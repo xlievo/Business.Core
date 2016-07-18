@@ -2,14 +2,22 @@
 
 Support .Net4.5 Mono 4.x
 
-# install
+# Depend
+
+Castle.Core 3.3.3
+
+Microsoft.CSharp
+
+# Install
 
 NuGet:https://www.nuget.org/packages/Business.Core/
 
 PM> Install-Package Business.Core
 
 # Please add to
+
 AssemblyInfo.cs
+
 [assembly: InternalsVisibleTo("Business.Core")]
 
 # Please refer unit test
