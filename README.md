@@ -229,7 +229,6 @@ AssemblyInfo.cs
 	[ConvertC(99, Group = "CCC")]
     public struct Register
     {
-        [Check(1)]
         [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
         [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
         public string account;
