@@ -5,6 +5,7 @@ using Business.Result;
 
 namespace Business.Core.Test
 {
+    [ConvertC(99, Group = "CCC")]
     public struct Register
     {
         [Check(1)]
@@ -65,12 +66,73 @@ namespace Business.Core.Test
         }
     }
 
+    public class ConvertAAttribute : DeserializeAttribute
+    {
+        public ConvertAAttribute(int code = -911, string message = null)
+            : base(code, message) { }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            try
+            {
+                //Return pass or data
+                return ResultFactory.Create(value);
+            }
+            catch
+            {
+                //Return error message
+                return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member));
+            }
+        }
+    }
+
+    public class ConvertBAttribute : DeserializeAttribute
+    {
+        public ConvertBAttribute(int code = -911, string message = null)
+            : base(code, message) { }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            try
+            {
+                //Return pass or data
+                return ResultFactory.Create(value);
+            }
+            catch
+            {
+                //Return error message
+                return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member));
+            }
+        }
+    }
+
+    public class ConvertCAttribute : DeserializeAttribute
+    {
+        public ConvertCAttribute(int code = -911, string message = null)
+            : base(code, message) { }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            try
+            {
+                //Return pass or data
+                return ResultFactory.Create(value);
+            }
+            catch
+            {
+                //Return error message
+                return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member));
+            }
+        }
+    }
+
     public class A : IBusiness
     {
         public Action<BusinessLog> WriteLogAsync { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand>> Command { get; set; }
         public Type ResultType { get; set; }
 
+        //=========================Check============================//
         public virtual IResult TestParameterA_01(Register ags)
         {
             return this.ResultCreate(new { ags.account, ags.Password });
@@ -81,12 +143,28 @@ namespace Business.Core.Test
             return this.ResultCreate(new { ags.account, ags.Password, password });
         }
 
+        //==========================Convert===========================//
         public virtual IResult TestParameterB_01([Convert(99)]Arg<Register> ags)
         {
             return this.ResultCreate(new { ags.Out.account, ags.Out.Password });
         }
 
         public virtual IResult TestParameterB_02([Convert(99)]Arg<Register> ags, [Size(12, "password size verification failed", Min = 4, Max = "8")]int password)
+        {
+            return this.ResultCreate(new { ags.Out.account, ags.Out.Password, password });
+        }
+
+        //==========================Group===========================//
+        [Command(Group = "AAA")]
+        [Command(Group = "BBB")]
+        public virtual IResult TestParameterC_01([Convert(99)][ConvertA(99, Group = "AAA")][ConvertB(99, Group = "BBB")]Arg<Register> ags)
+        {
+            return this.ResultCreate(new { ags.Out.account, ags.Out.Password });
+        }
+
+        [Command(Group = "AAA")]
+        [Command(Group = "CCC")]
+        public virtual IResult TestParameterC_02([Convert(99)][ConvertA(99, Group = "AAA")]Arg<Register> ags, [Size(12, "password size verification failed", Min = 4, Max = "8")]int password)
         {
             return this.ResultCreate(new { ags.Out.account, ags.Out.Password, password });
         }
@@ -225,6 +303,45 @@ namespace Business.Core.Test
         {
             var result = A2.TestParameterB_02(new Arg<Register> { In = new Register { account = "1111" } }, 666);
             var result2 = Cmd["TestParameterB_02"].Call(new Register { account = "1111" }, 666);
+
+            Assert.IsTrue(1 > result.State);
+            Assert.IsTrue(System.Object.Equals(result.Data, null));
+            Assert.IsTrue(System.Object.Equals(result.Message, "password size verification failed"));
+            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
+            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
+            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+        }
+
+        #endregion
+
+        #region TestParameterC
+
+        [TestMethod]
+        public void TestParameterC_01()
+        {
+            var cmd_A = A2.Command["AAA"];
+            var cmd_B = A2.Command["BBB"];
+
+            var result = A2.TestParameterC_01(new Arg<Register> { In = new Register { account = "aaa" } });
+            var result2 = cmd_A["TestParameterC_01"].Call(new Register { account = "aaa" });
+            var result3 = cmd_B["TestParameterC_01"].Call(new Register { account = "aaa" });
+
+            Assert.IsTrue(1 > result.State);
+            Assert.IsTrue(System.Object.Equals(result.Message, "argument \"account\" size verification failed"));
+            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
+            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
+            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+        }
+
+        [TestMethod]
+        public void TestParameterC_02()
+        {
+            var cmd_A = A2.Command["AAA"];
+            var cmd_C = A2.Command["CCC"];
+
+            var result = A2.TestParameterC_02(new Arg<Register> { In = new Register { account = "1111" } }, 666);
+            var result2 = cmd_A["TestParameterC_02"].Call(new Register { account = "1111" }, 666);
+            var result3 = cmd_C["TestParameterC_02"].Call(new Register { account = "1111" }, 666);
 
             Assert.IsTrue(1 > result.State);
             Assert.IsTrue(System.Object.Equals(result.Data, null));
