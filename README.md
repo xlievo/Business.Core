@@ -42,7 +42,7 @@ PM> Install-Package Business.Core
     public class UnitTest1
     {
 
-# Initialization you code
+		//Initialization you code
 
         static A A2 = BusinessBind<A>.Create();
         static System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand> Cmd = A2.Command[BusinessBind.DefaultCommandGroup];
@@ -163,7 +163,7 @@ PM> Install-Package Business.Core
     public class UnitTest1
     {
 
-# Initialization you code
+		//Initialization you code
 
         static A A2 = BusinessBind<A>.Create();
         static System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand> Cmd = A2.Command[BusinessBind.DefaultCommandGroup];
