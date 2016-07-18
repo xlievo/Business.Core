@@ -1,10 +1,10 @@
-# Business.Core
+# Platform
 
-Support Mono
-
-NuGet:https://www.nuget.org/packages/Business.Core/
+Support .Net4.5 Mono 4.x
 
 # install
+
+NuGet:https://www.nuget.org/packages/Business.Core/
 
 PM> Install-Package Business.Core
 
