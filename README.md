@@ -1,5 +1,6 @@
 # Business.Core
-This is a server framework
+
+Support Mono
 
 NuGet:https://www.nuget.org/packages/Business.Core/
 
