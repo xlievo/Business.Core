@@ -8,22 +8,11 @@ NuGet:https://www.nuget.org/packages/Business.Core/
 
 PM> Install-Package Business.Core
 
-# Initialization you code
-
-    public static BusinessMember Member = BusinessBind<BusinessMember>.Create();
-    
-    
-    
-    
-    
 # Please refer unit test
 
-# Arguments 
 #   a: Check 
-#   b: Convert 
-#   c: Group
-    
-    public struct Register
+
+	public struct Register
     {
         [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
         [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
@@ -31,23 +20,8 @@ PM> Install-Package Business.Core
 
         public int Password { get; set; }
     }
-    
-    public class ConvertAttribute : DeserializeAttribute
-    {
-        public ConvertAttribute(int code = -911, string message = null)
-            : base(code, message) { }
 
-        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
-        {
-            try
-            {
-                return ResultFactory.Create(value);
-            }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member)); }
-        }
-    }
-    
-    public class A : IBusiness
+	public class A : IBusiness
     {
         public Action<BusinessLog> WriteLogAsync { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand>> Command { get; set; }
@@ -62,25 +36,16 @@ PM> Install-Package Business.Core
         {
             return this.ResultCreate(new { ags.account, ags.Password, password });
         }
-
-        public virtual IResult TestParameterB_01([Convert(99)]Arg<Register> ags)
-        {
-            return this.ResultCreate(new { ags.Out.account, ags.Out.Password });
-        }
-
-        public virtual IResult TestParameterB_02([Convert(99)]Arg<Register> ags, [Size(12, "password size verification failed", Min = 4, Max = "8")]int password)
-        {
-            return this.ResultCreate(new { ags.Out.account, ags.Out.Password, password });
-        }
     }
-    
-    [TestClass]
+
+	[TestClass]
     public class UnitTest1
     {
+
+# Initialization you code
+
         static A A2 = BusinessBind<A>.Create();
         static System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand> Cmd = A2.Command[BusinessBind.DefaultCommandGroup];
-
-        #region TestParameterA
 
         [TestMethod]
         public void TestParameterA_01()
@@ -149,10 +114,59 @@ PM> Install-Package Business.Core
             Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
             Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
         }
+	}
 
-        #endregion
+#   b: Convert 
 
-        #region TestParameterB
+	public struct Register
+    {
+        [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
+        [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
+        public string account;
+
+        public int Password { get; set; }
+    }
+
+	public class ConvertAttribute : DeserializeAttribute
+    {
+        public ConvertAttribute(int code = -911, string message = null)
+            : base(code, message) { }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            try
+            {
+                return ResultFactory.Create(value);
+            }
+            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member)); }
+        }
+    }
+
+	public class A : IBusiness
+    {
+        public Action<BusinessLog> WriteLogAsync { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand>> Command { get; set; }
+        public Type ResultType { get; set; }
+
+        public virtual IResult TestParameterB_01([Convert(99)]Arg<Register> ags)
+        {
+            return this.ResultCreate(new { ags.Out.account, ags.Out.Password });
+        }
+
+        public virtual IResult TestParameterB_02([Convert(99)]Arg<Register> ags, [Size(12, "password size verification failed", Min = 4, Max = "8")]int password)
+        {
+            return this.ResultCreate(new { ags.Out.account, ags.Out.Password, password });
+        }
+    }
+
+	[TestClass]
+    public class UnitTest1
+    {
+
+# Initialization you code
+
+        static A A2 = BusinessBind<A>.Create();
+        static System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand> Cmd = A2.Command[BusinessBind.DefaultCommandGroup];
 
         [TestMethod]
         public void TestParameterB_01()
@@ -180,6 +194,12 @@ PM> Install-Package Business.Core
             Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
             Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
         }
-
-        #endregion
     }
+
+#   c: Group
+    
+    
+    
+    
+    
+    
