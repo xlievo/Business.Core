@@ -7,6 +7,7 @@ namespace Business.Core.Test
 {
     public struct Register
     {
+        [Check(1)]
         [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
         [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
         public string account;
@@ -26,6 +27,24 @@ namespace Business.Core.Test
 
     public enum RegisterType { }
 
+    public class CheckAttribute : ArgumentAttribute
+    {
+        public CheckAttribute(int code = -800, string message = null)
+            : base(code, message) { }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            if (System.Object.Equals(null, value))
+            {
+                //Return error message
+                return ResultFactory.Create(Code, Message ?? string.Format("argument \"{0}\" can not null.", member));
+            }
+
+            //Return pass or data
+            return ResultFactory.Create();
+        }
+    }
+
     public class ConvertAttribute : DeserializeAttribute
     {
         public ConvertAttribute(int code = -911, string message = null)
@@ -35,9 +54,14 @@ namespace Business.Core.Test
         {
             try
             {
+                //Return pass or data
                 return ResultFactory.Create(value);
             }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member)); }
+            catch
+            {
+                //Return error message
+                return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member));
+            }
         }
     }
 
