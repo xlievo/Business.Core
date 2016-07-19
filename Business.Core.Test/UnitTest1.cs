@@ -6,7 +6,7 @@ using Business.Result;
 namespace Business.Core.Test
 {
     [ConvertC(99, Group = "CCC")]
-    public struct Register
+    public class Register
     {
         [Check(1)]
         [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
@@ -14,6 +14,8 @@ namespace Business.Core.Test
         public string account;
 
         public int Password { get; set; }
+
+        public Register2 Password2 { get; set; }
     }
 
     [CanNotNull(98, "\"Register\" not is null")]
@@ -24,6 +26,8 @@ namespace Business.Core.Test
         [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
         [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
         public string account;
+
+        public Register Password2 { get; set; }
     }
 
     public enum RegisterType { }
@@ -242,8 +246,8 @@ namespace Business.Core.Test
         [TestMethod]
         public void TestParameterA_03()
         {
-            var result = A2.TestParameterA_01(new Register { account = "1111", Password = 1111 });
-            var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "1111", Password = 1111 });
+            var result = A2.TestParameterA_01(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } });
+            var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } });
 
             Assert.IsTrue(0 < result.State);
             Assert.IsTrue(System.Object.Equals(result.Data, new { account = "1111", Password = 1111 }));
@@ -256,8 +260,8 @@ namespace Business.Core.Test
         [TestMethod]
         public void TestParameterA_04()
         {
-            var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111 }, 6);
-            var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111 }, 6);
+            var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } }, 6);
+            var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } }, 6);
 
             Assert.IsTrue(0 < result.State);
             Assert.IsTrue(System.Object.Equals(result.Data, new { account = "1111", Password = 1111, password = 6 }));
@@ -270,8 +274,8 @@ namespace Business.Core.Test
         [TestMethod]
         public void TestParameterA_05()
         {
-            var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111 }, 666);
-            var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111 }, 666);
+            var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } }, 666);
+            var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } }, 666);
 
             Assert.IsTrue(1 > result.State);
             Assert.IsTrue(System.Object.Equals(result.Data, null));
@@ -301,8 +305,8 @@ namespace Business.Core.Test
         [TestMethod]
         public void TestParameterB_02()
         {
-            var result = A2.TestParameterB_02(new Arg<Register> { In = new Register { account = "1111" } }, 666);
-            var result2 = Cmd["TestParameterB_02"].Call(new Register { account = "1111" }, 666);
+            var result = A2.TestParameterB_02(new Arg<Register> { In = new Register { account = "1111", Password2 = new Register2 { account = "111" } } }, 666);
+            var result2 = Cmd["TestParameterB_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "111" } }, 666);
 
             Assert.IsTrue(1 > result.State);
             Assert.IsTrue(System.Object.Equals(result.Data, null));
@@ -339,9 +343,9 @@ namespace Business.Core.Test
             var cmd_A = A2.Command["AAA"];
             var cmd_C = A2.Command["CCC"];
 
-            var result = A2.TestParameterC_02(new Arg<Register> { In = new Register { account = "1111" } }, 666);
-            var result2 = cmd_A["TestParameterC_02"].Call(new Register { account = "1111" }, 666);
-            var result3 = cmd_C["TestParameterC_02"].Call(new Register { account = "1111" }, 666);
+            var result = A2.TestParameterC_02(new Arg<Register> { In = new Register { account = "1111", Password2 = new Register2 { account = "111" } } }, 666);
+            var result2 = cmd_A["TestParameterC_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "111" } }, 666);
+            var result3 = cmd_C["TestParameterC_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "111" } }, 666);
 
             Assert.IsTrue(1 > result.State);
             Assert.IsTrue(System.Object.Equals(result.Data, null));
