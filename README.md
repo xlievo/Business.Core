@@ -1,26 +1,26 @@
-# Platform
+## Platform
 
 Support .Net4.5 Mono 4.x
 
-# Depend
+## Depend
 
 Castle.Core 3.3.3
 
 Microsoft.CSharp
 
-# Install
+## Install
 
 NuGet:https://www.nuget.org/packages/Business.Core/
 
 PM> Install-Package Business.Core
 
-# Please add to
+### Please add to
 
 AssemblyInfo.cs
 
 [assembly: InternalsVisibleTo("Business.Core")]
 
-# Please refer unit test
+## Please refer unit test
 
 #   a: Check 
 
