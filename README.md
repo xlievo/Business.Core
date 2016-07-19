@@ -22,7 +22,7 @@ AssemblyInfo.cs
 
 ## Please refer unit test
 
-#   a: Check 
+#   a. Check 
 
 	public struct Register
     {
@@ -147,7 +147,7 @@ AssemblyInfo.cs
         }
 	}
 
-#   b: Convert 
+#   b. Convert 
 
 	public struct Register
     {
@@ -232,7 +232,7 @@ AssemblyInfo.cs
         }
     }
 
-#   c: Group
+#   c. Group
 
 	[ConvertC(99, Group = "CCC")]
     public struct Register
