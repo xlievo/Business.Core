@@ -51,6 +51,7 @@ AssemblyInfo.cs
             return ResultFactory.Create();
         }
     }
+    
 	[BusinessLog]
 	public class A : IBusiness
     {
