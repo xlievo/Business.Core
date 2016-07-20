@@ -51,7 +51,7 @@ AssemblyInfo.cs
             return ResultFactory.Create();
         }
     }
-
+	[BusinessLog]
 	public class A : IBusiness
     {
 		public A()
@@ -187,6 +187,7 @@ AssemblyInfo.cs
         }
     }
 
+	[BusinessLog]
 	public class A : IBusiness
     {
         public Action<BusinessLog> WriteLogAsync { get; set; }
@@ -333,6 +334,7 @@ AssemblyInfo.cs
         }
     }
     
+    [BusinessLog]
     public class A : IBusiness
     {
         public Action<BusinessLog> WriteLogAsync { get; set; }
