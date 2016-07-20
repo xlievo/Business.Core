@@ -54,6 +54,15 @@ AssemblyInfo.cs
 
 	public class A : IBusiness
     {
+		public A()
+        {
+            //[BusinessLog] control
+            this.WriteLogAsync = (log) => 
+            {
+                //...
+            };
+        }
+
         public Action<BusinessLog> WriteLogAsync { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand>> Command { get; set; }
         public Type ResultType { get; set; }
