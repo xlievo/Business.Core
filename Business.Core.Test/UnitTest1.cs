@@ -19,7 +19,6 @@ namespace Business.Core.Test
     }
 
     [CanNotNull(98, "\"Register\" not is null")]
-    //[Convert(99)]
     public class Register2
     {
         [CanNotNull(-11, "\"account\" not is null")]
@@ -130,19 +129,20 @@ namespace Business.Core.Test
         }
     }
 
+    [BusinessLog]
     public class A : IBusiness
     {
         public A()
         {
             //[BusinessLog] control
-            this.WriteLogAsync = (log) => 
+            this.WriteLogAsync = (log) =>
             {
                 //...
             };
         }
 
-        public Action<BusinessLog> WriteLogAsync { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand>> Command { get; set; }
+        public Action<Log> WriteLogAsync { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
 
         //=========================Check============================//
@@ -186,8 +186,8 @@ namespace Business.Core.Test
     [TestClass]
     public class UnitTest1
     {
-        static A A2 = BusinessBind<A>.Create();
-        static System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand> Cmd = A2.Command[BusinessBind.DefaultCommandGroup];
+        static A A2 = Bind<A>.Create();
+        static System.Collections.Generic.IReadOnlyDictionary<string, Command> Cmd = A2.Command[Bind.DefaultCommandGroup];
 
         static bool IsClass<T>()
         {

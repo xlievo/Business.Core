@@ -53,19 +53,19 @@ AssemblyInfo.cs
     }
     
 	[BusinessLog]
-	public class A : IBusiness
+    public class A : IBusiness
     {
-		public A()
+        public A()
         {
             //[BusinessLog] control
-            this.WriteLogAsync = (log) => 
+            this.WriteLogAsync = (log) =>
             {
                 //...
             };
         }
 
-        public Action<BusinessLog> WriteLogAsync { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand>> Command { get; set; }
+        public Action<Log> WriteLogAsync { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
 
         public virtual IResult TestParameterA_01(Register ags)
@@ -85,8 +85,8 @@ AssemblyInfo.cs
 
 		//Initialization you code
 
-        static A A2 = BusinessBind<A>.Create();
-        static System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand> Cmd = A2.Command[BusinessBind.DefaultCommandGroup];
+        static A A2 = Bind<A>.Create();
+        static System.Collections.Generic.IReadOnlyDictionary<string, Command> Cmd = A2.Command[Bind.DefaultCommandGroup];
 
         [TestMethod]
         public void TestParameterA_01()
@@ -191,8 +191,8 @@ AssemblyInfo.cs
 	[BusinessLog]
 	public class A : IBusiness
     {
-        public Action<BusinessLog> WriteLogAsync { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand>> Command { get; set; }
+        public Action<Log> WriteLogAsync { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
 
         public virtual IResult TestParameterB_01([Convert(99)]Arg<Register> ags)
@@ -212,8 +212,8 @@ AssemblyInfo.cs
 
 		//Initialization you code
 
-        static A A2 = BusinessBind<A>.Create();
-        static System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand> Cmd = A2.Command[BusinessBind.DefaultCommandGroup];
+        static A A2 = Bind<A>.Create();
+        static System.Collections.Generic.IReadOnlyDictionary<string, Command> Cmd = A2.Command[Bind.DefaultCommandGroup];
 
         [TestMethod]
         public void TestParameterB_01()
@@ -338,8 +338,8 @@ AssemblyInfo.cs
     [BusinessLog]
     public class A : IBusiness
     {
-        public Action<BusinessLog> WriteLogAsync { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, BusinessCommand>> Command { get; set; }
+        public Action<Log> WriteLogAsync { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
 
         [Command(Group = "AAA")]
@@ -363,7 +363,7 @@ AssemblyInfo.cs
 
 		//Initialization you code
 
-        static A A2 = BusinessBind<A>.Create();
+        static A A2 = Bind<A>.Create();
 
         [TestMethod]
         public void TestParameterC_01()

@@ -4,12 +4,12 @@
         <name>Business.Core</name>
     </assembly>
     <members>
-        <member name="F:Business.BusinessLogType.Exception">
+        <member name="F:Business.LogType.Exception">
             <summary>
             Exception = 0
             </summary>
         </member>
-        <member name="F:Business.BusinessLogType.Record">
+        <member name="F:Business.LogType.Record">
             <summary>
             Record = 1
             </summary>
