@@ -76,6 +76,21 @@ namespace Business
         }
     }
 
+    /// <summary>
+    /// Result.ResultObject
+    /// </summary>
+    /// <typeparam name="Business"></typeparam>
+    public class Bind2<Business> : Bind<Business, Result.ResultObject<string>>
+        where Business : class
+    {
+        public Bind2(Auth.IInterceptor<Result.ResultObject<string>> interceptor) : base(interceptor) { }
+
+        public static Business Create()
+        {
+            return new Bind2<Business>(new Auth.Interceptor<Result.ResultObject<string>>()).Instance;
+        }
+    }
+
     public class Bind<Business> : Bind<Business, ResultBase<string>>
         where Business : class//, IBusiness
     {

@@ -17,6 +17,8 @@
 
 namespace Business.Extensions
 {
+    using System.Linq;
+
     public static class Help
     {
         /// <summary>
@@ -103,56 +105,6 @@ namespace Business.Extensions
             }
         }
 
-        /*
-        public static string EncryptDES(this string str, string key, string iv = IV)
-        {
-            var rgbKey = System.Text.Encoding.UTF8.GetBytes(key.Substring(0, 8));
-            var rgbIV = System.Text.Encoding.UTF8.GetBytes(iv.Substring(0, 8));
-            var inputByteArray = System.Text.Encoding.UTF8.GetBytes(str);
-            using (var des = new System.Security.Cryptography.DESCryptoServiceProvider())
-            {
-                using (var ms = new System.IO.MemoryStream())
-                {
-                    using (var cs = new System.Security.Cryptography.CryptoStream(ms, des.CreateEncryptor(rgbKey, rgbIV), System.Security.Cryptography.CryptoStreamMode.Write))
-                    {
-                        cs.Write(inputByteArray, 0, inputByteArray.Length);
-                        cs.FlushFinalBlock();
-                        return System.Convert.ToBase64String(ms.ToArray());
-                    }
-                }
-            }
-        }
-
-        public static string DecryptDES(this string str, string key, string iv = IV)
-        {
-            var rgbKey = System.Text.Encoding.UTF8.GetBytes(key);
-            var rgbIV = System.Text.Encoding.UTF8.GetBytes(iv.Substring(0, 8));
-            var inputByteArray = System.Convert.FromBase64String(str);
-            using (var des = new System.Security.Cryptography.DESCryptoServiceProvider())
-            {
-                using (var ms = new System.IO.MemoryStream())
-                {
-                    using (var cs = new System.Security.Cryptography.CryptoStream(ms, des.CreateDecryptor(rgbKey, rgbIV), System.Security.Cryptography.CryptoStreamMode.Write))
-                    {
-                        cs.Write(inputByteArray, 0, inputByteArray.Length);
-                        cs.FlushFinalBlock();
-                        return System.Text.Encoding.UTF8.GetString(ms.ToArray());
-                    }
-                }
-            }
-        }
-        */
-        //public void dsa()
-        //{
-        //    var aes = System.Security.Cryptography.Rijndael.Create().;
-        //    using (var cStream = new System.Security.Cryptography.CryptoStream(mStream, aes.CreateEncryptor(bKey, bIV), System.Security.Cryptography.CryptoStreamMode.Write))
-        //    {
-        //        cStream.Write(byteArray, 0, byteArray.Length);
-        //        cStream.FlushFinalBlock();
-        //        encrypt = Convert.ToBase64String(mStream.ToArray());
-        //    }
-        //}
-
         [System.Flags]
         public enum CheckCharMode
         {
@@ -221,82 +173,6 @@ namespace Business.Extensions
                 default: return false;
             }
         }
-
-        /*
-        public static BusinessLib.Result.IResult CheckObject<T>(this T ags, string memberName = null, int state = -999, object min = null, object max = null)
-        {
-            var type = ags.GetType();
-
-            switch (type.FullName)
-            {
-                case "System.String":
-                    var _ags1 = null == ags ? System.String.Empty
-                        : System.Convert.ToString(ags).Trim();
-                    if (null != min && System.Convert.ToInt32(min) > _ags1.Length)
-                    {
-                        return BusinessLib.Result.ResultFactory.Create(state, string.Format("\"{0}\" minimum length exceeds", memberName));
-                    }
-                    if (null != max && System.Convert.ToInt32(max) < _ags1.Length)
-                    {
-                        return BusinessLib.Result.ResultFactory.Create(state, string.Format("\"{0}\" maximum length exceeds", memberName));
-                    }
-                    return BusinessLib.Result.ResultFactory.Create<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags1));
-                case "System.DateTime":
-                    var _ags2 = System.Convert.ToDateTime(ags);
-                    if (System.Data.SqlTypes.SqlDateTime.MinValue.Value > _ags2)
-                    {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum value error", memberName));
-                    }
-                    return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags2));
-                case "System.Int32":
-                    var _ags3 = System.Convert.ToInt32(ags);
-                    if (null != min && System.Convert.ToInt32(min) > _ags3)
-                    {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
-                    }
-                    if (null != max && System.Convert.ToInt32(max) < _ags3)
-                    {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
-                    }
-                    return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags3));
-                case "System.Int64":
-                    var _ags4 = System.Convert.ToInt64(ags);
-                    if (null != min && System.Convert.ToInt64(min) > _ags4)
-                    {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
-                    }
-                    if (null != max && System.Convert.ToInt64(max) < _ags4)
-                    {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
-                    }
-                    return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags4));
-                case "System.Decimal":
-                    var _ags5 = System.Convert.ToDecimal(ags);
-                    if (null != min && System.Convert.ToDecimal(min) > _ags5)
-                    {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
-                    }
-                    if (null != max && System.Convert.ToDecimal(max) < _ags5)
-                    {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
-                    }
-                    return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags5));
-                case "System.Double":
-                    var _ags6 = System.Convert.ToDouble(ags);
-                    if (null != min && System.Convert.ToDouble(min) > _ags6)
-                    {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" minimum length exceeds", memberName));
-                    }
-                    if (null != max && System.Convert.ToDouble(max) < _ags6)
-                    {
-                        return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" maximum length exceeds", memberName));
-                    }
-                    return BusinessLib.Result.ResultExtensions.Result<T>(BusinessLib.Extensions.Help.ChangeType<T>(_ags6));
-                default:
-                    return BusinessLib.Result.ResultExtensions.Result(state, string.Format("\"{0}\" unknown error", memberName));
-            }
-        }
-        */
 
         public static string NewGuidNumber()
         {
@@ -449,7 +325,50 @@ namespace Business.Extensions
         //    return System.DateTime.ParseExact(time, "yyyyMMddHHmmssfffffff", null);
         //}
 
-        /*
+        public static string EnumGetName(this System.Enum value)
+        {
+            return System.Enum.GetName(value.GetType(), value);
+        }
+
+        #region Json
+
+        public static Type JsonDeserialize<Type>(this string value)
+        {
+            try { return Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value); }
+            catch { return default(Type); }
+        }
+
+        public static Type JsonDeserialize<Type>(this string value, out string error)
+        {
+            error = null;
+
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value);
+            }
+            catch (System.Exception ex)
+            {
+                error = System.Convert.ToString(ex);
+                return default(Type);
+            }
+        }
+        public static object JsonDeserialize(this string value, System.Type type, out string error)
+        {
+            error = null;
+
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject(value, type);
+            }
+            catch (System.Exception ex)
+            {
+                error = System.Convert.ToString(ex);
+                return null;
+            }
+        }
+
+        #endregion
+
         #region ProtoBuf Serialize
         public static T ProtoBufDeserialize<T>(this System.Byte[] source)
         {
@@ -475,12 +394,6 @@ namespace Business.Extensions
         }
 
         #endregion
-        */
-
-        public static string EnumGetName(this System.Enum value)
-        {
-            return System.Enum.GetName(value.GetType(), value);
-        }
     }
 
     #region Equals

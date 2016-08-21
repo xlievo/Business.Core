@@ -97,7 +97,7 @@ namespace Business.Result
     }
     public static class ResultFactory
     {
-        internal static int GetState(int state)
+        public static int GetState(int state)
         {
             return 0 < state ? 0 - System.Math.Abs(state) : state;
         }

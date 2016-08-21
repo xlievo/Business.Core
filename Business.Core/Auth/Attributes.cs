@@ -91,22 +91,9 @@ namespace Business.Attributes
         }
     }
 
-    //[System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter | System.AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    //public abstract class ArgAttribute : ArgumentAttribute
-    //{
-    //    public ArgAttribute(int code, string message = null)
-    //        : base(code, message) { this.HasDeserialize = true; }
-
-    //    public override abstract IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business);
-    //}
-
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public class DeserializeAttribute : ArgAttribute
     {
-        //public DeserializeAttribute(int code, string message = null)
-        //    : base(code, message) { }//{ this.HasDeserialize = true; }
-
-        //public override abstract IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business);
         public DeserializeAttribute(int code = -901, string message = null)
             : base(code, message) { }
 
@@ -119,23 +106,6 @@ namespace Business.Attributes
             catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member)); }
         }
     }
-
-    //public sealed class DeserializeArgAttribute : DeserializeAttribute
-    //{
-    //    public DeserializeArgAttribute(int code = -901, string message = null)
-    //        : base(code, message) { }
-
-    //    public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
-    //    {
-    //        try
-    //        {
-    //            return ResultFactory.Create(value);
-    //        }
-    //        catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member)); }
-    //    }
-    //}
-
-
 
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class BusinessLogAttribute : System.Attribute
@@ -554,4 +524,72 @@ namespace Business.Attributes
     //    //return session;
     //    //throw new System.NotImplementedException();
     //}
+
+    #region
+
+    public sealed class JsonCmdAttribute : CommandAttribute
+    {
+        public JsonCmdAttribute(string onlyName = null, int code = -902, string message = null) : base(onlyName, code, message) { }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            try
+            {
+                return ResultFactory.Create(Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(value), type));
+            }
+            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
+        }
+    }
+
+    public sealed class ProtoBufCmdAttribute : CommandAttribute
+    {
+        public ProtoBufCmdAttribute(string onlyName = null, int code = -903, string message = null) : base(onlyName, code, message) { }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            try
+            {
+                using (var stream = new System.IO.MemoryStream((byte[])value))
+                {
+                    return ResultFactory.Create(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
+                }
+            }
+            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
+        }
+    }
+
+    public sealed class JsonArgAttribute : DeserializeAttribute
+    {
+        public JsonArgAttribute(int code = -902, string message = null)
+            : base(code, message) { }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            try
+            {
+                return ResultFactory.Create(Newtonsoft.Json.JsonConvert.DeserializeObject(value, type));
+            }
+            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
+        }
+    }
+
+    public sealed class ProtoBufArgAttribute : DeserializeAttribute
+    {
+        public ProtoBufArgAttribute(int code = -903, string message = null)
+            : base(code, message) { }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            try
+            {
+                using (var stream = new System.IO.MemoryStream(value))
+                {
+                    return ResultFactory.Create(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
+                }
+            }
+            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
+        }
+    }
+
+    #endregion
 }

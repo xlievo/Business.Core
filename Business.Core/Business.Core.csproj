@@ -44,14 +44,26 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\Business.Core.Test\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="protobuf-net, Version=2.1.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\Business.Core.Test\packages\protobuf-net.2.1.0\lib\net45\protobuf-net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Auth\Attributes.cs" />
     <Compile Include="Auth\Interceptor.cs" />
+    <Compile Include="Auth\Token.cs" />
     <Compile Include="Business\Arg.cs" />
     <Compile Include="Business\Log.cs" />
     <Compile Include="Business\IBusiness.cs" />
+    <Compile Include="Business\Mark.cs" />
+    <Compile Include="Extensions\CommandHelp.cs" />
     <Compile Include="Extensions\Emit\ConstructorInvokerGenerator.cs" />
     <Compile Include="Extensions\Emit\EmitUtils.cs" />
     <Compile Include="Extensions\Emit\FieldAccessorGenerator.cs" />
@@ -63,9 +75,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Result\IResult.cs" />
     <Compile Include="Result\ResultBase.cs" />
+    <Compile Include="Result\ResultObject.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Business.Core.nupkg" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
