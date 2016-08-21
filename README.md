@@ -6,6 +6,10 @@ Support .Net4.5 Mono 4.x
 
 Castle.Core 3.3.3
 
+Newtonsoft.Json 9.0.1
+
+protobuf-net 2.1.0
+
 Microsoft.CSharp
 
 ## Install
