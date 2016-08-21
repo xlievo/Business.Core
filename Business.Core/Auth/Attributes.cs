@@ -246,10 +246,18 @@ namespace Business.Attributes
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
-            if (System.Object.Equals(null, value))
+            if (typeof(System.String).Equals(type))
+            {
+                if (System.String.IsNullOrEmpty(value))
+                {
+                    return ResultFactory.Create(Code, Message ?? string.Format("argument \"{0}\" can not null.", member));
+                }
+            }
+            else if (System.Object.Equals(null, value))
             {
                 return ResultFactory.Create(Code, Message ?? string.Format("argument \"{0}\" can not null.", member));
             }
+
             return ResultFactory.Create();
         }
     }
@@ -525,7 +533,7 @@ namespace Business.Attributes
     //    //throw new System.NotImplementedException();
     //}
 
-    #region
+    #region Deserialize
 
     public sealed class JsonCmdAttribute : CommandAttribute
     {
