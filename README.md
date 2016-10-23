@@ -83,7 +83,7 @@ AssemblyInfo.cs
         }
     }
 
-	[TestClass]
+	[TestFixture]
     public class UnitTest1
     {
 
@@ -92,7 +92,7 @@ AssemblyInfo.cs
         static A A2 = Bind<A>.Create();
         static System.Collections.Generic.IReadOnlyDictionary<string, Command> Cmd = A2.Command[Bind.DefaultCommandGroup];
 
-        [TestMethod]
+        [Test]
         public void TestParameterA_01()
         {
             var result = A2.TestParameterA_01(new Register { account = "aaa" });
@@ -105,7 +105,7 @@ AssemblyInfo.cs
             Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
         }
 
-        [TestMethod]
+        [Test]
         public void TestParameterA_02()
         {
             var result = A2.TestParameterA_01(new Register { account = "aaaa" });
@@ -118,7 +118,7 @@ AssemblyInfo.cs
             Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
         }
 
-        [TestMethod]
+        [Test]
         public void TestParameterA_03()
         {
             var result = A2.TestParameterA_01(new Register { account = "1111", Password = 1111 });
@@ -132,7 +132,7 @@ AssemblyInfo.cs
             Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
         }
 
-        [TestMethod]
+        [Test]
         public void TestParameterA_04()
         {
             var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111 }, 6);
@@ -146,7 +146,7 @@ AssemblyInfo.cs
             Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
         }
 
-        [TestMethod]
+        [Test]
         public void TestParameterA_05()
         {
             var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111 }, 666);
@@ -219,7 +219,7 @@ AssemblyInfo.cs
         static A A2 = Bind<A>.Create();
         static System.Collections.Generic.IReadOnlyDictionary<string, Command> Cmd = A2.Command[Bind.DefaultCommandGroup];
 
-        [TestMethod]
+        [Test]
         public void TestParameterB_01()
         {
             var result = A2.TestParameterB_01(new Arg<Register> { In = new Register { account = "aaa" } });
@@ -232,7 +232,7 @@ AssemblyInfo.cs
             Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
         }
 
-        [TestMethod]
+        [Test]
         public void TestParameterB_02()
         {
             var result = A2.TestParameterB_02(new Arg<Register> { In = new Register { account = "1111" } }, 666);
@@ -369,7 +369,7 @@ AssemblyInfo.cs
 
         static A A2 = Bind<A>.Create();
 
-        [TestMethod]
+        [Test]
         public void TestParameterC_01()
         {
             var cmd_A = A2.Command["AAA"];
@@ -386,7 +386,7 @@ AssemblyInfo.cs
             Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
         }
 
-        [TestMethod]
+        [Test]
         public void TestParameterC_02()
         {
             var cmd_A = A2.Command["AAA"];

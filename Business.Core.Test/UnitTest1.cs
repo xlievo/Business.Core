@@ -131,11 +131,8 @@ namespace Business.Core.Test
         }
     }
 
-    //[Logger(LogType.Record, CanResult = true)]
-    [Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.Select)]
-    [Logger(LogType.Exception, CanValue = LoggerAttribute.ValueMode.Select)]
-    [Logger(LogType.Exception, CanValue = LoggerAttribute.ValueMode.Select)]
-    //[Logger(LogType.Error, CanResult = true)]
+    [Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)]
+    [Logger(LogType.Exception, CanValue = LoggerAttribute.ValueMode.All)]
     [Logger(LogType.Error, CanValue = LoggerAttribute.ValueMode.All)]
     public class A : IBusiness
     {
@@ -143,7 +140,7 @@ namespace Business.Core.Test
         {
             this.WriteLogAsync = log =>
             {
-
+                //...
             };
         }
 
@@ -204,8 +201,7 @@ namespace Business.Core.Test
 
         static UnitTest1()
         {
-            //Business.Extensions.Help.JsonDeserialize(r, );
-            A2.TestParameterA_01(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } });
+            //A2.TestParameterA_01(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } });
             //A2.TestParameterC_02(new Arg<Register> { In = new Register { account = "1111", Password2 = new Register2 { account = "11111" } } }, 666);
         }
 
@@ -354,20 +350,6 @@ namespace Business.Core.Test
             var cmd_A = A2.Command["AAA"];
             var cmd_B = A2.Command["BBB"];
 
-            //var sb = new System.Text.StringBuilder(null);
-            //cmd_A[""].Meta
-
-            //var sss =
-            //string.Join(System.Environment.NewLine,
-            //cmd_A.Values.Select(c => string.Format("{1}    {3}{0}{2}",
-            //    System.Environment.NewLine,
-            //    c.Meta.Name,
-            //    string.Join(System.Environment.NewLine, c.Meta.Args.Select(c2 => string.Format("    {0}    {1}", c2.HasDeserialize ? string.Format("{0} {1}", c2.Type.Name, c2.Type.GenericTypeArguments[0].Name) : c2.Type.Name, c2.Name))), c.Meta.ReturnType.Name))
-            //    );
-
-
-            //if (null == sss) { }
-
             var result = A2.TestParameterC_01(new Arg<Register> { In = new Register { account = "1111", Password2 = new Register2 { } } });
             var result2 = cmd_A["TestParameterC_01"].Call(new Register { account = "1111", Password2 = new Register2 { } });
             var result3 = cmd_B["TestParameterC_01"].Call(new Register { account = "1111", Password2 = new Register2 { } });
@@ -401,9 +383,7 @@ namespace Business.Core.Test
         [Test]
         public void TestLogger_01()
         {
-            //A2.LogCfg.SetCanWriteException(false);
             var result = A2.TestParameterA_01(new Register { account = "aaa" });
-            //A2.LogCfg.SetCanWriteException(true);
             var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "aaa" });
 
             Assert.IsTrue(1 > result.State);
