@@ -3,3 +3,7 @@
 ################################################################################
 
 /Business.Core/bin
+/Business.Core.Test/bin
+/Business.Core.Test/obj
+*.suo
+/Business.Core/obj
