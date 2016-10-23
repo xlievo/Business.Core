@@ -56,12 +56,12 @@ AssemblyInfo.cs
         }
     }
     
-	[BusinessLog]
+	[Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)]
     public class A : IBusiness
     {
         public A()
         {
-            //[BusinessLog] control
+            //[Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)] control
             this.WriteLogAsync = (log) =>
             {
                 //...
@@ -71,6 +71,7 @@ AssemblyInfo.cs
         public Action<Log> WriteLogAsync { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
+		public IConfig Config { get; set; }
 
         public virtual IResult TestParameterA_01(Register ags)
         {
@@ -192,12 +193,13 @@ AssemblyInfo.cs
         }
     }
 
-	[BusinessLog]
+	[Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)]
 	public class A : IBusiness
     {
         public Action<Log> WriteLogAsync { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
+		public IConfig Config { get; set; }
 
         public virtual IResult TestParameterB_01([Convert(99)]Arg<Register> ags)
         {
@@ -210,7 +212,7 @@ AssemblyInfo.cs
         }
     }
 
-	[TestClass]
+	[TestFixture]
     public class UnitTest1
     {
 
@@ -339,12 +341,13 @@ AssemblyInfo.cs
         }
     }
     
-    [BusinessLog]
+    [Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)]
     public class A : IBusiness
     {
         public Action<Log> WriteLogAsync { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
+		public IConfig Config { get; set; }
 
         [Command(Group = "AAA")]
         [Command(Group = "BBB")]
@@ -361,7 +364,7 @@ AssemblyInfo.cs
         }
     }
     
-    [TestClass]
+    [TestFixture]
     public class UnitTest1
     {
 
