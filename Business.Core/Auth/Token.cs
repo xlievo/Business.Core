@@ -17,28 +17,31 @@
 
 namespace Business.Auth
 {
-    public interface IToken
-    {
-        string Key { get; set; }
+    //public interface IToken
+    //{
+    //    string Key { get; set; }
 
-        string Remote { get; set; }
-    }
+    //    string Remote { get; set; }
+    //}
 
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
-    public struct Token : IToken
+    public struct Token
     {
         public static implicit operator Token(string value)
         {
             return Business.Extensions.Help.JsonDeserialize<Token>(value);
         }
+
         public static implicit operator Token(byte[] value)
         {
             return Business.Extensions.Help.ProtoBufDeserialize<Token>(value);
         }
+
         public override string ToString()
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+            return Business.Extensions.Help.JsonSerialize(this);
         }
+
         public byte[] ToBytes()
         {
             return Business.Extensions.Help.ProtoBufSerialize(this);
@@ -49,5 +52,10 @@ namespace Business.Auth
 
         [ProtoBuf.ProtoMember(2)]
         public string Remote { get; set; }
+
+        /// <summary>
+        /// Socket identity
+        /// </summary>
+        public string CommandID { get; set; }
     }
 }

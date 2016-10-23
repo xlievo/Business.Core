@@ -64,14 +64,14 @@ namespace Business
 
     class BusinessAllMethodsHook : Castle.DynamicProxy.AllMethodsHook
     {
-        readonly System.Reflection.MethodInfo[] ignoreMethods;
+        readonly System.Reflection.MethodInfo[] notInterceptMethods;
 
         public BusinessAllMethodsHook(params System.Reflection.MethodInfo[] method)
-            : base() { this.ignoreMethods = method; }
+            : base() { this.notInterceptMethods = method; }
 
         public override bool ShouldInterceptMethod(System.Type type, System.Reflection.MethodInfo methodInfo)
         {
-            if (System.Array.Exists(ignoreMethods, c => c.GetMethodFullName().Equals(methodInfo.GetMethodFullName()))) { return false; }
+            if (System.Array.Exists(notInterceptMethods, c => c.GetMethodFullName().Equals(methodInfo.GetMethodFullName()))) { return false; }
 
             return base.ShouldInterceptMethod(type, methodInfo);
         }
@@ -81,14 +81,14 @@ namespace Business
     /// Result.ResultObject
     /// </summary>
     /// <typeparam name="Business"></typeparam>
-    public class Bind<Business> : Bind<Business, Result.ResultObject<string>>
+    public class Bind2<Business> : Bind<Business, Result.ResultObject<string>>
         where Business : class
     {
-        public Bind(Auth.IInterceptor<Result.ResultObject<string>> interceptor, params object[] constructorArguments) : base(interceptor, constructorArguments) { }
+        public Bind2(Auth.IInterceptor<Result.ResultObject<string>> interceptor, params object[] constructorArguments) : base(interceptor, constructorArguments) { }
 
         public new static Business Create(params object[] constructorArguments)
         {
-            return new Bind<Business>(new Auth.Interceptor<Result.ResultObject<string>>(), constructorArguments).Instance;
+            return new Bind2<Business>(new Auth.Interceptor<Result.ResultObject<string>>(), constructorArguments).Instance;
         }
     }
 
@@ -96,14 +96,14 @@ namespace Business
     /// Result.ResultBase
     /// </summary>
     /// <typeparam name="Business"></typeparam>
-    public class Bind2<Business> : Bind<Business, ResultBase<string>>
+    public class Bind<Business> : Bind<Business, ResultBase<string>>
         where Business : class//, IBusiness
     {
-        public Bind2(Auth.IInterceptor<ResultBase<string>> interceptor, params object[] constructorArguments) : base(interceptor, constructorArguments) { }
+        public Bind(Auth.IInterceptor<ResultBase<string>> interceptor, params object[] constructorArguments) : base(interceptor, constructorArguments) { }
 
         public new static Business Create(params object[] constructorArguments)
         {
-            return new Bind2<Business>(new Auth.Interceptor<ResultBase<string>>(), constructorArguments).Instance;
+            return new Bind<Business>(new Auth.Interceptor<ResultBase<string>>(), constructorArguments).Instance;
         }
     }
 
@@ -276,9 +276,9 @@ namespace Business
         {
             var type = typeof(Business);
             var methods = GetMethods(type);
-            var methods2 = GetMethods2(methods);
+            var notIntercept = NotIntercept(methods);
 
-            var options = new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(methods2.Item1));
+            var options = new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(notIntercept.Item1));
             var proxy = new Castle.DynamicProxy.ProxyGenerator();
 
             //Instance = proxy.CreateClassProxy<Business>(options, interceptor);
@@ -289,22 +289,20 @@ namespace Business
 
             var resultType = typeof(Result).IsGenericType ? typeof(Result).GetGenericTypeDefinition() : typeof(ResultBase<string>);
 
-            interceptor.MetaData = GetInterceptorMetaData(methods2.Item2, type, resultType);
+            interceptor.MetaData = GetInterceptorMetaData(notIntercept.Item2, type, resultType);
             interceptor.Business = Instance;
 
             if (typeof(IBusiness).IsAssignableFrom(Instance.GetType()))
             {
                 var business = (IBusiness)Instance;
 
-                business.Command = GetBusinessCommand(methods2.Item2, Instance, interceptor.MetaData, business);
+                business.Command = GetBusinessCommand(notIntercept.Item2, Instance, interceptor.MetaData, business);
 
                 interceptor.WriteLogAsync = business.WriteLogAsync;
 
                 business.ResultType = resultType;
 
                 business.Config = new Configer.Config(interceptor.MetaData, type.FullName);
-
-                #region Config.Info
 
                 var configAttrs = type.GetAttributes<Attributes.ConfigAttribute>();
                 if (0 < configAttrs.Length)
@@ -321,8 +319,6 @@ namespace Business
                 }
 
                 Bind.BusinessList.TryAdd(business.Config.Info.Name, business);
-
-                #endregion
             }
 
             #region Config
@@ -367,23 +363,23 @@ namespace Business
 
         #region
 
-        static System.Tuple<System.Reflection.MethodInfo[], System.Reflection.MethodInfo[]> GetMethods2(System.Reflection.MethodInfo[] methods)
+        static System.Tuple<System.Reflection.MethodInfo[], System.Reflection.MethodInfo[]> NotIntercept(System.Reflection.MethodInfo[] methods)
         {
-            var ignoreList = new System.Collections.Generic.List<System.Reflection.MethodInfo>();
+            var notList = new System.Collections.Generic.List<System.Reflection.MethodInfo>();
             var list = new System.Collections.Generic.List<System.Reflection.MethodInfo>();
             foreach (var item in methods)
             {
-                var ignoreAttrs = item.GetAttributes<Attributes.IgnoreAttribute>();
-                if (0 < ignoreAttrs.Length)// || (!typeof(void).Equals(item.ReturnType) && !typeof(Result.IResult).Equals(item.ReturnType))
+                var notInterceptAttrs = item.GetAttributes<Attributes.NotInterceptAttribute>();
+                if (0 < notInterceptAttrs.Length)// || (!typeof(void).Equals(item.ReturnType) && !typeof(Result.IResult).Equals(item.ReturnType))
                 {
-                    ignoreList.Add(item);
+                    notList.Add(item);
                 }
                 else
                 {
                     list.Add(item);
                 }
             }
-            return System.Tuple.Create(ignoreList.ToArray(), list.ToArray());
+            return System.Tuple.Create(notList.ToArray(), list.ToArray());
         }
 
         //static Attributes.LoggerAttribute LogAttr(System.Reflection.ICustomAttributeProvider member, System.Type type = null)
@@ -397,56 +393,20 @@ namespace Business
         {
             var attrs = new System.Collections.Generic.List<Attributes.LoggerAttribute>(member.GetAttributes<Attributes.LoggerAttribute>());
             attrs.AddRange(type.GetAttributes<Attributes.LoggerAttribute>());
-            return attrs.Distinct(Equality<Attributes.LoggerAttribute>.CreateComparer(c => c.LogType)).ToList();
+            return attrs;
         }
         static System.Collections.Generic.List<Attributes.LoggerAttribute> LogAttr(System.Reflection.MemberInfo member)
         {
-            return member.GetAttributes<Attributes.LoggerAttribute>().Distinct(Equality<Attributes.LoggerAttribute>.CreateComparer(c => c.LogType)).ToList();
-        }
-
-        static MetaLogger GetMetaLogger(System.Collections.Generic.List<Attributes.LoggerAttribute> method, System.Collections.Generic.List<Attributes.LoggerAttribute> businessLogAttr)
-        {
-            var metaLogger = new MetaLogger();
-
-            foreach (var item in businessLogAttr)
-            {
-                if (!method.Exists(c => c.LogType == item.LogType))
-                {
-                    method.Add(item.Clone());
-                }
-            }
-
-            foreach (var item in method)
-            {
-                switch (item.LogType)
-                {
-                    case LogType.Record: metaLogger.RecordAttr = item; break;
-                    case LogType.Error: metaLogger.ErrorAttr = item; break;
-                    case LogType.Exception: metaLogger.ExceptionAttr = item; break;
-                }
-            }
-
-            if (null == metaLogger.RecordAttr)
-            {
-                metaLogger.RecordAttr = new Attributes.LoggerAttribute(LogType.Record, false);
-            }
-            if (null == metaLogger.ErrorAttr)
-            {
-                metaLogger.ErrorAttr = new Attributes.LoggerAttribute(LogType.Error, false);
-            }
-            if (null == metaLogger.ExceptionAttr)
-            {
-                metaLogger.ExceptionAttr = new Attributes.LoggerAttribute(LogType.Exception, false);
-            }
-
-            return metaLogger;
+            return new System.Collections.Generic.List<Attributes.LoggerAttribute>(member.GetAttributes<Attributes.LoggerAttribute>());
         }
 
         static MetaLogger GetMetaLogger(System.Collections.Generic.List<Attributes.LoggerAttribute> attrs)
         {
             var metaLogger = new MetaLogger();
 
-            foreach (var item in attrs)
+            var _attrs = attrs.Distinct(Equality<Attributes.LoggerAttribute>.CreateComparer(c => c.LogType)).ToArray();
+
+            foreach (var item in _attrs)
             {
                 switch (item.LogType)
                 {
@@ -701,14 +661,13 @@ namespace Business
 
             var metaData = new System.Collections.Concurrent.ConcurrentDictionary<string, MetaData>();
 
-            //foreach (var method in methods)
-            methods.AsParallel().ForAll(method =>
+            foreach (var method in methods)
+            //methods.AsParallel().ForAll(method =>
             {
                 //======LogAttribute======//
                 var methodLogger = LogAttr(method);
-                //methodLogger.AddRange(businessLogAttr.Select(c => c.Clone()));
-                //var metaLogger = GetMetaLogger(methodLogger);
-                var metaLogger = GetMetaLogger(methodLogger, businessLogAttr);
+                methodLogger.AddRange(businessLogAttr.Select(c => c.Clone()));
+                var metaLogger = GetMetaLogger(methodLogger);
 
                 var commandGroup = CmdAttrGroup(method);
 
@@ -800,14 +759,16 @@ namespace Business
                     //set all
                     foreach (var item in argAttrGroup)
                     {
-                        var argAttrs = argAttr.FindAll(c => item.Value.CommandAttr.Group == c.Group || Bind.CommandGroupDefault == c.Group);
-                        //var argAttrs = argAttr.FindAll(c => (c.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute)) && item.Value.CommandAttr.Group == ((Attributes.DeserializeAttribute)c).Group) || !c.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute)));
-                        ////unified
-                        //if (current.hasIArg && item.Value.CommandAttr.HasUnified)
-                        //{
-                        //    argAttrs = argAttrs.FindAll(c => !c.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute)));
-                        //    argAttrs.Add(item.Value.CommandAttr);
-                        //}
+                        var argAttrs = argAttr.FindAll(c => (c.GetType().IsSubclassOf(typeof(Attributes.ArgAttribute)) && item.Value.CommandAttr.Group == ((Attributes.ArgAttribute)c).Group) || !c.GetType().IsSubclassOf(typeof(Attributes.ArgAttribute)));
+                        //unified
+                        if (current.hasIArg && item.Value.CommandAttr.HasUnified)
+                        {
+                            argAttrs = argAttrs.FindAll(c => !c.GetType().IsSubclassOf(typeof(Attributes.ArgAttribute)));
+                            argAttrs.Add(item.Value.CommandAttr);
+                        }
+
+                        //argAttrChilds.FindAll(c => 0 < c.ArgAttr.Count || (c.HasString && (c.Trim || item.Value.CommandAttr.TrimChar))).Select(c => new ArgAttrChild(c.Name, c.Type, c.HasString, c.MemberAccessorGet, c.MemberAccessorSet, c.ArgAttr, c.HasString && (c.Trim || item.Value.CommandAttr.TrimChar), c.FullName)).ToList();
+                        //item.Value.Args.Add(new Args(argInfo.Name, type, argInfo.Position, argInfo.DefaultValue, argInfo.HasDefaultValue, hasString, argAttrs, argAttrChilds.FindAll(c => 0 < c.ArgAttr.Count || (c.HasString && (c.Trim || item.Value.CommandAttr.TrimChar))), hasDeserialize, hasIArg, iArgOutType));
 
                         var deserializes = hasDeserialize ? new System.Collections.Generic.List<System.Type>() { currentType } : new System.Collections.Generic.List<System.Type>();
 
@@ -828,7 +789,7 @@ namespace Business
 
                 if (metaData.ContainsKey(method.Name)) { throw new System.Exception(string.Format("MetaData name exists {0}!", method.Name)); }
                 metaData.TryAdd(method.Name, meta);
-            });
+            };
 
             return metaData;
         }
@@ -892,15 +853,14 @@ namespace Business
             argAttr.Reverse();
             foreach (var item in argAttr)
             {
-                //if (item.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute)))
-                //{
-                //    var iArgAttr = (Attributes.DeserializeAttribute)item;
-                //    if (System.String.IsNullOrEmpty(iArgAttr.Group)) { iArgAttr.Group = Bind.CommandGroupDefault; }
-                //}
-                if (System.String.IsNullOrWhiteSpace(item.Group)) { item.Group = Bind.CommandGroupDefault; }
+                if (item.GetType().IsSubclassOf(typeof(Attributes.ArgAttribute)))
+                {
+                    var iArgAttr = (Attributes.ArgAttribute)item;
+                    if (System.String.IsNullOrEmpty(iArgAttr.Group)) { iArgAttr.Group = Bind.CommandGroupDefault; }
+                }
             }
 
-            //argAttr = argAttr.OrderBy(c => c.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute))).ToList();
+            argAttr = argAttr.OrderBy(c => c.GetType().IsSubclassOf(typeof(Attributes.ArgAttribute))).ToList();
 
             return argAttr;
         }
@@ -966,10 +926,7 @@ namespace Business
 
                 if (trim || hasDeserialize || 0 < argAttrChild.Count)
                 {
-                    var getter = PropertyAccessorGenerator.CreateGetter(property);
-                    var setter = PropertyAccessorGenerator.CreateSetter(property);
-                    if (null == getter || null == setter) { continue; }
-                    argAttrs.Add(new Args(property.Name, property.PropertyType, hasString, getter, setter, argAttrChild, hasDeserialize ? GetArgAttr(current.type, trim, property.Name, commandAttr, ref deserializes) : new System.Collections.Generic.List<Args>(), hasDeserialize, current.hasIArg, current.iArgOutType, hasString && trim, string.Format("{0}.{1}", parameterName, property.Name)));
+                    argAttrs.Add(new Args(property.Name, property.PropertyType, hasString, PropertyAccessorGenerator.CreateGetter(property), PropertyAccessorGenerator.CreateSetter(property), argAttrChild, hasDeserialize ? GetArgAttr(current.type, trim, property.Name, commandAttr, ref deserializes) : new System.Collections.Generic.List<Args>(), hasDeserialize, current.hasIArg, current.iArgOutType, hasString && trim, string.Format("{0}.{1}", parameterName, property.Name)));
                 }
             }
 

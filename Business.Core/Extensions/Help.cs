@@ -21,20 +21,34 @@ namespace Business.Extensions
 
     public static class Help
     {
-        /// <summary>
-        ///   Gets the attributes.
-        /// </summary>
-        /// <param name = "member">The member.</param>
-        /// <returns>The member attributes.</returns>
-        internal static T[] GetAttributes<T>(this System.Reflection.ICustomAttributeProvider member, bool inherit = true) where T : class
+        ///// <summary>
+        /////   Gets the attributes.
+        ///// </summary>
+        ///// <param name = "member">The member.</param>
+        ///// <returns>The member attributes.</returns>
+        //public static T[] GetAttributes<T>(this System.Reflection.ICustomAttributeProvider member, bool inherit = true) where T : class
+        //{
+        //    if (null == member) { throw new System.ArgumentNullException("member"); }
+
+        //    if (typeof(T) != typeof(object))
+        //    {
+        //        return (T[])member.GetCustomAttributes(typeof(T), inherit);
+        //    }
+        //    return (T[])member.GetCustomAttributes(inherit);
+        //}
+
+        public static T[] GetAttributes<T>(this System.Reflection.MemberInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException("member"); }
 
-            if (typeof(T) != typeof(object))
-            {
-                return (T[])member.GetCustomAttributes(typeof(T), inherit);
-            }
-            return (T[])member.GetCustomAttributes(inherit);
+            return (T[])System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
+        }
+
+        public static T[] GetAttributes<T>(this System.Reflection.ParameterInfo member, bool inherit = true) where T : System.Attribute
+        {
+            if (null == member) { throw new System.ArgumentNullException("member"); }
+
+            return (T[])System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
         }
 
         public static System.IO.MemoryStream StreamCopy(this System.IO.Stream stream)
@@ -94,16 +108,16 @@ namespace Business.Extensions
             }
         }
 
-        public static string MD5Encoding(this string str, string encodingNmae = "UTF-8", bool hasUpper = false)
-        {
-            if (null == str) { throw new System.ArgumentNullException("str"); }
+        //public static string MD5Encoding(this string str, string encodingNmae = "UTF-8", bool hasUpper = false)
+        //{
+        //    if (null == str) { throw new System.ArgumentNullException("str"); }
 
-            using (var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider())
-            {
-                var result = System.BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.GetEncoding(encodingNmae).GetBytes(str))).Replace("-", System.String.Empty);
-                return hasUpper ? result.ToUpperInvariant() : result.ToLowerInvariant();
-            }
-        }
+        //    using (var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider())
+        //    {
+        //        var result = System.BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.GetEncoding(encodingNmae).GetBytes(str))).Replace("-", System.String.Empty);
+        //        return hasUpper ? result.ToUpperInvariant() : result.ToLowerInvariant();
+        //    }
+        //}
 
         [System.Flags]
         public enum CheckCharMode
@@ -299,21 +313,25 @@ namespace Business.Extensions
 
         public static double Scale(this double value, int size = 2)
         {
-            var sp = System.Convert.ToDouble(System.Math.Pow(10, size));
-            var t = System.Math.Truncate(value);
+            //var sp = System.Convert.ToDouble(System.Math.Pow(10, size));
+            //var t = System.Math.Truncate(value);
 
-            var result = t + (0 > value ? System.Math.Ceiling((value - t) * sp) : System.Math.Floor((value - t) * sp)) / sp;
+            //var result = t + (0 > value ? System.Math.Ceiling((value - t) * sp) : System.Math.Floor((value - t) * sp)) / sp;
 
-            return result;
+            //return result;
+
+            return System.Convert.ToDouble(value.ToString("N", new System.Globalization.NumberFormatInfo { NumberDecimalDigits = size }));
         }
         public static decimal Scale(this decimal value, int size = 2)
         {
-            var sp = System.Convert.ToDecimal(System.Math.Pow(10, size));
-            var t = System.Math.Truncate(value);
+            //var sp = System.Convert.ToDecimal(System.Math.Pow(10, size));
+            //var t = System.Math.Truncate(value);
 
-            var result = t + (0 > value ? System.Math.Ceiling((value - t) * sp) : System.Math.Floor((value - t) * sp)) / sp;
+            //var result = t + (0 > value ? System.Math.Ceiling((value - t) * sp) : System.Math.Floor((value - t) * sp)) / sp;
 
-            return result;
+            //return result;
+
+            return System.Convert.ToDecimal(value.ToString("N", new System.Globalization.NumberFormatInfo { NumberDecimalDigits = size }));
         }
 
         //public static string ConvertTime2(this System.DateTime time)
@@ -366,6 +384,10 @@ namespace Business.Extensions
                 return null;
             }
         }
+        public static string JsonSerialize<T>(this T value)
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(value);
+        }
 
         #endregion
 
@@ -395,6 +417,24 @@ namespace Business.Extensions
 
         #endregion
     }
+
+    #region ICloneable
+
+    /// <summary>  
+    /// Interface definition for cloneable objects.  
+    /// </summary>  
+    /// <typeparam name="T">Type of the cloneable objects.</typeparam>  
+    public interface ICloneable<T> : System.ICloneable
+        where T : ICloneable<T>
+    {
+        /// <summary>  
+        /// Clones this instance.  
+        /// </summary>  
+        /// <returns>The cloned instance.</returns>  
+        new T Clone();
+    }
+
+    #endregion
 
     #region Equals
 

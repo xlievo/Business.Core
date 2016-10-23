@@ -20,9 +20,15 @@ namespace Business
     public enum LogType
     {
         /// <summary>
+        /// Error = -1
+        /// </summary>
+        Error = -1,
+
+        /// <summary>
         /// Exception = 0
         /// </summary>
         Exception = 0,
+
         /// <summary>
         /// Record = 1
         /// </summary>
@@ -72,6 +78,8 @@ namespace Business
 
         //string member;
         public string Member { get; set; }
+
+        public string Group { get; set; }
 
         //string description;
         //public string Description { get; set; }

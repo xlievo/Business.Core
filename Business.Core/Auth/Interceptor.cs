@@ -15,24 +15,30 @@
           ##############
 ==================================*/
 
-using System.Linq;
-
 namespace Business.Auth
 {
-    using Business;
+    using System.Linq;
+    using Business.Attributes;
     using Result;
 
-    public interface IInterceptor : Castle.DynamicProxy.IInterceptor, System.IDisposable
+    //public interface IInterceptor : Castle.DynamicProxy.IInterceptor, System.IDisposable
+    //{
+    //    System.Action<Log> WriteLogAsync { get; set; }
+
+    //    System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get; set; }
+
+    //    dynamic Business { get; set; }
+    //}
+
+    public interface IInterceptor<Result> : Castle.DynamicProxy.IInterceptor, System.IDisposable
+        where Result : IResult, new()
     {
         System.Action<Log> WriteLogAsync { get; set; }
 
-        System.Collections.Generic.IReadOnlyDictionary<string, MetaData> MetaData { get; set; }
+        System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get; set; }
 
         dynamic Business { get; set; }
     }
-
-    public interface IInterceptor<Result> : IInterceptor
-        where Result : IResult, new() { }
 
     //public sealed class Interceptor : Interceptor<Business.Result.ResultBase<string>> { }
 
@@ -52,11 +58,13 @@ namespace Business.Auth
             var meta = this.MetaData[invocation.Method.Name];
             var methodName = meta.FullName;
             var argsObj = invocation.Arguments;
+            //var argsObjLog = new System.Collections.ArrayList(argsObj.Length);
+            var argsObjLog = new System.Collections.Generic.List<System.Tuple<object, MetaLogger>>(argsObj.Length);
             var logType = LogType.Record;
-            var logAttr = meta.BusinessLogAttr;
+            var metaLogger = meta.MetaLogger;
             //var commandGroup = meta.CommandGroup;
             //==================================//
-            var iArgGroup = Bind.GetDefaultCommandGroup(invocation.Method.Name);
+            var iArgGroup = Bind.GetCommandGroupDefault(invocation.Method.Name);
             var iArgs = Bind.GetIArgs(meta.IArgs, argsObj, iArgGroup);
             if (0 < iArgs.Count)
             {
@@ -64,8 +72,9 @@ namespace Business.Auth
                 //if (!System.String.IsNullOrEmpty(group)) { iArgGroup = iArgs[meta.IArgs[0].Position].Group; }
                 if (!System.String.IsNullOrEmpty(group)) { iArgGroup = group; }
             }
-            var args = meta.ArgAttrs[iArgGroup];
 
+            var args = meta.ArgAttrs[iArgGroup];
+            
             try
             {
                 foreach (var item in args.Args)
@@ -73,6 +82,14 @@ namespace Business.Auth
                     IResult result = null;
                     var value = argsObj[item.Position];
                     var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
+                    argsObjLog.Add(new System.Tuple<object, MetaLogger>(item.HasIArg ? iArgs[item.Position].In : value, item.MetaLogger));
+                    //if (null != logAttr)
+                    //{
+                    //    if ((logAttr.CanValue && (null == item.LogAttr || (null != item.LogAttr && item.LogAttr.CanWrite))) || (null != item.LogAttr && item.LogAttr.CanWrite))
+                    //    {
+                    //        argsObjLog.Add(item.HasIArg ? iArgs[item.Position].In : value);
+                    //    }
+                    //}
 
                     var iArgHasString = !System.Object.Equals(null, iArgIn) && typeof(System.String).Equals(iArgIn.GetType());
                     var trim = false;
@@ -107,9 +124,9 @@ namespace Business.Auth
                             result = argAttr.Proces(value, item.Type, methodName, item.Name, this.Business);
                         }
 
-                        if (0 >= result.State)
+                        if (1 > result.State)
                         {
-                            invocation.ReturnValue = Bind.GetReturnValue<Result>(result.State, result.Message, meta); logType = LogType.Exception; return;
+                            invocation.ReturnValue = Bind.GetReturnValue<Result>(result.State, result.Message, meta); logType = LogType.Error; return;
                         }
 
                         //if (!item.HasIArg && trim) { argsObj[item.Position] = value; }
@@ -175,7 +192,7 @@ namespace Business.Auth
                             foreach (var argAttr in argAttrChild.ArgAttr)
                             {
                                 result = argAttr.Proces(memberValue, argAttrChild.Type, methodName, argAttrChild.FullName, this.Business);
-                                if (0 >= result.State) { invocation.ReturnValue = Bind.GetReturnValue<Result>(result.State, result.Message, meta); logType = LogType.Exception; return; }
+                                if (0 >= result.State) { invocation.ReturnValue = Bind.GetReturnValue<Result>(result.State, result.Message, meta); logType = LogType.Error; return; }
                                 if (result.HasData)
                                 {
                                     if (!argAttrChild.HasIArg)
@@ -217,7 +234,7 @@ namespace Business.Auth
             finally
             {
                 startTime.Stop();
-                var total = Extensions.Help.Scale(startTime.Elapsed.TotalSeconds);
+                var total = Extensions.Help.Scale(startTime.Elapsed.TotalSeconds, 3);
 
                 if (null != this.WriteLogAsync)
                 {
@@ -233,39 +250,139 @@ namespace Business.Auth
                     //args.ArgAttr[0].
                     // type.GetAttributes<KnownTypeAttribute>().Select(a => a.Type).Distinct().ForEach(t => AddKnownTypeHierarchy(t));  
 
-                    if (logType == LogType.Exception)
-                    {
-                        this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = argsObj, Result = invocation.ReturnValue, Time = total, Member = methodName }, null, null);
-                    }
-                    else if (null != logAttr && !logAttr.NotRecord)
-                    {
-                        if (!logAttr.NotValue)
-                        {
-                            if (0 < iArgs.Count)
-                            {
-                                foreach (var item in iArgs)
-                                {
-                                    switch (item.Value.Log)
-                                    {
-                                        case Attributes.LogMode.No:
-                                            argsObj[item.Key] = null;
-                                            break;
-                                        case Attributes.LogMode.In:
-                                            argsObj[item.Key] = item.Value.In;
-                                            break;
-                                        case Attributes.LogMode.Out:
-                                            argsObj[item.Key] = item.Value.Out;
-                                            break;
-                                        case Attributes.LogMode.All: break;
-                                    }
-                                }
-                            }
-                        }
+                    //if (null != metaLogger)
+                    //{
+                    //    var canWrite = false;
 
-                        this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = !logAttr.NotValue ? argsObj : null, Result = !logAttr.NotResult ? invocation.ReturnValue : null, Time = total, Member = methodName }, null, null);
+                    //    switch (logType)
+                    //    {
+                    //        case LogType.Exception:
+                    //            if (metaLogger.CanWriteException) { canWrite = true; } break;
+                    //        case LogType.Record:
+                    //            if (metaLogger.CanWrite) { canWrite = true; } break;
+                    //    }
+
+                    //    if (canWrite)
+                    //    {
+                    //        this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = 0 == argsObjLog.Count ? null : argsObjLog.ToArray(), Result = metaLogger.CanResult ? invocation.ReturnValue : null, Time = total, Member = methodName }, null, null);
+                    //    }
+                    //}
+
+                    bool canWrite, canResult;
+                    var logObjs = Logger(logType, metaLogger, argsObjLog, out canWrite, out canResult);
+
+                    if (canWrite)
+                    {
+                        this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = 0 == logObjs.Count ? null : logObjs.ToArray(), Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
                     }
+
+                    //if (logType == LogType.Exception)
+                    //{
+                    //    this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = argsObj, Result = invocation.ReturnValue, Time = total, Member = methodName }, null, null);
+                    //}
+                    //else if (null != logAttr && logAttr.CanWrite)
+                    //{
+                    //    if (logAttr.CanValue)
+                    //    {
+                    //        //if (0 < iArgs.Count)
+                    //        //{
+                    //        //    foreach (var item in iArgs)
+                    //        //    {
+                    //        //        switch (item.Value.Log)
+                    //        //        {
+                    //        //            case Attributes.LogMode.No:
+                    //        //                argsObj[item.Key] = null;
+                    //        //                break;
+                    //        //            case Attributes.LogMode.In:
+                    //        //                argsObj[item.Key] = item.Value.In;
+                    //        //                break;
+                    //        //            case Attributes.LogMode.Out:
+                    //        //                argsObj[item.Key] = item.Value.Out;
+                    //        //                break;
+                    //        //            case Attributes.LogMode.All: break;
+                    //        //        }
+                    //        //    }
+                    //        //}
+                    //    }
+
+                    //    this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = !logAttr.CanValue ? argsObj : null, Result = !logAttr.CanResult ? invocation.ReturnValue : null, Time = total, Member = methodName }, null, null);
+                    //}
                 }
             }
+        }
+
+        static void Logger(Attributes.LoggerAttribute logAttr, Attributes.LoggerAttribute argLogAttr, System.Collections.ArrayList logObjs, object value)
+        {
+            switch (logAttr.CanValue)
+            {
+                case LoggerAttribute.ValueMode.All:
+                    logObjs.Add(value);
+                    break;
+                case LoggerAttribute.ValueMode.Select:
+                    if (null != argLogAttr && argLogAttr.CanWrite)
+                    {
+                        logObjs.Add(value);
+                    }
+                    break;
+                default: break;
+            }
+        }
+
+        static System.Collections.ArrayList Logger(LogType logType, MetaLogger metaLogger, System.Collections.Generic.List<System.Tuple<object, MetaLogger>> argsObjLog, out bool canWrite, out bool canResult)
+        {
+            canWrite = canResult = false;
+            var logObjs = new System.Collections.ArrayList(argsObjLog.Count);
+
+            switch (logType)
+            {
+                case LogType.Record:
+                    if (metaLogger.RecordAttr.CanWrite)
+                    {
+                        foreach (var log in argsObjLog)
+                        {
+                            Logger(metaLogger.RecordAttr, log.Item2.RecordAttr, logObjs, log.Item1);
+                        }
+                        canWrite = true;
+
+                        if (metaLogger.RecordAttr.CanResult)
+                        {
+                            canResult = true;
+                        }
+                    }
+                    break;
+                case LogType.Error:
+                    if (metaLogger.ErrorAttr.CanWrite)
+                    {
+                        foreach (var log in argsObjLog)
+                        {
+                            Logger(metaLogger.ErrorAttr, log.Item2.ErrorAttr, logObjs, log.Item1);
+                        }
+                        canWrite = true;
+
+                        if (metaLogger.ErrorAttr.CanResult)
+                        {
+                            canResult = true;
+                        }
+                    }
+                    break;
+                case LogType.Exception:
+                    if (metaLogger.ExceptionAttr.CanWrite)
+                    {
+                        foreach (var log in argsObjLog)
+                        {
+                            Logger(metaLogger.ExceptionAttr, log.Item2.ExceptionAttr, logObjs, log.Item1);
+                        }
+                        canWrite = true;
+
+                        if (metaLogger.ExceptionAttr.CanResult)
+                        {
+                            canResult = true;
+                        }
+                    }
+                    break;
+            }
+
+            return logObjs;
         }
 
         /*
@@ -527,7 +644,8 @@ namespace Business.Auth
             return CheckChild(item, currentValue, methodName, business, out trimIArg);
         }
         */
-        public System.Collections.Generic.IReadOnlyDictionary<string, MetaData> MetaData { get; set; }
+
+        public System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get; set; }
 
         public System.Action<Log> WriteLogAsync { get; set; }
 

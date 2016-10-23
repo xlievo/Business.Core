@@ -57,10 +57,11 @@ namespace Business.Extensions
             /// <summary>
             /// Gets the login key of this request.
             /// </summary>
+            [ProtoBuf.ProtoMember(4, Name = "T")]
             [Newtonsoft.Json.JsonProperty(PropertyName = "T")]
             public string Token { get; set; }
 
-            [ProtoBuf.ProtoMember(4, Name = "G")]
+            [ProtoBuf.ProtoMember(5, Name = "G")]
             [Newtonsoft.Json.JsonProperty(PropertyName = "G")]
             public string Group { get; set; }
 
@@ -68,35 +69,33 @@ namespace Business.Extensions
             public string Remote { get; set; }
         }
 
-        public static byte[] BusinessCall(this byte[] value, IBusiness business, string remote, string token, out bool hasAll, string businessGroup = null)
+        public static IResult BusinessCall(this byte[] value, IBusiness business, string remote, string businessGroup = null, string commandID = null)
         {
-            hasAll = false;
-
             try
             {
                 BusinessData<byte[]> businessData = value;
 
                 if (!System.String.IsNullOrEmpty(remote)) { businessData.Remote = remote; }
-                if (System.String.IsNullOrEmpty(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, "Remote is null").ToBytes(); }
+                if (System.String.IsNullOrEmpty(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, "Remote is null"); }
 
-                if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, "Cmd is null").ToBytes(); }
+                if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, "Cmd is null"); }
 
                 if (!System.String.IsNullOrEmpty(businessGroup)) { businessData.Group = businessGroup; }
-                if (System.String.IsNullOrEmpty(businessData.Group)) { businessData.Group = Bind.DefaultCommandGroup; }
+                if (System.String.IsNullOrEmpty(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
 
                 System.Collections.Generic.IReadOnlyDictionary<string, Business.Command> group;
                 if (!business.Command.TryGetValue(businessData.Group, out group))
                 {
-                    return business.ResultCreate((int)Mark.MarkItem.Business_GroupError, string.Format("Not businessGroup {0}", businessData.Group)).ToBytes();
+                    return business.ResultCreate((int)Mark.MarkItem.Business_GroupError, string.Format("Not businessGroup {0}", businessData.Group));
                 }
 
                 Business.Command command;
                 if (!group.TryGetValue(businessData.Cmd, out command))
                 {
-                    return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, string.Format("Not Cmd {0}", businessData.Cmd)).ToBytes();
+                    return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, string.Format("Not Cmd {0}", businessData.Cmd));
                 }
 
-                Result.IResult result = command.Call(new Auth.Token { Key = token, Remote = businessData.Remote }, businessData.Data);
+                Result.IResult result = command.Call(new Auth.Token { Key = businessData.Token, Remote = businessData.Remote, CommandID = commandID }, businessData.Data);
 
                 if (!command.Meta.HasReturn)
                 {
@@ -116,13 +115,13 @@ namespace Business.Extensions
                 //====================================//
                 result2.Callback = businessData.Callback;
 
-                return result2.ToBytes();
+                return result2;
             }
             catch (System.Exception ex)
             {
                 try
                 {
-                    return business.ResultCreate((int)Mark.MarkItem.Business_DataError, System.Convert.ToString(ex)).ToBytes();
+                    return business.ResultCreate((int)Mark.MarkItem.Business_DataError, System.Convert.ToString(ex));
                 }
                 catch { return null; }
             }
@@ -137,12 +136,12 @@ namespace Business.Extensions
             try
             {
                 if (!System.String.IsNullOrEmpty(remote)) { businessData.Remote = remote; }
-                if (System.String.IsNullOrEmpty(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, "Remote is null").ToString(); }
+                if (System.String.IsNullOrEmpty(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, Mark.Get<string>(Mark.MarkItem.Exp_RemoteIllegal)).ToString(); }
 
-                if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, "Cmd is null").ToString(); }
+                if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, Mark.Get<string>(Mark.MarkItem.Business_CmdError)).ToString(); }
 
                 if (!System.String.IsNullOrEmpty(businessGroup)) { businessData.Group = businessGroup; }
-                if (System.String.IsNullOrEmpty(businessData.Group)) { businessData.Group = Bind.DefaultCommandGroup; }
+                if (System.String.IsNullOrEmpty(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
 
                 System.Collections.Generic.IReadOnlyDictionary<string, Business.Command> group;
                 if (!business.Command.TryGetValue(businessData.Group, out group))

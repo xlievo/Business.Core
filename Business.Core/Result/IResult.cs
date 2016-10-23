@@ -46,6 +46,23 @@ namespace Business.Result
         /// </summary>
         System.String Callback { get; set; }
 
+        ///// <summary>
+        ///// Whether to notify all
+        ///// </summary>
+        //System.Boolean Overall { get; set; }
+
+        ///// <summary>
+        ///// Socket identity
+        ///// </summary>
+        //System.String CommandID { get; set; }
+
+        ///// <summary>
+        ///// Notify list
+        ///// </summary>
+        //System.Collections.Generic.IEnumerable<IResult> Notifys { get; set; }
+
+        ICommand Command { get; set; }
+
         /// <summary>
         /// Json Data
         /// </summary>
@@ -62,13 +79,13 @@ namespace Business.Result
         /// ProtoBuf
         /// </summary>
         /// <returns></returns>
-        byte[] ToBytes();
+        System.Byte[] ToBytes();
 
         /// <summary>
         /// Json
         /// </summary>
         /// <returns></returns>
-        string ToString();
+        System.String ToString();
     }
 
     public interface IResult<DataType> : IResult
@@ -77,5 +94,23 @@ namespace Business.Result
         /// Specific Byte/Json data objects
         /// </summary>
         new DataType Data { get; set; }
+    }
+
+    public interface ICommand
+    {
+        /// <summary>
+        /// Whether to notify all
+        /// </summary>
+        System.Boolean Overall { get; set; }
+
+        /// <summary>
+        /// Socket identity
+        /// </summary>
+        System.String CommandID { get; set; }
+
+        /// <summary>
+        /// Notify list
+        /// </summary>
+        System.Collections.Generic.IEnumerable<IResult> Notifys { get; set; }
     }
 }

@@ -17,9 +17,79 @@
 
 namespace Business.Attributes
 {
+    using System.Linq;
     using Result;
 
     #region abstract
+
+    #region
+
+    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public sealed class IgnoreAttribute : System.Attribute { }
+
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    public sealed class ConfigAttribute : System.Attribute
+    {
+        public ConfigAttribute(string name, int port = 5000)
+        {
+            this.name = name;
+            this.port = port;
+        }
+
+        public ConfigAttribute(int port, string name = null)
+        {
+            this.port = port;
+            this.name = name;
+        }
+
+        string name;
+        public string Name { get { return this.name; } internal set { this.name = value; } }
+
+        int port;
+        public int Port { get { return this.port; } internal set { this.port = value; } }
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
+    public class LoggerAttribute : System.Attribute, Extensions.ICloneable<LoggerAttribute>
+    {
+        public LoggerAttribute Clone()
+        {
+            return new LoggerAttribute(logType, canWrite) { CanValue = CanValue, CanResult = CanResult };
+        }
+
+        object System.ICloneable.Clone()
+        {
+            return this.Clone();
+        }
+
+        public enum ValueMode
+        {
+            No = 0,
+            Select = 1,
+            All = 2,
+        }
+
+        public LoggerAttribute(LogType logType, bool canWrite = true)
+        {
+            this.logType = logType;
+            this.canWrite = canWrite;
+        }
+
+        readonly LogType logType;
+        public LogType LogType
+        {
+            get { return logType; }
+        }
+
+        bool canWrite;
+        public bool CanWrite { get { return canWrite; } set { canWrite = value; } }
+
+        public ValueMode CanValue { get; set; }
+
+        public bool CanResult { get; set; }
+    }
+
+    #endregion
 
     //public interface IAuthAttribute
     //{
@@ -39,19 +109,186 @@ namespace Business.Attributes
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public abstract class ArgumentAttribute : System.Attribute
     {
+        #region MetaData
+
+        public static readonly System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Action<object, object>>>> MetaData;
+
+        //public struct Member
+        //{
+        //    public Member(System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Action<object, object>>> accessor)
+        //    {
+        //        this.accessor = accessor;
+        //    }
+
+        //    readonly System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Action<object, object>>> accessor;
+        //    public System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Action<object, object>>> Accessor { get { return accessor; } }
+        //}
+
+        static System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Action<object, object>>> GetMetaData(System.Type type)
+        {
+            var member = new System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Action<object, object>>>();
+
+            var fields = type.GetFields();
+            foreach (var field in fields)
+            {
+                member.Add(field.Name, System.Tuple.Create(field.FieldType, Extensions.Emit.FieldAccessorGenerator.CreateSetter(field)));
+            }
+
+            var propertys = type.GetProperties();
+            foreach (var property in propertys)
+            {
+                var setter = Extensions.Emit.PropertyAccessorGenerator.CreateSetter(property);
+                if (null == setter) { continue; }
+                member.Add(property.Name, System.Tuple.Create(property.PropertyType, setter));
+            }
+
+            return member;
+        }
+
+        static ArgumentAttribute()
+        {
+            MetaData = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Action<object, object>>>>();
+
+            var ass = System.AppDomain.CurrentDomain.GetAssemblies().Where(c => !c.IsDynamic);
+
+            foreach (var item in ass)
+            {
+                try
+                {
+                    var types = item.GetExportedTypes();
+
+                    foreach (var type in types)
+                    {
+                        if (type.IsSubclassOf(typeof(ArgumentAttribute)) && !type.IsAbstract)
+                        {
+                            MetaData.Add(type.FullName, GetMetaData(type));
+                        }
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    System.IO.File.AppendAllText(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Business.Lib.log.txt"), string.Format("{1}{0}{2}{0}", System.Environment.NewLine, item.FullName, ex), System.Text.Encoding.UTF8);
+                }
+            }
+        }
+
+        #endregion
+
+        public virtual bool MemberSet(System.Type type, string value, out object outValue)
+        {
+            outValue = null;
+
+            if (type.IsEnum)
+            {
+                if (System.String.IsNullOrWhiteSpace(value)) { return false; }
+
+                var enums = System.Enum.GetValues(type).Cast<System.Enum>();
+                var enumValue = enums.FirstOrDefault(c => value.Equals(c.ToString(), System.StringComparison.InvariantCultureIgnoreCase));
+                if (null != enumValue)
+                {
+                    outValue = enumValue;
+                    return true;
+                }
+                return false;
+            }
+            else
+            {
+                switch (type.FullName)
+                {
+                    case "System.String":
+                        outValue = value;
+                        return true;
+                    case "System.Int16":
+                        short value2;
+                        if (!System.Int16.TryParse(value, out value2))
+                        {
+                            outValue = value2;
+                            return true;
+                        }
+                        return false;
+                    case "System.Int32":
+                        int value3;
+                        if (System.Int32.TryParse(value, out value3))
+                        {
+                            outValue = value3;
+                            return true;
+                        }
+                        return false;
+                    case "System.Int64":
+                        long value4;
+                        if (System.Int64.TryParse(value, out value4))
+                        {
+                            outValue = value4;
+                            return true;
+                        }
+                        return false;
+                    case "System.Decimal":
+                        decimal value5;
+                        if (System.Decimal.TryParse(value, out value5))
+                        {
+                            outValue = value5;
+                            return true;
+                        }
+                        return false;
+                    case "System.Double":
+                        double value6;
+                        if (System.Double.TryParse(value, out value6))
+                        {
+                            outValue = value6;
+                            return true;
+                        }
+                        return false;
+                    default: return false;
+                }
+            }
+        }
+
+        internal bool MemberSet(string member, string value)
+        {
+            System.Collections.Generic.Dictionary<string, System.Tuple<System.Type, System.Action<object, object>>> meta;
+            if (MetaData.TryGetValue(this.GetType().FullName, out meta))
+            {
+                System.Tuple<System.Type, System.Action<object, object>> accessor;
+                if (meta.TryGetValue(member, out accessor))
+                {
+                    if (null == accessor.Item2) { return false; }
+
+                    try
+                    {
+                        object outValue;
+                        if (MemberSet(accessor.Item1, value, out outValue))
+                        {
+                            accessor.Item2(this, outValue);
+                            return true;
+                        }
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+
         public ArgumentAttribute(int code, string message = null)
         {
+            this.fullName = this.GetType().FullName;
             this.code = code;
             this.message = message;
         }
 
-        readonly int code;
-        public int Code { get { return code; } }
+        internal readonly string fullName;
 
-        readonly string message;
-        public string Message { get { return message; } }
+        int code;
+        public int Code { get { return code; } set { this.code = value; } }
+
+        string message;
+        public string Message { get { return message; } set { this.message = value; } }
 
         public bool TrimChar { get; set; }
+
+        public string Group { get; set; }
 
         //public string Group { get; set; }
 
@@ -63,88 +300,97 @@ namespace Business.Attributes
         //protected internal System.Type ResultType { get; internal set; }
 
         public abstract IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business);
-    }
 
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
-    public abstract class ArgAttribute : ArgumentAttribute
-    {
-        public ArgAttribute(int code, string message = null)
-            : base(code, message) { }
+        #region Result
 
-        public string Group { get; set; }
-
-        public override abstract IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business);
-    }
-
-    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class CommandAttribute : ArgAttribute
-    {
-        public CommandAttribute(string onlyName = null, int code = -901, string message = null) : base(code, message) { this.OnlyName = onlyName; }
-
-        public string OnlyName { get; set; }
-
-        public bool HasUnified { get; set; }
-
-        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        public IResult ResultCreate()
         {
             return ResultFactory.Create();
         }
-    }
 
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-    public class DeserializeAttribute : ArgAttribute
-    {
-        public DeserializeAttribute(int code = -901, string message = null)
-            : base(code, message) { }
-
-        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        public IResult ResultCreate(int state)
         {
-            try
-            {
-                return ResultFactory.Create(value);
-            }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member)); }
-        }
-    }
-
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class BusinessLogAttribute : System.Attribute
-    {
-        public BusinessLogAttribute(bool notRecord = false)
-        {
-            this.notRecord = notRecord;
+            return ResultFactory.Create(state);
         }
 
-        readonly bool notRecord;
-        public bool NotRecord { get { return notRecord; } }
-
-        public bool NotValue { get; set; }
-
-        public bool NotResult { get; set; }
-    }
-
-    [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class NotInterceptAttribute : System.Attribute { }
-
-    public enum LogMode
-    {
-        No = 0,
-        In = 1,
-        Out = 2,
-        All = 3
-    }
-
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-    public class ArgLog : System.Attribute
-    {
-        public ArgLog(LogMode log)
+        public IResult ResultCreate(int state, string message)
         {
-            this.log = log;
+            return ResultFactory.Create(state, message);
         }
 
-        readonly LogMode log;
-        public LogMode Log { get { return log; } }
+        public IResult<Data> ResultCreate<Data>(Data data, int state = 1)
+        {
+            return ResultFactory.Create(data, state);
+        }
+
+        #endregion
     }
+
+    //[System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
+    //public abstract class ArgAttribute : ArgumentAttribute
+    //{
+    //    public ArgAttribute(int code, string message = null)
+    //        : base(code, message) { }
+
+    //    public string Group { get; set; }
+
+    //    public override abstract IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business);
+    //}
+    
+    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public sealed class CommandAttribute : System.Attribute
+    {
+        public CommandAttribute(string onlyName = null) { this.OnlyName = onlyName; }
+
+        public bool TrimChar { get; set; }
+
+        public string Group { get; set; }
+
+        public string OnlyName { get; set; }
+
+        //public bool HasUnified { get; set; }
+
+        //public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        //{
+        //    return this.ResultCreate();
+        //}
+    }
+
+    //[System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    //public class DeserializeAttribute : ArgumentAttribute
+    //{
+    //    public DeserializeAttribute(int code = -901, string message = null)
+    //        : base(code, message) { }
+
+    //    public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+    //    {
+    //        try
+    //        {
+    //            return this.ResultCreate(value);
+    //        }
+    //        catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} deserialize error", member)); }
+    //    }
+    //}
+
+    //public enum LogMode
+    //{
+    //    No = 0,
+    //    In = 1,
+    //    Out = 2,
+    //    All = 3
+    //}
+
+    //[System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    //public class ArgLog : System.Attribute
+    //{
+    //    public ArgLog(LogMode log)
+    //    {
+    //        this.log = log;
+    //    }
+
+    //    readonly LogMode log;
+    //    public LogMode Log { get { return log; } }
+    //}
 
     #endregion
 
@@ -160,9 +406,9 @@ namespace Business.Attributes
         {
             try
             {
-                return ResultFactory.Create(Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(value), type));
+                return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(value), type));
             }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
+            catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
         }
     }
 
@@ -177,10 +423,10 @@ namespace Business.Attributes
             {
                 using (var stream = new System.IO.MemoryStream((byte[])value))
                 {
-                    return ResultFactory.Create(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
+                    return this.ResultCreate(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
                 }
             }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
+            catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
         }
     }
     */
@@ -202,9 +448,9 @@ namespace Business.Attributes
         {
             try
             {
-                return ResultFactory.Create(value);
+                return this.ResultCreate(value);
             }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} deserialize error", member)); }
+            catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} deserialize error", member)); }
         }
     }
     */
@@ -216,9 +462,9 @@ namespace Business.Attributes
     //    {
     //        try
     //        {
-    //            return ResultFactory.Create(Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(value), type));
+    //            return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(value), type));
     //        }
-    //        catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
+    //        catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
     //    }
     //}
 
@@ -232,10 +478,10 @@ namespace Business.Attributes
     //        {
     //            using (var stream = new System.IO.MemoryStream((byte[])value))
     //            {
-    //                return ResultFactory.Create(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
+    //                return this.ResultCreate(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
     //            }
     //        }
-    //        catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
+    //        catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
     //    }
     //}
 
@@ -250,15 +496,15 @@ namespace Business.Attributes
             {
                 if (System.String.IsNullOrEmpty(value))
                 {
-                    return ResultFactory.Create(Code, Message ?? string.Format("argument \"{0}\" can not null.", member));
+                    return this.ResultCreate(Code, Message ?? string.Format("argument \"{0}\" can not null.", member));
                 }
             }
             else if (System.Object.Equals(null, value))
             {
-                return ResultFactory.Create(Code, Message ?? string.Format("argument \"{0}\" can not null.", member));
+                return this.ResultCreate(Code, Message ?? string.Format("argument \"{0}\" can not null.", member));
             }
 
-            return ResultFactory.Create();
+            return this.ResultCreate();
         }
     }
 
@@ -272,74 +518,74 @@ namespace Business.Attributes
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
-            if (System.Object.Equals(null, value)) { return ResultFactory.Create(); }
+            if (System.Object.Equals(null, value)) { return this.ResultCreate(); }
 
             var msg = System.String.Empty;
 
             switch (type.FullName)
             {
                 case "System.String":
-                    var _ags1 = System.Convert.ToString(value).Trim();
-                    if (null != Min && Extensions.Help.ChangeType<System.Int32>(Min) > _ags1.Length)
+                    var ags1 = value.Trim();
+                    if (null != Min && Extensions.Help.ChangeType<System.Int32>(Min) > ags1.Length)
                     {
                         msg = string.Format("argument \"{0}\" minimum length value {1}.", member, Min);
                     }
-                    if (null != Max && Extensions.Help.ChangeType<System.Int32>(Max) < _ags1.Length)
+                    if (null != Max && Extensions.Help.ChangeType<System.Int32>(Max) < ags1.Length)
                     {
                         msg = string.Format("argument \"{0}\" maximum length value {1}.", member, Max);
                     }
                     break;
                 case "System.DateTime":
-                    var _ags2 = System.Convert.ToDateTime(value);
-                    if (null != Min && Extensions.Help.ChangeType<System.DateTime>(Min) > _ags2)
+                    var ags2 = System.Convert.ToDateTime(value);
+                    if (null != Min && Extensions.Help.ChangeType<System.DateTime>(Min) > ags2)
                     {
                         msg = string.Format("argument \"{0}\" minimum value {1}.", member, Min);
                     }
-                    if (null != Max && Extensions.Help.ChangeType<System.DateTime>(Max) < _ags2)
+                    if (null != Max && Extensions.Help.ChangeType<System.DateTime>(Max) < ags2)
                     {
                         msg = string.Format("argument \"{0}\" maximum value {1}.", member, Max);
                     }
                     break;
                 case "System.Int32":
-                    var _ags3 = System.Convert.ToInt32(value);
-                    if (null != Min && Extensions.Help.ChangeType<System.Int32>(Min) > _ags3)
+                    var ags3 = System.Convert.ToInt32(value);
+                    if (null != Min && Extensions.Help.ChangeType<System.Int32>(Min) > ags3)
                     {
                         msg = string.Format("argument \"{0}\" minimum value {1}.", member, Min);
                     }
-                    if (null != Max && Extensions.Help.ChangeType<System.Int32>(Max) < _ags3)
+                    if (null != Max && Extensions.Help.ChangeType<System.Int32>(Max) < ags3)
                     {
                         msg = string.Format("argument \"{0}\" maximum value {1}.", member, Max);
                     }
                     break;
                 case "System.Int64":
-                    var _ags4 = System.Convert.ToInt64(value);
-                    if (null != Min && Extensions.Help.ChangeType<System.Int64>(Min) > _ags4)
+                    var ags4 = System.Convert.ToInt64(value);
+                    if (null != Min && Extensions.Help.ChangeType<System.Int64>(Min) > ags4)
                     {
                         msg = string.Format("argument \"{0}\" minimum value {1}.", member, Min);
                     }
-                    if (null != Max && Extensions.Help.ChangeType<System.Int64>(Max) < _ags4)
+                    if (null != Max && Extensions.Help.ChangeType<System.Int64>(Max) < ags4)
                     {
                         msg = string.Format("argument \"{0}\" maximum value {1}.", member, Max);
                     }
                     break;
                 case "System.Decimal":
-                    var _ags5 = System.Convert.ToDecimal(value);
-                    if (null != Min && Extensions.Help.ChangeType<System.Decimal>(Min) > _ags5)
+                    var ags5 = System.Convert.ToDecimal(value);
+                    if (null != Min && Extensions.Help.ChangeType<System.Decimal>(Min) > ags5)
                     {
                         msg = string.Format("argument \"{0}\" minimum value {1}.", member, Min);
                     }
-                    if (null != Max && Extensions.Help.ChangeType<System.Decimal>(Max) < _ags5)
+                    if (null != Max && Extensions.Help.ChangeType<System.Decimal>(Max) < ags5)
                     {
                         msg = string.Format("argument \"{0}\" maximum value {1}.", member, Max);
                     }
                     break;
                 case "System.Double":
-                    var _ags6 = System.Convert.ToDouble(value);
-                    if (null != Min && Extensions.Help.ChangeType<System.Double>(Min) > _ags6)
+                    var ags6 = System.Convert.ToDouble(value);
+                    if (null != Min && Extensions.Help.ChangeType<System.Double>(Min) > ags6)
                     {
                         msg = string.Format("argument \"{0}\" minimum value {1}.", member, Min);
                     }
-                    if (null != Max && Extensions.Help.ChangeType<System.Double>(Max) < _ags6)
+                    if (null != Max && Extensions.Help.ChangeType<System.Double>(Max) < ags6)
                     {
                         msg = string.Format("argument \"{0}\" maximum value {1}.", member, Max);
                     }
@@ -363,10 +609,10 @@ namespace Business.Attributes
 
             if (!System.String.IsNullOrEmpty(msg))
             {
-                return ResultFactory.Create(Code, Message ?? msg);
+                return this.ResultCreate(Code, Message ?? msg);
             }
 
-            return ResultFactory.Create();
+            return this.ResultCreate();
         }
     }
 
@@ -390,14 +636,14 @@ namespace Business.Attributes
                 case "System.Double":
                     sp = System.Convert.ToDouble(System.Math.Pow(10, size));
                     break;
-                default: return ResultFactory.Create();
+                default: return this.ResultCreate();
             }
 
             var t = System.Math.Truncate(value);
 
             var result = t + (0 > value ? System.Math.Ceiling((value - t) * sp) : System.Math.Floor((value - t) * sp)) / sp;
 
-            return ResultFactory.Create(result);
+            return this.ResultCreate(result);
         }
     }
 
@@ -408,14 +654,14 @@ namespace Business.Attributes
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
-            if (System.Object.Equals(null, value)) { return ResultFactory.Create(); }
+            if (System.Object.Equals(null, value)) { return this.ResultCreate(); }
 
             var _value = System.Convert.ToString(value).Trim();
             if (!System.String.IsNullOrEmpty(_value) && !Extensions.Help.CheckEmail(_value))
             {
-                return ResultFactory.Create(Code, Message ?? string.Format("argument \"{0}\" email error.", member));
+                return this.ResultCreate(Code, Message ?? string.Format("argument \"{0}\" email error.", member));
             }
-            return ResultFactory.Create();
+            return this.ResultCreate();
         }
     }
 
@@ -429,24 +675,24 @@ namespace Business.Attributes
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
-            if (System.Object.Equals(null, value)) { return ResultFactory.Create(); }
+            if (System.Object.Equals(null, value)) { return this.ResultCreate(); }
 
-            var _value = System.Convert.ToString(value).Trim();
+            var _value = value.Trim();
             if (!System.String.IsNullOrEmpty(_value) && !CheckChar(_value, Mode))
             {
-                return ResultFactory.Create(Code, Message ?? string.Format("argument \"{0}\" char verification failed.", member));
+                return this.ResultCreate(Code, Message ?? string.Format("argument \"{0}\" char verification failed.", member));
             }
-            return ResultFactory.Create();
+            return this.ResultCreate();
         }
 
         [System.Flags]
         public enum CheckCharMode
         {
             All = 0,
-            Number = 2,
-            Upper = 4,
-            Lower = 8,
-            Chinese = 16
+            Number = 1,
+            Upper = 2,
+            Lower = 4,
+            Chinese = 8
         }
 
         static bool CheckChar(string value, CheckCharMode mode = CheckCharMode.All)
@@ -509,7 +755,6 @@ namespace Business.Attributes
 
     #endregion
 
-
     //public virtual IResult CheckAuth(object value, string mname)
     //{
     //    if (System.Object.Equals(null, value)) { return null; }
@@ -522,68 +767,68 @@ namespace Business.Attributes
 
     //    //if (null == session)
     //    //{
-    //    //    //return ResultFactory.Create<Result>(Mark.MarkItem.Exp_SessionOut);
+    //    //    //return this.ResultCreate<Result>(Mark.MarkItem.Exp_SessionOut);
     //    //    return null;
     //    //}
 
     //    var session = Extensions.Help.ProtoBufDeserialize(null, sessionType);
 
-    //    return ResultFactory.Create(session);
+    //    return this.ResultCreate(session);
     //    //return session;
     //    //throw new System.NotImplementedException();
     //}
 
     #region Deserialize
 
-    public sealed class JsonCmdAttribute : CommandAttribute
+    //public sealed class JsonCmdAttribute : CommandAttribute
+    //{
+    //    public JsonCmdAttribute(string onlyName = null, int code = -12, string message = null) : base(onlyName, code, message) { }
+
+    //    public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+    //    {
+    //        try
+    //        {
+    //            return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(value), type));
+    //        }
+    //        catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
+    //    }
+    //}
+
+    //public sealed class ProtoBufCmdAttribute : CommandAttribute
+    //{
+    //    public ProtoBufCmdAttribute(string onlyName = null, int code = -13, string message = null) : base(onlyName, code, message) { }
+
+    //    public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+    //    {
+    //        try
+    //        {
+    //            using (var stream = new System.IO.MemoryStream((byte[])value))
+    //            {
+    //                return this.ResultCreate(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
+    //            }
+    //        }
+    //        catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
+    //    }
+    //}
+
+    public sealed class JsonArgAttribute : ArgumentAttribute
     {
-        public JsonCmdAttribute(string onlyName = null, int code = -902, string message = null) : base(onlyName, code, message) { }
-
-        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
-        {
-            try
-            {
-                return ResultFactory.Create(Newtonsoft.Json.JsonConvert.DeserializeObject(System.Convert.ToString(value), type));
-            }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
-        }
-    }
-
-    public sealed class ProtoBufCmdAttribute : CommandAttribute
-    {
-        public ProtoBufCmdAttribute(string onlyName = null, int code = -903, string message = null) : base(onlyName, code, message) { }
-
-        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
-        {
-            try
-            {
-                using (var stream = new System.IO.MemoryStream((byte[])value))
-                {
-                    return ResultFactory.Create(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
-                }
-            }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
-        }
-    }
-
-    public sealed class JsonArgAttribute : DeserializeAttribute
-    {
-        public JsonArgAttribute(int code = -902, string message = null)
+        public JsonArgAttribute(int code = -12, string message = null)
             : base(code, message) { }
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
             try
             {
-                return ResultFactory.Create(Newtonsoft.Json.JsonConvert.DeserializeObject(value, type));
+                return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(value, type));
             }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
+            catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} Json deserialize error", member)); }
         }
     }
 
-    public sealed class ProtoBufArgAttribute : DeserializeAttribute
+    public sealed class ProtoBufArgAttribute : ArgumentAttribute
     {
-        public ProtoBufArgAttribute(int code = -903, string message = null)
+        public ProtoBufArgAttribute(int code = -13, string message = null)
             : base(code, message) { }
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
@@ -592,10 +837,10 @@ namespace Business.Attributes
             {
                 using (var stream = new System.IO.MemoryStream(value))
                 {
-                    return ResultFactory.Create(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
+                    return this.ResultCreate(ProtoBuf.Meta.RuntimeTypeModel.Default.Deserialize(stream, null, type));
                 }
             }
-            catch { return ResultFactory.Create(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
+            catch { return this.ResultCreate(Code, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", member)); }
         }
     }
 

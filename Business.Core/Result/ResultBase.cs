@@ -62,6 +62,8 @@ namespace Business.Result
         /// </summary>
         public string Callback { get; set; }
 
+        public ICommand Command { get; set; }
+
         /// <summary>
         /// Json Data
         /// </summary>
@@ -120,7 +122,7 @@ namespace Business.Result
             return new Result() { State = GetState(state), Message = message, DataType = typeof(Result).GenericTypeArguments[0] };
         }
 
-        public static IResult<Data> Create<Data>(this Data data, IResult<Data> result, int state = 1)
+        public static IResult<Data> Create<Data>(Data data, IResult<Data> result, int state = 1)
         {
             if (1 > state) { state = System.Math.Abs(state); }
 
@@ -145,7 +147,7 @@ namespace Business.Result
 
         //    return result;
         //}
-
+        //==================================================================//
         static IResult ResultCreate(IBusiness business, System.Type type)
         {
             var result = (IResult)System.Activator.CreateInstance(business.ResultType.MakeGenericType(type));
@@ -153,11 +155,15 @@ namespace Business.Result
             return result;
         }
 
-        public static IResult ResultCreate(this IBusiness business)
+        public static IResult ResultCreate(this IBusiness business)//, bool overall = false, string commandID = null, params IResult[] notifys
         {
             var result = ResultCreate(business, typeof(string));
 
             result.State = 1;
+            //result.Overall = overall;
+            //result.CommandID = commandID;
+            //result.Notifys = notifys;
+            //result.Socket = new ISocket { Overall = overall, List = list };
 
             return result;
         }
@@ -167,6 +173,10 @@ namespace Business.Result
             var result = ResultCreate(business, typeof(string));
 
             result.State = state;
+            //result.Overall = overall;
+            //result.CommandID = commandID;
+            //result.Notifys = notifys;
+            //result.Socket = new ISocket { Overall = overall, List = list };
 
             return result;
         }
@@ -177,6 +187,10 @@ namespace Business.Result
 
             result.State = GetState(state);
             result.Message = message;
+            //result.Overall = overall;
+            //result.CommandID = commandID;
+            //result.Notifys = notifys;
+            //result.Socket = new ISocket { Overall = overall, List = list };
 
             return result;
         }
@@ -193,7 +207,6 @@ namespace Business.Result
 
         //    return result;
         //}
-
         public static IResult ResultCreate<Data>(this IBusiness business, Data data, int state = 1)
         {
             var result = ResultCreate(business, typeof(Data));
@@ -203,9 +216,40 @@ namespace Business.Result
             result.State = state;
             result.Data = data;
             result.HasData = !System.Object.Equals(null, data);
+            //result.Overall = overall;
+            //result.CommandID = commandID;
+            //result.Notifys = notifys;
+            //result.Socket = new ISocket { List = list };
 
             return result;// as IResult<Data>;
         }
+
+        //public static IResult ResultCreate<Data>(this IBusiness business, Data data, bool overall = false, string commandID = null, params IResult[] list)
+        //{
+        //    return ResultCreate<Data>(business, data, 1, overall, commandID, list);
+        //}
+        //public static IResult ResultCreate<Data>(this IBusiness business, Data data, bool overall = false, params IResult[] list)
+        //{
+        //    return ResultCreate<Data>(business, data, 1, overall, null, list);
+        //}
+
+        //public static IResult ResultCreate<Data>(this IBusiness business, Data data, int state = 1, bool overall = false, string commandID = null)
+        //{
+        //    var result = ResultCreate(business, typeof(Data));
+
+        //    if (1 > state) { state = System.Math.Abs(state); }
+
+        //    result.State = state;
+        //    result.Data = data;
+        //    result.HasData = !System.Object.Equals(null, data);
+
+        //    result.Overall = overall;
+        //    result.CommandID = commandID;
+        //    //result.Socket = new ISocket { CommandID = commandID };
+
+        //    return result;// as IResult<Data>;
+        //}
+
 
         public static IResult ResultCreateToDataBytes(this IBusiness business, IResult result)
         {
@@ -225,7 +269,7 @@ namespace Business.Result
             {
                 if (result.HasData)
                 {
-                    result2 = business.ResultCreate(result.ToDataBytes(), result.State);
+                    result2 = ResultCreate(business, result.ToDataBytes(), result.State);
                 }
                 else
                 {
@@ -234,11 +278,14 @@ namespace Business.Result
             }
             else
             {
-                result2 = business.ResultCreate(result.State, result.Message);
+                result2 = ResultCreate(business, result.State, result.Message);
             }
 
             //====================================//
             result2.Callback = result.Callback;
+            //result2.Overall = result.Overall;
+            //result2.CommandID = result.CommandID;
+            //result2.Notifys = result.Notifys;
 
             return result2;
         }
@@ -261,7 +308,7 @@ namespace Business.Result
             {
                 if (result.HasData)
                 {
-                    result2 = business.ResultCreate(result.ToDataString(), result.State);
+                    result2 = ResultCreate(business, result.ToDataString(), result.State);
                 }
                 else
                 {
@@ -270,7 +317,7 @@ namespace Business.Result
             }
             else
             {
-                result2 = business.ResultCreate(result.State, result.Message);
+                result2 = ResultCreate(business, result.State, result.Message);
             }
 
             //====================================//
@@ -279,7 +326,7 @@ namespace Business.Result
             return result2;
         }
 
-        //================================================//
+        //==================================================================//
 
         public static IResult Create()
         {
@@ -296,7 +343,7 @@ namespace Business.Result
             return Create<ResultBase<string>>(state, message);
         }
 
-        public static IResult<Data> Create<Data>(this Data data, int state = 1)
+        public static IResult<Data> Create<Data>(Data data, int state = 1)
         {
             return Create<Data>(data, new ResultBase<Data>(), state);
         }

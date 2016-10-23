@@ -24,8 +24,6 @@ namespace Business
         dynamic In { get; set; }
 
         string Group { get; set; }
-
-        Attributes.LogMode Log { get; set; }
     }
 
     public interface IArg<OutType> : IArg
@@ -61,8 +59,6 @@ namespace Business
 
         //readonly string group;
         public string Group { get; set; }
-
-        public Attributes.LogMode Log { get; set; }
     }
 
     //public struct Arg<OutType, InType> : IArg<OutType, InType>

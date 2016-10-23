@@ -39,20 +39,21 @@
     <DelaySign>false</DelaySign>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=3.3.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+    <Reference Include="Castle.Core">
       <HintPath>..\packages\Castle.Core.3.3.3\lib\net45\Castle.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\Business.Core.Test\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="protobuf-net, Version=2.1.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
-      <HintPath>..\Business.Core.Test\packages\protobuf-net.2.1.0\lib\net45\protobuf-net.dll</HintPath>
+    <Reference Include="protobuf-net">
+      <HintPath>..\packages\protobuf-net.2.1.0\lib\net45\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +64,8 @@
     <Compile Include="Business\Log.cs" />
     <Compile Include="Business\IBusiness.cs" />
     <Compile Include="Business\Mark.cs" />
+    <Compile Include="Configer\Config.cs" />
+    <Compile Include="Configer\ConfigSection.cs" />
     <Compile Include="Extensions\CommandHelp.cs" />
     <Compile Include="Extensions\Emit\ConstructorInvokerGenerator.cs" />
     <Compile Include="Extensions\Emit\EmitUtils.cs" />
@@ -70,6 +73,7 @@
     <Compile Include="Extensions\Emit\MethodInvokerGenerator.cs" />
     <Compile Include="Extensions\Emit\OpCodeExtention.cs" />
     <Compile Include="Extensions\Emit\PropertyAccessorGenerator.cs" />
+    <Compile Include="Extensions\FileSystem.cs" />
     <Compile Include="Extensions\Help.cs" />
     <Compile Include="Business\Bind.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -78,10 +82,10 @@
     <Compile Include="Result\ResultObject.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Content Include="Extensions\Emit\Quote.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Extensions\Emit\Quote.txt" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

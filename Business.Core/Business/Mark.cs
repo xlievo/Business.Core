@@ -29,19 +29,19 @@ namespace Business
             Exp_UndefinedException = 0,
 
             /// <summary>
-            /// Source Error -8
+            /// Remote Illegal -8
             /// </summary>
             Exp_RemoteIllegal = -8,
             /// <summary>
-            /// Business_DataError -10
+            /// Data Error -10
             /// </summary>
             Business_DataError = -10,
             /// <summary>
-            /// Business_CmdError -11
+            /// "Command Error -11
             /// </summary>
             Business_CmdError = -11,
             /// <summary>
-            /// Business_GroupError -12
+            /// Group Error -12
             /// </summary>
             Business_GroupError = -12,
         }

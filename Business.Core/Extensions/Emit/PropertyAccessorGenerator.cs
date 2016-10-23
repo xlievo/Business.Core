@@ -19,12 +19,7 @@ namespace Business.Extensions.Emit
 {
     public static class PropertyAccessorGenerator
     {
-        public static System.Func<object, object> CreateGetter(System.Reflection.PropertyInfo propertyInfo)
-        {
-            return CreateGetter(propertyInfo, true);
-        }
-
-        public static System.Func<object, object> CreateGetter(System.Reflection.PropertyInfo propertyInfo, bool nonPublic)
+        public static System.Func<object, object> CreateGetter(System.Reflection.PropertyInfo propertyInfo, bool nonPublic = true)
         {
             return CreateGetter<object, object>(propertyInfo, nonPublic);
         }
@@ -63,23 +58,20 @@ namespace Business.Extensions.Emit
             var getMethod = propertyInfo.GetGetMethod(nonPublic);
             if (getMethod == null)
             {
-                if (nonPublic)
-                {
-                    throw new System.ArgumentException("The property does not have a get method.", "propertyInfo");
-                }
+                //if (nonPublic)
+                //{
+                //    throw new System.ArgumentException("The property does not have a get method.", "propertyInfo");
+                //}
 
-                throw new System.ArgumentException("The property does not have a public get method.", "propertyInfo");
+                //throw new System.ArgumentException("The property does not have a public get method.", "propertyInfo");
+
+                return null;
             }
 
             return EmitPropertyGetter<TSource, TRet>(propertyInfo, getMethod);
         }
 
-        public static System.Action<object, object> CreateSetter(System.Reflection.PropertyInfo propertyInfo)
-        {
-            return CreateSetter(propertyInfo, true);
-        }
-
-        public static System.Action<object, object> CreateSetter(System.Reflection.PropertyInfo propertyInfo, bool nonPublic)
+        public static System.Action<object, object> CreateSetter(System.Reflection.PropertyInfo propertyInfo, bool nonPublic = true)
         {
             return CreateSetter<object, object>(propertyInfo, nonPublic);
         }
@@ -116,12 +108,13 @@ namespace Business.Extensions.Emit
             var setMethod = propertyInfo.GetSetMethod(nonPublic);
             if (setMethod == null)
             {
-                if (nonPublic)
-                {
-                    throw new System.ArgumentException("The property does not have a set method.", "propertyInfo");
-                }
+                //if (nonPublic)
+                //{
+                //    throw new System.ArgumentException("The property does not have a set method.", "propertyInfo");
+                //}
 
-                throw new System.ArgumentException("The property does not have a public set method.", "propertyInfo");
+                //throw new System.ArgumentException("The property does not have a public set method.", "propertyInfo");
+                return null;
             }
 
             return EmitPropertySetter<TTarget, TValue>(propertyInfo, setMethod);

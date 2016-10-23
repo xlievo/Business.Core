@@ -71,6 +71,8 @@ namespace Business.Result
         [ProtoBuf.ProtoMember(5, Name = "B")]
         public string Callback { get; set; }
 
+        public ICommand Command { get; set; }
+
         /// <summary>
         /// Specific dynamic data objects
         /// </summary>
