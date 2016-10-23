@@ -73,7 +73,6 @@
     <Compile Include="Extensions\Emit\MethodInvokerGenerator.cs" />
     <Compile Include="Extensions\Emit\OpCodeExtention.cs" />
     <Compile Include="Extensions\Emit\PropertyAccessorGenerator.cs" />
-    <Compile Include="Extensions\FileSystem.cs" />
     <Compile Include="Extensions\Help.cs" />
     <Compile Include="Business\Bind.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
