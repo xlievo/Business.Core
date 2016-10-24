@@ -5,6 +5,11 @@
 
     public class Config : IConfig
     {
+        /// <summary>
+        /// *.*
+        /// </summary>
+        const string ANY = "*.*";
+
         public ConfigAttribute Info { get; set; }
 
         static readonly string CfgPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Business.config");
@@ -40,7 +45,7 @@
 
         public static System.Tuple<System.Collections.Generic.IEnumerable<IGrouping<string, LoggerItem>>, System.Collections.Generic.IEnumerable<IGrouping<string, AttributeItem>>> GetGroup(ConfigSection cfgSection)
         {
-            var loggerSections = cfgSection.Logger.Cast<LoggerItem>().Where(c => !System.String.IsNullOrWhiteSpace(c.Business) && !System.String.IsNullOrWhiteSpace(c.Method) && c.Type.HasValue).Distinct(Extensions.Equality<LoggerItem>.CreateComparer(c => new { c.Business, c.Method })).GroupBy(g => g.Business);
+            var loggerSections = cfgSection.Logger.Cast<LoggerItem>().Where(c => !System.String.IsNullOrWhiteSpace(c.Business) && !System.String.IsNullOrWhiteSpace(c.Method) && c.Type.HasValue).Distinct(Extensions.Equality<LoggerItem>.CreateComparer(c => new { c.Business, c.Method, c.Type })).GroupBy(g => g.Business);
 
             var attributeSections = cfgSection.Attribute.Cast<AttributeItem>().Where(c => !System.String.IsNullOrWhiteSpace(c.Business) && !System.String.IsNullOrWhiteSpace(c.Method) && !System.String.IsNullOrWhiteSpace(c.Argument) && !System.String.IsNullOrWhiteSpace(c.Attribute) && !System.String.IsNullOrWhiteSpace(c.Member)).Distinct().GroupBy(g => g.Business);
 
@@ -111,19 +116,19 @@
 
         public static void Logger(System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> metaData, System.Collections.Generic.IEnumerable<LoggerItem> group)
         {
-            var all = group.FirstOrDefault(c => "*.*" == c.Method);
+            var all = group.Where(c => ANY == c.Method);
             var loggers = group.Where(g => metaData.ContainsKey(g.Method));
 
-            if (null != all)
+            foreach (var item in all)
             {
                 foreach (var meta in metaData)
                 {
-                    if (loggers.Any(c => c.Method.Equals(meta.Value.Name))) { continue; }
+                    if (loggers.Any(c => c.Method.Equals(meta.Key) && c.Type.Value.Equals(item.Type.Value))) { continue; }
 
-                    SetMetaLogger(meta.Value.MetaLogger, all.Type.Value, all.CanWrite, all.CanValue.HasValue ? all.CanValue.Value : LoggerAttribute.ValueMode.No, all.CanResult);
+                    SetMetaLogger(meta.Value.MetaLogger, item.Type.Value, item.CanWrite, item.CanValue.HasValue ? item.CanValue.Value : LoggerAttribute.ValueMode.No, item.CanResult);
                 }
 
-                System.Console.WriteLine(System.String.Format("Logger {0} {1} {2}", all.Business, all.Method, all.Type));
+                System.Console.WriteLine(System.String.Format("Logger {0} {1} {2}", item.Business, item.Method, item.Type));
             }
 
             foreach (var item in loggers)
@@ -180,14 +185,14 @@
             }
         }
 
-        public bool Logger(LogType type, bool canWrite = false, LoggerAttribute.ValueMode? canValue = null, bool canResult = false, string method = "*.*")
+        public bool Logger(LogType type, bool canWrite = false, LoggerAttribute.ValueMode? canValue = null, bool canResult = false, string method = ANY)
         {
             if (System.String.IsNullOrWhiteSpace(method))
             {
                 return false;
             }
 
-            if ("*.*" == method)
+            if (ANY == method)
             {
                 foreach (var meta in this.metaData)
                 {
