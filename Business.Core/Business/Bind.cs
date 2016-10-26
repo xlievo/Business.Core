@@ -285,14 +285,13 @@ namespace Business
 
             Instance = (Business)proxy.CreateClassProxy(type, options, constructorArguments, interceptor);
 
-            //var resultType = System.Array.Find(interceptor.GetType().GenericTypeArguments, c => typeof(IResult).IsAssignableFrom(c) && c.IsGenericType);
-
-            var resultType = typeof(Result).IsGenericType ? typeof(Result).GetGenericTypeDefinition() : typeof(ResultBase<string>);
+            System.Type[] resultArguments;
+            var resultType = (typeof(IResult<>).IsAssignableFrom(typeof(Result), out resultArguments) ? typeof(Result) : typeof(ResultBase<>)).GetGenericTypeDefinition();
 
             interceptor.MetaData = GetInterceptorMetaData(methods2.Item2, type, resultType);
             interceptor.Business = Instance;
 
-            if (typeof(IBusiness).IsAssignableFrom(Instance.GetType()))
+            if (typeof(IBusiness).IsAssignableFrom(type))
             {
                 var business = (IBusiness)Instance;
 
@@ -321,6 +320,20 @@ namespace Business
                 }
 
                 Bind.BusinessList.TryAdd(business.Config.Info.Name, business);
+
+                #endregion
+
+                #region Token
+
+                System.Type[] businessArguments;
+                if (typeof(IBusiness<>).IsAssignableFrom(type, out businessArguments))
+                {
+                    business.Token = Extensions.Emit.ConstructorInvokerGenerator.CreateDelegate<Auth.IToken>(businessArguments[0]);
+                }
+                else
+                {
+                    business.Token = () => { return new Auth.Token(); };
+                }
 
                 #endregion
             }
@@ -813,7 +826,7 @@ namespace Business
 
                         var argAttrChilds = hasDeserialize ? GetArgAttr(currentType, argAttrTrim, argInfo.Name, item.Value.CommandAttr, ref deserializes) : new System.Collections.Generic.List<Args>();
 
-                        item.Value.Args.Add(new Args(argInfo.Name, type, argInfo.Position, argInfo.DefaultValue, argInfo.HasDefaultValue, hasString, argAttrs, argAttrChilds, hasDeserialize, current.hasIArg, current.iArgOutType, metaLoggerArg));
+                        item.Value.Args.Add(new Args(argInfo.Name, type, argInfo.Position, argInfo.DefaultValue, argInfo.HasDefaultValue, hasString, argAttrs, argAttrChilds, hasDeserialize, current.hasIArg, current.hasIArg ? currentType : null, metaLoggerArg));
                     }
 
                     var deserializes2 = hasDeserialize ? new System.Collections.Generic.List<System.Type>() { currentType } : new System.Collections.Generic.List<System.Type>();
@@ -837,26 +850,27 @@ namespace Business
         {
             public System.Boolean hasIArg;
             public System.Type type;
-            public System.Type iArgOutType;
-            //public Attributes.LogMode iArgLog;
         }
 
         static CurrentType GetCurrentType(System.Reflection.ICustomAttributeProvider member, System.Type type)
         {
-            var hasIArg = null != type.GetInterface("Business.IArg`1");
+            System.Type[] iArgOutType;
+            var hasIArg = typeof(IArg<>).IsAssignableFrom(type, out iArgOutType);
+            //var hasIArg = null != type.GetInterface("Business.IArg`1");
 
-            System.Type iArgOutType = null;
-            //Attributes.LogMode iArgLog = Attributes.LogMode.In;
-            if (hasIArg)
-            {
-                iArgOutType = type.GenericTypeArguments[0];
+            //System.Type iArgOutType = null;
+            ////Attributes.LogMode iArgLog = Attributes.LogMode.In;
+            //if (hasIArg)
+            //{
+            //    iArgOutType = genericArguments[0];
 
-                //var log = member.GetAttributes<Attributes.ArgLog>();
-                //if (0 == log.Length) { log = type.GetAttributes<Attributes.ArgLog>(); }
-                //if (0 < log.Length) { iArgLog = log[0].Log; }
-            }
+            //    //var log = member.GetAttributes<Attributes.ArgLog>();
+            //    //if (0 == log.Length) { log = type.GetAttributes<Attributes.ArgLog>(); }
+            //    //if (0 < log.Length) { iArgLog = log[0].Log; }
+            //}
 
-            return new CurrentType { hasIArg = hasIArg, iArgOutType = iArgOutType, type = iArgOutType ?? type };
+            //return new CurrentType { hasIArg = hasIArg, iArgOutType = iArgOutType, type = iArgOutType ?? type };
+            return new CurrentType { hasIArg = hasIArg, type = hasIArg ? iArgOutType[0] : type };
         }
 
         #region GetArgAttr
@@ -922,14 +936,15 @@ namespace Business
                 //var argAttrChild = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(field.GetAttributes<Attributes.ArgumentAttribute>());
 
                 var current = GetCurrentType(field, field.FieldType);
-                var argAttrChild = GetArgAttr(field, current.type);
+                var currentType = current.type;
+                var argAttrChild = GetArgAttr(field, currentType);
                 //var logAttrArg = LogAttr(field, current.type);
 
-                var hasString = typeof(System.String).Equals(current.type);
-                var hasDeserialize = IsClass(current.type);
+                var hasString = typeof(System.String).Equals(currentType);
+                var hasDeserialize = IsClass(currentType);
 
-                if (deserializes.Contains(current.type)) { continue; }
-                else if (hasDeserialize) { deserializes.Add(current.type); }
+                if (deserializes.Contains(currentType)) { continue; }
+                else if (hasDeserialize) { deserializes.Add(currentType); }
                 //if (0 == argAttrChild.Count) { continue; }
 
                 //trim = argAttrChild.HasString && (args.CommandAttr.TrimChar || argAttrChild.Trim);
@@ -937,7 +952,7 @@ namespace Business
 
                 if (trim || hasDeserialize || 0 < argAttrChild.Count)
                 {
-                    argAttrs.Add(new Args(field.Name, field.FieldType, hasString, FieldAccessorGenerator.CreateGetter(field), FieldAccessorGenerator.CreateSetter(field), argAttrChild, hasDeserialize ? GetArgAttr(current.type, trim, field.Name, commandAttr, ref deserializes) : new System.Collections.Generic.List<Args>(), hasDeserialize, current.hasIArg, current.iArgOutType, hasString && trim, string.Format("{0}.{1}", parameterName, field.Name)));
+                    argAttrs.Add(new Args(field.Name, field.FieldType, hasString, FieldAccessorGenerator.CreateGetter(field), FieldAccessorGenerator.CreateSetter(field), argAttrChild, hasDeserialize ? GetArgAttr(current.type, trim, field.Name, commandAttr, ref deserializes) : new System.Collections.Generic.List<Args>(), hasDeserialize, current.hasIArg, current.hasIArg ? currentType : null, hasString && trim, string.Format("{0}.{1}", parameterName, field.Name)));
                 }
             }
 
@@ -947,14 +962,15 @@ namespace Business
                 //var argAttrChild = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(property.GetAttributes<Attributes.ArgumentAttribute>());
 
                 var current = GetCurrentType(property, property.PropertyType);
-                var argAttrChild = GetArgAttr(property, current.type);
+                var currentType = current.type;
+                var argAttrChild = GetArgAttr(property, currentType);
                 //var logAttrArg = LogAttr(property, current.type);
 
-                var hasString = typeof(System.String).Equals(current.type);
-                var hasDeserialize = IsClass(current.type);
+                var hasString = typeof(System.String).Equals(currentType);
+                var hasDeserialize = IsClass(currentType);
 
-                if (deserializes.Contains(current.type)) { continue; }
-                else if (hasDeserialize) { deserializes.Add(current.type); }
+                if (deserializes.Contains(currentType)) { continue; }
+                else if (hasDeserialize) { deserializes.Add(currentType); }
                 //if (0 == argAttrChild.Count) { continue; }
 
                 //if (hasString || 0 < argAttrChild.Count)
@@ -969,7 +985,7 @@ namespace Business
                     var getter = PropertyAccessorGenerator.CreateGetter(property);
                     var setter = PropertyAccessorGenerator.CreateSetter(property);
                     if (null == getter || null == setter) { continue; }
-                    argAttrs.Add(new Args(property.Name, property.PropertyType, hasString, getter, setter, argAttrChild, hasDeserialize ? GetArgAttr(current.type, trim, property.Name, commandAttr, ref deserializes) : new System.Collections.Generic.List<Args>(), hasDeserialize, current.hasIArg, current.iArgOutType, hasString && trim, string.Format("{0}.{1}", parameterName, property.Name)));
+                    argAttrs.Add(new Args(property.Name, property.PropertyType, hasString, getter, setter, argAttrChild, hasDeserialize ? GetArgAttr(current.type, trim, property.Name, commandAttr, ref deserializes) : new System.Collections.Generic.List<Args>(), hasDeserialize, current.hasIArg, current.hasIArg ? currentType : null, hasString && trim, string.Format("{0}.{1}", parameterName, property.Name)));
                 }
             }
 
@@ -989,7 +1005,7 @@ namespace Business
                 if (deserializes.Contains(current.type)) { continue; }
                 else if (hasDeserialize) { deserializes.Add(current.type); }
 
-                argAttrs.Add(new CommandArgs(field.Name, current.hasIArg ? current.iArgOutType : field.FieldType, false, hasDeserialize, hasDeserialize ? GetCommandArgs(current.type, ref deserializes) : new System.Collections.Concurrent.ConcurrentBag<CommandArgs>()));
+                argAttrs.Add(new CommandArgs(field.Name, current.hasIArg ? current.type : field.FieldType, false, hasDeserialize, hasDeserialize ? GetCommandArgs(current.type, ref deserializes) : new System.Collections.Concurrent.ConcurrentBag<CommandArgs>()));
             }
 
             var propertys = type.GetProperties();
@@ -1000,7 +1016,7 @@ namespace Business
                 if (deserializes.Contains(current.type)) { continue; }
                 else if (hasDeserialize) { deserializes.Add(current.type); }
 
-                argAttrs.Add(new CommandArgs(property.Name, current.hasIArg ? current.iArgOutType : property.PropertyType, false, hasDeserialize, hasDeserialize ? GetCommandArgs(current.type, ref deserializes) : new System.Collections.Concurrent.ConcurrentBag<CommandArgs>()));
+                argAttrs.Add(new CommandArgs(property.Name, current.hasIArg ? current.type : property.PropertyType, false, hasDeserialize, hasDeserialize ? GetCommandArgs(current.type, ref deserializes) : new System.Collections.Concurrent.ConcurrentBag<CommandArgs>()));
             }
 
             return argAttrs;

@@ -25,8 +25,13 @@ namespace Business
 
         System.Type ResultType { get; set; }
 
+        System.Func<Auth.IToken> Token { get; set; }
+
         IConfig Config { get; set; }
     }
+
+    public interface IBusiness<Token> : IBusiness
+        where Token : Auth.IToken, new() { }
 
     public abstract class BusinessBase : IBusiness
     {
@@ -35,9 +40,14 @@ namespace Business
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
 
         public System.Type ResultType { get; set; }
+        
+        public System.Func<Auth.IToken> Token { get; set; }
 
         public IConfig Config { get; set; }
     }
+
+    public abstract class BusinessBase<Token> : BusinessBase, IBusiness<Token>
+        where Token : Auth.IToken, new() { }
 
     public interface IConfig
     {

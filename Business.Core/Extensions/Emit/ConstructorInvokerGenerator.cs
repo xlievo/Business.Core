@@ -19,6 +19,55 @@ namespace Business.Extensions.Emit
 {
     public static class ConstructorInvokerGenerator
     {
+        public static System.Func<Type> CreateDelegate<Type>(System.Type type)
+        {
+            if (type == null)
+            {
+                throw new System.ArgumentNullException("type");
+            }
+
+            if (type.IsInterface)
+            {
+                throw new System.ArgumentException(string.Format("{0} is an interface.", type), "type");
+            }
+
+            if (type.IsAbstract)
+            {
+                throw new System.ArgumentException(string.Format("{0} is abstract.", type), "type");
+            }
+
+            System.Reflection.ConstructorInfo constructorInfo = null;
+            if (type.IsClass)
+            {
+                constructorInfo = type.GetConstructor(System.Type.EmptyTypes);
+
+                if (constructorInfo == null)
+                {
+                    throw new System.ArgumentException(string.Format("{0} does not have a public parameterless constructor.", type), "type");
+                }
+            }
+
+            var dynamicMethod = EmitUtils.CreateDynamicMethod(string.Format("{0}_{1}", "$Create", type), typeof(Type), System.Type.EmptyTypes, type);
+            var il = dynamicMethod.GetILGenerator();
+
+            if (type.IsClass)
+            {
+                il.Newobj(constructorInfo);
+            }
+            else
+            {
+                il.DeclareLocal(type);
+                il.LoadLocalVariableAddress(0);
+                il.Initobj(type);
+
+                il.LoadLocalVariable(0);
+                il.Box(type);
+            }
+
+            il.Ret();
+            return (System.Func<Type>)dynamicMethod.CreateDelegate(typeof(System.Func<Type>));
+        }
+
         public static System.Func<object> CreateDelegate(System.Type type)
         {
             if (type == null)

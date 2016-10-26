@@ -51,6 +51,63 @@ namespace Business.Extensions
             return (T[])System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
         }
 
+        public static bool IsAssignableFrom(this System.Type type, System.Type fromType, out System.Type[] genericArguments)
+        {
+            if (null != type && null != fromType && type.IsGenericType)
+            {
+                if (type.IsInterface == fromType.IsInterface)
+                {
+                    if (InInheritanceChain(type, fromType, out genericArguments))
+                    {
+                        return true;
+                    }
+                }
+                if (type.IsInterface)
+                {
+                    var interfaces = fromType.GetInterfaces();
+                    for (int i = 0; i < interfaces.Length; i++)
+                    {
+                        if (InInheritanceChain(type, interfaces[i], out genericArguments))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            genericArguments = null;
+            return false;
+        }
+
+        static bool InInheritanceChain(System.Type type, System.Type fromType, out System.Type[] genericArguments)
+        {
+            while (null != fromType)
+            {
+                if (fromType.IsGenericType)
+                {
+                    genericArguments = fromType.GetGenericArguments();
+                    if (genericArguments.Length == type.GetGenericArguments().Length)
+                    {
+                        try
+                        {
+                            var closedType = type.MakeGenericType(genericArguments);
+                            if (closedType.IsAssignableFrom(fromType))
+                            {
+                                return true;
+                            }
+                        }
+                        catch (System.ArgumentException)
+                        {
+
+                        }
+                    }
+                }
+                fromType = fromType.BaseType;
+            }
+            genericArguments = null;
+            return false;
+        }
+
         public static System.IO.MemoryStream StreamCopy(this System.IO.Stream stream)
         {
             if (null == stream) { throw new System.ArgumentNullException("stream"); }

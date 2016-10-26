@@ -17,15 +17,17 @@
 
 namespace Business.Auth
 {
-    //public interface IToken
-    //{
-    //    string Key { get; set; }
+    public interface IToken
+    {
+        string Key { get; set; }
 
-    //    string Remote { get; set; }
-    //}
+        string Remote { get; set; }
+
+        string CommandID { get; set; }
+    }
 
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
-    public struct Token
+    public class Token : IToken
     {
         public static implicit operator Token(string value)
         {
@@ -56,6 +58,7 @@ namespace Business.Auth
         /// <summary>
         /// Socket identity
         /// </summary>
+        [ProtoBuf.ProtoMember(3)]
         public string CommandID { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Business.Attributes;
 using Business.Result;
 using NUnit.Framework;
@@ -147,7 +146,7 @@ namespace Business.Core.Test
         public Action<Log> WriteLogAsync { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
-
+        public Func<Auth.IToken> Token { get; set; }
         public IConfig Config { get; set; }
 
         //=========================Check============================//

@@ -95,7 +95,11 @@ namespace Business.Extensions
                     return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, string.Format("Not Cmd {0}", businessData.Cmd));
                 }
 
-                Result.IResult result = command.Call(new Auth.Token { Key = businessData.Token, Remote = businessData.Remote, CommandID = commandID }, businessData.Data);
+                var token = business.Token();
+                token.Key = businessData.Token;
+                token.Remote = businessData.Remote;
+                token.CommandID = commandID;
+                Result.IResult result = command.Call(token, businessData.Data);
 
                 if (!command.Meta.HasReturn)
                 {
@@ -155,7 +159,10 @@ namespace Business.Extensions
                     return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, string.Format("Not Cmd {0}", businessData.Cmd)).ToString();
                 }
 
-                var result = command.Call(new Auth.Token { Key = businessData.Token, Remote = businessData.Remote }, businessData.Data);
+                var token = business.Token();
+                token.Key = businessData.Token;
+                token.Remote = businessData.Remote;
+                var result = command.Call(token, businessData.Data);
                 //var result = command.Call(business.TokenCreate(businessData.Token, businessData.Remote), businessData.Data);
 
                 if (!command.Meta.HasReturn) { return null; }

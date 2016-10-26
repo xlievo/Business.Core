@@ -15,25 +15,21 @@
           ##############
 ==================================*/
 
-using System.Linq;
-
 namespace Business.Result
 {
-    //[ProtoBuf.ProtoContract(SkipConstructor = true)]
+    using System.Linq;
+    using Business.Extensions;
+
     public struct ResultBase<Type> : IResult<Type>
     {
         /// <summary>
         /// The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.
         /// </summary>
-        //[ProtoBuf.ProtoMember(1, Name = "S")]
-        //[Newtonsoft.Json.JsonProperty(PropertyName = "S")]
         public System.Int32 State { get; set; }
 
         /// <summary>
         /// Success can be null
         /// </summary>
-        //[ProtoBuf.ProtoMember(2, Name = "M")]
-        //[Newtonsoft.Json.JsonProperty(PropertyName = "M")]
         public System.String Message { get; set; }
 
         /// <summary>
@@ -44,15 +40,11 @@ namespace Business.Result
         /// <summary>
         /// Specific Byte/Json data objects
         /// </summary>
-        //[ProtoBuf.ProtoMember(3, Name = "D")]
-        //[Newtonsoft.Json.JsonProperty(PropertyName = "D")]
         public Type Data { get; set; }
 
         /// <summary>
         /// Whether there is value
         /// </summary>
-        //[ProtoBuf.ProtoMember(4, Name = "H")]
-        //[Newtonsoft.Json.JsonProperty(PropertyName = "H")]
         public System.Boolean HasData { get; set; }
 
         public System.Type DataType { get; set; }
@@ -107,19 +99,34 @@ namespace Business.Result
         public static Result Create<Result>()
             where Result : IResult, new()
         {
-            return new Result() { State = 1, DataType = typeof(Result).GenericTypeArguments[0] };
+            System.Type[] genericArguments;
+            if (!typeof(IResult<>).IsAssignableFrom(typeof(Result), out genericArguments))
+            {
+                throw new System.Exception("Result type is not generic IResult<>.");
+            }
+            return new Result() { State = 1, DataType = genericArguments[0] };
         }
 
         public static Result Create<Result>(int state)
             where Result : IResult, new()
         {
-            return new Result() { State = state, DataType = typeof(Result).GenericTypeArguments[0] };
+            System.Type[] genericArguments;
+            if (!typeof(IResult<>).IsAssignableFrom(typeof(Result), out genericArguments))
+            {
+                throw new System.Exception("Result type is not generic IResult<>.");
+            }
+            return new Result() { State = state, DataType = genericArguments[0] };
         }
 
         public static Result Create<Result>(int state, string message)
            where Result : IResult, new()
         {
-            return new Result() { State = GetState(state), Message = message, DataType = typeof(Result).GenericTypeArguments[0] };
+            System.Type[] genericArguments;
+            if (!typeof(IResult<>).IsAssignableFrom(typeof(Result), out genericArguments))
+            {
+                throw new System.Exception("Result type is not generic IResult<>.");
+            }
+            return new Result() { State = GetState(state), Message = message, DataType = genericArguments[0] };
         }
 
         public static IResult<Data> Create<Data>(Data data, IResult<Data> result, int state = 1)
@@ -133,7 +140,6 @@ namespace Business.Result
 
             return result;
         }
-
         //public static IResult Create<Data>(Data data, System.Type resultType, int state = 1)
         //{
         //    var type = resultType.MakeGenericType(typeof(Data));
