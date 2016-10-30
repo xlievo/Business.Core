@@ -32,7 +32,7 @@ AssemblyInfo.cs
     {
 		[Check(1)]
         [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
-        [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
+        [CheckNull(-13, "\" char account\" verification failed", Mode = Help.CheckCharMode.Number)]
         public string account;
 
         public int Password { get; set; }
@@ -167,7 +167,7 @@ AssemblyInfo.cs
 	public struct Register
     {
         [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
-        [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
+        [CheckNull(-13, "\" char account\" verification failed", Mode = Help.CheckCharMode.Number)]
         public string account;
 
         public int Password { get; set; }
@@ -255,7 +255,7 @@ AssemblyInfo.cs
     public struct Register
     {
         [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
-        [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
+        [CheckNull(-13, "\" char account\" verification failed", Mode = Help.CheckCharMode.Number)]
         public string account;
 
         public int Password { get; set; }

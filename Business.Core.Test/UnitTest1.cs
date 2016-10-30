@@ -1,5 +1,6 @@
 ﻿using System;
 using Business.Attributes;
+using Business.Extensions;
 using Business.Result;
 using NUnit.Framework;
 
@@ -10,7 +11,7 @@ namespace Business.Core.Test
     {
         [Check(1)]
         [Size(12, "argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
-        [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
+        [CheckChar(-13, "\" char account\" verification failed", Mode = Help.CheckCharMode.Number)]
         public string account;
 
         public int Password { get; set; }
@@ -18,13 +19,13 @@ namespace Business.Core.Test
         public Register2 Password2 { get; set; }
     }
 
-    [CanNotNull(98, "\"Register2\" not is null")]
+    [CheckNull(98, "\"Register2\" not is null")]
     //[Convert(99)]
     public class Register2
     {
-        [CanNotNull(-11, "\"Register2 account\" not is null")]
+        [CheckNull(-11, "\"Register2 account\" not is null")]
         [Size(12, "Register2 argument \"account\" size verification failed", Min = 4, Max = "8", TrimChar = true)]
-        [CheckChar(-13, "\" char account\" verification failed", Mode = CheckCharAttribute.CheckCharMode.Number)]
+        [CheckChar(-13, "\" char account\" verification failed", Mode = Help.CheckCharMode.Number)]
         public string account;
 
         public Register Password2 { get; set; }
@@ -152,7 +153,6 @@ namespace Business.Core.Test
         //=========================Check============================//
         [Logger(LogType.Record, CanResult = true)]
         [Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.Select)]
-        //[Logger(LogType.Exception, CanValue = true)]
         [Logger(LogType.Error, CanValue = LoggerAttribute.ValueMode.All)]
         public virtual IResult TestParameterA_01([Logger(LogType.Record)]Register ags)
         {

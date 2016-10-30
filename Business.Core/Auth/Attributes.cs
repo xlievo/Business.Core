@@ -91,21 +91,6 @@ namespace Business.Attributes
 
     #endregion
 
-    //public interface IAuthAttribute
-    //{
-    //    int Code { get; }
-
-    //    string Message { get; }
-
-    //    bool TrimChar { get; set; }
-
-    //    //string Group { get; set; }
-
-    //    //string RelationArg { get; set; }
-
-    //    IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business);
-    //}
-
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public abstract class ArgumentAttribute : System.Attribute
     {
@@ -675,29 +660,6 @@ namespace Business.Attributes
     }
 
     #endregion
-
-    //public virtual IResult CheckAuth(object value, string mname)
-    //{
-    //    if (System.Object.Equals(null, value)) { return null; }
-
-    //    Auth.Token _token = System.Convert.ToString(value);
-
-    //    if (null == _token) { return null; }
-
-    //    //var session = GetSession<Session>(_token);
-
-    //    //if (null == session)
-    //    //{
-    //    //    //return this.ResultCreate<Result>(Mark.MarkItem.Exp_SessionOut);
-    //    //    return null;
-    //    //}
-
-    //    var session = Extensions.Help.ProtoBufDeserialize(null, sessionType);
-
-    //    return this.ResultCreate(session);
-    //    //return session;
-    //    //throw new System.NotImplementedException();
-    //}
 
     #region Deserialize
 
