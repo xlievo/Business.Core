@@ -188,12 +188,11 @@ namespace Business.Extensions
 
         public static bool CheckChar(string value, CheckCharMode mode = CheckCharMode.All)
         {
-            if (null == value || System.String.IsNullOrEmpty(value)) { return false; }
+            if (System.String.IsNullOrWhiteSpace(value)) { return false; }
 
-            //if (0 < length && length < value.Length) { return false; }
-
+            var _value = value.Trim();
             var list = new System.Collections.Generic.List<int>();
-            for (int i = 0; i < value.Length; i++) { list.Add(value[i]); }
+            for (int i = 0; i < _value.Length; i++) { list.Add(_value[i]); }
 
             System.Predicate<int> number = delegate(int c) { return !(c >= 48 && c <= 57); };
             System.Predicate<int> upper = delegate(int c) { return !(c >= 65 && c <= 90); };
@@ -358,14 +357,12 @@ namespace Business.Extensions
 
         public static bool CheckEmail(this string email)
         {
-            var _email = null == email ? System.String.Empty : email.Trim();
-
-            if (System.String.IsNullOrEmpty(_email))
+            if (System.String.IsNullOrWhiteSpace(email))
             {
                 return false;
             }
 
-            return System.Text.RegularExpressions.Regex.IsMatch(email, @"^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})$");
+            return System.Text.RegularExpressions.Regex.IsMatch(email.Trim(), @"^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})$");
         }
 
         public static double Scale(this double value, int size = 2)

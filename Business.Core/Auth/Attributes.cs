@@ -271,11 +271,12 @@ namespace Business.Attributes
             return false;
         }
 
-        public ArgumentAttribute(int code, string message = null)
+        public ArgumentAttribute(int code, string message = null, bool canNull = true)
         {
             this.fullName = this.GetType().FullName;
             this.code = code;
             this.message = message;
+            this.canNull = canNull;
         }
 
         internal readonly string fullName;
@@ -285,6 +286,9 @@ namespace Business.Attributes
 
         string message;
         public string Message { get { return message; } set { this.message = value; } }
+
+        bool canNull;
+        public bool CanNull { get { return canNull; } set { canNull = value; } }
 
         public bool TrimChar { get; set; }
 
@@ -325,7 +329,6 @@ namespace Business.Attributes
 
         #endregion
     }
-
     //[System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     //public abstract class ArgAttribute : ArgumentAttribute
     //{
@@ -336,7 +339,6 @@ namespace Business.Attributes
 
     //    public override abstract IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business);
     //}
-    
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public sealed class CommandAttribute : System.Attribute
     {
@@ -485,9 +487,9 @@ namespace Business.Attributes
     //    }
     //}
 
-    public sealed class CanNotNullAttribute : ArgumentAttribute
+    public sealed class CheckNullAttribute : ArgumentAttribute
     {
-        public CanNotNullAttribute(int code = -800, string message = null)
+        public CheckNullAttribute(int code = -800, string message = null)
             : base(code, message) { }
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
@@ -510,22 +512,21 @@ namespace Business.Attributes
 
     public sealed class SizeAttribute : ArgumentAttribute
     {
-        public SizeAttribute(int code = -801, string message = null)
-            : base(code, message) { }
+        public SizeAttribute(int code = -801, string message = null, bool canNull = true) : base(code, message, canNull) { }
 
         public object Min { get; set; }
         public object Max { get; set; }
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
-            if (System.Object.Equals(null, value)) { return this.ResultCreate(); }
+            if (this.CanNull && System.Object.Equals(null, value)) { return this.ResultCreate(); }
 
             var msg = System.String.Empty;
 
             switch (type.FullName)
             {
                 case "System.String":
-                    var ags1 = value.Trim();
+                    var ags1 = System.Convert.ToString(value).Trim();
                     if (null != Min && Extensions.Help.ChangeType<System.Int32>(Min) > ags1.Length)
                     {
                         msg = string.Format("argument \"{0}\" minimum length value {1}.", member, Min);
@@ -591,8 +592,8 @@ namespace Business.Attributes
                     }
                     break;
                 default:
-                    var iList = type.GetInterface("System.Collections.IList");
-                    if (null != iList)
+                    //var iList = type.GetInterface("System.Collections.IList");
+                    if (typeof(System.Collections.IList).IsAssignableFrom(value.GetType()))
                     {
                         var list = value as System.Collections.IList;
                         if (null != Min && Extensions.Help.ChangeType<System.Int32>(Min) > list.Count)
@@ -618,46 +619,35 @@ namespace Business.Attributes
 
     public sealed class ScaleAttribute : ArgumentAttribute
     {
-        public ScaleAttribute(int code = -802, string message = null)
-            : base(code, message) { }
+        public ScaleAttribute(int code = -802, string message = null, bool canNull = true) : base(code, message, canNull) { }
 
         int size = 2;
         public int Size { get { return size; } set { size = value; } }
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
-            dynamic sp;
+            if (this.CanNull && System.Object.Equals(null, value)) { return this.ResultCreate(); }
 
             switch (type.FullName)
             {
                 case "System.Decimal":
-                    sp = System.Convert.ToDecimal(System.Math.Pow(10, size));
-                    break;
+                    return this.ResultCreate(Extensions.Help.Scale((decimal)value, size));
                 case "System.Double":
-                    sp = System.Convert.ToDouble(System.Math.Pow(10, size));
-                    break;
-                default: return this.ResultCreate();
+                    return this.ResultCreate(Extensions.Help.Scale((double)value, size));
+                default: return this.ResultCreate(Code, Message ?? string.Format("argument \"{0}\" type error.", member));
             }
-
-            var t = System.Math.Truncate(value);
-
-            var result = t + (0 > value ? System.Math.Ceiling((value - t) * sp) : System.Math.Floor((value - t) * sp)) / sp;
-
-            return this.ResultCreate(result);
         }
     }
 
     public sealed class CheckEmailAttribute : ArgumentAttribute
     {
-        public CheckEmailAttribute(int code = -803, string message = null)
-            : base(code, message) { }
+        public CheckEmailAttribute(int code = -803, string message = null, bool canNull = true) : base(code, message, canNull) { }
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
-            if (System.Object.Equals(null, value)) { return this.ResultCreate(); }
+            if (this.CanNull && System.Object.Equals(null, value)) { return this.ResultCreate(); }
 
-            var _value = System.Convert.ToString(value).Trim();
-            if (!System.String.IsNullOrEmpty(_value) && !Extensions.Help.CheckEmail(_value))
+            if (!Extensions.Help.CheckEmail(value))
             {
                 return this.ResultCreate(Code, Message ?? string.Format("argument \"{0}\" email error.", member));
             }
@@ -667,89 +657,20 @@ namespace Business.Attributes
 
     public sealed class CheckCharAttribute : ArgumentAttribute
     {
-        public CheckCharAttribute(int code = -804, string message = null)
-            : base(code, message) { }
+        public CheckCharAttribute(int code = -804, string message = null, bool canNull = true) : base(code, message, canNull) { }
 
-        CheckCharMode mode = CheckCharMode.All;
-        public CheckCharMode Mode { get { return mode; } set { mode = value; } }
+        Extensions.Help.CheckCharMode mode = Extensions.Help.CheckCharMode.All;
+        public Extensions.Help.CheckCharMode Mode { get { return mode; } set { mode = value; } }
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
-            if (System.Object.Equals(null, value)) { return this.ResultCreate(); }
+            if (this.CanNull && System.Object.Equals(null, value)) { return this.ResultCreate(); }
 
-            var _value = value.Trim();
-            if (!System.String.IsNullOrEmpty(_value) && !CheckChar(_value, Mode))
+            if (!Extensions.Help.CheckChar(value, Mode))
             {
                 return this.ResultCreate(Code, Message ?? string.Format("argument \"{0}\" char verification failed.", member));
             }
             return this.ResultCreate();
-        }
-
-        [System.Flags]
-        public enum CheckCharMode
-        {
-            All = 0,
-            Number = 1,
-            Upper = 2,
-            Lower = 4,
-            Chinese = 8
-        }
-
-        static bool CheckChar(string value, CheckCharMode mode = CheckCharMode.All)
-        {
-            if (null == value || System.String.IsNullOrEmpty(value)) { return false; }
-
-            var list = new System.Collections.Generic.List<int>();
-            for (int i = 0; i < value.Length; i++) { list.Add(value[i]); }
-
-            System.Predicate<int> number = delegate(int c) { return !(c >= 48 && c <= 57); };
-            System.Predicate<int> upper = delegate(int c) { return !(c >= 65 && c <= 90); };
-            System.Predicate<int> lower = delegate(int c) { return !(c >= 97 && c <= 122); };
-            System.Predicate<int> chinese = delegate(int c) { return !(c >= 0x4e00 && c <= 0x9fbb); };
-
-            switch (mode)
-            {
-                case CheckCharMode.All:
-                    return !list.Exists(c =>
-                number(c) &&
-                upper(c) &&
-                lower(c) &&
-                chinese(c));
-                case CheckCharMode.Number:
-                    return !list.Exists(c => number(c));
-                case CheckCharMode.Upper:
-                    return !list.Exists(c => upper(c));
-                case CheckCharMode.Lower:
-                    return !list.Exists(c => lower(c));
-                case CheckCharMode.Chinese:
-                    return !list.Exists(c => chinese(c));
-                //==============Number==============//
-                case CheckCharMode.Number | CheckCharMode.Upper | CheckCharMode.Lower:
-                    return !list.Exists(c => number(c) && upper(c) && lower(c));
-                case CheckCharMode.Number | CheckCharMode.Upper | CheckCharMode.Chinese:
-                    return !list.Exists(c => number(c) && upper(c) && chinese(c));
-                case CheckCharMode.Number | CheckCharMode.Lower | CheckCharMode.Chinese:
-                    return !list.Exists(c => number(c) && lower(c) && chinese(c));
-                case CheckCharMode.Number | CheckCharMode.Upper:
-                    return !list.Exists(c => number(c) && upper(c));
-                case CheckCharMode.Number | CheckCharMode.Lower:
-                    return !list.Exists(c => number(c) && lower(c));
-                case CheckCharMode.Number | CheckCharMode.Chinese:
-                    return !list.Exists(c => number(c) && chinese(c));
-                //==============Upper==============//
-                case CheckCharMode.Upper | CheckCharMode.Lower | CheckCharMode.Chinese:
-                    return !list.Exists(c => upper(c) && lower(c) && chinese(c));
-                case CheckCharMode.Upper | CheckCharMode.Lower:
-                    return !list.Exists(c => upper(c) && lower(c));
-                case CheckCharMode.Upper | CheckCharMode.Chinese:
-                    return !list.Exists(c => upper(c) && chinese(c));
-                //==============Lower==============//
-                case CheckCharMode.Lower | CheckCharMode.Chinese:
-                    return !list.Exists(c => lower(c) && chinese(c));
-                case CheckCharMode.Number | CheckCharMode.Upper | CheckCharMode.Lower | CheckCharMode.Chinese:
-                    return !list.Exists(c => number(c) && upper(c) && lower(c) && chinese(c));
-                default: return false;
-            }
         }
     }
 
@@ -813,11 +734,13 @@ namespace Business.Attributes
 
     public sealed class JsonArgAttribute : ArgumentAttribute
     {
-        public JsonArgAttribute(int code = -12, string message = null)
-            : base(code, message) { }
+        public JsonArgAttribute(int code = -12, string message = null, bool canNull = false)
+            : base(code, message, canNull) { }
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
+            if (this.CanNull && System.Object.Equals(null, value)) { return this.ResultCreate(); }
+
             try
             {
                 return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(value, type));
@@ -828,11 +751,13 @@ namespace Business.Attributes
 
     public sealed class ProtoBufArgAttribute : ArgumentAttribute
     {
-        public ProtoBufArgAttribute(int code = -13, string message = null)
-            : base(code, message) { }
+        public ProtoBufArgAttribute(int code = -13, string message = null, bool canNull = false)
+            : base(code, message, canNull) { }
 
         public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
         {
+            if (this.CanNull && System.Object.Equals(null, value)) { return this.ResultCreate(); }
+
             try
             {
                 using (var stream = new System.IO.MemoryStream(value))

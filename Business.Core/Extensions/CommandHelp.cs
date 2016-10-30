@@ -75,13 +75,13 @@ namespace Business.Extensions
             {
                 BusinessData<byte[]> businessData = value;
 
-                if (!System.String.IsNullOrEmpty(remote)) { businessData.Remote = remote; }
-                if (System.String.IsNullOrEmpty(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, "Remote is null"); }
+                if (!System.String.IsNullOrWhiteSpace(remote)) { businessData.Remote = remote; }
+                if (System.String.IsNullOrWhiteSpace(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, "Remote is null"); }
 
                 if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, "Cmd is null"); }
 
-                if (!System.String.IsNullOrEmpty(businessGroup)) { businessData.Group = businessGroup; }
-                if (System.String.IsNullOrEmpty(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
+                if (!System.String.IsNullOrWhiteSpace(businessGroup)) { businessData.Group = businessGroup; }
+                if (System.String.IsNullOrWhiteSpace(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
 
                 System.Collections.Generic.IReadOnlyDictionary<string, Business.Command> group;
                 if (!business.Command.TryGetValue(businessData.Group, out group))
@@ -139,13 +139,13 @@ namespace Business.Extensions
         {
             try
             {
-                if (!System.String.IsNullOrEmpty(remote)) { businessData.Remote = remote; }
-                if (System.String.IsNullOrEmpty(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, Mark.Get<string>(Mark.MarkItem.Exp_RemoteIllegal)).ToString(); }
+                if (!System.String.IsNullOrWhiteSpace(remote)) { businessData.Remote = remote; }
+                if (System.String.IsNullOrWhiteSpace(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, Mark.Get<string>(Mark.MarkItem.Exp_RemoteIllegal)).ToString(); }
 
                 if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, Mark.Get<string>(Mark.MarkItem.Business_CmdError)).ToString(); }
 
-                if (!System.String.IsNullOrEmpty(businessGroup)) { businessData.Group = businessGroup; }
-                if (System.String.IsNullOrEmpty(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
+                if (!System.String.IsNullOrWhiteSpace(businessGroup)) { businessData.Group = businessGroup; }
+                if (System.String.IsNullOrWhiteSpace(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
 
                 System.Collections.Generic.IReadOnlyDictionary<string, Business.Command> group;
                 if (!business.Command.TryGetValue(businessData.Group, out group))
