@@ -71,6 +71,7 @@ namespace Business.Result
         [ProtoBuf.ProtoMember(5, Name = "B")]
         public string Callback { get; set; }
 
+        [Newtonsoft.Json.JsonIgnore]
         public ICommand Command { get; set; }
 
         /// <summary>

@@ -574,7 +574,9 @@ namespace Business
 
         static bool IsClass(System.Type type)
         {
-            return !type.IsPrimitive && !type.IsEnum && !type.IsArray && !type.IsSecurityTransparent;
+            return true;
+
+            //return !type.IsPrimitive && !type.IsEnum && !type.IsArray && !type.IsSecurityTransparent;
         }
 
         static System.Object[] GetDefaultValue(System.Reflection.MethodInfo method, System.Collections.Generic.IList<Args> args)
@@ -714,8 +716,8 @@ namespace Business
 
             var metaData = new System.Collections.Concurrent.ConcurrentDictionary<string, MetaData>();
 
-            //foreach (var method in methods)
-            methods.AsParallel().ForAll(method =>
+            foreach (var method in methods)
+            //methods.AsParallel().ForAll(method =>
             {
                 //======LogAttribute======//
                 var methodLogger = LogAttr(method);
@@ -841,7 +843,7 @@ namespace Business
 
                 if (metaData.ContainsKey(method.Name)) { throw new System.Exception(string.Format("MetaData name exists {0}!", method.Name)); }
                 metaData.TryAdd(method.Name, meta);
-            });
+            };
 
             return metaData;
         }
@@ -889,6 +891,7 @@ namespace Business
             argAttr.AddRange(type.GetAttributes<Attributes.ArgumentAttribute>());
             return GetArgAttr(argAttr);
         }
+        
         static System.Collections.Generic.List<Attributes.ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<Attributes.ArgumentAttribute> argAttr)
         {
             //==================================//

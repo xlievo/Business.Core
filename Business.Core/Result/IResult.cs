@@ -316,6 +316,7 @@ namespace Business.Result
 
             //====================================//
             result2.Callback = result.Callback;
+            result2.Command = result.Command;
             //result2.Overall = result.Overall;
             //result2.CommandID = result.CommandID;
             //result2.Notifys = result.Notifys;

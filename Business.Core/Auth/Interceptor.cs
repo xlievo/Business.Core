@@ -83,13 +83,6 @@ namespace Business.Auth
                     var value = argsObj[item.Position];
                     var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
                     argsObjLog.Add(new System.Tuple<object, MetaLogger>(item.HasIArg ? iArgs[item.Position].In : value, item.MetaLogger));
-                    //if (null != logAttr)
-                    //{
-                    //    if ((logAttr.CanValue && (null == item.LogAttr || (null != item.LogAttr && item.LogAttr.CanWrite))) || (null != item.LogAttr && item.LogAttr.CanWrite))
-                    //    {
-                    //        argsObjLog.Add(item.HasIArg ? iArgs[item.Position].In : value);
-                    //    }
-                    //}
 
                     var iArgHasString = !System.Object.Equals(null, iArgIn) && typeof(System.String).Equals(iArgIn.GetType());
                     var trim = false;

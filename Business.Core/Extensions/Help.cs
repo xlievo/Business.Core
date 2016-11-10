@@ -41,6 +41,13 @@ namespace Business.Extensions
         {
             if (null == member) { throw new System.ArgumentNullException("member"); }
 
+            //var list = System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
+
+            //foreach (var item in list)
+            //{
+            //    System.Console.WriteLine(item.GetType().FullName);
+            //}
+
             return (T[])System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
         }
 

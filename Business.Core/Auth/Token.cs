@@ -49,16 +49,18 @@ namespace Business.Auth
             return Business.Extensions.Help.ProtoBufSerialize(this);
         }
 
-        [ProtoBuf.ProtoMember(1)]
+        [ProtoBuf.ProtoMember(1, Name = "K")]
+        [Newtonsoft.Json.JsonProperty(PropertyName = "K")]
         public string Key { get; set; }
 
-        [ProtoBuf.ProtoMember(2)]
+        [ProtoBuf.ProtoMember(2, Name = "R")]
+        [Newtonsoft.Json.JsonProperty(PropertyName = "R")]
         public string Remote { get; set; }
 
         /// <summary>
         /// Socket identity
         /// </summary>
-        [ProtoBuf.ProtoMember(3)]
+        [Newtonsoft.Json.JsonIgnore]
         public string CommandID { get; set; }
     }
 }

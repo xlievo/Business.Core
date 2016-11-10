@@ -33,18 +33,21 @@ namespace Business.Extensions.Emit
 
             if (propertyInfo.GetIndexParameters().Length > 0)
             {
-                throw new System.ArgumentException("Cannot create a dynamic getter for anindexed property.", "propertyInfo");
+                //throw new System.ArgumentException("Cannot create a dynamic getter for anindexed property.", "propertyInfo");
+                return null;
             }
 
             if (typeof(TSource) != typeof(object)
                 && !propertyInfo.DeclaringType.IsAssignableFrom(typeof(TSource)))
             {
-                throw new System.ArgumentException("The declaring type of the property is not assignable from the type of the instance.", "propertyInfo");
+                //throw new System.ArgumentException("The declaring type of the property is not assignable from the type of the instance.", "propertyInfo");
+                return null;
             }
 
             if (!typeof(TRet).IsAssignableFrom(propertyInfo.PropertyType))
             {
-                throw new System.ArgumentException("The type of the return value is not assignable from the type of the property.", "propertyInfo");
+                //throw new System.ArgumentException("The type of the return value is not assignable from the type of the property.", "propertyInfo");
+                return null;
             }
 
             //the method call of the get accessor method fails in runtime 
@@ -85,24 +88,28 @@ namespace Business.Extensions.Emit
 
             if (typeof(TTarget).IsValueType)
             {
-                throw new System.ArgumentException("The type of the isntance should not be a value type. " + "For a value type, use System.Object instead.", "propertyInfo");
+                //throw new System.ArgumentException("The type of the isntance should not be a value type. " + "For a value type, use System.Object instead.", "propertyInfo");
+                return null;
             }
 
             if (propertyInfo.GetIndexParameters().Length > 0)
             {
-                throw new System.ArgumentException("Cannot create a dynamic setter for an indexed property.", "propertyInfo");
+                //throw new System.ArgumentException("Cannot create a dynamic setter for an indexed property.", "propertyInfo");
+                return null;
             }
 
             if (typeof(TTarget) != typeof(object)
                 && !propertyInfo.DeclaringType.IsAssignableFrom(typeof(TTarget)))
             {
-                throw new System.ArgumentException("The declaring type of the property is not assignable from the type of the isntance.", "propertyInfo");
+                //throw new System.ArgumentException("The declaring type of the property is not assignable from the type of the isntance.", "propertyInfo");
+                return null;
             }
 
             if (typeof(TValue) != typeof(object)
                 && !propertyInfo.PropertyType.IsAssignableFrom(typeof(TValue)))
             {
-                throw new System.ArgumentException("The type of the property is not assignable from the type of the value.", "propertyInfo");
+                //throw new System.ArgumentException("The type of the property is not assignable from the type of the value.", "propertyInfo");
+                return null;
             }
 
             var setMethod = propertyInfo.GetSetMethod(nonPublic);
