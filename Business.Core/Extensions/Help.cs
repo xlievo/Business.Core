@@ -41,9 +41,7 @@ namespace Business.Extensions
         {
             if (null == member) { throw new System.ArgumentNullException("member"); }
 
-            //var list = System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
-
-            //foreach (var item in list)
+            //foreach (var item in System.Attribute.GetCustomAttributes(member, typeof(T), inherit))
             //{
             //    System.Console.WriteLine(item.GetType().FullName);
             //}
@@ -251,9 +249,41 @@ namespace Business.Extensions
             }
         }
 
+        #region Guid
+
         public static string NewGuidNumber()
         {
             return System.BitConverter.ToUInt32(System.Guid.NewGuid().ToByteArray(), 0).ToString();
+        }
+        public static long GuidNumber()
+        {
+            return (long)System.BitConverter.ToUInt64(System.Guid.NewGuid().ToByteArray(), 0);
+        }
+        public static string GuidString()
+        {
+            long i = 1;
+
+            foreach (byte b in System.Guid.NewGuid().ToByteArray())
+            {
+                i *= ((int)b + 1);
+            }
+
+            return string.Format("{0:x}", i - System.DateTime.Now.Ticks);
+        }
+
+        #endregion
+
+        public static string HumanReadableFilesize(double size)
+        {
+            var units = new string[] { "B", "KB", "MB", "GB", "TB", "PB" };
+            double mod = 1024.0;
+            int i = 0;
+            while (size >= mod)
+            {
+                size /= mod;
+                i++;
+            }
+            return System.Math.Round(size, 2) + units[i];
         }
 
         public static void MailSend(this string subject, string content, string from, string displayName, string host, string credentialsUserName, string credentialsPassword, int port = 25, bool enableSsl = false, System.Text.Encoding contentEncoding = null, string mediaType = "text/html", params string[] to)
@@ -361,6 +391,15 @@ namespace Business.Extensions
                 return new System.Random(System.BitConverter.ToInt32(bytes, 0)).Next(maxValue);
             }
         }
+        public static double Random()
+        {
+            using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
+            {
+                var bytes = new byte[4];
+                rng.GetBytes(bytes);
+                return new System.Random(System.BitConverter.ToInt32(bytes, 0)).NextDouble();
+            }
+        }
 
         public static bool CheckEmail(this string email)
         {
@@ -381,7 +420,10 @@ namespace Business.Extensions
 
             //return result;
 
-            return System.Convert.ToDouble(value.ToString("N", new System.Globalization.NumberFormatInfo { NumberDecimalDigits = size }));
+            var p = System.Math.Pow(10, size);
+            return (double)((int)(value * (int)p) / p);
+
+            //return System.Convert.ToDouble(value.ToString("N", new System.Globalization.NumberFormatInfo { NumberDecimalDigits = size }));
         }
         public static decimal Scale(this decimal value, int size = 2)
         {
@@ -392,7 +434,10 @@ namespace Business.Extensions
 
             //return result;
 
-            return System.Convert.ToDecimal(value.ToString("N", new System.Globalization.NumberFormatInfo { NumberDecimalDigits = size }));
+            var p = System.Math.Pow(10, size);
+            return (decimal)((int)(value * (int)p) / p);
+
+            //return System.Convert.ToDecimal(value.ToString("N", new System.Globalization.NumberFormatInfo { NumberDecimalDigits = size }));
         }
 
         //public static string ConvertTime2(this System.DateTime time)
@@ -404,7 +449,7 @@ namespace Business.Extensions
         //    return System.DateTime.ParseExact(time, "yyyyMMddHHmmssfffffff", null);
         //}
 
-        public static string EnumGetName(this System.Enum value)
+        public static string GetName(this System.Enum value)
         {
             return System.Enum.GetName(value.GetType(), value);
         }

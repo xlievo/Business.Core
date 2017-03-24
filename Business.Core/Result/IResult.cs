@@ -48,21 +48,6 @@ namespace Business.Result
         /// </summary>
         System.String Callback { get; set; }
 
-        ///// <summary>
-        ///// Whether to notify all
-        ///// </summary>
-        //System.Boolean Overall { get; set; }
-
-        ///// <summary>
-        ///// Socket identity
-        ///// </summary>
-        //System.String CommandID { get; set; }
-
-        ///// <summary>
-        ///// Notify list
-        ///// </summary>
-        //System.Collections.Generic.IEnumerable<IResult> Notifys { get; set; }
-
         ICommand Command { get; set; }
 
         /// <summary>
@@ -101,19 +86,47 @@ namespace Business.Result
     public interface ICommand
     {
         /// <summary>
+        /// Socket identity
+        /// </summary>
+        System.Collections.Generic.List<System.String> CommandID { get; }
+
+        /// <summary>
         /// Whether to notify all
         /// </summary>
         System.Boolean Overall { get; set; }
 
         /// <summary>
-        /// Socket identity
-        /// </summary>
-        System.String CommandID { get; set; }
-
-        /// <summary>
         /// Notify list
         /// </summary>
-        System.Collections.Generic.IEnumerable<IResult> Notifys { get; set; }
+        System.Collections.Generic.List<IResult> Notifys { get; }
+    }
+
+    public struct Command : ICommand
+    {
+        public Command(params string[] commandID)
+        {
+            this.overall = false;
+            this.notifys = new System.Collections.Generic.List<IResult>();
+            this.commandID = new System.Collections.Generic.List<string>();
+            this.commandID.AddRange(commandID);
+        }
+
+        public Command(params IResult[] notifys)
+        {
+            this.overall = false;
+            this.notifys = new System.Collections.Generic.List<IResult>();
+            this.commandID = new System.Collections.Generic.List<string>();
+            this.notifys.AddRange(notifys);
+        }
+
+        readonly System.Collections.Generic.List<string> commandID;
+        public System.Collections.Generic.List<string> CommandID { get { return commandID; } }
+
+        bool overall;
+        public bool Overall { get { return overall; } set { overall = value; } }
+
+        readonly System.Collections.Generic.List<IResult> notifys;
+        public System.Collections.Generic.List<IResult> Notifys { get { return notifys; } }
     }
 
     public static class ResultFactory
@@ -123,7 +136,7 @@ namespace Business.Result
             return 0 < state ? 0 - System.Math.Abs(state) : state;
         }
 
-        public static Result Create<Result>()
+        public static Result Create<Result>(bool overall = false, string callback = null, params IResult[] notifys)
             where Result : IResult, new()
         {
             System.Type[] genericArguments;
@@ -131,10 +144,10 @@ namespace Business.Result
             {
                 throw new System.Exception("Result type is not generic IResult<>.");
             }
-            return new Result() { State = 1, DataType = genericArguments[0] };
+            return new Result() { State = 1, DataType = genericArguments[0], Command = new Command(notifys) { Overall = overall }, Callback = callback };
         }
 
-        public static Result Create<Result>(int state)
+        public static Result Create<Result>(int state, bool overall, string callback = null, params IResult[] notifys)
             where Result : IResult, new()
         {
             System.Type[] genericArguments;
@@ -142,10 +155,10 @@ namespace Business.Result
             {
                 throw new System.Exception("Result type is not generic IResult<>.");
             }
-            return new Result() { State = state, DataType = genericArguments[0] };
+            return new Result() { State = state, DataType = genericArguments[0], Command = new Command(notifys) { Overall = overall }, Callback = callback };
         }
 
-        public static Result Create<Result>(int state, string message)
+        public static Result Create<Result>(int state, string message, bool overall = false, string callback = null, params IResult[] notifys)
            where Result : IResult, new()
         {
             System.Type[] genericArguments;
@@ -153,10 +166,10 @@ namespace Business.Result
             {
                 throw new System.Exception("Result type is not generic IResult<>.");
             }
-            return new Result() { State = GetState(state), Message = message, DataType = genericArguments[0] };
+            return new Result() { State = GetState(state), Message = message, DataType = genericArguments[0], Command = new Command(notifys) { Overall = overall }, Callback = callback };
         }
 
-        public static IResult<Data> Create<Data>(Data data, IResult<Data> result, int state = 1)
+        public static IResult<Data> Create<Data>(Data data, IResult<Data> result, int state = 1, bool overall = false, string callback = null, params IResult[] notifys)
         {
             if (1 > state) { state = System.Math.Abs(state); }
 
@@ -164,7 +177,20 @@ namespace Business.Result
             result.Data = data;
             result.HasData = !System.Object.Equals(null, data);
             result.DataType = typeof(Data);
+            result.Command = new Command(notifys) { Overall = overall };
+            result.Callback = callback;
+            return result;
+        }
 
+        public static IResult<Data> Create<Data>(Data data, IResult<Data> result, int state = 1, params string[] commandID)
+        {
+            if (1 > state) { state = System.Math.Abs(state); }
+
+            result.State = state;
+            result.Data = data;
+            result.HasData = !System.Object.Equals(null, data);
+            result.DataType = typeof(Data);
+            result.Command = new Command(commandID);
             return result;
         }
         //public static IResult Create<Data>(Data data, System.Type resultType, int state = 1)
@@ -188,43 +214,21 @@ namespace Business.Result
             return result;
         }
 
-        public static IResult ResultCreate(this IBusiness business)//, bool overall = false, string commandID = null, params IResult[] notifys
+        public static IResult ResultCreate(this IBusiness business, bool overall = false, string callback = null, params IResult[] notifys)
         {
-            var result = ResultCreate(business, typeof(string));
-
-            result.State = 1;
-            //result.Overall = overall;
-            //result.CommandID = commandID;
-            //result.Notifys = notifys;
-            //result.Socket = new ISocket { Overall = overall, List = list };
-
-            return result;
+            return ResultCreate<string>(business, null, 1, overall, callback, notifys);
         }
 
-        public static IResult ResultCreate(this IBusiness business, int state)
+        public static IResult ResultCreate(this IBusiness business, int state, bool overall, string callback = null, params IResult[] notifys)
         {
-            var result = ResultCreate(business, typeof(string));
-
-            result.State = state;
-            //result.Overall = overall;
-            //result.CommandID = commandID;
-            //result.Notifys = notifys;
-            //result.Socket = new ISocket { Overall = overall, List = list };
-
-            return result;
+            return ResultCreate<string>(business, null, state, overall, callback, notifys);
         }
 
-        public static IResult ResultCreate(this IBusiness business, int state, string message)
+        public static IResult ResultCreate(this IBusiness business, int state, string message, bool overall = false, string callback = null, params IResult[] notifys)
         {
-            var result = ResultCreate(business, typeof(string));
-
+            var result = ResultCreate<string>(business, null, 1, overall, callback, notifys);
             result.State = GetState(state);
             result.Message = message;
-            //result.Overall = overall;
-            //result.CommandID = commandID;
-            //result.Notifys = notifys;
-            //result.Socket = new ISocket { Overall = overall, List = list };
-
             return result;
         }
         //public static IResult ResultCreate<Data>(this Data data, IBusiness business, System.Type type, int state = 1)
@@ -240,7 +244,7 @@ namespace Business.Result
 
         //    return result;
         //}
-        public static IResult ResultCreate<Data>(this IBusiness business, Data data, int state = 1)
+        public static IResult ResultCreate<Data>(this IBusiness business, Data data, int state = 1, bool overall = false, string callback = null, params IResult[] notifys)
         {
             var result = ResultCreate(business, typeof(Data));
 
@@ -249,12 +253,22 @@ namespace Business.Result
             result.State = state;
             result.Data = data;
             result.HasData = !System.Object.Equals(null, data);
-            //result.Overall = overall;
-            //result.CommandID = commandID;
-            //result.Notifys = notifys;
-            //result.Socket = new ISocket { List = list };
+            result.Command = new Command(notifys) { Overall = overall };
+            result.Callback = callback;
+            return result;
+        }
 
-            return result;// as IResult<Data>;
+        public static IResult ResultCreate<Data>(IBusiness business, Data data, int state = 1, params string[] commandID)
+        {
+            var result = ResultCreate(business, typeof(Data));
+
+            if (1 > state) { state = System.Math.Abs(state); }
+
+            result.State = state;
+            result.Data = data;
+            result.HasData = !System.Object.Equals(null, data);
+            result.Command = new Command(commandID);
+            return result;
         }
 
         //public static IResult ResultCreate<Data>(this IBusiness business, Data data, bool overall = false, string commandID = null, params IResult[] list)
@@ -296,7 +310,7 @@ namespace Business.Result
                 return null;
             }
 
-            IResult result2;
+            IResult result2 = null;
 
             if (0 < result.State)
             {
@@ -306,7 +320,7 @@ namespace Business.Result
                 }
                 else
                 {
-                    result2 = ResultCreate(business, result.State);
+                    result2 = ResultCreate(business, result.State, result.Command.Overall);
                 }
             }
             else
@@ -317,9 +331,6 @@ namespace Business.Result
             //====================================//
             result2.Callback = result.Callback;
             result2.Command = result.Command;
-            //result2.Overall = result.Overall;
-            //result2.CommandID = result.CommandID;
-            //result2.Notifys = result.Notifys;
 
             return result2;
         }
@@ -336,7 +347,7 @@ namespace Business.Result
                 return null;
             }
 
-            IResult result2;
+            IResult result2 = null;
 
             if (0 < result.State)
             {
@@ -346,7 +357,7 @@ namespace Business.Result
                 }
                 else
                 {
-                    result2 = ResultCreate(business, result.State);
+                    result2 = ResultCreate(business, result.State, result.Command.Overall);
                 }
             }
             else
@@ -356,6 +367,7 @@ namespace Business.Result
 
             //====================================//
             result2.Callback = result.Callback;
+            result2.Command = result.Command;
 
             return result2;
         }
@@ -369,7 +381,7 @@ namespace Business.Result
 
         public static IResult Create(int state)
         {
-            return Create<ResultBase<string>>(state);
+            return Create<ResultBase<string>>(state, false);
         }
 
         public static IResult Create(int state, string message)

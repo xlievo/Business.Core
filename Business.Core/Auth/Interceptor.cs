@@ -58,6 +58,9 @@ namespace Business.Auth
             var meta = this.MetaData[invocation.Method.Name];
             var methodName = meta.FullName;
             var argsObj = invocation.Arguments;
+            var tokenNull = default(Token);
+            var token = tokenNull;
+            var isToken = false;
             //var argsObjLog = new System.Collections.ArrayList(argsObj.Length);
             var argsObjLog = new System.Collections.Generic.List<System.Tuple<object, MetaLogger>>(argsObj.Length);
             var logType = LogType.Record;
@@ -84,11 +87,32 @@ namespace Business.Auth
                     var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
                     argsObjLog.Add(new System.Tuple<object, MetaLogger>(item.HasIArg ? iArgs[item.Position].In : value, item.MetaLogger));
 
+                    #region Token
+                    if (!isToken)
+                    {
+                        if (item.HasIArg)
+                        {
+                            if (!System.Object.Equals(null, iArgIn) && typeof(Token).Equals(iArgIn.GetType()))
+                            {
+                                token = (Token)iArgIn;
+                                isToken = !isToken;
+                            }
+                        }
+                        else if (typeof(Token).Equals(item.Type) && !System.Object.Equals(tokenNull, value))
+                        {
+                            token = (Token)value;
+                            isToken = !isToken;
+                        }
+                    }
+                    #endregion
+
                     var iArgHasString = !System.Object.Equals(null, iArgIn) && typeof(System.String).Equals(iArgIn.GetType());
                     var trim = false;
 
-                    foreach (var argAttr in item.ArgAttr)
+                    for (int i = 0; i < item.ArgAttr.Count; i++)
                     {
+                        var argAttr = item.ArgAttr[i];
+
                         if (item.HasIArg)
                         {
                             trim = (args.CommandAttr.TrimChar || argAttr.TrimChar) && iArgHasString;
@@ -135,7 +159,14 @@ namespace Business.Auth
                             else
                             {
                                 //item.IArgValueSet(value, result.Data);
-                                iArgs[item.Position].Out = result.Data;
+                                if (i < item.ArgAttr.Count - 1)
+                                {
+                                    iArgIn = result.Data;
+                                }
+                                else
+                                {
+                                    iArgs[item.Position].Out = result.Data;
+                                }
                             }
                         }
                         //else if (!item.HasIArg && trim)
@@ -271,7 +302,7 @@ namespace Business.Auth
 
                     if (canWrite)
                     {
-                        this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = 0 == logObjs.Count ? null : logObjs.ToArray(), Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
+                        this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = 0 == logObjs.Count ? null : logObjs.ToArray(), Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group, Token = token }, null, null);
                     }
 
                     //if (logType == LogType.Exception)

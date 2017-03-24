@@ -107,6 +107,43 @@ namespace Business
         }
     }
 
+    public class Bind<Business, Result> : BindBase<Result>
+        where Business : class//, IBusiness
+        where Result : IResult, new()
+    {
+        //public static Business Create()
+        //{
+        //    return Create<ResultBase<string>>();
+        //}
+
+        //public static Business Create<Result>() where Result : IResult, new()
+        //{
+        //    return Create(new Auth.Interceptor<Result, BusinessLog>());
+        //}
+
+        //public static Business Create<Result, BusinessLog>(Auth.IInterceptor<Result, BusinessLog> interceptor = null)
+        //    where Result : IResult, new()
+        //    where BusinessLog : IBusinessLog, new()
+        //{
+        //    return new Bind<Business, Result, BusinessLog>(new Auth.Interceptor<Result, BusinessLog>()).Instance;
+        //}
+
+        public static Business Create(params object[] constructorArguments)
+        //where Result : IResult, new()
+        //where BusinessLog : IBusinessLog, new()
+        {
+            return new Bind<Business, Result>(new Auth.Interceptor<Result>(), constructorArguments).Instance;
+        }
+
+        public new Business Instance { get; private set; }
+
+        public Bind(Auth.IInterceptor<Result> interceptor, params object[] constructorArguments)
+            : base(typeof(Business), interceptor, constructorArguments)
+        {
+            Instance = (Business)base.Instance;
+        }
+    }
+
     //public class Bind<Business, Result> : Bind<Business, Result>
     //    where Business : class
     //    where Result : IResult, new()
@@ -242,39 +279,32 @@ namespace Business
     }
     */
 
-    public class Bind<Business, Result> : System.IDisposable
-        where Business : class//, IBusiness
+    public class BindBase : BindBase<Result.ResultObject<string>>
+    {
+        public BindBase(System.Type type, Auth.IInterceptor<Result.ResultObject<string>> interceptor, params object[] constructorArguments) : base(type, interceptor, constructorArguments) { }
+
+        public new static object Create(System.Type type, params object[] constructorArguments)
+        {
+            return new BindBase(type, new Auth.Interceptor<ResultObject<string>>(), constructorArguments).Instance;
+        }
+    }
+    public class BindBase2 : BindBase<Result.ResultBase<string>>
+    {
+        public BindBase2(System.Type type, Auth.IInterceptor<Result.ResultBase<string>> interceptor, params object[] constructorArguments) : base(type, interceptor, constructorArguments) { }
+
+        public new static object Create(System.Type type, params object[] constructorArguments)
+        {
+            return new BindBase2(type, new Auth.Interceptor<ResultBase<string>>(), constructorArguments).Instance;
+        }
+    }
+
+    public class BindBase<Result> : System.IDisposable
         where Result : IResult, new()
     {
-        //public static Business Create()
-        //{
-        //    return Create<ResultBase<string>>();
-        //}
+        public object Instance { get; private set; }
 
-        //public static Business Create<Result>() where Result : IResult, new()
-        //{
-        //    return Create(new Auth.Interceptor<Result, BusinessLog>());
-        //}
-
-        //public static Business Create<Result, BusinessLog>(Auth.IInterceptor<Result, BusinessLog> interceptor = null)
-        //    where Result : IResult, new()
-        //    where BusinessLog : IBusinessLog, new()
-        //{
-        //    return new Bind<Business, Result, BusinessLog>(new Auth.Interceptor<Result, BusinessLog>()).Instance;
-        //}
-
-        public static Business Create(params object[] constructorArguments)
-        //where Result : IResult, new()
-        //where BusinessLog : IBusinessLog, new()
+        public BindBase(System.Type type, Auth.IInterceptor<Result> interceptor, params object[] constructorArguments)
         {
-            return new Bind<Business, Result>(new Auth.Interceptor<Result>(), constructorArguments).Instance;
-        }
-
-        public Business Instance { get; private set; }
-
-        public Bind(Auth.IInterceptor<Result> interceptor, params object[] constructorArguments)
-        {
-            var type = typeof(Business);
             var methods = GetMethods(type);
             var methods2 = GetMethods2(methods);
 
@@ -283,7 +313,7 @@ namespace Business
 
             //Instance = proxy.CreateClassProxy<Business>(options, interceptor);
 
-            Instance = (Business)proxy.CreateClassProxy(type, options, constructorArguments, interceptor);
+            Instance = proxy.CreateClassProxy(type, options, constructorArguments, interceptor);
 
             System.Type[] resultArguments;
             var resultType = (typeof(IResult<>).IsAssignableFrom(typeof(Result), out resultArguments) ? typeof(Result) : typeof(ResultBase<>)).GetGenericTypeDefinition();
@@ -574,8 +604,7 @@ namespace Business
 
         static bool IsClass(System.Type type)
         {
-            return true;
-
+            return !type.FullName.StartsWith("System.") && !type.IsPrimitive && !type.IsEnum && !type.IsArray;
             //return !type.IsPrimitive && !type.IsEnum && !type.IsArray && !type.IsSecurityTransparent;
         }
 
@@ -602,20 +631,21 @@ namespace Business
             return argsObj;
         }
 
-        static object[] GetArgsObj(object[] defaultObj, object[] argsObj, System.Collections.Generic.IReadOnlyList<Args> iArgs, string group)
+        static object[] GetArgsObj(object[] defaultObj, object[] argsObj, System.Collections.Generic.IReadOnlyList<Args> iArgs, string group, System.Collections.Generic.IList<Args> args)
         {
-            object[] defaultObj2 = new object[defaultObj.Length];
+            var defaultObj2 = new object[defaultObj.Length];
             System.Array.Copy(defaultObj, defaultObj2, defaultObj2.Length);
 
             if (null != argsObj)
             {
                 for (int i = 0; i < argsObj.Length; i++)
                 {
-                    if (null != argsObj[i] && i < defaultObj2.Length)
+                    if (!System.Object.Equals(null, argsObj[i]) && i < defaultObj2.Length)
                     {
                         if (!System.Object.Equals(defaultObj2[i], argsObj[i]))
                         {
-                            defaultObj2[i] = argsObj[i];
+                            //int/long
+                            defaultObj2[i] = args[i].HasIArg ? argsObj[i] : System.Convert.ChangeType(argsObj[i], args[i].Type);
                         }
                     }
                 }
@@ -682,7 +712,7 @@ namespace Business
 
                     var businessCommand = new Command((arguments) =>
                     {
-                        return call(proxy, GetArgsObj(meta.DefaultValue, arguments, meta.IArgs, key));
+                        return call(proxy, GetArgsObj(meta.DefaultValue, arguments, meta.IArgs, key, meta.ArgAttrs[Bind.GetCommandGroupDefault(method.Name)].Args));
                     }, new CommandMeta(meta.Name, meta.HasReturn, meta.ReturnType));
                     //, meta.ArgAttrs[Bind.GetDefaultCommandGroup(method.Name)].CommandArgs
                     if (commandGroup.ContainsKey(item.Group))
@@ -891,7 +921,7 @@ namespace Business
             argAttr.AddRange(type.GetAttributes<Attributes.ArgumentAttribute>());
             return GetArgAttr(argAttr);
         }
-        
+
         static System.Collections.Generic.List<Attributes.ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<Attributes.ArgumentAttribute> argAttr)
         {
             //==================================//

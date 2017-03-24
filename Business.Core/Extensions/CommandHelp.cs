@@ -71,12 +71,14 @@ namespace Business.Extensions
 
         static IResult BusinessCall<T>(BusinessData<T> businessData, IBusiness business, string remote, string businessGroup = null, string commandID = null)
         {
+            if (null == businessData) { return ResultFactory.ResultCreate(business, (int)Mark.MarkItem.Business_CmdError, "Data is null"); }
+
             try
             {
                 if (!System.String.IsNullOrWhiteSpace(remote)) { businessData.Remote = remote; }
-                if (System.String.IsNullOrWhiteSpace(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, "Remote is null"); }
+                if (System.String.IsNullOrWhiteSpace(businessData.Remote)) { return ResultFactory.ResultCreate(business, (int)Mark.MarkItem.Exp_RemoteIllegal, "Remote is null"); }
 
-                if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, "Cmd is null"); }
+                if (null == businessData.Cmd) { return ResultFactory.ResultCreate(business, (int)Mark.MarkItem.Business_CmdError, "Cmd is null"); }
 
                 if (!System.String.IsNullOrWhiteSpace(businessGroup)) { businessData.Group = businessGroup; }
                 if (System.String.IsNullOrWhiteSpace(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
@@ -84,28 +86,46 @@ namespace Business.Extensions
                 System.Collections.Generic.IReadOnlyDictionary<string, Business.Command> group;
                 if (!business.Command.TryGetValue(businessData.Group, out group))
                 {
-                    return business.ResultCreate((int)Mark.MarkItem.Business_GroupError, string.Format("Not businessGroup {0}", businessData.Group));
+                    return ResultFactory.ResultCreate(business, (int)Mark.MarkItem.Business_GroupError, string.Format("Not businessGroup {0}", businessData.Group));
                 }
 
                 Business.Command command;
                 if (!group.TryGetValue(businessData.Cmd, out command))
                 {
-                    return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, string.Format("Not Cmd {0}", businessData.Cmd));
+                    return ResultFactory.ResultCreate(business, (int)Mark.MarkItem.Business_CmdError, string.Format("Not Cmd {0}", businessData.Cmd));
                 }
 
                 var token = business.Token();
                 token.Key = businessData.Token;
                 token.Remote = businessData.Remote;
                 token.CommandID = commandID;
-                Result.IResult result = command.Call(token, businessData.Data);
+
+                Result.IResult result;
+                if (typeof(T).IsArray && !System.Object.Equals(null, businessData.Data))
+                {
+                    var data = businessData.Data as object[];
+                    var list = new object[1 + data.Length];
+                    list[0] = token;
+                    System.Array.Copy(data, 0, list, 1, data.Length);
+                    result = command.Call(list);
+                }
+                else
+                {
+                    result = command.Call(token, businessData.Data);
+                }
+
                 if (!command.Meta.HasReturn) { return null; }
 
                 if (System.Object.Equals(null, result))
                 {
-                    result = business.ResultCreate();
+                    result = ResultFactory.ResultCreate(business);
                 }
 
                 result.Callback = businessData.Callback;
+                if (0 == result.Command.CommandID.Count)
+                {
+                    result.Command.CommandID.Add(commandID);
+                }
                 return result;
 
                 //====================================//
@@ -119,13 +139,13 @@ namespace Business.Extensions
             {
                 try
                 {
-                    return business.ResultCreate((int)Mark.MarkItem.Business_DataError, System.Convert.ToString(ex));
+                    return ResultFactory.ResultCreate(business, (int)Mark.MarkItem.Business_DataError, System.Convert.ToString(ex));
                 }
                 catch { return null; }
             }
         }
 
-        public static IResult BusinessCall(this byte[] value, IBusiness business, string remote, string businessGroup = null, string commandID = null)
+        public static IResult BusinessCall(this byte[] value, IBusiness business, string remote, string commandID, string businessGroup = null)
         {
             var result = BusinessCall<byte[]>((BusinessData<byte[]>)value, business, remote, businessGroup, commandID);
 
@@ -192,67 +212,126 @@ namespace Business.Extensions
         */
         public static IResult BusinessCall(this string value, IBusiness business, string remote = null, string businessGroup = null)
         {
-            return BusinessCall((BusinessData<string>)value, business, remote, businessGroup);
+            return BusinessCall((BusinessData<string[]>)value, business, remote, businessGroup);
         }
-        public static IResult BusinessCall(this BusinessData<string> businessData, IBusiness business, string remote = null, string businessGroup = null)
+        public static IResult BusinessCall(this BusinessData<string[]> businessData, IBusiness business, string remote = null, string businessGroup = null)
         {
-            return BusinessCall<string>(businessData, business, remote, businessGroup);
+            return BusinessCall<string[]>(businessData, business, remote, businessGroup);
+        }
+        //public static IResult BusinessCall(this BusinessData<string> businessData, IBusiness business, string remote = null, string businessGroup = null)
+        //{
+        //    return BusinessCall<string>(businessData, business, remote, businessGroup);
 
-            /*
-            try
+        //    /*
+        //    try
+        //    {
+        //        if (!System.String.IsNullOrWhiteSpace(remote)) { businessData.Remote = remote; }
+        //        if (System.String.IsNullOrWhiteSpace(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, Mark.Get<string>(Mark.MarkItem.Exp_RemoteIllegal)).ToString(); }
+
+        //        if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, Mark.Get<string>(Mark.MarkItem.Business_CmdError)).ToString(); }
+
+        //        if (!System.String.IsNullOrWhiteSpace(businessGroup)) { businessData.Group = businessGroup; }
+        //        if (System.String.IsNullOrWhiteSpace(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
+
+        //        System.Collections.Generic.IReadOnlyDictionary<string, Business.Command> group;
+        //        if (!business.Command.TryGetValue(businessData.Group, out group))
+        //        {
+        //            return business.ResultCreate((int)Mark.MarkItem.Business_GroupError, string.Format("Not businessGroup {0}", businessData.Group)).ToString();
+        //        }
+
+        //        Business.Command command;
+        //        if (!group.TryGetValue(businessData.Cmd, out command))
+        //        {
+        //            return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, string.Format("Not Cmd {0}", businessData.Cmd)).ToString();
+        //        }
+
+        //        var token = business.Token();
+        //        token.Key = businessData.Token;
+        //        token.Remote = businessData.Remote;
+        //        var result = command.Call(token, businessData.Data);
+        //        //var result = command.Call(business.TokenCreate(businessData.Token, businessData.Remote), businessData.Data);
+
+        //        if (!command.Meta.HasReturn) { return null; }
+        //        //Result.IResult result2;
+
+        //        if (System.Object.Equals(null, result))
+        //        {
+        //            return business.ResultCreate().ToString();
+        //        }
+        //        //else
+        //        //{
+        //        //    result2 = command.ResultCreateToDataString(result);
+        //        //}
+        //        //====================================//
+        //        //result.Callback = commandData.Callback;
+
+
+        //        return result.ToString();
+        //    }
+        //    catch (System.Exception ex)
+        //    {
+        //        try
+        //        {
+        //            return business.ResultCreate((int)Mark.MarkItem.Business_DataError, System.Convert.ToString(ex)).ToString();
+        //        }
+        //        catch { return null; }
+        //    }
+        //    */
+        //}
+
+        public struct CommandResult
+        {
+            public bool Overall { get; set; }
+            public string CommandID { get; set; }
+            public byte[] Data { get; set; }
+        }
+
+        public static System.Collections.Generic.List<CommandResult> BusinessCall2(this byte[] value, IBusiness business, string remote, string commandID, string businessGroup = null)
+        {
+            var result = BusinessCall(value, business, remote, businessGroup, commandID);
+
+            var list = new System.Collections.Generic.List<CommandResult>();
+
+            var data = result.ToBytes();
+
+            if (result.Command.Overall)
             {
-                if (!System.String.IsNullOrWhiteSpace(remote)) { businessData.Remote = remote; }
-                if (System.String.IsNullOrWhiteSpace(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, Mark.Get<string>(Mark.MarkItem.Exp_RemoteIllegal)).ToString(); }
-
-                if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, Mark.Get<string>(Mark.MarkItem.Business_CmdError)).ToString(); }
-
-                if (!System.String.IsNullOrWhiteSpace(businessGroup)) { businessData.Group = businessGroup; }
-                if (System.String.IsNullOrWhiteSpace(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
-
-                System.Collections.Generic.IReadOnlyDictionary<string, Business.Command> group;
-                if (!business.Command.TryGetValue(businessData.Group, out group))
-                {
-                    return business.ResultCreate((int)Mark.MarkItem.Business_GroupError, string.Format("Not businessGroup {0}", businessData.Group)).ToString();
-                }
-
-                Business.Command command;
-                if (!group.TryGetValue(businessData.Cmd, out command))
-                {
-                    return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, string.Format("Not Cmd {0}", businessData.Cmd)).ToString();
-                }
-
-                var token = business.Token();
-                token.Key = businessData.Token;
-                token.Remote = businessData.Remote;
-                var result = command.Call(token, businessData.Data);
-                //var result = command.Call(business.TokenCreate(businessData.Token, businessData.Remote), businessData.Data);
-
-                if (!command.Meta.HasReturn) { return null; }
-                //Result.IResult result2;
-
-                if (System.Object.Equals(null, result))
-                {
-                    return business.ResultCreate().ToString();
-                }
-                //else
-                //{
-                //    result2 = command.ResultCreateToDataString(result);
-                //}
-                //====================================//
-                //result.Callback = commandData.Callback;
-
-
-                return result.ToString();
+                list.Add(new CommandResult { Overall = true, Data = data });
             }
-            catch (System.Exception ex)
+            else
             {
-                try
+                foreach (var item in result.Command.CommandID)
                 {
-                    return business.ResultCreate((int)Mark.MarkItem.Business_DataError, System.Convert.ToString(ex)).ToString();
+                    if (System.String.IsNullOrEmpty(item)) { continue; }
+                    list.Add(new CommandResult { CommandID = item, Data = data });
                 }
-                catch { return null; }
             }
-            */
+
+            if (0 < result.Command.Notifys.Count)
+            {
+                foreach (var item in result.Command.Notifys)
+                {
+                    var data2 = item.ToBytes();
+
+                    if (item.Command.Overall)
+                    {
+                        list.Add(new CommandResult { Overall = true, Data = data2 });
+                    }
+                    //else if (1 == item.Command.CommandID.Count && !System.String.IsNullOrEmpty(item.Command.CommandID[0]))
+                    //{
+                    //    list.Add(new CommandResult { CommandID = item.Command.CommandID[0], Data = item.ToBytes() });
+                    else
+                    {
+                        foreach (var item2 in item.Command.CommandID)
+                        {
+                            if (System.String.IsNullOrEmpty(item2)) { continue; }
+                            list.Add(new CommandResult { CommandID = item2, Data = data2 });
+                        }
+                    }
+                }
+            }
+
+            return list;
         }
     }
 }

@@ -81,6 +81,7 @@ namespace Business
 
         public string Group { get; set; }
 
+        public Auth.Token Token { get; set; }
         //string description;
         //public string Description { get; set; }
     }
