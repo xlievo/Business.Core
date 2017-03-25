@@ -193,20 +193,7 @@ namespace Business.Result
             result.Command = new Command(commandID);
             return result;
         }
-        //public static IResult Create<Data>(Data data, System.Type resultType, int state = 1)
-        //{
-        //    var type = resultType.MakeGenericType(typeof(Data));
-        //    var result = (IResult)System.Activator.CreateInstance(type);
-
-        //    if (1 > state) { state = System.Math.Abs(state); }
-
-        //    result.State = state;
-        //    result.Data = data;
-        //    result.HasData = true;
-
-        //    return result;
-        //}
-        //==================================================================//
+        
         static IResult ResultCreate(IBusiness business, System.Type type)
         {
             var result = (IResult)System.Activator.CreateInstance(business.ResultType.MakeGenericType(type));
@@ -231,19 +218,7 @@ namespace Business.Result
             result.Message = message;
             return result;
         }
-        //public static IResult ResultCreate<Data>(this Data data, IBusiness business, System.Type type, int state = 1)
-        //{
-        //    var result = ResultCreate(business, type);
-
-        //    if (1 > state) { state = System.Math.Abs(state); }
-
-        //    result.State = state;
-        //    var obj = System.Convert.ChangeType(data, type);
-        //    result.Data = data;
-        //    result.HasData = true;
-
-        //    return result;
-        //}
+        
         public static IResult ResultCreate<Data>(this IBusiness business, Data data, int state = 1, bool overall = false, string callback = null, params IResult[] notifys)
         {
             var result = ResultCreate(business, typeof(Data));
@@ -270,33 +245,6 @@ namespace Business.Result
             result.Command = new Command(commandID);
             return result;
         }
-
-        //public static IResult ResultCreate<Data>(this IBusiness business, Data data, bool overall = false, string commandID = null, params IResult[] list)
-        //{
-        //    return ResultCreate<Data>(business, data, 1, overall, commandID, list);
-        //}
-        //public static IResult ResultCreate<Data>(this IBusiness business, Data data, bool overall = false, params IResult[] list)
-        //{
-        //    return ResultCreate<Data>(business, data, 1, overall, null, list);
-        //}
-
-        //public static IResult ResultCreate<Data>(this IBusiness business, Data data, int state = 1, bool overall = false, string commandID = null)
-        //{
-        //    var result = ResultCreate(business, typeof(Data));
-
-        //    if (1 > state) { state = System.Math.Abs(state); }
-
-        //    result.State = state;
-        //    result.Data = data;
-        //    result.HasData = !System.Object.Equals(null, data);
-
-        //    result.Overall = overall;
-        //    result.CommandID = commandID;
-        //    //result.Socket = new ISocket { CommandID = commandID };
-
-        //    return result;// as IResult<Data>;
-        //}
-
 
         public static IResult ResultCreateToDataBytes(this IBusiness business, IResult result)
         {
@@ -395,11 +343,5 @@ namespace Business.Result
         }
 
         //========================================================//
-
-        //    public static IResult<DataType> DeserializeResultProtoBuf<DataType, Result>(this byte[] source)
-        //where Result : class, IResult<DataType>, new()
-        //    {
-        //        return Extensions.Help.ProtoBufDeserialize<Result>(source);
-        //    }
     }
 }

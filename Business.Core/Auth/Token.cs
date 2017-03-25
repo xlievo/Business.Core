@@ -51,16 +51,16 @@ namespace Business.Auth
 
         [ProtoBuf.ProtoMember(1, Name = "K")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "K")]
-        public string Key { get; set; }
+        public virtual string Key { get; set; }
 
         [ProtoBuf.ProtoMember(2, Name = "R")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "R")]
-        public string Remote { get; set; }
+        public virtual string Remote { get; set; }
 
         /// <summary>
         /// Socket identity
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
-        public string CommandID { get; set; }
+        public virtual string CommandID { get; set; }
     }
 }

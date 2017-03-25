@@ -79,6 +79,7 @@
     <Compile Include="Result\ResultObject.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Business.Core.nupkg" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

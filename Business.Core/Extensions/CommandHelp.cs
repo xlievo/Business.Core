@@ -218,66 +218,6 @@ namespace Business.Extensions
         {
             return BusinessCall<string[]>(businessData, business, remote, businessGroup);
         }
-        //public static IResult BusinessCall(this BusinessData<string> businessData, IBusiness business, string remote = null, string businessGroup = null)
-        //{
-        //    return BusinessCall<string>(businessData, business, remote, businessGroup);
-
-        //    /*
-        //    try
-        //    {
-        //        if (!System.String.IsNullOrWhiteSpace(remote)) { businessData.Remote = remote; }
-        //        if (System.String.IsNullOrWhiteSpace(businessData.Remote)) { return business.ResultCreate((int)Mark.MarkItem.Exp_RemoteIllegal, Mark.Get<string>(Mark.MarkItem.Exp_RemoteIllegal)).ToString(); }
-
-        //        if (null == businessData.Cmd) { return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, Mark.Get<string>(Mark.MarkItem.Business_CmdError)).ToString(); }
-
-        //        if (!System.String.IsNullOrWhiteSpace(businessGroup)) { businessData.Group = businessGroup; }
-        //        if (System.String.IsNullOrWhiteSpace(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
-
-        //        System.Collections.Generic.IReadOnlyDictionary<string, Business.Command> group;
-        //        if (!business.Command.TryGetValue(businessData.Group, out group))
-        //        {
-        //            return business.ResultCreate((int)Mark.MarkItem.Business_GroupError, string.Format("Not businessGroup {0}", businessData.Group)).ToString();
-        //        }
-
-        //        Business.Command command;
-        //        if (!group.TryGetValue(businessData.Cmd, out command))
-        //        {
-        //            return business.ResultCreate((int)Mark.MarkItem.Business_CmdError, string.Format("Not Cmd {0}", businessData.Cmd)).ToString();
-        //        }
-
-        //        var token = business.Token();
-        //        token.Key = businessData.Token;
-        //        token.Remote = businessData.Remote;
-        //        var result = command.Call(token, businessData.Data);
-        //        //var result = command.Call(business.TokenCreate(businessData.Token, businessData.Remote), businessData.Data);
-
-        //        if (!command.Meta.HasReturn) { return null; }
-        //        //Result.IResult result2;
-
-        //        if (System.Object.Equals(null, result))
-        //        {
-        //            return business.ResultCreate().ToString();
-        //        }
-        //        //else
-        //        //{
-        //        //    result2 = command.ResultCreateToDataString(result);
-        //        //}
-        //        //====================================//
-        //        //result.Callback = commandData.Callback;
-
-
-        //        return result.ToString();
-        //    }
-        //    catch (System.Exception ex)
-        //    {
-        //        try
-        //        {
-        //            return business.ResultCreate((int)Mark.MarkItem.Business_DataError, System.Convert.ToString(ex)).ToString();
-        //        }
-        //        catch { return null; }
-        //    }
-        //    */
-        //}
 
         public struct CommandResult
         {

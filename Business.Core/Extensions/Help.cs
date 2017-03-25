@@ -21,30 +21,9 @@ namespace Business.Extensions
 
     public static class Help
     {
-        ///// <summary>
-        /////   Gets the attributes.
-        ///// </summary>
-        ///// <param name = "member">The member.</param>
-        ///// <returns>The member attributes.</returns>
-        //public static T[] GetAttributes<T>(this System.Reflection.ICustomAttributeProvider member, bool inherit = true) where T : class
-        //{
-        //    if (null == member) { throw new System.ArgumentNullException("member"); }
-
-        //    if (typeof(T) != typeof(object))
-        //    {
-        //        return (T[])member.GetCustomAttributes(typeof(T), inherit);
-        //    }
-        //    return (T[])member.GetCustomAttributes(inherit);
-        //}
-
         public static T[] GetAttributes<T>(this System.Reflection.MemberInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException("member"); }
-
-            //foreach (var item in System.Attribute.GetCustomAttributes(member, typeof(T), inherit))
-            //{
-            //    System.Console.WriteLine(item.GetType().FullName);
-            //}
 
             return (T[])System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
         }
@@ -169,17 +148,6 @@ namespace Business.Extensions
                 }
             }
         }
-
-        //public static string MD5Encoding(this string str, string encodingNmae = "UTF-8", bool hasUpper = false)
-        //{
-        //    if (null == str) { throw new System.ArgumentNullException("str"); }
-
-        //    using (var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider())
-        //    {
-        //        var result = System.BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.GetEncoding(encodingNmae).GetBytes(str))).Replace("-", System.String.Empty);
-        //        return hasUpper ? result.ToUpperInvariant() : result.ToLowerInvariant();
-        //    }
-        //}
 
         [System.Flags]
         public enum CheckCharMode
@@ -328,50 +296,6 @@ namespace Business.Extensions
             }
             catch { return System.Activator.CreateInstance(type); }
         }
-        /*
-        public static Type JsonDeserialize<Type>(this string value)
-        {
-            try { return Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value); }
-            catch { return default(Type); }
-        }
-
-        public static Type JsonDeserialize<Type>(this string value, out string error)
-        {
-            error = null;
-
-            try
-            {
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value);
-            }
-            catch (System.Exception ex)
-            {
-                error = System.Convert.ToString(ex);
-                return default(Type);
-            }
-        }
-        public static object JsonDeserialize(this string value, System.Type type, out string error)
-        {
-            error = null;
-
-            try
-            {
-                return Newtonsoft.Json.JsonConvert.DeserializeObject(value, type);
-            }
-            catch (System.Exception ex)
-            {
-                error = System.Convert.ToString(ex);
-                return null;
-            }
-        }
-        */
-
-        //public static int GetRandomSeed()
-        //{
-        //    var bytes = new byte[4];
-        //    var rng = new System.Security.Cryptography.RNGCryptoServiceProvider();
-        //    rng.GetBytes(bytes);
-        //    return System.BitConverter.ToInt32(bytes, 0);
-        //}
 
         public static int Random(int minValue, int maxValue)
         {

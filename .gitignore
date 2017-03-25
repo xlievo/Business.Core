@@ -7,3 +7,8 @@
 /Business.Core.Test/obj
 *.suo
 /Business.Core/obj
+/Business.Core/Business.Core.nupkg
+/Business.Core/Business.Core.nupkg
+*.nupkg
+/Business.Core/Business.Core.nupkg
+*.nupkg

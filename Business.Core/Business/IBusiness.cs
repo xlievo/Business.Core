@@ -40,7 +40,7 @@ namespace Business
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
 
         public System.Type ResultType { get; set; }
-        
+
         public System.Func<Auth.IToken> Token { get; set; }
 
         public IConfig Config { get; set; }

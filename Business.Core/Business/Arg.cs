@@ -42,13 +42,6 @@ namespace Business
             return new Arg<OutType>() { In = value };
         }
 
-        //public Arg(object valueObj, string group = null)
-        //{
-        //    this.valueObj = valueObj;
-        //    this.value = default(Type);
-        //    this.group = group;
-        //}
-
         OutType value;
         dynamic IArg.Out { get { return value; } set { this.value = value; } }
 
@@ -60,23 +53,4 @@ namespace Business
         //readonly string group;
         public string Group { get; set; }
     }
-
-    //public struct Arg<OutType, InType> : IArg<OutType, InType>
-    //{
-    //    public static implicit operator Arg<OutType, InType>(InType value)
-    //    {
-    //        return new Arg<OutType, InType>() { In = value };
-    //    }
-
-    //    OutType value;
-    //    dynamic IArg.Out { get { return value; } set { this.value = value; } }
-
-    //    public OutType Out { get { return value; } }
-
-    //    public InType In { get; set; }
-
-    //    object IArg.In { get { return this.In; } set { this.In = (InType)value; } }
-
-    //    public string Group { get; set; }
-    //}
 }

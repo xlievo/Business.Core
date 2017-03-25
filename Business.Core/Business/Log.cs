@@ -35,35 +35,8 @@ namespace Business
         Record = 1
     }
 
-    //public interface IBusinessLog
-    //{
-    //    BusinessLogType Type { get; set; }
-
-    //    object[] Value { get; set; }
-
-    //    dynamic Result { get; set; }
-
-    //    double Time { get; set; }
-
-    //    string Member { get; set; }
-
-    //    //string Description { get; set; }
-    //}
-
-    public struct Log //System.IEquatable<BusinessLog>
+    public struct Log
     {
-        //public bool Equals(BusinessLogData other) { return other.Guid.Equals(this.Guid); }
-        //[System.Runtime.CompilerServices.CallerMemberName] 
-        //public Log(BusinessLogType type, object value = null, object result = null, double time = 0, string member = null, string description = null)
-        //{
-        //    this.type = type;
-        //    this.value = value;
-        //    this.result = result;
-        //    this.time = time;
-        //    this.member = member;
-        //    this.description = description;
-        //}
-
         //LogType type;
         public LogType Type { get; set; }
 
@@ -81,8 +54,6 @@ namespace Business
 
         public string Group { get; set; }
 
-        public Auth.Token Token { get; set; }
-        //string description;
-        //public string Description { get; set; }
+        public dynamic Token { get; set; }
     }
 }
