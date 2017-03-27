@@ -21,9 +21,30 @@ namespace Business.Extensions
 
     public static class Help
     {
+        ///// <summary>
+        /////   Gets the attributes.
+        ///// </summary>
+        ///// <param name = "member">The member.</param>
+        ///// <returns>The member attributes.</returns>
+        //public static T[] GetAttributes<T>(this System.Reflection.ICustomAttributeProvider member, bool inherit = true) where T : class
+        //{
+        //    if (null == member) { throw new System.ArgumentNullException("member"); }
+
+        //    if (typeof(T) != typeof(object))
+        //    {
+        //        return (T[])member.GetCustomAttributes(typeof(T), inherit);
+        //    }
+        //    return (T[])member.GetCustomAttributes(inherit);
+        //}
+
         public static T[] GetAttributes<T>(this System.Reflection.MemberInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException("member"); }
+
+            //foreach (var item in System.Attribute.GetCustomAttributes(member, typeof(T), inherit))
+            //{
+            //    System.Console.WriteLine(item.GetType().FullName);
+            //}
 
             return (T[])System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
         }
@@ -148,6 +169,17 @@ namespace Business.Extensions
                 }
             }
         }
+
+        //public static string MD5Encoding(this string str, string encodingNmae = "UTF-8", bool hasUpper = false)
+        //{
+        //    if (null == str) { throw new System.ArgumentNullException("str"); }
+
+        //    using (var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider())
+        //    {
+        //        var result = System.BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.GetEncoding(encodingNmae).GetBytes(str))).Replace("-", System.String.Empty);
+        //        return hasUpper ? result.ToUpperInvariant() : result.ToLowerInvariant();
+        //    }
+        //}
 
         [System.Flags]
         public enum CheckCharMode

@@ -163,11 +163,11 @@ namespace Business
             System.Type[] resultArguments;
             var resultType = (typeof(IResult<>).IsAssignableFrom(typeof(Result), out resultArguments) ? typeof(Result) : typeof(ResultBase<>)).GetGenericTypeDefinition();
 
-            System.Type[] businessArguments;
-            var isGenericIBusiness = typeof(IBusiness<>).IsAssignableFrom(type, out businessArguments);
-            dynamic defaultToken = isGenericIBusiness ? businessArguments[0].IsValueType ? System.Activator.CreateInstance(businessArguments[0]) : null : default(Auth.Token);
+            //System.Type[] businessArguments;
+            //var isIBusinessGeneric = typeof(IBusiness<>).IsAssignableFrom(type, out businessArguments);
+            //dynamic defaultToken = isIBusinessGeneric ? businessArguments[0].IsValueType ? System.Activator.CreateInstance(businessArguments[0]) : null : default(Auth.Token);
 
-            interceptor.MetaData = GetInterceptorMetaData(methods.Item2, type, resultType, defaultToken);
+            interceptor.MetaData = GetInterceptorMetaData(methods.Item2, type, resultType);
             interceptor.Business = Instance;
 
             if (typeof(IBusiness).IsAssignableFrom(type))
@@ -204,7 +204,8 @@ namespace Business
 
                 #region Token
 
-                if (isGenericIBusiness)
+                System.Type[] businessArguments;
+                if (typeof(IBusiness<>).IsAssignableFrom(type, out businessArguments))
                 {
                     business.Token = Extensions.Emit.ConstructorInvokerGenerator.CreateDelegate<Auth.IToken>(businessArguments[0]);
                 }
@@ -311,30 +312,30 @@ namespace Business
             return System.Tuple.Create(ignoreList.ToArray(), list.ToArray());
         }
 
-        static System.Collections.Generic.List<Attributes.LoggerAttribute> LogAttr(System.Reflection.ParameterInfo member, System.Type type)
+        static System.Collections.Generic.List<Attributes.LoggerAttribute> LoggerAttr(System.Reflection.ParameterInfo member, System.Type type)
         {
             var attrs = new System.Collections.Generic.List<Attributes.LoggerAttribute>(member.GetAttributes<Attributes.LoggerAttribute>());
             attrs.AddRange(type.GetAttributes<Attributes.LoggerAttribute>());
             return attrs.Distinct(Equality<Attributes.LoggerAttribute>.CreateComparer(c => c.LogType)).ToList();
         }
-        static System.Collections.Generic.List<Attributes.LoggerAttribute> LogAttr(System.Reflection.MemberInfo member)
+        static System.Collections.Generic.List<Attributes.LoggerAttribute> LoggerAttr(System.Reflection.MemberInfo member)
         {
             return member.GetAttributes<Attributes.LoggerAttribute>().Distinct(Equality<Attributes.LoggerAttribute>.CreateComparer(c => c.LogType)).ToList();
         }
 
-        static MetaLogger GetMetaLogger(System.Collections.Generic.List<Attributes.LoggerAttribute> method, System.Collections.Generic.List<Attributes.LoggerAttribute> businessLogAttr)
+        static MetaLogger GetMetaLogger(System.Collections.Generic.List<Attributes.LoggerAttribute> methodLoggerAttr, System.Collections.Generic.List<Attributes.LoggerAttribute> businessLoggerAttr)
         {
             var metaLogger = new MetaLogger();
 
-            foreach (var item in businessLogAttr)
+            foreach (var item in businessLoggerAttr)
             {
-                if (!method.Exists(c => c.LogType == item.LogType))
+                if (!methodLoggerAttr.Exists(c => c.LogType == item.LogType))
                 {
-                    method.Add(item.Clone());
+                    methodLoggerAttr.Add(item.Clone());
                 }
             }
 
-            foreach (var item in method)
+            foreach (var item in methodLoggerAttr)
             {
                 switch (item.LogType)
                 {
@@ -389,7 +390,7 @@ namespace Business
 
             return metaLogger;
         }
-
+        
         #region
 
         static bool IsFinalize(System.Reflection.MethodInfo methodInfo)
@@ -562,20 +563,24 @@ namespace Business
             return command;
         }
 
-        static System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> GetInterceptorMetaData(System.Reflection.MethodInfo[] methods, System.Reflection.MemberInfo member, System.Type resultType, dynamic defaultToken)
+        static System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> GetInterceptorMetaData(System.Reflection.MethodInfo[] methods, System.Reflection.MemberInfo member, System.Type resultType)
         {
-            var businessLogAttr = LogAttr(member);
+            var businessLoggerAttr = LoggerAttr(member);
 
             var metaData = new System.Collections.Concurrent.ConcurrentDictionary<string, MetaData>();
 
+#if DEBUG
             foreach (var method in methods)
+#else
+            methods.AsParallel().ForAll(method =>
+#endif
             //methods.AsParallel().ForAll(method =>
             {
                 //======LogAttribute======//
-                var methodLogger = LogAttr(method);
+                var methodLoggerAttr = LoggerAttr(method);
                 //methodLogger.AddRange(businessLogAttr.Select(c => c.Clone()));
                 //var metaLogger = GetMetaLogger(methodLogger);
-                var metaLogger = GetMetaLogger(methodLogger, businessLogAttr);
+                var metaLogger = GetMetaLogger(methodLoggerAttr, businessLoggerAttr);
 
                 var commandGroup = CmdAttrGroup(method);
 
@@ -609,7 +614,7 @@ namespace Business
                     var currentType = current.type;
                     //==================================//
                     var argAttr = GetArgAttr(argInfo, currentType);
-                    var logAttrArg = LogAttr(argInfo, currentType);
+                    var logAttrArg = LoggerAttr(argInfo, currentType);
                     var metaLoggerArg = GetMetaLogger(logAttrArg);
                     //logAttrs.Add(argInfo.Position, LogAttr(argInfo, currentType));
                     //var argAttr = new System.Collections.Generic.List<Attributes.ArgumentAttribute>();
@@ -691,11 +696,15 @@ namespace Business
 
                 var args = argAttrGroup[Bind.GetCommandGroupDefault(method.Name)].Args;
 
-                var meta = new MetaData(commandGroup, argAttrGroup, args.Where(c => c.HasIArg).ToList(), metaLogger, method.Name, method.GetMethodFullName(), typeof(void) != method.ReturnType, typeof(IResult).IsAssignableFrom(method.ReturnType), method.ReturnType, resultType, GetDefaultValue(method, args), defaultToken);
+                var meta = new MetaData(commandGroup, argAttrGroup, args.Where(c => c.HasIArg).ToList(), metaLogger, method.Name, method.GetMethodFullName(), typeof(void) != method.ReturnType, typeof(IResult).IsAssignableFrom(method.ReturnType), method.ReturnType, resultType, GetDefaultValue(method, args));
 
                 if (metaData.ContainsKey(method.Name)) { throw new System.Exception(string.Format("MetaData name exists {0}!", method.Name)); }
                 metaData.TryAdd(method.Name, meta);
+#if DEBUG
             };
+#else
+            });
+#endif
 
             return metaData;
         }
@@ -1002,6 +1011,25 @@ namespace Business
         //==============logAttr===================//
         readonly MetaLogger metaLogger;
         public MetaLogger MetaLogger { get { return metaLogger; } }
+        ////==============iArgLog===================//
+        //readonly Attributes.LogMode iArgLog;
+        //public Attributes.LogMode IArgLog { get { return iArgLog; } }
+
+        ////===============iArgValueObj==================//
+        //readonly System.Func<object, object> iArgValueObjGet;
+        //public System.Func<object, object> IArgValueObjGet { get { return iArgValueObjGet; } }
+        ////===============iArgValueSet==================//
+        //readonly System.Action<object, object> iArgValueSet;
+        //public System.Action<object, object> IArgValueSet { get { return iArgValueSet; } }
+        ////===============iArgValueGet==================//
+        //readonly System.Func<object, object> iArgValueGet;
+        //public System.Func<object, object> IArgValueGet { get { return iArgValueGet; } }
+        ////===============hasCommand==================//
+        //readonly System.Func<object, string> iArgCommandGroupGet;
+        //public System.Func<object, string> IArgCommandGroupGet { get { return iArgCommandGroupGet; } }
+        //===============iArgConstructor==================//
+        //readonly System.Func<object[], object> iArgConstructor;
+        //public System.Func<object[], object> IArgConstructor { get { return iArgConstructor; } }
     }
 
     public struct MetaLogger
@@ -1013,7 +1041,7 @@ namespace Business
 
     public struct MetaData
     {
-        public MetaData(System.Collections.Generic.IReadOnlyList<Attributes.CommandAttribute> commandGroup, System.Collections.Concurrent.ConcurrentDictionary<string, ArgAttrs> argAttrs, System.Collections.Generic.IReadOnlyList<Args> iArgs, MetaLogger metaLogger, string name, string fullName, bool hasReturn, bool hasIResult, System.Type returnType, System.Type resultType, object[] defaultValue, dynamic defaultToken)
+        public MetaData(System.Collections.Generic.IReadOnlyList<Attributes.CommandAttribute> commandGroup, System.Collections.Concurrent.ConcurrentDictionary<string, ArgAttrs> argAttrs, System.Collections.Generic.IReadOnlyList<Args> iArgs, MetaLogger metaLogger, string name, string fullName, bool hasReturn, bool hasIResult, System.Type returnType, System.Type resultType, object[] defaultValue)
         {
             this.commandGroup = commandGroup;
             this.argAttrs = argAttrs;
@@ -1026,7 +1054,6 @@ namespace Business
             this.returnType = returnType;
             this.resultType = resultType;
             this.defaultValue = defaultValue;
-            this.defaultToken = defaultToken;
             //this.logAttrs = logAttrs;
         }
         //==============commandAttr===================//
@@ -1062,11 +1089,6 @@ namespace Business
         //==============defaultValue===================//
         readonly object[] defaultValue;
         public object[] DefaultValue { get { return defaultValue; } }
-        readonly dynamic defaultToken;
-        public dynamic DefaultToken { get { return defaultToken; } }
-        ////==============logAttributes===================//
-        //readonly System.Collections.Generic.Dictionary<int, Attributes.LoggerAttribute> logAttrs;
-        //public System.Collections.Generic.Dictionary<int, Attributes.LoggerAttribute> LogAttrs { get { return logAttrs; } }
     }
 
     public struct Command
@@ -1113,6 +1135,20 @@ namespace Business
 
         readonly System.Type returnType;
         public System.Type ReturnType { get { return returnType; } }
+
+        //readonly System.Collections.Generic.IList<CommandArgs> args;
+        //public System.Collections.Generic.IList<CommandArgs> Args { get { return args; } }
+
+        //public override string ToString()
+        //{
+        //    var sb = new System.Text.StringBuilder(null);
+
+        //    this.args.Select(c => string.Format("{0}{1}{2}", c.Name, c.Type.Name, c.HasDefaultValue));
+
+        //    sb.AppendFormat("{0}{1}", System.Environment.NewLine, this.name, this.returnType.Name);
+
+        //    return sb.ToString();
+        //}
     }
 
     public struct CommandArgs

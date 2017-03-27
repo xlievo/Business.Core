@@ -47,10 +47,8 @@ namespace Business
 
         public OutType Out { get { return value; } set { this.value = value; } }
 
-        //object valueObj;
         public dynamic In { get; set; }
 
-        //readonly string group;
         public string Group { get; set; }
     }
 }

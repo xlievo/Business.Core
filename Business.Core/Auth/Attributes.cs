@@ -64,9 +64,9 @@ namespace Business.Attributes
 
         public enum ValueMode
         {
-            No = 0,
-            Select = 1,
-            All = 2,
+            Select = 0,
+            All = 1,
+            No = 2,
         }
 
         public LoggerAttribute(LogType logType, bool canWrite = true)
@@ -294,7 +294,7 @@ namespace Business.Attributes
 
         #endregion
     }
-    
+
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public sealed class CommandAttribute : System.Attribute
     {

@@ -41,9 +41,7 @@ namespace Business.Auth
             var meta = this.MetaData[invocation.Method.Name];
             var methodName = meta.FullName;
             var argsObj = invocation.Arguments;
-            dynamic token = meta.DefaultToken;
-            var isToken = false;
-            var argsObjLog = new System.Collections.Generic.List<System.Tuple<object, MetaLogger>>(argsObj.Length);
+            var argsObjLog = new System.Collections.Generic.List<System.Tuple<string, dynamic, MetaLogger>>(argsObj.Length);
             var logType = LogType.Record;
             var metaLogger = meta.MetaLogger;
             //==================================//
@@ -64,26 +62,7 @@ namespace Business.Auth
                     IResult result = null;
                     var value = argsObj[item.Position];
                     var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
-                    argsObjLog.Add(new System.Tuple<object, MetaLogger>(item.HasIArg ? iArgs[item.Position].In : value, item.MetaLogger));
-
-                    #region IToken
-                    if (!isToken)
-                    {
-                        if (item.HasIArg)
-                        {
-                            if (!System.Object.Equals(null, iArgIn) && typeof(IToken).IsAssignableFrom(iArgIn.GetType()))
-                            {
-                                token = iArgIn;
-                                isToken = !isToken;
-                            }
-                        }
-                        else if (typeof(IToken).IsAssignableFrom(item.Type) && !System.Object.Equals(token, value))
-                        {
-                            token = value;
-                            isToken = !isToken;
-                        }
-                    }
-                    #endregion
+                    argsObjLog.Add(new System.Tuple<string, dynamic, MetaLogger>(item.Name, item.HasIArg ? iArgIn : value, item.MetaLogger));
 
                     var iArgHasString = !System.Object.Equals(null, iArgIn) && typeof(System.String).Equals(iArgIn.GetType());
                     var trim = false;
@@ -221,33 +200,33 @@ namespace Business.Auth
 
                     if (canWrite)
                     {
-                        this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = 0 == logObjs.Count ? null : logObjs.ToArray(), Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group, Token = token }, null, null);
+                        this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = 0 == logObjs.Count ? null : logObjs, Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
                     }
                 }
             }
         }
 
-        static void Logger(Attributes.LoggerAttribute logAttr, Attributes.LoggerAttribute argLogAttr, System.Collections.ArrayList logObjs, object value)
+        static void Logger(Attributes.LoggerAttribute logAttr, Attributes.LoggerAttribute argLogAttr, System.Collections.Generic.Dictionary<string, dynamic> logObjs, string name, object value)
         {
             switch (logAttr.CanValue)
             {
                 case LoggerAttribute.ValueMode.All:
-                    logObjs.Add(value);
+                    logObjs.Add(name, value);
                     break;
                 case LoggerAttribute.ValueMode.Select:
                     if (null != argLogAttr && argLogAttr.CanWrite)
                     {
-                        logObjs.Add(value);
+                        logObjs.Add(name, value);
                     }
                     break;
                 default: break;
             }
         }
 
-        static System.Collections.ArrayList Logger(LogType logType, MetaLogger metaLogger, System.Collections.Generic.List<System.Tuple<object, MetaLogger>> argsObjLog, out bool canWrite, out bool canResult)
+        static System.Collections.Generic.Dictionary<string, dynamic> Logger(LogType logType, MetaLogger metaLogger, System.Collections.Generic.List<System.Tuple<string, dynamic, MetaLogger>> argsObjLog, out bool canWrite, out bool canResult)
         {
             canWrite = canResult = false;
-            var logObjs = new System.Collections.ArrayList(argsObjLog.Count);
+            var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
 
             switch (logType)
             {
@@ -256,7 +235,7 @@ namespace Business.Auth
                     {
                         foreach (var log in argsObjLog)
                         {
-                            Logger(metaLogger.RecordAttr, log.Item2.RecordAttr, logObjs, log.Item1);
+                            Logger(metaLogger.RecordAttr, log.Item3.RecordAttr, logObjs, log.Item1, log.Item2);
                         }
                         canWrite = true;
 
@@ -271,7 +250,7 @@ namespace Business.Auth
                     {
                         foreach (var log in argsObjLog)
                         {
-                            Logger(metaLogger.ErrorAttr, log.Item2.ErrorAttr, logObjs, log.Item1);
+                            Logger(metaLogger.ErrorAttr, log.Item3.ErrorAttr, logObjs, log.Item1, log.Item2);
                         }
                         canWrite = true;
 
@@ -286,7 +265,7 @@ namespace Business.Auth
                     {
                         foreach (var log in argsObjLog)
                         {
-                            Logger(metaLogger.ExceptionAttr, log.Item2.ExceptionAttr, logObjs, log.Item1);
+                            Logger(metaLogger.ExceptionAttr, log.Item3.ExceptionAttr, logObjs, log.Item1, log.Item2);
                         }
                         canWrite = true;
 
