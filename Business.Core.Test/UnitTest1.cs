@@ -131,30 +131,30 @@ namespace Business.Core.Test
         }
     }
 
-    [Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)]
-    [Logger(LogType.Exception, CanValue = LoggerAttribute.ValueMode.All)]
-    [Logger(LogType.Error, CanValue = LoggerAttribute.ValueMode.All)]
+    [Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)]
+    [Logger(LoggerType.Exception, CanValue = LoggerAttribute.ValueMode.All)]
+    [Logger(LoggerType.Error, CanValue = LoggerAttribute.ValueMode.All)]
     public class A : IBusiness
     {
         public A()
         {
-            this.WriteLogAsync = log =>
+            this.Logger = log =>
             {
                 //...
             };
         }
 
-        public Action<Log> WriteLogAsync { get; set; }
+        public Action<Logger> Logger { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
         public Func<Auth.IToken> Token { get; set; }
-        public IConfig Config { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         //=========================Check============================//
-        [Logger(LogType.Record, CanResult = true)]
-        [Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.Select)]
-        [Logger(LogType.Error, CanValue = LoggerAttribute.ValueMode.All)]
-        public virtual IResult TestParameterA_01([Logger(LogType.Record)]Register ags)
+        [Logger(LoggerType.Record, CanResult = true)]
+        [Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.Select)]
+        [Logger(LoggerType.Error, CanValue = LoggerAttribute.ValueMode.All)]
+        public virtual IResult TestParameterA_01([Logger(LoggerType.Record)]Register ags)
         {
             //return this.ResultCreate(new { ags.account, ags.Password }, true, this.ResultCreate(commandID: "id2"), this.ResultCreate("", 1, true, "id"));
             return this.ResultCreate(new { ags.account, ags.Password });

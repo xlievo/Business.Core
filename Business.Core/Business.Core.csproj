@@ -59,7 +59,7 @@
     <Compile Include="Auth\Interceptor.cs" />
     <Compile Include="Auth\Token.cs" />
     <Compile Include="Business\Arg.cs" />
-    <Compile Include="Business\Log.cs" />
+    <Compile Include="Business\Logger.cs" />
     <Compile Include="Business\IBusiness.cs" />
     <Compile Include="Business\Mark.cs" />
     <Compile Include="Configer\Config.cs" />

@@ -17,14 +17,13 @@
 
 namespace Business.Auth
 {
-    using System.Linq;
     using Business.Attributes;
     using Result;
 
     public interface IInterceptor<Result> : Castle.DynamicProxy.IInterceptor, System.IDisposable
         where Result : IResult, new()
     {
-        System.Action<Log> WriteLogAsync { get; set; }
+        System.Action<Logger> WriteLogAsync { get; set; }
 
         System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get; set; }
 
@@ -42,7 +41,7 @@ namespace Business.Auth
             var methodName = meta.FullName;
             var argsObj = invocation.Arguments;
             var argsObjLog = new System.Collections.Generic.List<System.Tuple<string, dynamic, MetaLogger>>(argsObj.Length);
-            var logType = LogType.Record;
+            var logType = LoggerType.Record;
             var metaLogger = meta.MetaLogger;
             //==================================//
             var iArgGroup = Bind.GetCommandGroupDefault(invocation.Method.Name);
@@ -101,7 +100,7 @@ namespace Business.Auth
 
                         if (1 > result.State)
                         {
-                            invocation.ReturnValue = Bind.GetReturnValue<Result>(result.State, result.Message, meta); logType = LogType.Error; return;
+                            invocation.ReturnValue = Bind.GetReturnValue<Result>(result.State, result.Message, meta); logType = LoggerType.Error; return;
                         }
 
                         //========================================//
@@ -154,7 +153,7 @@ namespace Business.Auth
                             foreach (var argAttr in argAttrChild.ArgAttr)
                             {
                                 result = argAttr.Proces(memberValue, argAttrChild.Type, methodName, argAttrChild.FullName, this.Business);
-                                if (0 >= result.State) { invocation.ReturnValue = Bind.GetReturnValue<Result>(result.State, result.Message, meta); logType = LogType.Error; return; }
+                                if (0 >= result.State) { invocation.ReturnValue = Bind.GetReturnValue<Result>(result.State, result.Message, meta); logType = LoggerType.Error; return; }
                                 if (result.HasData)
                                 {
                                     if (!argAttrChild.HasIArg)
@@ -181,7 +180,7 @@ namespace Business.Auth
             }
             catch (System.Exception ex)
             {
-                invocation.ReturnValue = Bind.GetReturnValue<Result>(0, System.Convert.ToString(ex), meta); logType = LogType.Exception;
+                invocation.ReturnValue = Bind.GetReturnValue<Result>(0, System.Convert.ToString(ex), meta); logType = LoggerType.Exception;
             }
             finally
             {
@@ -192,15 +191,14 @@ namespace Business.Auth
                 {
                     if (meta.HasIResult && 0 > ((IResult)invocation.ReturnValue).State)
                     {
-                        logType = LogType.Error;
+                        logType = LoggerType.Error;
                     }
 
-                    bool canWrite, canResult;
-                    var logObjs = Logger(logType, metaLogger, argsObjLog, out canWrite, out canResult);
+                    var logObjs = Logger(logType, metaLogger, argsObjLog, out bool canWrite, out bool canResult);
 
                     if (canWrite)
                     {
-                        this.WriteLogAsync.BeginInvoke(new Log { Type = logType, Value = 0 == logObjs.Count ? null : logObjs, Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
+                        this.WriteLogAsync.BeginInvoke(new Logger { Type = logType, Value = 0 == logObjs.Count ? null : logObjs, Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
                     }
                 }
             }
@@ -223,14 +221,14 @@ namespace Business.Auth
             }
         }
 
-        static System.Collections.Generic.Dictionary<string, dynamic> Logger(LogType logType, MetaLogger metaLogger, System.Collections.Generic.List<System.Tuple<string, dynamic, MetaLogger>> argsObjLog, out bool canWrite, out bool canResult)
+        static System.Collections.Generic.Dictionary<string, dynamic> Logger(LoggerType logType, MetaLogger metaLogger, System.Collections.Generic.List<System.Tuple<string, dynamic, MetaLogger>> argsObjLog, out bool canWrite, out bool canResult)
         {
             canWrite = canResult = false;
             var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
 
             switch (logType)
             {
-                case LogType.Record:
+                case LoggerType.Record:
                     if (metaLogger.RecordAttr.CanWrite)
                     {
                         foreach (var log in argsObjLog)
@@ -245,7 +243,7 @@ namespace Business.Auth
                         }
                     }
                     break;
-                case LogType.Error:
+                case LoggerType.Error:
                     if (metaLogger.ErrorAttr.CanWrite)
                     {
                         foreach (var log in argsObjLog)
@@ -260,7 +258,7 @@ namespace Business.Auth
                         }
                     }
                     break;
-                case LogType.Exception:
+                case LoggerType.Exception:
                     if (metaLogger.ExceptionAttr.CanWrite)
                     {
                         foreach (var log in argsObjLog)
@@ -282,7 +280,7 @@ namespace Business.Auth
 
         public System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get; set; }
 
-        public System.Action<Log> WriteLogAsync { get; set; }
+        public System.Action<Logger> WriteLogAsync { get; set; }
 
         public dynamic Business { get; set; }
 

@@ -17,8 +17,6 @@
 
 namespace Business.Extensions
 {
-    using System.Linq;
-
     public static class Help
     {
         ///// <summary>

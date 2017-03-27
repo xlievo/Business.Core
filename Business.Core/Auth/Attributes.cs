@@ -69,14 +69,14 @@ namespace Business.Attributes
             No = 2,
         }
 
-        public LoggerAttribute(LogType logType, bool canWrite = true)
+        public LoggerAttribute(LoggerType logType, bool canWrite = true)
         {
             this.logType = logType;
             this.canWrite = canWrite;
         }
 
-        readonly LogType logType;
-        public LogType LogType
+        readonly LoggerType logType;
+        public LoggerType LogType
         {
             get { return logType; }
         }

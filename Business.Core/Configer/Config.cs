@@ -3,7 +3,7 @@
     using Business.Attributes;
     using System.Linq;
 
-    public class Config : IConfig
+    public class Config : IConfiguration
     {
         /// <summary>
         /// *.*
@@ -185,7 +185,7 @@
             }
         }
 
-        public bool Logger(LogType type, bool canWrite = false, LoggerAttribute.ValueMode? canValue = null, bool canResult = false, string method = ANY)
+        public bool Logger(LoggerType type, bool canWrite = false, LoggerAttribute.ValueMode? canValue = null, bool canResult = false, string method = ANY)
         {
             if (System.String.IsNullOrWhiteSpace(method))
             {
@@ -215,21 +215,21 @@
             return false;
         }
 
-        static void SetMetaLogger(MetaLogger metaLogger, LogType type, bool canWrite, LoggerAttribute.ValueMode canValue, bool canResult)
+        static void SetMetaLogger(MetaLogger metaLogger, LoggerType type, bool canWrite, LoggerAttribute.ValueMode canValue, bool canResult)
         {
             switch (type)
             {
-                case LogType.Record:
+                case LoggerType.Record:
                     metaLogger.RecordAttr.CanWrite = canWrite;
                     metaLogger.RecordAttr.CanResult = canResult;
                     metaLogger.RecordAttr.CanValue = canValue;
                     break;
-                case LogType.Error:
+                case LoggerType.Error:
                     metaLogger.ErrorAttr.CanWrite = canWrite;
                     metaLogger.ErrorAttr.CanResult = canResult;
                     metaLogger.ErrorAttr.CanValue = canValue;
                     break;
-                case LogType.Exception:
+                case LoggerType.Exception:
                     metaLogger.ExceptionAttr.CanWrite = canWrite;
                     metaLogger.ExceptionAttr.CanResult = canResult;
                     metaLogger.ExceptionAttr.CanValue = canValue;

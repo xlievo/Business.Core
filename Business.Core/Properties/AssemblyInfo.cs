@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Business.Core")]
@@ -16,5 +15,5 @@ using System.Runtime.InteropServices;
 [assembly: Guid("68294c7a-3496-4744-80c3-3ce6c06c4474")]
 [assembly: System.Runtime.CompilerServices.SuppressIldasm]
 
-[assembly: AssemblyVersion("1.0.4.0")]
-[assembly: AssemblyFileVersion("1.0.4.0")]
+[assembly: AssemblyVersion("1.0.4.1")]
+[assembly: AssemblyFileVersion("1.0.4.1")]

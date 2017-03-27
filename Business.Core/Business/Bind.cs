@@ -57,7 +57,7 @@ namespace Business
             return result;
         }
 
-        internal static object GetReturnValue<Result>(int state, string message, MetaData meta) where Result : Business.Result.IResult, new() { return meta.HasIResult ? Business.Result.ResultFactory.Create<Result>(state, message) : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null; }
+        internal static object GetReturnValue<Result>(int state, string message, MetaData meta) where Result : IResult, new() { return meta.HasIResult ? Business.Result.ResultFactory.Create<Result>(state, message) : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null; }
 
         public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, IBusiness> BusinessList = new System.Collections.Concurrent.ConcurrentDictionary<string, IBusiness>();
     }
@@ -81,14 +81,14 @@ namespace Business
     /// Result.ResultObject
     /// </summary>
     /// <typeparam name="Business"></typeparam>
-    public class Bind<Business> : Bind<Business, Result.ResultObject<string>>
+    public class Bind<Business> : Bind<Business, ResultObject<string>>
         where Business : class
     {
-        public Bind(Auth.IInterceptor<Result.ResultObject<string>> interceptor, params object[] constructorArguments) : base(interceptor, constructorArguments) { }
+        public Bind(Auth.IInterceptor<ResultObject<string>> interceptor, params object[] constructorArguments) : base(interceptor, constructorArguments) { }
 
         public new static Business Create(params object[] constructorArguments)
         {
-            return new Bind<Business>(new Auth.Interceptor<Result.ResultObject<string>>(), constructorArguments).Instance;
+            return new Bind<Business>(new Auth.Interceptor<ResultObject<string>>(), constructorArguments).Instance;
         }
     }
 
@@ -125,18 +125,18 @@ namespace Business
         }
     }
 
-    public class BindBase : BindBase<Result.ResultObject<string>>
+    public class BindBase : BindBase<ResultObject<string>>
     {
-        public BindBase(System.Type type, Auth.IInterceptor<Result.ResultObject<string>> interceptor, params object[] constructorArguments) : base(type, interceptor, constructorArguments) { }
+        public BindBase(System.Type type, Auth.IInterceptor<ResultObject<string>> interceptor, params object[] constructorArguments) : base(type, interceptor, constructorArguments) { }
 
         public static object Create(System.Type type, params object[] constructorArguments)
         {
             return new BindBase(type, new Auth.Interceptor<ResultObject<string>>(), constructorArguments).Instance;
         }
     }
-    public class BindBase2 : BindBase<Result.ResultBase<string>>
+    public class BindBase2 : BindBase<ResultBase<string>>
     {
-        public BindBase2(System.Type type, Auth.IInterceptor<Result.ResultBase<string>> interceptor, params object[] constructorArguments) : base(type, interceptor, constructorArguments) { }
+        public BindBase2(System.Type type, Auth.IInterceptor<ResultBase<string>> interceptor, params object[] constructorArguments) : base(type, interceptor, constructorArguments) { }
 
         public static object Create(System.Type type, params object[] constructorArguments)
         {
@@ -160,12 +160,7 @@ namespace Business
 
             Instance = proxy.CreateClassProxy(type, options, constructorArguments, interceptor);
 
-            System.Type[] resultArguments;
-            var resultType = (typeof(IResult<>).IsAssignableFrom(typeof(Result), out resultArguments) ? typeof(Result) : typeof(ResultBase<>)).GetGenericTypeDefinition();
-
-            //System.Type[] businessArguments;
-            //var isIBusinessGeneric = typeof(IBusiness<>).IsAssignableFrom(type, out businessArguments);
-            //dynamic defaultToken = isIBusinessGeneric ? businessArguments[0].IsValueType ? System.Activator.CreateInstance(businessArguments[0]) : null : default(Auth.Token);
+            var resultType = (typeof(IResult<>).IsAssignableFrom(typeof(Result), out System.Type[] resultArguments) ? typeof(Result) : typeof(ResultBase<>)).GetGenericTypeDefinition();
 
             interceptor.MetaData = GetInterceptorMetaData(methods.Item2, type, resultType);
             interceptor.Business = Instance;
@@ -176,38 +171,37 @@ namespace Business
 
                 business.Command = GetBusinessCommand(methods.Item2, Instance, interceptor.MetaData, business);
 
-                interceptor.WriteLogAsync = business.WriteLogAsync;
+                interceptor.WriteLogAsync = business.Logger;
 
                 business.ResultType = resultType;
 
-                business.Config = new Configer.Config(interceptor.MetaData, type.FullName);
+                business.Configuration = new Configer.Config(interceptor.MetaData, type.FullName);
 
                 #region Config.Info
 
                 var configAttrs = type.GetAttributes<Attributes.ConfigAttribute>();
                 if (0 < configAttrs.Length)
                 {
-                    business.Config.Info = configAttrs[0];
-                    if (System.String.IsNullOrWhiteSpace(business.Config.Info.Name))
+                    business.Configuration.Info = configAttrs[0];
+                    if (System.String.IsNullOrWhiteSpace(business.Configuration.Info.Name))
                     {
-                        business.Config.Info.Name = type.Name;
+                        business.Configuration.Info.Name = type.Name;
                     }
                 }
                 else
                 {
-                    business.Config.Info = new Attributes.ConfigAttribute(type.Name);
+                    business.Configuration.Info = new Attributes.ConfigAttribute(type.Name);
                 }
 
-                Bind.BusinessList.TryAdd(business.Config.Info.Name, business);
+                Bind.BusinessList.TryAdd(business.Configuration.Info.Name, business);
 
                 #endregion
 
                 #region Token
 
-                System.Type[] businessArguments;
-                if (typeof(IBusiness<>).IsAssignableFrom(type, out businessArguments))
+                if (typeof(IBusiness<>).IsAssignableFrom(type, out System.Type[] businessArguments))
                 {
-                    business.Token = Extensions.Emit.ConstructorInvokerGenerator.CreateDelegate<Auth.IToken>(businessArguments[0]);
+                    business.Token = ConstructorInvokerGenerator.CreateDelegate<Auth.IToken>(businessArguments[0]);
                 }
                 else
                 {
@@ -241,12 +235,6 @@ namespace Business
             }
 
             #endregion
-
-            //Instance.Command = GetBusinessCommand(notIntercept.Item2, Instance, interceptor.MetaData);
-
-            //interceptor.WriteLogAsync = Instance.WriteLogAsync;
-
-            //Instance.ResultType = resultType;
         }
 
         public void Dispose()
@@ -269,7 +257,7 @@ namespace Business
             foreach (var item in methods)
             {
                 var ignoreAttrs = item.GetAttributes<Attributes.IgnoreAttribute>();
-                if (0 < ignoreAttrs.Length)// || (!typeof(void).Equals(item.ReturnType) && !typeof(Result.IResult).Equals(item.ReturnType))
+                if (0 < ignoreAttrs.Length)
                 {
                     ignoreList.Add(item);
                 }
@@ -339,23 +327,23 @@ namespace Business
             {
                 switch (item.LogType)
                 {
-                    case LogType.Record: metaLogger.RecordAttr = item; break;
-                    case LogType.Error: metaLogger.ErrorAttr = item; break;
-                    case LogType.Exception: metaLogger.ExceptionAttr = item; break;
+                    case LoggerType.Record: metaLogger.RecordAttr = item; break;
+                    case LoggerType.Error: metaLogger.ErrorAttr = item; break;
+                    case LoggerType.Exception: metaLogger.ExceptionAttr = item; break;
                 }
             }
 
             if (null == metaLogger.RecordAttr)
             {
-                metaLogger.RecordAttr = new Attributes.LoggerAttribute(LogType.Record, false);
+                metaLogger.RecordAttr = new Attributes.LoggerAttribute(LoggerType.Record, false);
             }
             if (null == metaLogger.ErrorAttr)
             {
-                metaLogger.ErrorAttr = new Attributes.LoggerAttribute(LogType.Error, false);
+                metaLogger.ErrorAttr = new Attributes.LoggerAttribute(LoggerType.Error, false);
             }
             if (null == metaLogger.ExceptionAttr)
             {
-                metaLogger.ExceptionAttr = new Attributes.LoggerAttribute(LogType.Exception, false);
+                metaLogger.ExceptionAttr = new Attributes.LoggerAttribute(LoggerType.Exception, false);
             }
 
             return metaLogger;
@@ -369,28 +357,28 @@ namespace Business
             {
                 switch (item.LogType)
                 {
-                    case LogType.Record: metaLogger.RecordAttr = item; break;
-                    case LogType.Error: metaLogger.ErrorAttr = item; break;
-                    case LogType.Exception: metaLogger.ExceptionAttr = item; break;
+                    case LoggerType.Record: metaLogger.RecordAttr = item; break;
+                    case LoggerType.Error: metaLogger.ErrorAttr = item; break;
+                    case LoggerType.Exception: metaLogger.ExceptionAttr = item; break;
                 }
             }
 
             if (null == metaLogger.RecordAttr)
             {
-                metaLogger.RecordAttr = new Attributes.LoggerAttribute(LogType.Record, false);
+                metaLogger.RecordAttr = new Attributes.LoggerAttribute(LoggerType.Record, false);
             }
             if (null == metaLogger.ErrorAttr)
             {
-                metaLogger.ErrorAttr = new Attributes.LoggerAttribute(LogType.Error, false);
+                metaLogger.ErrorAttr = new Attributes.LoggerAttribute(LoggerType.Error, false);
             }
             if (null == metaLogger.ExceptionAttr)
             {
-                metaLogger.ExceptionAttr = new Attributes.LoggerAttribute(LogType.Exception, false);
+                metaLogger.ExceptionAttr = new Attributes.LoggerAttribute(LoggerType.Exception, false);
             }
 
             return metaLogger;
         }
-        
+
         #region
 
         static bool IsFinalize(System.Reflection.MethodInfo methodInfo)
@@ -476,7 +464,6 @@ namespace Business
 
             foreach (var item in iArgs)
             {
-                //defaultObj[item.Position] = System.Activator.CreateInstance(item.ParameterType, new object[] { defaultObj[item.Position], group });
                 var iArg = (IArg)System.Activator.CreateInstance(item.Type);
 
                 iArg.In = defaultObj2[item.Position];
@@ -578,8 +565,6 @@ namespace Business
             {
                 //======LogAttribute======//
                 var methodLoggerAttr = LoggerAttr(method);
-                //methodLogger.AddRange(businessLogAttr.Select(c => c.Clone()));
-                //var metaLogger = GetMetaLogger(methodLogger);
                 var metaLogger = GetMetaLogger(methodLoggerAttr, businessLoggerAttr);
 
                 var commandGroup = CmdAttrGroup(method);
@@ -597,90 +582,27 @@ namespace Business
                     argAttrGroup.TryAdd(key, new ArgAttrs(item, new System.Collections.Generic.List<Args>(), new System.Collections.Generic.List<CommandArgs>()));
                 }
 
-                //var logAttrs = new System.Collections.Generic.Dictionary<int, Attributes.LoggerAttribute>();
-
                 foreach (var argInfo in parameters)
                 {
                     var type = argInfo.ParameterType;
                     //==================================//
-                    //var hasIArg = null != type.GetInterface("Business.IArg`1");
-                    //System.Type iArgOutType = null;
-                    //if (hasIArg)
-                    //{
-                    //    iArgOutType = type.GenericTypeArguments[0];
-                    //}
-
                     var current = GetCurrentType(argInfo, type);
                     var currentType = current.type;
                     //==================================//
                     var argAttr = GetArgAttr(argInfo, currentType);
                     var logAttrArg = LoggerAttr(argInfo, currentType);
                     var metaLoggerArg = GetMetaLogger(logAttrArg);
-                    //logAttrs.Add(argInfo.Position, LogAttr(argInfo, currentType));
-                    //var argAttr = new System.Collections.Generic.List<Attributes.ArgumentAttribute>();
-                    //argAttr.AddRange(argInfo.GetAttributes<Attributes.ArgumentAttribute>());
-                    //argAttr.AddRange(currentType.GetAttributes<Attributes.ArgumentAttribute>());
-
-                    //foreach (var item in argAttr)
-                    //{
-                    //    if (item.GetType().IsSubclassOf(typeof(Attributes.ArgAttribute)))
-                    //    {
-                    //        var iArgAttr = (Attributes.ArgAttribute)item;
-                    //        if (System.String.IsNullOrEmpty(iArgAttr.Group)) { iArgAttr.Group = Bind.DefaultCommandGroup; }
-                    //    }
-                    //}
-
-                    //argAttr = argAttr.OrderBy(c => c.GetType().IsSubclassOf(typeof(Attributes.ArgAttribute))).ToList();
-
                     //==================================//
 
                     var hasString = currentType.Equals(typeof(System.String));
                     var hasDeserialize = IsClass(type);
-
-                    //&& (currentType.IsValueType && currentType.IsLayoutSequential) 
                     var argAttrTrim = argAttr.Exists(c => c.TrimChar);
-
-                    //var argAttrChilds = GetArgAttr(currentType, hasDeserialize, argAttrTrim, argInfo.Name);
-
-                    //var argAttrChilds = new System.Collections.Generic.List<Args>();
-
-                    //if (hasDeserialize)
-                    //{
-                    //    //if (hasIArg && null != commandAttr) { argAttr.Add(commandAttr); }
-
-                    //    var fields = currentType.GetFields();
-                    //    foreach (var field in fields)
-                    //    {
-                    //        var argAttrChild = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(field.GetAttributes<Attributes.ArgumentAttribute>());
-
-                    //        var trim = argAttrTrim || argAttrChild.Exists(c => c.TrimChar);
-
-                    //        argAttrChilds.Add(new Args(field.Name, field.FieldType, typeof(System.String).Equals(field.FieldType), FieldAccessorGenerator.CreateGetter(field), FieldAccessorGenerator.CreateSetter(field), argAttrChild, null, trim, string.Format("{0}.{1}", argInfo.Name, field.Name)));
-                    //    }
-
-                    //    var propertys = currentType.GetProperties();
-                    //    foreach (var property in propertys)
-                    //    {
-                    //        var argAttrChild = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(property.GetAttributes<Attributes.ArgumentAttribute>());
-
-                    //        var trim = argAttrTrim || argAttrChild.Exists(c => c.TrimChar);
-
-                    //        argAttrChilds.Add(new Args(property.Name, property.PropertyType, typeof(System.String).Equals(property.PropertyType), PropertyAccessorGenerator.CreateGetter(property), PropertyAccessorGenerator.CreateSetter(property), argAttrChild, null, trim, string.Format("{0}.{1}", argInfo.Name, property.Name)));
-                    //    }
-                    //}
 
                     //set all
                     foreach (var item in argAttrGroup)
                     {
                         var argAttrs = argAttr.FindAll(c => item.Value.CommandAttr.Group == c.Group || Bind.CommandGroupDefault == c.Group);
-                        //var argAttrs = argAttr.FindAll(c => (c.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute)) && item.Value.CommandAttr.Group == ((Attributes.DeserializeAttribute)c).Group) || !c.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute)));
-                        ////unified
-                        //if (current.hasIArg && item.Value.CommandAttr.HasUnified)
-                        //{
-                        //    argAttrs = argAttrs.FindAll(c => !c.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute)));
-                        //    argAttrs.Add(item.Value.CommandAttr);
-                        //}
-
+                        
                         var deserializes = hasDeserialize ? new System.Collections.Generic.List<System.Type>() { currentType } : new System.Collections.Generic.List<System.Type>();
 
                         var argAttrChilds = hasDeserialize ? GetArgAttr(currentType, argAttrTrim, argInfo.Name, item.Value.CommandAttr, ref deserializes) : new System.Collections.Generic.List<Args>();
@@ -717,22 +639,8 @@ namespace Business
 
         static CurrentType GetCurrentType(System.Reflection.ICustomAttributeProvider member, System.Type type)
         {
-            System.Type[] iArgOutType;
-            var hasIArg = typeof(IArg<>).IsAssignableFrom(type, out iArgOutType);
-            //var hasIArg = null != type.GetInterface("Business.IArg`1");
-
-            //System.Type iArgOutType = null;
-            ////Attributes.LogMode iArgLog = Attributes.LogMode.In;
-            //if (hasIArg)
-            //{
-            //    iArgOutType = genericArguments[0];
-
-            //    //var log = member.GetAttributes<Attributes.ArgLog>();
-            //    //if (0 == log.Length) { log = type.GetAttributes<Attributes.ArgLog>(); }
-            //    //if (0 < log.Length) { iArgLog = log[0].Log; }
-            //}
-
-            //return new CurrentType { hasIArg = hasIArg, iArgOutType = iArgOutType, type = iArgOutType ?? type };
+            var hasIArg = typeof(IArg<>).IsAssignableFrom(type, out System.Type[] iArgOutType);
+            
             return new CurrentType { hasIArg = hasIArg, type = hasIArg ? iArgOutType[0] : type };
         }
 
@@ -755,30 +663,12 @@ namespace Business
 
         static System.Collections.Generic.List<Attributes.ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<Attributes.ArgumentAttribute> argAttr)
         {
-            //==================================//
-            //var hasIArg = null != type.GetInterface("Business.IArg`1");
-            //System.Type iArgOutType = null;
-            //if (hasIArg)
-            //{
-            //    iArgOutType = type.GenericTypeArguments[0];
-            //}
-            //var current = GetCurrentType(type);
-            //var currentType = current.type;
-
-            //==================================//
             argAttr.Sort(ComparisonHelper<Attributes.ArgumentAttribute>.CreateComparer(c => ResultFactory.GetState(c.Code)));
             argAttr.Reverse();
             foreach (var item in argAttr)
             {
-                //if (item.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute)))
-                //{
-                //    var iArgAttr = (Attributes.DeserializeAttribute)item;
-                //    if (System.String.IsNullOrEmpty(iArgAttr.Group)) { iArgAttr.Group = Bind.CommandGroupDefault; }
-                //}
                 if (System.String.IsNullOrWhiteSpace(item.Group)) { item.Group = Bind.CommandGroupDefault; }
             }
-
-            //argAttr = argAttr.OrderBy(c => c.GetType().IsSubclassOf(typeof(Attributes.DeserializeAttribute))).ToList();
 
             return argAttr;
         }
@@ -789,28 +679,18 @@ namespace Business
         {
             var argAttrs = new System.Collections.Generic.List<Args>();
 
-            //var hasDeserialize = !type.IsPrimitive && !type.IsEnum && !type.Equals(typeof(System.Object)) && !type.Equals(typeof(System.String)) && type.IsNested;
-            //if (!hasDeserialize) { return argAttrs; }
-
-            //if (hasIArg && null != commandAttr) { argAttr.Add(commandAttr); }
-
             var fields = type.GetFields();
             foreach (var field in fields)
             {
-                //var argAttrChild = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(field.GetAttributes<Attributes.ArgumentAttribute>());
-
                 var current = GetCurrentType(field, field.FieldType);
                 var argAttrChild = GetArgAttr(field, current.type);
-                //var logAttrArg = LogAttr(field, current.type);
 
                 var hasString = typeof(System.String).Equals(current.type);
                 var hasDeserialize = IsClass(current.type);
 
                 if (deserializes.Contains(current.type)) { continue; }
                 else if (hasDeserialize) { deserializes.Add(current.type); }
-                //if (0 == argAttrChild.Count) { continue; }
 
-                //trim = argAttrChild.HasString && (args.CommandAttr.TrimChar || argAttrChild.Trim);
                 var trim = hasString && (commandAttr.TrimChar || argAttrTrim || argAttrChild.Exists(c => c.TrimChar));
 
                 if (trim || hasDeserialize || 0 < argAttrChild.Count)
@@ -822,23 +702,14 @@ namespace Business
             var propertys = type.GetProperties();
             foreach (var property in propertys)
             {
-                //var argAttrChild = new System.Collections.Generic.List<Attributes.ArgumentAttribute>(property.GetAttributes<Attributes.ArgumentAttribute>());
-
                 var current = GetCurrentType(property, property.PropertyType);
                 var argAttrChild = GetArgAttr(property, current.type);
-                //var logAttrArg = LogAttr(property, current.type);
 
                 var hasString = typeof(System.String).Equals(current.type);
                 var hasDeserialize = IsClass(current.type);
 
                 if (deserializes.Contains(current.type)) { continue; }
                 else if (hasDeserialize) { deserializes.Add(current.type); }
-                //if (0 == argAttrChild.Count) { continue; }
-
-                //if (hasString || 0 < argAttrChild.Count)
-                //{
-
-                //}
 
                 var trim = hasString && (commandAttr.TrimChar || argAttrTrim || argAttrChild.Exists(c => c.TrimChar));
 
@@ -856,7 +727,6 @@ namespace Business
 
         static System.Collections.Concurrent.ConcurrentBag<CommandArgs> GetCommandArgs(System.Type type, ref System.Collections.Generic.List<System.Type> deserializes)
         {
-            //var argAttrs = new System.Collections.Generic.List<CommandArgs>();
             var argAttrs = new System.Collections.Concurrent.ConcurrentBag<CommandArgs>();
 
             var fields = type.GetFields();
@@ -928,12 +798,6 @@ namespace Business
             this.hasIArg = hasIArg;
             this.iArgOutType = iArgOutType;
             this.metaLogger = metaLogger;
-            //this.iArgLog = iArgLog;
-            //this.iArgValueObjGet = iArgValueObjGet;
-            //this.iArgValueSet = iArgValueSet;
-            //this.iArgValueGet = iArgValueGet;
-            //this.iArgCommandGroupGet = commandGroup;
-            //this.iArgConstructor = iArgConstructor;
             this.memberAccessorGet = null;
             this.memberAccessorSet = null;
             this.trim = false;
@@ -960,7 +824,6 @@ namespace Business
             this.defaultValue = null;
             this.hasDefaultValue = false;
             this.metaLogger = default(MetaLogger);
-            //this.iArgLog = Attributes.LogMode.In;
         }
 
         //===============name==================//
@@ -1011,25 +874,6 @@ namespace Business
         //==============logAttr===================//
         readonly MetaLogger metaLogger;
         public MetaLogger MetaLogger { get { return metaLogger; } }
-        ////==============iArgLog===================//
-        //readonly Attributes.LogMode iArgLog;
-        //public Attributes.LogMode IArgLog { get { return iArgLog; } }
-
-        ////===============iArgValueObj==================//
-        //readonly System.Func<object, object> iArgValueObjGet;
-        //public System.Func<object, object> IArgValueObjGet { get { return iArgValueObjGet; } }
-        ////===============iArgValueSet==================//
-        //readonly System.Action<object, object> iArgValueSet;
-        //public System.Action<object, object> IArgValueSet { get { return iArgValueSet; } }
-        ////===============iArgValueGet==================//
-        //readonly System.Func<object, object> iArgValueGet;
-        //public System.Func<object, object> IArgValueGet { get { return iArgValueGet; } }
-        ////===============hasCommand==================//
-        //readonly System.Func<object, string> iArgCommandGroupGet;
-        //public System.Func<object, string> IArgCommandGroupGet { get { return iArgCommandGroupGet; } }
-        //===============iArgConstructor==================//
-        //readonly System.Func<object[], object> iArgConstructor;
-        //public System.Func<object[], object> IArgConstructor { get { return iArgConstructor; } }
     }
 
     public struct MetaLogger
@@ -1106,9 +950,6 @@ namespace Business
         {
             return call(args);
         }
-        //==============hasReturn===================//
-        //readonly bool hasReturn;
-        //public bool HasReturn { get { return hasReturn; } }
 
         readonly CommandMeta meta;
         public CommandMeta Meta { get { return meta; } }

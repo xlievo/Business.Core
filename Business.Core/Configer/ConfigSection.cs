@@ -84,13 +84,13 @@ namespace Business.Configer
         [ConfigurationProperty("canResult")]
         string canResult { get { return System.Convert.ToString(this["canResult"]); } }
 
-        public LogType? Type
+        public LoggerType? Type
         {
             get
             {
-                var type = LogType.Record;
+                var type = LoggerType.Record;
 
-                if (LogType.TryParse(this.type, true, out type))
+                if (LoggerType.TryParse(this.type, true, out type))
                 {
                     return type;
                 }
