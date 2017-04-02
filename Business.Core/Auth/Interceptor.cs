@@ -23,7 +23,7 @@ namespace Business.Auth
     public interface IInterceptor<Result> : Castle.DynamicProxy.IInterceptor, System.IDisposable
         where Result : IResult, new()
     {
-        System.Action<Logger> WriteLogAsync { get; set; }
+        System.Action<LoggerData> WriteLogAsync { get; set; }
 
         System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get; set; }
 
@@ -198,13 +198,13 @@ namespace Business.Auth
 
                     if (canWrite)
                     {
-                        this.WriteLogAsync.BeginInvoke(new Logger { Type = logType, Value = 0 == logObjs.Count ? null : logObjs, Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
+                        this.WriteLogAsync.BeginInvoke(new LoggerData { Type = logType, Value = 0 == logObjs.Count ? null : logObjs, Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
                     }
                 }
             }
         }
 
-        static void Logger(Attributes.LoggerAttribute logAttr, Attributes.LoggerAttribute argLogAttr, System.Collections.Generic.Dictionary<string, dynamic> logObjs, string name, object value)
+        static void Logger(LoggerAttribute logAttr, LoggerAttribute argLogAttr, System.Collections.Generic.Dictionary<string, dynamic> logObjs, string name, object value)
         {
             switch (logAttr.CanValue)
             {
@@ -280,7 +280,7 @@ namespace Business.Auth
 
         public System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get; set; }
 
-        public System.Action<Logger> WriteLogAsync { get; set; }
+        public System.Action<LoggerData> WriteLogAsync { get; set; }
 
         public dynamic Business { get; set; }
 

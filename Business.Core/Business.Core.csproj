@@ -61,7 +61,6 @@
     <Compile Include="Business\Arg.cs" />
     <Compile Include="Business\Logger.cs" />
     <Compile Include="Business\IBusiness.cs" />
-    <Compile Include="Business\Mark.cs" />
     <Compile Include="Configer\Config.cs" />
     <Compile Include="Configer\ConfigSection.cs" />
     <Compile Include="Extensions\CommandHelp.cs" />

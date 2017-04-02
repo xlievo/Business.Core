@@ -4,13 +4,11 @@ Support .Net4.5 Mono 4.x
 
 ## Depend
 
-Castle.Core 3.3.3
+Castle.Core 4.0.0
 
-Newtonsoft.Json 9.0.1
+Newtonsoft.Json 10.0.1
 
 protobuf-net 2.1.0
-
-Microsoft.CSharp
 
 ## Install
 
@@ -18,9 +16,7 @@ NuGet:https://www.nuget.org/packages/Business.Core/
 
 PM> Install-Package Business.Core
 
-### Please add to
-
-AssemblyInfo.cs
+### Please add to AssemblyInfo.cs
 
 [assembly: InternalsVisibleTo("Business.Core")]
 
@@ -56,22 +52,23 @@ AssemblyInfo.cs
         }
     }
     
-	[Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)]
+	[Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)]
     public class A : IBusiness
     {
         public A()
         {
-            //[Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)] control
-            this.WriteLogAsync = (log) =>
+            //[Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)] control
+            this.Logger = log =>
             {
                 //...
             };
         }
 
-        public Action<Log> WriteLogAsync { get; set; }
+        public Action<LoggerData> Logger { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
-		public IConfig Config { get; set; }
+        public Func<Auth.IToken> Token { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         public virtual IResult TestParameterA_01(Register ags)
         {
@@ -91,7 +88,7 @@ AssemblyInfo.cs
 		//Initialization you code
 
         static A A2 = Bind<A>.Create();
-        static System.Collections.Generic.IReadOnlyDictionary<string, Command> Cmd = A2.Command[Bind.DefaultCommandGroup];
+        static System.Collections.Generic.IReadOnlyDictionary<string, Command> Cmd = A2.Command[Bind.CommandGroupDefault];
 
         [Test]
         public void TestParameterA_01()
@@ -100,10 +97,10 @@ AssemblyInfo.cs
             var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "aaa" });
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Message, "argument \"account\" size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Message, "argument \"account\" size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
@@ -113,52 +110,51 @@ AssemblyInfo.cs
             var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "aaaa" });
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Message, "\" char account\" verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Message, "\" char account\" verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
         public void TestParameterA_03()
         {
-            var result = A2.TestParameterA_01(new Register { account = "1111", Password = 1111 });
-            var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "1111", Password = 1111 });
-
+           var result = A2.TestParameterA_01(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } });
+            var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } });
             Assert.IsTrue(0 < result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, new { account = "1111", Password = 1111 }));
-            Assert.IsTrue(System.Object.Equals(result.Message, null));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, new { account = "1111", Password = 1111 });
+            Assert.AreEqual(result.Message, null);
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
         public void TestParameterA_04()
         {
-            var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111 }, 6);
-            var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111 }, 6);
+            var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "11111" } }, 6);
+            var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "11111" } }, 6);
 
             Assert.IsTrue(0 < result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, new { account = "1111", Password = 1111, password = 6 }));
-            Assert.IsTrue(System.Object.Equals(result.Message, null));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, new { account = "1111", Password = 1111, password = 6 });
+            Assert.AreEqual(result.Message, null);
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
         public void TestParameterA_05()
         {
-            var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111 }, 666);
-            var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111 }, 666);
+            var result = A2.TestParameterA_02(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "11111" } }, 666);
+            var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "11111" } }, 666);
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, null));
-            Assert.IsTrue(System.Object.Equals(result.Message, "password size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, null);
+            Assert.AreEqual(result.Message, "password size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 	}
 
@@ -193,13 +189,14 @@ AssemblyInfo.cs
         }
     }
 
-	[Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)]
+	[Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)]
 	public class A : IBusiness
     {
-        public Action<Log> WriteLogAsync { get; set; }
+        public Action<LoggerData> Logger { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
-		public IConfig Config { get; set; }
+        public Func<Auth.IToken> Token { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         public virtual IResult TestParameterB_01([Convert(99)]Arg<Register> ags)
         {
@@ -219,7 +216,7 @@ AssemblyInfo.cs
 		//Initialization you code
 
         static A A2 = Bind<A>.Create();
-        static System.Collections.Generic.IReadOnlyDictionary<string, Command> Cmd = A2.Command[Bind.DefaultCommandGroup];
+        static System.Collections.Generic.IReadOnlyDictionary<string, Command> Cmd = A2.Command[Bind.CommandGroupDefault];
 
         [Test]
         public void TestParameterB_01()
@@ -228,24 +225,24 @@ AssemblyInfo.cs
             var result2 = Cmd["TestParameterB_01"].Call(new Register { account = "aaa" });
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Message, "argument \"account\" size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Message, "argument \"account\" size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
         public void TestParameterB_02()
         {
-            var result = A2.TestParameterB_02(new Arg<Register> { In = new Register { account = "1111" } }, 666);
-            var result2 = Cmd["TestParameterB_02"].Call(new Register { account = "1111" }, 666);
+            var result = A2.TestParameterB_02(new Arg<Register> { In = new Register { account = "1111", Password2 = new Register2 { account = "11111" } } }, 666);
+            var result2 = Cmd["TestParameterB_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "11111" } }, 666);
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, null));
-            Assert.IsTrue(System.Object.Equals(result.Message, "password size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, null);
+            Assert.AreEqual(result.Message, "password size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
     }
 
@@ -341,13 +338,14 @@ AssemblyInfo.cs
         }
     }
     
-    [Logger(LogType.Record, CanValue = LoggerAttribute.ValueMode.All)]
+    [Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)]
     public class A : IBusiness
     {
-        public Action<Log> WriteLogAsync { get; set; }
+        public Action<LoggerData> Logger { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
-		public IConfig Config { get; set; }
+        public Func<Auth.IToken> Token { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         [Command(Group = "AAA")]
         [Command(Group = "BBB")]
@@ -378,15 +376,14 @@ AssemblyInfo.cs
             var cmd_A = A2.Command["AAA"];
             var cmd_B = A2.Command["BBB"];
 
-            var result = A2.TestParameterC_01(new Arg<Register> { In = new Register { account = "aaa" } });
-            var result2 = cmd_A["TestParameterC_01"].Call(new Register { account = "aaa" });
-            var result3 = cmd_B["TestParameterC_01"].Call(new Register { account = "aaa" });
+            var result = A2.TestParameterC_01(new Arg<Register> { In = new Register { account = "1111", Password2 = new Register2 { } } });
+            var result2 = cmd_A["TestParameterC_01"].Call(new Register { account = "1111", Password2 = new Register2 { } });
+            var result3 = cmd_B["TestParameterC_01"].Call(new Register { account = "1111", Password2 = new Register2 { } });
 
-            Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Message, "argument \"account\" size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.IsTrue(0 < result.State);
+            Assert.AreEqual(result.Data, "DefaultTestParameterC_01");
+            Assert.AreEqual(result2.Data, "AAATestParameterC_01");
+            Assert.AreEqual(result3.Data, "BBBTestParameterC_01");
         }
 
         [Test]
@@ -395,15 +392,15 @@ AssemblyInfo.cs
             var cmd_A = A2.Command["AAA"];
             var cmd_C = A2.Command["CCC"];
 
-            var result = A2.TestParameterC_02(new Arg<Register> { In = new Register { account = "1111" } }, 666);
-            var result2 = cmd_A["TestParameterC_02"].Call(new Register { account = "1111" }, 666);
-            var result3 = cmd_C["TestParameterC_02"].Call(new Register { account = "1111" }, 666);
+            var result = A2.TestParameterC_02(new Arg<Register> { In = new Register { account = "1111", Password2 = new Register2 { account = "11111" } } }, 666);
+            var result2 = cmd_A["TestParameterC_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "11111" } }, 666);
+            var result3 = cmd_C["TestParameterC_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "11111" } }, 666);
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, null));
-            Assert.IsTrue(System.Object.Equals(result.Message, "password size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, null);
+            Assert.AreEqual(result.Message, "password size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
     }

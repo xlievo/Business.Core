@@ -131,9 +131,9 @@ namespace Business.Core.Test
         }
     }
 
-    [Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)]
+    [Logger(LoggerType.Record)]
+    [Logger(LoggerType.Error, CanValue = LoggerAttribute.ValueMode.No)]
     [Logger(LoggerType.Exception, CanValue = LoggerAttribute.ValueMode.All)]
-    [Logger(LoggerType.Error, CanValue = LoggerAttribute.ValueMode.All)]
     public class A : IBusiness
     {
         public A()
@@ -144,7 +144,7 @@ namespace Business.Core.Test
             };
         }
 
-        public Action<Logger> Logger { get; set; }
+        public Action<LoggerData> Logger { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
         public Type ResultType { get; set; }
         public Func<Auth.IToken> Token { get; set; }
@@ -189,6 +189,14 @@ namespace Business.Core.Test
         public virtual IResult TestParameterC_02([Convert(99)][ConvertA(99, Group = "AAA")]Arg<Register> ags, [Size(12, "password size verification failed", Min = 4, Max = "8")]int password)
         {
             return this.ResultCreate(new { ags.Out.account, ags.Out.Password, password });
+        }
+
+        //[Size(12, "password size verification failed", Min = 4, Max = "8")]
+        [Command(Group = "AAA")]
+        [Command(Group = "CCC")]
+        public virtual string TestParameterD_01(int password, string password2)
+        {
+            return this.ResultCreate(new { password, password2 }).ToString();
         }
     }
 
@@ -248,10 +256,10 @@ namespace Business.Core.Test
             var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "aaa" });
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Message, "argument \"account\" size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Message, "argument \"account\" size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
@@ -261,10 +269,10 @@ namespace Business.Core.Test
             var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "aaaa" });
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Message, "\" char account\" verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Message, "\" char account\" verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
@@ -273,11 +281,11 @@ namespace Business.Core.Test
             var result = A2.TestParameterA_01(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } });
             var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "111" } });
             Assert.IsTrue(0 < result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, new { account = "1111", Password = 1111 }));
-            Assert.IsTrue(System.Object.Equals(result.Message, null));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, new { account = "1111", Password = 1111 });
+            Assert.AreEqual(result.Message, null);
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
@@ -287,11 +295,11 @@ namespace Business.Core.Test
             var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "11111" } }, 6);
 
             Assert.IsTrue(0 < result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, new { account = "1111", Password = 1111, password = 6 }));
-            Assert.IsTrue(System.Object.Equals(result.Message, null));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, new { account = "1111", Password = 1111, password = 6 });
+            Assert.AreEqual(result.Message, null);
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
@@ -301,11 +309,11 @@ namespace Business.Core.Test
             var result2 = Cmd["TestParameterA_02"].Call(new Register { account = "1111", Password = 1111, Password2 = new Register2 { account = "11111" } }, 666);
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, null));
-            Assert.IsTrue(System.Object.Equals(result.Message, "password size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, null);
+            Assert.AreEqual(result.Message, "password size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         #endregion
@@ -319,10 +327,10 @@ namespace Business.Core.Test
             var result2 = Cmd["TestParameterB_01"].Call(new Register { account = "aaa" });
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Message, "argument \"account\" size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Message, "argument \"account\" size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]
@@ -332,11 +340,11 @@ namespace Business.Core.Test
             var result2 = Cmd["TestParameterB_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "11111" } }, 666);
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, null));
-            Assert.IsTrue(System.Object.Equals(result.Message, "password size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, null);
+            Assert.AreEqual(result.Message, "password size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         #endregion
@@ -370,14 +378,33 @@ namespace Business.Core.Test
             var result3 = cmd_C["TestParameterC_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "11111" } }, 666);
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Data, null));
-            Assert.IsTrue(System.Object.Equals(result.Message, "password size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Data, null);
+            Assert.AreEqual(result.Message, "password size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
 
         #endregion
+
+        [Test]
+        public void TestParameterD_01()
+        {
+            var cmd_A = A2.Command["AAA"];
+            var cmd_C = A2.Command["CCC"];
+
+            var result = A2.TestParameterD_01(666, "777");
+            var result2 = cmd_A["TestParameterD_01"].Call(666, "777");
+            //var result3 = cmd_C["TestParameterC_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "11111" } }, 666);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result2);
+            //Assert.AreEqual(result.Data, null);
+            //Assert.AreEqual(result.Message, "password size verification failed");
+            //Assert.AreEqual(result.State, result2.State);
+            //Assert.AreEqual(result.Message, result2.Message);
+            //Assert.AreEqual(result.Data, result2.Data);
+        }
 
         [Test]
         public void TestLogger_01()
@@ -386,11 +413,12 @@ namespace Business.Core.Test
             var result2 = Cmd["TestParameterA_01"].Call(new Register { account = "aaa" });
 
             Assert.IsTrue(1 > result.State);
-            Assert.IsTrue(System.Object.Equals(result.Message, "argument \"account\" size verification failed"));
-            Assert.IsTrue(System.Object.Equals(result.State, result2.State));
-            Assert.IsTrue(System.Object.Equals(result.Message, result2.Message));
-            Assert.IsTrue(System.Object.Equals(result.Data, result2.Data));
+            Assert.AreEqual(result.Message, "argument \"account\" size verification failed");
+            Assert.AreEqual(result.State, result2.State);
+            Assert.AreEqual(result.Message, result2.Message);
+            Assert.AreEqual(result.Data, result2.Data);
         }
+
     }
 
 

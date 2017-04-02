@@ -444,7 +444,7 @@ namespace Business.Extensions
                 return null;
             }
         }
-        public static string JsonSerialize<T>(this T value)
+        public static string JsonSerialize<Type>(this Type value)
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(value);
         }
@@ -452,14 +452,18 @@ namespace Business.Extensions
         #endregion
 
         #region ProtoBuf Serialize
-        public static T ProtoBufDeserialize<T>(this System.Byte[] source)
+        public static Type ProtoBufDeserialize<Type>(this System.Byte[] source)
         {
-            using (var stream = new System.IO.MemoryStream(source))
+            try
             {
-                return ProtoBuf.Serializer.Deserialize<T>(stream);
+                using (var stream = new System.IO.MemoryStream(source))
+                {
+                    return ProtoBuf.Serializer.Deserialize<Type>(stream);
+                }
             }
+            catch { return default(Type); }
         }
-        public static System.Byte[] ProtoBufSerialize<T>(this T instance)
+        public static System.Byte[] ProtoBufSerialize<Type>(this Type instance)
         {
             using (var stream = new System.IO.MemoryStream())
             {

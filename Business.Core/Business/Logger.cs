@@ -35,7 +35,7 @@ namespace Business
         Record = 1
     }
 
-    public struct Logger
+    public struct LoggerData
     {
         public LoggerType Type { get; set; }
 
@@ -52,7 +52,5 @@ namespace Business
         public string Member { get; set; }
 
         public string Group { get; set; }
-        //string description;
-        //public string Description { get; set; }
     }
 }

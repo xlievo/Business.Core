@@ -19,7 +19,7 @@ namespace Business
 {
     public interface IBusiness
     {
-        System.Action<Logger> Logger { get; set; }
+        System.Action<LoggerData> Logger { get; set; }
 
         System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
 
@@ -35,7 +35,7 @@ namespace Business
 
     public abstract class BusinessBase : IBusiness
     {
-        public System.Action<Logger> Logger { get; set; }
+        public System.Action<LoggerData> Logger { get; set; }
 
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
 
