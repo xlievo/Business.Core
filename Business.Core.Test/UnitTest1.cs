@@ -395,15 +395,9 @@ namespace Business.Core.Test
 
             var result = A2.TestParameterD_01(666, "777");
             var result2 = cmd_A["TestParameterD_01"].Call(666, "777");
-            //var result3 = cmd_C["TestParameterC_02"].Call(new Register { account = "1111", Password2 = new Register2 { account = "11111" } }, 666);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result2);
-            //Assert.AreEqual(result.Data, null);
-            //Assert.AreEqual(result.Message, "password size verification failed");
-            //Assert.AreEqual(result.State, result2.State);
-            //Assert.AreEqual(result.Message, result2.Message);
-            //Assert.AreEqual(result.Data, result2.Data);
         }
 
         [Test]

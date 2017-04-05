@@ -199,14 +199,7 @@ namespace Business
 
                 #region Token
 
-                if (typeof(IBusiness<>).IsAssignableFrom(type, out System.Type[] businessArguments))
-                {
-                    business.Token = ConstructorInvokerGenerator.CreateDelegate<Auth.IToken>(businessArguments[0]);
-                }
-                else
-                {
-                    business.Token = () => { return new Auth.Token(); };
-                }
+                business.Token = typeof(IBusiness<>).IsAssignableFrom(type, out System.Type[] businessArguments) ? ConstructorInvokerGenerator.CreateDelegate<Auth.IToken>(businessArguments[0]) : () => { return new Auth.Token(); };
 
                 #endregion
             }
@@ -602,7 +595,7 @@ namespace Business
                     foreach (var item in argAttrGroup)
                     {
                         var argAttrs = argAttr.FindAll(c => item.Value.CommandAttr.Group == c.Group || Bind.CommandGroupDefault == c.Group);
-                        
+
                         var deserializes = hasDeserialize ? new System.Collections.Generic.List<System.Type>() { currentType } : new System.Collections.Generic.List<System.Type>();
 
                         var argAttrChilds = hasDeserialize ? GetArgAttr(currentType, argAttrTrim, argInfo.Name, item.Value.CommandAttr, ref deserializes) : new System.Collections.Generic.List<Args>();
@@ -640,7 +633,7 @@ namespace Business
         static CurrentType GetCurrentType(System.Reflection.ICustomAttributeProvider member, System.Type type)
         {
             var hasIArg = typeof(IArg<>).IsAssignableFrom(type, out System.Type[] iArgOutType);
-            
+
             return new CurrentType { hasIArg = hasIArg, type = hasIArg ? iArgOutType[0] : type };
         }
 

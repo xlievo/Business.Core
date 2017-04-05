@@ -122,11 +122,13 @@ namespace Business.Extensions
                 if (!System.String.IsNullOrWhiteSpace(businessGroup)) { businessData.Group = businessGroup; }
                 if (System.String.IsNullOrWhiteSpace(businessData.Group)) { businessData.Group = Bind.CommandGroupDefault; }
 
+                //get Group
                 if (!business.Command.TryGetValue(businessData.Group, out System.Collections.Generic.IReadOnlyDictionary<string, Business.Command> group))
                 {
                     return ResultFactory.ResultCreate(business, (int)MarkItem.Business_GroupError, string.Format(GroupError, businessData.Group));
                 }
 
+                //get Cmd
                 if (!group.TryGetValue(businessData.Cmd, out Business.Command command))
                 {
                     return ResultFactory.ResultCreate(business, (int)MarkItem.Business_CmdError, string.Format(CmdError, businessData.Cmd));
