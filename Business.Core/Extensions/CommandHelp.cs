@@ -159,7 +159,7 @@ namespace Business.Extensions
                 }
 
                 result.Callback = businessData.Callback;
-                if (0 == result.Command.CommandID.Count)
+                if (!System.Object.Equals(null, result.Command) && 0 == result.Command.CommandID.Count)
                 {
                     result.Command.CommandID.Add(commandID);
                 }

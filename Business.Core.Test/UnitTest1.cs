@@ -198,6 +198,16 @@ namespace Business.Core.Test
         {
             return this.ResultCreate(new { password, password2 }).ToString();
         }
+
+        //{"S":-80,"M":"Token illegal","D":null,"H":false}
+        [Command(Group = "AAA")]
+        [Command(Group = "CCC")]
+        public virtual IResult TestParameterD_02(int password, string password2)
+        {
+            Business.Result.ResultObject<string> r = "{\"S\":-80,\"M\":\"Token illegal\",\"D\":null,\"H\":false}";
+            var r2 = this.ResultCreateToDataString(r);
+            return r;
+        }
     }
 
     [TestFixture]
@@ -413,7 +423,15 @@ namespace Business.Core.Test
             Assert.AreEqual(result.Data, result2.Data);
         }
 
+        [Test]
+        public void TestParameterD_02()
+        {
+            var data = new CommandHelp.BusinessData<string[]>();
+            data.Cmd = "TestParameterD_02";
+            data.Data = new string[] { "666", "777" };
+            var r = CommandHelp.BusinessCall(data, A2, "192.168.0.1").ToString();
+            Assert.AreNotEqual(null, r);
+        }
+
     }
-
-
 }
