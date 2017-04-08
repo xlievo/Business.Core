@@ -23,7 +23,7 @@ namespace Business.Auth
     public interface IInterceptor<Result> : Castle.DynamicProxy.IInterceptor, System.IDisposable
         where Result : IResult, new()
     {
-        System.Action<LoggerData> WriteLogAsync { get; set; }
+        System.Action<LoggerData> Logger { get; set; }
 
         System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get; set; }
 
@@ -40,9 +40,11 @@ namespace Business.Auth
             var meta = this.MetaData[invocation.Method.Name];
             var methodName = meta.FullName;
             var argsObj = invocation.Arguments;
-            var argsObjLog = new System.Collections.Generic.List<System.Tuple<string, dynamic, MetaLogger>>(argsObj.Length);
+            //var argsObjLog = new System.Collections.Generic.List<System.Tuple<string, dynamic, MetaLogger>>(argsObj.Length);
+            var argsObjLog = new System.Collections.Generic.Dictionary<string, System.Tuple<dynamic, MetaLogger>>(argsObj.Length);
+            var argsObjLogHasIArg = new System.Collections.Generic.Dictionary<string, bool>(argsObj.Length);
             var logType = LoggerType.Record;
-            var metaLogger = meta.MetaLogger;
+            //var metaLogger = meta.MetaLogger;
             //==================================//
             var iArgGroup = Bind.GetCommandGroupDefault(invocation.Method.Name);
             var iArgs = Bind.GetIArgs(meta.IArgs, argsObj, iArgGroup);
@@ -61,7 +63,8 @@ namespace Business.Auth
                     IResult result = null;
                     var value = argsObj[item.Position];
                     var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
-                    argsObjLog.Add(new System.Tuple<string, dynamic, MetaLogger>(item.Name, item.HasIArg ? iArgIn : value, item.MetaLogger));
+                    argsObjLog.Add(item.Name, System.Tuple.Create(item.HasIArg ? iArgs[item.Position] : value, item.MetaLogger));
+                    argsObjLogHasIArg.Add(item.Name, item.HasIArg);
 
                     var iArgHasString = !System.Object.Equals(null, iArgIn) && typeof(System.String).Equals(iArgIn.GetType());
                     var trim = false;
@@ -187,31 +190,31 @@ namespace Business.Auth
                 startTime.Stop();
                 var total = Extensions.Help.Scale(startTime.Elapsed.TotalSeconds, 3);
 
-                if (null != this.WriteLogAsync)
+                if (null != this.Logger)
                 {
                     if (meta.HasIResult && 0 > ((IResult)invocation.ReturnValue).State)
                     {
                         logType = LoggerType.Error;
                     }
 
-                    var logObjs = Logger(logType, metaLogger, argsObjLog, out bool canWrite, out bool canResult);
+                    var logObjs = LoggerSet(logType, meta.MetaLogger, argsObjLog, argsObjLogHasIArg,  out bool canWrite, out bool canResult);
 
                     if (canWrite)
                     {
-                        this.WriteLogAsync.BeginInvoke(new LoggerData { Type = logType, Value = 0 == logObjs.Count ? null : logObjs, Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
+                        this.Logger.BeginInvoke(new LoggerData { Type = logType, Value = 0 == logObjs.Count ? null : logObjs, Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
                     }
                 }
             }
         }
 
-        static void Logger(LoggerAttribute logAttr, LoggerAttribute argLogAttr, System.Collections.Generic.Dictionary<string, dynamic> logObjs, string name, object value)
+        static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, System.Collections.Generic.Dictionary<string, dynamic> logObjs, string name, dynamic value)
         {
-            switch (logAttr.CanValue)
+            switch (canValue)
             {
-                case LoggerAttribute.ValueMode.All:
+                case LoggerValueMode.All:
                     logObjs.Add(name, value);
                     break;
-                case LoggerAttribute.ValueMode.Select:
+                case LoggerValueMode.Select:
                     if (null != argLogAttr && argLogAttr.CanWrite)
                     {
                         logObjs.Add(name, value);
@@ -221,10 +224,10 @@ namespace Business.Auth
             }
         }
 
-        static System.Collections.Generic.Dictionary<string, dynamic> Logger(LoggerType logType, MetaLogger metaLogger, System.Collections.Generic.List<System.Tuple<string, dynamic, MetaLogger>> argsObjLog, out bool canWrite, out bool canResult)
+        static LoggerValue LoggerSet(LoggerType logType, MetaLogger metaLogger, System.Collections.Generic.IDictionary<string, System.Tuple<dynamic, MetaLogger>> argsObjLog, System.Collections.Generic.IDictionary<string, bool> argsObjLogHasIArg, out bool canWrite, out bool canResult)
         {
             canWrite = canResult = false;
-            var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
+            var logObjs = new LoggerValue(argsObjLogHasIArg, argsObjLog.Count);
 
             switch (logType)
             {
@@ -233,7 +236,7 @@ namespace Business.Auth
                     {
                         foreach (var log in argsObjLog)
                         {
-                            Logger(metaLogger.RecordAttr, log.Item3.RecordAttr, logObjs, log.Item1, log.Item2);
+                            LoggerSet(metaLogger.RecordAttr.CanValue, log.Value.Item2.RecordAttr, logObjs, log.Key, log.Value.Item1);
                         }
                         canWrite = true;
 
@@ -248,7 +251,7 @@ namespace Business.Auth
                     {
                         foreach (var log in argsObjLog)
                         {
-                            Logger(metaLogger.ErrorAttr, log.Item3.ErrorAttr, logObjs, log.Item1, log.Item2);
+                            LoggerSet(metaLogger.ErrorAttr.CanValue, log.Value.Item2.ErrorAttr, logObjs, log.Key, log.Value.Item1);
                         }
                         canWrite = true;
 
@@ -263,7 +266,7 @@ namespace Business.Auth
                     {
                         foreach (var log in argsObjLog)
                         {
-                            Logger(metaLogger.ExceptionAttr, log.Item3.ExceptionAttr, logObjs, log.Item1, log.Item2);
+                            LoggerSet(metaLogger.ExceptionAttr.CanValue, log.Value.Item2.ExceptionAttr, logObjs, log.Key, log.Value.Item1);
                         }
                         canWrite = true;
 
@@ -280,7 +283,7 @@ namespace Business.Auth
 
         public System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get; set; }
 
-        public System.Action<LoggerData> WriteLogAsync { get; set; }
+        public System.Action<LoggerData> Logger { get; set; }
 
         public dynamic Business { get; set; }
 

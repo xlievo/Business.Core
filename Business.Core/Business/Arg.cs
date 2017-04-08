@@ -50,5 +50,23 @@ namespace Business
         public dynamic In { get; set; }
 
         public string Group { get; set; }
+
+        /// <summary>
+        /// ProtoBuf format Out
+        /// </summary>
+        /// <returns></returns>
+        public byte[] ToBytes()
+        {
+            return Business.Extensions.Help.ProtoBufSerialize(value);
+        }
+
+        /// <summary>
+        /// JSON format Out
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return Business.Extensions.Help.JsonSerialize(value);
+        }
     }
 }

@@ -125,7 +125,7 @@
                 {
                     if (loggers.Any(c => c.Method.Equals(meta.Key) && c.Type.Value.Equals(item.Type.Value))) { continue; }
 
-                    SetMetaLogger(meta.Value.MetaLogger, item.Type.Value, item.CanWrite, item.CanValue.HasValue ? item.CanValue.Value : LoggerAttribute.ValueMode.No, item.CanResult);
+                    SetMetaLogger(meta.Value.MetaLogger, item.Type.Value, item.CanWrite, item.CanValue.HasValue ? item.CanValue.Value : LoggerValueMode.No, item.CanResult);
                 }
 
                 System.Console.WriteLine(System.String.Format("Logger {0} {1} {2}", item.Business, item.Method, item.Type));
@@ -133,7 +133,7 @@
 
             foreach (var item in loggers)
             {
-                SetMetaLogger(metaData[item.Method].MetaLogger, item.Type.Value, item.CanWrite, item.CanValue.HasValue ? item.CanValue.Value : LoggerAttribute.ValueMode.No, item.CanResult);
+                SetMetaLogger(metaData[item.Method].MetaLogger, item.Type.Value, item.CanWrite, item.CanValue.HasValue ? item.CanValue.Value : LoggerValueMode.No, item.CanResult);
 
                 System.Console.WriteLine(System.String.Format("Logger {0} {1} {2}", item.Business, item.Method, item.Type));
             }
@@ -185,7 +185,7 @@
             }
         }
 
-        public bool Logger(LoggerType type, bool canWrite = false, LoggerAttribute.ValueMode? canValue = null, bool canResult = false, string method = ANY)
+        public bool Logger(LoggerType type, bool canWrite = false, LoggerValueMode? canValue = null, bool canResult = false, string method = ANY)
         {
             if (System.String.IsNullOrWhiteSpace(method))
             {
@@ -196,7 +196,7 @@
             {
                 foreach (var meta in this.metaData)
                 {
-                    SetMetaLogger(meta.Value.MetaLogger, type, canWrite, canValue.HasValue ? canValue.Value : LoggerAttribute.ValueMode.No, canResult);
+                    SetMetaLogger(meta.Value.MetaLogger, type, canWrite, canValue.HasValue ? canValue.Value : LoggerValueMode.No, canResult);
                 }
 
                 return true;
@@ -206,7 +206,7 @@
                 MetaData meta;
                 if (this.metaData.TryGetValue(method, out meta))
                 {
-                    SetMetaLogger(meta.MetaLogger, type, canWrite, canValue.HasValue ? canValue.Value : LoggerAttribute.ValueMode.No, canResult);
+                    SetMetaLogger(meta.MetaLogger, type, canWrite, canValue.HasValue ? canValue.Value : LoggerValueMode.No, canResult);
 
                     return true;
                 }
@@ -215,7 +215,7 @@
             return false;
         }
 
-        static void SetMetaLogger(MetaLogger metaLogger, LoggerType type, bool canWrite, LoggerAttribute.ValueMode canValue, bool canResult)
+        static void SetMetaLogger(MetaLogger metaLogger, LoggerType type, bool canWrite, LoggerValueMode canValue, bool canResult)
         {
             switch (type)
             {

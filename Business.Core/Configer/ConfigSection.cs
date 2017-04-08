@@ -109,13 +109,13 @@ namespace Business.Configer
             }
         }
 
-        public Attributes.LoggerAttribute.ValueMode? CanValue
+        public Attributes.LoggerValueMode? CanValue
         {
             get
             {
-                var canValue = Attributes.LoggerAttribute.ValueMode.No;
+                var canValue = Attributes.LoggerValueMode.No;
 
-                if (Attributes.LoggerAttribute.ValueMode.TryParse(this.canValue, true, out canValue))
+                if (Attributes.LoggerValueMode.TryParse(this.canValue, true, out canValue))
                 {
                     return canValue;
                 }

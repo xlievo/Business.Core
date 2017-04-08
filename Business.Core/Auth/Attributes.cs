@@ -62,13 +62,6 @@ namespace Business.Attributes
             return this.Clone();
         }
 
-        public enum ValueMode
-        {
-            Select = 0,
-            All = 1,
-            No = 2,
-        }
-
         public LoggerAttribute(LoggerType logType, bool canWrite = true)
         {
             this.logType = logType;
@@ -84,9 +77,16 @@ namespace Business.Attributes
         bool canWrite;
         public bool CanWrite { get { return canWrite; } set { canWrite = value; } }
 
-        public ValueMode CanValue { get; set; }
+        public LoggerValueMode CanValue { get; set; }
 
         public bool CanResult { get; set; }
+    }
+
+    public enum LoggerValueMode
+    {
+        Select = 0,
+        All = 1,
+        No = 2,
     }
 
     #endregion

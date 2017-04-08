@@ -52,12 +52,12 @@ PM> Install-Package Business.Core
         }
     }
     
-	[Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)]
+	[Logger(LoggerType.Record, CanValue = ValueMode.All)]
     public class A : IBusiness
     {
         public A()
         {
-            //[Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)] control
+            //[Logger(LoggerType.Record, CanValue = ValueMode.All)] control
             this.Logger = log =>
             {
                 //...
@@ -189,7 +189,7 @@ PM> Install-Package Business.Core
         }
     }
 
-	[Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)]
+	[Logger(LoggerType.Record, CanValue = ValueMode.All)]
 	public class A : IBusiness
     {
         public Action<LoggerData> Logger { get; set; }
@@ -338,7 +338,7 @@ PM> Install-Package Business.Core
         }
     }
     
-    [Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.All)]
+    [Logger(LoggerType.Record, CanValue = ValueMode.All)]
     public class A : IBusiness
     {
         public Action<LoggerData> Logger { get; set; }

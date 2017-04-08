@@ -410,13 +410,13 @@ namespace Business.Extensions
 
         #region Json
 
-        public static Type JsonDeserialize<Type>(this string value)
+        public static Type TryJsonDeserialize<Type>(this string value)
         {
             try { return Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value); }
             catch { return default(Type); }
         }
 
-        public static Type JsonDeserialize<Type>(this string value, out string error)
+        public static Type TryJsonDeserialize<Type>(this string value, out string error)
         {
             error = null;
 
@@ -430,7 +430,7 @@ namespace Business.Extensions
                 return default(Type);
             }
         }
-        public static object JsonDeserialize(this string value, System.Type type, out string error)
+        public static object TryJsonDeserialize(this string value, System.Type type, out string error)
         {
             error = null;
 
@@ -452,7 +452,7 @@ namespace Business.Extensions
         #endregion
 
         #region ProtoBuf Serialize
-        public static Type ProtoBufDeserialize<Type>(this System.Byte[] source)
+        public static Type TryProtoBufDeserialize<Type>(this System.Byte[] source)
         {
             try
             {

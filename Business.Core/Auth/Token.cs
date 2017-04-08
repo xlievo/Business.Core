@@ -31,12 +31,12 @@ namespace Business.Auth
     {
         public static implicit operator Token(string value)
         {
-            return Business.Extensions.Help.JsonDeserialize<Token>(value);
+            return Business.Extensions.Help.TryJsonDeserialize<Token>(value);
         }
 
         public static implicit operator Token(byte[] value)
         {
-            return Business.Extensions.Help.ProtoBufDeserialize<Token>(value);
+            return Business.Extensions.Help.TryProtoBufDeserialize<Token>(value);
         }
 
         public override string ToString()

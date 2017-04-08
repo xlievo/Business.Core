@@ -171,7 +171,7 @@ namespace Business
 
                 business.Command = GetBusinessCommand(methods.Item2, Instance, interceptor.MetaData, business);
 
-                interceptor.WriteLogAsync = business.Logger;
+                interceptor.Logger = business.Logger;
 
                 business.ResultType = resultType;
 

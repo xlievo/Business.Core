@@ -55,7 +55,7 @@ namespace Business
 
         bool EnableWatcher { get; set; }
 
-        bool Logger(LoggerType type, bool canWrite = false, Attributes.LoggerAttribute.ValueMode? canValue = null, bool canResult = false, string method = "*.*");
+        bool Logger(LoggerType type, bool canWrite = false, Attributes.LoggerValueMode? canValue = null, bool canResult = false, string method = "*.*");
 
         bool Attribute(string method, string argument, string attributeFullName, string member, string value);
     }

@@ -26,11 +26,11 @@ namespace Business.Result
     {
         public static implicit operator ResultObject<Type>(string value)
         {
-            return Business.Extensions.Help.JsonDeserialize<ResultObject<Type>>(value);
+            return Business.Extensions.Help.TryJsonDeserialize<ResultObject<Type>>(value);
         }
         public static implicit operator ResultObject<Type>(byte[] value)
         {
-            return Business.Extensions.Help.ProtoBufDeserialize<ResultObject<Type>>(value);
+            return Business.Extensions.Help.TryProtoBufDeserialize<ResultObject<Type>>(value);
         }
 
         /// <summary>
@@ -80,25 +80,25 @@ namespace Business.Result
         dynamic IResult.Data { get { return this.Data; } set { this.Data = value; } }
 
         /// <summary>
-        /// Json
+        /// Json format
         /// </summary>
         /// <returns></returns>
         public override string ToString()
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+            return Business.Extensions.Help.JsonSerialize(this);
         }
 
         /// <summary>
-        /// Json Data
+        /// Json format Data
         /// </summary>
         /// <returns></returns>
         public string ToDataString()
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this.Data);
+            return Business.Extensions.Help.JsonSerialize(this.Data);
         }
 
         /// <summary>
-        /// ProtoBuf
+        /// ProtoBuf format
         /// </summary>
         /// <returns></returns>
         public byte[] ToBytes()
@@ -107,7 +107,7 @@ namespace Business.Result
         }
 
         /// <summary>
-        /// ProtoBuf Data
+        /// ProtoBuf format Data
         /// </summary>
         /// <returns></returns>
         public byte[] ToDataBytes()

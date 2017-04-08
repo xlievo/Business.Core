@@ -130,10 +130,9 @@ namespace Business.Core.Test
             }
         }
     }
-
     [Logger(LoggerType.Record)]
-    [Logger(LoggerType.Error, CanValue = LoggerAttribute.ValueMode.No)]
-    [Logger(LoggerType.Exception, CanValue = LoggerAttribute.ValueMode.All)]
+    [Logger(LoggerType.Error, CanValue = LoggerValueMode.No)]
+    [Logger(LoggerType.Exception, CanValue = LoggerValueMode.All)]
     public class A : IBusiness
     {
         public A()
@@ -152,8 +151,8 @@ namespace Business.Core.Test
 
         //=========================Check============================//
         [Logger(LoggerType.Record, CanResult = true)]
-        [Logger(LoggerType.Record, CanValue = LoggerAttribute.ValueMode.Select)]
-        [Logger(LoggerType.Error, CanValue = LoggerAttribute.ValueMode.All)]
+        [Logger(LoggerType.Record, CanValue = LoggerValueMode.Select)]
+        [Logger(LoggerType.Error, CanValue = LoggerValueMode.All)]
         public virtual IResult TestParameterA_01([Logger(LoggerType.Record)]Register ags)
         {
             //return this.ResultCreate(new { ags.account, ags.Password }, true, this.ResultCreate(commandID: "id2"), this.ResultCreate("", 1, true, "id"));

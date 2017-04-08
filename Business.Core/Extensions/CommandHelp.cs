@@ -62,11 +62,11 @@ namespace Business.Extensions
         {
             public static implicit operator BusinessData<Type>(string value)
             {
-                return Help.JsonDeserialize<BusinessData<Type>>(value);
+                return Help.TryJsonDeserialize<BusinessData<Type>>(value);
             }
             public static implicit operator BusinessData<Type>(byte[] value)
             {
-                return Help.ProtoBufDeserialize<BusinessData<Type>>(value);
+                return Help.TryProtoBufDeserialize<BusinessData<Type>>(value);
             }
 
             /// <summary>

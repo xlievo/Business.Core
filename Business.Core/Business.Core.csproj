@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Auth\Attributes.cs" />
     <Compile Include="Auth\Interceptor.cs" />
+    <Compile Include="Auth\Session.cs" />
     <Compile Include="Auth\Token.cs" />
     <Compile Include="Business\Arg.cs" />
     <Compile Include="Business\Logger.cs" />
