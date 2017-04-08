@@ -78,7 +78,7 @@ namespace Business
     }
 
     /// <summary>
-    /// Result.ResultObject
+    /// Using Result.ResultObject initialize a proxy class
     /// </summary>
     /// <typeparam name="Business"></typeparam>
     public class Bind<Business> : Bind<Business, ResultObject<string>>
@@ -93,7 +93,7 @@ namespace Business
     }
 
     /// <summary>
-    /// Result.ResultBase
+    /// Using Result.ResultBase initialize a proxy class
     /// </summary>
     /// <typeparam name="Business"></typeparam>
     public class Bind2<Business> : Bind<Business, ResultBase<string>>

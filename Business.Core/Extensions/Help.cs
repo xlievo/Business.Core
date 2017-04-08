@@ -168,24 +168,39 @@ namespace Business.Extensions
             }
         }
 
-        //public static string MD5Encoding(this string str, string encodingNmae = "UTF-8", bool hasUpper = false)
-        //{
-        //    if (null == str) { throw new System.ArgumentNullException("str"); }
+        public static string MD5Encoding(string value, string encodingNmae = "UTF-8", bool hasUpper = false)
+        {
+            if (null == value) { throw new System.ArgumentNullException("value"); }
 
-        //    using (var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider())
-        //    {
-        //        var result = System.BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.GetEncoding(encodingNmae).GetBytes(str))).Replace("-", System.String.Empty);
-        //        return hasUpper ? result.ToUpperInvariant() : result.ToLowerInvariant();
-        //    }
-        //}
+            using (var md5 = new System.Security.Cryptography.MD5CryptoServiceProvider())
+            {
+                var result = System.BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.GetEncoding(encodingNmae).GetBytes(value))).Replace("-", System.String.Empty);
+                return hasUpper ? result.ToUpperInvariant() : result.ToLowerInvariant();
+            }
+        }
 
         [System.Flags]
         public enum CheckCharMode
         {
+            /// <summary>
+            /// Allow all
+            /// </summary>
             All = 0,
+            /// <summary>
+            /// Allow number
+            /// </summary>
             Number = 2,
+            /// <summary>
+            /// Allow upper
+            /// </summary>
             Upper = 4,
+            /// <summary>
+            /// Allow lower
+            /// </summary>
             Lower = 8,
+            /// <summary>
+            /// Allow chinese
+            /// </summary>
             Chinese = 16
         }
 

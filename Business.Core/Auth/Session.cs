@@ -19,6 +19,9 @@ using Business.Attributes;
 
 namespace Business.Auth
 {
+    /// <summary>
+    /// This is a sample Session
+    /// </summary>
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
     public class Session
     {
@@ -30,10 +33,18 @@ namespace Business.Auth
         {
             return Business.Extensions.Help.TryProtoBufDeserialize<Session>(value);
         }
+        /// <summary>
+        /// ProtoBuf format
+        /// </summary>
+        /// <returns></returns>
         public byte[] ToBytes()
         {
             return Business.Extensions.Help.ProtoBufSerialize(this);
         }
+        /// <summary>
+        /// JSON format
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return Business.Extensions.Help.JsonSerialize(this);

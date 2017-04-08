@@ -31,6 +31,10 @@ namespace Business
         new OutType Out { get; set; }
     }
 
+    /// <summary>
+    /// This is a parameter package, used to transform parameters
+    /// </summary>
+    /// <typeparam name="OutType"></typeparam>
     public class Arg<OutType> : IArg<OutType>
     {
         public static implicit operator Arg<OutType>(string value)
@@ -45,10 +49,19 @@ namespace Business
         OutType value;
         dynamic IArg.Out { get { return value; } set { this.value = value; } }
 
+        /// <summary>
+        /// The final output object
+        /// </summary>
         public OutType Out { get { return value; } set { this.value = value; } }
 
+        /// <summary>
+        /// The first input object
+        /// </summary>
         public dynamic In { get; set; }
 
+        /// <summary>
+        /// Used for the command group
+        /// </summary>
         public string Group { get; set; }
 
         /// <summary>

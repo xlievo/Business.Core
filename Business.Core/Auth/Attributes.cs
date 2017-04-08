@@ -256,37 +256,83 @@ namespace Business.Attributes
         internal readonly string fullName;
 
         int code;
+        /// <summary>
+        /// Used to return code
+        /// </summary>
         public int Code { get { return code; } set { this.code = value; } }
 
         string message;
+        /// <summary>
+        /// Used to return error messages
+        /// </summary>
         public string Message { get { return message; } set { this.message = value; } }
 
         bool canNull;
+        /// <summary>
+        /// By checking the Allow null value
+        /// </summary>
         public bool CanNull { get { return canNull; } set { canNull = value; } }
 
+        /// <summary>
+        /// Remove leading or trailing white space characters
+        /// </summary>
         public bool TrimChar { get; set; }
 
+        /// <summary>
+        /// Used for the command group
+        /// </summary>
         public string Group { get; set; }
 
+        /// <summary>
+        /// Start processing the Parameter object, By this.ResultCreate() method returns
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type"></param>
+        /// <param name="method"></param>
+        /// <param name="member"></param>
+        /// <param name="business"></param>
+        /// <returns></returns>
         public abstract IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business);
 
         #region Result
 
+        /// <summary>
+        /// Used to create the Proces() method returns object
+        /// </summary>
+        /// <returns></returns>
         public IResult ResultCreate()
         {
             return ResultFactory.Create();
         }
 
+        /// <summary>
+        /// Used to create the Proces() method returns object
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
         public IResult ResultCreate(int state)
         {
             return ResultFactory.Create(state);
         }
 
+        /// <summary>
+        /// Used to create the Proces() method returns object
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public IResult ResultCreate(int state, string message)
         {
             return ResultFactory.Create(state, message);
         }
 
+        /// <summary>
+        /// Used to create the Proces() method returns object
+        /// </summary>
+        /// <typeparam name="Data"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="state"></param>
+        /// <returns></returns>
         public IResult<Data> ResultCreate<Data>(Data data, int state = 1)
         {
             return ResultFactory.Create(data, state);
@@ -495,6 +541,24 @@ namespace Business.Attributes
                 return this.ResultCreate(Code, Message ?? string.Format("argument \"{0}\" char verification failed.", member));
             }
             return this.ResultCreate();
+        }
+    }
+
+    public sealed class MD5Attribute : ArgumentAttribute
+    {
+        public MD5Attribute(int code = -805, string message = null, bool canNull = true)
+            : base(code, message, canNull) { }
+
+        string encodingNmae = "UTF-8";
+        public string EncodingNmae { get { return encodingNmae; } set { encodingNmae = value; } }
+
+        public bool HasUpper { get; set; }
+
+        public override IResult Proces(dynamic value, System.Type type, string method, string member, dynamic business)
+        {
+            if (this.CanNull && System.Object.Equals(null, value)) { return this.ResultCreate(); }
+
+            return this.ResultCreate(Extensions.Help.MD5Encoding(value, encodingNmae, HasUpper));
         }
     }
 
