@@ -15,6 +15,8 @@
           ##############
 ==================================*/
 
+using System.Reflection.Emit;
+
 namespace Business.Extensions.Emit
 {
     internal static class OpCodeExtention

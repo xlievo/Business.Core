@@ -24,6 +24,9 @@ namespace Business.Attributes
 
     #region
 
+    /// <summary>
+    /// The Method and Property needs to be ignored and will not be a proxy
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public sealed class IgnoreAttribute : System.Attribute { }
 
@@ -69,28 +72,55 @@ namespace Business.Attributes
         }
 
         readonly LoggerType logType;
+        /// <summary>
+        /// Record type
+        /// </summary>
         public LoggerType LogType
         {
             get { return logType; }
         }
 
         bool canWrite;
+        /// <summary>
+        /// Allow record
+        /// </summary>
         public bool CanWrite { get { return canWrite; } set { canWrite = value; } }
 
+        /// <summary>
+        /// Allowed to return to parameters
+        /// </summary>
         public LoggerValueMode CanValue { get; set; }
 
+        /// <summary>
+        /// Allowed to return to results
+        /// </summary>
         public bool CanResult { get; set; }
     }
 
+    /// <summary>
+    /// Record parameter model
+    /// </summary>
     public enum LoggerValueMode
     {
+        /// <summary>
+        /// Allow selective recording of some parameters
+        /// </summary>
         Select = 0,
+        /// <summary>
+        /// All parameter Records
+        /// </summary>
         All = 1,
+        /// <summary>
+        /// No records
+        /// </summary>
         No = 2,
     }
 
     #endregion
 
+    /// <summary>
+    /// Base class for all attributes that apply to parameters
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public abstract class ArgumentAttribute : System.Attribute
     {
@@ -341,6 +371,9 @@ namespace Business.Attributes
         #endregion
     }
 
+    /// <summary>
+    /// Command attribute on a method, for multiple sources to invoke the method
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public sealed class CommandAttribute : System.Attribute
     {
