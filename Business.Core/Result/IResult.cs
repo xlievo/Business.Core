@@ -207,6 +207,12 @@ namespace Business.Result
         //    return result;
         //}
         //==================================================================//
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <param name="business"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         static IResult ResultCreate(IBusiness business, System.Type type)
         {
             var result = (IResult)System.Activator.CreateInstance(business.ResultType.MakeGenericType(type));
@@ -214,16 +220,43 @@ namespace Business.Result
             return result;
         }
 
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <param name="business"></param>
+        /// <param name="overall"></param>
+        /// <param name="callback"></param>
+        /// <param name="notifys"></param>
+        /// <returns></returns>
         public static IResult ResultCreate(this IBusiness business, bool overall = false, string callback = null, params IResult[] notifys)
         {
             return ResultCreate<string>(business, null, 1, overall, callback, notifys);
         }
 
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <param name="business"></param>
+        /// <param name="state"></param>
+        /// <param name="overall"></param>
+        /// <param name="callback"></param>
+        /// <param name="notifys"></param>
+        /// <returns></returns>
         public static IResult ResultCreate(this IBusiness business, int state, bool overall, string callback = null, params IResult[] notifys)
         {
             return ResultCreate<string>(business, null, state, overall, callback, notifys);
         }
 
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <param name="business"></param>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        /// <param name="overall"></param>
+        /// <param name="callback"></param>
+        /// <param name="notifys"></param>
+        /// <returns></returns>
         public static IResult ResultCreate(this IBusiness business, int state, string message, bool overall = false, string callback = null, params IResult[] notifys)
         {
             var result = ResultCreate<string>(business, null, 1, overall, callback, notifys);
@@ -244,6 +277,17 @@ namespace Business.Result
 
         //    return result;
         //}
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <typeparam name="Data"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="data"></param>
+        /// <param name="state"></param>
+        /// <param name="overall"></param>
+        /// <param name="callback"></param>
+        /// <param name="notifys"></param>
+        /// <returns></returns>
         public static IResult ResultCreate<Data>(this IBusiness business, Data data, int state = 1, bool overall = false, string callback = null, params IResult[] notifys)
         {
             var result = ResultCreate(business, typeof(Data));
@@ -258,6 +302,15 @@ namespace Business.Result
             return result;
         }
 
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <typeparam name="Data"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="data"></param>
+        /// <param name="state"></param>
+        /// <param name="commandID"></param>
+        /// <returns></returns>
         public static IResult ResultCreate<Data>(IBusiness business, Data data, int state = 1, params string[] commandID)
         {
             var result = ResultCreate(business, typeof(Data));
@@ -297,7 +350,12 @@ namespace Business.Result
         //    return result;// as IResult<Data>;
         //}
 
-
+        /// <summary>
+        /// Used to create IResult.Data secondary encapsulation
+        /// </summary>
+        /// <param name="business"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
         public static IResult ResultCreateToDataBytes(this IBusiness business, IResult result)
         {
             if (System.Object.Equals(null, business))
@@ -335,6 +393,12 @@ namespace Business.Result
             return result2;
         }
 
+        /// <summary>
+        /// Used to create IResult.Data secondary encapsulation
+        /// </summary>
+        /// <param name="business"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
         public static IResult ResultCreateToDataString(this IBusiness business, IResult result)
         {
             if (System.Object.Equals(null, business))

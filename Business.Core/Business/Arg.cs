@@ -62,6 +62,7 @@ namespace Business
         /// <summary>
         /// Used for the command group
         /// </summary>
+        [Newtonsoft.Json.JsonIgnore]
         public string Group { get; set; }
 
         /// <summary>
