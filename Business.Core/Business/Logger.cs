@@ -110,12 +110,13 @@ namespace Business
         }
 
         /// <summary>
-        /// JSON format
+        /// JSON format, if the total number to 0, then returned null
         /// </summary>
         /// <returns></returns>
         public override string ToString()
         {
-            return Extensions.Help.JsonSerialize(null == dictionary ? this : dictionary);
+            var current = dictionary ?? this;
+            return 0 == current.Count ? null : Extensions.Help.JsonSerialize(current);
         }
     }
 }

@@ -201,7 +201,7 @@ namespace Business.Auth
 
                     if (canWrite)
                     {
-                        this.Logger.BeginInvoke(new LoggerData { Type = logType, Value = 0 == logObjs.Count ? null : logObjs, Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
+                        this.Logger.BeginInvoke(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? invocation.ReturnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }, null, null);
                     }
                 }
             }
