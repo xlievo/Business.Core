@@ -1,4 +1,0 @@
-D:\Source\Repos\Business.Core\Business.Mobile\bin\Debug\netstandard1.4\Business.Mobile.deps.json
-D:\Source\Repos\Business.Core\Business.Mobile\bin\Debug\netstandard1.4\Business.Mobile.dll
-D:\Source\Repos\Business.Core\Business.Mobile\obj\Debug\netstandard1.4\Business.Mobile.csprojResolveAssemblyReference.cache
-D:\Source\Repos\Business.Core\Business.Mobile\obj\Debug\netstandard1.4\Business.Mobile.AssemblyInfo.cs

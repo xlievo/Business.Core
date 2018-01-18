@@ -13,4 +13,4 @@
 /Business.Core/Business.Core.nupkg
 *.nupkg
 /.vs/Business.Core/v15/Server/sqlite3
-/packages/protobuf-net.2.3.2/lib
+/packages
