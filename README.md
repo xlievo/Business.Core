@@ -1,6 +1,6 @@
 ## Platform
 
-Support .Net4.5 Mono 4.x
+Support .Net4.5 Mono 4.x .Net Core
 
 ## Depend
 
