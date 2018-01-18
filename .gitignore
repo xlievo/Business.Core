@@ -12,3 +12,4 @@
 *.nupkg
 /Business.Core/Business.Core.nupkg
 *.nupkg
+/.vs/Business.Core/v15/Server/sqlite3
