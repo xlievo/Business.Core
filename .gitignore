@@ -2,15 +2,14 @@
 # 此 .gitignore 文件已由 Microsoft(R) Visual Studio 自动创建。
 ################################################################################
 
-/Business.Core/bin
-/Business.Core.Test/bin
-/Business.Core.Test/obj
+/Build/Business.Mobile/bin
+/Build/Business.Mobile/obj
+/Build/Business.Net/bin
+/Build/Business.Net/obj
+/Build/Business.Standard/bin
+/Build/Business.Standard/obj
+
 *.suo
-/Business.Core/obj
-/Business.Core/Business.Core.nupkg
-/Business.Core/Business.Core.nupkg
 *.nupkg
-/Business.Core/Business.Core.nupkg
-*.nupkg
-/.vs/Business.Core/v15/Server/sqlite3
+/.vs
 /packages
