@@ -16,7 +16,7 @@ NuGet:https://www.nuget.org/packages/Business.Core/
 
 PM> Install-Package Business.Core
 
-### Please add to AssemblyInfo.cs
+### Add to AssemblyInfo.cs
 
 [assembly: InternalsVisibleTo("Business.Core")]
 

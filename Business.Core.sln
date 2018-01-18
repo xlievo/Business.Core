@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{43142073-0768-410C-94C7-428F93401D7F}"
 	ProjectSection(SolutionItems) = preProject
@@ -18,8 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{893493
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business.Core", "Business.Core\Business.Core.csproj", "{CE268ED8-961E-4892-A529-E10E8C9A6ED6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business.Core.Test", "Business.Core.Test\Business.Core.Test.csproj", "{D24581D2-2D74-43C0-9A56-0DCF940AB913}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,12 +28,11 @@ Global
 		{CE268ED8-961E-4892-A529-E10E8C9A6ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE268ED8-961E-4892-A529-E10E8C9A6ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE268ED8-961E-4892-A529-E10E8C9A6ED6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D24581D2-2D74-43C0-9A56-0DCF940AB913}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D24581D2-2D74-43C0-9A56-0DCF940AB913}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D24581D2-2D74-43C0-9A56-0DCF940AB913}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D24581D2-2D74-43C0-9A56-0DCF940AB913}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {124A1BA0-DBBC-49D2-AA6F-C937149C884C}
 	EndGlobalSection
 EndGlobal
