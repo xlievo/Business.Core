@@ -37,22 +37,16 @@ namespace Business
     /// <typeparam name="OutType"></typeparam>
     public class Arg<OutType> : IArg<OutType>
     {
-        public static implicit operator Arg<OutType>(string value)
-        {
-            return new Arg<OutType>() { In = value };
-        }
-        public static implicit operator Arg<OutType>(byte[] value)
-        {
-            return new Arg<OutType>() { In = value };
-        }
+        public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
+        public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
 
         OutType value;
-        dynamic IArg.Out { get { return value; } set { this.value = value; } }
+        dynamic IArg.Out { get => this.value; set => this.value = value; }
 
         /// <summary>
         /// The final output object
         /// </summary>
-        public OutType Out { get { return value; } set { this.value = value; } }
+        public OutType Out { get => this.value; set => this.value = value; }
 
         /// <summary>
         /// The first input object
@@ -69,18 +63,12 @@ namespace Business
         /// ProtoBuf format Out
         /// </summary>
         /// <returns></returns>
-        public byte[] ToBytes()
-        {
-            return Business.Extensions.Help.ProtoBufSerialize(value);
-        }
+        public byte[] ToBytes() => Utils.Help.ProtoBufSerialize(value);
 
         /// <summary>
         /// JSON format Out
         /// </summary>
         /// <returns></returns>
-        public override string ToString()
-        {
-            return Business.Extensions.Help.JsonSerialize(value);
-        }
+        public override string ToString() => Utils.Help.JsonSerialize(value);
     }
 }

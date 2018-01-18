@@ -1,0 +1,16 @@
+D:\Source\Repos\Business.Core\Business.Mobile\obj\Release\netstandard1.5\Business.Mobile.AssemblyInfo.cs
+D:\Source\Repos\Business.Core\Business.Mobile\bin\Release\netstandard1.5\Business.Core.deps.json
+D:\Source\Repos\Business.Core\Business.Mobile\bin\Release\netstandard1.5\Business.Core.dll
+D:\Source\Repos\Business.Core\Business.Mobile\bin\Release\netstandard1.5\Business.Core.pdb
+D:\Source\Repos\Business.Core\Business.Mobile\obj\Release\netstandard1.5\Business.Core.dll
+D:\Source\Repos\Business.Core\Business.Mobile\obj\Release\netstandard1.5\Business.Core.pdb
+D:\Source\Repos\Business.Core\Build\Business.Mobile\bin\Release\netstandard1.5\Business.Core.deps.json
+D:\Source\Repos\Business.Core\Build\Business.Mobile\obj\Release\netstandard1.5\Business.Mobile.AssemblyInfo.cs
+D:\Source\Repos\Business.Core\Build\Business.Mobile\obj\Release\netstandard1.5\Business.Core.dll
+D:\Source\Repos\Business.Core\Build\Business.Mobile\obj\Release\netstandard1.5\Business.Core.pdb
+D:\Source\Repos\Business.Core\Build\Business.Mobile\bin\Release\netstandard1.5\Business.Core.dll
+D:\Source\Repos\Business.Core\Build\Business.Mobile\bin\Release\netstandard1.5\Business.Core.pdb
+D:\Source\Repos\Business.Core\Build\Business.Mobile\bin\Release\netstandard1.5\Business.Core.xml
+D:\Source\Repos\Business.Core\Build\Business.Mobile\obj\Release\netstandard1.5\Business.Mobile.csproj.CoreCompileInputs.cache
+D:\Source\Repos\Business.Core\Build\Business.Mobile\obj\Release\netstandard1.5\Business.Mobile.AssemblyInfoInputs.cache
+D:\Source\Repos\Business.Core\Build\Business.Mobile\obj\Release\netstandard1.5\Business.Mobile.csprojResolveAssemblyReference.cache

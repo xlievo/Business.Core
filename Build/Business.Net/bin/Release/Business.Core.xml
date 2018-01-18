@@ -1,0 +1,1857 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Business.Core</name>
+    </assembly>
+    <members>
+        <member name="P:Business.Attributes.AttributeBase.Item(System.String)">
+            <summary>
+            Accessor
+            </summary>
+            <param name="member"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Attributes.AttributeBase.Type">
+            <summary>
+            Gets the fully qualified type name, including the namespace but not the assembly
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.AttributeBase.AllowMultiple">
+            <summary>
+            Is it possible to specify attributes for multiple instances for a program element
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.AttributeBase.Inherited">
+            <summary>
+            Determines whether the attributes indicated by the derived class and the overridden member are inherited
+            </summary>
+        </member>
+        <member name="M:Business.Attributes.AttributeBase.Clone``1">
+            <summary>
+            Depth Clone
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="T:Business.Attributes.IgnoreAttribute">
+            <summary>
+            The Method and Property needs to be ignored and will not be a proxy
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.IgnoreAttribute.HasChild">
+            <summary>
+            Do you just ignore children? 
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.TokenAttribute">
+            <summary>
+            Token
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.HttpFileAttribute">
+            <summary>
+            HttpFile
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.HttpFileAttribute.Size">
+            <summary>
+            KB
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.InfoAttribute">
+            <summary>
+            Info
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.HttpAttribute">
+            <summary>
+            Http
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.HttpAttribute.DefaultDescription">
+            <summary>
+            Web Service
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.HttpAttribute.DefaultHost">
+            <summary>
+            http://localhost:8100
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.HttpAttribute.DefaultPort">
+            <summary>
+            8100
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.HttpAttribute.DefaultAllowedOrigins">
+            <summary>
+            *
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.HttpAttribute.DefaultAllowedMethods">
+            <summary>
+            GET, POST, PUT, DELETE, PATCH, OPTIONS
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.HttpAttribute.DefaultAllowedHeaders">
+            <summary>
+            Content-Type
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.HttpAttribute.DefaultAllowCredentials">
+            <summary>
+            false
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.HttpAttribute.DefaultResponseContentType">
+            <summary>
+            application/json;charset=utf-8
+            </summary>
+        </member>
+        <member name="M:Business.Attributes.HttpAttribute.#ctor(System.String,System.String,System.String,System.String,System.Boolean,System.String,System.String)">
+            <summary>
+            Constructor, assembly attribute.
+            </summary>
+            <param name="host">http://localhost:8100</param>
+            <param name="allowedOrigins">*</param>
+            <param name="allowedMethods">GET, POST, PUT, DELETE, PATCH, OPTIONS</param>
+            <param name="allowedHeaders">Content-Type</param>
+            <param name="allowCredentials">false</param>
+            <param name="responseContentType">application/json;charset=utf-8</param>
+            <param name="description">Web Service</param>
+        </member>
+        <member name="M:Business.Attributes.HttpAttribute.#ctor(System.Int32)">
+            <summary>
+            Constructor, class attribute.
+            </summary>
+            <param name="port">8100</param>
+        </member>
+        <member name="P:Business.Attributes.HttpAttribute.Url">
+            <summary>
+            Url
+            </summary>
+        </member>
+        <member name="M:Business.Attributes.HttpAttribute.UrlEnd(System.String[])">
+            <summary>
+            Add string to end
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Attributes.HttpAttribute.Host">
+            <summary>
+            Host address default localhost
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.HttpAttribute.Port">
+            <summary>
+            8100
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.HttpAttribute.AllowedOrigins">
+            <summary>
+            *
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.HttpAttribute.AllowedMethods">
+            <summary>
+            GET, POST, PUT, DELETE, PATCH, OPTIONS
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.HttpAttribute.AllowedHeaders">
+            <summary>
+            Content-Type
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.HttpAttribute.AllowCredentials">
+            <summary>
+            false
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.HttpAttribute.ResponseContentType">
+            <summary>
+            application/json;charset=utf-8
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.HttpAttribute.Description">
+            <summary>
+            Web Service
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.SocketAttribute">
+            <summary>
+            Socket
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.SocketAttribute.SocketMode">
+            <summary>
+            Socket server running mode
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.SocketMode.Tcp">
+            <summary>
+            Tcp mode
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.SocketMode.Udp">
+            <summary>
+            Udp mode
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultIp">
+            <summary>
+            The default ip
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultPort">
+            <summary>
+            The default port
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultMode">
+            <summary>
+            The default socket mode
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultSecurity">
+            <summary>
+            The default socket mode
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultClearIdleSession">
+            <summary>
+            The default security
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultClearIdleSessionInterval">
+            <summary>
+            Default clear idle session interval
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultIdleSessionTimeOut">
+            <summary>
+            Default idle session timeout
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultKeepAliveInterval">
+            <summary>
+            The default keep alive interval
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultKeepAliveTime">
+            <summary>
+            The default keep alive time
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultMaxConnectionNumber">
+            <summary>
+            Default MaxConnectionNumber
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultMaxRequestLength">
+            <summary>
+            Default MaxRequestLength
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultReceiveBufferSize">
+            <summary>
+            Default ReceiveBufferSize
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultSendBufferSize">
+            <summary>
+            The default send buffer size
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultSendingQueueSize">
+            <summary>
+            Default sending queue size
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultSendTimeout">
+            <summary>
+            Default send timeout value, in milliseconds
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.SocketAttribute.DefaultSessionSnapshotInterval">
+            <summary>
+            The default session snapshot interval
+            </summary>
+        </member>
+        <member name="M:Business.Attributes.SocketAttribute.#ctor(System.String,System.Int32,Business.Attributes.SocketAttribute.SocketMode,System.String,System.Boolean,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.String)">
+            <summary>
+            Initializes a new instance of the socket configuration class
+            </summary>
+            <param name="ip">Gets the ip of listener</param>
+            <param name="port">Gets the port of listener</param>
+            <param name="mode">Gets/sets the mode.</param>
+            <param name="security">Gets/sets the security option, None/Default/Tls/Ssl/...</param>
+            <param name="clearIdleSession"></param>
+            <param name="clearIdleSessionInterval">clear idle session interval</param>
+            <param name="idleSessionTimeOut">idle session timeout</param>
+            <param name="keepAliveInterval">The keep alive interval</param>
+            <param name="keepAliveTime">The keep alive time</param>
+            <param name="maxConnectionNumber">max connection number</param>
+            <param name="maxRequestLength"></param>
+            <param name="receiveBufferSize"></param>
+            <param name="sendBufferSize">The send buffer size</param>
+            <param name="sendingQueueSize">sending queue size</param>
+            <param name="sendTimeOut">send timeout value, in milliseconds</param>
+            <param name="sessionSnapshotInterval">The default session snapshot interval</param>
+            <param name="description"></param>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.Ip">
+            <summary>
+            Gets the ip of listener
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.Port">
+            <summary>
+            Gets the port of listener
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.Mode">
+            <summary>
+            Gets/sets the mode.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.Security">
+            <summary>
+            Gets/sets the security option, None/Default/Tls/Ssl/...
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.ClearIdleSession">
+            <summary>
+            Gets/sets a value indicating whether clear idle session.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.ClearIdleSessionInterval">
+            <summary>
+            Gets/sets the clear idle session interval, in seconds.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.IdleSessionTimeOut">
+            <summary>
+            Gets/sets the idle session timeout time length, in seconds.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.MaxConnectionNumber">
+            <summary>
+            Gets the max connection number.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.MaxRequestLength">
+            <summary>
+            Gets/sets the length of the max request.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.ReceiveBufferSize">
+            <summary>
+            Gets the size of the receive buffer.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.KeepAliveInterval">
+            <summary>
+            Gets/sets the keep alive interval, in seconds.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.KeepAliveTime">
+            <summary>
+            Gets/sets the start keep alive time, in seconds
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.SendBufferSize">
+            <summary>
+            Gets the size of the send buffer.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.SendingQueueSize">
+            <summary>
+            Gets/sets the size of the sending queue.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.SendTimeOut">
+            <summary>
+            Gets/sets the send time out.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.SocketAttribute.SessionSnapshotInterval">
+            <summary>
+            Gets/sets the interval to taking snapshot for all live sessions.
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.LoggerAttribute.LogType">
+            <summary>
+            Record type
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.LoggerAttribute.CanWrite">
+            <summary>
+            Allow record
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.LoggerAttribute.CanValue">
+            <summary>
+            Allowed to return to parameters
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.LoggerAttribute.CanResult">
+            <summary>
+            Allowed to return to results
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.LoggerValueMode">
+            <summary>
+            Record parameter model
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.LoggerValueMode.All">
+            <summary>
+            Allow selective recording of some parameters
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.LoggerValueMode.Select">
+            <summary>
+            All parameter Records
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.LoggerValueMode.No">
+            <summary>
+            No records
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.ArgumentAttribute">
+            <summary>
+            Base class for all attributes that apply to parameters
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.ArgumentAttribute.CanNull">
+            <summary>
+            By checking the Allow null value
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.ArgumentAttribute.State">
+            <summary>
+            Used to return state
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.ArgumentAttribute.Message">
+            <summary>
+            Used to return error messages
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.ArgumentAttribute.Group">
+            <summary>
+            Used for the command group
+            </summary>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.Proces(System.Object)">
+            <summary>
+            Start processing the Parameter object, By this.ResultCreate() method returns
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.ResultCreate">
+            <summary>
+            Used to create the Proces() method returns object
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.ResultCreate(System.Int32)">
+            <summary>
+            Used to create the Proces() method returns object
+            </summary>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.ResultCreate(System.Int32,System.String)">
+            <summary>
+            Used to create the Proces() method returns object
+            </summary>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.ResultCreate``1(``0,System.Int32)">
+            <summary>
+            Used to create the Proces() method returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="data"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Business.Attributes.CommandAttribute">
+            <summary>
+            Command attribute on a method, for multiple sources to invoke the method
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.RouteAttribute">
+            <summary>
+            Http Route
+            </summary>
+        </member>
+        <member name="M:Business.Attributes.RouteAttribute.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="path"></param>
+        </member>
+        <member name="M:Business.Attributes.RouteAttribute.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="path"></param>
+            <param name="verbs"></param>
+            <param name="group"></param>
+        </member>
+        <member name="F:Business.Attributes.RouteAttribute.Space">
+            <summary>
+            space
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.POSTAttribute">
+            <summary>
+            Http POST
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.GETAttribute">
+            <summary>
+            Http GET
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.AES">
+            <summary>
+            AES
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.AES.KEY">
+            <summary>
+            d5547b72d2aa42ceae402fd96b3d7b60
+            </summary>
+        </member>
+        <member name="T:Business.Auth.IInterceptor">
+            <summary>
+            IInterceptor
+            </summary>
+        </member>
+        <member name="T:Business.Auth.Interceptor">
+            <summary>
+            Interceptor
+            </summary>
+        </member>
+        <member name="M:Business.Auth.Interceptor.Intercept(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercept
+            </summary>
+            <param name="invocation"></param>
+        </member>
+        <member name="P:Business.Auth.Interceptor.MetaData">
+            <summary>
+            MetaData
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Interceptor.Logger">
+            <summary>
+            Logger
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Interceptor.Business">
+            <summary>
+            Business
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Interceptor.ResultType">
+            <summary>
+            ResultType
+            </summary>
+        </member>
+        <member name="T:Business.Auth.Token">
+            <summary>
+            A token sample
+            </summary>
+        </member>
+        <member name="M:Business.Auth.Token.ToString">
+            <summary>
+            JSON format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Auth.Token.ToBytes">
+            <summary>
+            ProtoBuf format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Auth.Token.Key">
+            <summary>
+            The user token
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Token.Remote">
+            <summary>
+            Remote IP address
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Token.CommandID">
+            <summary>
+            Socket identity
+            </summary>
+        </member>
+        <member name="T:Business.Arg`1">
+            <summary>
+            This is a parameter package, used to transform parameters
+            </summary>
+            <typeparam name="OutType"></typeparam>
+        </member>
+        <member name="P:Business.Arg`1.Out">
+            <summary>
+            The final output object
+            </summary>
+        </member>
+        <member name="P:Business.Arg`1.In">
+            <summary>
+            The first input object
+            </summary>
+        </member>
+        <member name="P:Business.Arg`1.Group">
+            <summary>
+            Used for the command group
+            </summary>
+        </member>
+        <member name="M:Business.Arg`1.ToBytes">
+            <summary>
+            ProtoBuf format Out
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Arg`1.ToString">
+            <summary>
+            JSON format Out
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="F:Business.Bind.CommandGroupDefault">
+            <summary>
+            Default
+            </summary>
+        </member>
+        <member name="M:Business.Bind.Create``1(System.Object[])">
+            <summary>
+            Initialize a Generic proxy class
+            </summary>
+            <typeparam name="Business"></typeparam>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Bind.Create``1(Business.Auth.IInterceptor,System.Object[])">
+            <summary>
+            Initialize a Generic proxy class
+            </summary>
+            <typeparam name="Business"></typeparam>
+            <param name="interceptor"></param>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Bind.Create(System.Type,System.Object[])">
+            <summary>
+            Initialize a Type proxy class
+            </summary>
+            <param name="type"></param>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Bind.Create(System.Type,Business.Auth.IInterceptor,System.Object[])">
+            <summary>
+            Initialize a Type proxy class
+            </summary>
+            <param name="type"></param>
+            <param name="interceptor"></param>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Meta.ArgAttrs.CommandAttr">
+            <summary>
+            Interceptor using.
+            </summary>
+        </member>
+        <member name="T:Business.Meta.Args">
+            <summary>
+            Argument
+            </summary>
+        </member>
+        <member name="P:Business.Meta.LocalLogger.LoggerAttribute.LogType">
+            <summary>
+            Record type
+            </summary>
+        </member>
+        <member name="P:Business.Meta.LocalLogger.LoggerAttribute.CanWrite">
+            <summary>
+            Allow record
+            </summary>
+        </member>
+        <member name="P:Business.Meta.LocalLogger.LoggerAttribute.CanValue">
+            <summary>
+            Allowed to return to parameters
+            </summary>
+        </member>
+        <member name="P:Business.Meta.LocalLogger.LoggerAttribute.CanResult">
+            <summary>
+            Allowed to return to results
+            </summary>
+        </member>
+        <member name="P:Business.Meta.LocalAttribute.AllowMultiple">
+            <summary>
+            Is it possible to specify attributes for multiple instances for a program element
+            </summary>
+        </member>
+        <member name="P:Business.Meta.LocalAttribute.Inherited">
+            <summary>
+            Determines whether the attributes indicated by the derived class and the overridden member are inherited
+            </summary>
+        </member>
+        <member name="M:Business.Meta.Local`1.ToString">
+            <summary>
+            Json
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Business.LoggerType">
+            <summary>
+            Needs of the logging categories
+            </summary>
+        </member>
+        <member name="F:Business.LoggerType.All">
+            <summary>
+            All
+            </summary>
+        </member>
+        <member name="F:Business.LoggerType.Record">
+            <summary>
+            Record
+            </summary>
+        </member>
+        <member name="F:Business.LoggerType.Error">
+            <summary>
+            Error
+            </summary>
+        </member>
+        <member name="F:Business.LoggerType.Exception">
+            <summary>
+            Exception
+            </summary>
+        </member>
+        <member name="T:Business.LoggerData">
+            <summary>
+            Logger data object
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Type">
+            <summary>
+            Logger type
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Value">
+            <summary>
+            The parameters of the method
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Result">
+            <summary>
+            The method's Return Value
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Time">
+            <summary>
+            Method execution time
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Member">
+            <summary>
+            Method full name
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Group">
+            <summary>
+            Used for the command group
+            </summary>
+        </member>
+        <member name="M:Business.LoggerData.ToString">
+            <summary>
+            Json format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Business.LoggerValue">
+            <summary>
+            The parameters of the method
+            </summary>
+        </member>
+        <member name="T:Business.LoggerValue.LoggerValueType">
+            <summary>
+            Logger value type
+            </summary>
+        </member>
+        <member name="F:Business.LoggerValue.LoggerValueType.In">
+            <summary>
+            In
+            </summary>
+        </member>
+        <member name="F:Business.LoggerValue.LoggerValueType.Out">
+            <summary>
+            Out
+            </summary>
+        </member>
+        <member name="M:Business.LoggerValue.#ctor(System.Collections.Generic.IDictionary{System.String,System.Boolean},System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="hasIArg"></param>
+            <param name="capacity"></param>
+        </member>
+        <member name="P:Business.LoggerValue.HasIArg">
+            <summary>
+            A combination of parameter names and HasIArg
+            </summary>
+        </member>
+        <member name="M:Business.LoggerValue.ToValue(Business.LoggerValue.LoggerValueType)">
+            <summary>
+            Filtering input or output objects
+            </summary>
+            <param name="valueType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.LoggerValue.ToString">
+            <summary>
+            JSON format, if the total number to 0, then returned null
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="F:Business.Configer.Configuration.Any">
+            <summary>
+            *
+            </summary>
+        </member>
+        <member name="F:Business.Request.Mark.MarkItem.Exp_UndefinedException">
+            <summary>
+            Undefined Exception 0
+            </summary>
+        </member>
+        <member name="F:Business.Request.Mark.MarkItem.Exp_RemoteIllegal">
+            <summary>
+            Remote Illegal -2
+            </summary>
+        </member>
+        <member name="F:Business.Request.Mark.MarkItem.Business_DataError">
+            <summary>
+            Data Error -3
+            </summary>
+        </member>
+        <member name="F:Business.Request.Mark.MarkItem.Business_CmdError">
+            <summary>
+            "Command Error -4
+            </summary>
+        </member>
+        <member name="F:Business.Request.Mark.MarkItem.Business_GroupError">
+            <summary>
+            Group Error -5
+            </summary>
+        </member>
+        <member name="T:Business.Request.HttpFile">
+            <summary>
+            Represents a file that was captured in a HTTP multipart/form-data request
+            </summary>
+        </member>
+        <member name="P:Business.Request.HttpFile.ContentType">
+            <summary>
+            Gets or sets the type of the content.
+            </summary>
+        </member>
+        <member name="P:Business.Request.HttpFile.Name">
+            <summary>
+            Gets or sets the name of the file.
+            </summary>
+        </member>
+        <member name="P:Business.Request.HttpFile.Key">
+            <summary>
+            Gets or sets the form element name of this file.
+            </summary>
+        </member>
+        <member name="P:Business.Request.HttpFile.Value">
+            <summary>
+            This is request stream.
+            </summary>
+        </member>
+        <member name="P:Business.Request.RequestObject`1.Cmd">
+            <summary>
+            Gets the cmd of this request.
+            </summary>
+        </member>
+        <member name="P:Business.Request.RequestObject`1.Data">
+            <summary>
+            Gets the data of this request.
+            </summary>
+        </member>
+        <member name="P:Business.Request.RequestObject`1.Token">
+            <summary>
+            Gets the login key of this request.
+            </summary>
+        </member>
+        <member name="P:Business.Request.RequestObject`1.Callback">
+            <summary>
+            Gets the Command token of this request, used for callback
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult.State">
+            <summary>
+            The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult.Message">
+            <summary>
+            Success can be null
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult.Data">
+            <summary>
+            Specific Byte/Json data objects
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult.HasData">
+            <summary>
+            Whether there is value
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult.Callback">
+            <summary>
+            Gets the token of this result, used for callback
+            </summary>
+        </member>
+        <member name="M:Business.Result.IResult.ToDataString">
+            <summary>
+            Json Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.IResult.ToDataBytes">
+            <summary>
+            ProtoBuf Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.IResult.ToBytes">
+            <summary>
+            ProtoBuf
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.IResult.ToString">
+            <summary>
+            Json
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Result.IResult`1.Data">
+            <summary>
+            Specific Byte/Json data objects
+            </summary>
+        </member>
+        <member name="M:Business.Result.ResultFactory.Create``1(System.Reflection.TypeInfo,``0,System.Int32,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="resultType"></param>
+            <param name="data"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.Create``1(Business.IBusiness,``0,System.Int32,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="business"></param>
+            <param name="data"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(System.Reflection.TypeInfo)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="resultType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(System.Reflection.TypeInfo,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="resultType"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(System.Reflection.TypeInfo,System.Int32,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="resultType"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate``1(System.Reflection.TypeInfo,``0,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="resultType"></param>
+            <param name="data"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(System.Reflection.TypeInfo,System.String,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="resultType"></param>
+            <param name="filePath"></param>
+            <param name="contentType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(Business.IBusiness)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="business"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(Business.IBusiness,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="business"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(Business.IBusiness,System.Int32,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="business"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate``1(Business.IBusiness,``0,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="business"></param>
+            <param name="data"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(Business.IBusiness,System.String,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="business"></param>
+            <param name="filePath"></param>
+            <param name="contentType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreateToDataBytes(Business.IBusiness,Business.Result.IResult)">
+            <summary>
+            Used to create IResult.Data secondary encapsulation
+            </summary>
+            <param name="business"></param>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreateToDataBytes(System.Reflection.TypeInfo,Business.Result.IResult)">
+            <summary>
+            Used to create IResult.Data secondary encapsulation
+            </summary>
+            <param name="resultType"></param>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreateToDataString(Business.IBusiness,Business.Result.IResult)">
+            <summary>
+            Used to create IResult.Data secondary encapsulation
+            </summary>
+            <param name="business"></param>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreateToDataString(System.Reflection.TypeInfo,Business.Result.IResult)">
+            <summary>
+            Used to create IResult.Data secondary encapsulation
+            </summary>
+            <param name="resultType"></param>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Business.Result.ResultObject`1">
+            <summary>
+            Serialize result
+            </summary>
+            <typeparam name="Type"></typeparam>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.op_Implicit(System.String)~Business.Result.ResultObject{`0}">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.op_Implicit(System.Byte[])~Business.Result.ResultObject{`0}">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.#ctor(`0,System.Type,System.Int32,System.String)">
+            <summary>
+            Activator.CreateInstance
+            </summary>
+            <param name="data"></param>
+            <param name="dataType"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.State">
+            <summary>
+            The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.Message">
+            <summary>
+            Success can be null
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.Business#Result#IResult#Data">
+            <summary>
+            Specific dynamic data objects
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.Data">
+            <summary>
+            Specific Byte/Json data objects
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.HasData">
+            <summary>
+            Whether there is value
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.Callback">
+            <summary>
+            Gets the token of this result, used for callback
+            </summary>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.ToString">
+            <summary>
+            Json format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.ToDataString">
+            <summary>
+            Json format Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.ToBytes">
+            <summary>
+            ProtoBuf format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.ToDataBytes">
+            <summary>
+            ProtoBuf format Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Bge(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.Label)">
+            <summary>
+            Transfers control to a target instruction if the first value is greater than
+            or equal to the second value.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="label">The label.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Bge_S(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.Label)">
+            <summary>
+            Transfers control to a target instruction (short form) if the first value 
+            is greater than or equal to the second value.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="label">The label.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Box(System.Reflection.Emit.ILGenerator,System.Type)">
+            <summary>
+            Converts a value type to an object reference (type O).
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="type">The value type.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Br(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.Label)">
+            <summary>
+            Unconditionally transfers control to a target instruction.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="label">The label.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Br_S(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.Label)">
+            <summary>
+            Unconditionally transfers control to a target instruction (short form).
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="label">The label.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Brfalse(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.Label)">
+            <summary>
+            Transfers control to a target instruction if value is <c>false</c>, 
+            a null reference, or zero. 
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="label">The label.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Brfalse_S(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.Label)">
+            <summary>
+            Transfers control to a target instruction (short form) if value is <c>false</c>, 
+            a null reference, or zero. 
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="label">The label.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Brtrue(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.Label)">
+            <summary>
+            Transfers control to a target instruction if value is <c>true</c>, 
+            not null, or non-zero.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="label">The label.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Brtrue_S(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.Label)">
+            <summary>
+            Transfers control to a target instruction (short form) if value is <c>true</c>, 
+            not null, or non-zero.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="label">The label.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Call(System.Reflection.Emit.ILGenerator,System.Reflection.MethodInfo)">
+            <summary>
+            Calls the method indicated by the passed method descriptor.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="methodInfo">The mechod to call.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Callvirt(System.Reflection.Emit.ILGenerator,System.Reflection.MethodInfo)">
+            <summary>
+            Calls a late-bound method on an object, pushing the return value onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="methodInfo">The mechod to call.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Castclass(System.Reflection.Emit.ILGenerator,System.Type)">
+            <summary>
+            Attempts to cast an object passed by reference to the specified class.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="type">The target class.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Conv_I(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Converts the value on top of the evaluation stack to native int.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Conv_I1(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Converts the value on top of the evaluation stack to int8, then extends (pads) it to int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Conv_I2(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Converts the value on top of the evaluation stack to int16, then extends (pads) it to int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Conv_I4(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Converts the value on top of the evaluation stack to int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Conv_I8(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Converts the value on top of the evaluation stack to int64.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Initobj(System.Reflection.Emit.ILGenerator,System.Type)">
+            <summary>
+            Initializes each field of the value type at a specified address to a null reference 
+            or a 0 of the appropriate primitive type.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="type">The value type.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldarg_0(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Loads the argument at index 0 onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldarg_1(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Loads the argument at index 1 onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldarg_2(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Loads the argument at index 2 onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldarg_3(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Loads the argument at index 3 onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldarg_S(System.Reflection.Emit.ILGenerator,System.Byte)">
+            <summary>
+            Loads the argument (referenced by a specified short form index) onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldarg(System.Reflection.Emit.ILGenerator,System.Int16)">
+            <summary>
+            Loads an argument (referenced by a specified index value) onto the stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldarga_S(System.Reflection.Emit.ILGenerator,System.Byte)">
+            <summary>
+            Load an argument address, in short form, onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldarga(System.Reflection.Emit.ILGenerator,System.Int16)">
+            <summary>
+            Load an argument address onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldfld(System.Reflection.Emit.ILGenerator,System.Reflection.FieldInfo)">
+            <summary>
+            Finds the value of a field in the object whose reference is currently on the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="fieldInfo">The target field.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_M1(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of -1 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_0(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of 0 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_1(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of 1 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_2(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of 2 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_3(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of 3 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_4(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of 4 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_5(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of 5 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_6(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of 6 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_7(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of 7 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_8(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the integer value of 8 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4_S(System.Reflection.Emit.ILGenerator,System.Byte)">
+            <summary>
+            Pushes the supplied int8 value onto the evaluation stack as an int32, short form.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="value">The value.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I4(System.Reflection.Emit.ILGenerator,System.Int32)">
+            <summary>
+            Pushes a supplied value of type int32 onto the evaluation stack as an int32.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="value">The value.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_I8(System.Reflection.Emit.ILGenerator,System.Int64)">
+            <summary>
+            Pushes a supplied value of type int64 onto the evaluation stack as an int64.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="value">The value.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_R4(System.Reflection.Emit.ILGenerator,System.Single)">
+            <summary>
+            Pushes a supplied value of type float32 onto the evaluation stack as type F (float).
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="value">The value.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldc_R8(System.Reflection.Emit.ILGenerator,System.Double)">
+            <summary>
+            Pushes a supplied value of type float64 onto the evaluation stack as type F (float).
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="value">The value.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldelem_Ref(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Loads the element containing an object reference at a specified array index onto 
+            the top of the evaluation stack as type O (object reference).
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldlen(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pushes the number of elements of a zero-based, one-dimensional array onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloc_0(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Loads the local variable at index 0 onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloc_1(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Loads the local variable at index 1 onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloc_2(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Loads the local variable at index 2 onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloc_3(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Loads the local variable at index 3 onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloc_S(System.Reflection.Emit.ILGenerator,System.Byte)">
+            <summary>
+            Loads the local variable at a specific index onto the evaluation stack, short form.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloc_S(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.LocalBuilder)">
+            <summary>
+            Loads the local variable at a specific index onto the evaluation stack, short form.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="localBuilder">The instance of <see cref="T:System.Reflection.Emit.LocalBuilder"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloc(System.Reflection.Emit.ILGenerator,System.Int16)">
+            <summary>
+            Loads the local variable at a specific index onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloc(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.LocalBuilder)">
+            <summary>
+            Loads the local variable at a specific index onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="localBuilder">The instance of <see cref="T:System.Reflection.Emit.LocalBuilder"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloca_S(System.Reflection.Emit.ILGenerator,System.Byte)">
+            <summary>
+            Loads the address of the local variable at a specific index onto
+            the evaluation stack, short form.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldloca(System.Reflection.Emit.ILGenerator,System.Int16)">
+            <summary>
+            Loads the address of the local variable at a specific index onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldsfld(System.Reflection.Emit.ILGenerator,System.Reflection.FieldInfo)">
+            <summary>
+            Pushes the value of a static field onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="fieldInfo">The static field.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ldstr(System.Reflection.Emit.ILGenerator,System.String)">
+            <summary>
+            Pushes a new object reference to a string literal stored in the metadata.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="value">The string.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Newobj(System.Reflection.Emit.ILGenerator,System.Reflection.ConstructorInfo)">
+            <summary>
+            Creates a new object or a new instance of a value type, pushing an object reference (type O) 
+            onto the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="constructorInfo">The constructor of the type.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Ret(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Returns from the current method, pushing a return value (if present) from 
+            the callee's evaluation stack onto the caller's evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stfld(System.Reflection.Emit.ILGenerator,System.Reflection.FieldInfo)">
+            <summary>
+            Replaces the value stored in the field of an object reference or pointer with a new value.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="fieldInfo">The target field.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stloc_0(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pops the current value from the top of the evaluation stack and stores it 
+            in a the local variable list at index 0.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stloc_1(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pops the current value from the top of the evaluation stack and stores it 
+            in a the local variable list at index 1.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stloc_2(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pops the current value from the top of the evaluation stack and stores it 
+            in a the local variable list at index 2.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stloc_3(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Pops the current value from the top of the evaluation stack and stores it 
+            in a the local variable list at index 3.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stloc_S(System.Reflection.Emit.ILGenerator,System.Byte)">
+            <summary>
+            Pops the current value from the top of the evaluation stack and stores it 
+            in a the local variable list at index (short form).
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stloc_S(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.LocalBuilder)">
+            <summary>
+            Pops the current value from the top of the evaluation stack and stores it 
+            in a the local variable list at index (short form).
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="localBuilder">The instance of <see cref="T:System.Reflection.Emit.LocalBuilder"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stloc(System.Reflection.Emit.ILGenerator,System.Int16)">
+            <summary>
+            Pops the current value from the top of the evaluation stack and stores it 
+            in a the local variable list at a specified index.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="index">The index.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stloc(System.Reflection.Emit.ILGenerator,System.Reflection.Emit.LocalBuilder)">
+            <summary>
+            Pops the current value from the top of the evaluation stack and stores it 
+            in a the local variable list at a specified index.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="localBuilder">The instance of <see cref="T:System.Reflection.Emit.LocalBuilder"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Stsfld(System.Reflection.Emit.ILGenerator,System.Reflection.FieldInfo)">
+            <summary>
+            Replaces the value of a static field with a value from the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="fieldInfo">The static field.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Throw(System.Reflection.Emit.ILGenerator)">
+            <summary>
+            Throws the exception object currently on the evaluation stack.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Unbox(System.Reflection.Emit.ILGenerator,System.Type)">
+            <summary>
+            Converts the boxed representation of a value type to its unboxed form.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="type">The value type.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.OpCodeExtention.Unbox_Any(System.Reflection.Emit.ILGenerator,System.Type)">
+            <summary>
+            Converts the boxed representation of a type specified 
+            in the instruction to its unboxed form.
+            </summary>
+            <param name="il">The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</param>
+            <param name="type">The type.</param>
+            <returns>The instance of <see cref="T:System.Reflection.Emit.ILGenerator"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.GZipDecompressByte(System.Byte[])">
+            <summary>
+            gzip to byte[]
+            </summary>
+            <param name="value">byte[]</param>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Business.Utils.Help.GZipDecompressStream(System.Byte[])">
+            <summary>
+            gzip to byte[]
+            </summary>
+            <param name="value">byte[]</param>
+            <returns>MemoryStream</returns>
+        </member>
+        <member name="M:Business.Utils.Help.ExceptionWrite(System.Exception,System.Boolean,System.Boolean,System.String,System.String)">
+            <summary>
+            Write exception to file
+            </summary>
+            <param name="ex"></param>
+            <param name="write"></param>
+            <param name="console"></param>
+            <param name="path"></param>
+            <param name="dateFormat"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Utils.Help.WriteLocal(System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.String)">
+            <summary>
+            Write text to file
+            </summary>
+            <param name="text"></param>
+            <param name="path"></param>
+            <param name="autoTime"></param>
+            <param name="write"></param>
+            <param name="console"></param>
+            <param name="dateFormat"></param>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.All">
+            <summary>
+            Allow all
+            </summary>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.Number">
+            <summary>
+            Allow number
+            </summary>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.Upper">
+            <summary>
+            Allow upper
+            </summary>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.Lower">
+            <summary>
+            Allow lower
+            </summary>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.Chinese">
+            <summary>
+            Allow chinese
+            </summary>
+        </member>
+        <member name="M:Business.Utils.Help.NewGuidNumber">
+            <summary>
+            9 - 10 digit number
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Utils.Help.Guid">
+            <summary>
+            ToString("N")
+            </summary>
+        </member>
+        <member name="M:Business.Utils.Help.IsArray(System.Type)">
+            <summary>
+            Checks if a type is an array or not
+            </summary>
+            <param name="source">The type to check.</param>
+            <returns><see langword="true" /> if the type is an array, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.IsCollection(System.Type)">
+            <summary>
+            Checks if a type is an collection or not
+            </summary>
+            <param name="source">The type to check.</param>
+            <returns><see langword="true" /> if the type is an collection, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.IsEnumerable(System.Type)">
+            <summary>
+            Checks if a type is enumerable or not
+            </summary>
+            <param name="source">The type to check.</param>
+            <returns><see langword="true" /> if the type is an enumerable, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.IsNumeric(System.Type)">
+            <summary>
+            Determines if a type is numeric.  Nullable numeric types are considered numeric.
+            </summary>
+            <remarks>
+            Boolean is not considered numeric.
+            </remarks>
+        </member>
+        <member name="M:Business.Utils.Help.NotOfType``1(System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            Filters our all types not assignable to <typeparamref name="TType"/>.
+            </summary>
+            <typeparam name="TType">The type that all resulting <see cref="!:Type"/> should be assignable to.</typeparam>
+            <param name="types">An <see cref="!:IEnumerable&lt;T&gt;"/> of <see cref="!:Type"/> instances that should be filtered.</param>
+            <returns>An <see cref="!:IEnumerable&lt;T&gt;"/> of <see cref="!:Type"/> instances.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.IsAssignableToGenericType(System.Type,System.Type)">
+            <summary>
+            Determines whether the <paramref name="genericType"/> is assignable from
+            <paramref name="givenType"/> taking into account generic definitions
+            </summary>
+            <remarks>
+            Borrowed from: http://tmont.com/blargh/2011/3/determining-if-an-open-generic-type-isassignablefrom-a-type
+            </remarks>
+        </member>
+    </members>
+</doc>

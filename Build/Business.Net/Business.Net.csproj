@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5D05E175-090B-4970-8A41-98B6DFA8DB4B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Business</RootNamespace>
+    <AssemblyName>Business.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NETFX</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Business.Core.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Castle.Core.4.2.1\lib\net45\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net, Version=2.3.2.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\protobuf-net.2.3.2\lib\net40\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Business.Core\Auth\Attributes.cs">
+      <Link>Auth\Attributes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Auth\Interceptor.cs">
+      <Link>Auth\Interceptor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Auth\Token.cs">
+      <Link>Auth\Token.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Business\Arg.cs">
+      <Link>Business\Arg.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Business\Bind.cs">
+      <Link>Business\Bind.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Business\IBusiness.cs">
+      <Link>Business\IBusiness.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Business\Logger.cs">
+      <Link>Business\Logger.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Configer\Configuration.cs">
+      <Link>Configer\Configuration.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Request\IRequest.cs">
+      <Link>Request\IRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Result\IResult.cs">
+      <Link>Result\IResult.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Result\ResultObject.cs">
+      <Link>Result\ResultObject.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Utils\Emit\ConstructorInvokerGenerator.cs">
+      <Link>Utils\Emit\ConstructorInvokerGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Utils\Emit\EmitUtils.cs">
+      <Link>Utils\Emit\EmitUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Utils\Emit\FieldAccessorGenerator.cs">
+      <Link>Utils\Emit\FieldAccessorGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Utils\Emit\MethodInvokerGenerator.cs">
+      <Link>Utils\Emit\MethodInvokerGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Utils\Emit\OpCodeExtention.cs">
+      <Link>Utils\Emit\OpCodeExtention.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Utils\Emit\PropertyAccessorGenerator.cs">
+      <Link>Utils\Emit\PropertyAccessorGenerator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Business.Core\Utils\Help.cs">
+      <Link>Utils\Help.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties business_1json__JSONSchema="http://json.schemastore.org/json-patch" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <PreBuildEvent>taskkill /f /fi "pid gt 0" /im "$(TargetFileName)" /t</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

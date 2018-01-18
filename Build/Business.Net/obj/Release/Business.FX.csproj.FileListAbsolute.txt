@@ -1,0 +1,11 @@
+D:\Source\Repos\Business.Core\Business.Core\bin\Release\Business.Core.xml
+D:\Source\Repos\Business.Core\Business.Core\bin\Release\Business.Core.dll
+D:\Source\Repos\Business.Core\Business.Core\bin\Release\Business.Core.pdb
+D:\Source\Repos\Business.Core\Business.Core\bin\Release\Castle.Core.dll
+D:\Source\Repos\Business.Core\Business.Core\bin\Release\Newtonsoft.Json.dll
+D:\Source\Repos\Business.Core\Business.Core\bin\Release\protobuf-net.dll
+D:\Source\Repos\Business.Core\Business.Core\bin\Release\Newtonsoft.Json.xml
+D:\Source\Repos\Business.Core\Business.Core\bin\Release\protobuf-net.xml
+D:\Source\Repos\Business.Core\Business.Core\obj\Release\Business.FX.csprojResolveAssemblyReference.cache
+D:\Source\Repos\Business.Core\Business.Core\obj\Release\Business.Core.dll
+D:\Source\Repos\Business.Core\Business.Core\obj\Release\Business.Core.pdb

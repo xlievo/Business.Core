@@ -22,22 +22,28 @@ namespace Business
     /// <summary>
     /// Needs of the logging categories
     /// </summary>
+    //[System.Flags]
     public enum LoggerType
     {
         /// <summary>
-        /// Error = -1
+        /// All
+        /// </summary>
+        All = 2,
+
+        /// <summary>
+        /// Record
+        /// </summary>
+        Record = 1,
+
+        /// <summary>
+        /// Error
         /// </summary>
         Error = -1,
 
         /// <summary>
-        /// Exception = 0
+        /// Exception
         /// </summary>
         Exception = 0,
-
-        /// <summary>
-        /// Record = 1
-        /// </summary>
-        Record = 1
     }
 
     /// <summary>
@@ -45,6 +51,9 @@ namespace Business
     /// </summary>
     public struct LoggerData
     {
+        /// <summary>
+        /// Logger type
+        /// </summary>
         public LoggerType Type { get; set; }
 
         /// <summary>
@@ -71,6 +80,12 @@ namespace Business
         /// Used for the command group
         /// </summary>
         public string Group { get; set; }
+
+        /// <summary>
+        /// Json format
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() => Utils.Help.JsonSerialize(this);
     }
 
     /// <summary>
@@ -78,25 +93,36 @@ namespace Business
     /// </summary>
     public class LoggerValue : System.Collections.Generic.Dictionary<string, dynamic>
     {
+        /// <summary>
+        /// Logger value type
+        /// </summary>
         public enum LoggerValueType
         {
+            /// <summary>
+            /// In
+            /// </summary>
             In = 0,
+            /// <summary>
+            /// Out
+            /// </summary>
             Out = 1
         }
 
-        protected internal LoggerValue(System.Collections.Generic.IDictionary<string, bool> hasIArg, int capacity) : base(capacity)
-        {
-            this.hasIArg = hasIArg;
-        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="hasIArg"></param>
+        /// <param name="capacity"></param>
+        protected internal LoggerValue(System.Collections.Generic.IDictionary<string, bool> hasIArg, int capacity) : base(capacity) => this.hasIArg = hasIArg;
 
         readonly System.Collections.Generic.IDictionary<string, bool> hasIArg;
 
         /// <summary>
         /// A combination of parameter names and HasIArg
         /// </summary>
-        public System.Collections.Generic.IDictionary<string, bool> HasIArg { get { return hasIArg; } }
+        public System.Collections.Generic.IDictionary<string, bool> HasIArg { get => hasIArg; }
 
-        System.Collections.Generic.IDictionary<string, dynamic> dictionary;
+        //LoggerValue dictionary;
 
         /// <summary>
         /// Filtering input or output objects
@@ -105,8 +131,15 @@ namespace Business
         /// <returns></returns>
         public LoggerValue ToValue(LoggerValueType valueType = LoggerValueType.In)
         {
-            dictionary = this.ToDictionary(c => c.Key, c => valueType == LoggerValueType.Out && hasIArg[c.Key] ? c.Value.Out : c.Value.In);
-            return this;
+            //var dictionary = this.ToDictionary(c => c.Key, c => hasIArg[c.Key] ? (valueType == LoggerValueType.Out ? c.Value.Out : c.Value.In) : c.Value);
+            var dictionary = new LoggerValue(0 < this.Count ? hasIArg.ToDictionary(c => c.Key, c => false) : hasIArg, this.Count);
+
+            foreach (var item in this)
+            {
+                dictionary.Add(item.Key, hasIArg[item.Key] ? (valueType == LoggerValueType.Out ? item.Value.Out : item.Value.In) : item.Value);
+            }
+
+            return dictionary;
         }
 
         /// <summary>
@@ -115,8 +148,9 @@ namespace Business
         /// <returns></returns>
         public override string ToString()
         {
-            var current = dictionary ?? this;
-            return 0 == current.Count ? null : Extensions.Help.JsonSerialize(current);
+            return Utils.Help.JsonSerialize(this);
+            //var current = dictionary ?? this;
+            //return 0 == current.Count ? null : Utils.Help.JsonSerialize(current);
         }
     }
 }

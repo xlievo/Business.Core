@@ -4,11 +4,11 @@ Support .Net4.5 Mono 4.x
 
 ## Depend
 
-Castle.Core 4.0.0
+Castle.Core
 
-Newtonsoft.Json 10.0.1
+Newtonsoft.Json
 
-protobuf-net 2.1.0
+protobuf-net
 
 ## Install
 

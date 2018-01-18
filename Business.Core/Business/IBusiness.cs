@@ -15,6 +15,8 @@
           ##############
 ==================================*/
 
+using System;
+
 namespace Business
 {
     public interface IBusiness
@@ -23,40 +25,48 @@ namespace Business
 
         System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
 
-        System.Type ResultType { get; set; }
+        Configer.Configuration Configuration { get; set; }
 
-        System.Func<Auth.IToken> Token { get; set; }
-
-        IConfiguration Configuration { get; set; }
+        System.Action BindAfter { get; set; }
     }
 
-    public interface IBusiness<Token> : IBusiness
-        where Token : Auth.IToken, new() { }
+    public interface IBusiness<Request, Result, Token> : IBusiness
+        where Request : Business.Request.IRequest
+        where Result : Business.Result.IResult
+        where Token : Auth.IToken, new()
+    { }
 
-    public abstract class BusinessBase : IBusiness
+    public interface IBusiness<Request, Result> : IBusiness<Request, Result, Auth.Token>
+        where Request : Business.Request.IRequest
+        where Result : Business.Result.IResult
+    { }
+
+    public interface IBusiness<Token> : IBusiness<Request.RequestObject<string>, Result.ResultObject<string>, Token>
+        where Token : Auth.IToken, new()
+    { }
+
+    public abstract class BusinessBase<Request, Result, Token> : IBusiness<Request, Result, Token>
+        where Request : Business.Request.IRequest
+        where Result : Business.Result.IResult
+        where Token : Auth.IToken, new()
     {
         public System.Action<LoggerData> Logger { get; set; }
 
         public System.Collections.Generic.IReadOnlyDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Command>> Command { get; set; }
 
-        public System.Type ResultType { get; set; }
+        public Configer.Configuration Configuration { get; set; }
 
-        public System.Func<Auth.IToken> Token { get; set; }
-
-        public IConfiguration Configuration { get; set; }
+        public Action BindAfter { get; set; }
     }
 
-    public abstract class BusinessBase<Token> : BusinessBase, IBusiness<Token>
-        where Token : Auth.IToken, new() { }
+    public abstract class BusinessBase<Request, Result> : BusinessBase<Request, Result, Auth.Token>, IBusiness<Request, Result>
+        where Request : Business.Request.IRequest
+        where Result : Business.Result.IResult
+    { }
 
-    public interface IConfiguration
-    {
-        Attributes.ConfigAttribute Info { get; set; }
+    public abstract class BusinessBase<Token> : BusinessBase<Request.RequestObject<string>, Result.ResultObject<string>, Token>, IBusiness<Token>
+        where Token : Auth.IToken, new()
+    { }
 
-        bool EnableWatcher { get; set; }
-
-        bool Logger(LoggerType type, bool canWrite = false, Attributes.LoggerValueMode? canValue = null, bool canResult = false, string method = "*.*");
-
-        bool Attribute(string method, string argument, string attributeFullName, string member, string value);
-    }
+    public abstract class BusinessBase : BusinessBase<Request.RequestObject<string>, Result.ResultObject<string>, Auth.Token> { }
 }

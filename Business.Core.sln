@@ -9,14 +9,62 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{89349370-E90A-448A-9C8B-74DF019AA3F2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{27883CDC-DFF5-4558-AA2D-01A647A22599}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business.Core", "Business.Core", "{FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auth", "Auth", "{942E324B-4266-4C8A-89CC-60E056A5F7D8}"
 	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
+		Business.Core\Auth\Attributes.cs = Business.Core\Auth\Attributes.cs
+		Business.Core\Auth\Interceptor.cs = Business.Core\Auth\Interceptor.cs
+		Business.Core\Auth\Token.cs = Business.Core\Auth\Token.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business.Core", "Business.Core\Business.Core.csproj", "{CE268ED8-961E-4892-A529-E10E8C9A6ED6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business", "Business", "{EA4A47D8-3ED6-48B7-AEAD-D217100A7E05}"
+	ProjectSection(SolutionItems) = preProject
+		Business.Core\Business\Arg.cs = Business.Core\Business\Arg.cs
+		Business.Core\Business\Bind.cs = Business.Core\Business\Bind.cs
+		Business.Core\Business\IBusiness.cs = Business.Core\Business\IBusiness.cs
+		Business.Core\Business\Logger.cs = Business.Core\Business\Logger.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configer", "Configer", "{05BCA310-CF40-471D-88D4-F840CA2AA41B}"
+	ProjectSection(SolutionItems) = preProject
+		Business.Core\Configer\Configuration.cs = Business.Core\Configer\Configuration.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Request", "Request", "{A4E95275-4BA9-41E7-AD3F-ED60B5DDD433}"
+	ProjectSection(SolutionItems) = preProject
+		Business.Core\Request\IRequest.cs = Business.Core\Request\IRequest.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Result", "Result", "{BADF3F8E-8A74-463D-BCAC-ADC3AA45E06E}"
+	ProjectSection(SolutionItems) = preProject
+		Business.Core\Result\IResult.cs = Business.Core\Result\IResult.cs
+		Business.Core\Result\ResultObject.cs = Business.Core\Result\ResultObject.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{B621B862-0E30-4023-AE06-E8912C596618}"
+	ProjectSection(SolutionItems) = preProject
+		Business.Core\Utils\CommandHelp.cs = Business.Core\Utils\CommandHelp.cs
+		Business.Core\Utils\Help.cs = Business.Core\Utils\Help.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Emit", "Emit", "{0711FAAA-708A-430D-8C86-90F9BE4F86B4}"
+	ProjectSection(SolutionItems) = preProject
+		Business.Core\Utils\Emit\ConstructorInvokerGenerator.cs = Business.Core\Utils\Emit\ConstructorInvokerGenerator.cs
+		Business.Core\Utils\Emit\EmitUtils.cs = Business.Core\Utils\Emit\EmitUtils.cs
+		Business.Core\Utils\Emit\FieldAccessorGenerator.cs = Business.Core\Utils\Emit\FieldAccessorGenerator.cs
+		Business.Core\Utils\Emit\MethodInvokerGenerator.cs = Business.Core\Utils\Emit\MethodInvokerGenerator.cs
+		Business.Core\Utils\Emit\OpCodeExtention.cs = Business.Core\Utils\Emit\OpCodeExtention.cs
+		Business.Core\Utils\Emit\PropertyAccessorGenerator.cs = Business.Core\Utils\Emit\PropertyAccessorGenerator.cs
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Business.Mobile", "Build\Business.Mobile\Business.Mobile.csproj", "{40586FA9-6FF1-46FF-B662-19B0D875F359}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business.Net", "Build\Business.Net\Business.Net.csproj", "{5D05E175-090B-4970-8A41-98B6DFA8DB4B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Business.Standard", "Build\Business.Standard\Business.Standard.csproj", "{79A7AE80-F893-44F1-BE12-F218B24B8794}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,13 +72,33 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CE268ED8-961E-4892-A529-E10E8C9A6ED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CE268ED8-961E-4892-A529-E10E8C9A6ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CE268ED8-961E-4892-A529-E10E8C9A6ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CE268ED8-961E-4892-A529-E10E8C9A6ED6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40586FA9-6FF1-46FF-B662-19B0D875F359}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40586FA9-6FF1-46FF-B662-19B0D875F359}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40586FA9-6FF1-46FF-B662-19B0D875F359}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40586FA9-6FF1-46FF-B662-19B0D875F359}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D05E175-090B-4970-8A41-98B6DFA8DB4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D05E175-090B-4970-8A41-98B6DFA8DB4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D05E175-090B-4970-8A41-98B6DFA8DB4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D05E175-090B-4970-8A41-98B6DFA8DB4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79A7AE80-F893-44F1-BE12-F218B24B8794}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79A7AE80-F893-44F1-BE12-F218B24B8794}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79A7AE80-F893-44F1-BE12-F218B24B8794}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79A7AE80-F893-44F1-BE12-F218B24B8794}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{942E324B-4266-4C8A-89CC-60E056A5F7D8} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
+		{EA4A47D8-3ED6-48B7-AEAD-D217100A7E05} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
+		{05BCA310-CF40-471D-88D4-F840CA2AA41B} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
+		{A4E95275-4BA9-41E7-AD3F-ED60B5DDD433} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
+		{BADF3F8E-8A74-463D-BCAC-ADC3AA45E06E} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
+		{B621B862-0E30-4023-AE06-E8912C596618} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
+		{0711FAAA-708A-430D-8C86-90F9BE4F86B4} = {B621B862-0E30-4023-AE06-E8912C596618}
+		{40586FA9-6FF1-46FF-B662-19B0D875F359} = {27883CDC-DFF5-4558-AA2D-01A647A22599}
+		{5D05E175-090B-4970-8A41-98B6DFA8DB4B} = {27883CDC-DFF5-4558-AA2D-01A647A22599}
+		{79A7AE80-F893-44F1-BE12-F218B24B8794} = {27883CDC-DFF5-4558-AA2D-01A647A22599}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {124A1BA0-DBBC-49D2-AA6F-C937149C884C}

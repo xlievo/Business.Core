@@ -32,33 +32,20 @@ namespace Business.Auth
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
     public class Token : IToken
     {
-        public static implicit operator Token(string value)
-        {
-            return Business.Extensions.Help.TryJsonDeserialize<Token>(value);
-        }
-
-        public static implicit operator Token(byte[] value)
-        {
-            return Business.Extensions.Help.TryProtoBufDeserialize<Token>(value);
-        }
+        public static implicit operator Token(string value) => new Token { Key = value };
+        public static implicit operator Token(byte[] value) => Utils.Help.TryProtoBufDeserialize<Token>(value);
 
         /// <summary>
         /// JSON format
         /// </summary>
         /// <returns></returns>
-        public override string ToString()
-        {
-            return Business.Extensions.Help.JsonSerialize(this);
-        }
+        public override string ToString() => Utils.Help.JsonSerialize(this);
 
         /// <summary>
         /// ProtoBuf format
         /// </summary>
         /// <returns></returns>
-        public byte[] ToBytes()
-        {
-            return Business.Extensions.Help.ProtoBufSerialize(this);
-        }
+        public byte[] ToBytes() => Utils.Help.ProtoBufSerialize(this);
 
         /// <summary>
         /// The user token
