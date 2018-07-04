@@ -1,6 +1,6 @@
 ## Platform
 
-Support .Net4.5 Mono 4.x .Net Core
+Support .Net 4.5, Mono 4.x, .Net Standard
 
 ## Depend
 
@@ -15,9 +15,5 @@ protobuf-net
 NuGet:https://www.nuget.org/packages/Business.Core/
 
 PM> Install-Package Business.Core
-
-### Add to AssemblyInfo.cs
-
-[assembly: InternalsVisibleTo("Business.Core")]
 
 ## Please refer unit test
