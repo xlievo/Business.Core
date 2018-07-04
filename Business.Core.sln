@@ -17,7 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auth", "Auth", "{942E324B-4
 	ProjectSection(SolutionItems) = preProject
 		Business.Core\Auth\Attributes.cs = Business.Core\Auth\Attributes.cs
 		Business.Core\Auth\Interceptor.cs = Business.Core\Auth\Interceptor.cs
-		Business.Core\Auth\Token.cs = Business.Core\Auth\Token.cs
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business", "Business", "{EA4A47D8-3ED6-48B7-AEAD-D217100A7E05}"
@@ -60,8 +59,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Emit", "Emit", "{0711FAAA-7
 		Business.Core\Utils\Emit\PropertyAccessorGenerator.cs = Business.Core\Utils\Emit\PropertyAccessorGenerator.cs
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Business.Mobile", "Build\Business.Mobile\Business.Mobile.csproj", "{40586FA9-6FF1-46FF-B662-19B0D875F359}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business.Net", "Build\Business.Net\Business.Net.csproj", "{5D05E175-090B-4970-8A41-98B6DFA8DB4B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Business.Standard", "Build\Business.Standard\Business.Standard.csproj", "{79A7AE80-F893-44F1-BE12-F218B24B8794}"
@@ -72,10 +69,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{40586FA9-6FF1-46FF-B662-19B0D875F359}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40586FA9-6FF1-46FF-B662-19B0D875F359}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40586FA9-6FF1-46FF-B662-19B0D875F359}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40586FA9-6FF1-46FF-B662-19B0D875F359}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5D05E175-090B-4970-8A41-98B6DFA8DB4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D05E175-090B-4970-8A41-98B6DFA8DB4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D05E175-090B-4970-8A41-98B6DFA8DB4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -96,7 +89,6 @@ Global
 		{BADF3F8E-8A74-463D-BCAC-ADC3AA45E06E} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
 		{B621B862-0E30-4023-AE06-E8912C596618} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
 		{0711FAAA-708A-430D-8C86-90F9BE4F86B4} = {B621B862-0E30-4023-AE06-E8912C596618}
-		{40586FA9-6FF1-46FF-B662-19B0D875F359} = {27883CDC-DFF5-4558-AA2D-01A647A22599}
 		{5D05E175-090B-4970-8A41-98B6DFA8DB4B} = {27883CDC-DFF5-4558-AA2D-01A647A22599}
 		{79A7AE80-F893-44F1-BE12-F218B24B8794} = {27883CDC-DFF5-4558-AA2D-01A647A22599}
 	EndGlobalSection

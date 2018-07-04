@@ -42,7 +42,7 @@ namespace Business.Result
         /// <param name="dataType"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public ResultObject(Type data, System.Type dataType, int state = 1, string message = null)
+        public ResultObject(Type data, System.Type dataType, int state = 1, string message = null, System.Type genericType = null)
         {
             this.data = data;
             this.dataType = dataType;
@@ -50,6 +50,8 @@ namespace Business.Result
             this.message = message;
             this.hasData = !System.Object.Equals(null, data);
             this.callback = default(string);
+
+            this.genericType = genericType;
         }
 
         System.Int32 state;
@@ -99,7 +101,12 @@ namespace Business.Result
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
         [ProtoBuf.ProtoMember(5, Name = "B")]
+        [Newtonsoft.Json.JsonProperty(PropertyName = "B")]
         public System.String Callback { get => callback; set => callback = value; }
+
+        System.Type genericType;
+        [Newtonsoft.Json.JsonIgnore]
+        public System.Type GenericType => genericType;
 
         //ICommand command;
         //[Newtonsoft.Json.JsonIgnore]
@@ -128,5 +135,12 @@ namespace Business.Result
         /// </summary>
         /// <returns></returns>
         public byte[] ToDataBytes() => Utils.Help.ProtoBufSerialize(this.Data);
+
+        /// <summary>
+        /// Get generic data
+        /// </summary>
+        /// <typeparam name="DataType">Generic type</typeparam>
+        /// <returns></returns>
+        public DataType Get<DataType>() => ((IResult)this).Data;
     }
 }

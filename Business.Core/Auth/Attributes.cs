@@ -17,10 +17,10 @@
 
 namespace Business.Attributes
 {
-    using System.Linq;
     using Result;
     using Utils;
     using System.Reflection;
+    using System.Linq;
 
     #region abstract
 
@@ -28,11 +28,11 @@ namespace Business.Attributes
     {
         #region MetaData
 
-        public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Accessor>> MetaData;
+        public static readonly ConcurrentReadOnlyDictionary<string, ConcurrentReadOnlyDictionary<string, Accessor>> MetaData;
 
         static AttributeBase()
         {
-            MetaData = new System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Generic.IReadOnlyDictionary<string, Accessor>>();
+            MetaData = new ConcurrentReadOnlyDictionary<string, ConcurrentReadOnlyDictionary<string, Accessor>>();
 
 #if !Mobile
 
@@ -40,23 +40,23 @@ namespace Business.Attributes
             {
                 if (typeInfo.IsSubclassOf(typeof(AttributeBase)) && !typeInfo.IsAbstract)
                 {
-                    var member = new System.Collections.Generic.Dictionary<string, Accessor>();
+                    var member = new ConcurrentReadOnlyDictionary<string, Accessor>();
 
                     foreach (var field in typeInfo.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
                     {
                         var accessor = field.GetAccessor();
                         if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                        member.Add(field.Name, accessor);
+                        member.dictionary.TryAdd(field.Name, accessor);
                     }
 
                     foreach (var property in typeInfo.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
                     {
                         var accessor = property.GetAccessor();
                         if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                        member.Add(property.Name, accessor);
+                        member.dictionary.TryAdd(property.Name, accessor);
                     }
 
-                    MetaData.GetOrAdd(typeInfo.FullName, new System.Collections.ObjectModel.ReadOnlyDictionary<string, Accessor>(member));
+                    MetaData.dictionary.GetOrAdd(typeInfo.FullName, member);
                 }
             });
 #endif
@@ -73,13 +73,13 @@ namespace Business.Attributes
         {
             get
             {
-                if (!MetaData.TryGetValue(this.type.FullName, out System.Collections.Generic.IReadOnlyDictionary<string, Accessor> meta) || !meta.TryGetValue(member, out Accessor accessor)) { return null; }
+                if (!MetaData.TryGetValue(this.type.FullName, out ConcurrentReadOnlyDictionary<string, Accessor> meta) || !meta.TryGetValue(member, out Accessor accessor)) { return null; }
 
                 return accessor.Getter(this);
             }
             set
             {
-                if (!MetaData.TryGetValue(this.type.FullName, out System.Collections.Generic.IReadOnlyDictionary<string, Accessor> meta) || !meta.TryGetValue(member, out Accessor accessor)) { return; }
+                if (!MetaData.TryGetValue(this.type.FullName, out ConcurrentReadOnlyDictionary<string, Accessor> meta) || !meta.TryGetValue(member, out Accessor accessor)) { return; }
 
                 try
                 {
@@ -226,10 +226,17 @@ namespace Business.Attributes
         //public bool Config { get => config; }
 
         readonly string basePath;
-        public string BasePath { get => basePath; }
+        public virtual string BasePath { get => basePath; }
 
         //readonly bool restart;
         //public bool Restart { get => restart; }
+
+        ///// <summary>
+        ///// Used for the command group
+        ///// </summary>
+        //public virtual string Group { get; set; }
+
+        //public virtual string GetKey(string space = "->") => string.Format("{1}{0}{2}", space, this.Group, this.BasePath);
 
         #endregion
 
@@ -262,51 +269,9 @@ namespace Business.Attributes
     public sealed class TokenAttribute : System.Attribute { }
     //[System.AttributeUsage(System.AttributeTargets.Parameter | System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
     //public sealed class HttpFileAttribute : System.Attribute { }
-    /// <summary>
-    /// HttpFile
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Parameter | System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
-    public class HttpFileAttribute : ArgumentAttribute
-    {
-        /// <summary>
-        /// KB
-        /// </summary>
-        public int Size { get; set; }
+    //[System.AttributeUsage(System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    //public class HttpRequestAttribute : System.Attribute { }
 
-        public HttpFileAttribute(int size = 4096, int code = -906, string message = null, bool canNull = true)
-            : base(code, message, canNull)
-        {
-            this.Size = size;
-        }
-
-        public override IResult Proces(dynamic value)
-        {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
-
-            System.Collections.Generic.IEnumerable<Request.HttpFile> values = value;
-            if (!values.Any())
-            {
-                if (this.CanNull)
-                {
-                    return this.ResultCreate();
-                }
-                else
-                {
-                    return this.ResultCreate(State, Message ?? string.Format("argument \"{0}\" can not null.", this.Member));
-                }
-            }
-
-            foreach (var item in values)
-            {
-                if (Size < (item.Value.Length / 1024)) { return this.ResultCreate(-171, string.Format("File size max {0} KB.", Size)); }
-            }
-
-            var files = values.Distinct(Equality<Request.HttpFile>.CreateComparer(c => c.Key)).ToDictionary(c => c.Key, c => c.Value.StreamReadByte());
-
-            return this.ResultCreate(files);
-        }
-    }
 
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class EnableWatcherAttribute : System.Attribute { }
@@ -326,181 +291,6 @@ namespace Business.Attributes
         public string BusinessName { get; internal set; }
 
         //public string ConfigFileName { get; internal set; }
-    }
-
-    /// <summary>
-    /// Http
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public class HttpAttribute : AttributeBase
-    {
-        #region Default
-
-        /// <summary>
-        /// Web Service
-        /// </summary>
-        public const string DefaultDescription = "Web Service";
-        /// <summary>
-        /// http://localhost:8100
-        /// </summary>
-        public const string DefaultHost = "http://localhost:8100";
-        /// <summary>
-        /// 8100
-        /// </summary>
-        public const int DefaultPort = 8100;
-        /// <summary>
-        /// *
-        /// </summary>
-        public const string DefaultAllowedOrigins = "*";
-        /// <summary>
-        /// GET, POST, PUT, DELETE, PATCH, OPTIONS
-        /// </summary>
-        public const string DefaultAllowedMethods = "GET, POST, PUT, DELETE, PATCH, OPTIONS";
-        /// <summary>
-        /// Content-Type
-        /// </summary>
-        public const string DefaultAllowedHeaders = "Content-Type";
-        /// <summary>
-        /// false
-        /// </summary>
-        public const bool DefaultAllowCredentials = false;
-        /// <summary>
-        /// application/json;charset=utf-8
-        /// </summary>
-        public const string DefaultResponseContentType = "application/json;charset=utf-8";
-
-        #endregion
-
-        /// <summary>
-        /// Constructor, assembly attribute.
-        /// </summary>
-        /// <param name="host">http://localhost:8100</param>
-        /// <param name="allowedOrigins">*</param>
-        /// <param name="allowedMethods">GET, POST, PUT, DELETE, PATCH, OPTIONS</param>
-        /// <param name="allowedHeaders">Content-Type</param>
-        /// <param name="allowCredentials">false</param>
-        /// <param name="responseContentType">application/json;charset=utf-8</param>
-        /// <param name="description">Web Service</param>
-        [Newtonsoft.Json.JsonConstructor]
-        public HttpAttribute(string host = DefaultHost, string allowedOrigins = DefaultAllowedOrigins, string allowedMethods = DefaultAllowedMethods, string allowedHeaders = DefaultAllowedHeaders, bool allowCredentials = DefaultAllowCredentials, string responseContentType = DefaultResponseContentType, string description = DefaultDescription)
-        {
-            defaultConstructor = true;
-
-            this.Host = host;
-            this.AllowedOrigins = allowedOrigins;
-            this.AllowedMethods = allowedMethods;
-            this.AllowedHeaders = allowedHeaders;
-            this.AllowCredentials = allowCredentials;
-            this.ResponseContentType = responseContentType;
-            this.Description = description;
-        }
-
-        /// <summary>
-        /// Constructor, class attribute.
-        /// </summary>
-        /// <param name="port">8100</param>
-        public HttpAttribute(int port) : this()
-        {
-            this.Port = port;
-            defaultConstructor = false;
-        }
-
-        internal readonly bool defaultConstructor;
-
-        internal void Set(string host = DefaultHost, string allowedOrigins = DefaultAllowedOrigins, string allowedMethods = DefaultAllowedMethods, string allowedHeaders = DefaultAllowedHeaders, bool allowCredentials = DefaultAllowCredentials, string responseContentType = DefaultResponseContentType, string description = DefaultDescription)
-        {
-            this.Host = host;
-            this.AllowedOrigins = allowedOrigins;
-            this.AllowedMethods = allowedMethods;
-            this.AllowedHeaders = allowedHeaders;
-            this.AllowCredentials = allowCredentials;
-            this.ResponseContentType = responseContentType;
-            this.Description = description;
-        }
-
-        /// <summary>
-        /// Url
-        /// </summary>
-        public System.Uri Url { get; private set; }
-
-        /// <summary>
-        /// Add string to end
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public System.String UrlEnd(params string[] value) => null != Url ? string.Format("{0}{1}", Url.AbsoluteUri.TrimEnd('/'), null != value && value.Any(c => !System.String.IsNullOrWhiteSpace(c)) ? string.Format("/{0}", string.Join("/", value.Where(c => !System.String.IsNullOrWhiteSpace(c)))) : System.String.Empty) : System.String.Empty;
-
-        string host = DefaultHost;
-        /// <summary>
-        /// Host address default localhost
-        /// </summary>
-        public string Host
-        {
-            get => host; private set
-            {
-                if (System.String.IsNullOrWhiteSpace(value)) { throw new System.ArgumentNullException(nameof(Host)); }
-
-                if (!System.Uri.TryCreate(value, System.UriKind.RelativeOrAbsolute, out System.Uri url)) { throw new System.ArgumentException(nameof(Host)); }
-
-                if (!defaultConstructor)
-                {
-                    Url = new System.Uri(string.Format("{0}://{1}:{2}{3}", url.Scheme, url.Host, port, url.AbsolutePath));
-                }
-                else
-                {
-                    Url = url;
-                    port = Url.Port;
-                }
-
-                host = value;
-            }
-        }
-
-        int port = DefaultPort;
-        /// <summary>
-        /// 8100
-        /// </summary>
-        public int Port
-        {
-            get => port; private set
-            {
-                if (!System.Uri.TryCreate(host, System.UriKind.RelativeOrAbsolute, out System.Uri url)) { throw new System.ArgumentException(nameof(Port)); }
-
-                Url = new System.Uri(string.Format("{0}://{1}:{2}{3}", url.Scheme, url.Host, value, url.AbsolutePath));
-
-                port = value;
-            }
-        }
-
-        /// <summary>
-        /// *
-        /// </summary>
-        public string AllowedOrigins { get; private set; }
-
-        /// <summary>
-        /// GET, POST, PUT, DELETE, PATCH, OPTIONS
-        /// </summary>
-        public string AllowedMethods { get; private set; }
-
-        /// <summary>
-        /// Content-Type
-        /// </summary>
-        public string AllowedHeaders { get; private set; }
-
-        /// <summary>
-        /// false
-        /// </summary>
-        public bool AllowCredentials { get; private set; }
-
-        /// <summary>
-        /// application/json;charset=utf-8
-        /// </summary>
-        public string ResponseContentType { get; private set; }
-
-        /// <summary>
-        /// Web Service
-        /// </summary>
-        public string Description { get; private set; }
     }
 
     /// <summary>
@@ -767,6 +557,8 @@ namespace Business.Attributes
             this.logType = logType;
             return this;
         }
+
+        public override T Clone<T>() => new LoggerAttribute(this.LogType) { CanResult = this.CanResult, CanValue = this.CanValue, CanWrite = this.CanWrite } as T;
     }
 
     /// <summary>
@@ -790,19 +582,19 @@ namespace Business.Attributes
 
     #endregion
 
-    public struct ArgumentResult
-    {
-        public ArgumentResult(ArgumentAttribute argAttr)
-        {
-            this.argAttr = argAttr;
-        }
+    //public struct ArgumentResult
+    //{
+    //    public ArgumentResult(ArgumentAttribute argAttr)
+    //    {
+    //        this.argAttr = argAttr;
+    //    }
 
-        internal readonly ArgumentAttribute argAttr;
+    //    internal readonly ArgumentAttribute argAttr;
 
-        public IResult OK { get => argAttr.resultType.ResultCreate(); }
+    //    public IResult OK { get => argAttr.resultType.ResultCreate(); }
 
-        public IResult Error { get => argAttr.resultType.ResultCreate(argAttr.State, argAttr.Message); }
-    }
+    //    public IResult Error { get => argAttr.resultType.ResultCreate(argAttr.State, argAttr.Message); }
+    //}
 
     /// <summary>
     /// Base class for all attributes that apply to parameters
@@ -817,10 +609,25 @@ namespace Business.Attributes
             this.state = state;
             this.message = message;
             this.canNull = canNull;
-            this.Result = new ArgumentResult(this);
+            //this.Result = new ArgumentResult(this);
+
+            this.BindAfter += () =>
+            {
+                if (!System.String.IsNullOrWhiteSpace(this.Message))
+                {
+                    this.Message = this.Replace(this.Message);
+                }
+
+                if (!System.String.IsNullOrWhiteSpace(this.Description))
+                {
+                    this.Description = this.Replace(this.Description);
+                }
+            };
         }
 
-        internal TypeInfo resultType;
+        public System.Action BindAfter { get; set; }
+
+        internal System.Type resultType;
         public dynamic Business { get; set; }
 
         public string Method { get; set; }
@@ -829,7 +636,7 @@ namespace Business.Attributes
 
         public System.Type MemberType { get; set; }
 
-        public ArgumentResult Result { get; }
+        //public ArgumentResult Result { get; }
 
         bool canNull;
         /// <summary>
@@ -862,12 +669,19 @@ namespace Business.Attributes
         string description;
         public string Description { get => description; set => description = value; }
 
+        /// <summary>
+        /// Amicable name
+        /// </summary>
+        public string Nick { get; set; }
+
         ///// <summary>
         ///// 
         ///// </summary>
         //public bool CanRef { get; set; }
 
         public bool Ignore { get; set; }
+
+        //public string Group { get; set; }
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -882,7 +696,7 @@ namespace Business.Attributes
         /// Used to create the Proces() method returns object
         /// </summary>
         /// <returns></returns>
-        public IResult ResultCreate() => resultType.ResultCreate();
+        //public IResult ResultCreate() => resultType.ResultCreate();
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -897,7 +711,7 @@ namespace Business.Attributes
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state, string message) => resultType.ResultCreate(state, message);
+        public IResult ResultCreate(int state = 1, string message = null) => resultType.ResultCreate(state, message);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -906,27 +720,32 @@ namespace Business.Attributes
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate<Data>(Data data, int state = 1) => resultType.ResultCreate(data, state);
+        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => resultType.ResultCreate(data, message, state);
+
+        //public IResult ResultCreate(dynamic data, string message = null, int state = 1) => ResultCreate<dynamic>(data, message, state);
 
         #endregion
 
-        public static string MemberReplace(ArgumentAttribute argAttr, string value)
+        public string Replace(string value)
         {
-            if (System.String.IsNullOrWhiteSpace(value) || !MetaData.TryGetValue(argAttr.TypeFullName, out System.Collections.Generic.IReadOnlyDictionary<string, Accessor> meta))
+            if (System.String.IsNullOrWhiteSpace(value) || !MetaData.TryGetValue(this.TypeFullName, out ConcurrentReadOnlyDictionary<string, Accessor> meta))
             {
                 return value;
             }
 
+            var sb = new System.Text.StringBuilder(value);
+
             foreach (var item in meta)
             {
                 var member = string.Format("{{{0}}}", item.Key);
-                if (value.Contains(member))
+
+                if (-1 < value.IndexOf(member))
                 {
-                    value = value.Replace(member, System.Convert.ToString(item.Value.Getter(argAttr)));
+                    sb = sb.Replace(member, System.Convert.ToString(item.Value.Getter(this)));
                 }
             }
 
-            return value;
+            return sb.ToString();
         }
 
         public static IResult CheckNull(ArgumentAttribute attribute, dynamic value)
@@ -951,7 +770,7 @@ namespace Business.Attributes
     /// Command attribute on a method, for multiple sources to invoke the method
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public sealed class CommandAttribute : AttributeBase
+    public class CommandAttribute : AttributeBase
     {
         public CommandAttribute(string onlyName = null) { this.OnlyName = onlyName; }
 
@@ -961,67 +780,12 @@ namespace Business.Attributes
 
         public string OnlyName { get; set; }
 
-        internal string GetKey(string space = "->") => string.Format("{1}{0}{2}", space, this.Group, this.OnlyName);
+        public string MethodName { get; set; }
+
+        public virtual string GetKey(string space = "->") => string.Format("{1}{0}{2}", space, this.Group, this.OnlyName);
+
+        public override T Clone<T>() => new CommandAttribute { Group = this.Group, OnlyName = this.OnlyName } as T;
     }
-
-    /// <summary>
-    /// Http Route
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class RouteAttribute : AttributeBase
-    {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="path"></param>
-        public RouteAttribute(string path = null)
-            : this(path, null) { }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="verbs"></param>
-        /// <param name="group"></param>
-        [Newtonsoft.Json.JsonConstructor]
-        public RouteAttribute(string path, string verbs, string group = Bind.CommandGroupDefault)
-        {
-            Path = path;
-            Verbs = verbs;
-            Group = group;
-        }
-
-        string path;
-        public string Path { get => path; set => path = value?.Trim('/'); }
-
-        public string Verbs { get; set; }
-
-        public string Group { get; set; }
-
-        public string Cmd { get; set; }
-
-        internal string MethodName { get; set; }
-
-        /// <summary>
-        /// space
-        /// </summary>
-        public const string Space = "->";
-
-        internal virtual string GetKey(bool all = false, string space = Space) => all ? string.Format("{1}{0}{2}{0}{3}", space, this.Path, this.Verbs, this.Group) : string.Format("{1}{0}{2}", space, this.Path, this.Verbs);
-    }
-
-    /// <summary>
-    /// Http POST
-    /// </summary>
-    public sealed class POSTAttribute : RouteAttribute
-    {
-        public POSTAttribute(string path = null, string group = Bind.CommandGroupDefault) : base(path, "POST", group) { }
-    }
-
-    /// <summary>
-    /// Http GET
-    /// </summary>
-    public sealed class GETAttribute : RouteAttribute { public GETAttribute(string path = null, string group = Bind.CommandGroupDefault) : base(path, "GET", group) { } }
 
     #endregion
 
@@ -1052,10 +816,27 @@ namespace Business.Attributes
 
     public class SizeAttribute : ArgumentAttribute
     {
-        public SizeAttribute(int state = -801, string message = null, bool canNull = true) : base(state, message, canNull) { }
+        public SizeAttribute(int state = -801, string message = null, bool canNull = true) : base(state, message, canNull)
+        {
+            this.BindAfter += () =>
+            {
+                if (!System.String.IsNullOrWhiteSpace(this.MinMsg))
+                {
+                    this.MinMsg = this.Replace(this.MinMsg);
+                }
+
+                if (!System.String.IsNullOrWhiteSpace(this.MaxMsg))
+                {
+                    this.MaxMsg = this.Replace(this.MaxMsg);
+                }
+            };
+        }
 
         public object Min { get; set; }
         public object Max { get; set; }
+
+        public string MinMsg { get; set; }
+        public string MaxMsg { get; set; }
 
         public override IResult Proces(dynamic value)
         {
@@ -1065,8 +846,8 @@ namespace Business.Attributes
             var type = System.Nullable.GetUnderlyingType(this.MemberType) ?? this.MemberType;
 
             var msg = System.String.Empty;
-            var min = string.Format("argument \"{0}\" minimum range ", this.Member) + "{0}.";
-            var max = string.Format("argument \"{0}\" maximum range ", this.Member) + "{0}.";
+            var minMsg = string.Format("argument \"{0}\" minimum range ", this.Member) + "{0}.";
+            var maxMsg = string.Format("argument \"{0}\" maximum range ", this.Member) + "{0}.";
 
             switch (type.FullName)
             {
@@ -1075,11 +856,11 @@ namespace Business.Attributes
                         var ags = System.Convert.ToString(value).Trim();
                         if (null != Min && Help.ChangeType<System.Int32>(Min) > ags.Length)
                         {
-                            msg = string.Format(min, Min); break;
+                            msg = MinMsg ?? string.Format(minMsg, Min); break;
                         }
                         if (null != Max && Help.ChangeType<System.Int32>(Max) < ags.Length)
                         {
-                            msg = string.Format(max, Max); break;
+                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
                         }
                     }
                     break;
@@ -1088,11 +869,11 @@ namespace Business.Attributes
                         var ags = System.Convert.ToDateTime(value);
                         if (null != Min && Help.ChangeType<System.DateTime>(Min) > ags)
                         {
-                            msg = string.Format(min, Min); break;
+                            msg = MinMsg ?? string.Format(minMsg, Min); break;
                         }
                         if (null != Max && Help.ChangeType<System.DateTime>(Max) < ags)
                         {
-                            msg = string.Format(max, Max); break;
+                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
                         }
                     }
                     break;
@@ -1101,11 +882,11 @@ namespace Business.Attributes
                         var ags = System.Convert.ToInt32(value);
                         if (null != Min && Help.ChangeType<System.Int32>(Min) > ags)
                         {
-                            msg = string.Format(min, Min); break;
+                            msg = MinMsg ?? string.Format(minMsg, Min); break;
                         }
                         if (null != Max && Help.ChangeType<System.Int32>(Max) < ags)
                         {
-                            msg = string.Format(max, Max); break;
+                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
                         }
                     }
                     break;
@@ -1114,11 +895,11 @@ namespace Business.Attributes
                         var ags = System.Convert.ToInt64(value);
                         if (null != Min && Help.ChangeType<System.Int64>(Min) > ags)
                         {
-                            msg = string.Format(min, Min); break;
+                            msg = MinMsg ?? string.Format(minMsg, Min); break;
                         }
                         if (null != Max && Help.ChangeType<System.Int64>(Max) < ags)
                         {
-                            msg = string.Format(max, Max); break;
+                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
                         }
                     }
                     break;
@@ -1127,11 +908,11 @@ namespace Business.Attributes
                         var ags = System.Convert.ToDecimal(value);
                         if (null != Min && Help.ChangeType<System.Decimal>(Min) > ags)
                         {
-                            msg = string.Format(min, Min); break;
+                            msg = MinMsg ?? string.Format(minMsg, Min); break;
                         }
                         if (null != Max && Help.ChangeType<System.Decimal>(Max) < ags)
                         {
-                            msg = string.Format(max, Max); break;
+                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
                         }
                     }
                     break;
@@ -1140,11 +921,11 @@ namespace Business.Attributes
                         var ags = System.Convert.ToDouble(value);
                         if (null != Min && Help.ChangeType<System.Double>(Min) > ags)
                         {
-                            msg = string.Format(min, Min); break;
+                            msg = MinMsg ?? string.Format(minMsg, Min); break;
                         }
                         if (null != Max && Help.ChangeType<System.Double>(Max) < ags)
                         {
-                            msg = string.Format(max, Max); break;
+                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
                         }
                     }
                     break;
@@ -1154,12 +935,16 @@ namespace Business.Attributes
                         var list = value as System.Collections.ICollection;
                         if (null != Min && Help.ChangeType<System.Int32>(Min) > list.Count)
                         {
-                            msg = string.Format(min, Min); break;
+                            msg = MinMsg ?? string.Format(minMsg, Min); break;
                         }
                         if (null != Max && Help.ChangeType<System.Int32>(Max) < list.Count)
                         {
-                            msg = string.Format(max, Max); break;
+                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
                         }
+                    }
+                    else
+                    {
+                        return this.ResultCreate(State, string.Format("argument \"{0}\" type error", this.Member, type.FullName));
                     }
                     break;
             }
@@ -1292,13 +1077,10 @@ namespace Business.Attributes
 
     public sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
-        public ArgumentDefaultAttribute(TypeInfo resultType, int state = -11, string message = null)
+        public ArgumentDefaultAttribute(System.Type resultType, int state = -11, string message = null)
             : base(state, message) { this.resultType = resultType; }
 
-        public override IResult Proces(dynamic value)
-        {
-            return this.ResultCreate(value);
-        }
+        public override IResult Proces(dynamic value) => this.ResultCreate<dynamic>(value);
     }
 
     public class JsonArgAttribute : ArgumentAttribute

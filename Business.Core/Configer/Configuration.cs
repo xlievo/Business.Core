@@ -20,8 +20,7 @@ namespace Business.Configer
     using Business.Utils;
     using Business.Meta;
     using System.Linq;
-    using System.Reflection;
-
+    /*
     #region ConfigJson
 
     public struct ConfigJson
@@ -131,220 +130,8 @@ namespace Business.Configer
 #if !Mobile
     public partial class Configuration
     {
-        #region Static
-
-        /// <summary>
-        /// *
-        /// </summary>
-        const string Any = "*";
-
-        static readonly string CfgPath = System.IO.Path.Combine(Help.BaseDirectory, "business.json");
-        static System.DateTime cfgLastTime = System.DateTime.MinValue;
-
-        static readonly System.Threading.ReaderWriterLockSlim locker = new System.Threading.ReaderWriterLockSlim();
-        internal static readonly System.IO.FileSystemWatcher CfgWatcher = new System.IO.FileSystemWatcher(System.IO.Path.GetDirectoryName(CfgPath)) { InternalBufferSize = 4096, Filter = System.IO.Path.GetFileName(CfgPath), NotifyFilter = System.IO.NotifyFilters.LastWrite | System.IO.NotifyFilters.FileName };
-
-        static Configuration()
+        public Configuration(bool enableWatcher)
         {
-            CfgWatcher.Renamed += Changed;
-            CfgWatcher.Changed += Changed;
-        }
-
-        static ConfigJson GetConfig()
-        {
-            if (!System.IO.File.Exists(CfgPath)) { return default(ConfigJson); }
-
-            if (!locker.TryEnterReadLock(300)) { return default(ConfigJson); }
-
-            try
-            {
-                return Help.FileReadString(CfgPath);
-            }
-            catch
-            {
-                return default(ConfigJson);
-            }
-            finally { locker.ExitReadLock(); }
-        }
-
-        static void Changed(object sender, System.IO.FileSystemEventArgs e)
-        {
-            if (!e.FullPath.Equals(CfgPath, System.StringComparison.CurrentCultureIgnoreCase)) { return; }
-
-            var lastTime = System.IO.File.GetLastWriteTime(e.FullPath);
-
-            if (0 <= cfgLastTime.CompareTo(lastTime)) { return; }
-
-            cfgLastTime = lastTime;
-
-            //------------------//
-
-            var dels = Bind.businessList.Where(c => c.Value.Configuration.EnableWatcher).Select(c => c.Value.Configuration).ToList();
-            if (0 == dels.Count) { return; }
-
-            var config = GetConfig();
-            if (default(ConfigJson).Equals(config) || 0 == config.Attributes.Count) { return; }
-
-            foreach (var item in config.Group)
-            {
-                var dels2 = dels.Where(c => c.info.BusinessName.Equals(item.Key));
-
-                foreach (var del in dels2)
-                {
-                    SetBusinessAttribute(del.attributes, del.metaData, item.Value);
-                }
-            }
-        }
-
-        #endregion
-
-        /*
-        public bool Logger(LoggerType type, bool canWrite = false, LoggerValueMode? canValue = null, bool canResult = false, string method = Any)
-        {
-            if (System.String.IsNullOrWhiteSpace(method))
-            {
-                return false;
-            }
-
-            if (Any == method)
-            {
-                foreach (var meta in this.metaData)
-                {
-                    SetMetaLogger(meta.Value.MetaLogger, type, canWrite, canValue ?? LoggerValueMode.No, canResult);
-                }
-
-                return true;
-            }
-            else
-            {
-                if (this.metaData.TryGetValue(method, out MetaData meta))
-                {
-                    SetMetaLogger(meta.MetaLogger, type, canWrite, canValue ?? LoggerValueMode.No, canResult);
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        static void SetMetaLogger(MetaLogger metaLogger, LoggerType type, bool canWrite, LoggerValueMode canValue, bool canResult)
-        {
-            switch (type)
-            {
-                case LoggerType.Record:
-                    metaLogger.RecordAttr.CanWrite = canWrite;
-                    metaLogger.RecordAttr.CanResult = canResult;
-                    metaLogger.RecordAttr.CanValue = canValue;
-                    break;
-                case LoggerType.Error:
-                    metaLogger.ErrorAttr.CanWrite = canWrite;
-                    metaLogger.ErrorAttr.CanResult = canResult;
-                    metaLogger.ErrorAttr.CanValue = canValue;
-                    break;
-                case LoggerType.Exception:
-                    metaLogger.ExceptionAttr.CanWrite = canWrite;
-                    metaLogger.ExceptionAttr.CanResult = canResult;
-                    metaLogger.ExceptionAttr.CanValue = canValue;
-                    break;
-            }
-        }
-        
-         public static void Logger(System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> metaData, System.Collections.Generic.IEnumerable<LoggerItem> group)
-        {
-            var all = group.Where(c => Any == c.Method);
-            var loggers = group.Where(g => metaData.ContainsKey(g.Method));
-
-            foreach (var item in all)
-            {
-                foreach (var meta in metaData)
-                {
-                    if (loggers.Any(c => c.Method.Equals(meta.Key) && c.Type.Value.Equals(item.Type.Value))) { continue; }
-
-                    SetMetaLogger(meta.Value.MetaLogger, item.Type.Value, item.CanWrite, item.CanValue.HasValue ? item.CanValue.Value : LoggerValueMode.No, item.CanResult);
-                }
-
-                System.Console.WriteLine(System.String.Format("Logger {0} {1} {2}", item.Business, item.Method, item.Type));
-            }
-
-            foreach (var item in loggers)
-            {
-                SetMetaLogger(metaData[item.Method].MetaLogger, item.Type.Value, item.CanWrite, item.CanValue.HasValue ? item.CanValue.Value : LoggerValueMode.No, item.CanResult);
-
-                System.Console.WriteLine(System.String.Format("Logger {0} {1} {2}", item.Business, item.Method, item.Type));
-            }
-        }
-        public static void Attribute(System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> metaData, System.Collections.Generic.IEnumerable<AttributeItem> group)
-        {
-            foreach (var item in group)
-            {
-                if (Attribute(metaData, item.Method, item.Argument, item.Attribute, item.Member, item.Value))
-                {
-                    System.Console.WriteLine(System.String.Format("Attribute {0} {1} {2} {3} {4}", item.Business, item.Method, item.Argument, item.Attribute, item.Member));
-                }
-            }
-        }
-        
-        public bool Attribute(string method, string argument, string attributeFullName, string member, string value)
-        {
-            return Attribute(metaData, method, argument, attributeFullName, member, value);
-        }
-
-        public static bool Attribute(System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> metaData, string method, string argument, string attribute, string member, string value)
-        {
-            if (System.String.IsNullOrWhiteSpace(method) || System.String.IsNullOrWhiteSpace(argument) || System.String.IsNullOrWhiteSpace(attribute) || System.String.IsNullOrWhiteSpace(member))
-            {
-                return false;
-            }
-
-            if (metaData.TryGetValue(method, out MetaData meta))
-            {
-                Args arg = default(Args);
-                var args = meta.ArgAttrs[Bind.GetCommandGroupDefault(method)].Args;
-                foreach (var item in argument.Split('.'))
-                {
-                    arg = args.FirstOrDefault(c => c.Name == item);
-                    if (default(Args).Equals(arg)) { break; }
-                    args = arg.ArgAttrChild;
-                }
-
-                if (default(Args).Equals(arg)) { return false; }
-
-                //var attr = arg.ArgAttr.Where(c => c.FullName == attributeFullName);
-
-                //foreach (var item in attr)
-                //{
-                //    item.MemberSet(member, value);
-                //}
-
-                //return true;
-
-                var attr = arg.ArgAttr.FirstOrDefault(c => c.FullName == attribute);
-                if (null == attr) { return false; }
-
-                return attr.MemberSet(member, value);
-            }
-
-            return false;
-        }
-        */
-    }
-#endif
-    public partial class Configuration
-    {
-        internal readonly System.String ID = System.Guid.NewGuid().ToString("N");
-
-        public Configuration(Attributes.InfoAttribute info, TypeInfo resultType, System.Func<Auth.IToken> token, TypeInfo requestType, System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> metaData, System.Collections.Generic.List<Attributes.AttributeBase> attributes, bool enableWatcher, System.Collections.Concurrent.ConcurrentDictionary<string, Attributes.RouteAttribute> routes)
-        {
-            this.info = info;
-            this.resultType = resultType;
-            this.token = token;
-            this.requestType = requestType;
-            this.requestDefault = System.Activator.CreateInstance(requestType.MakeGenericType(typeof(object)));
-            this.metaData = metaData;
-            this.attributes = attributes;
-            this.routes = routes;
-
 #if !Mobile
             if (enableWatcher && !CfgWatcher.EnableRaisingEvents)
             {
@@ -355,9 +142,9 @@ namespace Business.Configer
         }
 
 #if !Mobile
-        #region set business attribute
+    #region set business attribute
 
-        static void SetBusinessAttribute(System.Collections.Generic.IReadOnlyList<Attributes.AttributeBase> attributes, System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> metaData, System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ConfigJson.ConfigAttribute>> configAttributes)
+        static void SetBusinessAttribute(System.Collections.Generic.IReadOnlyList<Attributes.AttributeBase> attributes, ConcurrentReadOnlyDictionary<string, MetaData> metaData, System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<ConfigJson.ConfigAttribute>> configAttributes)
         {
             foreach (var item in configAttributes)
             {
@@ -522,13 +309,107 @@ namespace Business.Configer
             }
         }
 
-        #endregion
+    #endregion
 #endif
-        readonly System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> metaData;
-        public System.Collections.Concurrent.ConcurrentDictionary<string, MetaData> MetaData { get => metaData; }
+
+    #region Static
+
+        /// <summary>
+        /// *
+        /// </summary>
+        const string Any = "*";
+
+        static readonly string CfgPath = System.IO.Path.Combine(Help.BaseDirectory, "business.json");
+        static System.DateTime cfgLastTime = System.DateTime.MinValue;
+
+        static readonly System.Threading.ReaderWriterLockSlim locker = new System.Threading.ReaderWriterLockSlim();
+        internal static readonly System.IO.FileSystemWatcher CfgWatcher = new System.IO.FileSystemWatcher(System.IO.Path.GetDirectoryName(CfgPath)) { InternalBufferSize = 4096, Filter = System.IO.Path.GetFileName(CfgPath), NotifyFilter = System.IO.NotifyFilters.LastWrite | System.IO.NotifyFilters.FileName };
+
+        static Configuration()
+        {
+            CfgWatcher.Renamed += Changed;
+            CfgWatcher.Changed += Changed;
+        }
+
+        static ConfigJson GetConfig()
+        {
+            if (!System.IO.File.Exists(CfgPath)) { return default(ConfigJson); }
+
+            if (!locker.TryEnterReadLock(300)) { return default(ConfigJson); }
+
+            try
+            {
+                return Help.FileReadString(CfgPath);
+            }
+            catch
+            {
+                return default(ConfigJson);
+            }
+            finally { locker.ExitReadLock(); }
+        }
+
+        static void Changed(object sender, System.IO.FileSystemEventArgs e)
+        {
+            if (!e.FullPath.Equals(CfgPath, System.StringComparison.CurrentCultureIgnoreCase)) { return; }
+
+            var lastTime = System.IO.File.GetLastWriteTime(e.FullPath);
+
+            if (0 <= cfgLastTime.CompareTo(lastTime)) { return; }
+
+            cfgLastTime = lastTime;
+
+            //------------------//
+
+            var dels = Bind.BusinessList.Values.Where(c => c.Configuration.EnableWatcher).Select(c => c.Configuration).ToList();
+            if (0 == dels.Count) { return; }
+
+            var config = GetConfig();
+            if (default(ConfigJson).Equals(config) || 0 == config.Attributes.Count) { return; }
+
+            foreach (var item in config.Group)
+            {
+                var dels2 = dels.Where(c => c.info.BusinessName.Equals(item.Key));
+
+                foreach (var del in dels2)
+                {
+                    SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
+                }
+            }
+        }
+
+    #endregion
+    }
+#endif
+    */
+    public partial class Configuration
+    {
+        internal readonly System.String ID = System.Guid.NewGuid().ToString("N");
+
+        public Configuration(Attributes.InfoAttribute info, System.Type resultType, System.Collections.Generic.List<Attributes.AttributeBase> attributes)
+        /*
+#if !Mobile
+        , bool enableWatcher = false)
+        : this(enableWatcher)
+#else 
+        )
+#endif
+                    */
+        {
+            this.info = info;
+            this.resultType = resultType;
+            //this.token = token;
+            //this.requestType = requestType;
+            //this.requestDefault = RequestCreate<object>();
+            //this.requestDefault.Configuration = this;
+            this.attributes = attributes;
+            //this.routes = routes;
+            this.useTypes = new ConcurrentReadOnlyCollection<string>();
+        }
+
+        public ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; set; }
 
         readonly System.Collections.Generic.List<Attributes.AttributeBase> attributes;
-        public System.Collections.Generic.IReadOnlyList<Attributes.AttributeBase> Attributes { get => attributes; }
+        public System.Collections.Generic.List<Attributes.AttributeBase> Attributes { get => attributes; }
 
         readonly Attributes.InfoAttribute info;
         public Attributes.InfoAttribute Info { get => info; }
@@ -536,20 +417,39 @@ namespace Business.Configer
         readonly bool enableWatcher;
         public bool EnableWatcher { get => enableWatcher; }
 
-        readonly TypeInfo resultType;
-        public TypeInfo ResultType { get => resultType; }
+        readonly System.Type resultType;
+        public System.Type ResultType { get => resultType; }
 
-        readonly System.Func<Auth.IToken> token;
-        public System.Func<Auth.IToken> Token { get => token; }
+        //readonly System.Func<Auth.IToken> token;
+        //public System.Func<Auth.IToken> Token { get => token; }
+        /*
+readonly System.Type requestType;
+public System.Type RequestType { get => requestType; }
 
-        readonly TypeInfo requestType;
-        public TypeInfo RequestType { get => requestType; }
+readonly Request.IRequest<object> requestDefault;
+public Request.IRequest<object> RequestDefault { get => requestDefault; }
 
-        readonly dynamic requestDefault;
-        public dynamic RequestDefault { get => requestDefault; }
+readonly ConcurrentReadOnlyDictionary<string, RouteAttribute> routes;
+public ConcurrentReadOnlyDictionary<string, RouteAttribute> Routes { get => routes; }
 
-        readonly System.Collections.Concurrent.ConcurrentDictionary<string, Attributes.RouteAttribute> routes;
-        public System.Collections.Concurrent.ConcurrentDictionary<string, Attributes.RouteAttribute> Routes { get => routes; }
+public Request.IRequest<T> RequestCreate<T>() => (Request.IRequest<T>)System.Activator.CreateInstance(RequestType.MakeGenericType(typeof(T)));
+*/
+        readonly ConcurrentReadOnlyCollection<string> useTypes;
+        public ConcurrentReadOnlyCollection<string> UseTypes { get => useTypes; }
+
+        public Configuration UseType(params System.Type[] type)
+        {
+            if (null == type) { throw new System.ArgumentNullException(nameof(type)); }
+
+            foreach (var item in type)
+            {
+                if (null == item || useTypes.collection.Contains(item.FullName)) { continue; }
+
+                useTypes.collection.Add(item.FullName);
+            }
+
+            return this;
+        }
 
         //readonly System.Collections.Generic.List<Attributes.RouteAttribute> route;
         //public System.Collections.Generic.IReadOnlyList<Attributes.RouteAttribute> Route { get => route; }

@@ -17,15 +17,6 @@
 
 namespace Business.Result
 {
-    using System.Reflection;
-
-    public struct HttpFile
-    {
-        public string FilePath;
-
-        public string ContentType;
-    }
-
     public interface IResult
     {
         /// <summary>
@@ -78,6 +69,18 @@ namespace Business.Result
         /// </summary>
         /// <returns></returns>
         System.String ToString();
+
+        /// <summary>
+        /// Get generic data
+        /// </summary>
+        /// <typeparam name="DataType">Generic type</typeparam>
+        /// <returns></returns>
+        DataType Get<DataType>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        System.Type GenericType { get; }
     }
 
     public interface IResult<DataType> : IResult
@@ -251,10 +254,10 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        static IResult Create<Data>(TypeInfo resultType, Data data = default(Data), int state = 1, string message = null)
+        static IResult Create<Data>(System.Type resultType, Data data = default(Data), int state = 1, string message = null)
         {
             var type = typeof(Data);
-            var result = (IResult)System.Activator.CreateInstance(resultType.MakeGenericType(type), new object[] { data, type, state, message });
+            var result = (IResult)System.Activator.CreateInstance(resultType.MakeGenericType(type), new object[] { data, type, state, message, resultType });
             return result;
         }
         /// <summary>
@@ -266,7 +269,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        static IResult Create<Data>(IBusiness business, Data data = default(Data), int state = 1, string message = null) => Create<Data>(business.Configuration.ResultType, data, state, message);
+        static IResult Create<Data>(IBusiness business, Data data = default(Data), int state = 1, string message = null) => Create(business.Configuration.ResultType, data, state, message);
 
         #region resultType
 
@@ -275,7 +278,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// </summary>
         /// <param name="resultType"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this TypeInfo resultType) => Create<string>(resultType);
+        //public static IResult ResultCreate(this TypeInfo resultType, string message = null) => Create<string>(resultType, message: message);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -283,7 +286,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="resultType"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this TypeInfo resultType, int state) => Create<string>(resultType, state: state);
+        public static IResult ResultCreate(this System.Type resultType, int state) => Create<string>(resultType, state: state);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -292,7 +295,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this TypeInfo resultType, int state, string message) => Create<string>(resultType, state: GetState(state), message: message);
+        public static IResult ResultCreate(this System.Type resultType, int state = 1, string message = null) => Create<string>(resultType, state: state, message: message);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -300,18 +303,10 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <typeparam name="Data"></typeparam>
         /// <param name="resultType"></param>
         /// <param name="data"></param>
+        /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static IResult ResultCreate<Data>(this TypeInfo resultType, Data data, int state = 1) => Create<Data>(resultType, data, 0 > state ? System.Math.Abs(state) : state);
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="filePath"></param>
-        /// <param name="contentType"></param>
-        /// <returns></returns>
-        public static IResult ResultCreate(this TypeInfo resultType, string filePath, string contentType) => Create<HttpFile>(resultType, new HttpFile { FilePath = filePath, ContentType = contentType });
+        public static IResult ResultCreate<Data>(this System.Type resultType, Data data, string message = null, int state = 1) => Create(resultType, data, 0 > state ? System.Math.Abs(state) : state, message);
 
         #endregion
 
@@ -322,7 +317,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// </summary>
         /// <param name="business"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this IBusiness business) => Create<string>(business);
+        //public static IResult ResultCreate(this IBusiness business) => Create<string>(business);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -339,7 +334,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this IBusiness business, int state, string message) => Create<string>(business, state: GetState(state), message: message);
+        public static IResult ResultCreate(this IBusiness business, int state = 1, string message = null) => Create<string>(business, state: state, message: message);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -347,10 +342,12 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <typeparam name="Data"></typeparam>
         /// <param name="business"></param>
         /// <param name="data"></param>
+        /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static IResult ResultCreate<Data>(this IBusiness business, Data data, int state = 1) => Create<Data>(business, data, 0 > state ? System.Math.Abs(state) : state);
+        public static IResult ResultCreate<Data>(this IBusiness business, Data data, string message = null, int state = 1) => Create(business, data, 0 > state ? System.Math.Abs(state) : state, message);
 
+        /*
         /// <summary>
         /// Used to create the IResult returns object
         /// </summary>
@@ -359,36 +356,22 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="contentType"></param>
         /// <returns></returns>
         public static IResult ResultCreate(this IBusiness business, string filePath, string contentType) => Create<HttpFile>(business, new HttpFile { FilePath = filePath, ContentType = contentType });
+        */
 
         #endregion
 
         /// <summary>
         /// Used to create IResult.Data secondary encapsulation
         /// </summary>
-        /// <param name="business"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static IResult ResultCreateToDataBytes(this IBusiness business, IResult result)
-        {
-            if (System.Object.Equals(null, business))
-            {
-                return null;
-            }
-
-            return ResultCreateToDataBytes(business.Configuration.ResultType, result);
-        }
-        /// <summary>
-        /// Used to create IResult.Data secondary encapsulation
-        /// </summary>
         /// <param name="resultType"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static IResult ResultCreateToDataBytes(this TypeInfo resultType, IResult result)
+        public static IResult ResultCreateToDataBytes(this IResult result)
         {
-            if (null == resultType)
-            {
-                return null;
-            }
+            //if (null == resultType)
+            //{
+            //    return null;
+            //}
 
             if (System.Object.Equals(null, result))
             {
@@ -413,7 +396,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
             //    result2 = ResultCreate(resultType, result.State, result.Message);
             //}
 
-            var result2 = Create(resultType, result.HasData ? result.ToDataBytes() : null, result.State, result.Message);
+            var result2 = Create(result.GenericType, result.HasData ? result.ToDataBytes() : null, result.State, result.Message);
             //====================================//
             result2.Callback = result.Callback;
 
@@ -423,31 +406,11 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <summary>
         /// Used to create IResult.Data secondary encapsulation
         /// </summary>
-        /// <param name="business"></param>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static IResult ResultCreateToDataString(this IBusiness business, IResult result)
-        {
-            if (System.Object.Equals(null, business))
-            {
-                return null;
-            }
-
-            return ResultCreateToDataString(business.Configuration.ResultType, result);
-        }
-        /// <summary>
-        /// Used to create IResult.Data secondary encapsulation
-        /// </summary>
         /// <param name="resultType"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static IResult ResultCreateToDataString(this TypeInfo resultType, IResult result)
+        public static IResult ResultCreateToDataString(this IResult result)
         {
-            if (null == resultType)
-            {
-                return null;
-            }
-
             if (System.Object.Equals(null, result))
             {
                 return null;
@@ -470,8 +433,8 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
             //{
             //    result2 = ResultCreate(resultType, result.State, result.Message);
             //}
-
-            var result2 = Create(resultType, result.HasData ? result.ToDataString() : null, result.State, result.Message);
+            //var r = result.GetType().GetGenericTypeDefinition();
+            var result2 = Create(result.GenericType, result.HasData ? result.ToDataString() : null, result.State, result.Message);
             //====================================//
             result2.Callback = result.Callback;
 

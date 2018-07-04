@@ -37,10 +37,37 @@ namespace Business.Utils
 
         System.Action<object, object> setter;
         public System.Action<object, object> Setter => setter;
+
+        public object TryGetter(object obj)
+        {
+            try { return Getter(obj); } catch { return type.IsValueType ? System.Activator.CreateInstance(type) : null; }
+        }
     }
 
     public static class Help
     {
+        //public static Business UseType<Business>(this Business business, params System.Type[] type)
+        //   where Business : class, IBusiness
+        //{
+        //    if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
+        //    //this.Configuration.UseTypes.dictionary.TryAdd(type.FullName, type);
+
+        //    //this.Configuration.MetaData.Values.
+        //    //business.Configuration.MetaData[].
+        //    foreach (var item in business.Configuration.MetaData)
+        //    {
+        //        foreach (var item2 in item.Value.ArgAttrs[Bind.CommandGroupDefault].Args)
+        //        {
+        //            if (item2.Type.FullName)
+        //            {
+
+        //            }
+        //        }
+        //    }
+
+        //    return business;
+        //}
+
         public static string BaseDirectory
         {
             get
@@ -53,7 +80,6 @@ namespace Business.Utils
             }
         }
 
-#if !Mobile
         public static Assembly LoadAssembly(string path)
         {
 #if NETFX
@@ -93,7 +119,6 @@ namespace Business.Utils
                 }
             });
         }
-#endif
 
         public static Accessor GetAccessor(this System.Reflection.FieldInfo fieldInfo)
         {
@@ -171,7 +196,6 @@ namespace Business.Utils
         public static T[] GetAttributes<T>(this System.Reflection.ParameterInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
-
             return member.GetCustomAttributes<T>(inherit).ToArray();
             //return (T[])System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
         }
@@ -203,7 +227,7 @@ namespace Business.Utils
 
         #endregion
 
-        public static bool IsAssignableFrom(this TypeInfo type, TypeInfo fromType, out TypeInfo[] genericArguments)
+        public static bool IsAssignableFrom(this System.Type type, System.Type fromType, out System.Type[] genericArguments)
         {
             if (null != type && null != fromType && type.IsGenericType)
             {
@@ -231,7 +255,7 @@ namespace Business.Utils
             return false;
         }
 
-        static bool InInheritanceChain(TypeInfo type, TypeInfo fromType, out TypeInfo[] genericArguments)
+        static bool InInheritanceChain(System.Type type, System.Type fromType, out System.Type[] genericArguments)
         {
             while (null != fromType)
             {
@@ -242,7 +266,7 @@ namespace Business.Utils
                     {
                         try
                         {
-                            var closedType = (!type.IsGenericTypeDefinition ? type.GetGenericTypeDefinition() : type.AsType()).MakeGenericType(genericArguments2);
+                            var closedType = (!type.IsGenericTypeDefinition ? type.GetGenericTypeDefinition() : type).MakeGenericType(genericArguments2);
                             if (closedType.GetTypeInfo().IsAssignableFrom(fromType))
                             {
                                 genericArguments = genericArguments2.Select(c => c.GetTypeInfo()).ToArray();
@@ -281,6 +305,15 @@ namespace Business.Utils
             stream.Seek(0, System.IO.SeekOrigin.Begin);
             return bytes;
         }
+        public static async System.Threading.Tasks.Task<byte[]> StreamReadByteAsync(this System.IO.Stream stream)
+        {
+            if (null == stream) { throw new System.ArgumentNullException(nameof(stream)); }
+
+            var bytes = new byte[stream.Length];
+            await stream.ReadAsync(bytes, 0, bytes.Length);
+            stream.Seek(0, System.IO.SeekOrigin.Begin);
+            return bytes;
+        }
 
         public static byte[] StreamCopyByte(this System.IO.Stream stream)
         {
@@ -293,6 +326,17 @@ namespace Business.Utils
                 return m.ToArray();
             }
         }
+        public static async System.Threading.Tasks.Task<byte[]> StreamCopyByteAsync(this System.IO.Stream stream)
+        {
+            if (null == stream) { throw new System.ArgumentNullException(nameof(stream)); }
+
+            using (var m = new System.IO.MemoryStream())
+            {
+                await stream.CopyToAsync(m);
+                stream.Seek(0, System.IO.SeekOrigin.Begin);
+                return m.ToArray();
+            }
+        }
 
         public static string StreamReadString(this System.IO.Stream stream, System.Text.Encoding encoding = null)
         {
@@ -301,15 +345,12 @@ namespace Business.Utils
                 return reader.ReadToEnd();
             }
         }
-        public static System.Threading.Tasks.Task<string> StreamReadAsync(this System.IO.Stream stream, System.Text.Encoding encoding = null)
+        public static async System.Threading.Tasks.Task<string> StreamReadStringAsync(this System.IO.Stream stream, System.Text.Encoding encoding = null)
         {
-            return System.Threading.Tasks.Task.Run(async () =>
+            using (var reader = new System.IO.StreamReader(stream, encoding ?? System.Text.Encoding.UTF8))
             {
-                using (var reader = new System.IO.StreamReader(stream, encoding ?? System.Text.Encoding.UTF8))
-                {
-                    return await reader.ReadToEndAsync();
-                }
-            });
+                return await reader.ReadToEndAsync();
+            }
         }
 
         public static string FileReadString(string path, System.Text.Encoding encoding = null)
@@ -321,17 +362,31 @@ namespace Business.Utils
                 return fileStream.StreamReadString(encoding ?? System.Text.Encoding.UTF8);
             }
         }
+        public static async System.Threading.Tasks.Task<string> FileReadStringAsync(string path, System.Text.Encoding encoding = null)
+        {
+            if (System.String.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
+
+            using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
+            {
+                return await fileStream.StreamReadStringAsync(encoding ?? System.Text.Encoding.UTF8);
+            }
+        }
         public static byte[] FileReadByte(string path)
         {
             if (System.String.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
 
             using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
             {
-                using (var m = new System.IO.MemoryStream())
-                {
-                    fileStream.CopyTo(m);
-                    return m.ToArray();
-                }
+                return fileStream.StreamCopyByte();
+            }
+        }
+        public static async System.Threading.Tasks.Task<byte[]> FileReadByteAsync(string path)
+        {
+            if (System.String.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
+
+            using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
+            {
+                return await fileStream.StreamCopyByteAsync();
             }
         }
 
@@ -339,18 +394,17 @@ namespace Business.Utils
         {
             using (var writer = new System.IO.StreamWriter(stream, encoding ?? System.Text.Encoding.UTF8))
             {
-                writer.AutoFlush = true; writer.Write(value);
+                writer.AutoFlush = true;
+                writer.Write(value);
             }
         }
-        public static System.Threading.Tasks.Task StreamWriteAsync(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
+        public static async System.Threading.Tasks.Task StreamWriteAsync(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
         {
-            return System.Threading.Tasks.Task.Run(async () =>
+            using (var writer = new System.IO.StreamWriter(stream, encoding ?? System.Text.Encoding.UTF8))
             {
-                using (var writer = new System.IO.StreamWriter(stream, encoding ?? System.Text.Encoding.UTF8))
-                {
-                    writer.AutoFlush = true; await writer.WriteAsync(value);
-                }
-            });
+                writer.AutoFlush = true;
+                await writer.WriteAsync(value);
+            }
         }
         /*
         /// <summary>
@@ -509,14 +563,14 @@ namespace Business.Utils
                         file.Attributes = System.IO.FileAttributes.Normal;
                     }
                     try { System.IO.File.Delete(entrie); }
-                    catch { }//直接删除其中的文件  
+                    catch { }
                 }
                 else
                 {
                     var dir = new System.IO.DirectoryInfo(entrie);
                     if (0 < dir.GetFiles().Length)
                     {
-                        DeleteFolder(dir.FullName);//递归删除子文件夹
+                        DeleteFolder(dir.FullName);
                     }
                     try { System.IO.Directory.Delete(entrie); }
                     catch { }
@@ -556,7 +610,7 @@ namespace Business.Utils
                     inner.StackTrace,      //{5}
                     inner?.StackTrace);//{6}
 
-            WriteLocal(message, System.IO.Path.Combine(BaseDirectory, path), false, write, console, dateFormat);
+            WriteLocal(message, path, false, write, console, dateFormat);
 
             return inner;
         }
@@ -578,12 +632,15 @@ namespace Business.Utils
 
             if (!write && !console) { return; }
 
-            if (System.String.IsNullOrWhiteSpace(System.IO.Path.GetDirectoryName(path)))
+            if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(path)))
             {
                 path = System.IO.Path.Combine(BaseDirectory, System.IO.Path.GetFileName(path));
             }
 
-            text = autoTime ? string.Format("[{0}] {1}", System.DateTime.Now.ToString(dateFormat), text) : text;
+            if (autoTime)
+            {
+                text = string.Format("[{0}] {1}", System.DateTime.Now.ToString(dateFormat), text);
+            }
 
             if (console) { System.Console.WriteLine(text); }
 
@@ -611,6 +668,8 @@ namespace Business.Utils
                 finally { locker.ExitWriteLock(); }
             }
         }
+
+        public static void Console(string text, bool autoTime = true, bool console = true, bool write = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff") => WriteLocal(text, path, autoTime, write, console, dateFormat);
 
         #endregion
 
@@ -936,27 +995,14 @@ type.GetGenericTypeDefinition().Equals(typeof(System.Nullable<>)))
 
             if (null == item || 0 == item.Length) { return list; }
 
-            foreach (var item2 in item)
-            {
-                list.Add(item2);
-            }
+            var list2 = System.Collections.ArrayList.Adapter(list);
 
-            return list;
+            list2.AddRange(item);
+
+            return list2;
         }
-        public static System.Collections.Generic.IList<T> Adde<T>(this System.Collections.Generic.IList<T> list, params T[] item)
-        {
-            if (null == list) { throw new System.ArgumentNullException(nameof(list)); }
 
-            if (null == item || 0 == item.Length) { return list; }
-
-            foreach (var item2 in item)
-            {
-                list.Add(item2);
-            }
-
-            return list;
-        }
-        public static string AddJsonList(this string json, params object[] item)
+        public static string AddeJson(this string json, params object[] item)
         {
             var list = System.String.IsNullOrEmpty(json) ? new System.Collections.ArrayList() : json.TryJsonDeserialize<System.Collections.IList>() ?? new System.Collections.ArrayList { json };
 
@@ -992,7 +1038,7 @@ type.GetGenericTypeDefinition().Equals(typeof(System.Nullable<>)))
             }
             catch (System.Exception ex)
             {
-                error = System.Convert.ToString(ex.ExceptionWrite());
+                error = System.Convert.ToString(ex);
                 return default(Type);
             }
         }
@@ -1001,6 +1047,19 @@ type.GetGenericTypeDefinition().Equals(typeof(System.Nullable<>)))
             try
             {
                 result = (Type)Newtonsoft.Json.JsonConvert.DeserializeObject(value, type);
+                return true;
+            }
+            catch
+            {
+                result = default(Type);
+                return false;
+            }
+        }
+        public static bool TryJsonDeserialize<Type>(this string value, out Type result)
+        {
+            try
+            {
+                result = Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value);
                 return true;
             }
             catch
@@ -1019,7 +1078,7 @@ type.GetGenericTypeDefinition().Equals(typeof(System.Nullable<>)))
             }
             catch (System.Exception ex)
             {
-                error = System.Convert.ToString(ex.ExceptionWrite());
+                error = System.Convert.ToString(ex);
                 return null;
             }
         }
@@ -1046,6 +1105,38 @@ type.GetGenericTypeDefinition().Equals(typeof(System.Nullable<>)))
                 }
             }
             catch { return default(Type); }
+        }
+        public static bool TryProtoBufDeserialize<Type>(this System.Byte[] source, System.Type type, out Type result)
+        {
+            try
+            {
+                using (var stream = new System.IO.MemoryStream(source))
+                {
+                    result = (Type)ProtoBuf.Serializer.Deserialize(type, stream);
+                    return true;
+                }
+            }
+            catch
+            {
+                result = default(Type);
+                return false;
+            }
+        }
+        public static bool TryProtoBufDeserialize<Type>(this System.Byte[] source, out Type result)
+        {
+            try
+            {
+                using (var stream = new System.IO.MemoryStream(source))
+                {
+                    result = ProtoBuf.Serializer.Deserialize<Type>(stream);
+                    return true;
+                }
+            }
+            catch
+            {
+                result = default(Type);
+                return false;
+            }
         }
         public static System.Byte[] ProtoBufSerialize<Type>(this Type instance)
         {
@@ -1221,6 +1312,139 @@ type.GetGenericTypeDefinition().Equals(typeof(System.Nullable<>)))
         }
 
         #endregion
+
+        /*
+        public static dynamic Call(this IBusiness business, dynamic data, string remote, string group = null, Http.IHttpRequest httpRequest = null, string commandID = null)
+        {
+            var request = business.Configuration.RequestDefault.Create(data, business.Configuration.RequestType);
+
+            var resultType = business.Configuration.ResultType;
+
+            if (System.Object.Equals(business.Configuration.RequestDefault, request)) { return Result.ResultFactory.ResultCreate(resultType, (int)Request.Mark.MarkItem.Business_DataError, Request.Mark.DataNull); }
+
+            try
+            {
+                //checked Remote
+                if (!System.String.IsNullOrWhiteSpace(remote)) { request.Remote = remote; }
+                if (System.String.IsNullOrWhiteSpace(request.Remote)) { return Result.ResultFactory.ResultCreate(resultType, (int)Request.Mark.MarkItem.Exp_RemoteIllegal, Request.Mark.RemoteNull); }
+
+                //checker Cmd
+                if (System.String.IsNullOrWhiteSpace(request.Cmd)) { return Result.ResultFactory.ResultCreate(resultType, (int)Request.Mark.MarkItem.Business_CmdError, Request.Mark.CmdNull); }
+
+                //checked Group
+                if (!System.String.IsNullOrWhiteSpace(group)) { request.Group = group; }
+                if (System.String.IsNullOrWhiteSpace(request.Group)) { request.Group = Bind.CommandGroupDefault; }
+
+                //get Group
+                if (!business.Command.TryGetValue(request.Group, out System.Collections.Generic.IReadOnlyDictionary<string, Command> cmdGroup))
+                {
+                    return Result.ResultFactory.ResultCreate(resultType, (int)Request.Mark.MarkItem.Business_GroupError, string.Format(Request.Mark.GroupError, request.Group));
+                }
+
+                //get Cmd
+                if (!cmdGroup.TryGetValue(request.Cmd, out Command command))
+                {
+                    return Result.ResultFactory.ResultCreate(resultType, (int)Request.Mark.MarkItem.Business_CmdError, string.Format(Request.Mark.CmdError, request.Cmd));
+                }
+
+                var meta = business.Configuration.MetaData[command.Name];
+
+                var args = new object[meta.ArgAttrs[meta.GroupDefault].Args.Count];
+
+                #region Token
+
+                if (0 < meta.TokenPosition.Length)
+                {
+                    var token = business.Configuration.Token();
+                    token.Key = request.Token;
+                    token.Remote = request.Remote;
+                    token.CommandID = commandID;
+
+                    foreach (var item in meta.TokenPosition)
+                    {
+                        args[item] = token;
+                    }
+                }
+
+                #endregion
+
+                #region HttpRequest
+
+                if (0 < meta.HttpRequestPosition.Length && null != httpRequest)
+                {
+                    if (null != httpRequest.Files && 0 == httpRequest.Files.Count)
+                    {
+                        httpRequest.Files = null;
+                    }
+
+                    if (null != httpRequest.Cookies && 0 == httpRequest.Cookies.Count)
+                    {
+                        httpRequest.Cookies = null;
+                    }
+
+                    if (null != httpRequest.Headers && 0 == httpRequest.Headers.Count)
+                    {
+                        httpRequest.Headers = null;
+                    }
+
+                    foreach (var item in meta.HttpRequestPosition)
+                    {
+                        args[item] = httpRequest;
+                    }
+                }
+
+                #endregion
+
+                if (0 < request.Data.Length && 0 < args.Length)
+                {
+                    int l = 0;
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        if (meta.TokenPosition.Contains(i) || meta.HttpRequestPosition.Contains(i)) { continue; }
+
+                        if (request.Data.Length < l++)
+                        {
+                            break;
+                        }
+
+                        if (l - 1 < request.Data.Length)
+                        {
+                            args[i] = request.Data[l - 1];
+                        }
+                    }
+                }
+
+                var result = command.Call(args);
+
+                if (!command.HasReturn) { return null; }
+
+                if (command.HasIResult)
+                {
+                    if (System.Object.Equals(null, result))
+                    {
+                        result = Result.ResultFactory.ResultCreate(resultType);
+                    }
+
+                    result.Callback = request.Callback;
+                }
+
+                return result;
+
+                //====================================//
+                //var type = typeof(T);
+                //var result2 = business.ResultCreateToDataBytes(result);
+                //result2.Callback = businessData.Callback;
+
+                //return result2;
+            }
+            catch (System.Exception ex)
+            {
+                ex = Utils.Help.ExceptionWrite(ex, console: true);
+                //...
+                return Result.ResultFactory.ResultCreate(resultType, (int)Request.Mark.MarkItem.Exp_UndefinedException, ex.Message);
+            }
+        }
+        */
     }
     /*
 #region ICloneable
@@ -1241,6 +1465,31 @@ type.GetGenericTypeDefinition().Equals(typeof(System.Nullable<>)))
 
 #endregion
     */
+
+    public class ConcurrentReadOnlyDictionary<TKey, TValue> : System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue>
+    {
+        readonly internal System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue> dictionary;
+
+        public ConcurrentReadOnlyDictionary(System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue> dictionary) : base(dictionary) => this.dictionary = dictionary;
+
+        public ConcurrentReadOnlyDictionary() : this(new System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>()) { }
+    }
+
+    public class ConcurrentReadOnlyCollection<TValue> : System.Collections.Generic.IReadOnlyCollection<TValue>
+    {
+        readonly internal System.Collections.Concurrent.ConcurrentBag<TValue> collection;
+
+        public int Count => collection.Count;
+
+        public ConcurrentReadOnlyCollection(System.Collections.Concurrent.ConcurrentBag<TValue> dictionary) => this.collection = dictionary;
+
+        public ConcurrentReadOnlyCollection() : this(new System.Collections.Concurrent.ConcurrentBag<TValue>()) { }
+
+        public System.Collections.Generic.IEnumerator<TValue> GetEnumerator() => collection.GetEnumerator();
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
     #region Equals
 
     public static class Equality<T>

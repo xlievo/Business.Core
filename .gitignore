@@ -12,4 +12,3 @@
 *.suo
 *.nupkg
 /.vs
-/packages
