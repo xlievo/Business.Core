@@ -1409,6 +1409,7 @@ namespace Business
                     //{
                     //    continue;
                     //}
+
                     if (meta.UseTypePosition.ContainsKey(i))
                     {
                         if (null != useObj && 0 < useObj.Length)
