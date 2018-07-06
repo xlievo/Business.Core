@@ -69,10 +69,13 @@ public class Startup
             }
         });
 
-        Business.Bind.UseType(typeof(BusinessController));
+        Business.Bind.UseType(typeof(BusinessController), typeof(Token));
     }
 }
 
+public class Token : Business.Auth.Token { }
+
+//Internal object do not write logs
 [Business.Attributes.Logger(Business.LoggerType.All, false)]
 public class BusinessController : Controller
 {
@@ -86,6 +89,7 @@ public class BusinessController : Controller
         var c = System.String.Empty;
         var t = System.String.Empty;
         var d = System.String.Empty;
+        var g = System.String.Empty;
 
         switch (this.Request.Method)
         {
@@ -93,6 +97,7 @@ public class BusinessController : Controller
                 c = this.Request.Query["c"].ToString();
                 t = this.Request.Query["t"].ToString();
                 d = this.Request.Query["d"].ToString();
+                g = this.Request.Query["g"].ToString();
                 break;
             case "POST":
                 {
@@ -102,6 +107,7 @@ public class BusinessController : Controller
                         c = form["c"].ToString();
                         t = form["t"].ToString();
                         d = form["d"].ToString();
+                        g = form["g"].ToString();
                     }
                 }
                 break;
@@ -109,12 +115,19 @@ public class BusinessController : Controller
         }
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
-        return await Business.Bind.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCallUseType(new Business.Request.RequestObject
-        {
-            Cmd = c,
-            Token = t,
-            Data = Business.Utils.Help.TryJsonDeserialize(d, out object[] data) ? data : new object[] { d },
-            Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
-        }, new object[] { this });//, result => result.Callback = "Callback"
+        
+        return await Business.Bind.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCallUseType(
+            //the cmd of this request.
+            c,
+            //the group of this request.
+            g,
+            //the data of this request.
+            Business.Utils.Help.TryJsonDeserialize(d, out object[] data) ? data : new object[] { d },
+            //the incoming data object
+            new object[]
+            {
+                this,
+                new Token { Key = t, Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort)}
+            });//, result => result.Callback = "Callback"
     }
 }

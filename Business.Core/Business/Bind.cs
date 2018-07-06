@@ -22,7 +22,6 @@ namespace Business
     using Business.Utils;
     using Business.Utils.Emit;
     using Business.Result;
-    using Business.Request;
     using Business.Meta;
 
     public partial class Bind
@@ -1225,23 +1224,27 @@ namespace Business
 
         #region IRequest
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCallUseType(IRequest request, object[] useObj, System.Action<dynamic> callback = null)
-        {
-            return await AsyncCallUseType(request.Cmd, request.Group, request.Data, useObj).ContinueWith(c =>
-            {
-                callback?.Invoke(c.Result);
+        //public virtual async System.Threading.Tasks.Task<dynamic> AsyncCallUseType(IRequest request, object[] useObj, System.Action<dynamic> callback = null)
+        //{
+        //    return await AsyncCallUseType(request.Cmd, request.Group, request.Data, useObj).ContinueWith(c =>
+        //    {
+        //        callback?.Invoke(c.Result);
 
-                return c.Result;
-            });
-        }
+        //        return c.Result;
+        //    });
+        //}
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCallUseType<Result>(IRequest request, object[] useObj, System.Action<Result> callback = null) => await AsyncCallUseType(request, useObj, c => callback?.Invoke(c));
+        //public virtual async System.Threading.Tasks.Task<Result> AsyncCallUseType<Result>(IRequest request, object[] useObj, System.Action<Result> callback = null) => await AsyncCallUseType(request, useObj, c => callback?.Invoke(c));
 
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResultUseType(IRequest request, object[] useObj, System.Action<IResult> callback = null) => await AsyncCallUseType(request, useObj, c => callback?.Invoke(c));
+        //public virtual async System.Threading.Tasks.Task<IResult> AsyncIResultUseType(IRequest request, object[] useObj, System.Action<IResult> callback = null) => await AsyncCallUseType(request, useObj, c => callback?.Invoke(c));
 
         #endregion
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCallUseType(string cmd, string group = null, object[] args = null, params object[] useObj)
+        public virtual async System.Threading.Tasks.Task<Result> AsyncIResultUseType<Result>(string cmd, string group = null, object[] args = null, object[] useObj = null, System.Action<Result> callback = null) => await AsyncCallUseType(cmd, group, args, useObj, c => callback?.Invoke(c));
+
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResultUseType(string cmd, string group = null, object[] args = null, object[] useObj = null, System.Action<IResult> callback = null) => await AsyncCallUseType(cmd, group, args, useObj, c => callback?.Invoke(c));
+
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCallUseType(string cmd, string group = null, object[] args = null, object[] useObj = null, System.Action<dynamic> callback = null)
         {
             var command = GetCommand(cmd, group);
 
@@ -1250,7 +1253,12 @@ namespace Business
                 return await System.Threading.Tasks.Task.FromResult(Bind.CmdError(resultType, cmd));
             }
 
-            return await command.AsyncCallUseType(args, useObj);
+            return await command.AsyncCallUseType(args, useObj).ContinueWith(c =>
+            {
+                callback?.Invoke(c.Result);
+
+                return c.Result;
+            });
         }
 
         #region AsyncCallGroup
@@ -1282,7 +1290,7 @@ namespace Business
         public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, params object[] args) => await AsyncCall(cmd, args);
 
         #endregion
-
+        /*
         #region IRequest
 
         public virtual dynamic CallUseType(IRequest request, params object[] useObj) => CallUseType(request.Cmd, request.Group, request.Data, useObj);
@@ -1299,6 +1307,7 @@ namespace Business
 
             return null == command ? Bind.CmdError(resultType, cmd) : command.CallUseType(args, useObj);
         }
+        */
 
         #region CallGroup
 

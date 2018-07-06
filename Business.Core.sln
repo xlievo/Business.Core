@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auth", "Auth", "{942E324B-4
 	ProjectSection(SolutionItems) = preProject
 		Business.Core\Auth\Attributes.cs = Business.Core\Auth\Attributes.cs
 		Business.Core\Auth\Interceptor.cs = Business.Core\Auth\Interceptor.cs
+		Business.Core\Auth\Token.cs = Business.Core\Auth\Token.cs
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business", "Business", "{EA4A47D8-3ED6-48B7-AEAD-D217100A7E05}"
@@ -30,11 +31,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configer", "Configer", "{05BCA310-CF40-471D-88D4-F840CA2AA41B}"
 	ProjectSection(SolutionItems) = preProject
 		Business.Core\Configer\Configuration.cs = Business.Core\Configer\Configuration.cs
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Request", "Request", "{A4E95275-4BA9-41E7-AD3F-ED60B5DDD433}"
-	ProjectSection(SolutionItems) = preProject
-		Business.Core\Request\IRequest.cs = Business.Core\Request\IRequest.cs
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Result", "Result", "{BADF3F8E-8A74-463D-BCAC-ADC3AA45E06E}"
@@ -93,7 +89,6 @@ Global
 		{942E324B-4266-4C8A-89CC-60E056A5F7D8} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
 		{EA4A47D8-3ED6-48B7-AEAD-D217100A7E05} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
 		{05BCA310-CF40-471D-88D4-F840CA2AA41B} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
-		{A4E95275-4BA9-41E7-AD3F-ED60B5DDD433} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
 		{BADF3F8E-8A74-463D-BCAC-ADC3AA45E06E} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
 		{B621B862-0E30-4023-AE06-E8912C596618} = {FEF0B3A2-B2C7-44E7-95D0-B7101C8E1227}
 		{0711FAAA-708A-430D-8C86-90F9BE4F86B4} = {B621B862-0E30-4023-AE06-E8912C596618}

@@ -63,6 +63,9 @@
     <Compile Include="..\..\Business.Core\Auth\Interceptor.cs">
       <Link>Auth\Interceptor.cs</Link>
     </Compile>
+    <Compile Include="..\..\Business.Core\Auth\Token.cs">
+      <Link>Auth\Token.cs</Link>
+    </Compile>
     <Compile Include="..\..\Business.Core\Business\Arg.cs">
       <Link>Business\Arg.cs</Link>
     </Compile>
@@ -77,9 +80,6 @@
     </Compile>
     <Compile Include="..\..\Business.Core\Configer\Configuration.cs">
       <Link>Configer\Configuration.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Business.Core\Request\IRequest.cs">
-      <Link>Request\IRequest.cs</Link>
     </Compile>
     <Compile Include="..\..\Business.Core\Result\IResult.cs">
       <Link>Result\IResult.cs</Link>

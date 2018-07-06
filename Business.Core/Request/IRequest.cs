@@ -72,19 +72,19 @@ namespace Business.Request
         /// </summary>
         object[] Data { get; set; }
 
-        /// <summary>
-        /// Gets the login key of this request.
-        /// </summary>
-        string Token { get; set; }
+        ///// <summary>
+        ///// Gets the login key of this request.
+        ///// </summary>
+        //string Token { get; set; }
 
         string Group { get; set; }
 
-        string Remote { get; set; }
+        //string Remote { get; set; }
 
-        /// <summary>
-        /// Gets the token of this result, used for callback
-        /// </summary>
-        string Callback { get; set; }
+        ///// <summary>
+        ///// Gets the token of this result, used for callback
+        ///// </summary>
+        //string Callback { get; set; }
     }
 
     [ProtoBuf.ProtoContract(SkipConstructor = true)]
