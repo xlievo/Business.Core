@@ -69,11 +69,11 @@ public class Startup
             }
         });
 
-        Business.Bind.UseType(typeof(BusinessController), typeof(Token));
+        Business.Bind.UseType(typeof(BusinessController), typeof(Business.Auth.Token));
     }
 }
 
-public class Token : Business.Auth.Token { }
+//public class Token : Business.Auth.Token { }
 
 //Internal object do not write logs
 [Business.Attributes.Logger(Business.LoggerType.All, false)]
@@ -127,7 +127,7 @@ public class BusinessController : Controller
             new object[]
             {
                 this,
-                new Token { Key = t, Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort)}
+                new Business.Auth.Token { Key = t, Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort)}
             });//, result => result.Callback = "Callback"
     }
 }

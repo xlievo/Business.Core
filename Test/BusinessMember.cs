@@ -3,13 +3,9 @@ using Business.Attributes;
 using Business.Result;
 using Business.Utils;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-
-public class Test
-{
-    public static BusinessMember Member = Bind.Create<BusinessMember>();
-    public static ConcurrentReadOnlyDictionary<string, Command> Cmd = Member.Command[Bind.CommandGroupDefault];
-}
+using System.Linq;
 
 [Logger]
 public class BusinessMember : BusinessBase
@@ -40,39 +36,77 @@ public class BusinessMember : BusinessBase
         //this.Config += cfg => cfg.UseType(typeof(BusinessController));
     }
 
+    public class A2 : ArgumentAttribute
+    {
+        public A2(int state = -110, string message = null, bool canNull = true) : base(state, message, canNull)
+        {
+        }
+
+        public async override Task<IResult> Proces(dynamic value)
+        {
+            return this.ResultCreate(string.Format("{0}+{1}", value, "1234567890"));
+        }
+    }
+
     [JsonArg]
     public struct Ags2
     {
-        public string A { get; set; }
+        [A2]
+        public string A2 { get; set; }
 
-        public string B { get; set; }
+        public Ags3 B2 { get; set; }
     }
 
-    public class TokenCheck : ArgumentAttribute
+    public class Ags3
     {
-        public TokenCheck(int state = -110, string message = null, bool canNull = true) : base(state, message, canNull)
-        {
-        }
+        //[A2]
+        public string A3 { get; set; }
 
-        public override IResult Proces(dynamic value)
-        {
-            return this.ResultCreate();
-        }
+        public Ags4 B3 { get; set; }
     }
 
-    public class ControllerCheck : ArgumentAttribute
+    public struct Ags4
     {
-        public ControllerCheck(int state = -110, string message = null, bool canNull = true) : base(state, message, canNull)
-        {
-        }
+        [A2]
+        public string A4 { get; set; }
 
-        public override IResult Proces(dynamic value)
+        public string B4 { get; set; }
+    }
+
+    public struct Files
+    {
+        public string Key { get; set; }
+
+        public string Name { get; set; }
+
+        public byte[] File { get; set; }
+    }
+
+    public class FileCheck : ArgumentAttribute
+    {
+        public FileCheck(int state = -110, string message = null, bool canNull = true) : base(state, message, canNull) { }
+
+        public override async Task<IResult> Proces(dynamic value)
         {
-            return this.ResultCreate();
+            BusinessController col = value;
+
+            if (!col.Request.HasFormContentType) { return this.ResultCreate(); }
+
+            var list = new List<Files>();
+            foreach (var item in col.Request.Form.Files)
+            {
+                using (var m = new System.IO.MemoryStream())
+                {
+                    await item.CopyToAsync(m);
+                    list.Add(new Files { Name = item.FileName, Key = item.Name, File = m.GetBuffer() });
+                }
+            }
+
+            return this.ResultCreate(list);
         }
     }
 
-    public virtual async Task<dynamic> TestAgs001(BusinessController control, Arg<Ags2> a, decimal mm = 0.0234m, Arg<BusinessController, BusinessController> ss = default(Arg<BusinessController, BusinessController>), Token token = default(Token))
+    public virtual async Task<dynamic> TestAgs001(BusinessController control, Arg<Ags2> a, decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default(Arg<List<Files>, BusinessController>), Business.Auth.Token token = default(Business.Auth.Token))
     {
         return this.ResultCreate(new { a = a.In, Remote = string.Format("{0}:{1}", control.HttpContext.Connection.RemoteIpAddress.ToString(), control.HttpContext.Connection.RemotePort), control.Request.Cookies });
 

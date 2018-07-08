@@ -53,7 +53,7 @@ namespace Business.Auth
         /// Intercept
         /// </summary>
         /// <param name="invocation"></param>
-        public virtual void Intercept(Castle.DynamicProxy.IInvocation invocation)
+        public virtual async void Intercept(Castle.DynamicProxy.IInvocation invocation)
         {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
@@ -96,7 +96,7 @@ namespace Business.Auth
                     {
                         var argAttr = item.ArgAttr[i];
 
-                        result = argAttr.Proces(item.HasIArg ? iArgIn : value);
+                        result = await argAttr.Proces(item.HasIArg ? iArgIn : value);
 
                         if (1 > result.State)
                         {
@@ -139,10 +139,11 @@ namespace Business.Auth
                         continue;
                     }
 
-                    var isUpdate = false;
+                    //var isUpdate = false;
 
-                    result = ArgsResult(item.ArgAttrChild, args.CommandAttr.OnlyName, ref currentValue, ref isUpdate);
-                    if (null != result)
+                    result = await ArgsResult2(item.ArgAttrChild, args.CommandAttr.OnlyName, currentValue);
+                    //if (null != result)
+                    if (1 > result.State)
                     {
                         logType = LoggerType.Error;
                         returnValue = result;
@@ -150,7 +151,7 @@ namespace Business.Auth
                         return;
                     }
 
-                    if (item.HasIArg && isUpdate)
+                    if (item.HasIArg && result.Data)
                     {
                         iArgs[item.Position].Out = currentValue;
                     }
@@ -260,11 +261,14 @@ namespace Business.Auth
             }
         }
 
-        static IResult ArgsResult(System.Collections.Generic.IList<Args> args, string methodName, ref object currentValue, ref bool isUpdate)
+        async System.Threading.Tasks.Task<IResult> ArgsResult2(System.Collections.Generic.IList<Args> args, string methodName, object currentValue)
         {
+            bool isUpdate = false;
+
             foreach (var item in args)
             {
                 IResult result = null;
+
                 var memberValue = item.Accessor.TryGetter(currentValue);
                 //========================================//
 
@@ -274,7 +278,7 @@ namespace Business.Auth
 
                     for (int i = 0; i < item.ArgAttr.Count; i++)
                     {
-                        result = item.ArgAttr[i].Proces(item.HasIArg ? iArgIn : memberValue);
+                        result = await item.ArgAttr[i].Proces(item.HasIArg ? iArgIn : memberValue);
 
                         if (1 > result.State)
                         {
@@ -314,15 +318,24 @@ namespace Business.Auth
 
                 if (0 < item.ArgAttrChild.Count && null != currentValue2)
                 {
-                    var result2 = ArgsResult(item.ArgAttrChild, methodName, ref currentValue2, ref isUpdate);
-                    if (null != result2)
+                    var result2 = await ArgsResult2(item.ArgAttrChild, methodName, currentValue2);
+                    if (1 > result2.State)
                     {
                         return result2;
+                    }
+
+                    if (result2.Data)
+                    {
+                        if (item.Type.IsValueType || item.HasIArg)
+                        {
+                            item.Accessor.Setter(currentValue, currentValue2);
+                        }
+                        if (!isUpdate) { isUpdate = !isUpdate; }
                     }
                 }
             }
 
-            return null;
+            return ResultType.ResultCreate(isUpdate);
         }
 
         static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, LoggerValue logObjs, ArgsLog log)
