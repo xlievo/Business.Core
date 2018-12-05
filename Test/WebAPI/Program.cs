@@ -133,57 +133,6 @@ public class ResultObject<Type> : Business.Result.ResultObject<Type>
 [Logger(canWrite: false)]
 public class BusinessController : Controller
 {
-    //static BusinessController() => Configer.UseType(typeof(BusinessController), typeof(Auth.Token));
-
-    public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Net.WebSockets.WebSocket> Sockets = new System.Collections.Concurrent.ConcurrentDictionary<string, System.Net.WebSockets.WebSocket>();
-
-    public static void Register(IApplicationBuilder app)
-    {
-        var bufferSize = 4 * 1024;
-        app.UseWebSockets(new WebSocketOptions
-        {
-            KeepAliveInterval = System.TimeSpan.FromSeconds(120),  //向客户端发送“ping”帧的频率，以确保代理保持连接处于打开状态
-            ReceiveBufferSize = bufferSize   //用于接收数据的缓冲区的大小。 只有高级用户才需要对其进行更改，以便根据数据大小调整性能。
-        })
-        .Use(async (context, next) =>
-        {
-            if (context.Request.Path != "/ws")
-            {
-                await next();
-                return;
-            }
-
-            if (!context.WebSockets.IsWebSocketRequest)
-            {
-                context.Response.StatusCode = 400;
-                return;
-            }
-
-            var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-
-            var ct = context.RequestAborted;
-            var buffer = new byte[bufferSize];
-            var result = await webSocket.ReceiveAsync(new System.ArraySegment<byte>(buffer), System.Threading.CancellationToken.None);
-
-            while (!result.CloseStatus.HasValue)
-            {
-                if (ct.IsCancellationRequested)
-                {
-                    break;
-                }
-
-                await webSocket.SendAsync(new System.ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, System.Threading.CancellationToken.None);
-
-                result = await webSocket.ReceiveAsync(new System.ArraySegment<byte>(buffer), System.Threading.CancellationToken.None);
-            }
-
-            await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, System.Threading.CancellationToken.None);
-            //await Echo(context, webSocket);
-        });
-    }
-
-    //public static System.Func<BusinessController, RequestData, object[]> UseObj;
-
     /// <summary>
     /// Call
     /// </summary>

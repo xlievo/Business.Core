@@ -106,8 +106,10 @@ public class BusinessMember : BusinessBase
         }
     }
 
-    public virtual async Task<dynamic> TestAgs001(BusinessController control, Arg<Ags2> a, decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default(Arg<List<Files>, BusinessController>), Business.Auth.Token token = default(Business.Auth.Token))
+    public virtual async Task<dynamic> TestAgs001(BusinessController control, Arg<Ags2> a, decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default, Business.Auth.Token token = default)
     {
+        return this.ResultCreate(a.In);
+
         return this.ResultCreate(new { a = a.In, Remote = string.Format("{0}:{1}", control.HttpContext.Connection.RemoteIpAddress.ToString(), control.HttpContext.Connection.RemotePort), control.Request.Cookies });
 
         return control.Redirect("https://www.github.com");
