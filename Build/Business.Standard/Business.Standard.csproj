@@ -50,11 +50,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Auth\" />
-    <Folder Include="Business\" />
-    <Folder Include="Configer\" />
-    <Folder Include="Result\" />
     <Folder Include="Utils\" />
+    <Folder Include="Result\" />
+    <Folder Include="Configer\" />
+    <Folder Include="Business\" />
+    <Folder Include="Auth\" />
   </ItemGroup>
 
 </Project>

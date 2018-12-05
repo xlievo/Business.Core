@@ -19,14 +19,19 @@ PM> Install-Package Business.Core
 This library has the following functions
 
 1: Call Method with a fixed routing, including grouping mode
+
 2: A Process for Processing Parameters
+
 3: A standard return object wrapper
 
 This library has the following features
 
 1: Callbacks for method calls
+
 2: Support object-to-parameter injection
+
 3: A Model for Documentation
+
 4: async Support
 
 You can use any communication layer you like, such as ASP.Net Core MVC, WebAPI, Sockets, or even UI logic. It can dramatically improve the readability and specifications of your business logic.
