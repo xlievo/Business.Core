@@ -113,14 +113,12 @@ namespace Business
         /// </summary>
         /// <param name="hasIArg"></param>
         /// <param name="capacity"></param>
-        protected internal LoggerValue(System.Collections.Generic.IDictionary<string, bool> hasIArg, int capacity) : base(capacity) => this.hasIArg = hasIArg;
-
-        readonly System.Collections.Generic.IDictionary<string, bool> hasIArg;
+        protected internal LoggerValue(System.Collections.Generic.IDictionary<string, bool> hasIArg, int capacity) : base(capacity) => this.HasIArg = hasIArg;
 
         /// <summary>
         /// A combination of parameter names and HasIArg
         /// </summary>
-        public System.Collections.Generic.IDictionary<string, bool> HasIArg { get => hasIArg; }
+        public System.Collections.Generic.IDictionary<string, bool> HasIArg { get; private set; }
 
         //LoggerValue dictionary;
 
@@ -132,11 +130,11 @@ namespace Business
         public LoggerValue ToValue(LoggerValueType valueType = LoggerValueType.In)
         {
             //var dictionary = this.ToDictionary(c => c.Key, c => hasIArg[c.Key] ? (valueType == LoggerValueType.Out ? c.Value.Out : c.Value.In) : c.Value);
-            var dictionary = new LoggerValue(0 < this.Count ? hasIArg.ToDictionary(c => c.Key, c => false) : hasIArg, this.Count);
+            var dictionary = new LoggerValue(0 < this.Count ? HasIArg.ToDictionary(c => c.Key, c => false) : HasIArg, this.Count);
 
             foreach (var item in this)
             {
-                dictionary.Add(item.Key, hasIArg[item.Key] ? (valueType == LoggerValueType.Out ? item.Value.Out : item.Value.In) : item.Value);
+                dictionary.Add(item.Key, HasIArg[item.Key] ? (valueType == LoggerValueType.Out ? item.Value.Out : item.Value.In) : item.Value);
             }
 
             return dictionary;

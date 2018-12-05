@@ -142,7 +142,7 @@ namespace Business.Result
     */
     public static class ResultFactory
     {
-        public static int GetState(int state) => 0 < state ? 0 - System.Math.Abs(state) : state;
+        internal static int ConvertErrorState(this int state) => 0 < state ? 0 - System.Math.Abs(state) : state;
 
         #region Create
 
@@ -254,7 +254,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        static IResult Create<Data>(System.Type resultType, Data data = default(Data), int state = 1, string message = null)
+        static IResult Create<Data>(System.Type resultType, Data data = default, int state = 1, string message = null)
         {
             var type = typeof(Data);
             var result = (IResult)System.Activator.CreateInstance(resultType.MakeGenericType(type), new object[] { data, type, state, message, resultType });
@@ -269,7 +269,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        static IResult Create<Data>(IBusiness business, Data data = default(Data), int state = 1, string message = null) => Create(business.Configuration.ResultType, data, state, message);
+        static IResult Create<Data>(IBusiness business, Data data = default, int state = 1, string message = null) => Create(business.Configer.ResultType, data, state, message);
 
         #region resultType
 
@@ -286,7 +286,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="resultType"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this System.Type resultType, int state) => Create<string>(resultType, state: state);
+        public static IResult ResultCreate(System.Type resultType, int state) => Create<string>(resultType, state: state);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -295,7 +295,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this System.Type resultType, int state = 1, string message = null) => Create<string>(resultType, state: state, message: message);
+        public static IResult ResultCreate(System.Type resultType, int state = 1, string message = null) => Create<string>(resultType, state: state, message: message);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -306,7 +306,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static IResult ResultCreate<Data>(this System.Type resultType, Data data, string message = null, int state = 1) => Create(resultType, data, 0 > state ? System.Math.Abs(state) : state, message);
+        public static IResult ResultCreate<Data>(System.Type resultType, Data data, string message = null, int state = 1) => Create(resultType, data, 0 > state ? System.Math.Abs(state) : state, message);
 
         #endregion
 
@@ -325,7 +325,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="business"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this IBusiness business, int state) => Create<string>(business, state: state);
+        public static IResult ResultCreate(IBusiness business, int state) => Create<string>(business, state: state);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -334,7 +334,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this IBusiness business, int state = 1, string message = null) => Create<string>(business, state: state, message: message);
+        public static IResult ResultCreate(IBusiness business, int state = 1, string message = null) => Create<string>(business, state: state, message: message);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -345,7 +345,7 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static IResult ResultCreate<Data>(this IBusiness business, Data data, string message = null, int state = 1) => Create(business, data, 0 > state ? System.Math.Abs(state) : state, message);
+        public static IResult ResultCreate<Data>(IBusiness business, Data data, string message = null, int state = 1) => Create(business, data, 0 > state ? System.Math.Abs(state) : state, message);
 
         /*
         /// <summary>

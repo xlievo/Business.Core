@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Business</RootNamespace>
     <AssemblyName>Business.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -23,6 +23,7 @@
     <DefineConstants>TRACE;DEBUG;NETFX</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -44,16 +45,14 @@
       <HintPath>..\..\packages\Castle.Core.4.3.1\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="protobuf-net, Version=2.3.13.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\protobuf-net.2.3.13\lib\net40\protobuf-net.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -72,14 +71,17 @@
     <Compile Include="..\..\Business.Core\Business\Bind.cs">
       <Link>Business\Bind.cs</Link>
     </Compile>
+    <Compile Include="..\..\Business.Core\Business\Doc.cs">
+      <Link>Business\Doc.cs</Link>
+    </Compile>
     <Compile Include="..\..\Business.Core\Business\IBusiness.cs">
       <Link>Business\IBusiness.cs</Link>
     </Compile>
     <Compile Include="..\..\Business.Core\Business\Logger.cs">
       <Link>Business\Logger.cs</Link>
     </Compile>
-    <Compile Include="..\..\Business.Core\Configer\Configuration.cs">
-      <Link>Configer\Configuration.cs</Link>
+    <Compile Include="..\..\Business.Core\Configer\Configer.cs">
+      <Link>Configer\Configer.cs</Link>
     </Compile>
     <Compile Include="..\..\Business.Core\Result\IResult.cs">
       <Link>Result\IResult.cs</Link>
@@ -87,23 +89,8 @@
     <Compile Include="..\..\Business.Core\Result\ResultObject.cs">
       <Link>Result\ResultObject.cs</Link>
     </Compile>
-    <Compile Include="..\..\Business.Core\Utils\Emit\ConstructorInvokerGenerator.cs">
-      <Link>Utils\Emit\ConstructorInvokerGenerator.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Business.Core\Utils\Emit\EmitUtils.cs">
-      <Link>Utils\Emit\EmitUtils.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Business.Core\Utils\Emit\FieldAccessorGenerator.cs">
-      <Link>Utils\Emit\FieldAccessorGenerator.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Business.Core\Utils\Emit\MethodInvokerGenerator.cs">
-      <Link>Utils\Emit\MethodInvokerGenerator.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Business.Core\Utils\Emit\OpCodeExtention.cs">
-      <Link>Utils\Emit\OpCodeExtention.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Business.Core\Utils\Emit\PropertyAccessorGenerator.cs">
-      <Link>Utils\Emit\PropertyAccessorGenerator.cs</Link>
+    <Compile Include="..\..\Business.Core\Utils\EmitUtils.cs">
+      <Link>Utils\EmitUtils.cs</Link>
     </Compile>
     <Compile Include="..\..\Business.Core\Utils\Help.cs">
       <Link>Utils\Help.cs</Link>

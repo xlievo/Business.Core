@@ -29,11 +29,12 @@ namespace Business.Auth
     /// <summary>
     /// A token sample
     /// </summary>
-    [ProtoBuf.ProtoContract(SkipConstructor = true)]
+    //[ProtoBuf.ProtoContract(SkipConstructor = true)]
+    [Attributes.Use]
     public class Token : IToken
     {
         public static implicit operator Token(string value) => new Token { Key = value };
-        public static implicit operator Token(byte[] value) => Utils.Help.TryProtoBufDeserialize<Token>(value);
+        //public static implicit operator Token(byte[] value) => Utils.Help.TryProtoBufDeserialize<Token>(value);
 
         /// <summary>
         /// JSON format
@@ -45,19 +46,19 @@ namespace Business.Auth
         /// ProtoBuf format
         /// </summary>
         /// <returns></returns>
-        public byte[] ToBytes() => Utils.Help.ProtoBufSerialize(this);
+        public byte[] ToBytes() => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
 
         /// <summary>
         /// The user token
         /// </summary>
-        [ProtoBuf.ProtoMember(1, Name = "K")]
+        //[ProtoBuf.ProtoMember(1, Name = "K")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "K")]
         public virtual string Key { get; set; }
 
         /// <summary>
         /// Remote IP address
         /// </summary>
-        [ProtoBuf.ProtoMember(2, Name = "R")]
+        //[ProtoBuf.ProtoMember(2, Name = "R")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "R")]
         public virtual string Remote { get; set; }
 

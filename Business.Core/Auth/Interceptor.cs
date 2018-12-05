@@ -71,17 +71,29 @@ namespace Business.Auth
             if (0 < iArgs.Count)
             {
                 var group = iArgs[meta.IArgs[0].Position].Group;
-                if (!System.String.IsNullOrEmpty(group)) { iArgGroup = group; }
+                if (!string.IsNullOrEmpty(group)) { iArgGroup = group; }
             }
 
-            var args = meta.ArgAttrs[iArgGroup];
+            //var args = meta.ArgAttrs[iArgGroup];
+            //if (!meta.ArgAttrs.TryGetValue(iArgGroup, out ArgAttrs args))
+            //{
+            //    invocation.ReturnValue = Bind.GetReturnValue(Bind.CmdError(ResultType, invocation.Method.Name), meta);
+            //    return;
+            //}
+
+            //var group = meta.ArgAttrs[iArgGroup];
+            if (!meta.CommandGroup.TryGetValue(iArgGroup, out CommandAttribute command))
+            {
+                invocation.ReturnValue = Bind.GetReturnValue(Bind.CmdError(ResultType, invocation.Method.Name), meta);
+                return;
+            }
 
             //var argsObjLog = args.Args.Select(c => new argsLog {Key = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], Logger = c.MetaLogger }).ToList();
             dynamic returnValue = null;
 
             try
             {
-                foreach (var item in args.Args)
+                foreach (var item in meta.Args)
                 {
                     //if (meta.UseTypePosition.ContainsKey(item.Position) && !item.HasIArg) { continue; }
 
@@ -91,12 +103,16 @@ namespace Business.Auth
                     //argsObjLog.Add(item.Name, System.Tuple.Create(item.HasIArg ? iArgs[item.Position] : value, item.MetaLogger));
                     //argsObjLog.Add(new argsLog { Key = item.Name, Value = item.HasIArg ? iArgs[item.Position] : value, Logger = item.MetaLogger });
                     //argsObjLogHasIArg.Add(item.Name, item.HasIArg);
+                    //var argAttrs = item.ArgAttr.OrderByDescending(c => c.Value.State);
+                    var attrs = item.Group[iArgGroup].Attrs;
 
-                    for (int i = 0; i < item.ArgAttr.Count; i++)
+                    var first = attrs.First;
+
+                    while (NodeState.DAT == first.State)
                     {
-                        var argAttr = item.ArgAttr[i];
+                        var argAttr = first.Value;
 
-                        result = await argAttr.Proces(item.HasIArg ? iArgIn : value);
+                        result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null) : await argAttr.Proces(item.HasIArg ? iArgIn : value);
 
                         if (1 > result.State)
                         {
@@ -108,6 +124,8 @@ namespace Business.Auth
 
                         //========================================//
 
+                        first = first.Next;
+
                         if (result.HasData)
                         {
                             if (!item.HasIArg)
@@ -116,7 +134,8 @@ namespace Business.Auth
                             }
                             else
                             {
-                                if (i < item.ArgAttr.Count - 1)
+                                //if (i < attrs.Count - 1)
+                                if (NodeState.DAT == first.State)
                                 {
                                     iArgIn = result.Data;
                                 }
@@ -128,7 +147,45 @@ namespace Business.Auth
                         }
                     }
 
+                    //foreach (var argAttr in attrs)
+                    ////for (int i = 0; i < item.ArgAttr.Count; i++)
+                    //{
+                    //    result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null) : await argAttr.Proces(item.HasIArg ? iArgIn : value);
+
+                    //    if (1 > result.State)
+                    //    {
+                    //        logType = LoggerType.Error;
+                    //        returnValue = result;
+                    //        invocation.ReturnValue = Bind.GetReturnValue(result, meta);
+                    //        return;
+                    //    }
+
+                    //    //========================================//
+
+                    //    if (result.HasData)
+                    //    {
+                    //        if (!item.HasIArg)
+                    //        {
+                    //            argsObj[item.Position] = result.Data;
+                    //        }
+                    //        else
+                    //        {
+                    //            if (i < attrs.Count - 1)
+                    //            {
+                    //                iArgIn = result.Data;
+                    //            }
+                    //            else
+                    //            {
+                    //                iArgs[item.Position].Out = result.Data;
+                    //            }
+                    //        }
+                    //    }
+
+                    //    i++;
+                    //}
+
                     //========================================//
+
                     object currentValue = item.HasIArg ?
                         ((null != result && result.HasData) ? result.Data : iArgs[item.Position].Out) :
                         ((null != result && result.HasData) ? result.Data : value);
@@ -141,7 +198,7 @@ namespace Business.Auth
 
                     //var isUpdate = false;
 
-                    result = await ArgsResult2(item.ArgAttrChild, args.CommandAttr.OnlyName, currentValue);
+                    result = await ArgsResult2(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue);
                     //if (null != result)
                     if (1 > result.State)
                     {
@@ -158,18 +215,19 @@ namespace Business.Auth
                 }
 
                 //===============================//
-                watch.Restart();
+                //watch.Restart();
                 invocation.Proceed();
                 returnValue = invocation.ReturnValue;
             }
             catch (System.Exception ex)
             {
+                ex = ex.ExceptionWrite();
                 logType = LoggerType.Exception;
                 if (!meta.HasAsync)
                 {
-                    returnValue = ResultType.ResultCreate(0, System.Convert.ToString(ex.ExceptionWrite()));
+                    returnValue = ResultFactory.ResultCreate(ResultType, 0, System.Convert.ToString(ex));
                 }
-                invocation.ReturnValue = !meta.HasAsync ? Bind.GetReturnValue(0, System.Convert.ToString(ex.ExceptionWrite()), meta, ResultType) : System.Threading.Tasks.Task.Run(() => throw ex);
+                invocation.ReturnValue = !meta.HasAsync ? Bind.GetReturnValue(0, System.Convert.ToString(ex), meta, ResultType) : System.Threading.Tasks.Task.FromException(ex);
             }
             finally
             {
@@ -179,21 +237,21 @@ namespace Business.Auth
 
                     if (meta.HasIResult)
                     {
-                        invocation.ReturnValue = task.ContinueWith<IResult>(c => Async<IResult>(c, ResultType, meta, returnValue, logType, args, iArgs, argsObj, methodName, this.Logger, watch));
+                        invocation.ReturnValue = task.ContinueWith<IResult>(c => Async<IResult>(iArgGroup, c, ResultType, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch));
                     }
                     else
                     {
-                        invocation.ReturnValue = task.ContinueWith(c => Async<dynamic>(c, ResultType, meta, returnValue, logType, args, iArgs, argsObj, methodName, this.Logger, watch));
+                        invocation.ReturnValue = task.ContinueWith(c => Async<dynamic>(iArgGroup, c, ResultType, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch));
                     }
                 }
                 else
                 {
-                    Finally(meta, returnValue, logType, args, iArgs, argsObj, methodName, this.Logger, watch);
+                    Finally(iArgGroup, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch);
                 }
             }
         }
 
-        static Type Async<Type>(System.Threading.Tasks.Task task, System.Type resultType, MetaData meta, dynamic returnValue, LoggerType logType, ArgAttrs args, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
+        static Type Async<Type>(string group, System.Threading.Tasks.Task task, System.Type resultType, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
         {
             try
             {
@@ -201,7 +259,7 @@ namespace Business.Auth
                 {
                     logType = LoggerType.Exception;
                     //result = Bind.GetReturnValue(0, System.Convert.ToString(Help.ExceptionWrite(c.Exception)), meta, ResultType);
-                    returnValue = resultType.ResultCreate(0, System.Convert.ToString(task.Exception.ExceptionWrite()));
+                    returnValue = ResultFactory.ResultCreate(resultType, 0, System.Convert.ToString(task.Exception.ExceptionWrite()));
 
                     return meta.HasReturn ? returnValue : default(Type);
                 }
@@ -220,29 +278,30 @@ namespace Business.Auth
                     returnValue = default(Type);
                 }
 
-                return default(Type);
+                return default;
             }
             catch (System.Exception ex)
             {
                 logType = LoggerType.Exception;
                 //result = Bind.GetReturnValue(0, System.Convert.ToString(Help.ExceptionWrite(ex)), meta, ResultType);
-                returnValue = resultType.ResultCreate(0, System.Convert.ToString(ex.ExceptionWrite()));
+
+                returnValue = ResultFactory.ResultCreate(resultType, 0, System.Convert.ToString(ex.ExceptionWrite()));
                 return meta.HasReturn ? returnValue : null;
             }
             finally
             {
-                Finally(meta, returnValue, logType, args, iArgs, argsObj, methodName, logger, watch);
+                Finally(group, meta, returnValue, logType, iArgs, argsObj, methodName, logger, watch);
             }
         }
 
-        static void Finally(MetaData meta, dynamic returnValue, LoggerType logType, ArgAttrs args, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
+        static void Finally(string group, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
         {
             if (null == logger) { return; }
 
-            watch.Stop();
-            var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+            //watch.Stop();
+            //var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
 
-            if (!System.Object.Equals(null, returnValue) && typeof(IResult).IsAssignableFrom(returnValue.GetType()))
+            if (!object.Equals(null, returnValue) && typeof(IResult).IsAssignableFrom(returnValue.GetType()))
             {
                 var result = returnValue as IResult;
                 if (0 > result.State)
@@ -251,17 +310,21 @@ namespace Business.Auth
                 }
             }
 
-            var argsObjLog = args.Args.Select(c => new ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = c.Logger, iArgInLogger = c.IArgInLogger, hasIArg = c.HasIArg }).ToList();
+            var argsObjLog = meta.Args.Select(c => new ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = c.Group[group].Logger, iArgInLogger = c.Group[group].IArgInLogger, hasIArg = c.HasIArg }).ToList();
 
-            var logObjs = LoggerSet(logType, meta.MetaLogger, argsObjLog, argsObjLog.ToDictionary(c => c.name, c => c.hasIArg), out bool canWrite, out bool canResult);
+            //meta.MetaLogger.TryGetValue(gropu, out MetaLogger methodLogger);
+            var logObjs = LoggerSet(logType, meta.MetaLogger[group], argsObjLog, argsObjLog.ToDictionary(c => c.name, c => c.hasIArg), out bool canWrite, out bool canResult);
+
+            watch.Stop();
+            var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
 
             if (canWrite)
             {
-                System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = args.CommandAttr.Group }));
+                System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = group }));
             }
         }
 
-        async System.Threading.Tasks.Task<IResult> ArgsResult2(System.Collections.Generic.IList<Args> args, string methodName, object currentValue)
+        async System.Threading.Tasks.Task<IResult> ArgsResult2(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue)
         {
             bool isUpdate = false;
 
@@ -272,36 +335,42 @@ namespace Business.Auth
                 var memberValue = item.Accessor.TryGetter(currentValue);
                 //========================================//
 
-                if (0 < item.ArgAttr.Count)
+                var attrs = item.Group[group].Attrs;
+
+                var first = attrs.First;
+
+                while (NodeState.DAT == first.State)
                 {
+                    var argAttr = first.Value;
+
                     var iArgIn = item.HasIArg ? null != memberValue ? ((IArg)memberValue).In : null : null;
 
-                    for (int i = 0; i < item.ArgAttr.Count; i++)
-                    {
-                        result = await item.ArgAttr[i].Proces(item.HasIArg ? iArgIn : memberValue);
+                    result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null) : await argAttr.Proces(item.HasIArg ? iArgIn : memberValue);
 
-                        if (1 > result.State)
+                    if (1 > result.State)
+                    {
+                        return result;
+                    }
+
+                    first = first.Next;
+
+                    if (result.HasData)
+                    {
+                        if (!item.HasIArg)
                         {
-                            return result;
+                            memberValue = result.Data;
+                            item.Accessor.Setter(currentValue, memberValue);
+                            if (!isUpdate) { isUpdate = !isUpdate; }
                         }
-                        if (result.HasData)
+                        else
                         {
-                            if (!item.HasIArg)
+                            if (NodeState.DAT == first.State)
                             {
-                                memberValue = result.Data;
-                                item.Accessor.Setter(currentValue, memberValue);
-                                if (!isUpdate) { isUpdate = !isUpdate; }
+                                iArgIn = result.Data;
                             }
-                            else
+                            else if (null != memberValue)
                             {
-                                if (i < item.ArgAttr.Count - 1)
-                                {
-                                    iArgIn = result.Data;
-                                }
-                                else if (null != memberValue)
-                                {
-                                    ((IArg)memberValue).Out = result.Data;
-                                }
+                                ((IArg)memberValue).Out = result.Data;
                             }
                         }
                     }
@@ -318,7 +387,7 @@ namespace Business.Auth
 
                 if (0 < item.ArgAttrChild.Count && null != currentValue2)
                 {
-                    var result2 = await ArgsResult2(item.ArgAttrChild, methodName, currentValue2);
+                    var result2 = await ArgsResult2(group, item.ArgAttrChild, methodName, currentValue2);
                     if (1 > result2.State)
                     {
                         return result2;
@@ -335,7 +404,7 @@ namespace Business.Auth
                 }
             }
 
-            return ResultType.ResultCreate(isUpdate);
+            return ResultFactory.ResultCreate(ResultType, isUpdate);
         }
 
         static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, LoggerValue logObjs, ArgsLog log)
@@ -461,7 +530,7 @@ namespace Business.Auth
         {
             foreach (var item in this.MetaData)
             {
-                item.Value.ArgAttrs.dictionary.Clear();
+                item.Value.Args.collection.Clear();
                 item.Value.Attributes.Clear();
             }
             this.MetaData.dictionary.Clear();

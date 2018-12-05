@@ -20,8 +20,8 @@ namespace Business.Attributes
     using Result;
     using Utils;
     using System.Reflection;
-    using System.Linq;
     using System.Threading.Tasks;
+    using System.Linq;
 
     #region abstract
 
@@ -29,39 +29,169 @@ namespace Business.Attributes
     {
         #region MetaData
 
-        public static readonly ConcurrentReadOnlyDictionary<string, ConcurrentReadOnlyDictionary<string, Accessor>> MetaData;
+        public struct AttributeAccessor
+        {
+            public ConcurrentReadOnlyDictionary<string, Accessor> Accessor;
 
+            public object[] ConstructorArgs;
+        }
+
+        public static readonly ConcurrentReadOnlyDictionary<string, AttributeAccessor> Accessors = new ConcurrentReadOnlyDictionary<string, AttributeAccessor>();
+
+        internal static void LoadAttributes(System.Type type)
+        {
+            if (type.IsAbstract || Accessors.ContainsKey(type.FullName)) { return; }
+
+            var member = Accessors.dictionary.GetOrAdd(type.FullName, key => new AttributeAccessor { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() });
+
+            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+            {
+                if (typeof(System.MulticastDelegate).IsAssignableFrom(field.FieldType))
+                {
+                    continue;
+                }
+
+                var accessor = field.GetAccessor();
+                if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                member.Accessor.dictionary.TryAdd(field.Name, accessor);
+            }
+
+            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+            {
+                if (typeof(System.MulticastDelegate).IsAssignableFrom(property.PropertyType))
+                {
+                    continue;
+                }
+
+                var accessor = property.GetAccessor();
+                if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                member.Accessor.dictionary.TryAdd(property.Name, accessor);
+            }
+        }
+
+        #region GetAttributes
+
+        //internal static System.Collections.Generic.List<AttributeBase> GetArgAttr(System.Type type, bool inherit = true)
+        //{
+        //    var argAttr = new System.Collections.Generic.List<AttributeBase>(type.GetAttributes<AttributeBase>(inherit));
+        //    argAttr.Distinct(type.Assembly.GetCustomAttributes<AttributeBase>());//.AddRange(type.Assembly.GetCustomAttributes<AttributeBase>());
+        //    return argAttr;
+        //}
+        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(System.Type classType, bool inherit = true)
+        {
+            var classAttr = classType.GetAttributes<AttributeBase>(inherit);
+
+            foreach (var item in classAttr)
+            {
+                item.Source = SourceType.Class;
+            }
+
+            var assemblyAttr = classType.Assembly.GetCustomAttributes<AttributeBase>();
+
+            foreach (var item in assemblyAttr)
+            {
+                item.Source = SourceType.Assembly;
+            }
+
+            var attributes = new System.Collections.Generic.List<AttributeBase>(classAttr).Distinct(assemblyAttr);
+
+            return attributes;
+        }
+
+        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(MemberInfo member, bool inherit = true)
+        {
+            var attributes = member.GetAttributes<AttributeBase>(inherit).ToList();
+            attributes.ForEach(c => c.Source = SourceType.Method);
+            return attributes;
+        }
+
+        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(ParameterInfo member, System.Type type)
+        {
+            var attributes = new System.Collections.Generic.List<AttributeBase>(member.GetAttributes<AttributeBase>());
+            attributes.AddRange(member.ParameterType.GetAttributes<AttributeBase>());
+            attributes.AddRange(type.GetAttributes<AttributeBase>());
+            attributes.ForEach(c => c.Source = SourceType.Parameter);
+            return attributes;
+        }
+        internal static Attribute GetAttribute<Attribute>(ParameterInfo member, System.Type type) where Attribute : AttributeBase
+        {
+            var attribute = member.GetAttribute<Attribute>() ?? type.GetAttribute<Attribute>();
+            if (null != attribute)
+            {
+                attribute.Source = SourceType.Parameter;
+            }
+            return attribute;
+        }
+        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(MemberInfo member, System.Type type)
+        {
+            var attributes = new System.Collections.Generic.List<AttributeBase>();
+            attributes.AddRange(member.GetAttributes<AttributeBase>());
+            attributes.AddRange(type.GetAttributes<AttributeBase>());
+            attributes.ForEach(c => c.Source = SourceType.Children);
+            return attributes;
+        }
+
+        internal static System.Collections.Generic.List<Attribute> GetAttributes<Attribute>(System.Type type, SourceType source, System.Collections.Generic.IEqualityComparer<Attribute> comparer = null) where Attribute : AttributeBase
+        {
+            var attributes = type.GetAttributes<Attribute>().Distinct(comparer).ToList();
+            attributes.ForEach(c => c.Source = source);
+            return attributes;
+        }
+
+        internal static bool ExistAttr<Attribute>(ParameterInfo member, System.Type type) where Attribute : System.Attribute
+        {
+            return member.Exists<Attribute>() || type.Exists<Attribute>();
+        }
+
+        #endregion
+
+        /*
         static AttributeBase()
         {
             MetaData = new ConcurrentReadOnlyDictionary<string, ConcurrentReadOnlyDictionary<string, Accessor>>();
 
 #if !Mobile
+            var ass = System.AppDomain.CurrentDomain.GetAssemblies().Where(c => !c.IsDynamic);
 
-            Help.LoadAssemblys(Help.BaseDirectory, (assembly, typeInfo) =>
+            foreach (var assembly in ass)
             {
-                if (typeInfo.IsSubclassOf(typeof(AttributeBase)) && !typeInfo.IsAbstract)
+                try
                 {
-                    var member = new ConcurrentReadOnlyDictionary<string, Accessor>();
+                    var types = assembly.GetExportedTypes();
 
-                    foreach (var field in typeInfo.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+                    foreach (var type in types)
                     {
-                        var accessor = field.GetAccessor();
-                        if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                        member.dictionary.TryAdd(field.Name, accessor);
-                    }
+                        var typeInfo = type.GetTypeInfo();
 
-                    foreach (var property in typeInfo.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
-                    {
-                        var accessor = property.GetAccessor();
-                        if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                        member.dictionary.TryAdd(property.Name, accessor);
-                    }
+                        if (typeInfo.IsSubclassOf(typeof(AttributeBase)) && !typeInfo.IsAbstract)
+                        {
+                            var member = new ConcurrentReadOnlyDictionary<string, Accessor>();
 
-                    MetaData.dictionary.GetOrAdd(typeInfo.FullName, member);
+                            foreach (var field in typeInfo.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+                            {
+                                var accessor = field.GetAccessor();
+                                if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                                member.dictionary.TryAdd(field.Name, accessor);
+                            }
+
+                            foreach (var property in typeInfo.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+                            {
+                                var accessor = property.GetAccessor();
+                                if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                                member.dictionary.TryAdd(property.Name, accessor);
+                            }
+
+                            MetaData.dictionary.GetOrAdd(typeInfo.FullName, member);
+                        }
+                    }
                 }
-            });
-#endif
-        }
+                catch (System.Exception ex)
+                {
+                    System.Console.WriteLine(assembly.Location);
+                    ex.ExceptionWrite(console: true);
+                }
+            }
+            */
 
         #endregion
 
@@ -74,18 +204,18 @@ namespace Business.Attributes
         {
             get
             {
-                if (!MetaData.TryGetValue(this.type.FullName, out ConcurrentReadOnlyDictionary<string, Accessor> meta) || !meta.TryGetValue(member, out Accessor accessor)) { return null; }
+                if (!Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return null; }
 
                 return accessor.Getter(this);
             }
             set
             {
-                if (!MetaData.TryGetValue(this.type.FullName, out ConcurrentReadOnlyDictionary<string, Accessor> meta) || !meta.TryGetValue(member, out Accessor accessor)) { return; }
+                if (!Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return; }
 
                 try
                 {
                     var value2 = Help.ChangeType(value, accessor.Type);
-                    if (System.Object.Equals(value2, accessor.Getter(this))) { return; }
+                    if (object.Equals(value2, accessor.Getter(this))) { return; }
 
                     accessor.Setter(this, value2);
                 }
@@ -183,42 +313,49 @@ namespace Business.Attributes
 
         public AttributeBase()//bool config = false
         {
-            this.type = this.GetType();
-            this.typeFullName = this.type.FullName;
-            this.basePath = this.type.FullName.Replace('+', '.');
+            this.Type = this.GetType();
+            //this.AllowMultiple = this.Type.GetTypeInfo().GetAttribute<System.AttributeUsageAttribute>()?.AllowMultiple ?? false;
+            //this.basePath = this.Type.FullName.Replace('+', '.');
 
-            var usage = this.type.GetTypeInfo().GetAttribute<System.AttributeUsageAttribute>();
-            if (null != usage)
-            {
-                this.allowMultiple = usage.AllowMultiple;
-                this.inherited = usage.Inherited;
-            }
+            //var usage = this.Type.GetTypeInfo().GetAttribute<System.AttributeUsageAttribute>();
+            //if (null != usage)
+            //{
+            //    this.AllowMultiple = usage?.AllowMultiple;
+            //    this.Inherited = usage.Inherited;
+            //}
+
+            LoadAttributes(this.Type);
 
             //this.config = config;
         }
 
-        #region Property
+        #region
 
-        readonly System.Type type;
+        public enum SourceType
+        {
+            Assembly,
+            Class,
+            Method,
+            Parameter,
+            Children,
+        }
+
         /// <summary>
         /// Gets the fully qualified type name, including the namespace but not the assembly
         /// </summary>
-        public System.Type Type { get => type; }
+        public System.Type Type { get; private set; }
 
-        readonly System.String typeFullName;
-        public System.String TypeFullName { get => typeFullName; }
+        ///// <summary>
+        ///// Is it possible to specify attributes for multiple instances for a program element
+        ///// </summary>
+        //public bool AllowMultiple { get; private set; }
 
-        readonly bool allowMultiple;
-        /// <summary>
-        /// Is it possible to specify attributes for multiple instances for a program element
-        /// </summary>
-        public bool AllowMultiple { get => allowMultiple; }
+        public SourceType Source { get; internal set; }
 
-        readonly bool inherited;
-        /// <summary>
-        /// Determines whether the attributes indicated by the derived class and the overridden member are inherited
-        /// </summary>
-        public bool Inherited { get => inherited; }
+        ///// <summary>
+        ///// Determines whether the attributes indicated by the derived class and the overridden member are inherited
+        ///// </summary>
+        //public bool Inherited { get; private set; }
 
         //bool enable = true;
         //public bool Enable { get => enable; set => enable = value; }
@@ -226,8 +363,8 @@ namespace Business.Attributes
         //readonly bool config;
         //public bool Config { get => config; }
 
-        readonly string basePath;
-        public virtual string BasePath { get => basePath; }
+        //readonly string basePath;
+        //public virtual string BasePath { get => basePath; }
 
         //readonly bool restart;
         //public bool Restart { get => restart; }
@@ -246,21 +383,79 @@ namespace Business.Attributes
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public virtual T Clone<T>() where T : AttributeBase => this.JsonSerialize().TryJsonDeserialize<T>();
+        public virtual T Clone<T>() where T : AttributeBase
+        {
+            if (this.Type.IsAbstract) { return default; }
+
+            if (!Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta))
+            {
+                return default;
+            }
+
+            var attr = System.Activator.CreateInstance(this.Type, meta.ConstructorArgs);
+
+            foreach (var item in meta.Accessor.Values)
+            {
+                item.Setter(attr, item.Getter(this));
+            }
+
+            return attr as T;
+        }
+
+        public string Replace(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) || !Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta))
+            {
+                return value;
+            }
+
+            var sb = new System.Text.StringBuilder(value);
+
+            foreach (var item in meta.Accessor)
+            {
+                var member = $"{{{item.Key}}}";
+
+                if (-1 < value.IndexOf(member))
+                {
+                    sb = sb.Replace(member, System.Convert.ToString(item.Value.Getter(this)));
+                }
+            }
+
+            return sb.ToString();
+        }
     }
+
+    #endregion
 
     #region
 
+    public enum IgnoreMode
+    {
+        Method = 2,
+        Arg = 4,
+        ArgChild = 8,
+        BusinessArg = 16,
+    }
+
+    /* 1:Ignore method 2:Ignore document 3:Ignore Business ArgAttr */
     /// <summary>
     /// The Method and Property needs to be ignored and will not be a proxy
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Property | System.AttributeTargets.Parameter | System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
-    public sealed class IgnoreAttribute : System.Attribute
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property | System.AttributeTargets.Parameter | System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
+    public class Ignore : GropuAttribute
     {
-        /// <summary>
-        /// Do you just ignore children? 
-        /// </summary>
-        public bool HasChild { get; set; }
+        public Ignore(IgnoreMode mode = IgnoreMode.Method)
+        {
+            this.Mode = mode;
+        }
+
+        public IgnoreMode Mode { get; private set; }
+
+        //public string Group { get; set; }
+
+        //public bool Contains(IgnoreMode mode) => 0 != (this.Mode & mode);
+
+        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.Mode.GetName()}";
     }
 
     /// <summary>
@@ -274,16 +469,16 @@ namespace Business.Attributes
     //public class HttpRequestAttribute : System.Attribute { }
 
 
-    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public sealed class EnableWatcherAttribute : System.Attribute { }
+    //[System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    //public sealed class EnableWatcherAttribute : System.Attribute { }
 
     /// <summary>
     /// Info
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public class InfoAttribute : AttributeBase
+    public class Info : AttributeBase
     {
-        public InfoAttribute(string businessName)
+        public Info(string businessName = null)
         {
             this.BusinessName = businessName;
             //this.ConfigFileName = System.IO.Path.Combine(Help.BaseDirectory, configFileName);
@@ -291,9 +486,15 @@ namespace Business.Attributes
 
         public string BusinessName { get; internal set; }
 
+        /// <summary>
+        /// Default
+        /// </summary>
+        public string CommandGroupDefault { get; set; } = "Default";
+
         //public string ConfigFileName { get; internal set; }
     }
 
+    /*
     /// <summary>
     /// Socket
     /// </summary>
@@ -519,47 +720,81 @@ namespace Business.Attributes
 
         public string Description { get; internal set; }
     }
+    */
+
+    public struct UseEntry
+    {
+        public static System.Type Type = typeof(UseEntry);
+
+        //public static UseEntry Default = default;
+
+        public UseEntry(string name, object value) { this.Name = name; this.Value = value; }
+
+        public string Name { get; private set; }
+
+        public object Value { get; private set; }
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    public sealed class UseAttribute : AttributeBase
+    {
+        public UseAttribute(bool parameterName = false) => this.ParameterName = parameterName;
+
+        public bool ParameterName { get; private set; }
+    }
+
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+    public sealed class NickAttribute : AttributeBase
+    {
+        public NickAttribute(string nick) => this.Nick = nick;
+
+        /// <summary>
+        /// Amicable name
+        /// </summary>
+        public string Nick { get; private set; }
+    }
 
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
-    public class LoggerAttribute : AttributeBase
+    public class LoggerAttribute : GropuAttribute
     {
-        [Newtonsoft.Json.JsonConstructor]
+        //[Newtonsoft.Json.JsonConstructor]
         public LoggerAttribute(LoggerType logType = LoggerType.All, bool canWrite = true)
         {
-            this.logType = logType;
-            this.canWrite = canWrite;
+            this.LogType = logType;
+            this.CanWrite = canWrite;
         }
-
-        LoggerType logType;
         /// <summary>
         /// Record type
         /// </summary>
-        public LoggerType LogType { get => logType; }
-
-        bool canWrite;
+        public LoggerType LogType { get; private set; }
         /// <summary>
         /// Allow record
         /// </summary>
-        public bool CanWrite { get => canWrite; set => canWrite = value; }
+        public bool CanWrite { get; set; }
 
         /// <summary>
         /// Allowed to return to parameters
         /// </summary>
         public LoggerValueMode CanValue { get; set; }
-
-        bool canResult = true;
         /// <summary>
         /// Allowed to return to results
         /// </summary>
-        public bool CanResult { get => canResult; set => canResult = value; }
+        public bool CanResult { get; set; } = true;
 
-        public LoggerAttribute SetLogType(LoggerType logType)
+        public LoggerAttribute SetType(LoggerType logType)
         {
-            this.logType = logType;
+            this.LogType = logType;
             return this;
         }
 
-        public override T Clone<T>() => new LoggerAttribute(this.LogType) { CanResult = this.CanResult, CanValue = this.CanValue, CanWrite = this.CanWrite } as T;
+        //public static System.Collections.Generic.IEqualityComparer<LoggerAttribute> Comparer = Equality<LoggerAttribute>.CreateComparer(c => c.LogType);
+
+        //public override T Clone<T>() => new LoggerAttribute(this.LogType) { Group = this.Group, CanResult = this.CanResult, CanValue = this.CanValue, CanWrite = this.CanWrite } as T;
+
+        //public override string Key(string space = "->") => string.Format("{1}{0}{2}", space, this.Mode.GetName(), this.Group.Trim());
+        public override string GroupKey(string space = "->") => $"{ base.GroupKey(space)}{space}{this.LogType.GetName()}";
+
+        public override string ToString() => $"{this.Type.Name} {this.LogType.ToString()}";
     }
 
     /// <summary>
@@ -597,29 +832,59 @@ namespace Business.Attributes
     //    public IResult Error { get => argAttr.resultType.ResultCreate(argAttr.State, argAttr.Message); }
     //}
 
+    public abstract class GropuAttribute : AttributeBase
+    {
+        string group = string.Empty;
+
+        /// <summary>
+        /// Used for the command group
+        /// </summary>
+        public string Group { get => group; set => group = value?.Trim() ?? string.Empty; }
+
+        public virtual string GroupKey(string space = "->") => $"{this.Type.FullName}{space}{this.Group.Trim()}";
+
+        public static System.Collections.Generic.IEqualityComparer<GropuAttribute> Comparer = Equality<GropuAttribute>.CreateComparer(c => c.GroupKey(), System.StringComparer.CurrentCultureIgnoreCase);
+    }
+
     /// <summary>
     /// Base class for all attributes that apply to parameters
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-    public abstract class ArgumentAttribute : AttributeBase
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
+    public abstract class ArgumentAttribute : GropuAttribute
     {
+        public class MetaData
+        {
+            internal System.Type resultType;
+
+            public dynamic Business { get; internal set; }
+
+            public string Method { get; internal set; }
+
+            public string Member { get; internal set; }
+
+            public System.Type MemberType { get; internal set; }
+
+            public bool HasProcesIArg { get; internal set; }
+        }
+
         public ArgumentAttribute(int state, string message = null, bool canNull = true)
         {
             //if (-1 < state) { throw new System.ArgumentOutOfRangeException("state"); }
 
-            this.state = state;
-            this.message = message;
-            this.canNull = canNull;
+            this.State = state;
+            this.Message = message;
+            this.CanNull = canNull;
             //this.Result = new ArgumentResult(this);
+            this.Meta = new MetaData();
 
             this.BindAfter += () =>
             {
-                if (!System.String.IsNullOrWhiteSpace(this.Message))
+                if (!string.IsNullOrWhiteSpace(this.Message))
                 {
                     this.Message = this.Replace(this.Message);
                 }
 
-                if (!System.String.IsNullOrWhiteSpace(this.Description))
+                if (!string.IsNullOrWhiteSpace(this.Description))
                 {
                     this.Description = this.Replace(this.Description);
                 }
@@ -628,47 +893,35 @@ namespace Business.Attributes
 
         public System.Action BindAfter { get; set; }
 
-        internal System.Type resultType;
-        public dynamic Business { get; set; }
+        public MetaData Meta { get; }
 
-        public string Method { get; set; }
-
-        public string Member { get; set; }
-
-        public System.Type MemberType { get; set; }
-
-        //public ArgumentResult Result { get; }
-
-        bool canNull;
         /// <summary>
         /// By checking the Allow null value
         /// </summary>
-        public bool CanNull { get => canNull; set => canNull = value; }
+        public bool CanNull { get; set; }
 
         int state;
         /// <summary>
         /// Used to return state
         /// </summary>
-        public int State { get => state; set => state = value; }
+        public virtual int State { get => state; set => state = value.ConvertErrorState(); }
 
-        string message;
         /// <summary>
         /// Used to return error messages
         /// </summary>
-        public string Message { get => message; set => message = value; }
+        public string Message { get; set; }
 
         ///// <summary>
         ///// Remove leading or trailing white space characters
         ///// </summary>
         //public bool TrimChar { get; set; }
 
-        /// <summary>
-        /// Used for the command group
-        /// </summary>
-        public string Group { get; set; }
+        ///// <summary>
+        ///// Used for the command group
+        ///// </summary>
+        //public string Group { get; set; }
 
-        string description;
-        public string Description { get => description; set => description = value; }
+        public string Description { get; set; }
 
         /// <summary>
         /// Amicable name
@@ -680,7 +933,7 @@ namespace Business.Attributes
         ///// </summary>
         //public bool CanRef { get; set; }
 
-        public bool Ignore { get; set; }
+        //public bool Ignore { get; set; }
 
         //public string Group { get; set; }
 
@@ -689,14 +942,22 @@ namespace Business.Attributes
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public abstract Task<IResult> Proces(dynamic value);
+        public virtual async Task<IResult> Proces(dynamic value) => this.ResultCreate<dynamic>(value);
+
+        /// <summary>
+        /// Start processing the Parameter object, By this.ResultCreate() method returns
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="iArg"></param>
+        /// <returns></returns>
+        public virtual async Task<IResult> Proces(dynamic value, IArg arg) => this.ResultCreate<dynamic>(value);
 
         #region Result
 
-        /// <summary>
-        /// Used to create the Proces() method returns object
-        /// </summary>
-        /// <returns></returns>
+        ///// <summary>
+        ///// Used to create the Proces() method returns object
+        ///// </summary>
+        ///// <returns></returns>
         //public IResult ResultCreate() => resultType.ResultCreate();
 
         /// <summary>
@@ -704,7 +965,7 @@ namespace Business.Attributes
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state) => resultType.ResultCreate(state);
+        public IResult ResultCreate(int state) => ResultFactory.ResultCreate(Meta.resultType, state);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -712,7 +973,7 @@ namespace Business.Attributes
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state = 1, string message = null) => resultType.ResultCreate(state, message);
+        public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.ResultCreate(Meta.resultType, state, message);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -721,37 +982,27 @@ namespace Business.Attributes
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => resultType.ResultCreate(data, message, state);
+        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(Meta.resultType, data, message, state);
+
+        /// <summary>
+        /// Used to create the Proces() method returns object
+        /// </summary>
+        /// <typeparam name="Data"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(Meta.resultType, data, message, state);
 
         //public IResult ResultCreate(dynamic data, string message = null, int state = 1) => ResultCreate<dynamic>(data, message, state);
 
+        //public IResult OK { get => this.ResultCreate(); }
+        //public IResult Error { get => this.ResultCreate(State, Message); }
+
         #endregion
-
-        public string Replace(string value)
-        {
-            if (System.String.IsNullOrWhiteSpace(value) || !MetaData.TryGetValue(this.TypeFullName, out ConcurrentReadOnlyDictionary<string, Accessor> meta))
-            {
-                return value;
-            }
-
-            var sb = new System.Text.StringBuilder(value);
-
-            foreach (var item in meta)
-            {
-                var member = string.Format("{{{0}}}", item.Key);
-
-                if (-1 < value.IndexOf(member))
-                {
-                    sb = sb.Replace(member, System.Convert.ToString(item.Value.Getter(this)));
-                }
-            }
-
-            return sb.ToString();
-        }
 
         public static IResult CheckNull(ArgumentAttribute attribute, dynamic value)
         {
-            if (System.Object.Equals(null, value))
+            if (object.Equals(null, value))
             {
                 if (attribute.CanNull)
                 {
@@ -759,7 +1010,7 @@ namespace Business.Attributes
                 }
                 else
                 {
-                    return attribute.ResultCreate(attribute.State, attribute.Message ?? string.Format("argument \"{0}\" can not null.", attribute.Member));
+                    return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Meta.Member}\" can not null.");
                 }
             }
 
@@ -770,25 +1021,27 @@ namespace Business.Attributes
     /// <summary>
     /// Command attribute on a method, for multiple sources to invoke the method
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class CommandAttribute : AttributeBase
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public class CommandAttribute : GropuAttribute
     {
         public CommandAttribute(string onlyName = null) { this.OnlyName = onlyName; }
 
         //public bool TrimChar { get; set; }
 
-        public string Group { get; set; }
+        //public string Group { get; set; }
 
         public string OnlyName { get; set; }
 
-        public string MethodName { get; set; }
+        //public string MethodName { get; set; }
 
-        public virtual string GetKey(string space = "->") => string.Format("{1}{0}{2}", space, this.Group, this.OnlyName);
+        public bool IgnoreBusinessArg { get; set; }
 
-        public override T Clone<T>() => new CommandAttribute { Group = this.Group, OnlyName = this.OnlyName } as T;
+        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.OnlyName}";
+
+        //public override T Clone<T>() => new CommandAttribute { Group = this.Group, OnlyName = this.OnlyName } as T;
+
+        public override string ToString() => $"{this.Type.Name} {Group} {OnlyName}";
     }
-
-    #endregion
 
     #region
 
@@ -799,16 +1052,16 @@ namespace Business.Attributes
 
         public override async Task<IResult> Proces(dynamic value)
         {
-            if (typeof(System.String).Equals(this.MemberType))
+            if (typeof(string).Equals(this.Meta.MemberType))
             {
-                if (System.String.IsNullOrEmpty(value))
+                if (string.IsNullOrEmpty(value))
                 {
-                    return this.ResultCreate(State, Message ?? string.Format("argument \"{0}\" can not null.", this.Member));
+                    return this.ResultCreate(State, Message ?? $"argument \"{this.Meta.Member}\" can not null.");
                 }
             }
-            else if (System.Object.Equals(null, value))
+            else if (object.Equals(null, value))
             {
-                return this.ResultCreate(State, Message ?? string.Format("argument \"{0}\" can not null.", this.Member));
+                return this.ResultCreate(State, Message ?? $"argument \"{ this.Meta.Member}\" can not null.");
             }
 
             return this.ResultCreate();
@@ -821,12 +1074,12 @@ namespace Business.Attributes
         {
             this.BindAfter += () =>
             {
-                if (!System.String.IsNullOrWhiteSpace(this.MinMsg))
+                if (!string.IsNullOrWhiteSpace(this.MinMsg))
                 {
                     this.MinMsg = this.Replace(this.MinMsg);
                 }
 
-                if (!System.String.IsNullOrWhiteSpace(this.MaxMsg))
+                if (!string.IsNullOrWhiteSpace(this.MaxMsg))
                 {
                     this.MaxMsg = this.Replace(this.MaxMsg);
                 }
@@ -836,32 +1089,30 @@ namespace Business.Attributes
         public object Min { get; set; }
         public object Max { get; set; }
 
-        public string MinMsg { get; set; }
-        public string MaxMsg { get; set; }
+        public string MinMsg { get; set; } = "argument \"{Member}\" minimum range {Min}.";
+        public string MaxMsg { get; set; } = "argument \"{Member}\" maximum range {Max}.";
 
         public override async Task<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            var type = System.Nullable.GetUnderlyingType(this.MemberType) ?? this.MemberType;
+            var type = System.Nullable.GetUnderlyingType(this.Meta.MemberType) ?? this.Meta.MemberType;
 
-            var msg = System.String.Empty;
-            var minMsg = string.Format("argument \"{0}\" minimum range ", this.Member) + "{0}.";
-            var maxMsg = string.Format("argument \"{0}\" maximum range ", this.Member) + "{0}.";
+            string msg = null;
 
             switch (type.FullName)
             {
                 case "System.String":
                     {
                         var ags = System.Convert.ToString(value).Trim();
-                        if (null != Min && Help.ChangeType<System.Int32>(Min) > ags.Length)
+                        if (null != Min && Help.ChangeType<int>(Min) > ags.Length)
                         {
-                            msg = MinMsg ?? string.Format(minMsg, Min); break;
+                            msg = MinMsg; break;
                         }
-                        if (null != Max && Help.ChangeType<System.Int32>(Max) < ags.Length)
+                        if (null != Max && Help.ChangeType<int>(Max) < ags.Length)
                         {
-                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
+                            msg = MaxMsg; break;
                         }
                     }
                     break;
@@ -870,63 +1121,63 @@ namespace Business.Attributes
                         var ags = System.Convert.ToDateTime(value);
                         if (null != Min && Help.ChangeType<System.DateTime>(Min) > ags)
                         {
-                            msg = MinMsg ?? string.Format(minMsg, Min); break;
+                            msg = MinMsg; break;
                         }
                         if (null != Max && Help.ChangeType<System.DateTime>(Max) < ags)
                         {
-                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
+                            msg = MaxMsg; break;
                         }
                     }
                     break;
                 case "System.Int32":
                     {
                         var ags = System.Convert.ToInt32(value);
-                        if (null != Min && Help.ChangeType<System.Int32>(Min) > ags)
+                        if (null != Min && Help.ChangeType<int>(Min) > ags)
                         {
-                            msg = MinMsg ?? string.Format(minMsg, Min); break;
+                            msg = MinMsg; break;
                         }
-                        if (null != Max && Help.ChangeType<System.Int32>(Max) < ags)
+                        if (null != Max && Help.ChangeType<int>(Max) < ags)
                         {
-                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
+                            msg = MaxMsg; break;
                         }
                     }
                     break;
                 case "System.Int64":
                     {
                         var ags = System.Convert.ToInt64(value);
-                        if (null != Min && Help.ChangeType<System.Int64>(Min) > ags)
+                        if (null != Min && Help.ChangeType<long>(Min) > ags)
                         {
-                            msg = MinMsg ?? string.Format(minMsg, Min); break;
+                            msg = MinMsg; break;
                         }
-                        if (null != Max && Help.ChangeType<System.Int64>(Max) < ags)
+                        if (null != Max && Help.ChangeType<long>(Max) < ags)
                         {
-                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
+                            msg = MaxMsg; break;
                         }
                     }
                     break;
                 case "System.Decimal":
                     {
                         var ags = System.Convert.ToDecimal(value);
-                        if (null != Min && Help.ChangeType<System.Decimal>(Min) > ags)
+                        if (null != Min && Help.ChangeType<decimal>(Min) > ags)
                         {
-                            msg = MinMsg ?? string.Format(minMsg, Min); break;
+                            msg = MinMsg; break;
                         }
-                        if (null != Max && Help.ChangeType<System.Decimal>(Max) < ags)
+                        if (null != Max && Help.ChangeType<decimal>(Max) < ags)
                         {
-                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
+                            msg = MaxMsg; break;
                         }
                     }
                     break;
                 case "System.Double":
                     {
                         var ags = System.Convert.ToDouble(value);
-                        if (null != Min && Help.ChangeType<System.Double>(Min) > ags)
+                        if (null != Min && Help.ChangeType<double>(Min) > ags)
                         {
-                            msg = MinMsg ?? string.Format(minMsg, Min); break;
+                            msg = MinMsg; break;
                         }
-                        if (null != Max && Help.ChangeType<System.Double>(Max) < ags)
+                        if (null != Max && Help.ChangeType<double>(Max) < ags)
                         {
-                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
+                            msg = MaxMsg; break;
                         }
                     }
                     break;
@@ -934,23 +1185,24 @@ namespace Business.Attributes
                     if (type.IsCollection())
                     {
                         var list = value as System.Collections.ICollection;
-                        if (null != Min && Help.ChangeType<System.Int32>(Min) > list.Count)
+                        if (null != Min && Help.ChangeType<int>(Min) > list.Count)
                         {
-                            msg = MinMsg ?? string.Format(minMsg, Min); break;
+                            msg = MinMsg; break;
                         }
-                        if (null != Max && Help.ChangeType<System.Int32>(Max) < list.Count)
+                        if (null != Max && Help.ChangeType<int>(Max) < list.Count)
                         {
-                            msg = MaxMsg ?? string.Format(maxMsg, Max); break;
+                            msg = MaxMsg; break;
                         }
                     }
                     else
                     {
-                        return this.ResultCreate(State, string.Format("argument \"{0}\" type error", this.Member, type.FullName));
+                        return this.ResultCreate(State, $"argument \"{this.Meta.Member}\" type error");
                     }
                     break;
             }
 
-            if (!System.String.IsNullOrEmpty(msg))
+            //checked error
+            if (!string.IsNullOrEmpty(msg))
             {
                 return this.ResultCreate(State, Message ?? msg);
             }
@@ -962,22 +1214,20 @@ namespace Business.Attributes
     public class ScaleAttribute : ArgumentAttribute
     {
         public ScaleAttribute(int state = -802, string message = null, bool canNull = true) : base(state, message, canNull) { }
-
-        int size = 2;
-        public int Size { get => size; set => size = value; }
+        public int Size { get; set; } = 2;
 
         public override async Task<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            switch (this.MemberType.FullName)
+            switch (this.Meta.MemberType.FullName)
             {
                 case "System.Decimal":
-                    return this.ResultCreate(Utils.Help.Scale((decimal)value, size));
+                    return this.ResultCreate(Help.Scale((decimal)value, Size));
                 case "System.Double":
-                    return this.ResultCreate(Utils.Help.Scale((double)value, size));
-                default: return this.ResultCreate(State, Message ?? string.Format("argument \"{0}\" type error.", this.Member));
+                    return this.ResultCreate(Help.Scale((double)value, Size));
+                default: return this.ResultCreate(State, Message ?? $"argument \"{this.Meta.Member}\" type error");
             }
         }
     }
@@ -993,7 +1243,7 @@ namespace Business.Attributes
 
             if (!Utils.Help.CheckEmail(value))
             {
-                return this.ResultCreate(State, Message ?? string.Format("argument \"{0}\" email error.", this.Member));
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Meta.Member}\" email error");
             }
             return this.ResultCreate();
         }
@@ -1002,9 +1252,7 @@ namespace Business.Attributes
     public class CheckCharAttribute : ArgumentAttribute
     {
         public CheckCharAttribute(int state = -804, string message = null, bool canNull = true) : base(state, message, canNull) { }
-
-        Utils.Help.CheckCharMode mode = Utils.Help.CheckCharMode.All;
-        public Utils.Help.CheckCharMode Mode { get => mode; set => mode = value; }
+        public Utils.Help.CheckCharMode Mode { get; set; } = Help.CheckCharMode.All;
 
         public override async Task<IResult> Proces(dynamic value)
         {
@@ -1013,7 +1261,7 @@ namespace Business.Attributes
 
             if (!Utils.Help.CheckChar(value, Mode))
             {
-                return this.ResultCreate(State, Message ?? string.Format("argument \"{0}\" char verification failed.", this.Member));
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Meta.Member}\" char verification failed");
             }
             return this.ResultCreate();
         }
@@ -1024,8 +1272,7 @@ namespace Business.Attributes
         public MD5Attribute(int state = -820, string message = null, bool canNull = true)
             : base(state, message, canNull) { }
 
-        string encodingNmae = "UTF-8";
-        public string EncodingNmae { get => encodingNmae; set => encodingNmae = value; }
+        public string EncodingNmae { get; set; } = "UTF-8";
 
         public bool HasUpper { get; set; }
 
@@ -1034,36 +1281,36 @@ namespace Business.Attributes
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            return this.ResultCreate(Utils.Help.MD5(value, encodingNmae, HasUpper));
+            return this.ResultCreate(Utils.Help.MD5(value, EncodingNmae, HasUpper));
         }
     }
 
     /// <summary>
-    /// AES
+    /// AES return to item1=IV and item2=value
     /// </summary>
     public class AES : ArgumentAttribute
     {
         /// <summary>
-        /// d5547b72d2aa42ceae402fd96b3d7b60
+        /// key
         /// </summary>
-        public static string KEY = "d5547b72d2aa42ceae402fd96b3d7b60";
+        public string Key { get; private set; }
 
-        public AES(int code = -821, string message = null, bool canNull = true)
-            : base(code, message, canNull) { }
+        public AES(string key, int code = -821, string message = null, bool canNull = true)
+            : base(code, message, canNull) => this.Key = key;
 
         public override async Task<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            return this.ResultCreate(Help.AES.Encrypt(value, KEY));
+            return this.ResultCreate(Help.AES.Encrypt(value, Key));
         }
 
-        public static bool Equals(string password, string encryptData, string salt)
+        public bool Equals(string password, string encryptData, string salt)
         {
             try
             {
-                return System.Object.Equals(password, Help.AES.Decrypt(encryptData, KEY, salt));
+                return object.Equals(password, Help.AES.Decrypt(encryptData, Key, salt));
             }
             catch
             {
@@ -1078,10 +1325,9 @@ namespace Business.Attributes
 
     public sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
-        public ArgumentDefaultAttribute(System.Type resultType, int state = -11, string message = null)
-            : base(state, message) { this.resultType = resultType; }
+        public ArgumentDefaultAttribute(System.Type resultType, int state = -11, string message = null) : base(state, message) { this.Meta.resultType = resultType; }
 
-        public override async Task<IResult> Proces(dynamic value) => this.ResultCreate<dynamic>(value);
+        //public override async Task<IResult> Proces(dynamic value) => this.ResultCreate<dynamic>(value);
     }
 
     public class JsonArgAttribute : ArgumentAttribute
@@ -1098,12 +1344,12 @@ namespace Business.Attributes
 
             try
             {
-                return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(value, this.MemberType, Settings));
+                return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(value, this.Meta.MemberType, Settings));
             }
-            catch { return this.ResultCreate(State, Message ?? string.Format("Arguments {0} Json deserialize error", this.Member)); }
+            catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Meta.Member} Json deserialize error"); }
         }
     }
-
+    /*
     public class ProtoBufArgAttribute : ArgumentAttribute
     {
         public ProtoBufArgAttribute(int state = -13, string message = null, bool canNull = false)
@@ -1124,6 +1370,6 @@ namespace Business.Attributes
             catch { return this.ResultCreate(State, Message ?? string.Format("Arguments {0} ProtoBuf deserialize error", this.Member)); }
         }
     }
-
+    */
     #endregion
 }
