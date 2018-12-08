@@ -67,7 +67,7 @@ namespace UnitTest
         [CheckNull]
         [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = "DEF")]
         [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = "DEF")]
-        public Arg<dynamic> A;
+        public Arg<object, dynamic> A;
     }
 
     [Info("Business", CommandGroupDefault = "DEF")]
@@ -176,7 +176,7 @@ namespace UnitTest
         {
             this.Logger = logger =>
             {
-                var data = logger.Value?.ToValue(LoggerValue.LoggerValueType.Out);
+                var data = logger.Value?.ToValue();
 
                 System.Console.WriteLine(data.JsonSerialize());
             };
@@ -199,7 +199,7 @@ namespace UnitTest
 
             [Logger(LoggerType.Record, Group = "DEF", CanWrite = false)]Token token = default)
             =>
-            this.ResultCreate(use03.Out.A);
+            this.ResultCreate(arg01.Out.A);
     }
 
     [TestClass]

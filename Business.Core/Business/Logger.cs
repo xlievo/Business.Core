@@ -134,7 +134,7 @@ namespace Business
 
             foreach (var item in this)
             {
-                dictionary.Add(item.Key, HasIArg[item.Key] ? (valueType == LoggerValueType.Out ? item.Value.Out : item.Value.In) : item.Value);
+                dictionary.Add(item.Key, HasIArg[item.Key] ? (valueType == LoggerValueType.Out ? (item.Value as IArg).Out : (item.Value as IArg).In) : item.Value);
             }
 
             return dictionary;

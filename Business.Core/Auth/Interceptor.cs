@@ -420,9 +420,13 @@ namespace Business.Auth
 
                     if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite && log.hasIArg)
                     {
-                        logObjs.Add(log.name, log.value.Out);
+                        logObjs.Add(log.name, (log.value as IArg).Out);
                         logObjs.HasIArg[log.name] = false;
                         //logObjs.Add(log.name, log.value.GetOut());
+                    }
+                    else if (log.hasIArg)
+                    {
+                        logObjs.Add(log.name, log.value as IArg);
                     }
                     else
                     {
@@ -434,9 +438,13 @@ namespace Business.Auth
                     {
                         if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite && log.hasIArg)
                         {
-                            logObjs.Add(log.name, log.value.Out);
+                            logObjs.Add(log.name, (log.value as IArg).Out);
                             logObjs.HasIArg[log.name] = false;
                             //logObjs.Add(log.name, log.value.GetOut());
+                        }
+                        else if (log.hasIArg)
+                        {
+                            logObjs.Add(log.name, log.value as IArg);
                         }
                         else
                         {
