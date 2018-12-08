@@ -908,7 +908,10 @@ namespace Business
 
                     var argAttrAll = AttributeBase.GetAttributes(argInfo, currentType);
 
-                    var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() : argAttrAll.GetAttr<UseAttribute>();
+                    //var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() : argAttrAll.GetAttr<UseAttribute>();
+
+                    var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
+
                     var hasUse = null != use || (current.hasIArg ? cfg.UseTypes.Contains(current.inType.FullName) : false);
                     var nick = argAttrAll.GetAttr<NickAttribute>();
 
@@ -1074,7 +1077,8 @@ namespace Business
                 var path2 = $"{path}.{item.Name}";
 
                 var argAttrAll = AttributeBase.GetAttributes(item, current.outType);
-                var use = argAttrAll.GetAttr<UseAttribute>();
+                //var use = argAttrAll.GetAttr<UseAttribute>();
+                var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
                 var hasUse = null != use || (current.hasIArg ? useTypes.Contains(current.inType.FullName) : false);
 
                 args.collection.Add(new Args(item.Name,

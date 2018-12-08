@@ -941,7 +941,18 @@ namespace Business.Utils
             }
         }
 
-        public static Attribute GetAttr<Attribute>(this System.Collections.Generic.IList<Attributes.AttributeBase> attributes) where Attribute : Attributes.AttributeBase => attributes.FirstOrDefault(c => c is Attribute) as Attribute;
+        public static Attribute GetAttr<Attribute>(this System.Collections.Generic.IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null) where Attribute : Attributes.AttributeBase
+        {
+            if (null == predicate)
+            {
+                return attributes.FirstOrDefault(c => c is Attribute) as Attribute;
+            }
+            else
+            {
+                return attributes.FirstOrDefault(c => c is Attribute && predicate((Attribute)c)) as Attribute;
+            }
+            //return attributes.FirstOrDefault(c => c is Attribute) as Attribute;
+        }
 
         public static T[] GetAttributes<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
         {
@@ -952,6 +963,9 @@ namespace Business.Utils
         public static T GetAttribute<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
+
+            if (member.MemberType == MemberTypes.TypeInfo && typeof(object) == (System.Type)member) { return default; }
+
             return member.GetCustomAttribute<T>(inherit);
         }
 

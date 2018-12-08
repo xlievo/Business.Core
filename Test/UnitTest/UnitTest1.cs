@@ -14,9 +14,25 @@ using System.Linq;
 namespace UnitTest
 {
     [Logger(LoggerType.Record, CanWrite = false)]
+    [Use]
     public struct Use01
     {
         public string A;
+    }
+
+    public struct Use02
+    {
+        public string B;
+    }
+
+    /// <summary>
+    /// Attr01
+    /// </summary>
+    public class ProcesUse02 : ArgumentAttribute
+    {
+        public ProcesUse02(int state = -100, string message = null, bool canNull = true) : base(state, message, canNull) { }
+
+        public async override Task<IResult> Proces(dynamic value) => this.ResultCreate(new Use02 { B = value.A });
     }
 
     /// <summary>
@@ -61,7 +77,9 @@ namespace UnitTest
         {
             this.Logger = logger =>
             {
-                //logger.
+                var data = logger.Value?.ToValue();
+
+                System.Console.WriteLine(data.JsonSerialize());
             };
         }
 
@@ -149,25 +167,39 @@ namespace UnitTest
         public virtual async Task<dynamic> TestAnonymous(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
 
         public virtual async Task<dynamic> TestAnonymous2(dynamic a, [Use(true)]dynamic use01) => new { a, b = use01 };
+    }
+
+    [Info(CommandGroupDefault = "DEF")]
+    public class BusinessMember2 : BusinessBase<ResultObject<object>>
+    {
+        public BusinessMember2()
+        {
+            this.Logger = logger =>
+            {
+                var data = logger.Value?.ToValue(LoggerValue.LoggerValueType.Out);
+
+                System.Console.WriteLine(data.JsonSerialize());
+            };
+        }
 
         public virtual async Task<dynamic> TestLogger(
-            [Use(true)]Use01 use01,
+            Use01 use01,
 
             Arg<Arg01> arg01,
 
-            [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
-            [Nick("arg.b")]
-            decimal b = 0.0234m,
+            [Use(true)]Arg<Use01> use02,
 
-            [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = "DEF")]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
-            decimal c = 0.0234m,
+            Arg<dynamic, Use01> use03,
+
+            Arg<Use01, Use01> use04,
+
+            [ProcesUse02]Arg<dynamic, Use01> use05,
+
+            [ProcesUse02]Arg<Use02, Use01> use06,
 
             [Logger(LoggerType.Record, Group = "DEF", CanWrite = false)]Token token = default)
             =>
-            this.ResultCreate(arg01.Out.A.Out);
+            this.ResultCreate(use03.Out.A);
     }
 
     [TestClass]
@@ -177,12 +209,15 @@ namespace UnitTest
         static CommandGroup Cmd = Member.Command;
         static Configer Cfg = Member.Configer;
 
-        static dynamic AsyncCallUse(string cmd, string group = null, object[] args = null, params object[] useObj)
+        static dynamic AsyncCallUse(CommandGroup businessCommand, string cmd, string group = null, object[] args = null, params object[] useObj)
         {
-            var t = Cmd.AsyncCallUse(cmd, group, args, useObj);
+            var t = businessCommand.AsyncCallUse(cmd, group, args, useObj);
             t.Wait();
             return t.Result;
         }
+
+        static dynamic AsyncCallUse(string cmd, string group = null, object[] args = null, params object[] useObj) => AsyncCallUse(Cmd, cmd, group, args, useObj);
+
 
         [TestMethod]
         public void TestCfgInfo()
@@ -386,7 +421,8 @@ namespace UnitTest
         [TestMethod]
         public void TestLogger()
         {
-            var t2 = AsyncCallUse("TestLogger", null, new object[] { new Arg01 { A = "abc" }, 2, 2 }, new UseEntry("use01", new Use01 { A = "aaa" }));
+            var member = Bind.Create<BusinessMember2>().UseDoc();
+            var t2 = AsyncCallUse(member.Command, "TestLogger", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry("use02", new Use01 { A = "bbb" }), new Use01 { A = "aaa" });
             Assert.AreEqual(t2.State, 1);
             Assert.AreEqual(t2.HasData, true);
         }

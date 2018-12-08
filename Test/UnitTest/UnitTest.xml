@@ -4,6 +4,11 @@
         <name>UnitTest</name>
     </assembly>
     <members>
+        <member name="T:UnitTest.ProcesUse02">
+            <summary>
+            Attr01
+            </summary>
+        </member>
         <member name="T:UnitTest.Proces01">
             <summary>
             Attr01

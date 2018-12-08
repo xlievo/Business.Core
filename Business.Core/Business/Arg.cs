@@ -90,7 +90,8 @@ namespace Business
     {
         public static implicit operator Arg<OutType, InType>(InType value) => new Arg<OutType, InType> { In = value };
         //default OutType
-        public static implicit operator Arg<OutType, InType>(OutType value) => new Arg<OutType, InType>() { In = (InType)Utils.Help.ChangeType(value, typeof(InType)) };
+        //public static implicit operator Arg<OutType, InType>(OutType value) => new Arg<OutType, InType>() { In = (InType)Utils.Help.ChangeType(value, typeof(InType)) };
+        //public static implicit operator Arg<OutType, InType>(OutType value) => new Arg<OutType, InType>() { In = (dynamic)value };
 
         dynamic IArg.Out { get => this.Out; set => this.Out = value; }
 
