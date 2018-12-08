@@ -1166,12 +1166,12 @@ namespace Business
 
                 var group = new ArgGroup(ignores.ToReadOnly(), argAttr, nickValue, path2, default == owner ? item.Value.OnlyName : $"{item.Value.OnlyName}.{owner}");
 
-                if (null != log)
+                if (0 < log?.Count)
                 {
                     group.Logger = GetMetaLogger(log, item.Value.Group);
                 }
 
-                if (null != inLog)
+                if (0 < inLog?.Count)
                 {
                     group.IArgInLogger = GetMetaLogger(inLog, item.Value.Group);
                 }
