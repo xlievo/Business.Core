@@ -12,5 +12,5 @@
 *.suo
 *.nupkg
 /.vs
-/Test/WebAPI/bin/Debug/netcoreapp2.1
-/Test/WebAPI/obj
+bin
+obj
