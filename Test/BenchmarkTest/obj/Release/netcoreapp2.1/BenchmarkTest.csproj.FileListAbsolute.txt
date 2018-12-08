@@ -1,0 +1,15 @@
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\bin\Release\netcoreapp2.1\BenchmarkTest.deps.json
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\bin\Release\netcoreapp2.1\BenchmarkTest.runtimeconfig.json
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\bin\Release\netcoreapp2.1\BenchmarkTest.runtimeconfig.dev.json
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\bin\Release\netcoreapp2.1\BenchmarkTest.dll
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\bin\Release\netcoreapp2.1\BenchmarkTest.pdb
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\bin\Release\netcoreapp2.1\Business.Core.dll
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\bin\Release\netcoreapp2.1\Business.Core.pdb
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\bin\Release\netcoreapp2.1\Business.Core.xml
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\obj\Release\netcoreapp2.1\BenchmarkTest.csprojAssemblyReference.cache
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\obj\Release\netcoreapp2.1\BenchmarkTest.csproj.CoreCompileInputs.cache
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\obj\Release\netcoreapp2.1\BenchmarkTest.AssemblyInfoInputs.cache
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\obj\Release\netcoreapp2.1\BenchmarkTest.AssemblyInfo.cs
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\obj\Release\netcoreapp2.1\BenchmarkTest.csproj.CopyComplete
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\obj\Release\netcoreapp2.1\BenchmarkTest.dll
+D:\Source\Repos\Business.Core\Test\BenchmarkTest\obj\Release\netcoreapp2.1\BenchmarkTest.pdb

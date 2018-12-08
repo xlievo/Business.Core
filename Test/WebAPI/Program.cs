@@ -28,7 +28,7 @@ public class Program
 
 public class Startup
 {
-    static Startup() => Business.Bind.Create<BusinessMember>();
+    static Startup() => Bind.Create<BusinessMember>();
 
     public Startup(IConfiguration configuration)
     {

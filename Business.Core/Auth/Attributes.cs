@@ -1252,7 +1252,7 @@ namespace Business.Attributes
     public class CheckCharAttribute : ArgumentAttribute
     {
         public CheckCharAttribute(int state = -804, string message = null, bool canNull = true) : base(state, message, canNull) { }
-        public Utils.Help.CheckCharMode Mode { get; set; } = Help.CheckCharMode.All;
+        public Help.CheckCharMode Mode { get; set; } = Help.CheckCharMode.All;
 
         public override async Task<IResult> Proces(dynamic value)
         {
@@ -1295,8 +1295,8 @@ namespace Business.Attributes
         /// </summary>
         public string Key { get; private set; }
 
-        public AES(string key, int code = -821, string message = null, bool canNull = true)
-            : base(code, message, canNull) => this.Key = key;
+        public AES(string key, int state = -821, string message = null, bool canNull = true)
+            : base(state, message, canNull) => this.Key = key;
 
         public override async Task<IResult> Proces(dynamic value)
         {

@@ -13,7 +13,7 @@ using System.Linq;
 [assembly: Command(Group = "DEF")]
 namespace UnitTest
 {
-     /// <summary>
+    /// <summary>
     /// Attr01
     /// </summary>
     public class Proces01 : ArgumentAttribute
@@ -21,6 +21,19 @@ namespace UnitTest
         public Proces01(int state = -110, string message = null, bool canNull = true) : base(state, message, canNull) { }
 
         public async override Task<IResult> Proces(dynamic value) => this.ResultCreate($"{value}.1234567890");
+    }
+
+    public class AES2 : AES
+    {
+        public AES2(string key, int state = -821, string message = null, bool canNull = true) : base(key, state, message, canNull)
+        {
+        }
+
+        public async override Task<IResult> Proces(dynamic value)
+        {
+            Assert.AreEqual(value, "abc.1234567890");
+            return await base.Proces((object)value);
+        }
     }
 
     /// <summary>
@@ -32,7 +45,7 @@ namespace UnitTest
         /// Child Property, Field Agr<> type is only applicable to JSON
         /// </summary>
         [CheckNull]
-        [AES("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = "DEF")]
+        [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = "DEF")]
         [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = "DEF")]
         public Arg<dynamic> A;
     }
@@ -120,6 +133,10 @@ namespace UnitTest
         public virtual async Task<dynamic> TestUse02(IToken token = default) => this.ResultCreate(token);
 
         public virtual async Task<dynamic> TestUse03(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+
+        public virtual async Task<dynamic> TestAnonymous(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+
+        public virtual async Task<dynamic> TestAnonymous2(dynamic a, [Use(true)]dynamic use01) => new { a, b = use01 };
     }
 
     [TestClass]
@@ -339,6 +356,14 @@ namespace UnitTest
 
             var t18 = CallUse("TestUse03", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
             Assert.AreEqual(t18.Data, "abcsss");
+
+            var t19 = CallUse("TestAnonymous", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+            Assert.AreEqual(t19.Data.a, "abc");
+            Assert.AreEqual(t19.Data.b, "sss");
+
+            var t20 = CallUse("TestAnonymous2", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+            Assert.AreEqual(t20.a, "abc");
+            Assert.AreEqual(t20.b, "sss");
         }
     }
 }

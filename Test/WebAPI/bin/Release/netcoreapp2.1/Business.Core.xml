@@ -1,0 +1,972 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Business.Core</name>
+    </assembly>
+    <members>
+        <member name="P:Business.Attributes.AttributeBase.Item(System.String)">
+            <summary>
+            Accessor
+            </summary>
+            <param name="member"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Attributes.AttributeBase.Type">
+            <summary>
+            Gets the fully qualified type name, including the namespace but not the assembly
+            </summary>
+        </member>
+        <member name="M:Business.Attributes.AttributeBase.Clone``1">
+            <summary>
+            Depth Clone
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="T:Business.Attributes.Ignore">
+            <summary>
+            The Method and Property needs to be ignored and will not be a proxy
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.TokenAttribute">
+            <summary>
+            Token
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.Info">
+            <summary>
+            Info
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.Info.CommandGroupDefault">
+            <summary>
+            Default
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.NickAttribute.Nick">
+            <summary>
+            Amicable name
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.LoggerAttribute.LogType">
+            <summary>
+            Record type
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.LoggerAttribute.CanWrite">
+            <summary>
+            Allow record
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.LoggerAttribute.CanValue">
+            <summary>
+            Allowed to return to parameters
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.LoggerAttribute.CanResult">
+            <summary>
+            Allowed to return to results
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.LoggerValueMode">
+            <summary>
+            Record parameter model
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.LoggerValueMode.All">
+            <summary>
+            Allow selective recording of some parameters
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.LoggerValueMode.Select">
+            <summary>
+            All parameter Records
+            </summary>
+        </member>
+        <member name="F:Business.Attributes.LoggerValueMode.No">
+            <summary>
+            No records
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.GropuAttribute.Group">
+            <summary>
+            Used for the command group
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.ArgumentAttribute">
+            <summary>
+            Base class for all attributes that apply to parameters
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.ArgumentAttribute.CanNull">
+            <summary>
+            By checking the Allow null value
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.ArgumentAttribute.State">
+            <summary>
+            Used to return state
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.ArgumentAttribute.Message">
+            <summary>
+            Used to return error messages
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.ArgumentAttribute.Nick">
+            <summary>
+            Amicable name
+            </summary>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.Proces(System.Object)">
+            <summary>
+            Start processing the Parameter object, By this.ResultCreate() method returns
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.Proces(System.Object,Business.IArg)">
+            <summary>
+            Start processing the Parameter object, By this.ResultCreate() method returns
+            </summary>
+            <param name="value"></param>
+            <param name="iArg"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.ResultCreate(System.Int32)">
+            <summary>
+            Used to create the Proces() method returns object
+            </summary>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.ResultCreate(System.Int32,System.String)">
+            <summary>
+            Used to create the Proces() method returns object
+            </summary>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.ResultCreate``1(``0,System.String,System.Int32)">
+            <summary>
+            Used to create the Proces() method returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="data"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Attributes.ArgumentAttribute.ResultCreate(System.Object,System.String,System.Int32)">
+            <summary>
+            Used to create the Proces() method returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="data"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Business.Attributes.CommandAttribute">
+            <summary>
+            Command attribute on a method, for multiple sources to invoke the method
+            </summary>
+        </member>
+        <member name="T:Business.Attributes.AES">
+            <summary>
+            AES return to item1=IV and item2=value
+            </summary>
+        </member>
+        <member name="P:Business.Attributes.AES.Key">
+            <summary>
+            key
+            </summary>
+        </member>
+        <member name="T:Business.Auth.IInterceptor">
+            <summary>
+            IInterceptor
+            </summary>
+        </member>
+        <member name="T:Business.Auth.Interceptor">
+            <summary>
+            Interceptor
+            </summary>
+        </member>
+        <member name="M:Business.Auth.Interceptor.Intercept(Castle.DynamicProxy.IInvocation)">
+            <summary>
+            Intercept
+            </summary>
+            <param name="invocation"></param>
+        </member>
+        <member name="P:Business.Auth.Interceptor.MetaData">
+            <summary>
+            MetaData
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Interceptor.Logger">
+            <summary>
+            Logger
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Interceptor.Business">
+            <summary>
+            Business
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Interceptor.ResultType">
+            <summary>
+            ResultType
+            </summary>
+        </member>
+        <member name="T:Business.Auth.Token">
+            <summary>
+            A token sample
+            </summary>
+        </member>
+        <member name="M:Business.Auth.Token.ToString">
+            <summary>
+            JSON format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Auth.Token.ToBytes">
+            <summary>
+            ProtoBuf format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Auth.Token.Key">
+            <summary>
+            The user token
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Token.Remote">
+            <summary>
+            Remote IP address
+            </summary>
+        </member>
+        <member name="P:Business.Auth.Token.Callback">
+            <summary>
+            Gets the token of this result, used for callback
+            </summary>
+        </member>
+        <member name="T:Business.Arg`2">
+            <summary>
+            This is a parameter package, used to transform parameters
+            </summary>
+            <typeparam name="OutType"></typeparam>
+            <typeparam name="InType"></typeparam>
+        </member>
+        <member name="P:Business.Arg`2.Out">
+            <summary>
+            The final output object
+            </summary>
+        </member>
+        <member name="P:Business.Arg`2.In">
+            <summary>
+            The first input object
+            </summary>
+        </member>
+        <member name="P:Business.Arg`2.Group">
+            <summary>
+            Used for the command group
+            </summary>
+        </member>
+        <member name="M:Business.Arg`2.ToBytes">
+            <summary>
+            ProtoBuf format Out
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Arg`2.ToString">
+            <summary>
+            JSON format Out
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Business.Arg`1">
+            <summary>
+            This is a parameter package, used to transform parameters
+            </summary>
+            <typeparam name="OutType"></typeparam>
+        </member>
+        <member name="M:Business.Bind.Create``1(System.Object[])">
+            <summary>
+            Initialize a Generic proxy class
+            </summary>
+            <typeparam name="Business"></typeparam>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Bind.Create``1(Business.Auth.IInterceptor,System.Object[])">
+            <summary>
+            Initialize a Generic proxy class
+            </summary>
+            <typeparam name="Business"></typeparam>
+            <param name="interceptor"></param>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Bind.Create(System.Type,System.Object[])">
+            <summary>
+            Initialize a Type proxy class
+            </summary>
+            <param name="type"></param>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Bind.Create(System.Type,Business.Auth.IInterceptor,System.Object[])">
+            <summary>
+            Initialize a Type proxy class
+            </summary>
+            <param name="type"></param>
+            <param name="interceptor"></param>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Bind.GroupEquals(Business.Attributes.GropuAttribute,System.String)">
+            <summary>
+            string.IsNullOrWhiteSpace(x.Group) || x.Group == group
+            </summary>
+            <param name="x"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Business.Meta.Args">
+            <summary>
+            Argument
+            </summary>
+        </member>
+        <member name="P:Business.Meta.Args.ArgType">
+            <summary>
+            xml using
+            </summary>
+        </member>
+        <member name="M:Business.Meta.MetaData.#ctor(Business.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Attributes.CommandAttribute},Business.Utils.ReadOnlyCollection{Business.Meta.Args},Business.Utils.ReadOnlyCollection{Business.Meta.Args},Business.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Meta.MetaLogger},System.String,System.String,System.String,System.Reflection.TypeInfo,System.Type,System.Object[],System.Collections.Generic.List{Business.Attributes.AttributeBase},System.Int32,System.String,Business.Utils.ConcurrentReadOnlyDictionary{System.Int32,System.Type},System.String)">
+            <summary>
+            MetaData
+            </summary>
+            <param name="commandGroup"></param>
+            <param name="args"></param>
+            <param name="iArgs"></param>
+            <param name="metaLogger"></param>
+            <param name="path"></param>
+            <param name="name"></param>
+            <param name="fullName"></param>
+            <param name="returnType"></param>
+            <param name="resultType"></param>
+            <param name="defaultValue"></param>
+            <param name="attributes"></param>
+            <param name="position"></param>
+            <param name="groupDefault"></param>
+            <param name="useTypePosition"></param>
+            <param name="methodTypeFullName"></param>
+        </member>
+        <member name="M:Business.BusinessBase`1.ResultCreate(System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="business"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.BusinessBase`1.ResultCreate(System.Int32,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="business"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.BusinessBase`1.ResultCreate``1(``0,System.String,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="business"></param>
+            <param name="data"></param>
+            <param name="message"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.BusinessBase`1.ResultCreate(System.Object,System.String,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="business"></param>
+            <param name="data"></param>
+            <param name="message"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Business.LoggerType">
+            <summary>
+            Needs of the logging categories
+            </summary>
+        </member>
+        <member name="F:Business.LoggerType.All">
+            <summary>
+            All
+            </summary>
+        </member>
+        <member name="F:Business.LoggerType.Record">
+            <summary>
+            Record
+            </summary>
+        </member>
+        <member name="F:Business.LoggerType.Error">
+            <summary>
+            Error
+            </summary>
+        </member>
+        <member name="F:Business.LoggerType.Exception">
+            <summary>
+            Exception
+            </summary>
+        </member>
+        <member name="T:Business.LoggerData">
+            <summary>
+            Logger data object
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Type">
+            <summary>
+            Logger type
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Value">
+            <summary>
+            The parameters of the method
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Result">
+            <summary>
+            The method's Return Value
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Time">
+            <summary>
+            Method execution time
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Member">
+            <summary>
+            Method full name
+            </summary>
+        </member>
+        <member name="P:Business.LoggerData.Group">
+            <summary>
+            Used for the command group
+            </summary>
+        </member>
+        <member name="M:Business.LoggerData.ToString">
+            <summary>
+            Json format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Business.LoggerValue">
+            <summary>
+            The parameters of the method
+            </summary>
+        </member>
+        <member name="T:Business.LoggerValue.LoggerValueType">
+            <summary>
+            Logger value type
+            </summary>
+        </member>
+        <member name="F:Business.LoggerValue.LoggerValueType.In">
+            <summary>
+            In
+            </summary>
+        </member>
+        <member name="F:Business.LoggerValue.LoggerValueType.Out">
+            <summary>
+            Out
+            </summary>
+        </member>
+        <member name="M:Business.LoggerValue.#ctor(System.Collections.Generic.IDictionary{System.String,System.Boolean},System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="hasIArg"></param>
+            <param name="capacity"></param>
+        </member>
+        <member name="P:Business.LoggerValue.HasIArg">
+            <summary>
+            A combination of parameter names and HasIArg
+            </summary>
+        </member>
+        <member name="M:Business.LoggerValue.ToValue(Business.LoggerValue.LoggerValueType)">
+            <summary>
+            Filtering input or output objects
+            </summary>
+            <param name="valueType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.LoggerValue.ToString">
+            <summary>
+            JSON format, if the total number to 0, then returned null
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Result.IResult.State">
+            <summary>
+            The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult.Message">
+            <summary>
+            Success can be null
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult.Data">
+            <summary>
+            Specific Byte/Json data objects
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult.HasData">
+            <summary>
+            Whether there is value
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult.Callback">
+            <summary>
+            Gets the token of this result, used for callback
+            </summary>
+        </member>
+        <member name="M:Business.Result.IResult.ToDataString">
+            <summary>
+            Json Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.IResult.ToDataBytes">
+            <summary>
+            ProtoBuf Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.IResult.ToBytes">
+            <summary>
+            ProtoBuf
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.IResult.ToString">
+            <summary>
+            Json
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.IResult.Get``1">
+            <summary>
+            Get generic data
+            </summary>
+            <typeparam name="DataType">Generic type</typeparam>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Result.IResult.GenericType">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Business.Result.IResult`1.Data">
+            <summary>
+            Specific Byte/Json data objects
+            </summary>
+        </member>
+        <member name="M:Business.Result.ResultFactory.Create``1(System.Type,``0,System.Int32,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="resultType"></param>
+            <param name="data"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.Create``1(Business.IBusiness,``0,System.Int32,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="business"></param>
+            <param name="data"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(System.Type,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="resultType"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(System.Type,System.Int32,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="resultType"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate``1(System.Type,``0,System.String,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="resultType"></param>
+            <param name="data"></param>
+            <param name="message"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(Business.IBusiness,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="business"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate(Business.IBusiness,System.Int32,System.String)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <param name="business"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreate``1(Business.IBusiness,``0,System.String,System.Int32)">
+            <summary>
+            Used to create the IResult returns object
+            </summary>
+            <typeparam name="Data"></typeparam>
+            <param name="business"></param>
+            <param name="data"></param>
+            <param name="message"></param>
+            <param name="state"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreateToDataBytes(Business.Result.IResult)">
+            <summary>
+            Used to create IResult.Data secondary encapsulation
+            </summary>
+            <param name="resultType"></param>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultFactory.ResultCreateToDataString(Business.Result.IResult)">
+            <summary>
+            Used to create IResult.Data secondary encapsulation
+            </summary>
+            <param name="resultType"></param>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Business.Result.ResultObject`1">
+            <summary>
+            Serialize result
+            </summary>
+            <typeparam name="Type"></typeparam>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.op_Implicit(System.String)~Business.Result.ResultObject{`0}">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.#ctor(`0,System.Type,System.Int32,System.String,System.Type)">
+            <summary>
+            Activator.CreateInstance
+            </summary>
+            <param name="data"></param>
+            <param name="dataType"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.State">
+            <summary>
+            The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.Message">
+            <summary>
+            Success can be null
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.Business#Result#IResult#Data">
+            <summary>
+            Specific dynamic data objects
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.Data">
+            <summary>
+            Specific Byte/Json data objects
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.HasData">
+            <summary>
+            Whether there is value
+            </summary>
+        </member>
+        <member name="P:Business.Result.ResultObject`1.Callback">
+            <summary>
+            Gets the token of this result, used for callback
+            </summary>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.ToString">
+            <summary>
+            Json format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.ToDataString">
+            <summary>
+            Json format Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.ToBytes">
+            <summary>
+            ProtoBuf format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.ToDataBytes">
+            <summary>
+            ProtoBuf format Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Result.ResultObject`1.Get``1">
+            <summary>
+            Get generic data
+            </summary>
+            <typeparam name="DataType">Generic type</typeparam>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Utils.Emit.EmitUtils.GetDeclaringType(System.Reflection.MethodInfo)">
+            <summary>
+            Gets the declaring type of the target <paramref name="method"/>.
+            </summary>
+            <param name="method">The <see cref="T:System.Reflection.MethodInfo"/> for which to return the declaring type.</param>
+            <returns>The type that declares the target <paramref name="method"/>.</returns>
+        </member>
+        <member name="T:Business.Utils.Emit.IDynamicMethodSkeleton">
+            <summary>
+            Represents the skeleton of a dynamic method.
+            </summary>    
+        </member>
+        <member name="M:Business.Utils.Emit.IDynamicMethodSkeleton.GetILGenerator">
+            <summary>
+            Gets the <see cref="T:System.Reflection.Emit.ILGenerator"/> used to emit the method body.
+            </summary>
+            <returns>An <see cref="T:System.Reflection.Emit.ILGenerator"/> instance.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.IDynamicMethodSkeleton.CreateDelegate">
+            <summary>
+            Create a delegate used to invoke the dynamic method.
+            </summary>
+            <returns>A function delegate.</returns>
+        </member>
+        <member name="T:Business.Utils.Emit.IMethodBuilder">
+            <summary>
+            Represents a class that is capable of creating a delegate used to invoke 
+            a method without using late-bound invocation.
+            </summary>
+        </member>
+        <member name="M:Business.Utils.Emit.IMethodBuilder.GetDelegate(System.Reflection.MethodInfo)">
+            <summary>
+            Gets a delegate that is used to invoke the <paramref name="targetMethod"/>.
+            </summary>
+            <param name="targetMethod">The <see cref="T:System.Reflection.MethodInfo"/> that represents the target method to invoke.</param>
+            <returns>A delegate that represents compiled code used to invoke the <paramref name="targetMethod"/>.</returns>
+        </member>
+        <member name="T:Business.Utils.Emit.DynamicMethodBuilder">
+            <summary>
+            A class that is capable of creating a delegate used to invoke 
+            a method without using late-bound invocation.
+            </summary>
+        </member>
+        <member name="M:Business.Utils.Emit.DynamicMethodBuilder.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Business.Utils.Emit.DynamicMethodBuilder"/> class.
+            </summary>
+        </member>
+        <member name="M:Business.Utils.Emit.DynamicMethodBuilder.GetDelegate(System.Reflection.MethodInfo)">
+            <summary>
+            Gets a delegate that is used to invoke the <paramref name="targetMethod"/>.
+            </summary>
+            <param name="targetMethod">The <see cref="T:System.Reflection.MethodInfo"/> that represents the target method to invoke.</param>
+            <returns>A delegate that represents compiled code used to invoke the <paramref name="targetMethod"/>.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.DynamicMethodBuilder.DynamicMethodSkeleton.GetILGenerator">
+            <summary>
+            Gets the <see cref="T:System.Reflection.Emit.ILGenerator"/> used to emit the method body.
+            </summary>
+            <returns>An <see cref="T:System.Reflection.Emit.ILGenerator"/> instance.</returns>
+        </member>
+        <member name="M:Business.Utils.Emit.DynamicMethodBuilder.DynamicMethodSkeleton.CreateDelegate">
+            <summary>
+            Create a delegate used to invoke the dynamic method.
+            </summary>
+            <returns>A function delegate.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.GZipDecompressByte(System.Byte[])">
+            <summary>
+            gzip to byte[]
+            </summary>
+            <param name="value">byte[]</param>
+            <returns>byte[]</returns>
+        </member>
+        <member name="M:Business.Utils.Help.GZipDecompressStream(System.Byte[])">
+            <summary>
+            gzip to byte[]
+            </summary>
+            <param name="value">byte[]</param>
+            <returns>MemoryStream</returns>
+        </member>
+        <member name="M:Business.Utils.Help.ExceptionWrite(System.Exception,System.Boolean,System.Boolean,System.String,System.String)">
+            <summary>
+            Write exception to file
+            </summary>
+            <param name="ex"></param>
+            <param name="write"></param>
+            <param name="console"></param>
+            <param name="path"></param>
+            <param name="dateFormat"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Utils.Help.WriteLocal(System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.String)">
+            <summary>
+            Write text to file
+            </summary>
+            <param name="text"></param>
+            <param name="path"></param>
+            <param name="autoTime"></param>
+            <param name="write"></param>
+            <param name="console"></param>
+            <param name="dateFormat"></param>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.All">
+            <summary>
+            Allow all
+            </summary>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.Number">
+            <summary>
+            Allow number
+            </summary>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.Upper">
+            <summary>
+            Allow upper
+            </summary>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.Lower">
+            <summary>
+            Allow lower
+            </summary>
+        </member>
+        <member name="F:Business.Utils.Help.CheckCharMode.Chinese">
+            <summary>
+            Allow chinese
+            </summary>
+        </member>
+        <member name="M:Business.Utils.Help.NewGuidNumber">
+            <summary>
+            9 - 10 digit number
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Business.Utils.Help.Guid">
+            <summary>
+            ToString("N")
+            </summary>
+        </member>
+        <member name="M:Business.Utils.Help.IsArray(System.Type)">
+            <summary>
+            Checks if a type is an array or not
+            </summary>
+            <param name="source">The type to check.</param>
+            <returns><see langword="true" /> if the type is an array, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.IsCollection(System.Type)">
+            <summary>
+            Checks if a type is an collection or not
+            </summary>
+            <param name="source">The type to check.</param>
+            <returns><see langword="true" /> if the type is an collection, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.IsEnumerable(System.Type)">
+            <summary>
+            Checks if a type is enumerable or not
+            </summary>
+            <param name="source">The type to check.</param>
+            <returns><see langword="true" /> if the type is an enumerable, otherwise <see langword="false" />.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.IsNumeric(System.Type)">
+            <summary>
+            Determines if a type is numeric.  Nullable numeric types are considered numeric.
+            </summary>
+            <remarks>
+            Boolean is not considered numeric.
+            </remarks>
+        </member>
+        <member name="M:Business.Utils.Help.NotOfType``1(System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            Filters our all types not assignable to <typeparamref name="TType"/>.
+            </summary>
+            <typeparam name="TType">The type that all resulting <see cref="!:Type"/> should be assignable to.</typeparam>
+            <param name="types">An <see cref="!:IEnumerable&lt;T&gt;"/> of <see cref="!:Type"/> instances that should be filtered.</param>
+            <returns>An <see cref="!:IEnumerable&lt;T&gt;"/> of <see cref="!:Type"/> instances.</returns>
+        </member>
+        <member name="M:Business.Utils.Help.IsAssignableToGenericType(System.Type,System.Type)">
+            <summary>
+            Determines whether the <paramref name="genericType"/> is assignable from
+            <paramref name="givenType"/> taking into account generic definitions
+            </summary>
+            <remarks>
+            Borrowed from: http://tmont.com/blargh/2011/3/determining-if-an-open-generic-type-isassignablefrom-a-type
+            </remarks>
+        </member>
+        <member name="M:Business.Utils.ConcurrentLinkedList`1.TryAdd(`0)">
+            <summary>
+            Attempts to add the specified value to the <see cref="T:Business.Utils.ConcurrentLinkedList`1"/>.
+            </summary>
+        </member>
+        <member name="M:Business.Utils.ConcurrentLinkedList`1.Remove(`0,`0@)">
+            <summary>
+            Attempts to remove the specified value from the <see cref="T:Business.Utils.ConcurrentLinkedList`1"/>.
+            </summary>
+        </member>
+        <member name="M:Business.Utils.ConcurrentLinkedList`1.Contains(`0)">
+            <summary>
+            Determines whether the <see cref="T:Business.Utils.ConcurrentLinkedList`1"/> contains the specified key.
+            </summary>
+        </member>
+        <member name="M:Business.Utils.IConcurrentLinkedList`1.TryAdd(`0)">
+            <summary>
+            Attempts to add the specified value to the <see cref="T:Business.Utils.ConcurrentLinkedList`1"/>.
+            </summary>
+        </member>
+        <member name="M:Business.Utils.IConcurrentLinkedList`1.Remove(`0,`0@)">
+            <summary>
+            Attempts to remove the specified value from the <see cref="T:Business.Utils.ConcurrentLinkedList`1"/>.
+            </summary>
+        </member>
+        <member name="M:Business.Utils.IConcurrentLinkedList`1.Contains(`0)">
+            <summary>
+            Determines whether the <see cref="T:Business.Utils.ConcurrentLinkedList`1"/> contains the specified key.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -335,6 +335,8 @@ namespace Business.Auth
                 var memberValue = item.Accessor.TryGetter(currentValue);
                 //========================================//
 
+                var iArgIn = item.HasIArg ? null != memberValue ? ((IArg)memberValue).In : null : null;
+
                 var attrs = item.Group[group].Attrs;
 
                 var first = attrs.First;
@@ -342,8 +344,6 @@ namespace Business.Auth
                 while (NodeState.DAT == first.State)
                 {
                     var argAttr = first.Value;
-
-                    var iArgIn = item.HasIArg ? null != memberValue ? ((IArg)memberValue).In : null : null;
 
                     result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null) : await argAttr.Proces(item.HasIArg ? iArgIn : memberValue);
 
