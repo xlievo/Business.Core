@@ -9,6 +9,7 @@
 /Build/Business.Standard/bin
 /Build/Business.Standard/obj
 
+*.user
 *.suo
 *.nupkg
 /.vs
