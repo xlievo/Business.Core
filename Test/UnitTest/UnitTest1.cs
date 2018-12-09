@@ -182,7 +182,7 @@ namespace UnitTest
             };
         }
 
-        public virtual async Task<dynamic> TestLogger(
+        public virtual async Task<dynamic> TestLoggerAndArg(
             Use01 use01,
 
             Arg<Arg01> arg01,
@@ -419,10 +419,10 @@ namespace UnitTest
         }
 
         [TestMethod]
-        public void TestLogger()
+        public void TestLoggerAndArg()
         {
             var member = Bind.Create<BusinessMember2>().UseDoc();
-            var t2 = AsyncCallUse(member.Command, "TestLogger", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry("use02", new Use01 { A = "bbb" }), new Use01 { A = "aaa" });
+            var t2 = AsyncCallUse(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry("use02", new Use01 { A = "bbb" }), new Use01 { A = "aaa" });
             Assert.AreEqual(t2.State, 1);
             Assert.AreEqual(t2.HasData, true);
         }
