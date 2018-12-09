@@ -704,7 +704,9 @@ namespace Business
                         else
                         {
                             //group.dictionary.AddOrUpdate(cfg.GetCommandGroup(item2.Group, item2.OnlyName), item2, (key, oldValue) => oldValue.Source != AttributeBase.SourceType.Method ? item2 : oldValue);
-                            group.dictionary.TryAdd(cfg.GetCommandGroup(item2.Group, item2.OnlyName), item2);
+                            var key = cfg.GetCommandGroup(item2.Group, item2.OnlyName);
+                            item2.Key = key;
+                            group.dictionary.TryAdd(key, item2);
 
                             //var command = group.FirstOrDefault(c => c.Value.Source != AttributeBase.SourceType.Method && c.Value.Group == item2.Group);
                             //if (!default(System.Collections.Generic.KeyValuePair<string, CommandAttribute>).Equals(command))
@@ -725,7 +727,9 @@ namespace Business
                     //clone.Source = AttributeBase.SourceType.Method;
                     clone.OnlyName = methodName;
 
-                    group.dictionary.TryAdd(cfg.GetCommandGroup(clone.Group, clone.OnlyName), clone);
+                    var key = cfg.GetCommandGroup(clone.Group, clone.OnlyName);
+                    clone.Key = key;
+                    group.dictionary.TryAdd(key, clone);
                 }
             }
 
@@ -745,7 +749,8 @@ namespace Business
             /*if (!group.ContainsKey(groupDefault))*/// && methodName == c.OnlyName
             if (!isDef) //(!group.Values.Any(c => groupDefault == c.Group))
             {
-                group.dictionary.TryAdd(cfg.GetCommandGroup(groupDefault, methodName), new CommandAttribute(methodName) { Group = groupDefault });
+                var key = cfg.GetCommandGroup(groupDefault, methodName);
+                group.dictionary.TryAdd(key, new CommandAttribute(methodName) { Group = groupDefault, Key = key });
             }
 
             return group;

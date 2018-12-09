@@ -1028,7 +1028,7 @@ namespace Business.Attributes
 
         //public bool TrimChar { get; set; }
 
-        //public string Group { get; set; }
+        public string Key { get; internal set; }
 
         public string OnlyName { get; set; }
 

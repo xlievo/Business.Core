@@ -237,21 +237,21 @@ namespace Business.Auth
 
                     if (meta.HasIResult)
                     {
-                        invocation.ReturnValue = task.ContinueWith<IResult>(c => Async<IResult>(iArgGroup, c, ResultType, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch));
+                        invocation.ReturnValue = task.ContinueWith<IResult>(c => Async<IResult>(command, c, ResultType, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch));
                     }
                     else
                     {
-                        invocation.ReturnValue = task.ContinueWith(c => Async<dynamic>(iArgGroup, c, ResultType, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch));
+                        invocation.ReturnValue = task.ContinueWith(c => Async<dynamic>(command, c, ResultType, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch));
                     }
                 }
                 else
                 {
-                    Finally(iArgGroup, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch);
+                    Finally(command, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch);
                 }
             }
         }
 
-        static Type Async<Type>(string group, System.Threading.Tasks.Task task, System.Type resultType, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
+        static Type Async<Type>(CommandAttribute command, System.Threading.Tasks.Task task, System.Type resultType, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
         {
             try
             {
@@ -290,11 +290,11 @@ namespace Business.Auth
             }
             finally
             {
-                Finally(group, meta, returnValue, logType, iArgs, argsObj, methodName, logger, watch);
+                Finally(command, meta, returnValue, logType, iArgs, argsObj, methodName, logger, watch);
             }
         }
 
-        static void Finally(string group, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
+        static void Finally(CommandAttribute command, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
         {
             if (null == logger) { return; }
 
@@ -310,17 +310,17 @@ namespace Business.Auth
                 }
             }
 
-            var argsObjLog = meta.Args.Select(c => new ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = c.Group[group].Logger, iArgInLogger = c.Group[group].IArgInLogger, hasIArg = c.HasIArg }).ToList();
+            var argsObjLog = meta.Args.Select(c => new ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = c.Group[command.Key].Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg }).ToList();
 
             //meta.MetaLogger.TryGetValue(gropu, out MetaLogger methodLogger);
-            var logObjs = LoggerSet(logType, meta.MetaLogger[group], argsObjLog, argsObjLog.ToDictionary(c => c.name, c => c.hasIArg), out bool canWrite, out bool canResult);
+            var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLog.ToDictionary(c => c.name, c => c.hasIArg), out bool canWrite, out bool canResult);
 
             watch.Stop();
             var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
 
             if (canWrite)
             {
-                System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = group }));
+                System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }));
             }
         }
 
