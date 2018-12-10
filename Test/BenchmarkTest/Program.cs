@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Linq;
 
+[assembly: Logger(LoggerType.All)]
 namespace BenchmarkTest
 {
     class Program
@@ -60,7 +61,7 @@ namespace BenchmarkTest
 
             var dist = results.Distinct().OrderBy(c => c).ToList();
 
-            Console.WriteLine($"ResultCount={results.Count} DistCount={dist.Count} Time={total}");
+            Console.WriteLine($"ResultCount={results.Count} DistCount={dist.Count}  Loggers={Member.Loggers.Count} Time={total}");
         }
     }
 
@@ -87,6 +88,10 @@ namespace BenchmarkTest
     [Info("Business", CommandGroupDefault = "DEF")]
     public class BusinessMember : BusinessBase
     {
+        public ConcurrentBag<LoggerData> Loggers = new ConcurrentBag<LoggerData>();
+
+        public BusinessMember() => this.Logger = logger => Loggers.Add(logger);
+
         public virtual dynamic Test000([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
 
         public virtual async Task<dynamic> Test001([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
