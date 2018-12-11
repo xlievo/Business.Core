@@ -129,7 +129,6 @@ namespace Business
         /// <returns></returns>
         public LoggerValue ToValue(LoggerValueType valueType = LoggerValueType.In)
         {
-            //var dictionary = this.ToDictionary(c => c.Key, c => hasIArg[c.Key] ? (valueType == LoggerValueType.Out ? c.Value.Out : c.Value.In) : c.Value);
             var dictionary = new LoggerValue(0 < this.Count ? HasIArg.ToDictionary(c => c.Key, c => false) : HasIArg, this.Count);
 
             foreach (var item in this)
@@ -147,8 +146,6 @@ namespace Business
         public override string ToString()
         {
             return Utils.Help.JsonSerialize(this);
-            //var current = dictionary ?? this;
-            //return 0 == current.Count ? null : Utils.Help.JsonSerialize(current);
         }
     }
 }

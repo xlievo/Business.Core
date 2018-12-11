@@ -60,10 +60,6 @@ namespace Business.Auth
             var meta = this.MetaData[invocation.Method.Name];
             var methodName = meta.FullName;
             var argsObj = invocation.Arguments;
-            //var argsObjLog = new System.Collections.Generic.Dictionary<string, System.Tuple<dynamic, MetaLogger>>(argsObj.Length);
-            //var argsObjLog = new System.Collections.Generic.List<argsLog>(argsObj.Length);
-            //var argsObjLog = argsObj.Select(c => new argsLog { }).ToList();
-            //var argsObjLogHasIArg = new System.Collections.Generic.Dictionary<string, bool>(argsObj.Length);
             var logType = LoggerType.Record;
             //==================================//
             var iArgGroup = meta.GroupDefault;
@@ -74,36 +70,21 @@ namespace Business.Auth
                 if (!string.IsNullOrEmpty(group)) { iArgGroup = group; }
             }
 
-            //var args = meta.ArgAttrs[iArgGroup];
-            //if (!meta.ArgAttrs.TryGetValue(iArgGroup, out ArgAttrs args))
-            //{
-            //    invocation.ReturnValue = Bind.GetReturnValue(Bind.CmdError(ResultType, invocation.Method.Name), meta);
-            //    return;
-            //}
-
-            //var group = meta.ArgAttrs[iArgGroup];
             if (!meta.CommandGroup.TryGetValue(iArgGroup, out CommandAttribute command))
             {
                 invocation.ReturnValue = Bind.GetReturnValue(Bind.CmdError(ResultType, invocation.Method.Name), meta);
                 return;
             }
 
-            //var argsObjLog = args.Args.Select(c => new argsLog {Key = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], Logger = c.MetaLogger }).ToList();
             dynamic returnValue = null;
 
             try
             {
                 foreach (var item in meta.Args)
                 {
-                    //if (meta.UseTypePosition.ContainsKey(item.Position) && !item.HasIArg) { continue; }
-
                     IResult result = null;
                     var value = argsObj[item.Position];
                     var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
-                    //argsObjLog.Add(item.Name, System.Tuple.Create(item.HasIArg ? iArgs[item.Position] : value, item.MetaLogger));
-                    //argsObjLog.Add(new argsLog { Key = item.Name, Value = item.HasIArg ? iArgs[item.Position] : value, Logger = item.MetaLogger });
-                    //argsObjLogHasIArg.Add(item.Name, item.HasIArg);
-                    //var argAttrs = item.ArgAttr.OrderByDescending(c => c.Value.State);
                     var attrs = item.Group[iArgGroup].Attrs;
 
                     var first = attrs.First;
@@ -134,7 +115,6 @@ namespace Business.Auth
                             }
                             else
                             {
-                                //if (i < attrs.Count - 1)
                                 if (NodeState.DAT == first.State)
                                 {
                                     iArgIn = result.Data;
@@ -146,43 +126,6 @@ namespace Business.Auth
                             }
                         }
                     }
-
-                    //foreach (var argAttr in attrs)
-                    ////for (int i = 0; i < item.ArgAttr.Count; i++)
-                    //{
-                    //    result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null) : await argAttr.Proces(item.HasIArg ? iArgIn : value);
-
-                    //    if (1 > result.State)
-                    //    {
-                    //        logType = LoggerType.Error;
-                    //        returnValue = result;
-                    //        invocation.ReturnValue = Bind.GetReturnValue(result, meta);
-                    //        return;
-                    //    }
-
-                    //    //========================================//
-
-                    //    if (result.HasData)
-                    //    {
-                    //        if (!item.HasIArg)
-                    //        {
-                    //            argsObj[item.Position] = result.Data;
-                    //        }
-                    //        else
-                    //        {
-                    //            if (i < attrs.Count - 1)
-                    //            {
-                    //                iArgIn = result.Data;
-                    //            }
-                    //            else
-                    //            {
-                    //                iArgs[item.Position].Out = result.Data;
-                    //            }
-                    //        }
-                    //    }
-
-                    //    i++;
-                    //}
 
                     //========================================//
 
@@ -258,7 +201,6 @@ namespace Business.Auth
                 if (null != task.Exception)
                 {
                     logType = LoggerType.Exception;
-                    //result = Bind.GetReturnValue(0, System.Convert.ToString(Help.ExceptionWrite(c.Exception)), meta, ResultType);
                     returnValue = ResultFactory.ResultCreate(resultType, 0, System.Convert.ToString(task.Exception.ExceptionWrite()));
 
                     return meta.HasReturn ? returnValue : default(Type);
@@ -283,8 +225,6 @@ namespace Business.Auth
             catch (System.Exception ex)
             {
                 logType = LoggerType.Exception;
-                //result = Bind.GetReturnValue(0, System.Convert.ToString(Help.ExceptionWrite(ex)), meta, ResultType);
-
                 returnValue = ResultFactory.ResultCreate(resultType, 0, System.Convert.ToString(ex.ExceptionWrite()));
                 return meta.HasReturn ? returnValue : null;
             }
@@ -298,9 +238,6 @@ namespace Business.Auth
         {
             if (null == logger) { return; }
 
-            //watch.Stop();
-            //var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
-
             if (!object.Equals(null, returnValue) && typeof(IResult).IsAssignableFrom(returnValue.GetType()))
             {
                 var result = returnValue as IResult;
@@ -312,7 +249,6 @@ namespace Business.Auth
 
             var argsObjLog = meta.Args.Select(c => new ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = c.Group[command.Key].Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg }).ToList();
 
-            //meta.MetaLogger.TryGetValue(gropu, out MetaLogger methodLogger);
             var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLog.ToDictionary(c => c.name, c => c.hasIArg), out bool canWrite, out bool canResult);
 
             watch.Stop();
@@ -422,7 +358,6 @@ namespace Business.Auth
                     {
                         logObjs.Add(log.name, (log.value as IArg).Out);
                         logObjs.HasIArg[log.name] = false;
-                        //logObjs.Add(log.name, log.value.GetOut());
                     }
                     else if (log.hasIArg)
                     {
@@ -440,7 +375,6 @@ namespace Business.Auth
                         {
                             logObjs.Add(log.name, (log.value as IArg).Out);
                             logObjs.HasIArg[log.name] = false;
-                            //logObjs.Add(log.name, log.value.GetOut());
                         }
                         else if (log.hasIArg)
                         {

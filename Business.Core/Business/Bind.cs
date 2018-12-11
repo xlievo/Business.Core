@@ -29,16 +29,7 @@ namespace Business
     {
         internal static IResult CmdError(System.Type resultType, string cmd) => ResultFactory.ResultCreate(resultType, -1, $"Without this Cmd {cmd}");
 
-        ///// <summary>
-        ///// Default
-        ///// </summary>
-        //public const string CommandGroupDefault = "Default";
-
         #region Internal
-
-        //internal static System.Func<string, string> GetCommandGroupDefault = name => GetCommandGroup(CommandGroupDefault, name);
-
-        //internal static System.Func<string, string, string> GetCommandGroup = (group, name) => string.Format("{0}.{1}", group, name);
 
         internal static System.Collections.Generic.Dictionary<int, IArg> GetIArgs(System.Collections.Generic.IReadOnlyList<Args> iArgs, object[] argsObj, string defaultCommandKey)
         {
@@ -63,15 +54,10 @@ namespace Business
 
         internal static object GetReturnValue(int state, string message, MetaData meta, System.Type resultType) => (meta.HasIResult || meta.HasObject) ? ResultFactory.ResultCreate(resultType, state, message) : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null;
 
-        // : meta.ReturnType.Equals(typeof(string)) ? message
         internal static object GetReturnValue(IResult result, MetaData meta)
         {
             var result2 = (meta.HasIResult || meta.HasObject) ? result : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null;
 
-            //if (meta.HasAsync)
-            //{
-            //    return meta.HasIResult ? System.Threading.Tasks.Task.Run(() => (IResult)result2) : meta.HasReturn ? System.Threading.Tasks.Task.Run(() => result2) : System.Threading.Tasks.Task.Run(() => { });
-            //}
             if (meta.HasAsync)
             {
                 return meta.HasIResult ? System.Threading.Tasks.Task.FromResult((IResult)result2) : meta.HasReturn ? System.Threading.Tasks.Task.FromResult(result2) : System.Threading.Tasks.Task.Run(() => { });
@@ -79,10 +65,6 @@ namespace Business
 
             return result2;
         }
-
-        //public static ConcurrentReadOnlyDictionary<string, IBusiness> BusinessList = new ConcurrentReadOnlyDictionary<string, IBusiness>(new System.Collections.Concurrent.ConcurrentDictionary<string, IBusiness>(System.StringComparer.InvariantCultureIgnoreCase));
-
-        //public static ConcurrentReadOnlyDictionary<string, Xml> Xmls = new ConcurrentReadOnlyDictionary<string, Xml>();
 
         #endregion
 
@@ -136,22 +118,6 @@ namespace Business
             return new Bind(type, interceptor ?? new Auth.Interceptor(), constructorArguments).Instance;
         }
 
-        //public static void UseType(params System.Type[] type)
-        //{
-        //    foreach (var item in BusinessList.Values)
-        //    {
-        //        item.UseType(type);
-        //    }
-        //}
-
-        //public static void UseDoc()
-        //{
-        //    foreach (var item in BusinessList.Values)
-        //    {
-        //        item.UseDoc();
-        //    }
-        //}
-
         #endregion
     }
 
@@ -180,13 +146,10 @@ namespace Business
 
             var methods = GetMethods(typeInfo);
 
-            //var options = new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(methods.Item1));
             var proxy = new Castle.DynamicProxy.ProxyGenerator();
 
             try
             {
-                //Castle.DynamicProxy.ProxyUtil.IsAccessible();
-                //Instance = proxy.CreateClassProxy(type, options, constructorArguments, interceptor);
                 Instance = proxy.CreateClassProxy(type, constructorArguments, interceptor);
             }
             catch (System.Exception ex)
@@ -194,28 +157,11 @@ namespace Business
                 throw ex.ExceptionWrite(true, true);
             }
 
-            //container.Intercept(c => true, async invocationInfo =>
-            //{
-            //    return await System.Threading.Tasks.Task.FromResult(invocationInfo.Proceed());
-            //});
-
-
             var generics = typeof(IBusiness<>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments);
 
-            //var requestType = generics ? businessArguments[0].GetGenericTypeDefinition() : typeof(RequestObject<string>).GetGenericTypeDefinition();
             var resultType = generics ? businessArguments[0].GetGenericTypeDefinition() : typeof(ResultObject<string>).GetGenericTypeDefinition();
-            //var token = generics ? ConstructorInvokerGenerator.CreateDelegate<Auth.IToken>(businessArguments[1]) : () => new Auth.Token();
-
-            //var resultType = ((typeof(IResult<>).GetTypeInfo().IsAssignableFrom(typeof(Result).GetTypeInfo(), out _) ? typeof(Result) : typeof(ResultObject<>)).GetGenericTypeDefinition()).GetTypeInfo();
-
-            //var requestType = ((typeof(IRequest<>).GetTypeInfo().IsAssignableFrom(typeof(Request).GetTypeInfo(), out _) ? typeof(Request) : typeof(RequestObject<>)).GetGenericTypeDefinition()).GetTypeInfo();
-
-            //var attributes = typeInfo.GetAttributes().Distinct();
 
             var attributes = AttributeBase.GetAttributes(typeInfo);//GetArgAttr(typeInfo);
-
-            //Help.GetAttr(attributes, Equality<Attributes.LoggerAttribute>.CreateComparer(c => c.LogType));
-            //Help.GetAttr(attributes, Equality<Attributes.RouteAttribute>.CreateComparer(c => new { c.Path, c.Verbs, c.Group }));
 
             #region LoggerAttribute
 
@@ -245,33 +191,12 @@ namespace Business
 
 #endregion
             */
-
-            //var info = typeInfo.GetAttribute<Info>() ?? new Info(type.Name);
             var info = attributes.GetAttr<Info>() ?? new Info(type.Name);
 
             if (string.IsNullOrWhiteSpace(info.BusinessName))
             {
                 info.BusinessName = type.Name;
             }
-
-            //var info = typeInfo.GetAttribute<Attributes.InfoAttribute>();
-            //if (null != info)
-            //{
-            //    if (System.String.IsNullOrWhiteSpace(info.BusinessName))
-            //    {
-            //        info.BusinessName = type.Name;
-            //    }
-            //}
-            //else
-            //{
-            //    info = new Attributes.InfoAttribute(type.Name);
-            //}
-
-            //if (routes.Values.Any(c => System.String.Equals(c.Path, info.BusinessName, System.StringComparison.InvariantCultureIgnoreCase) && c.Root))
-            //{
-            //    throw new System.Exception(string.Format("Route path exists \"{0}\"", info.BusinessName));
-            //}
-
 
             var business = typeof(IBusiness).IsAssignableFrom(type) ? (IBusiness)Instance : null;
 #if !Mobile
@@ -289,26 +214,6 @@ namespace Business
 
             if (null != business)
             {
-                //var info = typeInfo.GetAttribute<Attributes.InfoAttribute>();
-                //if (null != info)
-                //{
-                //    if (System.String.IsNullOrWhiteSpace(info.BusinessName))
-                //    {
-                //        info.BusinessName = type.Name;
-                //    }
-                //}
-                //else
-                //{
-                //    info = new Attributes.InfoAttribute(type.Name);
-                //}
-
-                //if (routes.Values.Any(c => System.String.Equals(c.Path, info.BusinessName, System.StringComparison.InvariantCultureIgnoreCase) && c.Root))
-                //{
-                //    throw new System.Exception(string.Format("Route path exists \"{0}\"", info.BusinessName));
-                //}
-
-                //var requestDefault = (IRequest)System.Activator.CreateInstance(requestType.MakeGenericType(typeof(object)));
-                //requestDefault.Business = business;
                 cfg.MetaData = interceptor.MetaData;
 
                 business.Configer = cfg;
@@ -318,26 +223,7 @@ namespace Business
                 interceptor.Logger = business.Logger;
 
                 Configer.BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
-                //Bind.BusinessList.dictionary.TryAdd(business.Configuration.Info.BusinessName, new ConcurrentReadOnlyCollection<IBusiness> { business });
-                /*
-#region HttpAttribute
 
-                var httpBase = typeInfo.Assembly.GetCustomAttribute<HttpAttribute>();
-                if (null != httpBase)
-                {
-                    var http = attributes.FirstOrDefault(c => c is HttpAttribute) as HttpAttribute;
-                    if (null == http)
-                    {
-                        attributes.Add(httpBase.Clone<HttpAttribute>());
-                    }
-                    else if (!http.defaultConstructor)
-                    {
-                        http.Set(httpBase.Host, httpBase.AllowedOrigins, httpBase.AllowedMethods, httpBase.AllowedHeaders, httpBase.AllowCredentials, httpBase.ResponseContentType, httpBase.Description);
-                    }
-                }
-
-#endregion
-                */
                 business.BindAfter?.Invoke();
             }
 
@@ -1206,28 +1092,6 @@ namespace Business
             this.groupDefault = groupDefault;
         }
 
-        /*
-        public virtual IResult Get2(string cmd, string group = null)
-        {
-            if (System.String.IsNullOrWhiteSpace(cmd))
-            {
-                return resultType.ResultCreate(0, System.Convert.ToString(Utils.Help.ExceptionWrite(new System.ArgumentException(nameof(cmd)))));
-            }
-
-            if (!this.TryGetValue(System.String.IsNullOrWhiteSpace(group) ? Bind.CommandGroupDefault : group, out ConcurrentReadOnlyDictionary<string, Command> cmdGroup))
-            {
-                return resultType.ResultCreate((int)Request.Mark.MarkItem.Business_GroupError, string.Format(Request.Mark.GroupError, group));
-            }
-
-            if (!cmdGroup.TryGetValue(cmd, out Command command))
-            {
-                return resultType.ResultCreate((int)Request.Mark.MarkItem.Business_CmdError, string.Format(Request.Mark.CmdError, cmd));
-            }
-
-            return resultType.ResultCreate(command);
-        }
-        */
-
         public virtual Command GetCommand(string cmd, string group = null)
         {
             if (string.IsNullOrEmpty(cmd))
@@ -1236,38 +1100,10 @@ namespace Business
             }
 
             return !TryGetValue(string.IsNullOrWhiteSpace(group) ? groupDefault : group, out ConcurrentReadOnlyDictionary<string, Command> cmdGroup) || !cmdGroup.TryGetValue(cmd, out Command command) ? null : command;
-
-            //if (string.IsNullOrWhiteSpace(group))
-            //{
-            //    return !this[Bind.CommandGroupDefault].TryGetValue(cmd, out Command command) ? null : command;
-            //}
-            //else
-            //{
-            //    return !TryGetValue(group, out ConcurrentReadOnlyDictionary<string, Command> cmdGroup) || !cmdGroup.TryGetValue(cmd, out Command command) ? null : command;
-            //}
         }
 
-        #region IRequest
-
-        //public virtual async System.Threading.Tasks.Task<dynamic> AsyncCallUse(IRequest request, object[] useObj, System.Action<dynamic> callback = null)
-        //{
-        //    return await AsyncCallUse(request.Cmd, request.Group, request.Data, useObj).ContinueWith(c =>
-        //    {
-        //        callback?.Invoke(c.Result);
-
-        //        return c.Result;
-        //    });
-        //}
-
-        //public virtual async System.Threading.Tasks.Task<Result> AsyncCallUse<Result>(IRequest request, object[] useObj, System.Action<Result> callback = null) => await AsyncCallUse(request, useObj, c => callback?.Invoke(c));
-
-        //public virtual async System.Threading.Tasks.Task<IResult> AsyncIResultUse(IRequest request, object[] useObj, System.Action<IResult> callback = null) => await AsyncCallUse(request, useObj, c => callback?.Invoke(c));
-
-        #endregion
-
         #region AsyncCallUse
-        //, System.Action<Result> callback = null
-        //, c => callback?.Invoke(c)
+
         public virtual async System.Threading.Tasks.Task<Result> AsyncCallUse<Result>(string cmd, string group = null, object[] args = null, params object[] useObj) => await AsyncCallUse(cmd, group, args, useObj);
 
         public virtual async System.Threading.Tasks.Task<IResult> AsyncIResultUse(string cmd, string group = null, object[] args = null, params object[] useObj) => await AsyncCallUse(cmd, group, args, useObj);
@@ -1277,13 +1113,6 @@ namespace Business
             var command = GetCommand(cmd, group);
 
             return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.CmdError(resultType, cmd)) : await command.AsyncCallUse(args, useObj);
-
-            //return await command.AsyncCallUse(args, useObj).ContinueWith(c =>
-            //{
-            //    callback?.Invoke(c.Result);
-
-            //    return c.Result;
-            //});
         }
 
         #endregion
@@ -1395,10 +1224,6 @@ namespace Business
         public virtual Result Call<Result>(params object[] args) => Call(args);
         public virtual IResult CallIResult(params object[] args) => Call(args);
 
-        //#if Standard
-        //        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(params object[] args) => await System.Threading.Tasks.Task.Factory.StartNew(obj => { var obj2 = (dynamic)obj; return obj2.call(obj2.args); }, new { call, args });
-        //#else
-
         public virtual object[] GetAgs(object[] args, params object[] useObj)
         {
             var args2 = new object[Meta.Args.Count];
@@ -1471,7 +1296,6 @@ namespace Business
             {
                 if (Meta.HasAsync)
                 {
-                    //return this.HasIResult ? await (call(args) as System.Threading.Tasks.Task<IResult>) : await (call(args) as System.Threading.Tasks.Task<dynamic>);
                     return await call(args);
                 }
                 else
@@ -1735,205 +1559,6 @@ namespace Business.Meta
         ////==============ignore===================//
         //public Attributes.Ignore Ignore { get; private set; }
     }
-
-    /*
-    public interface ILocalArgs<T> { System.Collections.Generic.IList<T> ArgAttrChild { get; set; } }
-
-    public struct LocalArgs : ILocalArgs<LocalArgs>
-    {
-        public LocalArgs(System.String name, System.String type, System.Int32 position, System.Object defaultValue, System.Boolean hasDefaultValue, System.Collections.Generic.IReadOnlyList<LocalAttribute> argAttr, System.Collections.Generic.IList<LocalArgs> argAttrChild, System.Boolean hasDeserialize, System.Boolean hasIArg, LocalLogger metaLogger, System.String fullName, string group, string owner)
-        {
-            this.name = name;
-            this.type = type;
-            this.position = position;
-            this.defaultValue = defaultValue;
-            this.hasDefaultValue = hasDefaultValue;
-            this.argAttr = argAttr;
-            this.argAttrChild = argAttrChild;
-            this.hasDeserialize = hasDeserialize;
-            this.hasIArg = hasIArg;
-            this.metaLogger = metaLogger;
-            this.fullName = fullName;
-            this.group = group;
-            this.owner = owner;
-        }
-
-        //===============name==================//
-        readonly System.String name;
-        public System.String Name { get => name; }
-        //===============type==================//
-        readonly System.String type;
-        public System.String Type { get => type; }
-        //===============position==================//
-        readonly System.Int32 position;
-        public System.Int32 Position { get => position; }
-        //===============defaultValue==================//
-        readonly System.Object defaultValue;
-        public System.Object DefaultValue { get => defaultValue; }
-        //===============hasDefaultValue==================//
-        readonly System.Boolean hasDefaultValue;
-        public System.Boolean HasDefaultValue { get => hasDefaultValue; }
-        //===============argAttr==================//
-        readonly System.Collections.Generic.IReadOnlyList<LocalAttribute> argAttr;
-        public System.Collections.Generic.IReadOnlyList<LocalAttribute> ArgAttr { get => argAttr; }
-        //===============argAttrChild==================//
-        System.Collections.Generic.IList<LocalArgs> argAttrChild;
-        public System.Collections.Generic.IList<LocalArgs> ArgAttrChild { get => argAttrChild; set => argAttrChild = value; }
-        //===============hasDeserialize==================//
-        readonly System.Boolean hasDeserialize;
-        public System.Boolean HasDeserialize { get => hasDeserialize; }
-        //===============hasIArg==================//
-        readonly System.Boolean hasIArg;
-        public System.Boolean HasIArg { get => hasIArg; }
-        //==============fullName===================//
-        readonly System.String fullName;
-        public System.String FullName { get => fullName; }
-        //==============logAttr===================//
-        readonly LocalLogger metaLogger;
-        public LocalLogger MetaLogger { get => metaLogger; }
-        //==============group===================//
-        readonly string group;
-        public string Group { get => group; }
-        //==============owner===================//
-        readonly string owner;
-        public string Owner { get => owner; }
-    }
-
-    public struct LocalLogger
-    {
-        public LocalLogger(LoggerAttribute record, LoggerAttribute exception, LoggerAttribute error)
-        {
-            this.record = record;
-            this.exception = exception;
-            this.error = error;
-        }
-
-        readonly LoggerAttribute record;
-        public LoggerAttribute Record { get => record; }
-
-        readonly LoggerAttribute exception;
-        public LoggerAttribute Exception { get => exception; }
-
-        readonly LoggerAttribute error;
-        public LoggerAttribute Error { get => error; }
-
-        public class LoggerAttribute
-        {
-            public LoggerAttribute(LoggerType logType, bool canWrite, Attributes.LoggerValueMode canValue, bool canResult)
-            {
-                this.logType = logType;
-                this.canWrite = canWrite;
-                this.canValue = canValue;
-                this.canResult = canResult;
-            }
-
-            readonly LoggerType logType;
-            /// <summary>
-            /// Record type
-            /// </summary>
-            public LoggerType LogType
-            {
-                get { return logType; }
-            }
-
-            readonly bool canWrite;
-            /// <summary>
-            /// Allow record
-            /// </summary>
-            public bool CanWrite { get => canWrite; }
-
-            readonly Attributes.LoggerValueMode canValue;
-            /// <summary>
-            /// Allowed to return to parameters
-            /// </summary>
-            public Attributes.LoggerValueMode CanValue { get => canValue; }
-
-            readonly bool canResult;
-            /// <summary>
-            /// Allowed to return to results
-            /// </summary>
-            public bool CanResult { get => canResult; }
-        }
-    }
-
-    public struct LocalAttribute
-    {
-        public LocalAttribute(string type, bool allowMultiple = false, bool inherited = false)
-        {
-            this.type = type;
-            this.allowMultiple = allowMultiple;
-            this.inherited = inherited;
-        }
-
-        readonly string type;
-        public System.String Type { get => type; }
-
-        readonly bool allowMultiple;
-        /// <summary>
-        /// Is it possible to specify attributes for multiple instances for a program element
-        /// </summary>
-        public bool AllowMultiple { get => allowMultiple; }
-
-        readonly bool inherited;
-        /// <summary>
-        /// Determines whether the attributes indicated by the derived class and the overridden member are inherited
-        /// </summary>
-        public bool Inherited { get => inherited; }
-    }
-
-    public struct Local<T>
-    {
-        /// <summary>
-        /// Json
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString() => Utils.Help.JsonSerialize(this);
-
-        public Local(string name, string returnType, LocalLogger metaLogger, System.Collections.Generic.IList<LocalAttribute> attributes, System.Collections.Generic.List<T> args, int position, string path, string group, string onlyName)
-        {
-            this.name = name;
-            this.returnType = returnType;
-            this.metaLogger = metaLogger;
-            this.attributes = attributes as System.Collections.Generic.IReadOnlyList<LocalAttribute>;
-            this.args = args;
-            this.position = position;
-            this.path = path;
-            this.group = group;
-            this.onlyName = onlyName;
-        }
-
-        readonly string name;
-        public string Name { get => name; }
-
-        readonly string returnType;
-        public string ReturnType { get => returnType; }
-
-        readonly LocalLogger metaLogger;
-        public LocalLogger MetaLogger { get => metaLogger; }
-
-        readonly System.Collections.Generic.IReadOnlyList<LocalAttribute> attributes;
-        public System.Collections.Generic.IReadOnlyList<LocalAttribute> Attributes { get => attributes; }
-
-        readonly System.Collections.Generic.List<T> args;
-        public System.Collections.Generic.List<T> Args { get => args; }
-
-        //===============position==================//
-        readonly System.Int32 position;
-        public System.Int32 Position { get => position; }
-
-        //==============path===================//
-        readonly string path;
-        public string Path { get => path; }
-
-        //==============group===================//
-        readonly string group;
-        public string Group { get => group; }
-
-        //==============onlyName===================//
-        readonly string onlyName;
-        public string OnlyName { get => onlyName; }
-    }
-    */
 
     #endregion
 }

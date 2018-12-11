@@ -818,20 +818,6 @@ namespace Business.Attributes
 
     #endregion
 
-    //public struct ArgumentResult
-    //{
-    //    public ArgumentResult(ArgumentAttribute argAttr)
-    //    {
-    //        this.argAttr = argAttr;
-    //    }
-
-    //    internal readonly ArgumentAttribute argAttr;
-
-    //    public IResult OK { get => argAttr.resultType.ResultCreate(); }
-
-    //    public IResult Error { get => argAttr.resultType.ResultCreate(argAttr.State, argAttr.Message); }
-    //}
-
     public abstract class GropuAttribute : AttributeBase
     {
         string group = string.Empty;
@@ -869,12 +855,9 @@ namespace Business.Attributes
 
         public ArgumentAttribute(int state, string message = null, bool canNull = true)
         {
-            //if (-1 < state) { throw new System.ArgumentOutOfRangeException("state"); }
-
             this.State = state;
             this.Message = message;
             this.CanNull = canNull;
-            //this.Result = new ArgumentResult(this);
             this.Meta = new MetaData();
 
             this.BindAfter += () =>
@@ -911,31 +894,12 @@ namespace Business.Attributes
         /// </summary>
         public string Message { get; set; }
 
-        ///// <summary>
-        ///// Remove leading or trailing white space characters
-        ///// </summary>
-        //public bool TrimChar { get; set; }
-
-        ///// <summary>
-        ///// Used for the command group
-        ///// </summary>
-        //public string Group { get; set; }
-
         public string Description { get; set; }
 
         /// <summary>
         /// Amicable name
         /// </summary>
         public string Nick { get; set; }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //public bool CanRef { get; set; }
-
-        //public bool Ignore { get; set; }
-
-        //public string Group { get; set; }
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -953,12 +917,6 @@ namespace Business.Attributes
         public virtual async Task<IResult> Proces(dynamic value, IArg arg) => this.ResultCreate<dynamic>(value);
 
         #region Result
-
-        ///// <summary>
-        ///// Used to create the Proces() method returns object
-        ///// </summary>
-        ///// <returns></returns>
-        //public IResult ResultCreate() => resultType.ResultCreate();
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -993,11 +951,6 @@ namespace Business.Attributes
         /// <returns></returns>
         public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(Meta.resultType, data, message, state);
 
-        //public IResult ResultCreate(dynamic data, string message = null, int state = 1) => ResultCreate<dynamic>(data, message, state);
-
-        //public IResult OK { get => this.ResultCreate(); }
-        //public IResult Error { get => this.ResultCreate(State, Message); }
-
         #endregion
 
         public static IResult CheckNull(ArgumentAttribute attribute, dynamic value)
@@ -1026,19 +979,13 @@ namespace Business.Attributes
     {
         public CommandAttribute(string onlyName = null) { this.OnlyName = onlyName; }
 
-        //public bool TrimChar { get; set; }
-
         public string Key { get; internal set; }
 
         public string OnlyName { get; set; }
 
-        //public string MethodName { get; set; }
-
         public bool IgnoreBusinessArg { get; set; }
 
         public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.OnlyName}";
-
-        //public override T Clone<T>() => new CommandAttribute { Group = this.Group, OnlyName = this.OnlyName } as T;
 
         public override string ToString() => $"{this.Type.Name} {Group} {OnlyName}";
     }
