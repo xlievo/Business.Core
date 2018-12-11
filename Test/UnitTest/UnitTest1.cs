@@ -6,6 +6,7 @@ using Business.Auth;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Text;
 
 [assembly: JsonArg(Group = "G01")]
 [assembly: Logger(LoggerType.All)]
@@ -47,7 +48,9 @@ namespace UnitTest
 
     public class AES2 : AES
     {
-        public AES2(string key, int state = -821, string message = null, bool canNull = true) : base(key, state, message, canNull) { }
+        public AES2(string key, int state = -821, string message = null, bool canNull = true) : base(key, state, message, canNull)
+        {
+        }
 
         public async override Task<IResult> Proces(dynamic value)
         {
@@ -65,7 +68,7 @@ namespace UnitTest
         /// Child Property, Field Agr<> type is only applicable to JSON
         /// </summary>
         [CheckNull]
-        [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = "DEF")]
+        [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = "DEF", Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
         [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = "DEF")]
         public Arg<object, dynamic> A;
     }
@@ -356,6 +359,8 @@ namespace UnitTest
             var t3 = AsyncCallUse("DEFTest001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
             Assert.AreEqual(t3.State, t1.Result.State);
             Assert.AreEqual(t3.HasData, t1.Result.HasData);
+            Assert.AreEqual(t3.Data.Item1, t1.Result.Data.Item1);
+            Assert.AreEqual(t3.Data.Item2, t1.Result.Data.Item2);
 
             var t4 = AsyncCallUse("G01Test001", "G01",
                 //args

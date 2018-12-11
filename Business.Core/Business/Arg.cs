@@ -19,8 +19,14 @@ namespace Business
 {
     public interface IArg
     {
+        /// <summary>
+        /// The first input object
+        /// </summary>
         dynamic In { get; set; }
 
+        /// <summary>
+        /// The final output object
+        /// </summary>
         dynamic Out { get; set; }
 
         string Group { get; set; }

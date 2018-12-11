@@ -18,10 +18,8 @@
 namespace Business.Utils
 {
     using Business.Document;
-    using System.Collections.Concurrent;
     using System.Linq;
     using System.Reflection;
-    using System.Threading;
 
     public struct Accessor
     {
@@ -286,7 +284,7 @@ namespace Business.Utils
 
                 if (System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(outFile)))
                 {
-                    System.IO.File.WriteAllText(outFile, business.Configer.Doc.JsonSerialize(), System.Text.Encoding.UTF8);
+                    System.IO.File.WriteAllText(outFile, business.Configer.Doc.JsonSerialize(), UTF8);
                 }
             }
 
@@ -1118,14 +1116,14 @@ namespace Business.Utils
 
         public static string StreamReadString(this System.IO.Stream stream, System.Text.Encoding encoding = null)
         {
-            using (var reader = new System.IO.StreamReader(stream, encoding ?? System.Text.Encoding.UTF8))
+            using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8))
             {
                 return reader.ReadToEnd();
             }
         }
         public static async System.Threading.Tasks.Task<string> StreamReadStringAsync(this System.IO.Stream stream, System.Text.Encoding encoding = null)
         {
-            using (var reader = new System.IO.StreamReader(stream, encoding ?? System.Text.Encoding.UTF8))
+            using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8))
             {
                 return await reader.ReadToEndAsync();
             }
@@ -1137,7 +1135,7 @@ namespace Business.Utils
 
             using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
             {
-                return fileStream.StreamReadString(encoding ?? System.Text.Encoding.UTF8);
+                return fileStream.StreamReadString(encoding ?? UTF8);
             }
         }
         public static async System.Threading.Tasks.Task<string> FileReadStringAsync(string path, System.Text.Encoding encoding = null)
@@ -1146,7 +1144,7 @@ namespace Business.Utils
 
             using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
             {
-                return await fileStream.StreamReadStringAsync(encoding ?? System.Text.Encoding.UTF8);
+                return await fileStream.StreamReadStringAsync(encoding ?? UTF8);
             }
         }
         public static byte[] FileReadByte(string path)
@@ -1170,7 +1168,7 @@ namespace Business.Utils
 
         public static void StreamWrite(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
         {
-            using (var writer = new System.IO.StreamWriter(stream, encoding ?? System.Text.Encoding.UTF8))
+            using (var writer = new System.IO.StreamWriter(stream, encoding ?? UTF8))
             {
                 writer.AutoFlush = true;
                 writer.Write(value);
@@ -1178,7 +1176,7 @@ namespace Business.Utils
         }
         public static async System.Threading.Tasks.Task StreamWriteAsync(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
         {
-            using (var writer = new System.IO.StreamWriter(stream, encoding ?? System.Text.Encoding.UTF8))
+            using (var writer = new System.IO.StreamWriter(stream, encoding ?? UTF8))
             {
                 writer.AutoFlush = true;
                 await writer.WriteAsync(value);
@@ -1236,30 +1234,38 @@ namespace Business.Utils
 
         #region Crypto
 
-        public static string MD5(this string value, string encodingNmae = "UTF-8", bool hasUpper = false)
+        public static string MD5(this string value, bool hasUpper = false, System.Text.Encoding encoding = null)
         {
             if (null == value) { throw new System.ArgumentNullException(nameof(value)); }
 
             using (var md5 = System.Security.Cryptography.MD5.Create())
             {
-                var result = System.BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.GetEncoding(encodingNmae).GetBytes(value))).Replace("-", string.Empty);
+                var result = System.BitConverter.ToString(md5.ComputeHash((encoding ?? UTF8).GetBytes(value))).Replace("-", string.Empty);
                 return hasUpper ? result.ToUpperInvariant() : result.ToLowerInvariant();
             }
         }
 
         public static class AES
         {
-            public static (string, string) Encrypt(string input, string key, string iv = null)
+            /// <summary>
+            /// AES return to item1=Data and item2=Salt
+            /// </summary>
+            /// <param name="input"></param>
+            /// <param name="key"></param>
+            /// <param name="iv"></param>
+            /// <param name="encoding"></param>
+            /// <returns></returns>
+            public static (string, string) Encrypt(string input, string key, string iv = null, System.Text.Encoding encoding = null)
             {
                 if (null == input) { throw new System.ArgumentNullException(nameof(input)); }
 
-                if (null == key) { throw new System.ArgumentNullException(nameof(key)); }
+                if (string.IsNullOrWhiteSpace(key)) { throw new System.ArgumentNullException(nameof(key)); }
 
-                var encryptKey = System.Text.Encoding.UTF8.GetBytes(key);
+                var encryptKey = (encoding ?? UTF8).GetBytes(key);
 
                 using (var aesAlg = System.Security.Cryptography.Aes.Create())
                 {
-                    var encryptIV = null == iv ? aesAlg.IV : System.Convert.FromBase64String(iv);
+                    var encryptIV = string.IsNullOrWhiteSpace(iv) ? aesAlg.IV : System.Convert.FromBase64String(iv);
 
                     using (var encryptor = aesAlg.CreateEncryptor(encryptKey, encryptIV))
                     {
@@ -1278,7 +1284,7 @@ namespace Business.Utils
 
                                 System.Buffer.BlockCopy(decryptedContent, 0, value, 0, decryptedContent.Length);
 
-                                return (System.Convert.ToBase64String(encryptIV), System.Convert.ToBase64String(value));
+                                return (System.Convert.ToBase64String(value), System.Convert.ToBase64String(encryptIV));
                                 //return new { iv = System.Convert.ToBase64String(encryptIV), value = System.Convert.ToBase64String(value) };
                             }
                         }
@@ -1286,11 +1292,13 @@ namespace Business.Utils
                 }
             }
 
-            public static string Decrypt(string input, string key, string iv)
+            public static string Decrypt(string input, string key, string iv, System.Text.Encoding encoding = null)
             {
                 if (null == input) { throw new System.ArgumentNullException(nameof(input)); }
 
-                if (null == key) { throw new System.ArgumentNullException(nameof(key)); }
+                if (string.IsNullOrWhiteSpace(key)) { throw new System.ArgumentNullException(nameof(key)); }
+
+                if (string.IsNullOrWhiteSpace(iv)) { throw new System.ArgumentNullException(nameof(iv)); }
 
                 var data = System.Convert.FromBase64String(input);
 
@@ -1299,7 +1307,7 @@ namespace Business.Utils
                 var cipher = new byte[data.Length];
 
                 System.Buffer.BlockCopy(data, 0, cipher, 0, data.Length);
-                var decryptKey = System.Text.Encoding.UTF8.GetBytes(key);
+                var decryptKey = (encoding ?? UTF8).GetBytes(key);
 
                 using (var aesAlg = System.Security.Cryptography.Aes.Create())
                 {
@@ -1367,7 +1375,7 @@ namespace Business.Utils
         /// <param name="path"></param>
         /// <param name="dateFormat"></param>
         /// <returns></returns>
-        public static System.Exception ExceptionWrite(this System.Exception ex, bool write = false, bool console = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff")
+        public static System.Exception ExceptionWrite(this System.Exception ex, bool write = false, bool console = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null)
         {
             var inner = ex;
             while (null != inner && null != inner.InnerException) { inner = inner.InnerException; }
@@ -1383,7 +1391,7 @@ namespace Business.Utils
                     inner.StackTrace,      //{5}
                     inner?.StackTrace);//{6}
 
-            WriteLocal(message, path, false, write, console, dateFormat);
+            WriteLocal(message, path, false, write, console, dateFormat, encoding);
 
             return inner;
         }
@@ -1399,7 +1407,7 @@ namespace Business.Utils
         /// <param name="write"></param>
         /// <param name="console"></param>
         /// <param name="dateFormat"></param>
-        public static void WriteLocal(string text, string path = "business.log.txt", bool autoTime = true, bool write = true, bool console = false, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff")
+        public static void WriteLocal(string text, string path = "business.log.txt", bool autoTime = true, bool write = true, bool console = false, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
 
@@ -1429,20 +1437,25 @@ namespace Business.Utils
                     {
                         using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
                         {
-                            using (var stream = new System.IO.StreamReader(fileStream, System.Text.Encoding.UTF8))
+                            using (var stream = new System.IO.StreamReader(fileStream, encoding ?? UTF8))
                             {
                                 if (-1 != stream.Peek()) { prefix = string.Format("{0}{0}", System.Environment.NewLine); }
                             }
                         }
                     }
 
-                    System.IO.File.AppendAllText(path, $"{prefix}{text}", System.Text.Encoding.UTF8);
+                    System.IO.File.AppendAllText(path, $"{prefix}{text}", encoding ?? UTF8);
                 }
                 finally { locker.ExitWriteLock(); }
             }
         }
 
-        public static void Console(string text, bool autoTime = true, bool console = true, bool write = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff") => WriteLocal(text, path, autoTime, write, console, dateFormat);
+        public static void Console(string text, bool autoTime = true, bool console = true, bool write = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null) => WriteLocal(text, path, autoTime, write, console, dateFormat, encoding);
+
+        /// <summary>
+        /// Ignore erroneous characters: Unable to translate Unicode...
+        /// </summary>
+        static readonly System.Text.Encoding UTF8 = System.Text.Encoding.GetEncoding("UTF-8", new System.Text.EncoderReplacementFallback(string.Empty), new System.Text.DecoderExceptionFallback());
 
         #endregion
 
@@ -2372,7 +2385,7 @@ namespace Business.Utils
         private int _counter;
         private Node<T> _first;
         private readonly Node<T> _dummy;
-        private readonly ConcurrentDictionary<int, int> _threads;
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, int> _threads;
         private readonly ThreadState<T>[] _threadStates;
 
         public ConcurrentLinkedList()
@@ -2380,9 +2393,9 @@ namespace Business.Utils
             _counter = 0;
             _dummy = new Node<T>();
 
-            ThreadPool.GetMaxThreads(out var _, out var maxThreads);
+            System.Threading.ThreadPool.GetMaxThreads(out var _, out var maxThreads);
             _threadStates = new ThreadState<T>[maxThreads];
-            _threads = new ConcurrentDictionary<int, int>();
+            _threads = new System.Collections.Concurrent.ConcurrentDictionary<int, int>();
             _first = new Node<T>(default(T), NodeState.REM, -1);
         }
 
@@ -2391,7 +2404,7 @@ namespace Business.Utils
         /// </summary>
         public bool TryAdd(T value)
         {
-            var node = new Node<T>(value, (int)NodeState.INS, Thread.CurrentThread.ManagedThreadId);
+            var node = new Node<T>(value, (int)NodeState.INS, System.Threading.Thread.CurrentThread.ManagedThreadId);
 
             Enlist(node);
             var insertionResult = HelpInsert(node, value);
@@ -2411,7 +2424,7 @@ namespace Business.Utils
         /// </summary>
         public bool Remove(T value, out T result)
         {
-            var node = new Node<T>(value, NodeState.REM, Thread.CurrentThread.ManagedThreadId);
+            var node = new Node<T>(value, NodeState.REM, System.Threading.Thread.CurrentThread.ManagedThreadId);
 
             Enlist(node);
             var removeResult = HelpRemove(node, value, out result);
@@ -2520,9 +2533,9 @@ namespace Business.Utils
 
         private void Enlist(Node<T> node)
         {
-            var phase = Interlocked.Increment(ref _counter);
+            var phase = System.Threading.Interlocked.Increment(ref _counter);
             var threadState = new ThreadState<T>(phase, true, node);
-            var currentThreadId = Thread.CurrentThread.ManagedThreadId;
+            var currentThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
 
             _threadStates[currentThreadId] = threadState;
             _threads.AddOrUpdate(currentThreadId, currentThreadId, (key, value) => currentThreadId);
@@ -2548,7 +2561,7 @@ namespace Business.Utils
                         if (IsPending(threadId, phase))
                         {
                             var node = _threadStates[threadId].Node;
-                            var original = Interlocked.CompareExchange(ref current.Previous, node, null);
+                            var original = System.Threading.Interlocked.CompareExchange(ref current.Previous, node, null);
                             if (original is null)
                             {
                                 HelpFinish();
@@ -2575,9 +2588,9 @@ namespace Business.Utils
                 if (current.Equals(_first) && previous.Equals(threadState.Node))
                 {
                     var updatedState = new ThreadState<T>(threadState.Phase, false, threadState.Node);
-                    Interlocked.CompareExchange(ref _threadStates[threadId], updatedState, threadState);
+                    System.Threading.Interlocked.CompareExchange(ref _threadStates[threadId], updatedState, threadState);
                     previous.Next = current;
-                    Interlocked.CompareExchange(ref _first, previous, current);
+                    System.Threading.Interlocked.CompareExchange(ref _first, previous, current);
                     current.Previous = _dummy;
                 }
             }
@@ -2642,7 +2655,7 @@ namespace Business.Utils
 
         internal NodeState AtomicCompareAndExchangeState(NodeState value, NodeState compare)
         {
-            return (NodeState)Interlocked.CompareExchange(ref _state, (int)value, (int)compare);
+            return (NodeState)System.Threading.Interlocked.CompareExchange(ref _state, (int)value, (int)compare);
         }
 
         internal bool IsDummy()

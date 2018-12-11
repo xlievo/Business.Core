@@ -55,7 +55,7 @@ namespace Business.Result
 
         System.Int32 state;
         /// <summary>
-        /// The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.
+        /// The results of the state is greater than or equal to 1: success, equal to 0: system level exceptions, less than 0: business class error.
         /// </summary>
         //[ProtoBuf.ProtoMember(1, Name = "S")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "S")]

@@ -20,7 +20,8 @@ namespace Business.Result
     public interface IResult
     {
         /// <summary>
-        /// The results of the state is greater than or equal to 1: success, equal to 0: not to capture the system level exceptions, less than 0: business class error.
+        /// The results of the state is greater than or equal 
+        /// to 1: success, equal to 0: system level exceptions, less than 0: business class error.
         /// </summary>
         System.Int32 State { get; }
 
@@ -53,13 +54,13 @@ namespace Business.Result
         System.String ToDataString();
 
         /// <summary>
-        /// ProtoBuf Data
+        /// Byte Data
         /// </summary>
         /// <returns></returns>
         System.Byte[] ToDataBytes();
 
         /// <summary>
-        /// ProtoBuf
+        /// ProtoBuf,MessagePack or Other
         /// </summary>
         /// <returns></returns>
         System.Byte[] ToBytes();

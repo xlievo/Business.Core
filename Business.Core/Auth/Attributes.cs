@@ -1272,7 +1272,7 @@ namespace Business.Attributes
         public MD5Attribute(int state = -820, string message = null, bool canNull = true)
             : base(state, message, canNull) { }
 
-        public string EncodingNmae { get; set; } = "UTF-8";
+        public System.Text.Encoding Encoding { get; set; }
 
         public bool HasUpper { get; set; }
 
@@ -1281,12 +1281,12 @@ namespace Business.Attributes
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            return this.ResultCreate(Utils.Help.MD5(value, EncodingNmae, HasUpper));
+            return this.ResultCreate(Help.MD5(value, HasUpper, Encoding));
         }
     }
 
     /// <summary>
-    /// AES return to item1=IV and item2=value
+    /// AES return to item1=Data and item2=Salt
     /// </summary>
     public class AES : ArgumentAttribute
     {
@@ -1294,6 +1294,13 @@ namespace Business.Attributes
         /// key
         /// </summary>
         public string Key { get; private set; }
+
+        /// <summary>
+        /// salt
+        /// </summary>
+        public string Salt { get; set; }
+
+        public System.Text.Encoding Encoding { get; set; }
 
         public AES(string key, int state = -821, string message = null, bool canNull = true)
             : base(state, message, canNull) => this.Key = key;
@@ -1303,14 +1310,14 @@ namespace Business.Attributes
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            return this.ResultCreate(Help.AES.Encrypt(value, Key));
+            return this.ResultCreate(Help.AES.Encrypt(value, Key, Salt, Encoding));
         }
 
         public bool Equals(string password, string encryptData, string salt)
         {
             try
             {
-                return object.Equals(password, Help.AES.Decrypt(encryptData, Key, salt));
+                return object.Equals(password, Help.AES.Decrypt(encryptData, Key, salt, Encoding));
             }
             catch
             {
