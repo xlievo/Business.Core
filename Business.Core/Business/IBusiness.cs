@@ -28,6 +28,14 @@ namespace Business
         System.Action BindAfter { get; set; }
 
         System.Action<Configer> BindBefore { get; set; }
+
+        Result.IResult ResultCreate(int state);
+
+        Result.IResult ResultCreate(int state = 1, string message = null);
+
+        Result.IResult ResultCreate<Data>(Data data, string message = null, int state = 1);
+
+        Result.IResult ResultCreate(object data, string message = null, int state = 1);
     }
 
     public interface IBusiness<Result> : IBusiness where Result : Business.Result.IResult { }

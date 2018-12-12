@@ -348,6 +348,16 @@ public static IResult<Data> Create<Data>(Data data, int state = 1) => Create<Dat
         /// <returns></returns>
         public static IResult ResultCreate<Data>(IBusiness business, Data data, string message = null, int state = 1) => Create(business, data, 0 > state ? System.Math.Abs(state) : state, message);
 
+        ///// <summary>
+        ///// Used to create the IResult returns object
+        ///// </summary>
+        ///// <param name="business"></param>
+        ///// <param name="data"></param>
+        ///// <param name="message"></param>
+        ///// <param name="state"></param>
+        ///// <returns></returns>
+        //public static IResult ResultCreate(IBusiness business, object data, string message = null, int state = 1) => ResultCreate<object>(business, data, message, state);
+
         /*
         /// <summary>
         /// Used to create the IResult returns object
