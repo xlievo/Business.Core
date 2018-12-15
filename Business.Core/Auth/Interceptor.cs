@@ -194,7 +194,7 @@ namespace Business.Auth
             }
         }
 
-        static Type Async<Type>(CommandAttribute command, System.Threading.Tasks.Task task, System.Type resultType, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
+        static dynamic Async<Type>(CommandAttribute command, System.Threading.Tasks.Task task, System.Type resultType, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
         {
             try
             {
@@ -203,7 +203,7 @@ namespace Business.Auth
                     logType = LoggerType.Exception;
                     returnValue = ResultFactory.ResultCreate(resultType, 0, System.Convert.ToString(task.Exception.ExceptionWrite()));
 
-                    return meta.HasReturn ? returnValue : default(Type);
+                    return meta.HasReturn ? returnValue : default;
                 }
                 else if (meta.HasReturn)
                 {
@@ -217,7 +217,7 @@ namespace Business.Auth
 
                 if (logType == LoggerType.Record)
                 {
-                    returnValue = default(Type);
+                    returnValue = default;
                 }
 
                 return default;

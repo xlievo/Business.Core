@@ -892,7 +892,7 @@ namespace Business.Utils
                 {
                     gropus.Add(item as Attributes.GropuAttribute);
 
-                    attributes.Remove(item);
+                    attributes.RemoveAt(i);
                 }
             }
 

@@ -23,7 +23,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants>TRACE;Standard</DefineConstants>
-    <DocumentationFile>bin\Release\netstandard1.5\Business.Core.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.0\Business.Core.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
