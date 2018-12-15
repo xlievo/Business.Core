@@ -16,10 +16,16 @@ namespace BenchmarkTest
         static CommandGroup Cmd = Member.Command;
         static Configer Cfg = Member.Configer;
 
+        public struct Dto
+        {
+            [CheckNull]
+            public string A { get; set; }
+        }
+
         static void Main(string[] args)
         {
             //~preheat
-            var t = Cmd.AsyncCallUse("Test001", null, new object[] { new Arg00 { A = 123 } }, new UseEntry("use01", "sss"), new Business.Auth.Token { Key = "a", Remote = "b" });
+            var t = Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = 123 } }, new object[] { new UseEntry("use01", "sss"), new Business.Auth.Token { Key = "a", Remote = "b" } });
             t.Wait();
             //~end
 
@@ -38,18 +44,18 @@ namespace BenchmarkTest
 
             Parallel.For(0, count, c =>
             {
-                var result = Cmd.CallUse("Test000", null, new object[] { new Arg00 { A = c } }, new UseEntry("use01", "abc"), new Business.Auth.Token { Key = "a", Remote = "b" });
+                var result = Cmd.Call("Test000", new object[] { new Arg00 { A = c } }, new object[] { new UseEntry("use01", "abc"), new Business.Auth.Token { Key = "a", Remote = "b" } });
 
                 results.Add(result.Data);
 
-                var task = Cmd.AsyncCallUse("Test001", null, new object[] { new Arg00 { A = c } }, new UseEntry("use01", "abc"), new Business.Auth.Token { Key = "a", Remote = "b" }).ContinueWith(c2 =>
+                var task = Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, new object[] { new UseEntry("use01", "abc"), new Business.Auth.Token { Key = "a", Remote = "b" } }).ContinueWith(c2 =>
                 {
                     results.Add(c2.Result.Data);
                 });
 
                 tasks.Add(task);
 
-                result = Cmd.CallIResultUse("Test002", null, new object[] { new Arg00 { A = c } }, new UseEntry("use01", "abc"), new Business.Auth.Token { Key = "a", Remote = "b" });
+                result = Cmd.CallIResult("Test002", new object[] { new Arg00 { A = c } }, new object[] { new UseEntry("use01", "abc"), new Business.Auth.Token { Key = "a", Remote = "b" } });
 
                 results.Add(result.Data);
             });

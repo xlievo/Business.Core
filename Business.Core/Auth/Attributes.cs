@@ -1286,8 +1286,7 @@ namespace Business.Attributes
 
     public class JsonArgAttribute : ArgumentAttribute
     {
-        public JsonArgAttribute(int state = -12, string message = null, bool canNull = false)
-            : base(state, message, canNull) { }
+        public JsonArgAttribute(int state = -12, string message = null, bool canNull = false) : base(state, message, canNull) { }
 
         public Newtonsoft.Json.JsonSerializerSettings Settings { get; set; }
 

@@ -1102,88 +1102,45 @@ namespace Business
             return !TryGetValue(string.IsNullOrWhiteSpace(group) ? groupDefault : group, out ConcurrentReadOnlyDictionary<string, Command> cmdGroup) || !cmdGroup.TryGetValue(cmd, out Command command) ? null : command;
         }
 
-        #region AsyncCallUse
-
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCallUse<Result>(string cmd, string group = null, object[] args = null, params object[] useObj) => await AsyncCallUse(cmd, group, args, useObj);
-
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResultUse(string cmd, string group = null, object[] args = null, params object[] useObj) => await AsyncCallUse(cmd, group, args, useObj);
-
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCallUse(string cmd, string group = null, object[] args = null, params object[] useObj)
-        {
-            var command = GetCommand(cmd, group);
-
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.CmdError(resultType, cmd)) : await command.AsyncCallUse(args, useObj);
-        }
-
-        #endregion
-
-        #region AsyncCallGroup
-
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCallGroup(string cmd, string group, params object[] args)
-        {
-            var command = GetCommand(cmd, group);
-
-            if (null == command)
-            {
-                return await System.Threading.Tasks.Task.FromResult(Bind.CmdError(resultType, cmd));
-            }
-
-            return await command.AsyncCall(args);
-        }
-
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCallGroup<Result>(string cmd, string group, params object[] args) => await AsyncCallGroup(cmd, group, args);
-
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResultGroup(string cmd, string group, params object[] args) => await AsyncCallGroup(cmd, group, args);
-
-        #endregion
-
-        #region AsyncCall
-
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, params object[] args) => await AsyncCallGroup(cmd, null, args);
-
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, params object[] args) => await AsyncCall(cmd, args);
-
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, params object[] args) => await AsyncCall(cmd, args);
-
-        #endregion
-
-        #region CallUse
-
-        public virtual Result CallUse<Result>(string cmd, string group = null, object[] args = null, params object[] useObj) => CallUse(cmd, group, args, useObj);
-
-        public virtual IResult CallIResultUse(string cmd, string group = null, object[] args = null, params object[] useObj) => CallUse(cmd, group, args, useObj);
-
-        public virtual dynamic CallUse(string cmd, string group = null, object[] args = null, params object[] useObj)
-        {
-            var command = GetCommand(cmd, group);
-
-            return null == command ? Bind.CmdError(resultType, cmd) : command.CallUse(args, useObj);
-        }
-
-        #endregion
-
-        #region CallGroup
-
-        public virtual dynamic CallGroup(string cmd, string group, params object[] args)
-        {
-            var command = GetCommand(cmd, group);
-
-            return null == command ? Bind.CmdError(resultType, cmd) : command.Call(args);
-        }
-
-        public virtual Result CallGroup<Result>(string cmd, string group, params object[] args) => CallGroup(cmd, group, args);
-
-        public virtual IResult CallIResultGroup(string cmd, string group, params object[] args) => CallGroup(cmd, group, args);
-
-        #endregion
-
         #region Call
 
-        public virtual dynamic Call(string cmd, params object[] args) => CallGroup(cmd, null, args);
+        public virtual Result Call<Result>(string cmd, object[] args = null, object[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
 
-        public virtual Result Call<Result>(string cmd, params object[] args) => Call(cmd, args);
+        public virtual IResult CallIResult(string cmd, object[] args = null, object[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
 
-        public virtual IResult CallIResult(string cmd, params object[] args) => Call(cmd, args);
+        public virtual dynamic Call(string cmd, object[] args = null, object[] useObj = null, string group = null)
+        {
+            var command = GetCommand(cmd, group);
+
+            return null == command ? Bind.CmdError(resultType, cmd) : command.Call(args, useObj);
+        }
+
+        public virtual Result Call<Result>(string cmd, object[] args = null, string group = null, params object[] useObj) => Call(cmd, args, useObj, group);
+
+        public virtual IResult CallIResult(string cmd, object[] args = null, string group = null, params object[] useObj) => Call(cmd, args, useObj, group);
+
+        public virtual dynamic Call(string cmd, object[] args = null, string group = null, params object[] useObj) => Call(cmd, args, useObj, group);
+
+        #endregion
+
+        #region AsyncCallUse
+
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] args = null, object[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, object[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] args = null, object[] useObj = null, string group = null)
+        {
+            var command = GetCommand(cmd, group);
+
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.CmdError(resultType, cmd)) : await command.AsyncCall(args, useObj);
+        }
+
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, string group = null, params object[] useObj) => await AsyncCall(cmd, args, useObj, group);
+
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] args = null, string group = null, params object[] useObj) => await AsyncCall(cmd, args, useObj, group);
+
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] args = null, string group = null, params object[] useObj) => await AsyncCall(cmd, args, useObj, group);
 
         #endregion
     }
@@ -1199,30 +1156,6 @@ namespace Business
 
         //===============member==================//
         readonly System.Func<object[], dynamic> call;
-
-        #region CallUse
-
-        public virtual dynamic CallUse(object[] args, params object[] useObj) => Call(GetAgs(args, useObj));
-
-        public virtual Result CallUse<Result>(object[] args, params object[] useObj) => CallUse(args, useObj);
-
-        public virtual IResult CallIResultUse(object[] args, params object[] useObj) => CallUse(args, useObj);
-
-        #endregion
-
-        public virtual dynamic Call(params object[] args)
-        {
-            try
-            {
-                return call(args);
-            }
-            catch (System.Exception ex)
-            {
-                return ResultFactory.ResultCreate(Meta.ResultType, 0, System.Convert.ToString(Help.ExceptionWrite(ex)));
-            }
-        }
-        public virtual Result Call<Result>(params object[] args) => Call(args);
-        public virtual IResult CallIResult(params object[] args) => Call(args);
 
         public virtual object[] GetAgs(object[] args, params object[] useObj)
         {
@@ -1280,27 +1213,37 @@ namespace Business
             return args2;
         }
 
-        #region AsyncCallUse
+        #region Call
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCallUse(object[] args, params object[] useObj) => await AsyncCall(GetAgs(args, useObj));
-
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCallUse<Result>(object[] args, params object[] useObj) => await AsyncCallUse(args, useObj);
-
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResultUse(object[] args, params object[] useObj) => await AsyncCallUse(args, useObj);
+        public virtual dynamic Call(object[] args, params object[] useObj)
+        {
+            try
+            {
+                return call(GetAgs(args, useObj));
+            }
+            catch (System.Exception ex)
+            {
+                return ResultFactory.ResultCreate(Meta.ResultType, 0, System.Convert.ToString(Help.ExceptionWrite(ex)));
+            }
+        }
+        public virtual Result Call<Result>(object[] args, params object[] useObj) => Call(args, useObj);
+        public virtual IResult CallIResult(object[] args, params object[] useObj) => Call(args, useObj);
 
         #endregion
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(params object[] args)
+        #region AsyncCall
+
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(object[] args, params object[] useObj)
         {
             try
             {
                 if (Meta.HasAsync)
                 {
-                    return await call(args);
+                    return await call(GetAgs(args, useObj));
                 }
                 else
                 {
-                    using (var task = System.Threading.Tasks.Task.Factory.StartNew(obj => { var obj2 = (dynamic)obj; return obj2.call(obj2.args); }, new { call, args })) { return await task; }
+                    using (var task = System.Threading.Tasks.Task.Factory.StartNew(obj => { var obj2 = (dynamic)obj; return obj2.call(obj2.args); }, new { call, args = GetAgs(args, useObj) })) { return await task; }
                 }
             }
             catch (System.Exception ex)
@@ -1309,9 +1252,11 @@ namespace Business
             }
         }
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(params object[] args) => await AsyncCall(args);
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(object[] args, params object[] useObj) => await AsyncCall(args, useObj);
 
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(params object[] args) => await AsyncCall(args);
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(object[] args, params object[] useObj) => await AsyncCall(args, useObj);
+
+        #endregion
 
         public readonly string Key;
 

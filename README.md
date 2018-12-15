@@ -97,3 +97,72 @@ public interface IArg
     dynamic Out { get; set; }
 }
 ```
+
+### Begin use
+
+1: Define some processing features, if there are multiple, they are sorted by state
+
+```C#
+public class JsonArg : ArgumentAttribute
+{
+    public JsonArg(int state = -12, string message = null, bool canNull = false) : base(state, message, canNull) { }
+
+    public Newtonsoft.Json.JsonSerializerSettings Settings { get; set; }
+
+    public override async Task<IResult> Proces(dynamic value)
+    {
+        try
+        {
+            return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(value, this.Meta.MemberType, Settings));
+        }
+        catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Meta.Member} Json deserialize error"); }
+    }
+}
+
+public class CheckNull : ArgumentAttribute
+{
+    public CheckNull(int state = -800, string message = null) : base(state, message, false) { }
+
+    public override async Task<IResult> Proces(dynamic value)
+    {
+        if (object.Equals(null, value))
+        {
+            return this.ResultCreate(State, Message ?? $"argument \"{ this.Meta.Member}\" can not null.");
+        }
+
+        return this.ResultCreate();
+    }
+}
+```
+
+2: Define your business class
+
+```C#
+public class BusinessMember : BusinessBase
+{
+    [JsonArg]
+    public struct Dto
+    {
+        [CheckNull]
+        public string A { get; set; }
+    }
+
+    public virtual async Task<dynamic> MyLogic(Arg<Dto> arg)
+    {
+        return this.ResultCreate(arg.Out.A);
+    }
+}
+```
+
+3: Register your business class
+
+```C#
+static BusinessMember Member = Bind.Create<BusinessMember>();
+```
+
+4: Calling business methods
+
+```C#
+Member.Command.AsyncCall("MyLogic", new object[] { "{\"A\":\"abc\"}" });
+```
+

@@ -47,6 +47,7 @@ namespace UnitTest
         public async override Task<IResult> Proces(dynamic value) => this.ResultCreate($"{value}.1234567890");
     }
 
+
     public class AES2 : AES
     {
         public AES2(string key, int state = -821, string message = null, bool canNull = true) : base(key, state, message, canNull)
@@ -75,7 +76,7 @@ namespace UnitTest
     }
 
     [Info("Business", CommandGroupDefault = "DEF")]
-    public class BusinessMember : BusinessBase<ResultObject<object>>
+    public class BusinessMember : BusinessBase
     {
         public BusinessMember()
         {
@@ -85,6 +86,16 @@ namespace UnitTest
 
                 System.Console.WriteLine(data.JsonSerialize());
             };
+        }
+
+        public struct Dto
+        {
+            public string A { get; set; }
+        }
+
+        public virtual async Task<dynamic> MyLogic(Arg<Dto> arg)
+        {
+            return this.ResultCreate(arg.Out.A);
         }
 
         /// <summary>
@@ -330,14 +341,14 @@ namespace UnitTest
         static CommandGroup Cmd3 = Member3.Command;
         static Configer Cfg3 = Member3.Configer;
 
-        static dynamic AsyncCallUse(CommandGroup businessCommand, string cmd, string group = null, object[] args = null, params object[] useObj)
+        static dynamic AsyncCall(CommandGroup businessCommand, string cmd, string group = null, object[] args = null, params object[] useObj)
         {
-            var t = businessCommand.AsyncCallUse(cmd, group, args, useObj);
+            var t = businessCommand.AsyncCall(cmd, args, useObj, group);
             t.Wait();
             return t.Result;
         }
 
-        static dynamic AsyncCallUse(string cmd, string group = null, object[] args = null, params object[] useObj) => AsyncCallUse(Cmd, cmd, group, args, useObj);
+        static dynamic AsyncCall(string cmd, string group = null, object[] args = null, params object[] useObj) => AsyncCall(Cmd, cmd, group, args, useObj);
 
 
         [TestMethod]
@@ -470,17 +481,17 @@ namespace UnitTest
             Assert.AreEqual(t1.Result.State, 1);
             Assert.AreEqual(t1.Result.HasData, true);
 
-            var t2 = AsyncCallUse("Test001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
+            var t2 = AsyncCall("Test001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
             Assert.AreEqual(t2.State, t1.Result.State);
             Assert.AreEqual(t2.HasData, t1.Result.HasData);
 
-            var t3 = AsyncCallUse("DEFTest001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
+            var t3 = AsyncCall("DEFTest001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
             Assert.AreEqual(t3.State, t1.Result.State);
             Assert.AreEqual(t3.HasData, t1.Result.HasData);
             Assert.AreEqual(t3.Data.Item1, t1.Result.Data.Item1);
             Assert.AreEqual(t3.Data.Item2, t1.Result.Data.Item2);
 
-            var t4 = AsyncCallUse("G01Test001", "G01",
+            var t4 = AsyncCall("G01Test001", "G01",
                 //args
                 new object[] { new Arg01 { A = "abc" }.JsonSerialize(), 2, 2 },
                 //useObj
@@ -489,74 +500,74 @@ namespace UnitTest
             Assert.AreEqual(t4.State, t1.Result.State);
             Assert.AreEqual(t4.HasData, false);
 
-            var t5 = AsyncCallUse("Test002");
+            var t5 = AsyncCall("Test002");
             Assert.AreEqual(t5.Message, null);
             Assert.AreEqual(t5.State, 200);
 
-            var t6 = AsyncCallUse("Test003");
+            var t6 = AsyncCall("Test003");
             Assert.AreEqual(t6.Message, null);
             Assert.AreEqual(t6.State, -200);
 
-            var t7 = AsyncCallUse("Test004");
+            var t7 = AsyncCall("Test004");
             Assert.AreEqual(t7.Message, null);
             Assert.AreEqual(t7.Data.a, "aaa");
 
-            var t8 = AsyncCallUse("Test005");
+            var t8 = AsyncCall("Test005");
             Assert.AreEqual(t8.Message, null);
             Assert.AreEqual(t8.Data.a, "aaa");
 
-            var t9 = AsyncCallUse("Test006");
+            var t9 = AsyncCall("Test006");
             Assert.AreEqual(t9.Message, null);
             Assert.AreEqual(t9.Data, "aaa");
 
-            var t10 = AsyncCallUse("Test007");
+            var t10 = AsyncCall("Test007");
             Assert.AreEqual(t10.Message, null);
             Assert.AreEqual(t10.Data, -200m);
 
-            var t11 = AsyncCallUse("Test008");
+            var t11 = AsyncCall("Test008");
             Assert.AreEqual(t11.Message, null);
             Assert.AreEqual(t11.Data, -200);
 
-            var t12 = AsyncCallUse("Test009");
+            var t12 = AsyncCall("Test009");
             Assert.AreEqual(t12.Message, "111");
             Assert.AreEqual(t12.State, 111);
             Assert.AreEqual(t12.Data, null);
 
-            var t13 = AsyncCallUse("Test010");
+            var t13 = AsyncCall("Test010");
             Assert.AreEqual(t13.Data, null);
 
-            var t14 = AsyncCallUse("Test011");
+            var t14 = AsyncCall("Test011");
             Assert.AreEqual(t14.Message, null);
             Assert.AreEqual(t14.Data, null);
 
-            var t15 = AsyncCallUse("Test012");
+            var t15 = AsyncCall("Test012");
             Assert.AreEqual(t15.Message, null);
             Assert.AreEqual(t15.Data, 111);
 
-            var t16 = AsyncCallUse("TestUse01", null, null, new UseEntry("use01", "sss"));
+            var t16 = AsyncCall("TestUse01", null, null, new UseEntry("use01", "sss"));
             Assert.AreEqual(t16.Message, null);
             Assert.AreEqual(t16.Data, "sss");
 
             var token = new Token { Key = "a", Remote = "b" };
-            var t17 = AsyncCallUse("TestUse02", null, null, token);
+            var t17 = AsyncCall("TestUse02", null, null, token);
             Assert.AreEqual(t17.Message, null);
             Assert.AreEqual(t17.Data, token);
 
-            var t18 = AsyncCallUse("TestUse03", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+            var t18 = AsyncCall("TestUse03", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
             Assert.AreEqual(t18.Message, null);
             Assert.AreEqual(t18.Data, "abcsss");
 
-            var t19 = AsyncCallUse("TestAnonymous", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+            var t19 = AsyncCall("TestAnonymous", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
             Assert.AreEqual(t19.Message, null);
             Assert.AreEqual(t19.Data.a, "abc");
             Assert.AreEqual(t19.Data.b, "sss");
 
-            var t20 = AsyncCallUse("TestAnonymous2", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+            var t20 = AsyncCall("TestAnonymous2", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
             Assert.AreEqual(t20.a, "abc");
             Assert.AreEqual(t20.b, "sss");
 
             var t21result = new Token { Key = "a", Remote = "b" };
-            var t21 = AsyncCallUse("TestDynamic", null, new object[] { "abc" }, new UseEntry("use01", t21result));
+            var t21 = AsyncCall("TestDynamic", null, new object[] { "abc" }, new UseEntry("use01", t21result));
             Assert.AreEqual(t21, t21result);
         }
 
@@ -564,7 +575,7 @@ namespace UnitTest
         public void TestLoggerAndArg()
         {
             var member = Bind.Create<BusinessMember2>().UseDoc();
-            var t2 = AsyncCallUse(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry("use02", new Use01 { A = "bbb" }), new Use01 { A = "aaa" });
+            var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry("use02", new Use01 { A = "bbb" }), new Use01 { A = "aaa" });
             Assert.AreEqual(t2.Message, null);
             Assert.AreEqual(t2.State, 1);
             Assert.AreEqual(t2.HasData, true);
@@ -584,17 +595,17 @@ namespace UnitTest
             Assert.AreEqual(t1.Result.State, 1);
             Assert.AreEqual(t1.Result.HasData, true);
 
-            var t2 = AsyncCallUse(Cmd3, "Test001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
+            var t2 = AsyncCall(Cmd3, "Test001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
             Assert.AreEqual(t2.State, t1.Result.State);
             Assert.AreEqual(t2.HasData, t1.Result.HasData);
 
-            var t3 = AsyncCallUse(Cmd3, "DEFTest001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
+            var t3 = AsyncCall(Cmd3, "DEFTest001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
             Assert.AreEqual(t3.State, t1.Result.State);
             Assert.AreEqual(t3.HasData, t1.Result.HasData);
             Assert.AreEqual(t3.Data.Item1, t1.Result.Data.Item1);
             Assert.AreEqual(t3.Data.Item2, t1.Result.Data.Item2);
 
-            var t4 = AsyncCallUse(Cmd3, "G01Test001", "G01",
+            var t4 = AsyncCall(Cmd3, "G01Test001", "G01",
                 //args
                 new object[] { new Arg01 { A = "abc" }.JsonSerialize(), 2, 2 },
                 //useObj
@@ -603,74 +614,74 @@ namespace UnitTest
             Assert.AreEqual(t4.State, t1.Result.State);
             Assert.AreEqual(t4.HasData, false);
 
-            var t5 = AsyncCallUse(Cmd3, "Test002");
+            var t5 = AsyncCall(Cmd3, "Test002");
             Assert.AreEqual(t5.Message, null);
             Assert.AreEqual(t5.State, 200);
 
-            var t6 = AsyncCallUse(Cmd3, "Test003");
+            var t6 = AsyncCall(Cmd3, "Test003");
             Assert.AreEqual(t6.Message, null);
             Assert.AreEqual(t6.State, -200);
 
-            var t7 = AsyncCallUse(Cmd3, "Test004");
+            var t7 = AsyncCall(Cmd3, "Test004");
             Assert.AreEqual(t7.Message, null);
             Assert.AreEqual(t7.Data.a, "aaa");
 
-            var t8 = AsyncCallUse(Cmd3, "Test005");
+            var t8 = AsyncCall(Cmd3, "Test005");
             Assert.AreEqual(t8.Message, null);
             Assert.AreEqual(t8.Data.a, "aaa");
 
-            var t9 = AsyncCallUse(Cmd3, "Test006");
+            var t9 = AsyncCall(Cmd3, "Test006");
             Assert.AreEqual(t9.Message, null);
             Assert.AreEqual(t9.Data, "aaa");
 
-            var t10 = AsyncCallUse(Cmd3, "Test007");
+            var t10 = AsyncCall(Cmd3, "Test007");
             Assert.AreEqual(t10.Message, null);
             Assert.AreEqual(t10.Data, -200m);
 
-            var t11 = AsyncCallUse(Cmd3, "Test008");
+            var t11 = AsyncCall(Cmd3, "Test008");
             Assert.AreEqual(t11.Message, null);
             Assert.AreEqual(t11.Data, -200);
 
-            var t12 = AsyncCallUse(Cmd3, "Test009");
+            var t12 = AsyncCall(Cmd3, "Test009");
             Assert.AreEqual(t12.Message, "111");
             Assert.AreEqual(t12.State, 111);
             Assert.AreEqual(t12.Data, null);
 
-            var t13 = AsyncCallUse(Cmd3, "Test010");
+            var t13 = AsyncCall(Cmd3, "Test010");
             Assert.AreEqual(t13.Data, null);
 
-            var t14 = AsyncCallUse(Cmd3, "Test011");
+            var t14 = AsyncCall(Cmd3, "Test011");
             Assert.AreEqual(t14.Message, null);
             Assert.AreEqual(t14.Data, null);
 
-            var t15 = AsyncCallUse(Cmd3, "Test012");
+            var t15 = AsyncCall(Cmd3, "Test012");
             Assert.AreEqual(t15.Message, null);
             Assert.AreEqual(t15.Data, 111);
 
-            var t16 = AsyncCallUse(Cmd3, "TestUse01", null, null, new UseEntry("use01", "sss"));
+            var t16 = AsyncCall(Cmd3, "TestUse01", null, null, new UseEntry("use01", "sss"));
             Assert.AreEqual(t16.Message, null);
             Assert.AreEqual(t16.Data, "sss");
 
             var token = new Token { Key = "a", Remote = "b" };
-            var t17 = AsyncCallUse(Cmd3, "TestUse02", null, null, token);
+            var t17 = AsyncCall(Cmd3, "TestUse02", null, null, token);
             Assert.AreEqual(t17.Message, null);
             Assert.AreEqual(t17.Data, token);
 
-            var t18 = AsyncCallUse(Cmd3, "TestUse03", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+            var t18 = AsyncCall(Cmd3, "TestUse03", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
             Assert.AreEqual(t18.Message, null);
             Assert.AreEqual(t18.Data, "abcsss");
 
-            var t19 = AsyncCallUse(Cmd3, "TestAnonymous", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+            var t19 = AsyncCall(Cmd3, "TestAnonymous", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
             Assert.AreEqual(t19.Message, null);
             Assert.AreEqual(t19.Data.a, "abc");
             Assert.AreEqual(t19.Data.b, "sss");
 
-            var t20 = AsyncCallUse(Cmd3, "TestAnonymous2", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+            var t20 = AsyncCall(Cmd3, "TestAnonymous2", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
             Assert.AreEqual(t20.a, "abc");
             Assert.AreEqual(t20.b, "sss");
 
             var t21result = new Token { Key = "a", Remote = "b" };
-            var t21 = AsyncCallUse(Cmd3, "TestDynamic", null, new object[] { "abc" }, new UseEntry("use01", t21result));
+            var t21 = AsyncCall(Cmd3, "TestDynamic", null, new object[] { "abc" }, new UseEntry("use01", t21result));
             Assert.AreEqual(t21, t21result);
         }
     }

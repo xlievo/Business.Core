@@ -193,11 +193,9 @@ public class BusinessController : Controller
             //Callback = b
         });
 
-        var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCallUse(
+        var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCall(
             //the cmd of this request.
             c,
-            //the group of this request.
-            g,
             //the data of this request, allow null.
             Help.TryJsonDeserialize(d, out object[] data) ? data : new object[] { d },
             //the incoming use object
@@ -211,7 +209,9 @@ public class BusinessController : Controller
                         //Callback = b
                     },
                     new UseEntry("control", use)
-            });
+            },
+            //the group of this request.
+            g);
 
         if (null != result)
         {
