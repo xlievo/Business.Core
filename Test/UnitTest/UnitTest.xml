@@ -4,23 +4,23 @@
         <name>UnitTest</name>
     </assembly>
     <members>
-        <member name="T:UnitTest.ProcesUse02">
+        <member name="T:ProcesUse02">
             <summary>
             Attr01
             </summary>
         </member>
-        <member name="T:UnitTest.Proces01">
+        <member name="T:Proces01">
             <summary>
             Attr01
             </summary>
         </member>
-        <member name="T:UnitTest.Arg01">
+        <member name="T:Arg01">
             <summary>
             This is Arg01.
             </summary>
         </member>
-        <!-- 对于成员“F:UnitTest.Arg01.A”忽略有格式错误的 XML 注释 -->
-        <member name="M:UnitTest.BusinessMember.Test001(System.Object,Business.Arg{UnitTest.Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
+        <!-- 对于成员“F:Arg01.A”忽略有格式错误的 XML 注释 -->
+        <member name="M:BusinessMember.Test001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
             <summary>
             This is Test001.
             </summary>
@@ -31,7 +31,7 @@
             <param name="token">This is token.</param>
             <returns></returns>
         </member>
-        <member name="M:UnitTest.BusinessMember3.Test001(System.Object,Business.Arg{UnitTest.Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
+        <member name="M:BusinessMember2.Test001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
             <summary>
             This is Test001.
             </summary>
@@ -42,7 +42,7 @@
             <param name="token">This is token.</param>
             <returns></returns>
         </member>
-        <member name="M:UnitTest.BusinessMember4.Test001(System.Object,Business.Arg{UnitTest.Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
+        <member name="M:BusinessMember3.Test001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
             <summary>
             This is Test001.
             </summary>
