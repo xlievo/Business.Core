@@ -963,7 +963,7 @@ namespace Business.Attributes
                 }
                 else
                 {
-                    return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Meta.Member}\" can not null.");
+                    return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Nick}\" can not null.");
                 }
             }
 
@@ -1003,12 +1003,12 @@ namespace Business.Attributes
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    return this.ResultCreate(State, Message ?? $"argument \"{this.Meta.Member}\" can not null.");
+                    return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" can not null.");
                 }
             }
             else if (object.Equals(null, value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{ this.Meta.Member}\" can not null.");
+                return this.ResultCreate(State, Message ?? $"argument \"{ this.Nick}\" can not null.");
             }
 
             return this.ResultCreate();
@@ -1143,7 +1143,7 @@ namespace Business.Attributes
                     }
                     else
                     {
-                        return this.ResultCreate(State, $"argument \"{this.Meta.Member}\" type error");
+                        return this.ResultCreate(State, $"argument \"{this.Nick}\" type error");
                     }
                     break;
             }
@@ -1174,7 +1174,7 @@ namespace Business.Attributes
                     return this.ResultCreate(Help.Scale((decimal)value, Size));
                 case "System.Double":
                     return this.ResultCreate(Help.Scale((double)value, Size));
-                default: return this.ResultCreate(State, Message ?? $"argument \"{this.Meta.Member}\" type error");
+                default: return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" type error");
             }
         }
     }
@@ -1190,7 +1190,7 @@ namespace Business.Attributes
 
             if (!Utils.Help.CheckEmail(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Meta.Member}\" email error");
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" email error");
             }
             return this.ResultCreate();
         }
@@ -1208,7 +1208,7 @@ namespace Business.Attributes
 
             if (!Utils.Help.CheckChar(value, Mode))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Meta.Member}\" char verification failed");
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" char verification failed");
             }
             return this.ResultCreate();
         }
@@ -1299,7 +1299,7 @@ namespace Business.Attributes
             {
                 return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(value, this.Meta.MemberType, Settings));
             }
-            catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Meta.Member} Json deserialize error"); }
+            catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
         }
     }
     /*
