@@ -7,8 +7,26 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 
+public class ResultObject<Type> : Business.Result.ResultObject<Type>
+{
+    static ResultObject() => MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
+
+    public ResultObject(Type data, System.Type dataType, int state = 1, string message = null, System.Type genericType = null)
+        : base(data, dataType, state, message, genericType) { }
+
+    public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }
+
+    [MessagePack.IgnoreMember]
+    public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
+
+    [MessagePack.IgnoreMember]
+    public override System.Type GenericType => base.GenericType;
+
+    public override byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
+}
+
 [Logger]
-public class BusinessMember : BusinessBase
+public class BusinessMember : BusinessBase<ResultObject<object>>
 {
     public BusinessMember()
     {
@@ -108,7 +126,7 @@ public class BusinessMember : BusinessBase
 
     public virtual async Task<dynamic> TestAgs001(BusinessController control, Arg<Ags2> a, decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default, Business.Auth.Token token = default)
     {
-        return this.ResultCreate(a.In);
+        return this.ResultCreate(a.Out);
 
         return this.ResultCreate(new { a = a.In, Remote = string.Format("{0}:{1}", control.HttpContext.Connection.RemoteIpAddress.ToString(), control.HttpContext.Connection.RemotePort), control.Request.Cookies });
 

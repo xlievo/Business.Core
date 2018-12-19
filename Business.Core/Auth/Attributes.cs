@@ -1036,8 +1036,8 @@ namespace Business.Attributes
         public object Min { get; set; }
         public object Max { get; set; }
 
-        public string MinMsg { get; set; } = "argument \"{Member}\" minimum range {Min}.";
-        public string MaxMsg { get; set; } = "argument \"{Member}\" maximum range {Max}.";
+        public string MinMsg { get; set; } = "argument \"{Nick}\" minimum range {Min}.";
+        public string MaxMsg { get; set; } = "argument \"{Nick}\" maximum range {Max}.";
 
         public override async Task<IResult> Proces(dynamic value)
         {

@@ -1039,9 +1039,9 @@ namespace Business
                     attr.Meta.MemberType = c.Meta.MemberType;
                     attr.Meta.HasProcesIArg = c.Meta.HasProcesIArg;
 
-                    if (string.IsNullOrWhiteSpace(attr.Nick) && !string.IsNullOrWhiteSpace(nickValue))
+                    if (string.IsNullOrWhiteSpace(attr.Nick))
                     {
-                        attr.Nick = nickValue;
+                        attr.Nick = !string.IsNullOrWhiteSpace(nickValue) ? nickValue : attr.Meta.Member;
                     }
 
                     attr.BindAfter?.Invoke();

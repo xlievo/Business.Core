@@ -452,7 +452,6 @@ public class TestBusinessMember
 
     static dynamic AsyncCall(string cmd, string group = null, object[] args = null, params object[] useObj) => AsyncCall(Cmd, cmd, group, args, useObj);
 
-
     [TestMethod]
     public void TestCfgInfo()
     {
@@ -692,12 +691,38 @@ public class TestBusinessMember
     [TestMethod]
     public void TestResult02()
     {
-        TestResult(Bind.Create<BusinessMember2>().UseType(typeof(IToken)));
+        var member = Bind.Create<BusinessMember2>().UseType(typeof(IToken));
+
+        var t0 = member.Test001(null, new Arg01 { A = "abc" });
+        t0.Wait();
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t0.Result.GetType()), true);
+        Assert.AreEqual(t0.Result.State, -113);
+        Assert.AreEqual(t0.Result.Message, "arg.b minimum range 2");
+
+        var t1 = member.Test001(null, new Arg01 { A = "abc" }, 2, 2);
+        t1.Wait();
+        Assert.AreEqual(t1.Result.State, 1);
+        Assert.AreEqual(t1.Result.HasData, true);
+
+        TestResult(member);
     }
 
     [TestMethod]
     public void TestResult03()
     {
-        TestResult(Bind.Create<BusinessMember3>().UseType(typeof(IToken)));
+        var member = Bind.Create<BusinessMember3>().UseType(typeof(IToken));
+
+        var t0 = member.Test001(null, new Arg01 { A = "abc" });
+        t0.Wait();
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t0.Result.GetType()), true);
+        Assert.AreEqual(t0.Result.State, -113);
+        Assert.AreEqual(t0.Result.Message, "arg.b minimum range 2");
+
+        var t1 = member.Test001(null, new Arg01 { A = "abc" }, 2, 2);
+        t1.Wait();
+        Assert.AreEqual(t1.Result.State, 1);
+        Assert.AreEqual(t1.Result.HasData, true);
+
+        TestResult(member);
     }
 }

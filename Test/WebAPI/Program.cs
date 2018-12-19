@@ -117,24 +117,6 @@ public class Startup
     }
 }
 
-public class ResultObject<Type> : Business.Result.ResultObject<Type>
-{
-    //static ResultObject() => MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
-
-    public ResultObject(Type data, System.Type dataType, int state = 1, string message = null, System.Type genericType = null)
-        : base(data, dataType, state, message, genericType) { }
-
-    public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }
-
-    [MessagePack.IgnoreMember]
-    public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
-
-    [MessagePack.IgnoreMember]
-    public override System.Type GenericType => base.GenericType;
-
-    public override byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
-}
-
 [Use]
 //Internal object do not write logs
 [Logger(canWrite: false)]
@@ -221,11 +203,11 @@ public class BusinessController : Controller
             }
         }
 
-        //var bytes = result.ToBytes();
+        var bytes = result.ToBytes();
 
-        //var ags4 = MessagePack.MessagePackSerializer.Deserialize<Business.Result.ResultObject<BusinessMember.Ags4>>(bytes);
+        var result2 = MessagePack.MessagePackSerializer.Deserialize<Business.Result.ResultObject<BusinessMember.Ags2>>(bytes);
 
-        //var r2 = ags4?.Data?.A4;
+        var a4 = result2?.Data?.B2?.B3?.A4;
 
         return result;
     }
