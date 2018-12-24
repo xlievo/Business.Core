@@ -16,6 +16,9 @@ PM> Install-Package Business.Core
 
 ## Please refer unit test
 
+## Preface: This library is not RPC, WebAPI, MVC, REST, Http, Rabbitmq, Socket, Kestrel.
+## What can he do?
+
 This library has the following functions
 
 1: Call Method with a fixed routing, including grouping mode
@@ -166,3 +169,4 @@ static BusinessMember Member = Bind.Create<BusinessMember>();
 Member.Command.AsyncCall("MyLogic", new object[] { "{\"A\":\"abc\"}" });
 ```
 
+## See Unit Testing for more features

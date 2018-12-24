@@ -1455,9 +1455,16 @@ namespace Business.Utils
         /// <summary>
         /// Ignore erroneous characters: Unable to translate Unicode...
         /// </summary>
-        static readonly System.Text.Encoding UTF8 = System.Text.Encoding.GetEncoding("UTF-8", new System.Text.EncoderReplacementFallback(string.Empty), new System.Text.DecoderExceptionFallback());
+        public static readonly System.Text.Encoding UTF8 = System.Text.Encoding.GetEncoding("UTF-8", new System.Text.EncoderReplacementFallback(string.Empty), new System.Text.DecoderExceptionFallback());
 
         #endregion
+
+        /// <summary>
+        /// Ignore erroneous characters: Unable to translate Unicode...
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string UTF8String(this string value) => UTF8.GetString(UTF8.GetBytes(value ?? string.Empty));
 
         [System.Flags]
         public enum CheckCharMode
@@ -1561,7 +1568,7 @@ namespace Business.Utils
 
             foreach (byte b in System.Guid.NewGuid().ToByteArray())
             {
-                i *= ((int)b + 1);
+                i *= b + 1;
             }
 
             return string.Format("{0:x}", i - System.DateTime.Now.Ticks);
@@ -1746,7 +1753,7 @@ namespace Business.Utils
         public static double Scale(this double value, int size = 2)
         {
             var p = System.Math.Pow(10, size);
-            return (double)((int)(value * (int)p) / p);
+            return (int)(value * (int)p) / p;
         }
         public static decimal Scale(this decimal value, int size = 2)
         {
@@ -1772,14 +1779,8 @@ namespace Business.Utils
         //    return System.DateTime.ParseExact(time, "yyyyMMddHHmmssfffffff", null);
         //}
 
-        public static string GetName(this System.Enum value)
-        {
-            return null == value ? null : System.Enum.GetName(value.GetType(), value);
-        }
-        public static int? GetValue(this System.Enum value)
-        {
-            return null == value ? new int?() : value.GetHashCode();
-        }
+        public static string GetName(this System.Enum value) => null == value ? null : System.Enum.GetName(value.GetType(), value);
+        public static int? GetValue(this System.Enum value) => null == value ? new int?() : value.GetHashCode();
         public static System.Collections.IList Adde(this System.Collections.IList list, params object[] item)
         {
             if (null == list) { throw new System.ArgumentNullException(nameof(list)); }
@@ -1804,7 +1805,15 @@ namespace Business.Utils
 
         public static Type TryJsonDeserialize<Type>(this string value, Newtonsoft.Json.JsonSerializerSettings settings)
         {
-            try { return Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value, settings); }
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return default;
+            }
+
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value, settings);
+            }
             catch (System.Exception)
             {
                 return default;
@@ -1812,8 +1821,16 @@ namespace Business.Utils
         }
         public static Type TryJsonDeserialize<Type>(this string value, params Newtonsoft.Json.JsonConverter[] converters)
         {
-            try { return Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value, converters); }
-            catch (System.Exception)
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return default;
+            }
+
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<Type>(value, converters);
+            }
+            catch
             {
                 return default;
             }
@@ -1822,6 +1839,11 @@ namespace Business.Utils
         public static Type TryJsonDeserialize<Type>(this string value, out string error)
         {
             error = null;
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return default;
+            }
 
             try
             {
@@ -1862,6 +1884,11 @@ namespace Business.Utils
         public static object TryJsonDeserialize(this string value, System.Type type, out string error)
         {
             error = null;
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
 
             try
             {
