@@ -70,11 +70,6 @@ public interface IResult
     System.Boolean HasData { get; }
 
     /// <summary>
-    /// Gets the token of this result, used for callback
-    /// </summary>
-    System.String Callback { get; set; }
-
-    /// <summary>
     /// ProtoBuf,MessagePack or Other
     /// </summary>
     /// <returns></returns>
@@ -130,7 +125,7 @@ public class CheckNull : ArgumentAttribute
     {
         if (object.Equals(null, value))
         {
-            return this.ResultCreate(State, Message ?? $"argument \"{ this.Meta.Member}\" can not null.");
+            return this.ResultCreate(State, Message ?? $"argument \"{Nick}\" can not null.");
         }
 
         return this.ResultCreate();
