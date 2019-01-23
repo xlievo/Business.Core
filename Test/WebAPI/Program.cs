@@ -28,8 +28,6 @@ public class Program
 
 public class Startup
 {
-    static Startup() => Bind.Create<BusinessMember>();
-
     public Startup(IConfiguration configuration)
     {
         Configuration = configuration;
@@ -58,7 +56,7 @@ public class Startup
                 options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
-                options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                //options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
             });
     }
 
@@ -70,13 +68,19 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
+        var wwwroot = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
+
+        if (!System.IO.Directory.Exists(wwwroot))
+        {
+            System.IO.Directory.CreateDirectory(wwwroot);
+        }
         // Set up custom content types -associating file extension to MIME type
         var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
         //provider.Mappings[".yaml"] = "text/yaml";
         provider.Mappings[".doc"] = "application/json";
         app.UseDefaultFiles().UseStaticFiles(new StaticFileOptions
         {
-            FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "wwwroot")),
+            FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwroot),
             ContentTypeProvider = provider,
             OnPrepareResponse = c =>
             {
@@ -97,9 +101,10 @@ public class Startup
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto }).UseAuthentication().UseCors("any");
 
-        //====================================//
+        //==================First step==================//
         Configer.LoadBusiness();
 
+        //==================The second step==================//
         //add route
         app.UseMvc(routes =>
         {
@@ -112,7 +117,8 @@ public class Startup
             }
         });
 
-        Configer.UseDoc(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "wwwroot", "doc"));
+        //==================The third step==================//
+        Configer.UseDoc(System.IO.Path.Combine(wwwroot));//, "doc"
         Configer.UseType(typeof(BusinessController));
     }
 }
@@ -203,11 +209,11 @@ public class BusinessController : Controller
             }
         }
 
-        var bytes = result.ToBytes();
+        //var bytes = result.ToBytes();
 
-        var result2 = MessagePack.MessagePackSerializer.Deserialize<Business.Result.ResultObject<BusinessMember.Ags2>>(bytes);
+        //var result2 = MessagePack.MessagePackSerializer.Deserialize<Business.Result.ResultObject<BusinessMember.Ags2>>(bytes);
 
-        var a4 = result2?.Data?.B2?.B3?.A4;
+        //var a4 = result2?.Data?.B2?.B3?.A4;
 
         return result;
     }
