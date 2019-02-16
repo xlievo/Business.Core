@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("www.tmopen.com")]
 [assembly: AssemblyProduct("Business.Core")]
-[assembly: AssemblyCopyright("Copyright ©  2014~2018")]
+[assembly: AssemblyCopyright("Copyright ©  2014~2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 [assembly: Guid("68294c7a-3496-4744-80c3-3ce6c06c4474")]
 [assembly: System.Runtime.CompilerServices.SuppressIldasm]
 
-[assembly: AssemblyVersion("1.1.5.1")]
-[assembly: AssemblyFileVersion("1.1.5.1")]
+[assembly: AssemblyVersion("1.1.5.2")]
+[assembly: AssemblyFileVersion("1.1.5.2")]
 //[assembly: AssemblyInformationalVersion("1.1.0-bate4")]
-[assembly: AssemblyInformationalVersion("1.1.5.1")]
+[assembly: AssemblyInformationalVersion("1.1.5.2")]

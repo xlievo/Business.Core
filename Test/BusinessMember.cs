@@ -28,6 +28,20 @@ public class ResultObject<Type> : Business.Result.ResultObject<Type>
 [Logger]
 public class BusinessMember : BusinessBase<ResultObject<object>>
 {
+    static BusinessMember()
+    {
+        /*
+#if DEBUG
+        var con = Startup.appSettings.GetSection("Redis").GetSection("ConnectionString").Value;
+#else
+        var con = Startup.appSettings.GetSection("Redis").GetSection("ConnectionString2").Value;
+#endif
+        System.Console.WriteLine($"Redis={con}");
+        var csredis = new CSRedis.CSRedisClient(con);
+        RedisHelper.Initialization(csredis);
+        */
+    }
+
     public BusinessMember()
     {
         this.Logger = x =>
@@ -38,7 +52,7 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
 
                 var log = x.JsonSerialize();
 
-                Help.WriteLocal(log, console: true, write: x.Type == LoggerType.Exception);
+                //Help.WriteLocal(log, console: true, write: x.Type == LoggerType.Exception);
             }
             catch (Exception exception)
             {

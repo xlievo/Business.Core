@@ -16,10 +16,7 @@ using System.Collections.Generic;
 
 public class Program
 {
-    public static void Main(string[] args)
-    {
-        CreateWebHostBuilder(args).Build().Run();
-    }
+    public static void Main(string[] args) => CreateWebHostBuilder(args).Build().Run();
 
     public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
         WebHost.CreateDefaultBuilder(args)
@@ -28,9 +25,12 @@ public class Program
 
 public class Startup
 {
+    public static IConfigurationSection appSettings = null;
+
     public Startup(IConfiguration configuration)
     {
         Configuration = configuration;
+        appSettings = Configuration.GetSection("AppSettings");
     }
 
     public IConfiguration Configuration { get; }
@@ -119,7 +119,7 @@ public class Startup
 
         //==================The third step==================//
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));//, "doc"
-        Configer.UseType(typeof(BusinessController));
+        //Configer.UseType(typeof(BusinessController));
     }
 }
 
@@ -171,7 +171,7 @@ public class BusinessController : Controller
         }
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
-
+        /*
         var use = new System.Dynamic.ExpandoObject();
         use.TryAdd("Control", this);
         use.TryAdd("Token", new Token //token
@@ -180,7 +180,7 @@ public class BusinessController : Controller
             Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
             //Callback = b
         });
-
+        */
         var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCall(
             //the cmd of this request.
             c,
@@ -195,8 +195,8 @@ public class BusinessController : Controller
                         Key = t,
                         Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
                         //Callback = b
-                    },
-                    new UseEntry("control", use)
+                    }
+                    //, new UseEntry("control", use)
             },
             //the group of this request.
             g);
