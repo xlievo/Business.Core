@@ -33,7 +33,7 @@ public class BusinessMember : BusinessBase
         };
     }
 
-    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)]decimal arg2 = default)
+    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]decimal arg2 = default)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -45,14 +45,23 @@ public class BusinessMember : BusinessBase
 
 public class TestAttribute : ArgumentAttribute
 {
-    public TestAttribute(int state = 111, string message = null, bool canNull = true) : base(state, message, canNull)
-    {
-    }
+    public TestAttribute(int state = 111, string message = null, bool canNull = true) : base(state, message, canNull) { }
 
     public override async Task<IResult> Proces(dynamic value)
     {
-        var value2 = value + "1122";
-        return this.ResultCreate(value2);
+        switch (value)
+        {
+            case "ok":
+                return this.ResultCreate();
+
+            case "error":
+                return this.ResultCreate(this.State, $"{this.Nick} cannot be empty");
+
+            case "data":
+                return this.ResultCreate(value + "1122");
+
+            default: throw new System.Exception("exception!");
+        }
     }
 }
 
@@ -61,6 +70,7 @@ public class Args
     public struct Test001
     {
         [Test]
+        [Nick("password")]
         public string A { get; set; }
 
         public string B { get; set; }
