@@ -1,4 +1,4 @@
-﻿using Business;
+using Business;
 using Business.Attributes;
 using Business.Utils;
 using System;
@@ -10,9 +10,9 @@ using static Args;
 [JsonArg]
 [Logger]
 [Info("API")]
-public class BusinessMember2 : BusinessBase
+public class BusinessMember : BusinessBase
 {
-    public BusinessMember2()
+    public BusinessMember()
     {
         this.Logger = x =>
         {
@@ -31,9 +31,12 @@ public class BusinessMember2 : BusinessBase
         };
     }
 
-    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg)
+    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)]decimal arg2 = default)
     {
-        return this.ResultCreate(arg.Out);
+        dynamic args = new System.Dynamic.ExpandoObject();
+        args.arg = arg.Out;
+        args.arg2 = arg2;
+        return this.ResultCreate(args);
     }
 }
 
