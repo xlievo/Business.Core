@@ -22,7 +22,7 @@
       "launchBrowser": true,
       //{"A":"A","B":{"A3":"A3","B3":"B3"}}
       //"launchUrl": "BusinessMember?d=[\"{\\\"A2\\\":\\\"A2\\\",\\\"B2\\\":{\\\"A3\\\":\\\"A3\\\",\\\"B3\\\":{\\\"A4\\\":\\\"A4\\\",\\\"B4\\\":\\\"B4\\\"}}}\",2233.5678]&c=TestAgs001&t=dddd",
-      "launchUrl": "API?d=[\"{\\\"A\\\":\\\"aaa\\\",\\\"B\\\":\\\"bbb\\\"}\",2233.5678]&c=Test001&t=dddd",
+      "launchUrl": "API?d=[\"{\\\"A\\\":\\\"ok\\\",\\\"B\\\":\\\"bbb\\\"}\",2233.5678]&c=Test001&t=dddd",
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
