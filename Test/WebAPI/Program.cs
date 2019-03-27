@@ -56,7 +56,6 @@ public class Startup
                 options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
-                //options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
             });
     }
 
@@ -118,8 +117,7 @@ public class Startup
         });
 
         //==================The third step==================//
-        Configer.UseDoc(System.IO.Path.Combine(wwwroot));//, "doc"
-        //Configer.UseType(typeof(BusinessController));
+        Configer.UseDoc(System.IO.Path.Combine(wwwroot));
     }
 }
 
@@ -140,7 +138,6 @@ public class BusinessController : Controller
     {
         if (null != path) { return this.NotFound(); }
 
-        //RequestData requestData = null;
         string c = null, t = null, d = null, g = null, b = null;
 
         switch (this.Request.Method)
@@ -171,16 +168,6 @@ public class BusinessController : Controller
         }
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
-        /*
-        var use = new System.Dynamic.ExpandoObject();
-        use.TryAdd("Control", this);
-        use.TryAdd("Token", new Token //token
-        {
-            Key = t,
-            Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
-            //Callback = b
-        });
-        */
         var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCall(
             //the cmd of this request.
             c,
@@ -196,7 +183,6 @@ public class BusinessController : Controller
                         Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
                         //Callback = b
                     }
-                    //, new UseEntry("control", use)
             },
             //the group of this request.
             g);
@@ -208,13 +194,7 @@ public class BusinessController : Controller
                 result.Callback = b;
             }
         }
-
-        //var bytes = result.ToBytes();
-
-        //var result2 = MessagePack.MessagePackSerializer.Deserialize<Business.Result.ResultObject<BusinessMember.Ags2>>(bytes);
-
-        //var a4 = result2?.Data?.B2?.B3?.A4;
-
+        
         return result;
     }
 }
