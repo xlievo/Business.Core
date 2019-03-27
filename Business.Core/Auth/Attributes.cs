@@ -1282,7 +1282,7 @@ namespace Business.Attributes
 
     internal sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
-        public ArgumentDefaultAttribute(System.Type resultType, int state = -11, string message = null) : base(state, message) { this.Meta.resultType = resultType; }
+        public ArgumentDefaultAttribute(System.Type resultType, int state = -11, string message = null) : base(state, message) => this.Meta.resultType = resultType;
     }
 
     public class JsonArgAttribute : ArgumentAttribute
