@@ -76,7 +76,7 @@ namespace BenchmarkTest
     /// </summary>
     public class Proces01 : ArgumentAttribute
     {
-        public Proces01(int state = -110, string message = null, bool canNull = true) : base(state, message, canNull) { }
+        public Proces01(int state = -110, string message = null) : base(state, message) { }
 
         public async override Task<IResult> Proces(dynamic value) => this.ResultCreate(data: value + 1);
     }

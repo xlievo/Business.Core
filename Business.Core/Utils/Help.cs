@@ -101,7 +101,7 @@ namespace Business.Utils
                         {
                             var attr = first.Value;
 
-                            if (attr.Source != Attributes.AttributeBase.SourceType.Parameter)
+                            if (attr.Declaring != Attributes.AttributeBase.DeclaringType.Parameter)
                             {
                                 item2.Value.Attrs.Remove(attr, out _);
                             }
@@ -119,7 +119,7 @@ namespace Business.Utils
                         //add default convert
                         if (arg.HasIArg && NodeState.DAT != first.State)
                         {
-                            var attr = new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter };
+                            var attr = new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Declaring = Attributes.AttributeBase.DeclaringType.Parameter };
                             item2.Value.Attrs.TryAdd(attr);
                             //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
                         }
@@ -491,7 +491,7 @@ namespace Business.Utils
 
             var arg = new Doc.Member.Arg
             {
-                //Name = args.Name,
+                Name = args.Name,
                 Type = args.Type.Name,
                 //Position = args.Position,
                 DefaultValue = args.DefaultValue,

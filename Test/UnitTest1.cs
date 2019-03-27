@@ -48,7 +48,7 @@ public struct Use02
 /// </summary>
 public class ProcesUse02 : ArgumentAttribute
 {
-    public ProcesUse02(int state = -100, string message = null, bool canNull = true) : base(state, message, canNull) { }
+    public ProcesUse02(int state = -100, string message = null) : base(state, message) { }
 
     public async override Task<IResult> Proces(dynamic value) => this.ResultCreate(new Use02 { B = value.A });
 }
@@ -58,14 +58,14 @@ public class ProcesUse02 : ArgumentAttribute
 /// </summary>
 public class Proces01 : ArgumentAttribute
 {
-    public Proces01(int state = -110, string message = null, bool canNull = true) : base(state, message, canNull) { }
+    public Proces01(int state = -110, string message = null) : base(state, message) { }
 
     public async override Task<IResult> Proces(dynamic value) => this.ResultCreate($"{value}.1234567890");
 }
 
 public class AES2 : AES
 {
-    public AES2(string key, int state = -821, string message = null, bool canNull = true) : base(key, state, message, canNull)
+    public AES2(string key, int state = -821, string message = null) : base(key, state, message)
     {
     }
 
@@ -456,7 +456,7 @@ public class TestBusinessMember
     public void TestCfgInfo()
     {
         Assert.AreEqual(Cfg.Info.CommandGroupDefault, "DEF");
-        Assert.AreEqual(Cfg.Info.Source, AttributeBase.SourceType.Class);
+        Assert.AreEqual(Cfg.Info.Declaring, AttributeBase.DeclaringType.Class);
         Assert.AreEqual(Cfg.Info.BusinessName, "Business");
     }
 
@@ -502,19 +502,19 @@ public class TestBusinessMember
 
         var json = Cfg.Attributes.FirstOrDefault(c => c.Type == typeof(JsonArgAttribute));
         Assert.AreNotEqual(json, null);
-        Assert.AreEqual(json.Source, AttributeBase.SourceType.Assembly);
+        Assert.AreEqual(json.Declaring, AttributeBase.DeclaringType.Assembly);
 
         var logger = Cfg.Attributes.FirstOrDefault(c => c.Type == typeof(LoggerAttribute));
         Assert.AreNotEqual(logger, null);
-        Assert.AreEqual(logger.Source, AttributeBase.SourceType.Assembly);
+        Assert.AreEqual(logger.Declaring, AttributeBase.DeclaringType.Assembly);
 
         var command = Cfg.Attributes.FirstOrDefault(c => c.Type == typeof(CommandAttribute));
         Assert.AreNotEqual(command, null);
-        Assert.AreEqual(command.Source, AttributeBase.SourceType.Assembly);
+        Assert.AreEqual(command.Declaring, AttributeBase.DeclaringType.Assembly);
 
         var info = Cfg.Attributes.FirstOrDefault(c => c.Type == typeof(Info));
         Assert.AreNotEqual(info, null);
-        Assert.AreEqual(info.Source, AttributeBase.SourceType.Class);
+        Assert.AreEqual(info.Declaring, AttributeBase.DeclaringType.Class);
     }
 
     [TestMethod]

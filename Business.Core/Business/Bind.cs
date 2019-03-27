@@ -577,7 +577,7 @@ namespace Business
                     {
                         if (!isDef && item2.Group == groupDefault) { isDef = true; }
 
-                        if (item2.Source != AttributeBase.SourceType.Method)
+                        if (item2.Declaring != AttributeBase.DeclaringType.Method)
                         {
                             notMethods.Add(item2);
 
@@ -810,7 +810,7 @@ namespace Business
 
                     //==================================//
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
-                    var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.SourceType.Parameter, GropuAttribute.Comparer) : null;
+                    var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
 
                     var hasDefinition = IsClass(parameterType);
 
@@ -1018,7 +1018,7 @@ namespace Business
                 var ignoreBusinessArg = ignores.Any(c => c.Mode == IgnoreMode.BusinessArg);
                 // || (item.Group == c.Group || string.IsNullOrWhiteSpace(c.Group))
                 var argAttrChild = (hasUse || item.Value.IgnoreBusinessArg || ignoreBusinessArg) ?
-                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group) && c.Source == AttributeBase.SourceType.Parameter) :
+                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group) && c.Declaring == AttributeBase.DeclaringType.Parameter) :
                     argAttrs.FindAll(c => GroupEquals(c, item.Value.Group));
 
                 var nickValue = string.IsNullOrWhiteSpace(nick?.Nick) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Nick) && GroupEquals(c, item.Value.Group)).GroupBy(c => c.Nick, System.StringComparer.InvariantCultureIgnoreCase).FirstOrDefault()?.Key : nick.Nick;
@@ -1055,7 +1055,7 @@ namespace Business
                     //if (current.hasIArg && 0 == argAttr.Count)
                     if (current.hasIArg && null == argAttr.First.Value)
                     {
-                        argAttr.TryAdd(new ArgumentDefaultAttribute(resultType) { Source = AttributeBase.SourceType.Parameter });
+                        argAttr.TryAdd(new ArgumentDefaultAttribute(resultType) { Declaring = AttributeBase.DeclaringType.Parameter });
                     }
                 }
 

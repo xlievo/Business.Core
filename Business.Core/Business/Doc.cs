@@ -181,9 +181,9 @@ namespace Business.Document
 
     public class Doc
     {
-        public virtual string Name { get; set; }
+        public string Name { get; set; }
 
-        public virtual Dictionary<string, Dictionary<string, Member>> Members { get; set; }
+        public Dictionary<string, Dictionary<string, Member>> Members { get; set; }
 
         public class Member
         {
@@ -191,10 +191,10 @@ namespace Business.Document
             public string Name { get; set; }
 
             //==============hasReturn===================//
-            public virtual bool HasReturn { get; set; }
+            public bool HasReturn { get; set; }
 
             //==============Returns===================//
-            public virtual string Returns { get; set; }
+            public string Returns { get; set; }
 
             ////===============position==================//
             //public int Position { get; set; }
@@ -203,37 +203,37 @@ namespace Business.Document
             //public virtual string GroupDefault { get; set; }
 
             //==============Summary===================//
-            public virtual string Summary { get; set; }
+            public string Summary { get; set; }
 
             //==============args===================//
-            public virtual IEnumerable<Arg> Args { get; set; }
+            public IEnumerable<Arg> Args { get; set; }
 
             public class Arg
             {
-                ////===============name==================//
-                //public string Name { get; set; }
+                //===============name==================//
+                public string Name { get; set; }
                 //===============type==================//
-                public virtual string Type { get; set; }
+                public string Type { get; set; }
                 ////===============position==================//
                 //public int Position { get; set; }
                 ////===============hasDefaultValue==================//
                 //public bool HasDefaultValue { get; set; }
                 //===============defaultValue==================//
-                public virtual object DefaultValue { get; set; }
+                public object DefaultValue { get; set; }
                 //===============argAttr==================//
-                public virtual IEnumerable<Attribute> Attrs { get; set; }
+                public IEnumerable<Attribute> Attrs { get; set; }
                 //===============hasDefinition==================//
-                public virtual bool HasDefinition { get; set; }
+                public bool HasDefinition { get; set; }
                 ////==============group===================//
                 //public string Group { get; set; }
                 ////==============hasChild===================//
                 //public virtual bool HasChild { get; set; }
                 //===============child==================//
-                public virtual IEnumerable<Arg> Child { get; set; }
+                public IEnumerable<Arg> Child { get; set; }
                 //==============Summary===================//
-                public virtual string Summary { get; set; }
+                public string Summary { get; set; }
                 //===============nick==================//
-                public virtual string Nick { get; set; }
+                public string Nick { get; set; }
 
                 public class Attribute
                 {
@@ -242,11 +242,11 @@ namespace Business.Document
 
                     public string Type { get; set; }
 
-                    public virtual string Description { get; set; }
+                    public string Description { get; set; }
 
-                    public virtual string Message { get; set; }
+                    public string Message { get; set; }
 
-                    public virtual int State { get; set; }
+                    public int State { get; set; }
                 }
             }
         }

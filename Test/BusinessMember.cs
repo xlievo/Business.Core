@@ -70,7 +70,7 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
 
     public class A2 : ArgumentAttribute
     {
-        public A2(int state = -110, string message = null, bool canNull = true) : base(state, message, canNull)
+        public A2(int state = -110, string message = null) : base(state, message)
         {
         }
 
@@ -116,7 +116,7 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
 
     public class FileCheck : ArgumentAttribute
     {
-        public FileCheck(int state = -110, string message = null, bool canNull = true) : base(state, message, canNull) { }
+        public FileCheck(int state = -110, string message = null) : base(state, message) { }
 
         public override async Task<IResult> Proces(dynamic value)
         {

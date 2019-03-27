@@ -83,14 +83,14 @@ namespace Business.Attributes
 
             foreach (var item in classAttr)
             {
-                item.Source = SourceType.Class;
+                item.Declaring = DeclaringType.Class;
             }
 
             var assemblyAttr = classType.Assembly.GetCustomAttributes<AttributeBase>();
 
             foreach (var item in assemblyAttr)
             {
-                item.Source = SourceType.Assembly;
+                item.Declaring = DeclaringType.Assembly;
             }
 
             var attributes = new System.Collections.Generic.List<AttributeBase>(classAttr).Distinct(assemblyAttr);
@@ -101,7 +101,7 @@ namespace Business.Attributes
         internal static System.Collections.Generic.List<AttributeBase> GetAttributes(MemberInfo member, bool inherit = true)
         {
             var attributes = member.GetAttributes<AttributeBase>(inherit).ToList();
-            attributes.ForEach(c => c.Source = SourceType.Method);
+            attributes.ForEach(c => c.Declaring = DeclaringType.Method);
             return attributes;
         }
 
@@ -110,7 +110,7 @@ namespace Business.Attributes
             var attributes = new System.Collections.Generic.List<AttributeBase>(member.GetAttributes<AttributeBase>());
             attributes.AddRange(member.ParameterType.GetAttributes<AttributeBase>());
             attributes.AddRange(type.GetAttributes<AttributeBase>());
-            attributes.ForEach(c => c.Source = SourceType.Parameter);
+            attributes.ForEach(c => c.Declaring = DeclaringType.Parameter);
             return attributes;
         }
         internal static Attribute GetAttribute<Attribute>(ParameterInfo member, System.Type type) where Attribute : AttributeBase
@@ -118,7 +118,7 @@ namespace Business.Attributes
             var attribute = member.GetAttribute<Attribute>() ?? type.GetAttribute<Attribute>();
             if (null != attribute)
             {
-                attribute.Source = SourceType.Parameter;
+                attribute.Declaring = DeclaringType.Parameter;
             }
             return attribute;
         }
@@ -127,14 +127,14 @@ namespace Business.Attributes
             var attributes = new System.Collections.Generic.List<AttributeBase>();
             attributes.AddRange(member.GetAttributes<AttributeBase>());
             attributes.AddRange(type.GetAttributes<AttributeBase>());
-            attributes.ForEach(c => c.Source = SourceType.Children);
+            attributes.ForEach(c => c.Declaring = DeclaringType.Children);
             return attributes;
         }
 
-        internal static System.Collections.Generic.List<Attribute> GetAttributes<Attribute>(System.Type type, SourceType source, System.Collections.Generic.IEqualityComparer<Attribute> comparer = null) where Attribute : AttributeBase
+        internal static System.Collections.Generic.List<Attribute> GetAttributes<Attribute>(System.Type type, DeclaringType source, System.Collections.Generic.IEqualityComparer<Attribute> comparer = null) where Attribute : AttributeBase
         {
             var attributes = type.GetAttributes<Attribute>().Distinct(comparer).ToList();
-            attributes.ForEach(c => c.Source = source);
+            attributes.ForEach(c => c.Declaring = source);
             return attributes;
         }
 
@@ -331,7 +331,10 @@ namespace Business.Attributes
 
         #region
 
-        public enum SourceType
+        /// <summary>
+        /// Source types that declare this feature
+        /// </summary>
+        public enum DeclaringType
         {
             Assembly,
             Class,
@@ -350,7 +353,10 @@ namespace Business.Attributes
         ///// </summary>
         //public bool AllowMultiple { get; private set; }
 
-        public SourceType Source { get; internal set; }
+        /// <summary>
+        /// Declare the source of this feature
+        /// </summary>
+        public DeclaringType Declaring { get; internal set; }
 
         ///// <summary>
         ///// Determines whether the attributes indicated by the derived class and the overridden member are inherited
@@ -402,7 +408,7 @@ namespace Business.Attributes
             return attr as T;
         }
 
-        public string Replace(string value)
+        public virtual string Replace(string value)
         {
             if (string.IsNullOrWhiteSpace(value) || !Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta))
             {
@@ -853,11 +859,11 @@ namespace Business.Attributes
             public bool HasProcesIArg { get; internal set; }
         }
 
-        public ArgumentAttribute(int state, string message = null, bool canNull = true)
+        public ArgumentAttribute(int state, string message = null)
         {
             this.State = state;
             this.Message = message;
-            this.CanNull = canNull;
+            //this.CanNull = canNull;
             this.Meta = new MetaData();
 
             this.BindAfter += () =>
@@ -879,9 +885,9 @@ namespace Business.Attributes
         public MetaData Meta { get; }
 
         /// <summary>
-        /// By checking the Allow null value
+        /// By checking the Allow null value, Default to true
         /// </summary>
-        public bool CanNull { get; set; }
+        public bool CanNull { get; set; } = true;
 
         int state;
         /// <summary>
@@ -994,8 +1000,7 @@ namespace Business.Attributes
 
     public class CheckNullAttribute : ArgumentAttribute
     {
-        public CheckNullAttribute(int state = -800, string message = null)
-            : base(state, message, false) { }
+        public CheckNullAttribute(int state = -800, string message = null) : base(state, message) => this.CanNull = false;
 
         public override async Task<IResult> Proces(dynamic value)
         {
@@ -1017,7 +1022,7 @@ namespace Business.Attributes
 
     public class SizeAttribute : ArgumentAttribute
     {
-        public SizeAttribute(int state = -801, string message = null, bool canNull = true) : base(state, message, canNull)
+        public SizeAttribute(int state = -801, string message = null) : base(state, message)
         {
             this.BindAfter += () =>
             {
@@ -1160,7 +1165,7 @@ namespace Business.Attributes
 
     public class ScaleAttribute : ArgumentAttribute
     {
-        public ScaleAttribute(int state = -802, string message = null, bool canNull = true) : base(state, message, canNull) { }
+        public ScaleAttribute(int state = -802, string message = null) : base(state, message) { }
         public int Size { get; set; } = 2;
 
         public override async Task<IResult> Proces(dynamic value)
@@ -1181,7 +1186,7 @@ namespace Business.Attributes
 
     public class CheckEmailAttribute : ArgumentAttribute
     {
-        public CheckEmailAttribute(int state = -803, string message = null, bool canNull = true) : base(state, message, canNull) { }
+        public CheckEmailAttribute(int state = -803, string message = null) : base(state, message) { }
 
         public override async Task<IResult> Proces(dynamic value)
         {
@@ -1198,7 +1203,7 @@ namespace Business.Attributes
 
     public class CheckCharAttribute : ArgumentAttribute
     {
-        public CheckCharAttribute(int state = -804, string message = null, bool canNull = true) : base(state, message, canNull) { }
+        public CheckCharAttribute(int state = -804, string message = null) : base(state, message) { }
         public Help.CheckCharMode Mode { get; set; } = Help.CheckCharMode.All;
 
         public override async Task<IResult> Proces(dynamic value)
@@ -1216,8 +1221,7 @@ namespace Business.Attributes
 
     public class MD5Attribute : ArgumentAttribute
     {
-        public MD5Attribute(int state = -820, string message = null, bool canNull = true)
-            : base(state, message, canNull) { }
+        public MD5Attribute(int state = -820, string message = null) : base(state, message) { }
 
         public System.Text.Encoding Encoding { get; set; }
 
@@ -1249,8 +1253,7 @@ namespace Business.Attributes
 
         public System.Text.Encoding Encoding { get; set; }
 
-        public AES(string key, int state = -821, string message = null, bool canNull = true)
-            : base(state, message, canNull) => this.Key = key;
+        public AES(string key, int state = -821, string message = null) : base(state, message) => this.Key = key;
 
         public override async Task<IResult> Proces(dynamic value)
         {
@@ -1277,16 +1280,14 @@ namespace Business.Attributes
 
     #region Deserialize
 
-    public sealed class ArgumentDefaultAttribute : ArgumentAttribute
+    internal sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
         public ArgumentDefaultAttribute(System.Type resultType, int state = -11, string message = null) : base(state, message) { this.Meta.resultType = resultType; }
-
-        //public override async Task<IResult> Proces(dynamic value) => this.ResultCreate<dynamic>(value);
     }
 
     public class JsonArgAttribute : ArgumentAttribute
     {
-        public JsonArgAttribute(int state = -12, string message = null, bool canNull = false) : base(state, message, canNull) { }
+        public JsonArgAttribute(int state = -12, string message = null) : base(state, message) => this.CanNull = false;
 
         public Newtonsoft.Json.JsonSerializerSettings Settings { get; set; }
 
