@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
-using Business.Utils;
+using Business;
 using Business.Attributes;
 using Business.Auth;
-using Business;
+using Business.Utils;
 using System.Collections.Generic;
 
 public class Program
@@ -29,6 +29,14 @@ public class Startup
 
     public Startup(IConfiguration configuration)
     {
+        System.Threading.ThreadPool.SetMinThreads(50, 50);
+        System.Threading.ThreadPool.SetMaxThreads(32767, 32767);
+        System.Threading.ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
+        System.Threading.ThreadPool.GetMaxThreads(out int workerThreads2, out int completionPortThreads2);
+
+        System.Console.WriteLine($"Min {workerThreads}, {completionPortThreads}");
+        System.Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
+
         Configuration = configuration;
         appSettings = Configuration.GetSection("AppSettings");
     }
@@ -172,20 +180,18 @@ public class BusinessController : Controller
             //the cmd of this request.
             c,
             //the data of this request, allow null.
-            Help.TryJsonDeserialize(d, out object[] data) ? data : new object[] { d },
-            //the incoming use object
-            new object[]
-            {
-                    this, //controller
-                    new Token //token
-                    {
-                        Key = t,
-                        Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
-                        //Callback = b
-                    }
-            },
+            d.TryJsonDeserialize(out object[] data) ? data : new object[] { d },
             //the group of this request.
-            g);
+            g,
+            //the incoming use object
+            new UseEntry(this, "controller"), //controller
+            new UseEntry(new Token //token
+            {
+                Key = t,
+                Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
+                //Callback = b
+            }, "session") //[Use(true)]
+            );
 
         if (null != result)
         {
@@ -194,7 +200,7 @@ public class BusinessController : Controller
                 result.Callback = b;
             }
         }
-        
+
         return result;
     }
 }

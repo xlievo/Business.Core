@@ -730,15 +730,20 @@ namespace Business.Attributes
 
     public struct UseEntry
     {
-        public static System.Type Type = typeof(UseEntry);
+        public UseEntry(object value, params string[] parameterName)
+        {
+            this.Value = value;
 
-        //public static UseEntry Default = default;
+            this.Type = this.Value?.GetType();
 
-        public UseEntry(string name, object value) { this.Name = name; this.Value = value; }
+            this.ParameterName = parameterName;
+        }
 
-        public string Name { get; private set; }
+        public System.Type Type { get; private set; }
 
         public object Value { get; private set; }
+
+        public string[] ParameterName { get; private set; }
     }
 
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]

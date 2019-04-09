@@ -11,7 +11,12 @@ using System;
 [assembly: JsonArg(Group = "G01")]
 [assembly: Logger(LoggerType.All)]
 [assembly: Command(Group = "G01")]
-[assembly: Command(Group = "DEF")]
+[assembly: Command(Group = CommandGroupDefault.Group)]
+
+public struct CommandGroupDefault
+{
+    public const string Group = "333";
+}
 
 public class ResultObject<Type> : Business.Result.ResultObject<Type>
 {
@@ -85,12 +90,14 @@ public struct Arg01
     /// Child Property, Field Agr<> type is only applicable to JSON
     /// </summary>
     [CheckNull]
-    [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = "DEF", Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
-    [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = "DEF")]
+    [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
+    [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = CommandGroupDefault.Group)]
     public Arg<object, dynamic> A;
+
+    public string B;
 }
 
-[Info(CommandGroupDefault = "DEF")]
+[Info(CommandGroupDefault = CommandGroupDefault.Group)]
 public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
 {
     public BusinessLoggerAndArg()
@@ -118,21 +125,48 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
 
         [ProcesUse02]Arg<Use02, Use01> use06,
 
-        [Logger(LoggerType.Record, Group = "DEF", CanWrite = false)]Token token = default)
+        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A);
 }
 
-[Info("Business", CommandGroupDefault = "DEF")]
+[Info("Business", CommandGroupDefault = CommandGroupDefault.Group)]
 public class BusinessMember : BusinessBase
 {
     public BusinessMember()
     {
         this.Logger = logger =>
         {
-            var data = logger.Value?.ToValue();
+            logger.Value = logger.Value?.ToValue();
 
-            System.Console.WriteLine(data.JsonSerialize());
+            System.Console.WriteLine(logger.JsonSerialize());
+            System.Diagnostics.Debug.WriteLine(logger.JsonSerialize());
+
+            if (logger.Member == "BusinessMember.Test0011" || logger.Member == "BusinessMember.Test0012")
+            {
+                switch (logger.Type)
+                {
+                    case LoggerType.Record:
+                        {
+                            Assert.IsNull(logger.Result);
+                        }
+                        break;
+                    case LoggerType.Error:
+                        {
+                            Assert.AreEqual(typeof(IResult).IsAssignableFrom(logger.Result.GetType()), true);
+                            var result = logger.Result as IResult;
+                            Assert.AreEqual(1 > result.State, true);
+                            Assert.IsNotNull(result.Message);
+                        }
+                        break;
+                    case LoggerType.Exception:
+                        {
+
+                        }
+                        break;
+                    default: break;
+                }
+            }
         };
     }
 
@@ -160,13 +194,114 @@ public class BusinessMember : BusinessBase
             decimal b = 0.0234m,
 
         [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = "DEF")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(LoggerType.Record, Group = "DEF", CanWrite = false)]Token token = default)
+        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A.Out);
+
+    /// <summary>
+    /// This is Test001.
+    /// </summary>
+    /// <param name="use01">This is use01.</param>
+    /// <param name="arg01"></param>
+    /// <param name="b">This is b.</param>
+    /// <param name="c">This is c.</param>
+    /// <param name="token">This is token.</param>
+    /// <returns></returns>
+    [Command(Group = "G01", OnlyName = "G01Test0001")]
+    [Command(Group = "G01", OnlyName = "G01Test0002")]
+    [Command(OnlyName = "DEFTest0001")]
+    [Command(OnlyName = "Test0001")]
+    public virtual IResult Test0001(
+        [Use(true)]dynamic use01,
+
+        Arg<Arg01> arg01,
+
+        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
+            [Nick("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        =>
+        this.ResultCreate(arg01.Out.A.Out);
+
+    /// <summary>
+    /// This is Test001.
+    /// </summary>
+    /// <param name="use01">This is use01.</param>
+    /// <param name="arg01"></param>
+    /// <param name="b">This is b.</param>
+    /// <param name="c">This is c.</param>
+    /// <param name="token">This is token.</param>
+    /// <returns></returns>
+    [Command(Group = "G01", OnlyName = "G01Test00001")]
+    [Command(Group = "G01", OnlyName = "G01Test00002")]
+    [Command(OnlyName = "DEFTest00001")]
+    [Command(OnlyName = "Test00001")]
+    public virtual dynamic Test00001(
+        [Use(true)]dynamic use01,
+
+        Arg<Arg01> arg01,
+
+        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
+            [Nick("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        =>
+        this.ResultCreate(arg01.Out.A.Out);
+
+    public virtual async Task Test0011(
+        [Use(true)]dynamic use01,
+
+        Arg<Arg01> arg01,
+
+        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
+            [Nick("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        =>
+        this.ResultCreate(arg01.Out.A.Out);
+
+    public virtual async void Test0012(
+        [Use(true)]dynamic use01,
+
+        Arg<Arg01> arg01,
+
+        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
+            [Nick("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+    { }
 
     [Command(Group = "G02", OnlyName = "G02Test002")]
     public virtual async Task<dynamic> Test002() => this.ResultCreate(200);
@@ -224,7 +359,7 @@ public class BusinessMember : BusinessBase
     public virtual async Task<dynamic> TestDynamic(dynamic a, [Use(true)]dynamic use01) => use01;
 }
 
-[Info("Business", CommandGroupDefault = "DEF")]
+[Info("Business", CommandGroupDefault = CommandGroupDefault.Group)]
 public class BusinessMember2 : BusinessBase<ResultObject<object>>
 {
     public BusinessMember2()
@@ -261,11 +396,11 @@ public class BusinessMember2 : BusinessBase<ResultObject<object>>
             decimal b = 0.0234m,
 
         [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = "DEF")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(LoggerType.Record, Group = "DEF", CanWrite = false)]Token token = default)
+        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A.Out);
 
@@ -325,7 +460,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<object>>
     public virtual async Task<dynamic> TestDynamic(dynamic a, [Use(true)]dynamic use01) => use01;
 }
 
-[Info("Business", CommandGroupDefault = "DEF")]
+[Info("Business", CommandGroupDefault = CommandGroupDefault.Group)]
 public class BusinessMember3 : IBusiness<ResultObject<object>>
 {
     public BusinessMember3()
@@ -372,11 +507,11 @@ public class BusinessMember3 : IBusiness<ResultObject<object>>
             decimal b = 0.0234m,
 
         [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = "DEF")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(LoggerType.Record, Group = "DEF", CanWrite = false)]Token token = default)
+        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A.Out);
 
@@ -443,19 +578,19 @@ public class TestBusinessMember
     static CommandGroup Cmd = Member.Command;
     static Configer Cfg = Member.Configer;
 
-    static dynamic AsyncCall(CommandGroup businessCommand, string cmd, string group = null, object[] args = null, params object[] useObj)
+    static dynamic AsyncCall(CommandGroup businessCommand, string cmd, string group = null, object[] args = null, params UseEntry[] useObj)
     {
         var t = businessCommand.AsyncCall(cmd, args, useObj, group);
         t.Wait();
         return t.Result;
     }
 
-    static dynamic AsyncCall(string cmd, string group = null, object[] args = null, params object[] useObj) => AsyncCall(Cmd, cmd, group, args, useObj);
+    static dynamic AsyncCall(string cmd, string group = null, object[] args = null, params UseEntry[] useObj) => AsyncCall(Cmd, cmd, group, args, useObj);
 
     [TestMethod]
     public void TestCfgInfo()
     {
-        Assert.AreEqual(Cfg.Info.CommandGroupDefault, "DEF");
+        Assert.AreEqual(Cfg.Info.CommandGroupDefault, CommandGroupDefault.Group);
         Assert.AreEqual(Cfg.Info.Declaring, AttributeBase.DeclaringType.Class);
         Assert.AreEqual(Cfg.Info.BusinessName, "Business");
     }
@@ -482,17 +617,17 @@ public class TestBusinessMember
     {
         Assert.AreNotEqual(Cfg.Doc, null);
         Assert.AreEqual(Cfg.Doc.Members.Count, 3);
-        Assert.AreEqual(Cfg.Doc.Members.ContainsKey("DEF"), true);
+        Assert.AreEqual(Cfg.Doc.Members.ContainsKey(CommandGroupDefault.Group), true);
         Assert.AreEqual(Cfg.Doc.Members.ContainsKey("G01"), true);
         Assert.AreEqual(Cfg.Doc.Members.ContainsKey("G02"), true);
 
-        Assert.AreEqual(Cfg.Doc.Members["DEF"].ContainsKey("Test001"), true);
+        Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group].ContainsKey("Test001"), true);
         Assert.AreEqual(Cfg.Doc.Members["G01"].ContainsKey("G01Test001"), true);
         Assert.AreEqual(Cfg.Doc.Members["G01"].ContainsKey("G01Test002"), true);
 
-        Assert.AreEqual(Cfg.Doc.Members["DEF"]["Test001"].Summary, "This is Test001.");
-        Assert.AreEqual(Cfg.Doc.Members["DEF"]["Test001"].Args.ElementAt(0).Summary, "This is Arg01.");
-        Assert.AreEqual(Cfg.Doc.Members["DEF"]["Test001"].Args.ElementAt(1).Summary, "This is b.");
+        Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Summary, "This is Test001.");
+        Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args.ElementAt(0).Summary, "This is Arg01.");
+        Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args.ElementAt(1).Summary, "This is b.");
     }
 
     [TestMethod]
@@ -521,13 +656,13 @@ public class TestBusinessMember
     public void TestCmd()
     {
         Assert.AreEqual(Cmd.Count, 3);
-        Assert.AreEqual(Cmd.ContainsKey("DEF"), true);
+        Assert.AreEqual(Cmd.ContainsKey(CommandGroupDefault.Group), true);
         Assert.AreEqual(Cmd.ContainsKey("G01"), true);
         Assert.AreEqual(Cmd.ContainsKey("G02"), true);
 
-        Assert.AreEqual(Cmd["DEF"].Values.Any(c => c.Key == "DEF.Test001"), true);
-        Assert.AreEqual(Cmd["DEF"].Values.Any(c => c.Key == "DEF.DEFTest001"), true);
-        Assert.AreEqual(Cmd["DEF"].Values.Any(c => c.Key == "DEF.Test002"), true);
+        Assert.AreEqual(Cmd[CommandGroupDefault.Group].Values.Any(c => c.Key == $"{CommandGroupDefault.Group}.Test001"), true);
+        Assert.AreEqual(Cmd[CommandGroupDefault.Group].Values.Any(c => c.Key == $"{CommandGroupDefault.Group}.DEFTest001"), true);
+        Assert.AreEqual(Cmd[CommandGroupDefault.Group].Values.Any(c => c.Key == $"{CommandGroupDefault.Group}.Test002"), true);
 
         Assert.AreEqual(Cmd["G01"].Values.Any(c => c.Key == "G01.G01Test001"), true);
         Assert.AreEqual(Cmd["G01"].Values.Any(c => c.Key == "G01.G01Test002"), true);
@@ -572,7 +707,7 @@ public class TestBusinessMember
     public void TestLoggerAndArg()
     {
         var member = Bind.Create<BusinessLoggerAndArg>().UseDoc();
-        var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry("use02", new Use01 { A = "bbb" }), new Use01 { A = "aaa" });
+        var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry(new Use01 { A = "bbb" }, "use02"), new UseEntry(new Use01 { A = "aaa" }));
         Assert.AreEqual(t2.Message, null);
         Assert.AreEqual(t2.State, 1);
         Assert.AreEqual(t2.HasData, true);
@@ -595,7 +730,7 @@ public class TestBusinessMember
             //args
             new object[] { new Arg01 { A = "abc" }.JsonSerialize(), 2, 2 },
             //useObj
-            new UseEntry("use01", "sss"), new Token { Key = "a", Remote = "b" });
+            new UseEntry("use01", "sss"), new UseEntry(new Token { Key = "a", Remote = "b" }));
         Assert.AreEqual(t4.Message, null);
         Assert.AreEqual(t4.State, t2.State);
         Assert.AreEqual(t4.HasData, false);
@@ -644,30 +779,30 @@ public class TestBusinessMember
         Assert.AreEqual(t15.Message, null);
         Assert.AreEqual(t15.Data, 111);
 
-        var t16 = AsyncCall(business.Command, "TestUse01", null, null, new UseEntry("use01", "sss"));
+        var t16 = AsyncCall(business.Command, "TestUse01", null, null, new UseEntry("sss", "use01"));
         Assert.AreEqual(t16.Message, null);
         Assert.AreEqual(t16.Data, "sss");
 
         var token = new Token { Key = "a", Remote = "b" };
-        var t17 = AsyncCall(business.Command, "TestUse02", null, null, token);
+        var t17 = AsyncCall(business.Command, "TestUse02", null, null, new UseEntry(token));
         Assert.AreEqual(t17.Message, null);
         Assert.AreEqual(t17.Data, token);
 
-        var t18 = AsyncCall(business.Command, "TestUse03", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+        var t18 = AsyncCall(business.Command, "TestUse03", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
         Assert.AreEqual(t18.Message, null);
         Assert.AreEqual(t18.Data, "abcsss");
 
-        var t19 = AsyncCall(business.Command, "TestAnonymous", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+        var t19 = AsyncCall(business.Command, "TestAnonymous", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
         Assert.AreEqual(t19.Message, null);
         Assert.AreEqual(t19.Data.a, "abc");
         Assert.AreEqual(t19.Data.b, "sss");
 
-        var t20 = AsyncCall(business.Command, "TestAnonymous2", null, new object[] { "abc" }, new UseEntry("use01", "sss"));
+        var t20 = AsyncCall(business.Command, "TestAnonymous2", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
         Assert.AreEqual(t20.a, "abc");
         Assert.AreEqual(t20.b, "sss");
 
         var t21result = new Token { Key = "a", Remote = "b" };
-        var t21 = AsyncCall(business.Command, "TestDynamic", null, new object[] { "abc" }, new UseEntry("use01", t21result));
+        var t21 = AsyncCall(business.Command, "TestDynamic", null, new object[] { "abc" }, new UseEntry(t21result, "use01"));
         Assert.AreEqual(t21, t21result);
     }
 
@@ -684,6 +819,18 @@ public class TestBusinessMember
         t1.Wait();
         Assert.AreEqual(t1.Result.State, 1);
         Assert.AreEqual(t1.Result.HasData, true);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test001", new object[] { new Arg01 { A = "abc" } });
+        t2.Wait();
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t2.Result.GetType()), true);
+        Assert.AreEqual(t2.Result.State, -113);
+        Assert.AreEqual(t2.Result.Message, "arg.b minimum range 2");
+
+        var t3 = Cmd.AsyncCall("Test001", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.Wait();
+        Assert.AreEqual(t3.Result.State, 1);
+        Assert.AreEqual(t3.Result.HasData, true);
 
         TestResult(Member);
     }
@@ -724,5 +871,113 @@ public class TestBusinessMember
         Assert.AreEqual(t1.Result.HasData, true);
 
         TestResult(member);
+    }
+
+    [TestMethod]
+    public void TestResult001()
+    {
+        var t0 = Member.Test0001(null, new Arg01 { A = "abc" });
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t0.GetType()), true);
+        Assert.AreEqual(t0.State, -113);
+        Assert.AreEqual(t0.Message, "arg.b minimum range 2");
+
+        var t1 = Member.Test0001(null, new Arg01 { A = "abc" }, 2, 2);
+        Assert.AreEqual(t1.State, 1);
+        Assert.AreEqual(t1.HasData, true);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test0001", new object[] { new Arg01 { A = "abc" } });
+        t2.Wait();
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t2.Result.GetType()), true);
+        Assert.AreEqual(t2.Result.State, -113);
+        Assert.AreEqual(t2.Result.Message, "arg.b minimum range 2");
+
+        var t3 = Cmd.AsyncCall("Test0001", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.Wait();
+        Assert.AreEqual(t3.Result.State, 1);
+        Assert.AreEqual(t3.Result.HasData, true);
+
+        //Cmd
+        var t4 = Cmd.Call("Test0001", new object[] { new Arg01 { A = "abc" } });
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t4.GetType()), true);
+        Assert.AreEqual(t4.State, -113);
+        Assert.AreEqual(t4.Message, "arg.b minimum range 2");
+
+        var t5 = Cmd.Call("Test0001", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        Assert.AreEqual(t5.State, 1);
+        Assert.AreEqual(t5.HasData, true);
+    }
+
+    [TestMethod]
+    public void TestResult0001()
+    {
+        var t0 = Member.Test00001(null, new Arg01 { A = "abc" });
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t0.GetType()), true);
+        Assert.AreEqual(t0.State, -113);
+        Assert.AreEqual(t0.Message, "arg.b minimum range 2");
+
+        var t1 = Member.Test00001(null, new Arg01 { A = "abc" }, 2, 2);
+        Assert.AreEqual(t1.State, 1);
+        Assert.AreEqual(t1.HasData, true);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test00001", new object[] { new Arg01 { A = "abc" } });
+        t2.Wait();
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t2.Result.GetType()), true);
+        Assert.AreEqual(t2.Result.State, -113);
+        Assert.AreEqual(t2.Result.Message, "arg.b minimum range 2");
+
+        var t3 = Cmd.AsyncCall("Test00001", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.Wait();
+        Assert.AreEqual(t3.Result.State, 1);
+        Assert.AreEqual(t3.Result.HasData, true);
+
+        //Cmd
+        var t4 = Cmd.Call("Test00001", new object[] { new Arg01 { A = "abc" } });
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t4.GetType()), true);
+        Assert.AreEqual(t4.State, -113);
+        Assert.AreEqual(t4.Message, "arg.b minimum range 2");
+
+        var t5 = Cmd.Call("Test00001", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        Assert.AreEqual(t5.State, 1);
+        Assert.AreEqual(t5.HasData, true);
+    }
+
+    [TestMethod]
+    public void TestResult011()
+    {
+        var t0 = Member.Test0011(null, new Arg01 { A = "abc" });
+        t0.Wait();
+
+        var t1 = Member.Test0011(null, new Arg01 { A = "abc" }, 2, 2);
+        t1.Wait();
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test0011", new object[] { new Arg01 { A = "abc" } });
+        t2.Wait();
+        Assert.IsNull(t2.Result);
+
+        var t3 = Cmd.AsyncCall("Test0011", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.Wait();
+        Assert.IsNull(t3.Result);
+    }
+
+    [TestMethod]
+    public void TestResult012()
+    {
+        Member.Test0012(null, new Arg01 { A = "abc" });
+
+        Member.Test0012(null, new Arg01 { A = "abc" }, 2, 2);
+
+        Member.Test0012(null, new Arg01 { A = "abc", B = "ex" }, 2, 2);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test0012", new object[] { new Arg01 { A = "abc" } });
+        t2.Wait();
+        Assert.IsNull(t2.Result);
+
+        var t3 = Cmd.AsyncCall("Test0012", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.Wait();
+        Assert.IsNull(t3.Result);
     }
 }

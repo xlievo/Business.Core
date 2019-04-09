@@ -327,6 +327,19 @@ namespace Business.Utils
             }, outFile);
         }
 
+        /// <summary>
+        /// Logger use threadPool, Default true
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="use"></param>
+        /// <returns></returns>
+        public static Business LoggerUseThreadPool<Business>(this Business business, bool use = true) where Business : IBusiness
+        {
+            business.Configer.LoggerUseThreadPool = use;
+            return business;
+        }
+
         //public static Business UseDoc<Business>(this Business business, string outFile = null) where Business : IBusiness
         //{
         //    return business.UseDoc(xmlMembers =>
@@ -1800,6 +1813,10 @@ namespace Business.Utils
 
             return list.Adde(item).JsonSerialize();
         }
+
+        public static bool SpinWait(this int millisecondsTimeout) => System.Threading.SpinWait.SpinUntil(() => false, millisecondsTimeout);
+
+        public static bool SpinWait(this System.TimeSpan timeout) => System.Threading.SpinWait.SpinUntil(() => false, timeout);
 
         #region Json
 

@@ -32,7 +32,9 @@ namespace Business.Auth
 
         ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; set; }
 
-        System.Type ResultType { get; set; }
+        //System.Type ResultType { get; set; }
+
+        Configer Configer { get; set; }
     }
 
     struct ArgsLog
@@ -49,12 +51,15 @@ namespace Business.Auth
     /// </summary>
     public class Interceptor : IInterceptor
     {
+        public void Intercept(Castle.DynamicProxy.IInvocation invocation) => invocation.ReturnValue = InterceptAsync(invocation).Result;
+
         /// <summary>
         /// Intercept
         /// </summary>
         /// <param name="invocation"></param>
-        public virtual async void Intercept(Castle.DynamicProxy.IInvocation invocation)
+        public virtual async System.Threading.Tasks.Task<dynamic> InterceptAsync(Castle.DynamicProxy.IInvocation invocation)
         {
+            var proceed = invocation.CaptureProceedInfo();
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
             var meta = this.MetaData[invocation.Method.Name];
@@ -72,8 +77,8 @@ namespace Business.Auth
 
             if (!meta.CommandGroup.TryGetValue(iArgGroup, out CommandAttribute command))
             {
-                invocation.ReturnValue = Bind.GetReturnValue(Bind.CmdError(ResultType, invocation.Method.Name), meta);
-                return;
+                invocation.ReturnValue = Bind.GetReturnValue(Bind.CmdError(Configer.ResultType, invocation.Method.Name), meta);
+                return invocation.ReturnValue;
             }
 
             dynamic returnValue = null;
@@ -100,7 +105,7 @@ namespace Business.Auth
                             logType = LoggerType.Error;
                             returnValue = result;
                             invocation.ReturnValue = Bind.GetReturnValue(result, meta);
-                            return;
+                            return invocation.ReturnValue;
                         }
 
                         //========================================//
@@ -141,14 +146,14 @@ namespace Business.Auth
 
                     //var isUpdate = false;
 
-                    result = await ArgsResult2(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue);
+                    result = await ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue);
                     //if (null != result)
                     if (1 > result.State)
                     {
                         logType = LoggerType.Error;
                         returnValue = result;
                         invocation.ReturnValue = Bind.GetReturnValue(result, meta);
-                        return;
+                        return invocation.ReturnValue;
                     }
 
                     if (item.HasIArg && result.Data)
@@ -159,41 +164,61 @@ namespace Business.Auth
 
                 //===============================//
                 //watch.Restart();
-                invocation.Proceed();
-                returnValue = invocation.ReturnValue;
+                proceed.Invoke();
+
+                if (meta.HasAsync)
+                {
+                    var task = invocation.ReturnValue as System.Threading.Tasks.Task;
+                    if (null != task?.Exception)
+                    {
+                        throw task?.Exception;
+                    }
+                }
+
+                //result
+                if (!meta.HasReturn)
+                {
+                    returnValue = null;
+                    invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(Configer.ResultType), meta);
+                }
+                else
+                {
+                    //log
+                    returnValue = invocation.ReturnValue;
+                }
+
+                return invocation.ReturnValue;
             }
             catch (System.Exception ex)
             {
                 ex = ex.ExceptionWrite();
                 logType = LoggerType.Exception;
-                if (!meta.HasAsync)
-                {
-                    returnValue = ResultFactory.ResultCreate(ResultType, 0, System.Convert.ToString(ex));
-                }
-                invocation.ReturnValue = !meta.HasAsync ? Bind.GetReturnValue(0, System.Convert.ToString(ex), meta, ResultType) : System.Threading.Tasks.Task.FromException(ex);
+
+                //log
+                returnValue = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
+
+                //result
+                invocation.ReturnValue = Bind.GetReturnValue(returnValue, meta);
+
+                //if (!meta.HasAsync)
+                //{
+                //    invocation.ReturnValue = result;
+                //}
+                //else
+                //{
+                //    invocation.ReturnValue = System.Threading.Tasks.Task.FromResult(result);
+                //}
+
+                //invocation.ReturnValue = !meta.HasAsync ? Bind.GetReturnValue(0, System.Convert.ToString(ex), meta, ResultType) : System.Threading.Tasks.Task.FromException(ex);
+                return invocation.ReturnValue;// meta.HasReturn ? invocation.ReturnValue : default;
             }
             finally
             {
-                if (meta.HasAsync)
-                {
-                    var task = invocation.ReturnValue as System.Threading.Tasks.Task;
-
-                    if (meta.HasIResult)
-                    {
-                        invocation.ReturnValue = task.ContinueWith<IResult>(c => Async<IResult>(command, c, ResultType, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch));
-                    }
-                    else
-                    {
-                        invocation.ReturnValue = task.ContinueWith(c => Async<dynamic>(command, c, ResultType, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch));
-                    }
-                }
-                else
-                {
-                    Finally(command, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, watch);
-                }
+                Finally(command, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, Configer.LoggerUseThreadPool, watch);
             }
         }
 
+        /*
         static dynamic Async<Type>(CommandAttribute command, System.Threading.Tasks.Task task, System.Type resultType, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
         {
             try
@@ -233,10 +258,20 @@ namespace Business.Auth
                 Finally(command, meta, returnValue, logType, iArgs, argsObj, methodName, logger, watch);
             }
         }
+        */
 
-        static void Finally(CommandAttribute command, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, System.Diagnostics.Stopwatch watch)
+        async void Finally(CommandAttribute command, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, bool loggerUseThreadPool, System.Diagnostics.Stopwatch watch)
         {
             if (null == logger) { return; }
+
+            if (meta.HasAsync)
+            {
+                var task = returnValue as System.Threading.Tasks.Task<dynamic>;
+                if (null != task)
+                {
+                    returnValue = await task;
+                }
+            }
 
             if (!object.Equals(null, returnValue) && typeof(IResult).IsAssignableFrom(returnValue.GetType()))
             {
@@ -256,11 +291,18 @@ namespace Business.Auth
 
             if (canWrite)
             {
-                System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }));
+                if (loggerUseThreadPool)
+                {
+                    System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }));
+                }
+                else
+                {
+                    System.Threading.Tasks.Task.Factory.StartNew(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }), System.Threading.Tasks.TaskCreationOptions.DenyChildAttach | System.Threading.Tasks.TaskCreationOptions.LongRunning);
+                }
             }
         }
 
-        async System.Threading.Tasks.Task<IResult> ArgsResult2(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue)
+        async System.Threading.Tasks.Task<IResult> ArgsResult(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue)
         {
             bool isUpdate = false;
 
@@ -280,6 +322,8 @@ namespace Business.Auth
                 while (NodeState.DAT == first.State)
                 {
                     var argAttr = first.Value;
+
+                    var value = item.HasIArg ? iArgIn : memberValue;
 
                     result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null) : await argAttr.Proces(item.HasIArg ? iArgIn : memberValue);
 
@@ -323,7 +367,7 @@ namespace Business.Auth
 
                 if (0 < item.ArgAttrChild.Count && null != currentValue2)
                 {
-                    var result2 = await ArgsResult2(group, item.ArgAttrChild, methodName, currentValue2);
+                    var result2 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue2);
                     if (1 > result2.State)
                     {
                         return result2;
@@ -340,7 +384,7 @@ namespace Business.Auth
                 }
             }
 
-            return ResultFactory.ResultCreate(ResultType, isUpdate);
+            return ResultFactory.ResultCreate(Configer.ResultType, isUpdate);
         }
 
         static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, LoggerValue logObjs, ArgsLog log)
@@ -458,27 +502,26 @@ namespace Business.Auth
         /// </summary>
         public System.Action<LoggerData> Logger { get; set; }
 
-        /// <summary>
-        /// Business
-        /// </summary>
-        public dynamic Business { get; set; }
+        ///// <summary>
+        ///// ResultType
+        ///// </summary>
+        //public System.Type ResultType { get; set; }
 
         /// <summary>
-        /// ResultType
+        /// Configer
         /// </summary>
-        public System.Type ResultType { get; set; }
-
-        public void Dispose()
-        {
-            foreach (var item in this.MetaData)
-            {
-                item.Value.Args.collection.Clear();
-                item.Value.Attributes.Clear();
-            }
-            this.MetaData.dictionary.Clear();
-            this.Logger = null;
-            this.MetaData = null;
-            this.Business = null;
-        }
+        public Configer Configer { get; set; }
+        //public void Dispose()
+        //{
+        //    foreach (var item in this.MetaData)
+        //    {
+        //        item.Value.Args.collection.Clear();
+        //        item.Value.Attributes.Clear();
+        //    }
+        //    this.MetaData.dictionary.Clear();
+        //    this.Logger = null;
+        //    this.MetaData = null;
+        //    this.Business = null;
+        //}
     }
 }

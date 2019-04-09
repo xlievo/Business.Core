@@ -389,7 +389,7 @@ namespace Business
 
         //internal readonly string ID = System.Guid.NewGuid().ToString("N");
 
-        public Configer(Attributes.Info info, System.Type resultType, System.Collections.Generic.List<Attributes.AttributeBase> attributes)
+        public Configer(Attributes.Info info, System.Type resultType, System.Collections.Generic.List<Attributes.AttributeBase> attributes, bool loggerUseThreadPool = true)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -410,6 +410,7 @@ namespace Business
             this.UseTypes = new ReadOnlyCollection<string>();
 
             //GetCommandGroupDefault = name => GetCommandGroup(CommandGroupDefault, name);
+            this.LoggerUseThreadPool = loggerUseThreadPool;
         }
 
         ///// <summary>
@@ -431,6 +432,10 @@ namespace Business
         public ReadOnlyCollection<string> UseTypes { get; private set; }
         public Document.Doc Doc { get; internal set; }
 
+        /// <summary>
+        /// Logger use threadPool, Default true
+        /// </summary>
+        public bool LoggerUseThreadPool { get; internal set; } = true;
         //public Configuration UseType(params System.Type[] type)
         //{
         //    if (null == type) { return this; }
@@ -497,6 +502,19 @@ namespace Business
                 item.UseDoc(operation, exist ? System.IO.Path.Combine(outDir, $"{item.Configer.Info.BusinessName}.doc") : null);
             }
         }
+
+        /// <summary>
+        /// Logger use threadPool, Default true
+        /// </summary>
+        /// <param name="use"></param>
+        public static void LoggerUseThreadPoolAll(bool use = true)
+        {
+            foreach (var item in BusinessList.Values)
+            {
+                item.Configer.LoggerUseThreadPool = use;
+            }
+        }
+
 
         //public static System.Collections.Generic.Dictionary<string, Doc> LoadDoc<Business>()
         //{

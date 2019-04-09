@@ -52,7 +52,7 @@ namespace Business
             return result;
         }
 
-        internal static object GetReturnValue(int state, string message, MetaData meta, System.Type resultType) => (meta.HasIResult || meta.HasObject) ? ResultFactory.ResultCreate(resultType, state, message) : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null;
+        //internal static object GetReturnValue(int state, string message, MetaData meta, System.Type resultType) => GetReturnValue(ResultFactory.ResultCreate(resultType, state, message), meta);
 
         internal static object GetReturnValue(IResult result, MetaData meta)
         {
@@ -60,7 +60,17 @@ namespace Business
 
             if (meta.HasAsync)
             {
-                return meta.HasIResult ? System.Threading.Tasks.Task.FromResult((IResult)result2) : meta.HasReturn ? System.Threading.Tasks.Task.FromResult(result2) : System.Threading.Tasks.Task.Run(() => { });
+                //return meta.HasIResult ? System.Threading.Tasks.Task.FromResult((IResult)result2) : meta.HasReturn ? System.Threading.Tasks.Task.FromResult(result2) : System.Threading.Tasks.Task.Run(() => { });
+                //if (meta.HasIResult)
+                //{
+                //    return System.Threading.Tasks.Task.FromResult((IResult)result2);
+                //}
+                //else
+                //{
+                //    return System.Threading.Tasks.Task.FromResult(meta.HasReturn ? result2 : null);
+                //}
+
+                return System.Threading.Tasks.Task.FromResult(meta.HasIResult ? result2 as IResult : meta.HasReturn ? result2 : null);
             }
 
             return result2;
@@ -210,7 +220,9 @@ namespace Business
 
             interceptor.MetaData = GetInterceptorMetaData(cfg, methods, Instance);
 
-            interceptor.ResultType = cfg.ResultType;
+            //interceptor.ResultType = cfg.ResultType;
+
+            interceptor.Configer = cfg;
 
             if (null != business)
             {
@@ -1104,43 +1116,43 @@ namespace Business
 
         #region Call
 
-        public virtual Result Call<Result>(string cmd, object[] args = null, object[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
+        public virtual Result Call<Result>(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
 
-        public virtual IResult CallIResult(string cmd, object[] args = null, object[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
+        public virtual IResult CallIResult(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
 
-        public virtual dynamic Call(string cmd, object[] args = null, object[] useObj = null, string group = null)
+        public virtual dynamic Call(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null)
         {
             var command = GetCommand(cmd, group);
 
             return null == command ? Bind.CmdError(resultType, cmd) : command.Call(args, useObj);
         }
 
-        public virtual Result Call<Result>(string cmd, object[] args = null, string group = null, params object[] useObj) => Call(cmd, args, useObj, group);
+        public virtual Result Call<Result>(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
 
-        public virtual IResult CallIResult(string cmd, object[] args = null, string group = null, params object[] useObj) => Call(cmd, args, useObj, group);
+        public virtual IResult CallIResult(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
 
-        public virtual dynamic Call(string cmd, object[] args = null, string group = null, params object[] useObj) => Call(cmd, args, useObj, group);
+        public virtual dynamic Call(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
 
         #endregion
 
         #region AsyncCallUse
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] args = null, object[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, object[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] args = null, object[] useObj = null, string group = null)
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null)
         {
             var command = GetCommand(cmd, group);
 
             return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.CmdError(resultType, cmd)) : await command.AsyncCall(args, useObj);
         }
 
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, string group = null, params object[] useObj) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] args = null, string group = null, params object[] useObj) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] args = null, string group = null, params object[] useObj) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
 
         #endregion
     }
@@ -1157,7 +1169,7 @@ namespace Business
         //===============member==================//
         readonly System.Func<object[], dynamic> call;
 
-        public virtual object[] GetAgs(object[] args, params object[] useObj)
+        public virtual object[] GetAgs(object[] args, params UseEntry[] useObj)
         {
             var args2 = new object[Meta.Args.Count];
 
@@ -1168,26 +1180,30 @@ namespace Business
                 {
                     if (Meta.UseTypePosition.ContainsKey(i))
                     {
-                        if (null != useObj && 0 < useObj.Length)
+                        if (0 < useObj?.Length)
                         {
                             var arg = Meta.Args[i];
 
                             if (arg.Use?.ParameterName ?? false)
                             {
-                                var item = useObj.FirstOrDefault(c => c.GetType().Equals(UseEntry.Type) && ((UseEntry)c).Name == arg.Name);
-
-                                if (!Equals(null, item))
+                                foreach (var use in useObj)
                                 {
-                                    args2[i] = ((UseEntry)item).Value;
+                                    if (use.ParameterName?.Contains(arg.Name, System.StringComparer.InvariantCultureIgnoreCase) ?? false)
+                                    {
+                                        args2[i] = use.Value;
+                                        break;
+                                    }
                                 }
                             }
                             else
                             {
-                                var item = useObj.FirstOrDefault(c => Meta.UseTypePosition[i].IsAssignableFrom(c.GetType()));
-
-                                if (!Equals(null, item))
+                                foreach (var use in useObj)
                                 {
-                                    args2[i] = item;
+                                    if (Meta.UseTypePosition[i].IsAssignableFrom(use.Type))
+                                    {
+                                        args2[i] = use.Value;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -1215,7 +1231,7 @@ namespace Business
 
         #region Call
 
-        public virtual dynamic Call(object[] args, params object[] useObj)
+        public virtual dynamic Call(object[] args, params UseEntry[] useObj)
         {
             try
             {
@@ -1226,14 +1242,14 @@ namespace Business
                 return ResultFactory.ResultCreate(Meta.ResultType, 0, System.Convert.ToString(Help.ExceptionWrite(ex)));
             }
         }
-        public virtual Result Call<Result>(object[] args, params object[] useObj) => Call(args, useObj);
-        public virtual IResult CallIResult(object[] args, params object[] useObj) => Call(args, useObj);
+        public virtual Result Call<Result>(object[] args, params UseEntry[] useObj) => Call(args, useObj);
+        public virtual IResult CallIResult(object[] args, params UseEntry[] useObj) => Call(args, useObj);
 
         #endregion
 
         #region AsyncCall
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(object[] args, params object[] useObj)
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(object[] args, params UseEntry[] useObj)
         {
             try
             {
@@ -1252,9 +1268,9 @@ namespace Business
             }
         }
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(object[] args, params object[] useObj) => await AsyncCall(args, useObj);
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(object[] args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
 
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(object[] args, params object[] useObj) => await AsyncCall(args, useObj);
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(object[] args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
 
         #endregion
 
