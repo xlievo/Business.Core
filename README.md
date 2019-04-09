@@ -10,7 +10,9 @@ Newtonsoft.Json
 
 ## Install
 
-NuGet:https://www.nuget.org/packages/Business.Core/
+[![NuGet Version](https://img.shields.io/nuget/v/Business.Core.svg?style=flat)](https://www.nuget.org/packages/Business.Core/)
+[![NuGet](https://img.shields.io/nuget/dt/Business.Core.svg)](https://www.nuget.org/packages/Business.Core)
+[![Badge](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu/#/en_US)
 
 PM> Install-Package Business.Core
 
