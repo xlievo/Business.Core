@@ -917,7 +917,7 @@ namespace Business.Attributes
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual async Task<IResult> Proces(dynamic value) => this.ResultCreate<dynamic>(value);
+        public virtual async ValueTask<IResult> Proces(dynamic value) => this.ResultCreate<dynamic>(value);
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -925,7 +925,7 @@ namespace Business.Attributes
         /// <param name="value"></param>
         /// <param name="iArg"></param>
         /// <returns></returns>
-        public virtual async Task<IResult> Proces(dynamic value, IArg arg) => this.ResultCreate<dynamic>(value);
+        public virtual async ValueTask<IResult> Proces(dynamic value, IArg arg) => this.ResultCreate<dynamic>(value);
 
         #region Result
 
@@ -1007,7 +1007,7 @@ namespace Business.Attributes
     {
         public CheckNullAttribute(int state = -800, string message = null) : base(state, message) => this.CanNull = false;
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             if (typeof(string).Equals(this.Meta.MemberType))
             {
@@ -1049,7 +1049,7 @@ namespace Business.Attributes
         public string MinMsg { get; set; } = "argument \"{Nick}\" minimum range {Min}.";
         public string MaxMsg { get; set; } = "argument \"{Nick}\" maximum range {Max}.";
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
@@ -1173,7 +1173,7 @@ namespace Business.Attributes
         public ScaleAttribute(int state = -802, string message = null) : base(state, message) { }
         public int Size { get; set; } = 2;
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
@@ -1193,7 +1193,7 @@ namespace Business.Attributes
     {
         public CheckEmailAttribute(int state = -803, string message = null) : base(state, message) { }
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
@@ -1211,7 +1211,7 @@ namespace Business.Attributes
         public CheckCharAttribute(int state = -804, string message = null) : base(state, message) { }
         public Help.CheckCharMode Mode { get; set; } = Help.CheckCharMode.All;
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
@@ -1232,7 +1232,7 @@ namespace Business.Attributes
 
         public bool HasUpper { get; set; }
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
@@ -1260,7 +1260,7 @@ namespace Business.Attributes
 
         public AES(string key, int state = -821, string message = null) : base(state, message) => this.Key = key;
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
@@ -1296,7 +1296,7 @@ namespace Business.Attributes
 
         public Newtonsoft.Json.JsonSerializerSettings Settings { get; set; }
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
@@ -1314,7 +1314,7 @@ namespace Business.Attributes
         public ProtoBufArgAttribute(int state = -13, string message = null, bool canNull = false)
             : base(state, message, canNull) { }
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }

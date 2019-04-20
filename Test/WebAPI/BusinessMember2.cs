@@ -9,10 +9,13 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using static Args;
 
-[JsonArg]
+[JsonArg(Group = "j")]
+[Command(Group = "j")]
+[MessagePackArg(Group = "s")]
+[Command(Group = "s")]
 [Logger]
 [Info("API")]
-public class BusinessMember2 : BusinessBase
+public class BusinessMember2 : BusinessBase<ResultObject<string>>
 {
     static BusinessMember2()
     {
@@ -90,13 +93,31 @@ public class BusinessMember2 : BusinessBase
             throw new System.Exception("Method exception!");
         }
     }
+
+    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg)
+    {
+        //dynamic args = new System.Dynamic.ExpandoObject();
+        //args.token = 11;
+        //args.arg = 22;
+
+        //var args = new { token, arg = arg.Out };
+
+        return this.ResultCreate(new { token, arg = arg?.Out });
+    }
+
+    public struct Result
+    {
+        public Business.Auth.Token token { get; set; }
+
+        public List<Test001> arg { get; set; }
+    }
 }
 
 public class TestAttribute : ArgumentAttribute
 {
     public TestAttribute(int state = 111, string message = null) : base(state, message) { }
 
-    public override async Task<IResult> Proces(dynamic value)
+    public override async ValueTask<IResult> Proces(dynamic value)
     {
         var exit = await RedisHelper.HExistsAsync("Role", "value2");
 
@@ -120,7 +141,7 @@ public class Test2Attribute : ArgumentAttribute
 {
     public Test2Attribute(int state = 112, string message = null) : base(state, message) { }
 
-    public override async Task<IResult> Proces(dynamic value)
+    public override async ValueTask<IResult> Proces(dynamic value)
     {
         return this.ResultCreate(value + 0.1m);
     }

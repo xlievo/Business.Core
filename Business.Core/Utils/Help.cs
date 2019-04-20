@@ -1094,7 +1094,7 @@ namespace Business.Utils
             stream.Seek(0, System.IO.SeekOrigin.Begin);
             return bytes;
         }
-        public static async System.Threading.Tasks.Task<byte[]> StreamReadByteAsync(this System.IO.Stream stream)
+        public static async System.Threading.Tasks.ValueTask<byte[]> StreamReadByteAsync(this System.IO.Stream stream)
         {
             if (null == stream) { throw new System.ArgumentNullException(nameof(stream)); }
 
@@ -1115,7 +1115,7 @@ namespace Business.Utils
                 return m.ToArray();
             }
         }
-        public static async System.Threading.Tasks.Task<byte[]> StreamCopyByteAsync(this System.IO.Stream stream)
+        public static async System.Threading.Tasks.ValueTask<byte[]> StreamCopyByteAsync(this System.IO.Stream stream)
         {
             if (null == stream) { throw new System.ArgumentNullException(nameof(stream)); }
 
@@ -1134,7 +1134,7 @@ namespace Business.Utils
                 return reader.ReadToEnd();
             }
         }
-        public static async System.Threading.Tasks.Task<string> StreamReadStringAsync(this System.IO.Stream stream, System.Text.Encoding encoding = null)
+        public static async System.Threading.Tasks.ValueTask<string> StreamReadStringAsync(this System.IO.Stream stream, System.Text.Encoding encoding = null)
         {
             using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8))
             {
@@ -1151,7 +1151,7 @@ namespace Business.Utils
                 return fileStream.StreamReadString(encoding ?? UTF8);
             }
         }
-        public static async System.Threading.Tasks.Task<string> FileReadStringAsync(string path, System.Text.Encoding encoding = null)
+        public static async System.Threading.Tasks.ValueTask<string> FileReadStringAsync(string path, System.Text.Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
 
@@ -1169,7 +1169,7 @@ namespace Business.Utils
                 return fileStream.StreamCopyByte();
             }
         }
-        public static async System.Threading.Tasks.Task<byte[]> FileReadByteAsync(string path)
+        public static async System.Threading.Tasks.ValueTask<byte[]> FileReadByteAsync(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
 
@@ -1187,7 +1187,7 @@ namespace Business.Utils
                 writer.Write(value);
             }
         }
-        public static async System.Threading.Tasks.Task StreamWriteAsync(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
+        public static async System.Threading.Tasks.ValueTask StreamWriteAsync(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
         {
             using (var writer = new System.IO.StreamWriter(stream, encoding ?? UTF8))
             {
@@ -2326,6 +2326,18 @@ namespace Business.Utils
         public ConcurrentReadOnlyDictionary() : this(new System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>()) { }
 
         public ConcurrentReadOnlyDictionary(System.Collections.Generic.IEqualityComparer<TKey> comparer) : this(new System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>(comparer)) { }
+
+        public virtual TValue TryGetValue(TKey key)
+        {
+            if (System.Object.Equals(null, key))
+            {
+                return default;
+            }
+
+            this.TryGetValue(key, out TValue value);
+
+            return value;
+        }
     }
 
     public class ReadOnlyCollection<TValue> : System.Collections.ObjectModel.ReadOnlyCollection<TValue>
@@ -2429,17 +2441,13 @@ namespace Business.Utils
         private int _counter;
         private Node<T> _first;
         private readonly Node<T> _dummy;
-        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, int> _threads;
-        private readonly ThreadState<T>[] _threadStates;
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, ThreadState<T>> _threads;
 
         public ConcurrentLinkedList()
         {
             _counter = 0;
             _dummy = new Node<T>();
-
-            System.Threading.ThreadPool.GetMaxThreads(out var _, out var maxThreads);
-            _threadStates = new ThreadState<T>[maxThreads];
-            _threads = new System.Collections.Concurrent.ConcurrentDictionary<int, int>();
+            _threads = new System.Collections.Concurrent.ConcurrentDictionary<int, ThreadState<T>>();
             _first = new Node<T>(default(T), NodeState.REM, -1);
         }
 
@@ -2580,9 +2588,7 @@ namespace Business.Utils
             var phase = System.Threading.Interlocked.Increment(ref _counter);
             var threadState = new ThreadState<T>(phase, true, node);
             var currentThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
-
-            _threadStates[currentThreadId] = threadState;
-            _threads.AddOrUpdate(currentThreadId, currentThreadId, (key, value) => currentThreadId);
+            _threads.AddOrUpdate(currentThreadId, threadState, (key, value) => threadState);
 
             foreach (var threadId in _threads.Keys)
             {
@@ -2604,7 +2610,7 @@ namespace Business.Utils
                     {
                         if (IsPending(threadId, phase))
                         {
-                            var node = _threadStates[threadId].Node;
+                            var node = _threads[threadId].Node;
                             var original = System.Threading.Interlocked.CompareExchange(ref current.Previous, node, null);
                             if (original is null)
                             {
@@ -2628,11 +2634,12 @@ namespace Business.Utils
             if (previous != null && !previous.IsDummy())
             {
                 var threadId = previous.ThreadId;
-                var threadState = _threadStates[threadId];
+                var threadState = _threads[threadId];
                 if (current.Equals(_first) && previous.Equals(threadState.Node))
                 {
+                    var currentState = _threads[threadId];
                     var updatedState = new ThreadState<T>(threadState.Phase, false, threadState.Node);
-                    System.Threading.Interlocked.CompareExchange(ref _threadStates[threadId], updatedState, threadState);
+                    _threads.TryUpdate(threadId, updatedState, currentState);
                     previous.Next = current;
                     System.Threading.Interlocked.CompareExchange(ref _first, previous, current);
                     current.Previous = _dummy;
@@ -2642,7 +2649,7 @@ namespace Business.Utils
 
         private bool IsPending(int threadId, int phase)
         {
-            var threadState = _threadStates[threadId];
+            var threadState = _threads[threadId];
             return threadState.Pending && threadState.Phase <= phase;
         }
     }

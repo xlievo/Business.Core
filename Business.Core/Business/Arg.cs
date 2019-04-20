@@ -78,7 +78,7 @@ namespace Business
         public virtual string Group { get; set; }
 
         /// <summary>
-        /// ProtoBuf format Out
+        /// byte format Out
         /// </summary>
         /// <returns></returns>
         public virtual byte[] ToBytes() => throw new System.NotImplementedException();

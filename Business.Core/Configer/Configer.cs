@@ -381,6 +381,7 @@ namespace Business
     }
 #endif
     */
+
     public partial class Configer
     {
         public static ConcurrentReadOnlyDictionary<string, IBusiness> BusinessList = new ConcurrentReadOnlyDictionary<string, IBusiness>(System.StringComparer.InvariantCultureIgnoreCase);

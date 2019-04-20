@@ -4,6 +4,42 @@
         <name>WebAPI</name>
     </assembly>
     <members>
+        <member name="T:Arg`1">
+            <summary>
+            This is a parameter package, used to transform parameters
+            </summary>
+            <typeparam name="OutType"></typeparam>
+        </member>
+        <member name="P:ReceiveData.a">
+            <summary>
+            business
+            </summary>
+        </member>
+        <member name="P:ReceiveData.c">
+            <summary>
+            cmd
+            </summary>
+        </member>
+        <member name="P:ReceiveData.t">
+            <summary>
+            token
+            </summary>
+        </member>
+        <member name="P:ReceiveData.d">
+            <summary>
+            data
+            </summary>
+        </member>
+        <member name="P:ReceiveData.g">
+            <summary>
+            business group
+            </summary>
+        </member>
+        <member name="P:ReceiveData.b">
+            <summary>
+            callback
+            </summary>
+        </member>
         <member name="M:BusinessController.Call(System.String)">
             <summary>
             Call

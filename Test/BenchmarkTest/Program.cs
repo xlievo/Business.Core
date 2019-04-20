@@ -16,6 +16,7 @@ namespace BenchmarkTest
         static BusinessMember Member;
         static CommandGroup Cmd;
         static Configer Cfg;
+        public static int WorkTime = 500;
 
         public struct Dto
         {
@@ -35,10 +36,10 @@ namespace BenchmarkTest
 #else
             var count = 100000;
 #endif
-            System.Console.WriteLine($"RUN Count = {count} X 3");
+            System.Console.WriteLine($"RUN Count = {count} X 3 WorkTime = {WorkTime}");
 
             var results = new ConcurrentBag<int>();
-            var tasks = new ConcurrentBag<Task>();
+            //var tasks = new ConcurrentBag<Task>();
             var watch = new System.Diagnostics.Stopwatch();
 
             //~preheat
@@ -54,7 +55,7 @@ namespace BenchmarkTest
 
             if (Cfg.LoggerUseThreadPool)
             {
-                //System.Threading.ThreadPool.SetMinThreads(800, 300);
+                System.Threading.ThreadPool.SetMinThreads(800, 300);
             }
 
             System.Threading.ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
@@ -63,26 +64,29 @@ namespace BenchmarkTest
 
             watch.Start();
 
-            Parallel.For(0, count, c =>
+            Parallel.For(0, count, async c =>
             {
                 var result = Cmd.Call("Test000", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" }));
 
                 results.Add(result.Data);
 
-                var task = Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" }))
-                .ContinueWith(c2 =>
-                {
-                    results.Add(c2.Result.Data);
-                });
+                //var task = Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" })).ContinueWith(c2 =>
+                //{
+                //    results.Add(c2.Result.Data);
+                //});
 
-                tasks.Add(task);
+                //tasks.Add(task);
+
+                var task = await Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" }));
+
+                results.Add(task.Data);
 
                 result = Cmd.CallIResult("Test002", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" }));
 
                 results.Add(result.Data);
             });
 
-            Task.WaitAll(tasks.ToArray());
+            //Task.WaitAll(tasks.ToArray());
 
             watch.Stop();
             var total = Help.Scale(watch.Elapsed.TotalMilliseconds, 3);
@@ -109,7 +113,8 @@ namespace BenchmarkTest
                 throw new System.Exception("result error!");
             }
 
-            Console.WriteLine($"ResultCount={results.Count} TaskCount={tasks.Count}  Loggers={BusinessMember.Loggers.Count} Time={total}");
+            //Console.WriteLine($"ResultCount={results.Count} TaskCount={tasks.Count}  Loggers={BusinessMember.Loggers.Count} Time={total}");
+            Console.WriteLine($"ResultCount={results.Count} Loggers={BusinessMember.Loggers.Count} Time={total} Avg={Help.Scale(total / results.Count)}");
 
             //===========================================================//
             /*
@@ -171,7 +176,7 @@ namespace BenchmarkTest
     {
         public Proces01(int state = -110, string message = null) : base(state, message) { }
 
-        public async override Task<IResult> Proces(dynamic value) => this.ResultCreate(data: value + 1);
+        public async override ValueTask<IResult> Proces(dynamic value) => this.ResultCreate(data: value + 1);
     }
 
     public class Arg00
@@ -191,14 +196,20 @@ namespace BenchmarkTest
 
         public BusinessMember() => this.Logger = logger =>
         {
-            System.Threading.Thread.SpinWait(100);
+            if (-1 != Program.WorkTime)
+            {
+                Business.Utils.Help.SpinWait(Program.WorkTime);
+            }
 
             Loggers.Add(logger);
         };
 
         public virtual dynamic Test000([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
 
-        public virtual async Task<dynamic> Test001([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
+        public virtual async Task<dynamic> Test001([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token)
+        {
+            return this.ResultCreate(data: arg00.Out.A + 1);
+        }
 
         public virtual IResult Test002([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
     }

@@ -27,7 +27,9 @@ namespace Business
 
     public partial class Bind
     {
-        internal static IResult CmdError(System.Type resultType, string cmd) => ResultFactory.ResultCreate(resultType, -1, $"Without this Cmd {cmd}");
+        public static IResult BusinessError(System.Type resultType, string business) => ResultFactory.ResultCreate(resultType, -1, $"Without this Business {business}");
+
+        public static IResult CmdError(System.Type resultType, string cmd) => ResultFactory.ResultCreate(resultType, -2, $"Without this Cmd {cmd}");
 
         #region Internal
 

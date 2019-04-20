@@ -55,7 +55,7 @@ public class ProcesUse02 : ArgumentAttribute
 {
     public ProcesUse02(int state = -100, string message = null) : base(state, message) { }
 
-    public async override Task<IResult> Proces(dynamic value) => this.ResultCreate(new Use02 { B = value.A });
+    public async override ValueTask<IResult> Proces(dynamic value) => this.ResultCreate(new Use02 { B = value.A });
 }
 
 /// <summary>
@@ -65,7 +65,7 @@ public class Proces01 : ArgumentAttribute
 {
     public Proces01(int state = -110, string message = null) : base(state, message) { }
 
-    public async override Task<IResult> Proces(dynamic value) => this.ResultCreate($"{value}.1234567890");
+    public async override ValueTask<IResult> Proces(dynamic value) => this.ResultCreate($"{value}.1234567890");
 }
 
 public class AES2 : AES
@@ -74,7 +74,7 @@ public class AES2 : AES
     {
     }
 
-    public async override Task<IResult> Proces(dynamic value)
+    public async override ValueTask<IResult> Proces(dynamic value)
     {
         Assert.AreEqual(value, "abc.1234567890");
         return await base.Proces((object)value);

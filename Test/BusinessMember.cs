@@ -7,24 +7,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 
-public class ResultObject<Type> : Business.Result.ResultObject<Type>
-{
-    static ResultObject() => MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
-
-    public ResultObject(Type data, System.Type dataType, int state = 1, string message = null, System.Type genericType = null)
-        : base(data, dataType, state, message, genericType) { }
-
-    public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }
-
-    [MessagePack.IgnoreMember]
-    public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
-
-    [MessagePack.IgnoreMember]
-    public override System.Type GenericType => base.GenericType;
-
-    public override byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
-}
-
 [Logger]
 public class BusinessMember : BusinessBase<ResultObject<object>>
 {
@@ -74,7 +56,7 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
         {
         }
 
-        public async override Task<IResult> Proces(dynamic value)
+        public async override ValueTask<IResult> Proces(dynamic value)
         {
             return this.ResultCreate(string.Format("{0}+{1}", value, "1234567890"));
         }
@@ -118,7 +100,7 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
     {
         public FileCheck(int state = -110, string message = null) : base(state, message) { }
 
-        public override async Task<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces(dynamic value)
         {
             BusinessController col = value;
 

@@ -302,7 +302,7 @@ namespace Business.Auth
             }
         }
 
-        async System.Threading.Tasks.Task<IResult> ArgsResult(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue)
+        async System.Threading.Tasks.ValueTask<IResult> ArgsResult(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue)
         {
             bool isUpdate = false;
 
@@ -322,8 +322,6 @@ namespace Business.Auth
                 while (NodeState.DAT == first.State)
                 {
                     var argAttr = first.Value;
-
-                    var value = item.HasIArg ? iArgIn : memberValue;
 
                     result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null) : await argAttr.Proces(item.HasIArg ? iArgIn : memberValue);
 
@@ -368,6 +366,7 @@ namespace Business.Auth
                 if (0 < item.ArgAttrChild.Count && null != currentValue2)
                 {
                     var result2 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue2);
+
                     if (1 > result2.State)
                     {
                         return result2;
@@ -379,6 +378,7 @@ namespace Business.Auth
                         {
                             item.Accessor.Setter(currentValue, currentValue2);
                         }
+
                         if (!isUpdate) { isUpdate = !isUpdate; }
                     }
                 }
