@@ -5,7 +5,9 @@ using Business.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using static Args;
 
@@ -94,8 +96,9 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         }
     }
 
-    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg)
+    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, WebSocket socket)
     {
+        await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
         //dynamic args = new System.Dynamic.ExpandoObject();
         //args.token = 11;
         //args.arg = 22;

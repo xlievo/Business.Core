@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore;
+﻿using System;
+using System.Net.WebSockets;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Builder;
@@ -6,6 +10,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Business;
@@ -13,12 +18,6 @@ using Business.Attributes;
 using Business.Auth;
 using Business.Utils;
 using Business.Result;
-using System;
-using System.Net.WebSockets;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
 
 #region Socket Support
 
@@ -211,6 +210,7 @@ public class Startup
 
         //==================First step==================//
         Configer.LoadBusiness();
+        Configer.UseType(typeof(HttpContext), typeof(WebSocket));
 
         //==================The second step==================//
         //add route
@@ -281,81 +281,103 @@ public class Startup
     #region WebSocket
     async Task Keep(HttpContext context, WebSocket webSocket)
     {
-        var auth = context.Request.Headers["u"].ToString();
+        //var auth = context.Request.Headers["u"].ToString();
 
-        if (string.IsNullOrWhiteSpace(auth))
-        {
-            return;
-        }
+        //if (string.IsNullOrWhiteSpace(auth))
+        //{
+        //    return;
+        //}
 
-        var buffer = new byte[ReceiveBufferSize];
-        var socketResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-        while (!socketResult.CloseStatus.HasValue)
+        var id = context.Connection.Id;
+
+        try
         {
-            try
+            var buffer = new byte[ReceiveBufferSize];
+            var socketResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            while (!socketResult.CloseStatus.HasValue)
             {
-                var receiveData = buffer.TryBinaryDeserialize<ReceiveData>();
-
-                dynamic result;
-
-                ///* test data
-                receiveData.a = "API";
-                receiveData.c = "Test004";
-                receiveData.t = "token";
-                receiveData.d = new List<Args.Test001> { new Args.Test001 { A = "aaa", B = "bbb" } }.BinarySerialize();
-                receiveData.b = "bbb";
-                //*/
-
-                if (string.IsNullOrWhiteSpace(receiveData.a) || !Configer.BusinessList.TryGetValue(receiveData.a, out IBusiness business))
+                try
                 {
-                    result = Bind.BusinessError(ResultObject<string>.ResultType, receiveData.a);
-                    await SendAsync(result.ToBytes());
-                }
-                else
-                {
-                    result = await business.Command.AsyncCall(
-                    //the cmd of this request.
-                    receiveData.c,
-                    //the data of this request, allow null.
-                    new object[] { receiveData.d },
-                    //the group of this request.
-                    "s",
-                    //the incoming use object
-                    new UseEntry(context, "context"), //controller
-                    new UseEntry(new Token //token
+                    var receiveData = buffer.TryBinaryDeserialize<ReceiveData>();
+
+                    dynamic result;
+
+                    ///* test data
+                    receiveData.a = "API";
+                    //receiveData.c = "Test004";
+                    //receiveData.t = "token";
+                    //receiveData.d = new List<Args.Test001> { new Args.Test001 { A = "aaa", B = "bbb" } }.BinarySerialize();
+                    //receiveData.b = "bbb";
+                    //*/
+
+                    if (string.IsNullOrWhiteSpace(receiveData.a) || !Configer.BusinessList.TryGetValue(receiveData.a, out IBusiness business))
                     {
-                        Key = receiveData.t,
-                        Remote = string.Format("{0}:{1}", context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
+                        result = Bind.BusinessError(ResultObject<string>.ResultType, receiveData.a);
+                        await SendAsync(result.ToBytes());
+                    }
+                    else
+                    {
+                        result = await business.Command.AsyncCall(
+                        //the cmd of this request.
+                        receiveData.c,
+                        //the data of this request, allow null.
+                        new object[] { receiveData.d },
+                        //the group of this request.
+                        "s",
+                        //the incoming use object
+                        new UseEntry(context, "context"), //controller
+                        new UseEntry(webSocket, "socket"), //controller
+                        new UseEntry(new Token //token
+                    {
+                            Key = receiveData.t,
+                            Remote = string.Format("{0}:{1}", context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
                         //Callback = b
                     }, "session") //[Use(true)]
-                    );
+                        );
 
-                    if (null != result)
-                    {
-                        if (typeof(IResult).IsAssignableFrom(result.GetType()))
+                        if (null != result)
                         {
-                            result.Callback = receiveData.b;
+                            if (typeof(IResult).IsAssignableFrom(result.GetType()))
+                            {
+                                result.Callback = receiveData.b;
 
-                            var data = Business.Result.ResultFactory.ResultCreateToDataBytes(result).ToBytes();
+                                var data = Business.Result.ResultFactory.ResultCreateToDataBytes(result).ToBytes();
 
-                            //var result3 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
+                                //var result3 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
 
-                            //var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
+                                //var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
 
-                            await SendAsync(data);
+                                await SendAsync(data);
+                            }
                         }
                     }
                 }
-            }
-            catch (System.Exception ex)
-            {
-                var result = ResultFactory.ResultCreate(ResultObject<string>.ResultType, 0, System.Convert.ToString(ex));
-                await SendAsync(result.ToBytes());
+                catch (System.Exception ex)
+                {
+                    var result = ResultFactory.ResultCreate(ResultObject<string>.ResultType, 0, System.Convert.ToString(ex));
+                    await SendAsync(result.ToBytes(), id);
+                    Help.ExceptionWrite(ex, true, true);
+                }
+
+                if (webSocket.State != WebSocketState.Open)
+                {
+                    break;
+                }
+
+                socketResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
 
-            socketResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            if (webSocket.State == WebSocketState.Open)
+            {
+                await webSocket.CloseAsync(socketResult.CloseStatus.Value, socketResult.CloseStatusDescription, CancellationToken.None);
+            }
         }
-        await webSocket.CloseAsync(socketResult.CloseStatus.Value, socketResult.CloseStatusDescription, CancellationToken.None);
+        catch (System.Exception ex)
+        {
+            var result = ResultFactory.ResultCreate(ResultObject<string>.ResultType, 0, System.Convert.ToString(ex));
+            await SendAsync(result.ToBytes(), id);
+            Help.ExceptionWrite(ex, true, true);
+        }
     }
 
     #region SendAsync

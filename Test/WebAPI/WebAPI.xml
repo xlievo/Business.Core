@@ -30,11 +30,6 @@
             data
             </summary>
         </member>
-        <member name="P:ReceiveData.g">
-            <summary>
-            business group
-            </summary>
-        </member>
         <member name="P:ReceiveData.b">
             <summary>
             callback
