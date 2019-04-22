@@ -16,7 +16,7 @@ namespace BenchmarkTest
         static BusinessMember Member;
         static CommandGroup Cmd;
         static Configer Cfg;
-        public static int WorkTime = 500;
+        public static int WorkTime = -1;
 
         public struct Dto
         {
@@ -55,7 +55,7 @@ namespace BenchmarkTest
 
             if (Cfg.LoggerUseThreadPool)
             {
-                System.Threading.ThreadPool.SetMinThreads(800, 300);
+                //System.Threading.ThreadPool.SetMinThreads(800, 300);
             }
 
             System.Threading.ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
@@ -89,7 +89,7 @@ namespace BenchmarkTest
             //Task.WaitAll(tasks.ToArray());
 
             watch.Stop();
-            var total = Help.Scale(watch.Elapsed.TotalMilliseconds, 3);
+            var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
 
             var results2 = new int[results.Count];
 
@@ -114,7 +114,7 @@ namespace BenchmarkTest
             }
 
             //Console.WriteLine($"ResultCount={results.Count} TaskCount={tasks.Count}  Loggers={BusinessMember.Loggers.Count} Time={total}");
-            Console.WriteLine($"ResultCount={results.Count} Loggers={BusinessMember.Loggers.Count} Time={total} Avg={Help.Scale(total / results.Count)}");
+            Console.WriteLine($"ResultCount={results.Count} Loggers={BusinessMember.Loggers.Count} Time={total} Avg={Help.Scale(results.Count / total)}");
 
             //===========================================================//
             /*

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -229,7 +230,7 @@ public class Startup
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
 
         #region AcceptWebSocket
-
+        
         MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
 
         var webSocketcfg = appSettings.GetSection("WebSocket");
@@ -258,12 +259,13 @@ public class Startup
                 if (context.WebSockets.IsWebSocketRequest)
                 {
                     var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-
+                    
                     Sockets.TryAdd(context.Connection.Id, webSocket);
-
+                    System.Console.WriteLine($"Add:{context.Connection.Id} Sockets:{Sockets.Count}");
                     await Keep(context, webSocket);
 
                     Sockets.TryRemove(context.Connection.Id, out _);
+                    System.Console.WriteLine($"Remove:{context.Connection.Id} Sockets:{Sockets.Count}");
                 }
                 else
                 {
@@ -302,13 +304,13 @@ public class Startup
 
                     dynamic result;
 
-                    ///* test data
-                    receiveData.a = "API";
+                    /////* test data
+                    //receiveData.a = "API";
                     //receiveData.c = "Test004";
                     //receiveData.t = "token";
                     //receiveData.d = new List<Args.Test001> { new Args.Test001 { A = "aaa", B = "bbb" } }.BinarySerialize();
                     //receiveData.b = "bbb";
-                    //*/
+                    ////*/
 
                     if (string.IsNullOrWhiteSpace(receiveData.a) || !Configer.BusinessList.TryGetValue(receiveData.a, out IBusiness business))
                     {
@@ -328,11 +330,11 @@ public class Startup
                         new UseEntry(context, "context"), //controller
                         new UseEntry(webSocket, "socket"), //controller
                         new UseEntry(new Token //token
-                    {
+                        {
                             Key = receiveData.t,
                             Remote = string.Format("{0}:{1}", context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
-                        //Callback = b
-                    }, "session") //[Use(true)]
+                            //Callback = b
+                        }, "session") //[Use(true)]
                         );
 
                         if (null != result)
@@ -478,7 +480,7 @@ public class BusinessController : Controller
         g = "j";
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
-        var result = await Configer.BusinessList.TryGetValue(this.Request.Path.Value.TrimStart('/').Split('/')[0]).Command.AsyncCall(
+        var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCall(
             //the cmd of this request.
             c,
             //the data of this request, allow null.

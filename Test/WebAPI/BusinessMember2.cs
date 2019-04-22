@@ -96,15 +96,9 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         }
     }
 
-    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, WebSocket socket)
+    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, [Logger(LoggerType.All, false)]WebSocket socket)
     {
-        await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
-        //dynamic args = new System.Dynamic.ExpandoObject();
-        //args.token = 11;
-        //args.arg = 22;
-
-        //var args = new { token, arg = arg.Out };
-
+        //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
         return this.ResultCreate(new { token, arg = arg?.Out });
     }
 

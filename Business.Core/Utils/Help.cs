@@ -2327,17 +2327,17 @@ namespace Business.Utils
 
         public ConcurrentReadOnlyDictionary(System.Collections.Generic.IEqualityComparer<TKey> comparer) : this(new System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>(comparer)) { }
 
-        public virtual TValue TryGetValue(TKey key)
-        {
-            if (System.Object.Equals(null, key))
-            {
-                return default;
-            }
+        //public virtual TValue TryGetValue(TKey key)
+        //{
+        //    if (System.Object.Equals(null, key))
+        //    {
+        //        return default;
+        //    }
 
-            this.TryGetValue(key, out TValue value);
+        //    this.TryGetValue(key, out TValue value);
 
-            return value;
-        }
+        //    return value;
+        //}
     }
 
     public class ReadOnlyCollection<TValue> : System.Collections.ObjectModel.ReadOnlyCollection<TValue>
