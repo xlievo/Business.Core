@@ -194,11 +194,13 @@ namespace BenchmarkTest
     {
         public static ConcurrentBag<LoggerData> Loggers = new ConcurrentBag<LoggerData>();
 
+        public static bool SpinWait(int millisecondsTimeout) => System.Threading.SpinWait.SpinUntil(() => false, millisecondsTimeout);
+
         public BusinessMember() => this.Logger = logger =>
         {
             if (-1 != Program.WorkTime)
             {
-                Business.Utils.Help.SpinWait(Program.WorkTime);
+                SpinWait(Program.WorkTime);
             }
 
             Loggers.Add(logger);

@@ -333,7 +333,7 @@ public class Startup
                         {
                             Key = receiveData.t,
                             Remote = string.Format("{0}:{1}", context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
-                            //Callback = b
+                            Callback = receiveData.b
                         }, "session") //[Use(true)]
                         );
 

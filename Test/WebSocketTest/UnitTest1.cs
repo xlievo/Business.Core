@@ -87,7 +87,7 @@ namespace WebSocketTest
     {
         public static bool SpinWait(int millisecondsTimeout) => System.Threading.SpinWait.SpinUntil(() => false, millisecondsTimeout);
 
-        static WebSocket webSocketClient = new WebSocket("ws://localhost:5000/ws");
+        static WebSocket webSocketClient = new WebSocket("ws://localhost:5000/ws") { AutoSendPingInterval = 60 };
 
         static UnitTest1()
         {

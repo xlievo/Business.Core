@@ -44,7 +44,7 @@ namespace Business.Attributes
 
             var member = Accessors.dictionary.GetOrAdd(type.FullName, key => new AttributeAccessor { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() });
 
-            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
             {
                 if (typeof(System.MulticastDelegate).IsAssignableFrom(field.FieldType))
                 {
@@ -56,7 +56,7 @@ namespace Business.Attributes
                 member.Accessor.dictionary.TryAdd(field.Name, accessor);
             }
 
-            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
+            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
             {
                 if (typeof(System.MulticastDelegate).IsAssignableFrom(property.PropertyType))
                 {
@@ -393,6 +393,9 @@ namespace Business.Attributes
         {
             if (this.Type.IsAbstract) { return default; }
 
+            return Force.DeepCloner.DeepClonerExtensions.DeepClone(this) as T;
+
+            /*
             if (!Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta))
             {
                 return default;
@@ -406,6 +409,7 @@ namespace Business.Attributes
             }
 
             return attr as T;
+            */
         }
 
         public virtual string Replace(string value)
@@ -774,6 +778,7 @@ namespace Business.Attributes
             this.LogType = logType;
             this.CanWrite = canWrite;
         }
+
         /// <summary>
         /// Record type
         /// </summary>
@@ -787,6 +792,7 @@ namespace Business.Attributes
         /// Allowed to return to parameters
         /// </summary>
         public LoggerValueMode CanValue { get; set; }
+
         /// <summary>
         /// Allowed to return to results
         /// </summary>
@@ -1258,7 +1264,7 @@ namespace Business.Attributes
 
         public System.Text.Encoding Encoding { get; set; }
 
-        public AES(string key, int state = -821, string message = null) : base(state, message) => this.Key = key;
+        public AES(string key = null, int state = -821, string message = null) : base(state, message) => this.Key = key;
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {

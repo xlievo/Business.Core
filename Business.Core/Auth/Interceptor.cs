@@ -164,6 +164,9 @@ namespace Business.Auth
 
                 //===============================//
                 //watch.Restart();
+                //..CallBefore..//
+                Configer.CallBefore?.Invoke(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }));
+
                 proceed.Invoke();
 
                 if (meta.HasAsync)
@@ -262,8 +265,6 @@ namespace Business.Auth
 
         async void Finally(CommandAttribute command, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, bool loggerUseThreadPool, System.Diagnostics.Stopwatch watch)
         {
-            if (null == logger) { return; }
-
             if (meta.HasAsync)
             {
                 var task = returnValue as System.Threading.Tasks.Task<dynamic>;
@@ -282,12 +283,33 @@ namespace Business.Auth
                 }
             }
 
-            var argsObjLog = meta.Args.Select(c => new ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = c.Group[command.Key].Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg }).ToList();
+            //var argsObjLog = meta.Args.Select(c => new ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = c.Group[command.Key].Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg }).ToList();
 
-            var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLog.ToDictionary(c => c.name, c => c.hasIArg), out bool canWrite, out bool canResult);
+            //var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLog.ToDictionary(c => c.name, c => c.hasIArg), out bool canWrite, out bool canResult);
+
+            var argsObjLog = new System.Collections.Generic.List<ArgsLog>(meta.Args.Count);
+            var argsObjLogHasIArg = new System.Collections.Generic.Dictionary<string, bool>(meta.Args.Count);
+            var args = new System.Collections.Generic.Dictionary<string, MethodArgs>(meta.Args.Count);
+
+            foreach (var c in meta.Args)
+            {
+                var value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position];
+
+                argsObjLog.Add(new ArgsLog { name = c.Name, value = value, logger = c.Group[command.Key].Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg });
+                argsObjLogHasIArg.Add(c.Name, c.HasIArg);
+
+                args.Add(c.Name, new MethodArgs { Name = c.Name, Value = value, HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType });
+            }
+
+            var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLogHasIArg, out bool canWrite, out bool canResult);
 
             watch.Stop();
             var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+
+            //..CallAfter..//
+            Configer.CallAfter?.Invoke(meta, args);
+
+            if (null == logger) { return; }
 
             if (canWrite)
             {
@@ -393,7 +415,7 @@ namespace Business.Auth
             switch (canValue)
             {
                 case LoggerValueMode.All:
-                    if (null != argLogAttr && !argLogAttr.CanWrite)
+                    if ((null != argLogAttr && !argLogAttr.CanWrite))
                     {
                         break;
                     }

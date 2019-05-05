@@ -25,6 +25,21 @@ namespace Business
     using Business.Meta;
     using Business.Attributes;
 
+    public struct MethodArgs
+    {
+        public string Name;
+
+        public dynamic Value;
+
+        public bool HasIArg;
+
+        public System.Type Type;
+
+        public System.Type OutType;
+
+        public System.Type InType;
+    }
+
     public partial class Bind
     {
         public static IResult BusinessError(System.Type resultType, string business) => ResultFactory.ResultCreate(resultType, -1, $"Without this Business {business}");
@@ -818,7 +833,7 @@ namespace Business
                     var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
 
                     var hasUse = null != use || (current.hasIArg ? cfg.UseTypes.Contains(current.inType.FullName) : false);
-                    var nick = argAttrAll.GetAttr<NickAttribute>();
+                    //var nick = argAttrAll.GetAttr<NickAttribute>();
 
                     argAttrAll = argAttrAll.Distinct(!hasUse ? argAttrs : null);
 
@@ -1015,7 +1030,7 @@ namespace Business
         /// <param name="x"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        static bool GroupEquals(GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
+        internal static bool GroupEquals(GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
 
         static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string path, string owner, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, object business, bool hasUse, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
         {
@@ -1027,13 +1042,14 @@ namespace Business
 
             foreach (var item in commands)
             {
-                var ignores = argAttrAll.GetAttrs<Ignore>(c => GroupEquals(c, item.Value.Group));
+                var ignores = argAttrAll.GetAttrs<Ignore>(c => GroupEquals(c, item.Value.Group), clone: true);
 
                 var ignoreBusinessArg = ignores.Any(c => c.Mode == IgnoreMode.BusinessArg);
                 // || (item.Group == c.Group || string.IsNullOrWhiteSpace(c.Group))
+
                 var argAttrChild = (hasUse || item.Value.IgnoreBusinessArg || ignoreBusinessArg) ?
-                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group) && c.Declaring == AttributeBase.DeclaringType.Parameter) :
-                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group));
+                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group) && c.Declaring == AttributeBase.DeclaringType.Parameter).Select(c => c.Clone()).ToList() :
+                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group)).Select(c => c.Clone()).ToList();
 
                 var nickValue = string.IsNullOrWhiteSpace(nick?.Nick) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Nick) && GroupEquals(c, item.Value.Group)).GroupBy(c => c.Nick, System.StringComparer.InvariantCultureIgnoreCase).FirstOrDefault()?.Key : nick.Nick;
 
@@ -1289,7 +1305,7 @@ namespace Business.Meta
 
     #region Meta
 
-    public struct ArgGroup
+    public class ArgGroup
     {
         public ArgGroup(ReadOnlyCollection<Attributes.Ignore> ignore, ConcurrentLinkedList<Attributes.ArgumentAttribute> attrs, string nick, string path, string owner)
         {
@@ -1420,8 +1436,8 @@ namespace Business.Meta
     public struct MetaLogger
     {
         public Attributes.LoggerAttribute Record { get; set; }
-        public Attributes.LoggerAttribute Exception { get; set; }
         public Attributes.LoggerAttribute Error { get; set; }
+        public Attributes.LoggerAttribute Exception { get; set; }
     }
 
     public struct MetaData

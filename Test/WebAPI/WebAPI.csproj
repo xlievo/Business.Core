@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Business.Lib" Version="1.2.0" />
+    <PackageReference Include="Business.Lib" Version="1.2.1" />
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>

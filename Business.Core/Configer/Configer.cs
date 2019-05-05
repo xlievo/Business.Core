@@ -437,6 +437,11 @@ namespace Business
         /// Logger use threadPool, Default true
         /// </summary>
         public bool LoggerUseThreadPool { get; internal set; } = true;
+
+        public System.Action<Meta.MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>> CallBefore { get; set; }
+
+        public System.Action<Meta.MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>> CallAfter { get; set; }
+
         //public Configuration UseType(params System.Type[] type)
         //{
         //    if (null == type) { return this; }
@@ -516,6 +521,13 @@ namespace Business
             }
         }
 
+        public static void LoggerSet(Attributes.LoggerAttribute logger, params System.Type[] argType)
+        {
+            foreach (var item in BusinessList.Values)
+            {
+                item.LoggerSet(logger, argType);
+            }
+        }
 
         //public static System.Collections.Generic.Dictionary<string, Doc> LoadDoc<Business>()
         //{

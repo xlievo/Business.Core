@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
+using System.Collections.Generic;
 
 [assembly: JsonArg(Group = "G01")]
 [assembly: Logger(LoggerType.All)]
@@ -36,7 +37,7 @@ public class ResultObject<Type> : Business.Result.ResultObject<Type>
     public override byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
 }
 
-[Logger(LoggerType.Record, CanWrite = false)]
+//[Logger(LoggerType.Record, CanWrite = false)]
 [Use]
 public struct Use01
 {
@@ -91,6 +92,7 @@ public struct Arg01
     /// </summary>
     [CheckNull]
     [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
+    //[AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
     [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = CommandGroupDefault.Group)]
     public Arg<object, dynamic> A;
 
@@ -707,10 +709,15 @@ public class TestBusinessMember
     public void TestLoggerAndArg()
     {
         var member = Bind.Create<BusinessLoggerAndArg>().UseDoc();
+
+        Configer.LoggerSet(new LoggerAttribute(LoggerType.Record, canWrite: false) { Group = "333" }, typeof(Use02));
+
         var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry(new Use01 { A = "bbb" }, "use02"), new UseEntry(new Use01 { A = "aaa" }));
         Assert.AreEqual(t2.Message, null);
         Assert.AreEqual(t2.State, 1);
         Assert.AreEqual(t2.HasData, true);
+
+        System.Threading.Tasks.Task.WaitAll();
     }
 
     void TestResult(IBusiness business)

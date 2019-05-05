@@ -340,6 +340,69 @@ namespace Business.Utils
             return business;
         }
 
+        public static Business LoggerSet<Business>(this Business business, Attributes.LoggerAttribute logger, params System.Type[] argTyoe) where Business : IBusiness
+        {
+            if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
+
+            if (null == logger || null == argTyoe || 0 == argTyoe.Length) { return business; }
+
+            System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
+            {
+                var groups = item.CommandGroup.Values.Where(c => Bind.GroupEquals(logger, c.Group));
+
+                if (!groups.Any()) { return; }
+
+                logger.Declaring = Attributes.AttributeBase.DeclaringType.Parameter;
+
+                System.Threading.Tasks.Parallel.ForEach(argTyoe, type =>
+                {
+                    foreach (var group in groups)
+                    {
+                        foreach (var arg in item.Args)
+                        {
+                            if (Equals(arg.Type, type) || Equals(arg.IArgOutType, type))
+                            {
+                                arg.Group[group.Key].Logger = GetMetaLogger(arg.Group[group.Key].Logger, logger, group.Group);
+                            }
+
+                            if (Equals(arg.IArgInType, type))
+                            {
+                                arg.Group[group.Key].IArgInLogger = GetMetaLogger(arg.Group[group.Key].IArgInLogger, logger, group.Group);
+                            }
+                        }
+                    }
+                });
+            });
+
+            return business;
+        }
+
+        static Meta.MetaLogger GetMetaLogger(Meta.MetaLogger metaLogger, Attributes.LoggerAttribute logger, string group)
+        {
+            var logger2 = logger.Clone();
+            logger2.Group = group;
+
+            switch (logger2.LogType)
+            {
+                case LoggerType.All:
+                    metaLogger.Record = logger2.Clone().SetType(LoggerType.Record);
+                    metaLogger.Error = logger2.Clone().SetType(LoggerType.Error);
+                    metaLogger.Exception = logger2.Clone().SetType(LoggerType.Exception);
+                    break;
+                case LoggerType.Record:
+                    metaLogger.Record = logger2;
+                    break;
+                case LoggerType.Error:
+                    metaLogger.Error = logger2;
+                    break;
+                case LoggerType.Exception:
+                    metaLogger.Exception = logger2;
+                    break;
+            }
+
+            return metaLogger;
+        }
+
         //public static Business UseDoc<Business>(this Business business, string outFile = null) where Business : IBusiness
         //{
         //    return business.UseDoc(xmlMembers =>
@@ -940,16 +1003,40 @@ namespace Business.Utils
             return attributes;
         }
 
-        public static System.Collections.Generic.List<Attribute> GetAttrs<Attribute>(this System.Collections.Generic.IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null) where Attribute : Attributes.AttributeBase
+        public static System.Collections.Generic.List<Attribute> GetAttrs<Attribute>(this System.Collections.Generic.IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null, bool clone = false) where Attribute : Attributes.AttributeBase
         {
-            if (null == predicate)
+            var list = new System.Collections.Generic.List<Attribute>(attributes.Count);
+
+            foreach (var item in attributes)
             {
-                return attributes.Where(c => c is Attribute).Cast<Attribute>().ToList();
+                if (item is Attribute)
+                {
+                    var attr = item as Attribute;
+
+                    if (null != predicate)
+                    {
+                        if (predicate(attr))
+                        {
+                            list.Add(clone ? attr.Clone() : attr);
+                        }
+                    }
+                    else
+                    {
+                        list.Add(clone ? attr.Clone() : attr);
+                    }
+                }
             }
-            else
-            {
-                return attributes.Where(c => c is Attribute && predicate((Attribute)c)).Cast<Attribute>().ToList();
-            }
+
+            //if (null == predicate)
+            //{
+            //    //return attributes.Where(c => c is Attribute).Cast<Attribute>().ToList();
+            //}
+            //else
+            //{
+            //    //return attributes.Where(c => c is Attribute && predicate((Attribute)c)).Cast<Attribute>().ToList();
+            //}
+
+            return list;
         }
 
         public static Attribute GetAttr<Attribute>(this System.Collections.Generic.IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null) where Attribute : Attributes.AttributeBase
@@ -1814,9 +1901,9 @@ namespace Business.Utils
             return list.Adde(item).JsonSerialize();
         }
 
-        public static bool SpinWait(this int millisecondsTimeout) => System.Threading.SpinWait.SpinUntil(() => false, millisecondsTimeout);
+        //public static bool SpinWait(this int millisecondsTimeout) => System.Threading.SpinWait.SpinUntil(() => false, millisecondsTimeout);
 
-        public static bool SpinWait(this System.TimeSpan timeout) => System.Threading.SpinWait.SpinUntil(() => false, timeout);
+        //public static bool SpinWait(this System.TimeSpan timeout) => System.Threading.SpinWait.SpinUntil(() => false, timeout);
 
         #region Json
 
