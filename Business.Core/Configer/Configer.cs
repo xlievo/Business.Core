@@ -481,11 +481,19 @@ namespace Business
             });
         }
 
-        public static void UseType(params System.Type[] type)
+        public static void UseType(params System.Type[] argType)
         {
             foreach (var item in BusinessList.Values)
             {
-                item.UseType(type);
+                item.UseType(argType);
+            }
+        }
+
+        public static void UseType(params string[] argName)
+        {
+            foreach (var item in BusinessList.Values)
+            {
+                item.UseType(argName);
             }
         }
 
@@ -526,6 +534,14 @@ namespace Business
             foreach (var item in BusinessList.Values)
             {
                 item.LoggerSet(logger, argType);
+            }
+        }
+
+        public static void LoggerSet(Attributes.LoggerAttribute logger, params string[] argName)
+        {
+            foreach (var item in BusinessList.Values)
+            {
+                item.LoggerSet(logger, argName);
             }
         }
 

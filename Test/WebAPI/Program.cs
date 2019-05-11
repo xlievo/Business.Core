@@ -212,6 +212,8 @@ public class Startup
         //==================First step==================//
         Configer.LoadBusiness();
         Configer.UseType(typeof(HttpContext), typeof(WebSocket));
+        Configer.UseType("context");
+        Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
 
         //==================The second step==================//
         //add route
@@ -230,7 +232,7 @@ public class Startup
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
 
         #region AcceptWebSocket
-        
+
         MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
 
         var webSocketcfg = appSettings.GetSection("WebSocket");
@@ -259,7 +261,7 @@ public class Startup
                 if (context.WebSockets.IsWebSocketRequest)
                 {
                     var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                    
+
                     Sockets.TryAdd(context.Connection.Id, webSocket);
                     System.Console.WriteLine($"Add:{context.Connection.Id} Sockets:{Sockets.Count}");
                     await Keep(context, webSocket);
@@ -304,13 +306,13 @@ public class Startup
 
                     dynamic result;
 
-                    /////* test data
-                    //receiveData.a = "API";
-                    //receiveData.c = "Test004";
-                    //receiveData.t = "token";
-                    //receiveData.d = new List<Args.Test001> { new Args.Test001 { A = "aaa", B = "bbb" } }.BinarySerialize();
-                    //receiveData.b = "bbb";
-                    ////*/
+                    ///* test data
+                    receiveData.a = "API";
+                    receiveData.c = "Test004";
+                    receiveData.t = "token";
+                    receiveData.d = new List<Args.Test001> { new Args.Test001 { A = "aaa", B = "bbb" } }.BinarySerialize();
+                    receiveData.b = "bbb";
+                    //*/
 
                     if (string.IsNullOrWhiteSpace(receiveData.a) || !Configer.BusinessList.TryGetValue(receiveData.a, out IBusiness business))
                     {
@@ -319,6 +321,10 @@ public class Startup
                     }
                     else
                     {
+                        var dict = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
+                        dict.Add("HttpContext", context);
+                        dict.Add("WebSocket", webSocket);
+
                         result = await business.Command.AsyncCall(
                         //the cmd of this request.
                         receiveData.c,
@@ -327,8 +333,7 @@ public class Startup
                         //the group of this request.
                         "s",
                         //the incoming use object
-                        new UseEntry(context, "context"), //controller
-                        new UseEntry(webSocket, "socket"), //controller
+                        new UseEntry(dict, "context"), //controller
                         new UseEntry(new Token //token
                         {
                             Key = receiveData.t,
@@ -431,6 +436,9 @@ public class Startup
     #endregion
 }
 
+/// <summary>
+/// A class for an MVC controller with view support.
+/// </summary>
 [Use]
 //Internal object do not write logs
 [Logger(canWrite: false)]
@@ -488,7 +496,7 @@ public class BusinessController : Controller
             //the group of this request.
             g,
             //the incoming use object
-            new UseEntry(this, "context"), //controller
+            //new UseEntry(new Context(this, this.HttpContext, null), "context"), //context
             new UseEntry(new Token //token
             {
                 Key = t,

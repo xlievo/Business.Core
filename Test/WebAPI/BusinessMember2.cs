@@ -4,6 +4,7 @@ using Business.Result;
 using Business.Utils;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
@@ -11,10 +12,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Args;
 
-[JsonArg(Group = "j")]
-[Command(Group = "j")]
-[MessagePackArg(Group = "s")]
-[Command(Group = "s")]
+[assembly: JsonArg(Group = "j")]
+[assembly: Command(Group = "j")]
+[assembly: MessagePackArg(Group = "s")]
+[assembly: Command(Group = "s")]
+
 [Logger]
 [Info("API")]
 public class BusinessMember2 : BusinessBase<ResultObject<string>>
@@ -51,6 +53,19 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
             {
                 Help.ExceptionWrite(exception, true, true);
             }
+        };
+
+        this.BindBefore = c =>
+        {
+            c.CallBefore = (meta, args) =>
+            {
+
+            };
+
+            c.CallAfter = (meta, args) =>
+            {
+
+            };
         };
     }
 
@@ -96,10 +111,12 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         }
     }
 
-    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, [Logger(LoggerType.All, false)]WebSocket socket)
+    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context)
     {
+        Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
+
         //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
-        return this.ResultCreate(new { token, arg = arg?.Out });
+        return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
     public struct Result

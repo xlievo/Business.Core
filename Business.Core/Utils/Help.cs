@@ -64,13 +64,13 @@ namespace Business.Utils
         //    return business;
         //}
 
-        public static Business UseType<Business>(this Business business, params System.Type[] type) where Business : IBusiness
+        public static Business UseType<Business>(this Business business, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
-            if (null == type) { return business; }
+            if (null == argType) { return business; }
 
-            foreach (var item in type)
+            foreach (var item in argType)
             {
                 if (null == item || business.Configer.UseTypes.Contains(item.FullName)) { continue; }
 
@@ -257,6 +257,62 @@ namespace Business.Utils
             return business;
         }
 
+        public static Business UseType<Business>(this Business business, params string[] argName) where Business : IBusiness
+        {
+            if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
+
+            if (null == argName) { return business; }
+
+            var argName2 = argName.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+
+            if (0 == argName2.Count) { return business; }
+
+            System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
+            {
+                foreach (var arg in item.Args)
+                {
+                    var type2 = arg.HasIArg ? arg.IArgInType : arg.Type;
+
+                    if (!argName2.Contains(arg.Name) || !item.UseTypePosition.dictionary.TryAdd(arg.Position, type2))
+                    {
+                        continue;
+                    }
+
+                    arg.UseType = true;
+
+                    arg.Use = new Attributes.UseAttribute(true);
+
+                    foreach (var item2 in arg.Group)
+                    {
+                        //remove not parameter attr
+
+                        var first = item2.Value.Attrs.First;
+
+                        while (NodeState.DAT == first.State)
+                        {
+                            var attr = first.Value;
+
+                            if (attr.Declaring != Attributes.AttributeBase.DeclaringType.Parameter)
+                            {
+                                item2.Value.Attrs.Remove(attr, out _);
+                            }
+
+                            first = first.Next;
+                        }
+
+                        //add default convert
+                        if (arg.HasIArg && NodeState.DAT != first.State)
+                        {
+                            var attr = new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Declaring = Attributes.AttributeBase.DeclaringType.Parameter };
+                            item2.Value.Attrs.TryAdd(attr);
+                        }
+                    }
+                }
+            });
+
+            return business;
+        }
+
         public static Business UseDoc<Business, Doc>(this Business business, System.Func<System.Collections.Generic.Dictionary<string, Xml.member>, Doc> operation, string outFile = null) where Business : IBusiness where Doc : Document.Doc
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -340,11 +396,11 @@ namespace Business.Utils
             return business;
         }
 
-        public static Business LoggerSet<Business>(this Business business, Attributes.LoggerAttribute logger, params System.Type[] argTyoe) where Business : IBusiness
+        public static Business LoggerSet<Business>(this Business business, Attributes.LoggerAttribute logger, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
-            if (null == logger || null == argTyoe || 0 == argTyoe.Length) { return business; }
+            if (null == logger || null == argType || 0 == argType.Length) { return business; }
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
@@ -354,7 +410,7 @@ namespace Business.Utils
 
                 logger.Declaring = Attributes.AttributeBase.DeclaringType.Parameter;
 
-                System.Threading.Tasks.Parallel.ForEach(argTyoe, type =>
+                System.Threading.Tasks.Parallel.ForEach(argType, type =>
                 {
                     foreach (var group in groups)
                     {
@@ -368,6 +424,47 @@ namespace Business.Utils
                             if (Equals(arg.IArgInType, type))
                             {
                                 arg.Group[group.Key].IArgInLogger = GetMetaLogger(arg.Group[group.Key].IArgInLogger, logger, group.Group);
+                            }
+                        }
+                    }
+                });
+            });
+
+            return business;
+        }
+
+        public static Business LoggerSet<Business>(this Business business, Attributes.LoggerAttribute logger, params string[] argName) where Business : IBusiness
+        {
+            if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
+
+            if (null == logger || null == argName) { return business; }
+
+            var argName2 = argName.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+
+            if (0 == argName2.Count) { return business; }
+
+            System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
+            {
+                var groups = item.CommandGroup.Values.Where(c => Bind.GroupEquals(logger, c.Group));
+
+                if (!groups.Any()) { return; }
+
+                logger.Declaring = Attributes.AttributeBase.DeclaringType.Parameter;
+
+                System.Threading.Tasks.Parallel.ForEach(argName2, name =>
+                {
+                    foreach (var group in groups)
+                    {
+                        foreach (var arg in item.Args)
+                        {
+                            if (Equals(arg.Name, name))
+                            {
+                                arg.Group[group.Key].Logger = GetMetaLogger(arg.Group[group.Key].Logger, logger, group.Group);
+
+                                if (arg.HasIArg)
+                                {
+                                    arg.Group[group.Key].IArgInLogger = GetMetaLogger(arg.Group[group.Key].IArgInLogger, logger, group.Group);
+                                }
                             }
                         }
                     }
