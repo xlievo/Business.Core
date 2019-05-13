@@ -317,7 +317,7 @@ public class Startup
                     if (string.IsNullOrWhiteSpace(receiveData.a) || !Configer.BusinessList.TryGetValue(receiveData.a, out IBusiness business))
                     {
                         result = Bind.BusinessError(ResultObject<string>.ResultType, receiveData.a);
-                        await SendAsync(result.ToBytes());
+                        await SendAsync(result.ToBytes(), id);
                     }
                     else
                     {
@@ -354,7 +354,7 @@ public class Startup
 
                                 //var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
 
-                                await SendAsync(data);
+                                await SendAsync(data, id);
                             }
                         }
                     }
@@ -485,6 +485,9 @@ public class BusinessController : Controller
             default: return this.NotFound();
         }
 
+        var dict = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
+        dict.Add("Controller", this);
+
         g = "j";
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
@@ -496,7 +499,7 @@ public class BusinessController : Controller
             //the group of this request.
             g,
             //the incoming use object
-            //new UseEntry(new Context(this, this.HttpContext, null), "context"), //context
+            new UseEntry(dict, "context"), //context
             new UseEntry(new Token //token
             {
                 Key = t,
