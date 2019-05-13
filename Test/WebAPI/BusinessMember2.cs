@@ -57,14 +57,24 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
         this.BindBefore = c =>
         {
-            c.CallBefore = (meta, args) =>
+            c.CallBefore = async (meta, args) =>
             {
 
             };
 
-            c.CallAfter = (meta, args, result) =>
+            c.CallAfter = async (meta, args, result) =>
             {
-                throw new System.Exception($"{System.DateTime.Now} ex !!!");
+                if (typeof(System.Threading.Tasks.Task).IsAssignableFrom(result.GetType()))
+                {
+                    var result2 = await result;
+
+                    await System.Threading.Tasks.Task.Run(() =>
+                    {
+                        System.Threading.Thread.Sleep(3000);
+                    });
+
+                    result2.State = 111;
+                }
             };
         };
     }

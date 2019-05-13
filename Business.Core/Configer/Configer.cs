@@ -438,9 +438,9 @@ namespace Business
         /// </summary>
         public bool LoggerUseThreadPool { get; internal set; } = true;
 
-        public System.Action<Meta.MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>> CallBefore { get; set; }
+        public System.Func<Meta.MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>, System.Threading.Tasks.Task> CallBefore { get; set; }
 
-        public System.Action<Meta.MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>, dynamic> CallAfter { get; set; }
+        public System.Func<Meta.MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>, dynamic, System.Threading.Tasks.Task> CallAfter { get; set; }
 
         //public Configuration UseType(params System.Type[] type)
         //{

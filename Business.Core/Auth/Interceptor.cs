@@ -165,7 +165,10 @@ namespace Business.Auth
                 //===============================//
                 //watch.Restart();
                 //..CallBefore..//
-                Configer.CallBefore?.Invoke(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }));
+                if (null != Configer.CallBefore)
+                {
+                    await Configer.CallBefore(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }));
+                }
 
                 proceed.Invoke();
 
@@ -191,7 +194,10 @@ namespace Business.Auth
                 }
 
                 //..CallAfter..//
-                Configer.CallAfter?.Invoke(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), returnValue);
+                if (null != Configer.CallAfter)
+                {
+                    await Configer.CallAfter(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), invocation.ReturnValue);
+                }
 
                 return invocation.ReturnValue;
             }
