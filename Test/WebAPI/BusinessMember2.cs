@@ -62,9 +62,9 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
             };
 
-            c.CallAfter = (meta, args) =>
+            c.CallAfter = (meta, args, result) =>
             {
-
+                throw new System.Exception($"{System.DateTime.Now} ex !!!");
             };
         };
     }

@@ -440,7 +440,7 @@ namespace Business
 
         public System.Action<Meta.MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>> CallBefore { get; set; }
 
-        public System.Action<Meta.MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>> CallAfter { get; set; }
+        public System.Action<Meta.MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>, dynamic> CallAfter { get; set; }
 
         //public Configuration UseType(params System.Type[] type)
         //{

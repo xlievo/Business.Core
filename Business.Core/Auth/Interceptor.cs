@@ -190,6 +190,9 @@ namespace Business.Auth
                     returnValue = invocation.ReturnValue;
                 }
 
+                //..CallAfter..//
+                Configer.CallAfter?.Invoke(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), returnValue);
+
                 return invocation.ReturnValue;
             }
             catch (System.Exception ex)
@@ -289,7 +292,6 @@ namespace Business.Auth
 
             var argsObjLog = new System.Collections.Generic.List<ArgsLog>(meta.Args.Count);
             var argsObjLogHasIArg = new System.Collections.Generic.Dictionary<string, bool>(meta.Args.Count);
-            var args = new System.Collections.Generic.Dictionary<string, MethodArgs>(meta.Args.Count);
 
             foreach (var c in meta.Args)
             {
@@ -297,17 +299,12 @@ namespace Business.Auth
 
                 argsObjLog.Add(new ArgsLog { name = c.Name, value = value, logger = c.Group[command.Key].Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg });
                 argsObjLogHasIArg.Add(c.Name, c.HasIArg);
-
-                args.Add(c.Name, new MethodArgs { Name = c.Name, Value = value, HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType });
             }
 
             var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLogHasIArg, out bool canWrite, out bool canResult);
 
             watch.Stop();
             var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
-
-            //..CallAfter..//
-            Configer.CallAfter?.Invoke(meta, args);
 
             if (null == logger) { return; }
 

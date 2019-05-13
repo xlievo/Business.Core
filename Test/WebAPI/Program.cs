@@ -211,7 +211,7 @@ public class Startup
 
         //==================First step==================//
         Configer.LoadBusiness();
-        Configer.UseType(typeof(HttpContext), typeof(WebSocket));
+        //Configer.UseType(typeof(HttpContext), typeof(WebSocket));
         Configer.UseType("context");
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
 
