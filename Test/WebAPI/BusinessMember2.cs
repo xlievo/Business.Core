@@ -68,10 +68,10 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
                 {
                     var result2 = await result;
 
-                    await System.Threading.Tasks.Task.Run(() =>
-                    {
-                        System.Threading.Thread.Sleep(3000);
-                    });
+                    //await System.Threading.Tasks.Task.Run(() =>
+                    //{
+                    //    System.Threading.Thread.Sleep(3000);
+                    //});
 
                     result2.State = 111;
                 }

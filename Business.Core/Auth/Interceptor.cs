@@ -146,14 +146,44 @@ namespace Business.Auth
 
                     //var isUpdate = false;
 
-                    result = await ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue);
-                    //if (null != result)
-                    if (1 > result.State)
+                    if (item.HasCollection)
                     {
-                        logType = LoggerType.Error;
-                        returnValue = result;
-                        invocation.ReturnValue = Bind.GetReturnValue(result, meta);
-                        return invocation.ReturnValue;
+                        dynamic currentValue2 = currentValue;
+                        int collectioCount = currentValue2.Count;
+
+                        System.Threading.Tasks.Parallel.For(0, collectioCount, async (c, o) =>
+                        {
+                            var result2 = await ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue2[c]);
+
+                            if (1 > result2.State)
+                            {
+                                logType = LoggerType.Error;
+                                returnValue = result2;
+                                invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
+                                o.Stop();
+                            }
+                            else
+                            {
+                                result = result2;
+                            }
+                        });
+
+                        if (null != returnValue)
+                        {
+                            return invocation.ReturnValue;
+                        }
+                    }
+                    else
+                    {
+                        result = await ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue);
+                        //if (null != result)
+                        if (1 > result.State)
+                        {
+                            logType = LoggerType.Error;
+                            returnValue = result;
+                            invocation.ReturnValue = Bind.GetReturnValue(result, meta);
+                            return invocation.ReturnValue;
+                        }
                     }
 
                     if (item.HasIArg && result.Data)
@@ -341,7 +371,7 @@ namespace Business.Auth
                 var iArgIn = item.HasIArg ? null != memberValue ? ((IArg)memberValue).In : null : null;
 
                 var attrs = item.Group[group].Attrs;
-
+                
                 var first = attrs.First;
 
                 while (NodeState.DAT == first.State)
@@ -390,11 +420,41 @@ namespace Business.Auth
 
                 if (0 < item.ArgAttrChild.Count && null != currentValue2)
                 {
-                    var result2 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue2);
-
-                    if (1 > result2.State)
+                    dynamic result2 = null;
+                    dynamic result3 = null; //error
+                    if (item.HasCollection)
                     {
-                        return result2;
+                        dynamic currentValue3 = currentValue2;
+                        int collectioCount = currentValue3.Count;
+
+                        System.Threading.Tasks.Parallel.For(0, collectioCount, async (c, o) =>
+                        {
+                            var result4 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue3[c]);
+                            
+                            if (1 > result4.State)
+                            {
+                                result3 = result4;
+                                o.Stop();
+                            }
+                            else
+                            {
+                                result2 = result4;
+                            }
+                        });
+
+                        if (null != result3)
+                        {
+                            return result3;
+                        }
+                    }
+                    else
+                    {
+                        result2 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue2);
+
+                        if (1 > result2.State)
+                        {
+                            return result2;
+                        }
                     }
 
                     if (result2.Data)

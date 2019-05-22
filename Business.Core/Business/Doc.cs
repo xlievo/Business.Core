@@ -206,7 +206,9 @@ namespace Business.Document
             public string Summary { get; set; }
 
             //==============args===================//
-            public IEnumerable<Arg> Args { get; set; }
+            public List<Arg> Args { get; set; }
+
+            public List<Arg> ArgList { get; set; }
 
             public class Arg
             {
@@ -214,6 +216,13 @@ namespace Business.Document
                 public string Name { get; set; }
                 //===============type==================//
                 public string Type { get; set; }
+                //===============type==================//
+                public bool IsEnum { get; set; }
+                public bool IsArray { get; set; }
+                public bool IsNumeric { get; set; }
+                public string[] EnumNames { get; set; }
+                public System.Array EnumValues { get; set; }
+
                 ////===============position==================//
                 //public int Position { get; set; }
                 ////===============hasDefaultValue==================//
@@ -229,11 +238,13 @@ namespace Business.Document
                 ////==============hasChild===================//
                 //public virtual bool HasChild { get; set; }
                 //===============child==================//
-                public IEnumerable<Arg> Child { get; set; }
+                public List<Arg> Child { get; set; }
                 //==============Summary===================//
                 public string Summary { get; set; }
                 //===============nick==================//
                 public string Nick { get; set; }
+
+                public string Path { get; set; }
 
                 public class Attribute
                 {

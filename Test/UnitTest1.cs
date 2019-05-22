@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using static BusinessMember;
 
 [assembly: JsonArg(Group = "G01")]
 [assembly: Logger(LoggerType.All)]
@@ -359,6 +360,47 @@ public class BusinessMember : BusinessBase
     public virtual async Task<dynamic> TestAnonymous2(dynamic a, [Use(true)]dynamic use01) => new { a, b = use01 };
 
     public virtual async Task<dynamic> TestDynamic(dynamic a, [Use(true)]dynamic use01) => use01;
+
+    /// <summary>
+    /// Attr01
+    /// </summary>
+    public class TestCollectionAttribute : ArgumentAttribute
+    {
+        public TestCollectionAttribute(int state = -1106, string message = null) : base(state, message) { }
+
+        public async override ValueTask<IResult> Proces(dynamic value)
+        {
+            if (value == "sss")
+            {
+                return this.ResultCreate(this.State);
+            }
+
+            return this.ResultCreate();
+        }
+    }
+
+    [CheckNull(-1101)]
+    [ArgumentDefault(-1102)]
+    public struct TestCollectionArg
+    {
+        [CheckNull(-1103)]
+        public class TestCollectionArg2
+        {
+            [TestCollection(-1106)]
+            public string C { get; set; }
+        }
+
+        [CheckNull(-1104)]
+        public string A { get; set; }
+
+        [CheckNull(-1105)]
+        public List<TestCollectionArg2> B { get; set; }
+    }
+
+    public virtual async Task<dynamic> TestCollection([CheckNull(-1100)]Arg<List<TestCollectionArg>> a)
+    {
+        return this.ResultCreate();
+    }
 }
 
 [Info("Business", CommandGroupDefault = CommandGroupDefault.Group)]
@@ -630,6 +672,24 @@ public class TestBusinessMember
         Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Summary, "This is Test001.");
         Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args.ElementAt(0).Summary, "This is Arg01.");
         Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args.ElementAt(1).Summary, "This is b.");
+    }
+
+    [TestMethod]
+    public void TestCollectionMeta()
+    {
+        //Assert.AreNotEqual(Cfg.Doc, null);
+        //Assert.AreEqual(Cfg.Doc.Members.Count, 3);
+        //Assert.AreEqual(Cfg.Doc.Members.ContainsKey(CommandGroupDefault.Group), true);
+        //Assert.AreEqual(Cfg.Doc.Members.ContainsKey("G01"), true);
+        //Assert.AreEqual(Cfg.Doc.Members.ContainsKey("G02"), true);
+
+        //Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group].ContainsKey("Test001"), true);
+        //Assert.AreEqual(Cfg.Doc.Members["G01"].ContainsKey("G01Test001"), true);
+        //Assert.AreEqual(Cfg.Doc.Members["G01"].ContainsKey("G01Test002"), true);
+
+        //Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Summary, "This is Test001.");
+        //Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args.ElementAt(0).Summary, "This is Arg01.");
+        //Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args.ElementAt(1).Summary, "This is b.");
     }
 
     [TestMethod]
@@ -986,5 +1046,23 @@ public class TestBusinessMember
         var t3 = Cmd.AsyncCall("Test0012", new object[] { new Arg01 { A = "abc" }, 2, 2 });
         t3.Wait();
         Assert.IsNull(t3.Result);
+    }
+
+    [TestMethod]
+    public void TestCollection()
+    {
+        var list2 = new List<TestCollectionArg.TestCollectionArg2>();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            list2.Add(new TestCollectionArg.TestCollectionArg2 { C = $"{i}" });
+        }
+
+        list2[99999].C = "sss";
+
+        var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] {
+            new List<TestCollectionArg> { new TestCollectionArg { A = "aaa", B = list2 } }
+        });
+        Assert.AreEqual(t22.State, -1106);
     }
 }

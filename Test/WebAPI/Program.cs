@@ -19,6 +19,7 @@ using Business.Attributes;
 using Business.Auth;
 using Business.Utils;
 using Business.Result;
+using Doc;
 
 #region Socket Support
 
@@ -140,6 +141,8 @@ public class Startup
 
         Configuration = configuration;
         appSettings = Configuration.GetSection("AppSettings");
+
+        //var doc = GetSwagger().JsonSerialize();
     }
 
     public IConfiguration Configuration { get; }
@@ -211,7 +214,7 @@ public class Startup
 
         //==================First step==================//
         Configer.LoadBusiness();
-        //Configer.UseType(typeof(HttpContext), typeof(WebSocket));
+        Configer.UseType(typeof(HttpContext), typeof(WebSocket));
         Configer.UseType("context");
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
 
@@ -263,11 +266,15 @@ public class Startup
                     var webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
                     Sockets.TryAdd(context.Connection.Id, webSocket);
+#if DEBUG
                     System.Console.WriteLine($"Add:{context.Connection.Id} Sockets:{Sockets.Count}");
+#endif
                     await Keep(context, webSocket);
 
                     Sockets.TryRemove(context.Connection.Id, out _);
+#if DEBUG
                     System.Console.WriteLine($"Remove:{context.Connection.Id} Sockets:{Sockets.Count}");
+#endif
                 }
                 else
                 {
@@ -434,6 +441,73 @@ public class Startup
     #endregion
 
     #endregion
+
+    public static Root GetSwagger()
+    {
+        var paths = new System.Dynamic.ExpandoObject() as System.Collections.Generic.IDictionary<string, dynamic>;
+
+        var methods = new System.Dynamic.ExpandoObject() as System.Collections.Generic.IDictionary<string, object>;
+
+        methods.Add("post", new Post
+        {
+            tags = new string[] { "name1" },
+            summary = "uploads an image",
+            operationId = "uploadFile",
+            consumes = new string[] { "multipart/form-data" },
+            produces = new string[] { "application/json" },
+            parameters = new Parameters[]
+            {
+                new Parameters
+                {
+                    name = "c",
+                    _in = "path",
+                    description = "ID of pet to update",
+                    required = true,
+                    type = "string",
+                    _default = "ccccccccccccccccc",
+                    format = System.String.Empty
+                },
+                new Parameters
+                {
+                    name = "t",
+                    _in = "query",
+                    description = "ID of pet to update",
+                    required = false,
+                    type = "string",
+                    _default = System.String.Empty,
+                    format = System.String.Empty,
+                         //gropu = "d"
+                },
+                new Parameters
+                {
+                         name = "d",
+                         _in = "query",
+                         description = "ID of pet to update",
+                         required = false,
+                         type = "string",
+                         _default = System.String.Empty,
+                         format = System.String.Empty,
+                         //gropu = "d"
+               }
+            },
+            description = System.String.Empty,
+            responses = new Responses { _200 = new _200 { description = System.String.Empty } }
+        });
+
+        //paths.Add("/pet?c=&t=&d=", methods);
+        paths.Add("/pet/{c}", methods);
+
+        var root = new Root
+        {
+            info = new Doc.Info { title = "APIs", version = "0.3", license = new Doc.Info.License() },
+            host = "localhost:5000",
+            externalDocs = new ExternalDocs { description = "ExternalDocs description", url = "http://www.github.com" },
+            tags = new Tags[] { new Tags { description = "qqqq", name = "name1", externalDocs = new ExternalDocs { description = "sss", url = "http://github.com" } } },
+            paths = paths,
+        };
+
+        return root;
+    }
 }
 
 /// <summary>
@@ -491,6 +565,7 @@ public class BusinessController : Controller
         g = "j";
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
+
         var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCall(
             //the cmd of this request.
             c,

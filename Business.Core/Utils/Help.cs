@@ -329,7 +329,7 @@ namespace Business.Utils
                 xml = Configer.Xmls.dictionary.GetOrAdd(path, Xml.DeserializeDoc(FileReadString(path)));
             }
 
-            business.Configer.Doc = operation(xml?.members?.ToDictionary(c => c.name, c => c));
+            business.Configer.Doc = UseDoc(business, xml?.members?.ToDictionary(c => c.name, c => c));//operation(xml?.members?.ToDictionary(c => c.name, c => c));
 
             if (!string.IsNullOrEmpty(outFile))
             {
@@ -365,22 +365,215 @@ namespace Business.Utils
                     //    return null;
                     //}
 
-
-                    return new Doc.Member
+                    var member2 = new Doc.Member
                     {
                         Name = meta.Name,
                         HasReturn = meta.HasReturn,
                         Summary = member?.summary?.sub,
                         Returns = member?.returns?.sub,
+                        Args = new System.Collections.Generic.List<Doc.Member.Arg>(),
+                        ArgList = new System.Collections.Generic.List<Doc.Member.Arg>()
                         //Args = argsGroup.Args.Where(c3 => !c3.UseType && !c3.Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c3 => c3.Name, c3 => GetDocArgChild(c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text))
                         //Args = meta.Args.Where(c3 => !c3.UseType && !c3.Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c3 => c3.Name, c3 => GetDocArgChild(c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text))
-                        Args = meta.Args.Where(c3 => !c3.UseType && !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)).Select(c3 => GetDocArgChild(c2.Value.Key, c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text))
+                        //Args = meta.Args.Where(c3 => !c3.UseType && !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)).Select(c3 => GetDocArgChild2(ref argList, c2.Value.Key, c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text))
                     };
+
+                    foreach (var item in meta.Args.Where(c3 => !c3.UseType && !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
+                    {
+                        member2.Args.Add(GetDocArgChild(member2.ArgList, c2.Value.Key, item, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                    }
+
+                    return member2;
                 }));
 
                 return new Doc { Name = business.Configer.Info.BusinessName, Members = members };
 
             }, outFile);
+        }
+
+        public static Doc UseDoc<Business>(this Business business, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers) where Business : IBusiness
+        {
+            var members = business.Command.ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
+            {
+                var meta = c2.Value.Meta;
+
+                Xml.member member = null;
+                xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
+
+                var member2 = new Doc.Member
+                {
+                    Name = meta.Name,
+                    HasReturn = meta.HasReturn,
+                    Summary = member?.summary?.sub,
+                    Returns = member?.returns?.sub,
+                    Args = new System.Collections.Generic.List<Doc.Member.Arg>(),
+                    ArgList = new System.Collections.Generic.List<Doc.Member.Arg>()
+                };
+
+                foreach (var item in meta.Args.Where(c3 => !c3.UseType && !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
+                {
+                    member2.Args.Add(GetDocArgChild(member2.ArgList, c2.Value.Key, item, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                }
+
+                return member2;
+            }));
+
+            return new Doc { Name = business.Configer.Info.BusinessName, Members = members };
+        }
+        /*
+        static Doc.Member.Arg GetDocArgChild(string group, Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null)
+        {
+            Xml.member member = null;
+
+            if (string.IsNullOrWhiteSpace(summary))
+            {
+                switch (args.ArgType)
+                {
+                    case Meta.Args.ArgTypeCode.No:
+                        break;
+                    case Meta.Args.ArgTypeCode.Definition:
+                        xmlMembers?.TryGetValue($"T:{ args.ArgTypeFullName}", out member);
+                        break;
+                    case Meta.Args.ArgTypeCode.Field:
+                        xmlMembers?.TryGetValue($"F:{args.ArgTypeFullName}", out member);
+                        break;
+                    case Meta.Args.ArgTypeCode.Property:
+                        xmlMembers?.TryGetValue($"P:{args.ArgTypeFullName}", out member);
+                        break;
+                }
+
+                summary = member?.summary?.text;
+            }
+
+            var argGroup = args.Group[group];
+
+            var attrs = new System.Collections.Generic.List<Doc.Member.Arg.Attribute>();
+
+            var attr = argGroup.Attrs.First;
+
+            while (NodeState.DAT == attr.State)
+            {
+                attrs.Add(new Doc.Member.Arg.Attribute { Key = attr.Value.GroupKey(), Description = attr.Value.Description, State = attr.Value.State, Message = attr.Value.Message, Type = attr.Value.Type.Name });
+                attr = attr.Next;
+            }
+
+            var arg = new Doc.Member.Arg
+            {
+                Name = args.Name,
+                Type = args.Type.Name,
+                //Position = args.Position,
+                DefaultValue = args.DefaultValue,
+                //Attr = args.ArgAttr.Select(c => new Doc.Member.Arg.Attribute { Key = c.GroupKey(), Description = c.Description, State = c.State, Message = c.Message, Type = c.Type.Name }),
+                //Child = args.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
+                //Child = argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.List<Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArgChild(group, c, xmlMembers)),
+                HasDefinition = args.HasDefinition,
+                Summary = summary,
+                Nick = argGroup.Nick,
+                Attrs = attrs
+            };
+
+            //arg.HasChild = 0 < arg.Child.Count;
+
+            return arg;
+        }
+        */
+        static Doc.Member.Arg GetDocArgChild(System.Collections.Generic.List<Doc.Member.Arg> argList, string group, Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null)
+        {
+            Xml.member member = null;
+
+            if (string.IsNullOrWhiteSpace(summary))
+            {
+                switch (args.ArgType)
+                {
+                    case Meta.Args.ArgTypeCode.No:
+                        break;
+                    case Meta.Args.ArgTypeCode.Definition:
+                        xmlMembers?.TryGetValue($"T:{ args.ArgTypeFullName}", out member);
+                        break;
+                    case Meta.Args.ArgTypeCode.Field:
+                        xmlMembers?.TryGetValue($"F:{args.ArgTypeFullName}", out member);
+                        break;
+                    case Meta.Args.ArgTypeCode.Property:
+                        xmlMembers?.TryGetValue($"P:{args.ArgTypeFullName}", out member);
+                        break;
+                }
+
+                summary = member?.summary?.text;
+            }
+
+            var argGroup = args.Group[group];
+
+            var attrs = new System.Collections.Generic.List<Doc.Member.Arg.Attribute>();
+
+            var attr = argGroup.Attrs.First;
+
+            while (NodeState.DAT == attr.State)
+            {
+                attrs.Add(new Doc.Member.Arg.Attribute { Key = attr.Value.GroupKey(), Description = attr.Value.Description, State = attr.Value.State, Message = attr.Value.Message, Type = attr.Value.Type.Name });
+                attr = attr.Next;
+            }
+
+            var arg = new Doc.Member.Arg
+            {
+                Name = args.Name,
+                //Type = args.Type.Name,
+                //Position = args.Position,
+                DefaultValue = args.DefaultValue,
+                //Attr = args.ArgAttr.Select(c => new Doc.Member.Arg.Attribute { Key = c.GroupKey(), Description = c.Description, State = c.State, Message = c.Message, Type = c.Type.Name }),
+                //Child = args.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
+                Child = new System.Collections.Generic.List<Doc.Member.Arg>(),
+                //HasDefinition = args.HasDefinition,
+                Summary = summary,
+                Nick = argGroup.Nick,
+                Attrs = attrs,
+                Path = argGroup.Path
+            };
+
+            if (args.HasIArg)
+            {
+                arg.Type = args.IArgOutType.Name;
+                arg.IsArray = args.IArgOutType.IsArray || args.IArgOutType.IsCollection();
+                arg.IsEnum = args.IArgOutType.IsEnum;
+                arg.IsNumeric = args.IArgOutType.IsNumeric();
+
+                if (arg.IsEnum)
+                {
+                    arg.EnumNames = args.IArgOutType.GetEnumNames();
+                    arg.EnumValues = args.IArgOutType.GetEnumValues();
+                }
+            }
+            else
+            {
+                arg.Type = args.Type.Name;
+                arg.IsArray = args.Type.IsArray || args.Type.IsCollection();
+                arg.IsEnum = args.Type.IsEnum;
+                arg.IsNumeric = args.Type.IsNumeric();
+
+                if (arg.IsEnum)
+                {
+                    arg.EnumNames = args.Type.GetEnumNames();
+                    arg.EnumValues = args.Type.GetEnumValues();
+                }
+            }
+
+            //arg.HasChild = 0 < arg.Child.Count;
+
+            //arg.Child = argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.List<Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArgChild2(ref argList, group, c, xmlMembers));
+
+            if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !arg.IsArray && !arg.IsEnum)
+            {
+                foreach (var item in args.ArgAttrChild.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
+                {
+                    arg.Child.Add(GetDocArgChild(argList, group, item, xmlMembers));
+                }
+            }
+
+            if (arg.IsArray || arg.IsEnum || (!arg.IsArray && !arg.IsEnum && !args.HasDefinition))
+            {
+                argList.Add(arg);
+            }
+
+            return arg;
         }
 
         /// <summary>
@@ -626,61 +819,6 @@ namespace Business.Utils
             return arg;
         }
         */
-        static Doc.Member.Arg GetDocArgChild(string group, Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null)
-        {
-            Xml.member member = null;
-
-            if (string.IsNullOrWhiteSpace(summary))
-            {
-                switch (args.ArgType)
-                {
-                    case Meta.Args.ArgTypeCode.No:
-                        break;
-                    case Meta.Args.ArgTypeCode.Definition:
-                        xmlMembers?.TryGetValue($"T:{ args.ArgTypeFullName}", out member);
-                        break;
-                    case Meta.Args.ArgTypeCode.Field:
-                        xmlMembers?.TryGetValue($"F:{args.ArgTypeFullName}", out member);
-                        break;
-                    case Meta.Args.ArgTypeCode.Property:
-                        xmlMembers?.TryGetValue($"P:{args.ArgTypeFullName}", out member);
-                        break;
-                }
-
-                summary = member?.summary?.text;
-            }
-
-            var argGroup = args.Group[group];
-
-            var attrs = new System.Collections.Generic.List<Doc.Member.Arg.Attribute>();
-
-            var attr = argGroup.Attrs.First;
-
-            while (NodeState.DAT == attr.State)
-            {
-                attrs.Add(new Doc.Member.Arg.Attribute { Key = attr.Value.GroupKey(), Description = attr.Value.Description, State = attr.Value.State, Message = attr.Value.Message, Type = attr.Value.Type.Name });
-                attr = attr.Next;
-            }
-
-            var arg = new Doc.Member.Arg
-            {
-                Name = args.Name,
-                Type = args.Type.Name,
-                //Position = args.Position,
-                DefaultValue = args.DefaultValue,
-                //Attr = args.ArgAttr.Select(c => new Doc.Member.Arg.Attribute { Key = c.GroupKey(), Description = c.Description, State = c.State, Message = c.Message, Type = c.Type.Name }),
-                //Child = args.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
-                Child = argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.List<Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArgChild(group, c, xmlMembers)),
-                HasDefinition = args.HasDefinition,
-                Summary = summary,
-                Nick = argGroup.Nick,
-                Attrs = attrs
-            };
-
-            //arg.HasChild = 0 < arg.Child.Count;
-
-            return arg;
-        }
 
         //static Doc.Member.Arg GetDocArgChild(Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null)
         //{

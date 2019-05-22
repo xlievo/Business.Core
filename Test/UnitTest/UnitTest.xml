@@ -19,7 +19,7 @@
             This is Arg01.
             </summary>
         </member>
-        <!-- 对于成员“F:Arg01.A”忽略有格式错误的 XML 注释 -->
+        <!-- Badly formed XML comment ignored for member "F:Arg01.A" -->
         <member name="M:BusinessMember.Test001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
             <summary>
             This is Test001.
@@ -52,6 +52,11 @@
             <param name="c">This is c.</param>
             <param name="token">This is token.</param>
             <returns></returns>
+        </member>
+        <member name="T:BusinessMember.TestCollectionAttribute">
+            <summary>
+            Attr01
+            </summary>
         </member>
         <member name="M:BusinessMember2.Test001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
             <summary>

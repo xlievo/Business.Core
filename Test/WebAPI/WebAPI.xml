@@ -4,6 +4,181 @@
         <name>WebAPI</name>
     </assembly>
     <members>
+        <member name="P:Doc.Info.description">
+            <summary>
+            This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters.
+            </summary>
+        </member>
+        <member name="P:Doc.Info.version">
+            <summary>
+            1.0.0
+            </summary>
+        </member>
+        <member name="P:Doc.Info.title">
+            <summary>
+            Swagger Petstore
+            </summary>
+        </member>
+        <member name="P:Doc.ExternalDocs.description">
+            <summary>
+            Find out more
+            </summary>
+        </member>
+        <member name="P:Doc.ExternalDocs.url">
+            <summary>
+            http://swagger.io
+            </summary>
+        </member>
+        <member name="P:Doc.Tags.name">
+            <summary>
+            pet
+            </summary>
+        </member>
+        <member name="P:Doc.Tags.description">
+            <summary>
+            Everything about your Pets
+            </summary>
+        </member>
+        <member name="P:Doc.Tags.externalDocs">
+            <summary>
+            ExternalDocs
+            </summary>
+        </member>
+        <member name="P:Doc.Parameters.name">
+            <summary>
+            name
+            </summary>
+        </member>
+        <member name="P:Doc.Parameters._in">
+            <summary>
+            path, formData
+            </summary>
+        </member>
+        <member name="P:Doc.Parameters.description">
+            <summary>
+            ID of pet to update
+            </summary>
+        </member>
+        <member name="P:Doc.Parameters.required">
+            <summary>
+            Required
+            </summary>
+        </member>
+        <member name="P:Doc.Parameters.type">
+            <summary>
+            integer
+            </summary>
+        </member>
+        <member name="P:Doc.Parameters.format">
+            <summary>
+            int64
+            </summary>
+        </member>
+        <member name="P:Doc.Parameters._default">
+            <summary>
+            default
+            </summary>
+        </member>
+        <member name="P:Doc.Parameters.data">
+            <summary>
+            x-data
+            </summary>
+        </member>
+        <member name="P:Doc._200.description">
+            <summary>
+            successful operation
+            </summary>
+        </member>
+        <member name="P:Doc._400.description">
+            <summary>
+            successful operation
+            </summary>
+        </member>
+        <member name="P:Doc.Responses._200">
+            <summary>
+            200
+            </summary>
+        </member>
+        <member name="P:Doc.Post.tags">
+            <summary>
+            Tags
+            </summary>
+        </member>
+        <member name="P:Doc.Post.summary">
+            <summary>
+            uploads an image
+            </summary>
+        </member>
+        <member name="P:Doc.Post.description">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Doc.Post.operationId">
+            <summary>
+            uploadFile
+            </summary>
+        </member>
+        <member name="P:Doc.Post.consumes">
+            <summary>
+            Consumes
+            </summary>
+        </member>
+        <member name="P:Doc.Post.produces">
+            <summary>
+            Produces
+            </summary>
+        </member>
+        <member name="P:Doc.Post.parameters">
+            <summary>
+            Parameters
+            </summary>
+        </member>
+        <member name="P:Doc.Post.responses">
+            <summary>
+            Responses
+            </summary>
+        </member>
+        <member name="P:Doc.Root.swagger">
+            <summary>
+            2.0
+            </summary>
+        </member>
+        <member name="P:Doc.Root.info">
+            <summary>
+            Info
+            </summary>
+        </member>
+        <member name="P:Doc.Root.host">
+            <summary>
+            localhost
+            </summary>
+        </member>
+        <member name="P:Doc.Root.basePath">
+            <summary>
+            /v2
+            </summary>
+        </member>
+        <member name="P:Doc.Root.tags">
+            <summary>
+            Tags
+            </summary>
+        </member>
+        <member name="P:Doc.Root.schemes">
+            <summary>
+            Schemes
+            </summary>
+        </member>
+        <member name="P:Doc.Root.paths">
+            <summary>
+            Paths
+            </summary>
+        </member>
+        <member name="P:Doc.Root.externalDocs">
+            <summary>
+            ExternalDocs
+            </summary>
+        </member>
         <member name="T:Arg`1">
             <summary>
             This is a parameter package, used to transform parameters

@@ -15,7 +15,7 @@
           ##############
 ==================================*/
 
-namespace Business.Attributes
+namespace Business.Attributes //Annotations
 {
     using Result;
     using Utils;
@@ -1291,9 +1291,11 @@ namespace Business.Attributes
 
     #region Deserialize
 
-    internal sealed class ArgumentDefaultAttribute : ArgumentAttribute
+    public sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
-        public ArgumentDefaultAttribute(System.Type resultType, int state = -11, string message = null) : base(state, message) => this.Meta.resultType = resultType;
+        internal ArgumentDefaultAttribute(System.Type resultType, int state = -11, string message = null) : base(state, message) => this.Meta.resultType = resultType;
+
+        public ArgumentDefaultAttribute(int state = -11, string message = null) : base(state, message) { }
     }
 
     public class JsonArgAttribute : ArgumentAttribute
