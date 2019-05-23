@@ -98,6 +98,8 @@ namespace Business.Auth
                     {
                         var argAttr = first.Value;
 
+                        if (argAttr.Meta.hasCollection) { first = first.Next; continue; }
+
                         result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null) : await argAttr.Proces(item.HasIArg ? iArgIn : value);
 
                         if (1 > result.State)
@@ -146,50 +148,80 @@ namespace Business.Auth
 
                     //var isUpdate = false;
 
-                    if (item.HasCollection)
+                    if (item.HasLower || item.HasCollectionAttr)
                     {
-                        dynamic currentValue2 = currentValue;
-                        int collectioCount = currentValue2.Count;
-
-                        System.Threading.Tasks.Parallel.For(0, collectioCount, async (c, o) =>
+                        if (item.HasCollection)
                         {
-                            var result2 = await ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue2[c]);
+                            #region Collection
 
-                            if (1 > result2.State)
+                            dynamic currentValue2 = currentValue;
+                            int collectioCount = currentValue2.Count;
+
+                            System.Threading.Tasks.Parallel.For(0, collectioCount, async (c, o) =>
+                            {
+                                if (item.HasCollectionAttr)
+                                {
+                                    var result2 = await ArgsResultCollection(item, attrs, currentValue2[c]);
+
+                                    if (1 > result2.State)
+                                    {
+                                        logType = LoggerType.Error;
+                                        returnValue = result2;
+                                        invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
+                                        o.Stop();
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        result = result2;
+                                        currentValue2[c] = result2.Data.value;
+                                    }
+                                }
+
+                                if (item.HasLower)
+                                {
+                                    var result2 = await ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue2[c]);
+
+                                    if (1 > result2.State)
+                                    {
+                                        logType = LoggerType.Error;
+                                        returnValue = result2;
+                                        invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
+                                        o.Stop();
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        result = result2;
+                                        currentValue2[c] = result2.Data.value;
+                                    }
+                                }
+                            });
+
+                            if (null != returnValue)
+                            {
+                                return invocation.ReturnValue;
+                            }
+
+                            #endregion
+                        }
+                        else
+                        {
+                            result = await ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue);
+                            //if (null != result)
+                            if (1 > result.State)
                             {
                                 logType = LoggerType.Error;
-                                returnValue = result2;
-                                invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
-                                o.Stop();
+                                returnValue = result;
+                                invocation.ReturnValue = Bind.GetReturnValue(result, meta);
+                                return invocation.ReturnValue;
                             }
-                            else
-                            {
-                                result = result2;
-                                currentValue2[c] = result2.Data.value;
-                            }
-                        });
-
-                        if (null != returnValue)
-                        {
-                            return invocation.ReturnValue;
                         }
-                    }
-                    else
-                    {
-                        result = await ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue);
-                        //if (null != result)
-                        if (1 > result.State)
-                        {
-                            logType = LoggerType.Error;
-                            returnValue = result;
-                            invocation.ReturnValue = Bind.GetReturnValue(result, meta);
-                            return invocation.ReturnValue;
-                        }
-                    }
 
-                    if (item.HasIArg && result.Data.isUpdate)
-                    {
-                        iArgs[item.Position].Out = currentValue;
+                        if (item.HasIArg && result.Data.isUpdate)
+                        {
+                            iArgs[item.Position].Out = currentValue;
+                        }
                     }
                 }
 
@@ -386,6 +418,8 @@ namespace Business.Auth
                 {
                     var argAttr = first.Value;
 
+                    if (argAttr.Meta.hasCollection) { first = first.Next; continue; }
+
                     result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null) : await argAttr.Proces(item.HasIArg ? iArgIn : memberValue);
 
                     if (1 > result.State)
@@ -426,28 +460,53 @@ namespace Business.Auth
                     continue;
                 }
 
-                if (0 < item.ArgAttrChild.Count && null != currentValue2)
+                //if (0 < item.ArgAttrChild.Count && null != currentValue2)
+                if ((item.HasLower || item.HasCollectionAttr) && null != currentValue2)
                 {
                     dynamic result2 = null;
-                    dynamic result3 = null; //error
+
                     if (item.HasCollection)
                     {
+                        #region Collection
+
+                        dynamic result3 = null; //error
                         dynamic currentValue3 = currentValue2;
                         int collectioCount = currentValue3.Count;
 
                         System.Threading.Tasks.Parallel.For(0, collectioCount, async (c, o) =>
                         {
-                            var result4 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue3[c]);
+                            if (item.HasCollectionAttr)
+                            {
+                                var result4 = await ArgsResultCollection(item, attrs, currentValue3[c]);
 
-                            if (1 > result4.State)
-                            {
-                                result3 = result4;
-                                o.Stop();
+                                if (1 > result4.State)
+                                {
+                                    result3 = result4;
+                                    o.Stop();
+                                    return;
+                                }
+                                else
+                                {
+                                    result2 = result4;
+                                    currentValue3[c] = result4.Data.value;
+                                }
                             }
-                            else
+
+                            if (item.HasLower)
                             {
-                                result2 = result4;
-                                currentValue3[c] = result4.Data.value;
+                                var result4 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue3[c]);
+
+                                if (1 > result4.State)
+                                {
+                                    result3 = result4;
+                                    o.Stop();
+                                    return;
+                                }
+                                else
+                                {
+                                    result2 = result4;
+                                    currentValue3[c] = result4.Data.value;
+                                }
                             }
                         });
 
@@ -455,6 +514,8 @@ namespace Business.Auth
                         {
                             return result3;
                         }
+
+                        #endregion
                     }
                     else
                     {
@@ -474,6 +535,54 @@ namespace Business.Auth
                         }
 
                         if (!isUpdate) { isUpdate = !isUpdate; }
+                    }
+                }
+            }
+
+            return ResultFactory.ResultCreate(Configer.ResultType, new ArgResult { isUpdate = isUpdate, value = currentValue });
+        }
+
+        async System.Threading.Tasks.ValueTask<IResult> ArgsResultCollection(Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue)
+        {
+            bool isUpdate = false;
+
+            var iArg = item.HasCollectionIArg && null != currentValue ? (IArg)currentValue : null;
+            var iArgIn = item.HasCollectionIArg ? iArg?.In : null;
+
+            var first = attrs.First;
+
+            while (NodeState.DAT == first.State)
+            {
+                var argAttr = first.Value;
+
+                if (!argAttr.Meta.hasCollection) { first = first.Next; continue; }
+
+                var result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasCollectionIArg ? iArgIn : currentValue, iArg) : await argAttr.Proces(item.HasCollectionIArg ? iArgIn : currentValue);
+
+                if (1 > result.State)
+                {
+                    return result;
+                }
+
+                first = first.Next;
+
+                if (result.HasData)
+                {
+                    if (!item.HasCollectionIArg)
+                    {
+                        currentValue = result.Data;
+                        if (!isUpdate) { isUpdate = !isUpdate; }
+                    }
+                    else
+                    {
+                        if (NodeState.DAT == first.State)
+                        {
+                            iArgIn = result.Data;
+                        }
+                        else if (null != currentValue)
+                        {
+                            ((IArg)currentValue).Out = result.Data;
+                        }
                     }
                 }
             }

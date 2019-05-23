@@ -398,12 +398,28 @@ public class BusinessMember : BusinessBase
             return this.ResultCreate(data: value + 1);
         }
     }
-    
+
+    public class TestCollection4Attribute : ArgumentAttribute
+    {
+        public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
+
+        public async override ValueTask<IResult> Proces(dynamic value)
+        {
+            if (System.Object.Equals(null, value))
+            {
+                value = new TestCollectionArg { A = 666 };
+            }
+
+            return this.ResultCreate(value);
+        }
+    }
+
     [CheckNull(-1101)]
     [ArgumentDefault(-1102)]
-    public struct TestCollectionArg
+    [TestCollection4(-110)]
+    public class TestCollectionArg
     {
-        [CheckNull(-1103)]
+        //[CheckNull(-1103)]
         public class TestCollectionArg2
         {
             [TestCollection(-1106)]
@@ -413,15 +429,24 @@ public class BusinessMember : BusinessBase
             public int D { get; set; }
         }
 
-        [CheckNull(-1104)]
-        [TestCollection3(-1108)]
+        //[CheckNull(-1104)]
+        //[TestCollection3(-1108)]
         public int A { get; set; }
 
-        [CheckNull(-1105)]
-        public List<TestCollectionArg2> B { get; set; }
+        //[CheckNull(-1105)]
+        //public List<TestCollectionArg2> B { get; set; }
+
+        //public TestCollectionArg3 C { get; set; }
+
+        public struct TestCollectionArg3
+        {
+            public string E { get; set; }
+
+            public string F { get; set; }
+        }
     }
 
-    public virtual async Task<dynamic> TestCollection([CheckNull(-1100)]Arg<List<TestCollectionArg>> a)
+    public virtual async Task<dynamic> TestCollection([CheckNull(-1100)][ArgumentDefault(-1102)]Arg<List<TestCollectionArg>> a)
     {
         return this.ResultCreate();
     }
@@ -1082,35 +1107,29 @@ public class TestBusinessMember
             list2.Add(new TestCollectionArg.TestCollectionArg2 { C = $"{i}" });
         }
 
-        //list2[1].C = "sss";
-
-        var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] {
-            new List<TestCollectionArg> { new TestCollectionArg { A = 1, B = list2 } }
-        });
-        //Assert.AreEqual(t22.State, -1106);
-        Assert.AreEqual(t22.State, 1);
-    }
-
-    [TestMethod]
-    public void TestCollection2()
-    {
-        var list2 = new List<TestCollectionArg.TestCollectionArg2>();
-
-        for (int i = 0; i < 2; i++)
-        {
-            list2.Add(new TestCollectionArg.TestCollectionArg2 { C = $"{i}" });
-        }
-
         list2[1].C = "sss";
 
-        var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] {
-            new List<TestCollectionArg> { new TestCollectionArg { A = 1, B = list2 } }
-        });
-        Assert.AreEqual(t22.State, -1106);
-    }
+        var list3 = new List<TestCollectionArg> { new TestCollectionArg { A = 1 } };
 
+        //var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
+
+        //Assert.AreEqual(t22.State, -1106);
+
+        //list3[0].B = null;
+
+        //var t23 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
+
+        //Assert.AreEqual(t23.State, -1105);
+
+        list3[0] = null;
+
+        var t24 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
+
+        Assert.AreEqual(t24.State, 1);
+    }
+    /*
     [TestMethod]
-    public void TestCollection3()
+    public void TestCollection2()
     {
         var list2 = new List<TestCollectionArg.TestCollectionArg2>();
 
@@ -1133,15 +1152,15 @@ public class TestBusinessMember
     }
 
     [TestMethod]
-    public void TestCollection4()
+    public void TestCollection3()
     {
         var list2 = new List<TestCollectionArg>();
 
-        for (int i = 0; i < 100000; i++)
+        for (int i = 0; i < 5; i++)
         {
             var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
 
-            list2.Add(new TestCollectionArg { A = i, B = b });
+            list2.Add(new TestCollectionArg { A = i, B = b, C = new TestCollectionArg.TestCollectionArg3 { E = "e", F = "f" } });
         }
 
         var list3 = Force.DeepCloner.DeepClonerExtensions.DeepClone(list2);
@@ -1155,4 +1174,5 @@ public class TestBusinessMember
             Assert.AreEqual(list2[i].A, list3[i].A + 1);
         }
     }
+    */
 }

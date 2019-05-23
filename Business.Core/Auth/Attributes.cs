@@ -77,7 +77,7 @@ namespace Business.Attributes //Annotations
         //    argAttr.Distinct(type.Assembly.GetCustomAttributes<AttributeBase>());//.AddRange(type.Assembly.GetCustomAttributes<AttributeBase>());
         //    return argAttr;
         //}
-        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(System.Type classType, bool inherit = true)
+        internal static System.Collections.Generic.List<AttributeBase> GetTopAttributes(System.Type classType, bool inherit = true)
         {
             var classAttr = classType.GetAttributes<AttributeBase>(inherit);
 
@@ -111,6 +111,16 @@ namespace Business.Attributes //Annotations
             attributes.AddRange(member.ParameterType.GetAttributes<AttributeBase>());
             attributes.AddRange(type.GetAttributes<AttributeBase>());
             attributes.ForEach(c => c.Declaring = DeclaringType.Parameter);
+            return attributes;
+        }
+        internal static System.Collections.Generic.List<ArgumentAttribute> GetCollectionAttributes(System.Type type)
+        {
+            var attributes = new System.Collections.Generic.List<ArgumentAttribute>(type.GetAttributes<ArgumentAttribute>());
+            attributes.ForEach(c =>
+            {
+                c.Declaring = DeclaringType.Parameter;
+                c.Meta.hasCollection = true;
+            });
             return attributes;
         }
         internal static Attribute GetAttribute<Attribute>(ParameterInfo member, System.Type type) where Attribute : AttributeBase
@@ -858,6 +868,8 @@ namespace Business.Attributes //Annotations
         public class MetaData
         {
             internal System.Type resultType;
+
+            internal bool hasCollection;
 
             public dynamic Business { get; internal set; }
 
