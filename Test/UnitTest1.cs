@@ -379,6 +379,26 @@ public class BusinessMember : BusinessBase
         }
     }
 
+    public class TestCollection2Attribute : ArgumentAttribute
+    {
+        public TestCollection2Attribute(int state = -1107, string message = null) : base(state, message) { }
+
+        public async override ValueTask<IResult> Proces(dynamic value)
+        {
+            return this.ResultCreate(data: value + 1);
+        }
+    }
+
+    public class TestCollection3Attribute : ArgumentAttribute
+    {
+        public TestCollection3Attribute(int state = -1108, string message = null) : base(state, message) { }
+
+        public async override ValueTask<IResult> Proces(dynamic value)
+        {
+            return this.ResultCreate(data: value + 1);
+        }
+    }
+    
     [CheckNull(-1101)]
     [ArgumentDefault(-1102)]
     public struct TestCollectionArg
@@ -388,10 +408,14 @@ public class BusinessMember : BusinessBase
         {
             [TestCollection(-1106)]
             public string C { get; set; }
+
+            [TestCollection2(-1107)]
+            public int D { get; set; }
         }
 
         [CheckNull(-1104)]
-        public string A { get; set; }
+        [TestCollection3(-1108)]
+        public int A { get; set; }
 
         [CheckNull(-1105)]
         public List<TestCollectionArg2> B { get; set; }
@@ -1053,16 +1077,82 @@ public class TestBusinessMember
     {
         var list2 = new List<TestCollectionArg.TestCollectionArg2>();
 
-        for (int i = 0; i < 100000; i++)
+        for (int i = 0; i < 2; i++)
         {
             list2.Add(new TestCollectionArg.TestCollectionArg2 { C = $"{i}" });
         }
 
-        list2[99999].C = "sss";
+        //list2[1].C = "sss";
 
         var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] {
-            new List<TestCollectionArg> { new TestCollectionArg { A = "aaa", B = list2 } }
+            new List<TestCollectionArg> { new TestCollectionArg { A = 1, B = list2 } }
+        });
+        //Assert.AreEqual(t22.State, -1106);
+        Assert.AreEqual(t22.State, 1);
+    }
+
+    [TestMethod]
+    public void TestCollection2()
+    {
+        var list2 = new List<TestCollectionArg.TestCollectionArg2>();
+
+        for (int i = 0; i < 2; i++)
+        {
+            list2.Add(new TestCollectionArg.TestCollectionArg2 { C = $"{i}" });
+        }
+
+        list2[1].C = "sss";
+
+        var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] {
+            new List<TestCollectionArg> { new TestCollectionArg { A = 1, B = list2 } }
         });
         Assert.AreEqual(t22.State, -1106);
+    }
+
+    [TestMethod]
+    public void TestCollection3()
+    {
+        var list2 = new List<TestCollectionArg.TestCollectionArg2>();
+
+        for (int i = 0; i < 5; i++)
+        {
+            list2.Add(new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i });
+        }
+
+        var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] {
+            new List<TestCollectionArg> { new TestCollectionArg { A = 1, B = list2 } }
+        });
+
+        Assert.AreEqual(t22.State, 1);
+
+        Assert.AreEqual(list2[0].D, 1);
+        Assert.AreEqual(list2[1].D, 2);
+        Assert.AreEqual(list2[2].D, 3);
+        Assert.AreEqual(list2[3].D, 4);
+        Assert.AreEqual(list2[4].D, 5);
+    }
+
+    [TestMethod]
+    public void TestCollection4()
+    {
+        var list2 = new List<TestCollectionArg>();
+
+        for (int i = 0; i < 100000; i++)
+        {
+            var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
+
+            list2.Add(new TestCollectionArg { A = i, B = b });
+        }
+
+        var list3 = Force.DeepCloner.DeepClonerExtensions.DeepClone(list2);
+
+        var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list2 });
+
+        Assert.AreEqual(t22.State, 1);
+
+        for (int i = 0; i < list2.Count; i++)
+        {
+            Assert.AreEqual(list2[i].A, list3[i].A + 1);
+        }
     }
 }

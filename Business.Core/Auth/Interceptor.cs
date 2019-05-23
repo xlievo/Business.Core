@@ -165,6 +165,7 @@ namespace Business.Auth
                             else
                             {
                                 result = result2;
+                                currentValue2[c] = result2.Data.value;
                             }
                         });
 
@@ -186,7 +187,7 @@ namespace Business.Auth
                         }
                     }
 
-                    if (item.HasIArg && result.Data)
+                    if (item.HasIArg && result.Data.isUpdate)
                     {
                         iArgs[item.Position].Out = currentValue;
                     }
@@ -357,6 +358,13 @@ namespace Business.Auth
             }
         }
 
+        struct ArgResult
+        {
+            public bool isUpdate;
+
+            public dynamic value;
+        }
+
         async System.Threading.Tasks.ValueTask<IResult> ArgsResult(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue)
         {
             bool isUpdate = false;
@@ -371,7 +379,7 @@ namespace Business.Auth
                 var iArgIn = item.HasIArg ? null != memberValue ? ((IArg)memberValue).In : null : null;
 
                 var attrs = item.Group[group].Attrs;
-                
+
                 var first = attrs.First;
 
                 while (NodeState.DAT == first.State)
@@ -430,7 +438,7 @@ namespace Business.Auth
                         System.Threading.Tasks.Parallel.For(0, collectioCount, async (c, o) =>
                         {
                             var result4 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue3[c]);
-                            
+
                             if (1 > result4.State)
                             {
                                 result3 = result4;
@@ -439,6 +447,7 @@ namespace Business.Auth
                             else
                             {
                                 result2 = result4;
+                                currentValue3[c] = result4.Data.value;
                             }
                         });
 
@@ -457,7 +466,7 @@ namespace Business.Auth
                         }
                     }
 
-                    if (result2.Data)
+                    if (result2.Data.isUpdate)
                     {
                         if (item.Type.IsValueType || item.HasIArg)
                         {
@@ -469,7 +478,7 @@ namespace Business.Auth
                 }
             }
 
-            return ResultFactory.ResultCreate(Configer.ResultType, isUpdate);
+            return ResultFactory.ResultCreate(Configer.ResultType, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
         static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, LoggerValue logObjs, ArgsLog log)
