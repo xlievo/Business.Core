@@ -855,12 +855,12 @@ namespace Business
                         var collectionAttr = AttributeBase.GetCollectionAttributes(currentType);
                         if (0 < collectionAttr.Count)
                         {
-                            hasCollectionAttr = true;
+                            hasCollectionAttr = true; //checked hasCollectionAttr 1
                             argAttrAll.AddRange(collectionAttr);
                         }
                     }
 
-                    var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, cfg.ResultType, instance, hasUse, out _, logAttrArg, inLogAttrArg);
+                    var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, cfg.ResultType, instance, hasUse, out _, out bool hasCollectionAttr2, logAttrArg, inLogAttrArg);
 
                     var hasLower = false;
                     var argAttrChild = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? GetArgAttr(currentType, path, commandGroup, ref definitions, cfg.ResultType, instance, cfg.UseTypes, out hasLower) : new ReadOnlyCollection<Args>(0);
@@ -871,7 +871,7 @@ namespace Business
                     argInfo.HasDefaultValue ? argInfo.DefaultValue : default,
                     argInfo.HasDefaultValue,
                     hasCollection,
-                    hasCollectionAttr,
+                    hasCollectionAttr || hasCollectionAttr2,
                     hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(currentType, out _) : false,
                     default,
                     argGroup,
@@ -1040,12 +1040,12 @@ namespace Business
                     var collectionAttr = AttributeBase.GetCollectionAttributes(current.outType);
                     if (0 < collectionAttr.Count)
                     {
-                        hasCollectionAttr = true;
+                        hasCollectionAttr = true;//checked hasCollectionAttr 1
                         argAttrAll.AddRange(collectionAttr);
                     }
                 }
 
-                var argGroup = GetArgGroup(argAttrAll, current, path2, path, commands, resultType, business, hasUse, out bool hasLower2);
+                var argGroup = GetArgGroup(argAttrAll, current, path2, path, commands, resultType, business, hasUse, out bool hasLower2, out bool hasCollectionAttr2);
 
                 var hasLower3 = false;
                 var argAttrChild = hasDefinition ? GetArgAttr(current.outType, path2, commands, ref definitions, resultType, business, useTypes, out hasLower3) : new ReadOnlyCollection<Args>(0);
@@ -1056,7 +1056,7 @@ namespace Business
                     default,
                     default,
                     hasCollection,
-                    hasCollectionAttr,
+                    hasCollectionAttr || hasCollectionAttr2,
                     hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
                     accessor,
                     argGroup,
@@ -1090,9 +1090,11 @@ namespace Business
         /// <returns></returns>
         internal static bool GroupEquals(GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string path, string owner, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, object business, bool hasUse, out bool hasLower, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string path, string owner, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, object business, bool hasUse, out bool hasLower, out bool hasCollectionAttr, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
         {
             hasLower = false;
+            hasCollectionAttr = false;
+
             var argAttrs = GetArgAttr(argAttrAll, current.outType, resultType, business, path);
 
             var nick = argAttrAll.GetAttr<NickAttribute>();
@@ -1127,7 +1129,6 @@ namespace Business
                     attr.Meta.resultType = c.Meta.resultType;
                     attr.Meta.MemberType = c.Meta.MemberType;
                     attr.Meta.HasProcesIArg = c.Meta.HasProcesIArg;
-                    attr.Meta.hasCollection = c.Meta.hasCollection;
 
                     if (string.IsNullOrWhiteSpace(attr.Nick))
                     {
@@ -1136,9 +1137,14 @@ namespace Business
 
                     attr.BindAfter?.Invoke();
 
-                    argAttr.TryAdd(attr);
+                    if (!argAttr.TryAdd(attr))
+                    {
+                        System.Console.WriteLine("ConcurrentLinkedList TryAdd error! State = INV");
+                    }
 
                     if (!hasLower) { hasLower = true; }
+
+                    if (c.CollectionItem && !hasCollectionAttr) { hasCollectionAttr = true; }//checked hasCollectionAttr 2
                 }
 
                 if (default == owner)

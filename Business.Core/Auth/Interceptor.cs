@@ -94,11 +94,12 @@ namespace Business.Auth
 
                     var first = attrs.First;
 
+                    //while (NodeState.DAT == first.State) // .net fx ConcurrentLinkedList TryAdd error! State = INV 
                     while (NodeState.DAT == first.State)
                     {
                         var argAttr = first.Value;
 
-                        if (argAttr.Meta.hasCollection) { first = first.Next; continue; }
+                        if (argAttr.CollectionItem) { first = first.Next; continue; }
 
                         result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null) : await argAttr.Proces(item.HasIArg ? iArgIn : value);
 
@@ -218,7 +219,7 @@ namespace Business.Auth
                             }
                         }
 
-                        if (item.HasIArg && result.Data.isUpdate)
+                        if (item.HasIArg && !System.Object.Equals(null, result) && result.Data.isUpdate)
                         {
                             iArgs[item.Position].Out = currentValue;
                         }
@@ -418,7 +419,7 @@ namespace Business.Auth
                 {
                     var argAttr = first.Value;
 
-                    if (argAttr.Meta.hasCollection) { first = first.Next; continue; }
+                    if (argAttr.CollectionItem) { first = first.Next; continue; }
 
                     result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null) : await argAttr.Proces(item.HasIArg ? iArgIn : memberValue);
 
@@ -527,7 +528,7 @@ namespace Business.Auth
                         }
                     }
 
-                    if (result2.Data.isUpdate)
+                    if (!System.Object.Equals(null, result2) && result2.Data.isUpdate)
                     {
                         if (item.Type.IsValueType || item.HasIArg)
                         {
@@ -555,7 +556,7 @@ namespace Business.Auth
             {
                 var argAttr = first.Value;
 
-                if (!argAttr.Meta.hasCollection) { first = first.Next; continue; }
+                if (!argAttr.CollectionItem) { first = first.Next; continue; }
 
                 var result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasCollectionIArg ? iArgIn : currentValue, iArg) : await argAttr.Proces(item.HasCollectionIArg ? iArgIn : currentValue);
 

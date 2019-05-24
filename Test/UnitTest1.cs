@@ -405,21 +405,19 @@ public class BusinessMember : BusinessBase
 
         public async override ValueTask<IResult> Proces(dynamic value)
         {
-            if (System.Object.Equals(null, value))
+            if (200000 < value.A)
             {
-                value = new TestCollectionArg { A = 666 };
+                value.A = 369;
             }
 
             return this.ResultCreate(value);
         }
     }
 
-    [CheckNull(-1101)]
-    [ArgumentDefault(-1102)]
-    [TestCollection4(-110)]
+    [TestCollection4]
     public class TestCollectionArg
     {
-        //[CheckNull(-1103)]
+        [CheckNull(-1103)]
         public class TestCollectionArg2
         {
             [TestCollection(-1106)]
@@ -429,14 +427,14 @@ public class BusinessMember : BusinessBase
             public int D { get; set; }
         }
 
-        //[CheckNull(-1104)]
-        //[TestCollection3(-1108)]
+        [CheckNull(-1104)]
+        [TestCollection3(-1108)]
         public int A { get; set; }
 
-        //[CheckNull(-1105)]
-        //public List<TestCollectionArg2> B { get; set; }
+        [CheckNull(-1105)]
+        public List<TestCollectionArg2> B { get; set; }
 
-        //public TestCollectionArg3 C { get; set; }
+        public TestCollectionArg3 C { get; set; }
 
         public struct TestCollectionArg3
         {
@@ -446,7 +444,11 @@ public class BusinessMember : BusinessBase
         }
     }
 
-    public virtual async Task<dynamic> TestCollection([CheckNull(-1100)][ArgumentDefault(-1102)]Arg<List<TestCollectionArg>> a)
+    public virtual async Task<dynamic> TestCollection(
+        [CheckNull(-1100)]
+        [ArgumentDefault(-1102)]
+        [CheckNull(-1101, CollectionItem = true)]
+        Arg<List<TestCollectionArg>> a)
     {
         return this.ResultCreate();
     }
@@ -1100,34 +1102,27 @@ public class TestBusinessMember
     [TestMethod]
     public void TestCollection()
     {
-        var list2 = new List<TestCollectionArg.TestCollectionArg2>();
+        var list3 = new List<TestCollectionArg> { new TestCollectionArg { A = 200000 } };
 
-        for (int i = 0; i < 2; i++)
-        {
-            list2.Add(new TestCollectionArg.TestCollectionArg2 { C = $"{i}" });
-        }
+        var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
 
-        list2[1].C = "sss";
+        Assert.AreEqual(t22.State, -1105);
 
-        var list3 = new List<TestCollectionArg> { new TestCollectionArg { A = 1 } };
+        list3[0].B = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = "sss", D = 888 } };
 
-        //var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
+        var t23 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
 
-        //Assert.AreEqual(t22.State, -1106);
+        Assert.AreEqual(t23.State, -1106);
 
-        //list3[0].B = null;
-
-        //var t23 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
-
-        //Assert.AreEqual(t23.State, -1105);
+        Assert.AreEqual(list3[0].A, 370);
 
         list3[0] = null;
 
         var t24 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
 
-        Assert.AreEqual(t24.State, 1);
+        Assert.AreEqual(t24.State, -1101);
     }
-    /*
+
     [TestMethod]
     public void TestCollection2()
     {
@@ -1156,7 +1151,7 @@ public class TestBusinessMember
     {
         var list2 = new List<TestCollectionArg>();
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 100000; i++)
         {
             var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
 
@@ -1174,5 +1169,4 @@ public class TestBusinessMember
             Assert.AreEqual(list2[i].A, list3[i].A + 1);
         }
     }
-    */
 }

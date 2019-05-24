@@ -119,7 +119,7 @@ namespace Business.Attributes //Annotations
             attributes.ForEach(c =>
             {
                 c.Declaring = DeclaringType.Parameter;
-                c.Meta.hasCollection = true;
+                c.CollectionItem = true;
             });
             return attributes;
         }
@@ -869,8 +869,6 @@ namespace Business.Attributes //Annotations
         {
             internal System.Type resultType;
 
-            internal bool hasCollection;
-
             public dynamic Business { get; internal set; }
 
             public string Method { get; internal set; }
@@ -903,9 +901,16 @@ namespace Business.Attributes //Annotations
             };
         }
 
+        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.CollectionItem}";
+
         public System.Action BindAfter { get; set; }
 
         public MetaData Meta { get; }
+
+        /// <summary>
+        /// Whether to apply to each item of a set parameter
+        /// </summary>
+        public bool CollectionItem { get; set; }
 
         /// <summary>
         /// By checking the Allow null value, Default to true
