@@ -101,7 +101,8 @@ namespace Business.Auth
 
                         if (argAttr.CollectionItem) { first = first.Next; continue; }
 
-                        result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null) : await argAttr.Proces(item.HasIArg ? iArgIn : value);
+                        //result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null) : await argAttr.Proces(item.HasIArg ? iArgIn : value);
+                        result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null);
 
                         if (1 > result.State)
                         {
@@ -158,6 +159,7 @@ namespace Business.Auth
                             dynamic currentValue2 = currentValue;
                             int collectioCount = currentValue2.Count;
 
+                            /*
                             System.Threading.Tasks.Parallel.For(0, collectioCount, async (c, o) =>
                             {
                                 if (item.HasCollectionAttr)
@@ -198,9 +200,87 @@ namespace Business.Auth
                                     }
                                 }
                             });
+                            */
+
+                            var collectioTasks = new System.Collections.Generic.List<System.Threading.Tasks.Task>();
+
+                            System.Threading.Tasks.Parallel.For(0, collectioCount, (c, o) =>
+                            {
+                                if (item.HasCollectionAttr)
+                                {
+                                    object v2 = currentValue2[c];
+                                    var collectioTask = ArgsResultCollection(item, attrs, v2, iArgGroup, command.OnlyName, c).ContinueWith(c2 =>
+                                    {
+                                        if (null != c2.Exception)
+                                        {
+                                            var ex = c2.Exception.ExceptionWrite();
+                                            logType = LoggerType.Exception;
+                                            returnValue = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
+                                            o.Stop();
+                                            return;
+                                        }
+
+                                        var result2 = c2.Result;
+
+                                        if (1 > result2.State)
+                                        {
+                                            logType = LoggerType.Error;
+                                            returnValue = result2;
+                                            invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
+                                            o.Stop();
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            result = result2;
+                                            currentValue2[c] = result2.Data.value;
+                                        }
+                                    });
+
+                                    collectioTasks.Add(collectioTask);
+                                }
+
+                                //==========HasLower==========//
+                                else if (item.HasLower)
+                                {
+                                    object v2 = currentValue2[c];
+                                    var collectioTask2 = ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, v2, c).ContinueWith(c3 =>
+                                    {
+                                        if (null != c3.Exception)
+                                        {
+                                            var ex = c3.Exception.ExceptionWrite();
+                                            logType = LoggerType.Exception;
+                                            returnValue = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
+                                            o.Stop();
+                                            return;
+                                        }
+
+                                        var result3 = c3.Result;
+
+                                        if (1 > result3.State)
+                                        {
+                                            logType = LoggerType.Error;
+                                            returnValue = result3;
+                                            invocation.ReturnValue = Bind.GetReturnValue(result3, meta);
+                                            o.Stop();
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            result = result3;
+                                            currentValue2[c] = result3.Data.value;
+                                        }
+                                    });
+
+                                    collectioTasks.Add(collectioTask2);
+                                }
+                            });
+
+                            System.Threading.Tasks.Task.WaitAll(collectioTasks.ToArray());
 
                             if (null != returnValue)
                             {
+                                invocation.ReturnValue = Bind.GetReturnValue(returnValue, meta);
                                 return invocation.ReturnValue;
                             }
 
@@ -219,9 +299,12 @@ namespace Business.Auth
                             }
                         }
 
-                        if (item.HasIArg && !System.Object.Equals(null, result) && result.Data.isUpdate)
+                        if (item.HasIArg && !System.Object.Equals(null, result))
                         {
-                            iArgs[item.Position].Out = currentValue;
+                            if (result.Data is ArgResult && result.Data.isUpdate)
+                            {
+                                iArgs[item.Position].Out = currentValue;
+                            }
                         }
                     }
                 }
@@ -391,6 +474,20 @@ namespace Business.Auth
             }
         }
 
+        async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, IArg arg, int collectionIndex = -1)
+        {
+            switch (argAttr.Meta.HasProcesIArg)
+            {
+                case ArgumentAttribute.MetaData.ProcesMode.Proces:
+                    return await argAttr.Proces(value);
+                case ArgumentAttribute.MetaData.ProcesMode.ProcesIArg:
+                    return await argAttr.Proces(value, arg);
+                case ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection:
+                    return await argAttr.Proces(value, arg, collectionIndex);
+                default: return null;
+            }
+        }
+
         struct ArgResult
         {
             public bool isUpdate;
@@ -398,7 +495,7 @@ namespace Business.Auth
             public dynamic value;
         }
 
-        async System.Threading.Tasks.ValueTask<IResult> ArgsResult(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue)
+        async System.Threading.Tasks.Task<IResult> ArgsResult(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue, int collectionIndex = -1)
         {
             bool isUpdate = false;
 
@@ -421,7 +518,8 @@ namespace Business.Auth
 
                     if (argAttr.CollectionItem) { first = first.Next; continue; }
 
-                    result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null) : await argAttr.Proces(item.HasIArg ? iArgIn : memberValue);
+                    //result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null) : await argAttr.Proces(item.HasIArg ? iArgIn : memberValue);
+                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null, collectionIndex);
 
                     if (1 > result.State)
                     {
@@ -474,6 +572,7 @@ namespace Business.Auth
                         dynamic currentValue3 = currentValue2;
                         int collectioCount = currentValue3.Count;
 
+                        /*
                         System.Threading.Tasks.Parallel.For(0, collectioCount, async (c, o) =>
                         {
                             if (item.HasCollectionAttr)
@@ -510,6 +609,76 @@ namespace Business.Auth
                                 }
                             }
                         });
+                        */
+                        var collectioTasks = new System.Collections.Generic.List<System.Threading.Tasks.Task>();
+
+                        System.Threading.Tasks.Parallel.For(0, collectioCount, (c, o) =>
+                        {
+                            if (item.HasCollectionAttr)
+                            {
+                                object v2 = currentValue3[c];
+                                var collectioTask = ArgsResultCollection(item, attrs, v2, group, methodName, c).ContinueWith(c2 =>
+                                {
+                                    if (null != c2.Exception)
+                                    {
+                                        var ex = c2.Exception.ExceptionWrite();
+                                        //logType = LoggerType.Exception;
+                                        result3 = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
+                                        o.Stop();
+                                        return;
+                                    }
+
+                                    var result4 = c2.Result;
+
+                                    if (1 > result4.State)
+                                    {
+                                        result3 = result4;
+                                        o.Stop();
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        result2 = result4;
+                                        currentValue3[c] = result4.Data.value;
+                                    }
+                                });
+
+                                collectioTasks.Add(collectioTask);
+                            }
+                            else if (item.HasLower)
+                            {
+                                object v2 = currentValue3[c];
+                                var collectioTask2 = ArgsResult(group, item.ArgAttrChild, methodName, v2, c).ContinueWith(c3 =>
+                                {
+                                    if (null != c3.Exception)
+                                    {
+                                        var ex = c3.Exception.ExceptionWrite();
+                                        //logType = LoggerType.Exception;
+                                        result3 = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
+                                        o.Stop();
+                                        return;
+                                    }
+
+                                    var result5 = c3.Result;
+
+                                    if (1 > result5.State)
+                                    {
+                                        result3 = result5;
+                                        o.Stop();
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        result2 = result5;
+                                        currentValue3[c] = result5.Data.value;
+                                    }
+                                });
+
+                                collectioTasks.Add(collectioTask2);
+                            }
+                        });
+
+                        System.Threading.Tasks.Task.WaitAll(collectioTasks.ToArray());
 
                         if (null != result3)
                         {
@@ -528,7 +697,7 @@ namespace Business.Auth
                         }
                     }
 
-                    if (!System.Object.Equals(null, result2) && result2.Data.isUpdate)
+                    if (!System.Object.Equals(null, result2) && result2.Data is ArgResult && result2.Data.isUpdate)
                     {
                         if (item.Type.IsValueType || item.HasIArg)
                         {
@@ -543,7 +712,7 @@ namespace Business.Auth
             return ResultFactory.ResultCreate(Configer.ResultType, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
-        async System.Threading.Tasks.ValueTask<IResult> ArgsResultCollection(Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue)
+        async System.Threading.Tasks.Task<IResult> ArgsResultCollection(Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex)
         {
             bool isUpdate = false;
 
@@ -558,7 +727,9 @@ namespace Business.Auth
 
                 if (!argAttr.CollectionItem) { first = first.Next; continue; }
 
-                var result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasCollectionIArg ? iArgIn : currentValue, iArg) : await argAttr.Proces(item.HasCollectionIArg ? iArgIn : currentValue);
+                //var result = argAttr.Meta.HasProcesIArg ? await argAttr.Proces(item.HasCollectionIArg ? iArgIn : currentValue, iArg) : await argAttr.Proces(item.HasCollectionIArg ? iArgIn : currentValue);
+
+                var result = await GetProcesResult(argAttr, item.HasCollectionIArg ? iArgIn : currentValue, iArg, collectionIndex);
 
                 if (1 > result.State)
                 {
@@ -586,6 +757,18 @@ namespace Business.Auth
                         }
                     }
                 }
+            }
+            //==========HasLower==========//
+            if (item.HasLower)
+            {
+                var result2 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue);
+
+                if (1 > result2.State)
+                {
+                    return result2;
+                }
+
+                return ResultFactory.ResultCreate(Configer.ResultType, result2.Data);
             }
 
             return ResultFactory.ResultCreate(Configer.ResultType, new ArgResult { isUpdate = isUpdate, value = currentValue });

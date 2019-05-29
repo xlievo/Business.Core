@@ -710,7 +710,7 @@ namespace Business
             return group;
         }
 
-        static DynamicMethodBuilder dynamicMethodBuilder = new DynamicMethodBuilder();
+        static readonly DynamicMethodBuilder dynamicMethodBuilder = new DynamicMethodBuilder();
 
         static CommandGroup GetBusinessCommand(IBusiness business)
         {
@@ -769,16 +769,6 @@ namespace Business
             return name;
         }
 
-        static System.Collections.Generic.List<Ignore> GetIgnore(System.Collections.Generic.List<AttributeBase> attributes)
-        {
-            var ignores = attributes.Where(c => c is Ignore).Cast<Ignore>().ToList();
-
-            return ignores;
-            //var group = ignores.GroupBy(c => new { c.Mode, c.Group });
-
-            //group.
-        }
-
         static ConcurrentReadOnlyDictionary<string, MetaData> GetInterceptorMetaData(Configer cfg, System.Collections.Generic.Dictionary<int, MethodInfo> methods, object instance)
         {
             var metaData = new ConcurrentReadOnlyDictionary<string, MetaData>();
@@ -823,7 +813,7 @@ namespace Business
                     var path = argInfo.Name;
                     var parameterType = argInfo.ParameterType.GetTypeInfo();
                     //==================================//
-                    var current = GetCurrentType(argInfo, parameterType);
+                    var current = GetCurrentType(parameterType);
                     var currentType = current.outType;
                     var argAttrAll = AttributeBase.GetAttributes(argInfo, currentType);
 
@@ -916,7 +906,7 @@ namespace Business
 
         struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; }
 
-        static CurrentType GetCurrentType(ICustomAttributeProvider member, System.Type type)
+        static CurrentType GetCurrentType(System.Type type)
         {
             var hasIArg = typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType);
 
@@ -925,20 +915,22 @@ namespace Business
 
         #region GetArgAttr        
 
-        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<AttributeBase> attributes, System.Type memberType, System.Type resultType, dynamic business, string path, string groupDefault = null)
+        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<AttributeBase> attributes, System.Type memberType, System.Type resultType, dynamic business, string path)
         {
             var argAttr = attributes.Where(c => c is ArgumentAttribute).Cast<ArgumentAttribute>().ToList();
             GetArgAttrSort(argAttr);
-            return Bind.GetArgAttr(argAttr, resultType, business, path, memberType, groupDefault);
+            return Bind.GetArgAttr(argAttr, resultType, business, path, memberType);
         }
 
-        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<ArgumentAttribute> argAttr, System.Type resultType, dynamic business, string path, System.Type memberType, string groupDefault = null)
+        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<ArgumentAttribute> argAttr, System.Type resultType, dynamic business, string path, System.Type memberType)
         {
             //argAttr = argAttr.FindAll(c => c.Enable);
             //argAttr.Sort(ComparisonHelper<Attributes.ArgumentAttribute>.CreateComparer(c =>c.State.ConvertErrorState()));
             //argAttr.Reverse();
 
-            var procesTypes = new System.Type[] { typeof(object), typeof(IArg) };
+            var procesTypes = new System.Type[] { typeof(object) };
+            var procesIArgTypes = new System.Type[] { typeof(object), typeof(IArg) };
+            var procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int) };
             var argumentAttributeFullName = typeof(ArgumentAttribute).FullName;
 
             foreach (var item in argAttr)
@@ -949,8 +941,16 @@ namespace Business
                 item.Meta.Business = business;
                 item.Meta.Member = path;
                 item.Meta.MemberType = memberType;
-                item.Meta.HasProcesIArg = !item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName);
-
+                //item.Meta.HasProcesIArg = !item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName);
+                //item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.Proces; //item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName) ? ArgumentAttribute.MetaData.ProcesMode.Proces : item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName)?ArgumentAttribute.MetaData.ProcesMode.ProcesIArg: ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
+                if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName))
+                {
+                    item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
+                }
+                else if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName))
+                {
+                    item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
+                }
                 //if (string.IsNullOrWhiteSpace(item.Nick) && !string.IsNullOrWhiteSpace(nick))
                 //{
                 //    item.Nick = nick;
@@ -1013,7 +1013,7 @@ namespace Business
                     default: continue;
                 }
 
-                var current = GetCurrentType(item, memberType);
+                var current = GetCurrentType(memberType);
 
                 var argAttrAll = AttributeBase.GetAttributes(item, current.outType);
 
@@ -1050,6 +1050,11 @@ namespace Business
                 var hasLower3 = false;
                 var argAttrChild = hasDefinition ? GetArgAttr(current.outType, path2, commands, ref definitions, resultType, business, useTypes, out hasLower3) : new ReadOnlyCollection<Args>(0);
 
+                if (hasLower2 || hasLower3)
+                {
+                    hasLower = true;
+                }
+
                 args.collection.Add(new Args(item.Name,
                     memberType,
                     position++,
@@ -1061,7 +1066,7 @@ namespace Business
                     accessor,
                     argGroup,
                     argAttrChild,
-                    hasLower3,
+                    hasLower2 || hasLower3,
                     hasDefinition,
                     current.hasIArg,
                     current.hasIArg ? current.outType : default,
@@ -1072,11 +1077,6 @@ namespace Business
                     GetMethodTypeFullName(memberType),
                     $"{type.FullName.Replace('+', '.')}.{item.Name}",
                     argType));
-
-                if (hasLower2)
-                {
-                    hasLower = hasLower2;
-                }
             }
 
             return args;

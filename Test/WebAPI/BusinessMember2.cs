@@ -93,7 +93,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
         if (exit)
         {
-            arg.Out.B = await RedisHelper.HGetAsync("Role", "value2");
+            //arg.Out.B = await RedisHelper.HGetAsync("Role", "value2");
         }
 
         return this.ResultCreate(args);
@@ -126,6 +126,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
         //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
+        //return this.ResultCreate();
         return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
@@ -173,7 +174,7 @@ public class Test2Attribute : ArgumentAttribute
 
 public class Args
 {
-    public class Test001
+    public struct Test001
     {
         [Test]
         [Nick("password")]

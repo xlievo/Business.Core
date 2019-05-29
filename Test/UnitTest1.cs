@@ -403,13 +403,23 @@ public class BusinessMember : BusinessBase
     {
         public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value)
-        {
-            if (200000 < value.A)
-            {
-                value.A = 369;
-            }
+        //public async override ValueTask<IResult> Proces(dynamic value)
+        //{
+        //    if (200000 < value.A)
+        //    {
+        //        value.A = 369;
+        //    }
 
+        //    return this.ResultCreate(value);
+        //}
+
+        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex = -1)
+        {
+            //if (200000 < value.A)
+            //{
+            //    value.A = 369;
+            //}
+            value.A = value.A + 1;
             return this.ResultCreate(value);
         }
     }
@@ -449,6 +459,62 @@ public class BusinessMember : BusinessBase
         [ArgumentDefault(-1102)]
         [CheckNull(-1101, CollectionItem = true)]
         Arg<List<TestCollectionArg>> a)
+    {
+        return this.ResultCreate();
+    }
+
+    public class TestHasLowerArg
+    {
+        public class TestHasLower2
+        {
+            public List<TestHasLower3> C { get; set; }
+
+            public int D { get; set; }
+        }
+
+        public List<TestHasLower2> B { get; set; }
+
+        public class TestHasLower3
+        {
+            public string E { get; set; }
+
+            [CheckNull(-1100)]
+            public string F { get; set; }
+        }
+    }
+
+    public struct TestHasLowerArg_b
+    {
+        [CheckNull(-1200)]
+        public string A { get; set; }
+    }
+
+    public virtual async Task<dynamic> TestHasLower(Arg<List<TestHasLowerArg>> a, TestHasLowerArg_b b = default, string c = default)
+    {
+        return this.ResultCreate();
+    }
+
+    public class TestHasLowerArg2
+    {
+        public class TestHasLower2
+        {
+            public TestHasLower3 C { get; set; }
+
+            public int D { get; set; }
+        }
+
+        public TestHasLower2 B { get; set; }
+
+        public class TestHasLower3
+        {
+            public string E { get; set; }
+
+            [CheckNull(-1100)]
+            public string F { get; set; }
+        }
+    }
+
+    public virtual async Task<dynamic> TestHasLower2(Arg<TestHasLowerArg2> a, TestHasLowerArg_b b = default, string c = default)
     {
         return this.ResultCreate();
     }
@@ -1108,19 +1174,25 @@ public class TestBusinessMember
 
         Assert.AreEqual(t22.State, -1105);
 
-        list3[0].B = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = "sss", D = 888 } };
+        list3[0].B = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = "sss", D = 888 }, new TestCollectionArg.TestCollectionArg2 { C = "sss2", D = 999 } };
 
         var t23 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
 
         Assert.AreEqual(t23.State, -1106);
 
-        Assert.AreEqual(list3[0].A, 370);
+        //Assert.AreEqual(list3[0].A, 370);
 
-        list3[0] = null;
+        list3[0].B[1] = default;
 
         var t24 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
 
-        Assert.AreEqual(t24.State, -1101);
+        Assert.IsTrue(t24.State == -1106 || t24.State == -1103);
+
+        list3[0] = null;
+
+        var t25 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
+
+        Assert.AreEqual(t25.State, -1101);
     }
 
     [TestMethod]
@@ -1151,7 +1223,7 @@ public class TestBusinessMember
     {
         var list2 = new List<TestCollectionArg>();
 
-        for (int i = 0; i < 100000; i++)
+        for (int i = 0; i < 500; i++)
         {
             var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
 
@@ -1160,13 +1232,59 @@ public class TestBusinessMember
 
         var list3 = Force.DeepCloner.DeepClonerExtensions.DeepClone(list2);
 
-        var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list2 });
+        IResult t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list2 });
+
+        System.Console.WriteLine(t22.JsonSerialize());
 
         Assert.AreEqual(t22.State, 1);
 
         for (int i = 0; i < list2.Count; i++)
         {
-            Assert.AreEqual(list2[i].A, list3[i].A + 1);
+            Assert.AreEqual(list2[i].A, list3[i].A + 2);
         }
+    }
+
+    [TestMethod]
+    public void TestHasLower()
+    {
+        var list2 = new List<TestHasLowerArg> { new TestHasLowerArg { B = new List<TestHasLowerArg.TestHasLower2> { new TestHasLowerArg.TestHasLower2 { C = new List<TestHasLowerArg.TestHasLower3> { new TestHasLowerArg.TestHasLower3 { E = "EEE" } }, D = 99 } } } };
+
+        var r = AsyncCall(Member.Command, "TestHasLower", null, new object[] { list2 });
+
+        Assert.AreEqual(r.State, -1100);
+
+        list2[0].B[0].C[0].F = "FFF";
+        r = AsyncCall(Member.Command, "TestHasLower", null, new object[] { list2 });
+
+        Assert.AreEqual(r.State, -1200);
+
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[0].HasLower, true);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[0].ArgAttrChild[0].ArgAttrChild[0].ArgAttrChild[0].HasLower, false);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[0].ArgAttrChild[0].ArgAttrChild[0].ArgAttrChild[1].HasLower, true);
+
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[1].HasLower, true);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[2].HasLower, false);
+    }
+
+    [TestMethod]
+    public void TestHasLower2()
+    {
+        var list2 = new TestHasLowerArg2 { B = new TestHasLowerArg2.TestHasLower2 { C = new TestHasLowerArg2.TestHasLower3 { E = "EEE" }, D = 99 } };
+
+        var r = AsyncCall(Member.Command, "TestHasLower2", null, new object[] { list2 });
+
+        Assert.AreEqual(r.State, -1100);
+
+        list2.B.C.F = "FFF";
+        r = AsyncCall(Member.Command, "TestHasLower2", null, new object[] { list2 });
+
+        Assert.AreEqual(r.State, -1200);
+
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[0].HasLower, true);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[0].ArgAttrChild[0].ArgAttrChild[0].ArgAttrChild[0].HasLower, false);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[0].ArgAttrChild[0].ArgAttrChild[0].ArgAttrChild[1].HasLower, true);
+
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[1].HasLower, true);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[2].HasLower, false);
     }
 }

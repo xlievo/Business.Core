@@ -877,7 +877,17 @@ namespace Business.Attributes //Annotations
 
             public System.Type MemberType { get; internal set; }
 
-            public bool HasProcesIArg { get; internal set; }
+            public ProcesMode HasProcesIArg { get; internal set; } = ProcesMode.Proces;
+
+            [System.Flags]
+            public enum ProcesMode
+            {
+                Proces = 2,
+
+                ProcesIArg = 4,
+
+                ProcesIArgCollection = 8,
+            }
         }
 
         public ArgumentAttribute(int state, string message = null)
@@ -949,6 +959,15 @@ namespace Business.Attributes //Annotations
         /// <param name="iArg"></param>
         /// <returns></returns>
         public virtual async ValueTask<IResult> Proces(dynamic value, IArg arg) => this.ResultCreate<dynamic>(value);
+
+        /// <summary>
+        /// Start processing the Parameter object, By this.ResultCreate() method returns
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="arg"></param>
+        /// <param name="collectionIndex"></param>
+        /// <returns></returns>
+        public virtual async ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex) => this.ResultCreate<dynamic>(value);
 
         #region Result
 

@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using static BenchmarkTest.BusinessMember;
 
 [assembly: Logger(LoggerType.All)]
 namespace BenchmarkTest
@@ -116,6 +117,25 @@ namespace BenchmarkTest
             //Console.WriteLine($"ResultCount={results.Count} TaskCount={tasks.Count}  Loggers={BusinessMember.Loggers.Count} Time={total}");
             Console.WriteLine($"ResultCount={results.Count} Loggers={BusinessMember.Loggers.Count} Time={total} Avg={Help.Scale(results.Count / total)}");
 
+            watch.Restart();
+
+            System.Threading.Tasks.Parallel.For(0, 1000000, c =>
+            {
+                TestCollection();
+            });
+
+            watch.Stop();
+            total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+            System.Console.WriteLine($"TestCollection OK Time={total}");
+
+            watch.Restart();
+
+            TestCollection2();
+
+            watch.Stop();
+            total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+            System.Console.WriteLine($"TestCollection2 OK Time={total}");
+            
             //===========================================================//
             /*
             Configer.LoggerUseThreadPoolAll(false);
@@ -167,6 +187,65 @@ namespace BenchmarkTest
 #endif
 
         }
+
+
+        public async static void TestCollection()
+        {
+            var list2 = new List<TestCollectionArg>();
+            //1000000
+            for (int i = 0; i < 10; i++)
+            {
+                var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
+
+                list2.Add(new TestCollectionArg { A = i, B = b, C = new TestCollectionArg.TestCollectionArg3 { E = "e", F = "f" } });
+            }
+
+            var list3 = Force.DeepCloner.DeepClonerExtensions.DeepClone(list2);
+
+            var t22 = await Cmd.AsyncCall("TestCollection", new object[] { list2 });
+
+            if (t22.State != 1)
+            {
+                System.Console.WriteLine(t22.JsonSerialize());
+            }
+
+            for (int i = 0; i < list2.Count; i++)
+            {
+                if (list2[i].A != list3[i].A + 2)
+                {
+                    throw new System.Exception($"result error! {list2[i].A} != {list3[i].A + 2}");
+                }
+            }
+        }
+
+        public async static void TestCollection2()
+        {
+            var list2 = new List<TestCollectionArg>();
+
+            for (int i = 0; i < 10 * 1000000; i++)
+            {
+                var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
+
+                list2.Add(new TestCollectionArg { A = i, B = b, C = new TestCollectionArg.TestCollectionArg3 { E = "e", F = "f" } });
+            }
+
+            var list3 = Force.DeepCloner.DeepClonerExtensions.DeepClone(list2);
+
+            var t22 = await Cmd.AsyncCall("TestCollection", new object[] { list2 });
+
+            if (t22.State != 1)
+            {
+                System.Console.WriteLine(t22.JsonSerialize());
+            }
+
+            for (int i = 0; i < list2.Count; i++)
+            {
+                if (list2[i].A != list3[i].A + 2)
+                {
+                    throw new System.Exception($"result error! {list2[i].A} != {list3[i].A + 2}");
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -214,5 +293,90 @@ namespace BenchmarkTest
         }
 
         public virtual IResult Test002([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
+
+
+        public class TestCollectionAttribute : ArgumentAttribute
+        {
+            public TestCollectionAttribute(int state = -1106, string message = null) : base(state, message) { }
+
+            public async override ValueTask<IResult> Proces(dynamic value)
+            {
+                if (value == "sss")
+                {
+                    return this.ResultCreate(this.State);
+                }
+
+                return this.ResultCreate();
+            }
+        }
+
+        public class TestCollection2Attribute : ArgumentAttribute
+        {
+            public TestCollection2Attribute(int state = -1107, string message = null) : base(state, message) { }
+
+            public async override ValueTask<IResult> Proces(dynamic value)
+            {
+                return this.ResultCreate(data: value + 1);
+            }
+        }
+
+        public class TestCollection3Attribute : ArgumentAttribute
+        {
+            public TestCollection3Attribute(int state = -1108, string message = null) : base(state, message) { }
+
+            public async override ValueTask<IResult> Proces(dynamic value)
+            {
+                return this.ResultCreate(data: value + 1);
+            }
+        }
+
+        public class TestCollection4Attribute : ArgumentAttribute
+        {
+            public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
+
+            public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex = -1)
+            {
+                value.A = value.A + 1;
+                return this.ResultCreate(value);
+            }
+        }
+        [TestCollection4]
+        public class TestCollectionArg
+        {
+            [CheckNull(-1103)]
+            public class TestCollectionArg2
+            {
+                [TestCollection(-1106)]
+                public string C { get; set; }
+
+                [TestCollection2(-1107)]
+                public int D { get; set; }
+            }
+
+            [CheckNull(-1104)]
+            [TestCollection3(-1108)]
+            public int A { get; set; }
+
+            [CheckNull(-1105)]
+            public List<TestCollectionArg2> B { get; set; }
+
+            public TestCollectionArg3 C { get; set; }
+
+            public struct TestCollectionArg3
+            {
+                public string E { get; set; }
+
+                public string F { get; set; }
+            }
+        }
+
+        public virtual async Task<dynamic> TestCollection(
+        [CheckNull(-1100)]
+        [ArgumentDefault(-1102)]
+        [CheckNull(-1101, CollectionItem = true)]
+        Arg<List<TestCollectionArg>> a)
+        {
+            return this.ResultCreate();
+        }
     }
 }
