@@ -163,7 +163,7 @@ namespace Business.Auth
                             dynamic currentValue2 = currentValue;
                             int collectioCount = currentValue2.Count;
 
-                            var collectioTasks = new System.Collections.Generic.List<System.Threading.Tasks.Task>();
+                            var collectioTasks = new System.Collections.Generic.List<System.Threading.Tasks.Task>(collectioCount);
 
                             System.Threading.Tasks.Parallel.For(0, collectioCount, (c, o) =>
                             {
@@ -200,7 +200,6 @@ namespace Business.Auth
 
                                     collectioTasks.Add(collectioTask);
                                 }
-
                                 //==========HasLower==========//
                                 else if (item.HasLower)
                                 {

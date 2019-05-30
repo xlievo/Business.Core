@@ -135,7 +135,7 @@ namespace BenchmarkTest
             watch.Stop();
             total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
             System.Console.WriteLine($"TestCollection2 OK Time={total}");
-            
+
             //===========================================================//
             /*
             Configer.LoggerUseThreadPoolAll(false);
@@ -192,8 +192,8 @@ namespace BenchmarkTest
         public async static void TestCollection()
         {
             var list2 = new List<TestCollectionArg>();
-            //1000000
-            for (int i = 0; i < 10; i++)
+
+            for (int i = 0; i < 1; i++)
             {
                 var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
 
@@ -222,7 +222,7 @@ namespace BenchmarkTest
         {
             var list2 = new List<TestCollectionArg>();
 
-            for (int i = 0; i < 10 * 1000000; i++)
+            for (int i = 0; i < 1 * 1000000; i++)
             {
                 var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
 
@@ -374,9 +374,6 @@ namespace BenchmarkTest
         [CheckNull(-1100)]
         [ArgumentDefault(-1102)]
         [CheckNull(-1101, CollectionItem = true)]
-        Arg<List<TestCollectionArg>> a)
-        {
-            return this.ResultCreate();
-        }
+        Arg<List<TestCollectionArg>> a) => this.ResultCreate();
     }
 }

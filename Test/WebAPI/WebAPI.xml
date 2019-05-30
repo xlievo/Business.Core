@@ -179,6 +179,598 @@
             ExternalDocs
             </summary>
         </member>
+        <member name="T:Easy.Common.IDGenerator">
+            <summary>
+            Inspired by <see href="https://github.com/aspnet/KestrelHttpServer/blob/6fde01a825cffc09998d3f8a49464f7fbe40f9c4/src/Kestrel.Core/Internal/Infrastructure/CorrelationIdGenerator.cs"/>,
+            this class generates an efficient 20-bytes ID which is the concatenation of a <c>base36</c> encoded
+            machine name and <c>base32</c> encoded <see cref="T:System.Int64"/> using the alphabet <c>0-9</c> and <c>A-V</c>.
+            </summary>
+        </member>
+        <member name="P:Easy.Common.IDGenerator.Instance">
+            <summary>
+            Returns a single instance of the <see cref="T:Easy.Common.IDGenerator"/>.
+            </summary>
+        </member>
+        <member name="P:Easy.Common.IDGenerator.Next">
+            <summary>
+            Returns an ID. e.g: <c>XOGLN1-0HLHI1F5INOFA</c>
+            </summary>
+        </member>
+        <member name="T:Easy.Common.Base36">
+            <summary>
+            A Base36 Encoder and Decoder
+            </summary>
+        </member>
+        <member name="M:Easy.Common.Base36.Encode(System.Int64)">
+            <summary>
+            Encode the given number into a <see cref="T:Easy.Common.Base36"/>string.
+            </summary>
+            <param name="input">The number to encode.</param>
+            <returns>Encoded <paramref name="input"/> as string.</returns>
+        </member>
+        <member name="M:Easy.Common.Base36.Decode(System.String)">
+            <summary>
+            Decode the <see cref="T:Easy.Common.Base36"/> encoded string into a long.
+            </summary>
+            <param name="input">The number to decode.</param>
+            <returns>Decoded <paramref name="input"/> as long.</returns> 
+        </member>
+        <member name="T:Easy.Common.Ensure">
+            <summary>
+            Helper class that will <see langword="throw"/> exceptions when conditions are not satisfied.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.Ensure.That``1(System.Boolean,System.String)">
+            <summary>
+            Ensures that the given expression is <see langword="true"/>.
+            </summary>
+            <typeparam name="TException">Type of exception to throw</typeparam>
+            <param name="condition">Condition to test/ensure</param>
+            <param name="message">Message for the exception</param>
+            <exception>
+                Thrown when <cref>TException</cref> <paramref name="condition"/> is <see langword="false"/>.
+            </exception>
+        </member>
+        <member name="M:Easy.Common.Ensure.That(System.Boolean,System.String)">
+            <summary>
+            Ensures given <paramref name="condition"/> is <see langword="true"/>.
+            </summary>
+            <param name="condition">Condition to test</param>
+            <param name="message">Message for the exception</param>
+            <exception cref="T:System.ArgumentException">
+                Thrown when <paramref name="condition"/> is <see langword="false"/>.
+            </exception>
+        </member>
+        <member name="M:Easy.Common.Ensure.Not``1(System.Boolean,System.String)">
+            <summary>
+            Ensures given <paramref name="condition"/> is <see langword="false"/>.
+            </summary>
+            <typeparam name="TException">Type of exception to throw</typeparam>
+            <param name="condition">Condition to test</param>
+            <param name="message">Message for the exception</param>
+            <exception> 
+                Thrown when <paramref name="condition"/> is <see langword="false"/>.
+            </exception>
+        </member>
+        <member name="M:Easy.Common.Ensure.Not(System.Boolean,System.String)">
+            <summary>
+            Ensures given <paramref name="condition"/> is <see langword="false"/>.
+            </summary>
+            <param name="condition">Condition to test</param>
+            <param name="message">Message for the exception</param>
+            <exception cref="T:System.ArgumentException">
+                Thrown when <paramref name="condition"/> is <see langword="false"/>.
+            </exception>
+        </member>
+        <member name="M:Easy.Common.Ensure.NotNull``1(``0,System.String)">
+            <summary>
+            Ensures given <see langword="object"/> is not null.
+            </summary>
+            <typeparam name="T">Type of the given <see langword="object"/> .</typeparam>
+            <param name="value"> Value of the <see langword="object"/> to check for <see langword="null"/> reference.</param>
+            <param name="argName"> Name of the argument.</param>
+            <exception cref="T:System.ArgumentNullException">
+                Thrown when <paramref name="value"/> is null
+            </exception>
+            <returns> The <typeparamref name="T"/>.</returns>
+        </member>
+        <member name="M:Easy.Common.Ensure.Equal``1(``0,``0,System.String)">
+            <summary>
+            Ensures given objects are equal.
+            </summary>
+            <typeparam name="T">Type of objects to compare for equality</typeparam>
+            <param name="left">The left item</param>
+            <param name="right">The right item</param>
+            <param name="message">Message for the exception</param>
+            <exception cref="T:System.ArgumentException">
+                Thrown when <paramref name="left"/> not equal to <paramref name="right"/>
+            </exception>
+            <remarks>Null values will cause an exception to be thrown</remarks>
+        </member>
+        <member name="M:Easy.Common.Ensure.NotEqual``1(``0,``0,System.String)">
+            <summary>
+            Ensures given objects are not equal.
+            </summary>
+            <typeparam name="T">Type of objects to compare for equality</typeparam>
+            <param name="left">The left item</param>
+            <param name="right">The right item</param>
+            <param name="message">Message for the exception</param>
+            <exception cref="T:System.ArgumentException">
+                Thrown when <paramref name="left"/> equal to <paramref name="right"/>
+            </exception>
+            <remarks>Null values will cause an exception to be thrown</remarks>
+        </member>
+        <member name="M:Easy.Common.Ensure.NotNullOrEmpty``1(System.Collections.Generic.ICollection{``0},System.String)">
+            <summary>
+            Ensures a given <paramref name="collection"/> is not null or empty.
+            </summary>
+            <typeparam name="T">Collection type.</typeparam>
+            <param name="collection">Collection to check.</param>
+            <param name="message">Message for the exception</param>
+            <returns>The evaluated collection.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                Thrown when <paramref name="collection"/> is null.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+                Thrown when <paramref name="collection"/> is empty.
+            </exception>
+        </member>
+        <member name="M:Easy.Common.Ensure.NotNullOrEmptyOrWhiteSpace(System.String,System.String)">
+            <summary>
+            Ensures the given string is not <see langword="null"/> or empty or whitespace.
+            </summary>
+            <param name="value"><c>String</c> <paramref name="value"/> to check.</param>
+            <param name="message">Message for the exception</param>
+            <returns>Value to return if it is not null, empty or whitespace.</returns>
+            <exception cref="T:System.ArgumentException">
+                Thrown when <paramref name="value"/> is null or empty or whitespace.
+            </exception>
+        </member>
+        <member name="M:Easy.Common.Ensure.Exists(System.IO.DirectoryInfo)">
+            <summary>
+            Ensures given <see cref="T:System.IO.DirectoryInfo"/> exists.
+            </summary>
+            <param name="directoryInfo">DirectoryInfo object representing the directory to check for existence.</param>
+            <returns>DirectoryInfo to return if the directory exists.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                Thrown when <paramref name="directoryInfo"/> is null.
+            </exception>
+            <exception cref="T:System.IO.DirectoryNotFoundException">
+                Thrown when <paramref name="directoryInfo"/> is not found.
+            </exception>
+            <exception cref="T:System.IO.IOException">
+                A device such as a disk drive is not ready.
+            </exception>
+        </member>
+        <member name="M:Easy.Common.Ensure.Exists(System.IO.FileInfo)">
+            <summary>
+            Ensures given <paramref name="fileInfo"/> exists.
+            </summary>
+            <param name="fileInfo">FileInfo object representing the file to check for existence.</param>
+            <returns>FileInfo to return if the file exists.</returns>
+            <exception cref="T:System.ArgumentNullException">
+                Thrown when <paramref name="fileInfo"/> is null.
+            </exception>
+            <exception cref="T:System.IO.FileNotFoundException">
+                Thrown when <paramref name="fileInfo"/> does not exist.
+            </exception>
+        </member>
+        <member name="T:Easy.Common.StringExtensions">
+            <summary>
+            Extensions for <see cref="T:System.String"/>
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.IsNullOrEmpty(System.String)">
+            <summary>
+            A nicer way of calling <see cref="M:System.String.IsNullOrEmpty(System.String)"/>
+            </summary>
+            <param name="value">The string to test.</param>
+            <returns>
+            <see langword="true"/> if the format parameter is null or an empty string (""); otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.IsNotNullOrEmpty(System.String)">
+            <summary>
+            A nice way of calling the inverse of <see cref="M:System.String.IsNullOrEmpty(System.String)"/>
+            </summary>
+            <param name="value">The string to test.</param>
+            <returns>
+            <see langword="true"/> if the format parameter is not null or an empty string (""); otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.IsNullOrEmptyOrWhiteSpace(System.String)">
+            <summary>
+            A nice way of checking if a string is null, empty or whitespace 
+            </summary>
+            <param name="value">The string to test.</param>
+            <returns>
+            <see langword="true"/> if the format parameter is null or an empty string (""); otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.IsNotNullOrEmptyOrWhiteSpace(System.String)">
+            <summary>
+            A nice way of checking the inverse of (if a string is null, empty or whitespace) 
+            </summary>
+            <param name="value">The string to test.</param>
+            <returns>
+            <see langword="true"/> if the format parameter is not null or an empty string (""); otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.TryParseAsBool(System.String,System.Boolean@)">
+            <summary>
+            Parses a string as Boolean, valid inputs are: <c>true|false|yes|no|1|0</c>.
+            <remarks>Input is parsed as Case-Insensitive.</remarks>
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.NullIfEmpty(System.String)">
+            <summary>
+            Allows for using strings in <see langword="null"/> coalescing operations.
+            </summary>
+            <param name="value">The string value to check.</param>
+            <returns>
+            Null if <paramref name="value"/> is empty or the original <paramref name="value"/>.
+            </returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.TryExtractValueFromTag(System.String,System.String,System.String@)">
+            <summary>
+            Tries to extract the value between the tag <paramref name="tagName"/> 
+            from the <paramref name="input"/>.
+            <remarks>This method is case insensitive.</remarks>
+            </summary>
+            <param name="input">The input string.</param>
+            <param name="tagName">The tag whose value will be returned e.g <c>span, img</c>.</param>
+            <param name="value">The extracted value.</param>
+            <returns><c>True</c> if successful otherwise <c>False</c>.</returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.SplitAndTrim(System.String,System.Char[])">
+            <summary>
+            Returns a string array containing the trimmed substrings in this <paramref name="value"/>
+            that are delimited by the provided <paramref name="separators"/>.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.Contains(System.String,System.String,System.StringComparison)">
+            <summary>
+            Checks if the <paramref name="input"/> contains the <paramref name="stringToCheckFor"/> 
+            based on the provided <paramref name="comparison"/> rules.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.EqualsAny(System.String,System.StringComparer,System.String,System.String)">
+            <summary>
+            Checks that given <paramref name="input"/> matches any of the potential matches.
+            Inspired by: http://stackoverflow.com/a/20644611/23199
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.EqualsAny(System.String,System.StringComparer,System.String,System.String,System.String)">
+            <summary>
+            Checks that given <paramref name="input"/> matches any of the potential matches.
+            Inspired by: http://stackoverflow.com/a/20644611/23199
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.EqualsAny(System.String,System.StringComparer,System.String[])">
+            <summary>
+            Checks that given <paramref name="input"/> is in a list of 
+            potential <paramref name="matches"/>.
+            <remarks>Inspired by: <see href="http://stackoverflow.com/a/20644611/23199"/> </remarks>
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.IsPalindrome(System.String)">
+            <summary>
+            Checks to see if the given input is a valid palindrome or not.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.Truncate(System.String,System.Int32,System.String)">
+            <summary>
+            Truncates the <paramref name="input"/> to the maximum length of <paramref name="maxLength"/> 
+            and replaces the truncated part with <paramref name="suffix"/>
+            </summary>
+            <param name="input">The input string</param>
+            <param name="maxLength">Total length of characters to maintain before truncation.</param>
+            <param name="suffix">The suffix to add to the end of the truncated <paramref name="input"/></param>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.RemoveNewLines(System.String)">
+            <summary>
+            Removes different types of new lines from a given string.
+            </summary>
+            <param name="input">input string.</param>
+            <returns>The given input minus any new line characters.</returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.SeparatePascalCase(System.String)">
+            <summary>
+            Separates a PascalCase string.
+            </summary>
+            <example> "ThisIsPascalCase".SeparatePascalCase(); // returns "This Is Pascal Case" </example>
+            <param name="value">The format to split</param>
+            <returns>The original string separated on each uppercase character.</returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.ToPascalCase(System.String)">
+            <summary>
+            Converts string to Pascal Case
+            <example>This Is A Pascal Case String.</example>
+            </summary>
+            <param name="input">The given input.</param>
+            <returns>The given <paramref name="input"/> converted to Pascal Case.</returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.IsEqualTo(System.String,System.String)">
+            <summary>
+            Compares <paramref name="input"/> against <paramref name="target"/>, 
+            the comparison is case-sensitive.
+            </summary>
+            <param name="input">The input string</param>
+            <param name="target">The target string</param>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.Print(System.String,System.Object[])">
+            <summary>
+            Handy method to print arguments to <c>System.Console</c>.
+            </summary>
+            <param name="input">The input string.</param>
+            <param name="args">The arguments.</param>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.GenerateSlug(System.String,System.Nullable{System.UInt32})">
+            <summary>
+            Generates a slug.
+            <remarks>
+            Credit goes to <see href="http://stackoverflow.com/questions/2920744/url-slugify-alrogithm-in-cs"/>.
+            </remarks>
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.RemoveDiacritics(System.String)">
+            <summary>
+            Removes the diacritics from the given <paramref name="input"/> 
+            </summary>
+            <remarks>
+            Credit goes to <see href="http://stackoverflow.com/a/249126"/>.
+            </remarks>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.ToPersianNumber(System.String)">
+            <summary>
+            A method to convert English digits to Persian numbers.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.GetElements(System.String,System.Xml.Linq.XName,System.Boolean)">
+            <summary>
+            Gets a sequence containing every element with the name equal to <paramref name="name"/>.
+            </summary>
+            <param name="xmlInput">The input containing XML</param>
+            <param name="name">The name of the elements to return</param>
+            <param name="ignoreCase">The flag indicating whether the name should be looked up in a case sensitive manner</param>
+            <returns>
+            The sequence containing all the elements <see cref="T:System.Xml.Linq.XElement"/> matching the <paramref name="name"/>.
+            </returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.GetElements(System.String,System.Xml.Linq.XName,System.Xml.XmlReaderSettings,System.Boolean)">
+            <summary>
+            Gets a sequence containing every element with the name equal to <paramref name="name"/>.
+            </summary>
+            <param name="xmlInput">The input containing XML</param>
+            <param name="name">The name of the elements to return</param>
+            <param name="settings">The settings used by the <see cref="T:System.Xml.XmlReader"/></param>
+            <param name="ignoreCase">The flag indicating whether the name should be looked up in a case sensitive manner</param>
+            <returns>
+            The sequence containing all the elements <see cref="T:System.Xml.Linq.XElement"/> matching the <paramref name="name"/>.
+            </returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.Compress(System.String)">
+            <summary>
+            Compresses the given <paramref name="input"/> to <c>Base64</c> string.
+            </summary>
+            <param name="input">The string to be compressed</param>
+            <returns>The compressed string in <c>Base64</c></returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.Decompress(System.String)">
+            <summary>
+            Decompresses a <c>Base64</c> compressed string.
+            </summary>
+            <param name="compressedInput">The string compressed in <c>Base64</c></param>
+            <returns>The uncompressed string</returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.IsValidFileName(System.String)">
+            <summary>
+            Ensures the given <paramref name="input"/> can be used as a file name.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.IsValidPathName(System.String)">
+            <summary>
+            Ensures the given <paramref name="input"/> can be used as a path.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.ToGuid(System.String,System.Boolean)">
+            <summary>
+            Returns a <see cref="T:System.Guid"/> from a <c>Base64</c> encoded <paramref name="input"/>.
+            <example>
+            DRfscsSQbUu8bXRqAvcWQA== or DRfscsSQbUu8bXRqAvcWQA depending on <paramref name="trimmed"/>.
+            </example>
+            <remarks>
+            See: <see href="https://blog.codinghorror.com/equipping-our-ascii-armor/"/>
+            </remarks>
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.GetStartAndEndIndexes(System.String,System.String,System.String)">
+            <summary>
+            Returns all the start and end indexes of the occurrences of the 
+            given <paramref name="startTag"/> and <paramref name="endTag"/> 
+            in the given <paramref name="input"/>.
+            </summary>
+            <param name="input">The input to search.</param>
+            <param name="startTag">The starting tag e.g. <c>&lt;div></c>.</param>
+            <param name="endTag">The ending tag e.g. <c>&lt;/div></c>.</param>
+            <returns>
+            A sequence <see cref="T:System.Collections.Generic.KeyValuePair`2"/> where the key is 
+            the starting position and value is the end position.
+            </returns>
+        </member>
+        <member name="M:Easy.Common.StringExtensions.GetSize(System.String)">
+            <summary>
+            Returns the size of the given <paramref name="input"/> encoded 
+            as <c>UTF-16</c> characters in bytes.
+            </summary>
+        </member>
+        <member name="T:Easy.Common.StringBuilderCache">
+            <summary>
+            Provides a cached reusable instance of <see cref="T:System.Text.StringBuilder"/> per thread 
+            it is an optimization that reduces the number of instances constructed and collected.
+            <remarks>
+            <para>A StringBuilder instance is cached in <c>Thread Local Storage</c> and so there is one per thread.</para>
+            </remarks>
+            </summary>
+        </member>
+        <member name="M:Easy.Common.StringBuilderCache.Acquire">
+            <summary>
+            Acquires a cached instance of <see cref="T:System.Text.StringBuilder"/> if one exists otherwise a new instance.
+            </summary>
+            <returns>An instance of <see cref="T:System.Text.StringBuilder"/></returns>
+        </member>
+        <member name="M:Easy.Common.StringBuilderCache.GetStringAndRelease(System.Text.StringBuilder)">
+            <summary>
+            Gets the string representation of the <paramref name="builder"/> and releases it to the cache.
+            </summary>
+            <param name="builder">The <see cref="T:System.Text.StringBuilder"/></param>
+            <returns>The string representation of the <paramref name="builder"/></returns>
+        </member>
+        <member name="T:Easy.Common.XmlExtensions">
+            <summary>
+            Extension methods for classes in the <see cref="N:System.Xml"/> namespace.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.XmlExtensions.SetDefaultXmlNamespace(System.Xml.Linq.XElement,System.Xml.Linq.XNamespace)">
+            <summary>
+            Sets the default XML namespace of every element in the given XML element
+            </summary>
+        </member>
+        <member name="M:Easy.Common.XmlExtensions.GetEelements(System.Xml.XmlReader,System.Xml.Linq.XName,System.Boolean)">
+            <summary>
+            Gets a sequence containing every element with the name equal to <paramref name="name"/>.
+            </summary>
+            <param name="reader">The <see cref="T:System.Xml.XmlReader"/> used to read the XML</param>
+            <param name="name">The name of the elements to return</param>
+            <param name="ignoreCase">The flag indicating whether the name should be looked up in a case sensitive manner</param>
+            <returns>The sequence containing all the elements <see cref="T:System.Xml.Linq.XElement"/> matching the <paramref name="name"/></returns>
+        </member>
+        <member name="M:Easy.Common.XmlExtensions.ToDynamic(System.Xml.XmlReader,System.Boolean)">
+            <summary>
+            Converts the content of the given <paramref name="reader"/> to <see cref="T:Easy.Common.DynamicDictionary"/>.
+            </summary>
+        </member>
+        <member name="T:Easy.Common.DynamicDictionary">
+            <summary>
+            Provides an abstraction for an object to be used dynamically as a key value pair
+            where the property name is the key and value is an <see cref="T:System.Object"/>.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.#ctor(System.Boolean)">
+            <summary>
+            Creates a new instance of <see cref="T:Easy.Common.DynamicDictionary"/>.
+            </summary>
+            <param name="ignoreCase">
+            The flag indicating whether property names should be treated case sensitively.
+            </param>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.Add(System.Collections.Generic.KeyValuePair{System.String,System.Object})">
+            <summary>
+            Add the given <paramref name="item"/> to this instance.
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.Clear">
+            <summary>
+            Removes all the items from this instance.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.Contains(System.Collections.Generic.KeyValuePair{System.String,System.Object})">
+            <summary>
+            Determines whether this instance contains the given <paramref name="item"/>.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.CopyTo(System.Collections.Generic.KeyValuePair{System.String,System.Object}[],System.Int32)">
+            <summary>
+            Copies the elements of this instance to the given <paramref name="array"/>, starting at a particular <paramref name="array"/>.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.Remove(System.Collections.Generic.KeyValuePair{System.String,System.Object})">
+            <summary>
+            Removes the given <paramref name="item"/> from this instance.
+            </summary>
+        </member>
+        <member name="P:Easy.Common.DynamicDictionary.Count">
+            <summary>
+            Gets the number of elements contained in this instance.
+            </summary>
+        </member>
+        <member name="P:Easy.Common.DynamicDictionary.IsReadOnly">
+            <summary>
+            Determines whether this instance is <c>Read-Only</c>.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the keys and values of this instance.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            Returns an enumerator that iterates through the keys and values of this instance.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.ContainsKey(System.String)">
+            <summary>
+            Determines whether this instance contains an element with the given <paramref name="key"/>.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.Add(System.String,System.Object)">
+            <summary>
+            Adds an element for the given <paramref name="key"/> and associated <paramref name="value"/> to this instance.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.Remove(System.String)">
+            <summary>
+            Removes the element with the given <paramref name="key"/> from this instance.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.TryGetValue(System.String,System.Object@)">
+            <summary>
+            Attempts to get the value associated to the given <paramref name="key"/>.
+            </summary>
+        </member>
+        <member name="P:Easy.Common.DynamicDictionary.Item(System.String)">
+            <summary>
+            Gets or sets the value stored against the given <paramref name="key"/>.
+            <remarks>If the given <paramref name="key"/> does not exist, <c>NULL</c> is returned.</remarks>
+            </summary>
+        </member>
+        <member name="P:Easy.Common.DynamicDictionary.Keys">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.ICollection`1"/> containing the keys of this instance.
+            </summary>
+        </member>
+        <member name="P:Easy.Common.DynamicDictionary.Values">
+            <summary>
+            Gets an <see cref="T:System.Collections.Generic.ICollection`1"/> containing the values of this instance.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.TryGetMember(System.Dynamic.GetMemberBinder,System.Object@)">
+            <summary>
+            Attempts to get the member.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.TrySetMember(System.Dynamic.SetMemberBinder,System.Object)">
+            <summary>
+            Attempts to set the member.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.TryInvokeMember(System.Dynamic.InvokeMemberBinder,System.Object[],System.Object@)">
+            <summary>
+            Attempts to invoke the member.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.TryDeleteMember(System.Dynamic.DeleteMemberBinder)">
+            <summary>
+            Attempts to delete the member.
+            </summary>
+        </member>
+        <member name="M:Easy.Common.DynamicDictionary.GetDynamicMemberNames">
+            <summary>
+            Returns the enumeration of all dynamic member names.
+            </summary>
+        </member>
         <member name="T:Arg`1">
             <summary>
             This is a parameter package, used to transform parameters

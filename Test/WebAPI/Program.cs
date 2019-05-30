@@ -230,7 +230,8 @@ public class Startup
                  defaults: new { controller = "Business", action = "Call" });
             }
         });
-
+        var id2 = Easy.Common.IDGenerator.Instance.Next;
+        var id3 = Easy.Common.IDGenerator.Instance.Next;
         //==================The third step==================//
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
 
@@ -328,7 +329,7 @@ public class Startup
                     }
                     else
                     {
-                        var dict = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
+                        var dict = new System.Dynamic.ExpandoObject() as IDictionary<string, object>; // context objects
                         dict.Add("HttpContext", context);
                         dict.Add("WebSocket", webSocket);
 
@@ -338,7 +339,7 @@ public class Startup
                         //the data of this request, allow null.
                         new object[] { receiveData.d },
                         //the group of this request.
-                        "s",
+                        "s", //fixed grouping
                         //the incoming use object
                         new UseEntry(dict, "context"), //controller
                         new UseEntry(new Token //token
@@ -357,9 +358,10 @@ public class Startup
 
                                 var data = Business.Result.ResultFactory.ResultCreateToDataBytes(result).ToBytes();
 
-                                //var result3 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
-
-                                //var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
+                                /* test
+                                var result3 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
+                                var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
+                                */
 
                                 await SendAsync(data, id);
                             }
@@ -562,7 +564,7 @@ public class BusinessController : Controller
         var dict = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
         dict.Add("Controller", this);
 
-        g = "j";
+        g = "j";//fixed grouping
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
 

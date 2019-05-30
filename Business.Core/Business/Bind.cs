@@ -931,7 +931,7 @@ namespace Business
             //var procesTypes = new System.Type[] { typeof(object) }; //default
             var procesIArgTypes = new System.Type[] { typeof(object), typeof(IArg) };
             var procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int) };
-            var argumentAttributeFullName = typeof(ArgumentAttribute).FullName;
+            //var argumentAttributeFullName = typeof(ArgumentAttribute).FullName;
 
             foreach (var item in argAttr)
             {
@@ -942,14 +942,16 @@ namespace Business
                 item.Meta.Member = path;
                 item.Meta.MemberType = memberType;
 
-                if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName))
+                //!procesIArgMethod.DeclaringType.FullName.Equals(argumentAttributeFullName)
+                if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.IsAbstract)
                 {
                     item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArg;
                 }
-                else if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName))
+                else if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.IsAbstract)
                 {
                     item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
                 }
+
                 //if (string.IsNullOrWhiteSpace(item.Nick) && !string.IsNullOrWhiteSpace(nick))
                 //{
                 //    item.Nick = nick;
