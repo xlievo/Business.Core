@@ -928,7 +928,7 @@ namespace Business
             //argAttr.Sort(ComparisonHelper<Attributes.ArgumentAttribute>.CreateComparer(c =>c.State.ConvertErrorState()));
             //argAttr.Reverse();
 
-            var procesTypes = new System.Type[] { typeof(object) };
+            //var procesTypes = new System.Type[] { typeof(object) }; //default
             var procesIArgTypes = new System.Type[] { typeof(object), typeof(IArg) };
             var procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int) };
             var argumentAttributeFullName = typeof(ArgumentAttribute).FullName;
@@ -941,11 +941,10 @@ namespace Business
                 item.Meta.Business = business;
                 item.Meta.Member = path;
                 item.Meta.MemberType = memberType;
-                //item.Meta.HasProcesIArg = !item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName);
-                //item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.Proces; //item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName) ? ArgumentAttribute.MetaData.ProcesMode.Proces : item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName)?ArgumentAttribute.MetaData.ProcesMode.ProcesIArg: ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
-                if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName))
+
+                if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName))
                 {
-                    item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
+                    item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArg;
                 }
                 else if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(argumentAttributeFullName))
                 {

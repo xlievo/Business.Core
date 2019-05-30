@@ -403,17 +403,7 @@ public class BusinessMember : BusinessBase
     {
         public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
 
-        //public async override ValueTask<IResult> Proces(dynamic value)
-        //{
-        //    if (200000 < value.A)
-        //    {
-        //        value.A = 369;
-        //    }
-
-        //    return this.ResultCreate(value);
-        //}
-
-        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex = -1)
+        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex)
         {
             //if (200000 < value.A)
             //{
@@ -518,6 +508,43 @@ public class BusinessMember : BusinessBase
     {
         return this.ResultCreate();
     }
+
+    public class TestExceptionAttribute : ArgumentAttribute
+    {
+        public TestExceptionAttribute(int state = -1111, string message = null) : base(state, message) { }
+
+        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex)
+        {
+            if (1 == collectionIndex)
+            {
+                throw new System.Exception($"Attribute Proces exception! {collectionIndex}");
+            }
+
+            return this.ResultCreate();
+        }
+    }
+
+    public class TestExceptionArg
+    {
+        public class TestHasLower2
+        {
+            public List<TestHasLower3> C { get; set; }
+
+            public int D { get; set; }
+        }
+
+        public List<TestHasLower2> B { get; set; }
+
+        public class TestHasLower3
+        {
+            public string E { get; set; }
+
+            [TestException]
+            public string F { get; set; }
+        }
+    }
+
+    public virtual async Task<dynamic> TestException(Arg<List<TestExceptionArg>> a) => this.ResultCreate();
 }
 
 [Info("Business", CommandGroupDefault = CommandGroupDefault.Group)]
@@ -1223,7 +1250,7 @@ public class TestBusinessMember
     {
         var list2 = new List<TestCollectionArg>();
 
-        for (int i = 0; i < 500; i++)
+        for (int i = 0; i < 5; i++)
         {
             var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
 
@@ -1286,5 +1313,16 @@ public class TestBusinessMember
 
         Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[1].HasLower, true);
         Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[2].HasLower, false);
+    }
+
+    [TestMethod]
+    public void TestException()
+    {
+        var list2 = new List<TestExceptionArg> { new TestExceptionArg { B = new List<TestExceptionArg.TestHasLower2> { new TestExceptionArg.TestHasLower2 { C = new List<TestExceptionArg.TestHasLower3> { new TestExceptionArg.TestHasLower3 { E = "EEE" }, new TestExceptionArg.TestHasLower3 { E = "EEE", F = "F1" }, new TestExceptionArg.TestHasLower3 { E = "EEE", F = "F2" } }, D = 99 } } } };
+
+        IResult r = AsyncCall(Member.Command, "TestException", null, new object[] { list2 });
+
+        Assert.AreEqual(r.State, 0);
+        Assert.AreEqual(r.Message.Contains("Attribute Proces exception! 1"), true);
     }
 }
