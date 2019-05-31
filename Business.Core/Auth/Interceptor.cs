@@ -524,7 +524,7 @@ namespace Business.Auth
                         dynamic currentValue3 = currentValue2;
                         int collectioCount = currentValue3.Count;
 
-                        var collectioTasks = new System.Collections.Generic.List<System.Threading.Tasks.Task>();
+                        var collectioTasks = new System.Collections.Generic.List<System.Threading.Tasks.Task>(collectioCount);
 
                         System.Threading.Tasks.Parallel.For(0, collectioCount, (c, o) =>
                         {
@@ -536,7 +536,6 @@ namespace Business.Auth
                                     if (null != c2.Exception)
                                     {
                                         var ex = c2.Exception.ExceptionWrite();
-                                        //logType = LoggerType.Exception;
                                         result3 = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
                                         o.Stop();
                                         return;
@@ -567,7 +566,6 @@ namespace Business.Auth
                                     if (null != c3.Exception)
                                     {
                                         var ex = c3.Exception.ExceptionWrite();
-                                        //logType = LoggerType.Exception;
                                         result3 = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
                                         o.Stop();
                                         return;

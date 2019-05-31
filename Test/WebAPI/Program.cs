@@ -230,8 +230,7 @@ public class Startup
                  defaults: new { controller = "Business", action = "Call" });
             }
         });
-        var id2 = Easy.Common.IDGenerator.Instance.Next;
-        var id3 = Easy.Common.IDGenerator.Instance.Next;
+
         //==================The third step==================//
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
 

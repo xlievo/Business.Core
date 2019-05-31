@@ -943,11 +943,11 @@ namespace Business
                 item.Meta.MemberType = memberType;
 
                 //!procesIArgMethod.DeclaringType.FullName.Equals(argumentAttributeFullName)
-                if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.IsAbstract)
+                if (item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(item.Type.FullName))
                 {
                     item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArg;
                 }
-                else if (!item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.IsAbstract)
+                else if (item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(item.Type.FullName))
                 {
                     item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
                 }
