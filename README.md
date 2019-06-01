@@ -109,7 +109,7 @@ public class JsonArg : ArgumentAttribute
 
     public Newtonsoft.Json.JsonSerializerSettings Settings { get; set; }
 
-    public override async Task<IResult> Proces(dynamic value)
+    public override async ValueTask<IResult> Proces(dynamic value)
     {
         try
         {
@@ -123,7 +123,7 @@ public class CheckNull : ArgumentAttribute
 {
     public CheckNull(int state = -800, string message = null) : base(state, message, false) { }
 
-    public override async Task<IResult> Proces(dynamic value)
+    public override async ValueTask<IResult> Proces(dynamic value)
     {
         if (object.Equals(null, value))
         {
