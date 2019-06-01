@@ -818,10 +818,16 @@ namespace Business
                     var argAttrAll = AttributeBase.GetAttributes(argInfo, currentType);
 
                     var hasCollection = currentType.IsCollection();
-                    if (hasCollection)
+                    var hasDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(currentType);
+                    if (hasDictionary)
+                    {
+                        currentType = currentType.GenericTypeArguments[1];
+                    }
+                    else if (hasCollection)
                     {
                         currentType = currentType.GenericTypeArguments[0];
                     }
+
                     //var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() : argAttrAll.GetAttr<UseAttribute>();
 
                     var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
@@ -861,6 +867,7 @@ namespace Business
                     argInfo.HasDefaultValue ? argInfo.DefaultValue : default,
                     argInfo.HasDefaultValue,
                     hasCollection,
+                    hasDictionary,
                     hasCollectionAttr || hasCollectionAttr2,
                     hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(currentType, out _) : false,
                     default,
@@ -930,7 +937,7 @@ namespace Business
 
             //var procesTypes = new System.Type[] { typeof(object) }; //default
             var procesIArgTypes = new System.Type[] { typeof(object), typeof(IArg) };
-            var procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int) };
+            var procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
             //var argumentAttributeFullName = typeof(ArgumentAttribute).FullName;
 
             foreach (var item in argAttr)
@@ -1019,7 +1026,12 @@ namespace Business
                 var argAttrAll = AttributeBase.GetAttributes(item, current.outType);
 
                 var hasCollection = current.outType.IsCollection();
-                if (hasCollection)
+                var hasDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(current.outType);
+                if (hasDictionary)
+                {
+                    current.outType = current.outType.GenericTypeArguments[1];
+                }
+                else if (hasCollection)
                 {
                     current.outType = current.outType.GenericTypeArguments[0];
                 }
@@ -1062,6 +1074,7 @@ namespace Business
                     default,
                     default,
                     hasCollection,
+                    hasDictionary,
                     hasCollectionAttr || hasCollectionAttr2,
                     hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
                     accessor,
@@ -1412,12 +1425,13 @@ namespace Business.Meta
         //public override string ToString() => string.Format("{0} {1}", Group2, Name);
 
         //argChild
-        public Args(string name, System.Type type, int position, object defaultValue, bool hasDefaultValue, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> argAttrChild, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, string methodTypeFullName, string argTypeFullName, ArgTypeCode argType)
+        public Args(string name, System.Type type, int position, object defaultValue, bool hasDefaultValue, bool hasCollection, bool hasDictionary, bool hasCollectionAttr, bool hasCollectionIArg, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> argAttrChild, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, string methodTypeFullName, string argTypeFullName, ArgTypeCode argType)
         {
             Name = name;
             Type = type;
             Position = position;
             HasCollection = hasCollection;
+            HasDictionary = hasDictionary;
             HasCollectionAttr = hasCollectionAttr;
             HasCollectionIArg = hasCollectionIArg;
             //HasString = hasString;
@@ -1459,6 +1473,7 @@ namespace Business.Meta
         public bool HasDefaultValue { get; private set; }
         //===============hasCollection==================//
         public bool HasCollection { get; private set; }
+        public bool HasDictionary { get; private set; }
         //===============hasCollectionAttr==================//
         public bool HasCollectionAttr { get; internal set; }
         //===============hasCollectionIArg==================//

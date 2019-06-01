@@ -403,7 +403,7 @@ public class BusinessMember : BusinessBase
     {
         public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex)
+        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic key)
         {
             //if (200000 < value.A)
             //{
@@ -444,11 +444,50 @@ public class BusinessMember : BusinessBase
         }
     }
 
+    [TestCollection4]
+    public class TestDictArg
+    {
+        [CheckNull(-1103)]
+        public class TestDictArg2
+        {
+            [TestCollection(-1106)]
+            public string C { get; set; }
+
+            [TestCollection2(-1107)]
+            public int D { get; set; }
+        }
+
+        [CheckNull(-1104)]
+        [TestCollection3(-1108)]
+        public int A { get; set; }
+
+        [CheckNull(-1105)]
+        public Dictionary<string, TestDictArg2> B { get; set; }
+
+        public TestCollectionArg3 C { get; set; }
+
+        public struct TestCollectionArg3
+        {
+            public string E { get; set; }
+
+            public string F { get; set; }
+        }
+    }
+
     public virtual async Task<dynamic> TestCollection(
         [CheckNull(-1100)]
         [ArgumentDefault(-1102)]
         [CheckNull(-1101, CollectionItem = true)]
         Arg<List<TestCollectionArg>> a)
+    {
+        return this.ResultCreate();
+    }
+
+    public virtual async Task<dynamic> TestDict(
+        [CheckNull(-1100)]
+        [ArgumentDefault(-1102)]
+        [CheckNull(-1101, CollectionItem = true)]
+        Arg<Dictionary<string, TestDictArg>> a)
     {
         return this.ResultCreate();
     }
@@ -513,7 +552,7 @@ public class BusinessMember : BusinessBase
     {
         public TestExceptionAttribute(int state = -1111, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex)
+        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic key)
         {
             if (1 == collectionIndex)
             {
@@ -1223,6 +1262,36 @@ public class TestBusinessMember
     }
 
     [TestMethod]
+    public void TestDict()
+    {
+        var list3 = new Dictionary<string, TestDictArg> { { "a", new TestDictArg { A = 200000 } } };
+
+        var t22 = AsyncCall(Member.Command, "TestDict", null, new object[] { list3 });
+
+        Assert.AreEqual(t22.State, -1105);
+
+        list3["a"].B = new Dictionary<string, TestDictArg.TestDictArg2> { { "b", new TestDictArg.TestDictArg2 { C = "sss", D = 888 } }, { "c", new TestDictArg.TestDictArg2 { C = "sss2", D = 999 } } };
+
+        var t23 = AsyncCall(Member.Command, "TestDict", null, new object[] { list3 });
+
+        Assert.AreEqual(t23.State, -1106);
+
+        //Assert.AreEqual(list3[0].A, 370);
+
+        list3["a"].B["c"] = default;
+
+        var t24 = AsyncCall(Member.Command, "TestDict", null, new object[] { list3 });
+
+        Assert.IsTrue(t24.State == -1106 || t24.State == -1103);
+
+        list3["a"] = null;
+
+        var t25 = AsyncCall(Member.Command, "TestDict", null, new object[] { list3 });
+
+        Assert.AreEqual(t25.State, -1101);
+    }
+
+    [TestMethod]
     public void TestCollection2()
     {
         var list2 = new List<TestCollectionArg.TestCollectionArg2>();
@@ -1246,6 +1315,29 @@ public class TestBusinessMember
     }
 
     [TestMethod]
+    public void TestDict2()
+    {
+        var list2 = new Dictionary<string, TestDictArg.TestDictArg2>();
+
+        for (int i = 0; i < 5; i++)
+        {
+            list2.Add($"{i}", new TestDictArg.TestDictArg2 { C = $"{i}", D = i });
+        }
+
+        var t22 = AsyncCall(Member.Command, "TestDict", null, new object[] {
+             new Dictionary<string,TestDictArg> { { "a", new TestDictArg { A = 1, B = list2 } } }
+        });
+
+        Assert.AreEqual(t22.State, 1);
+
+        Assert.AreEqual(list2["0"].D, 1);
+        Assert.AreEqual(list2["1"].D, 2);
+        Assert.AreEqual(list2["2"].D, 3);
+        Assert.AreEqual(list2["3"].D, 4);
+        Assert.AreEqual(list2["4"].D, 5);
+    }
+
+    [TestMethod]
     public void TestCollection3()
     {
         var list2 = new List<TestCollectionArg>();
@@ -1261,13 +1353,35 @@ public class TestBusinessMember
 
         IResult t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list2 });
 
-        System.Console.WriteLine(t22.JsonSerialize());
-
         Assert.AreEqual(t22.State, 1);
 
         for (int i = 0; i < list2.Count; i++)
         {
             Assert.AreEqual(list2[i].A, list3[i].A + 2);
+        }
+    }
+
+    [TestMethod]
+    public void TestDict3()
+    {
+        var list2 = new Dictionary<string, TestDictArg>();
+
+        for (int i = 0; i < 5; i++)
+        {
+            var b = new Dictionary<string, TestDictArg.TestDictArg2> { { $"{i}", new TestDictArg.TestDictArg2 { C = $"{i}", D = i } } };
+
+            list2.Add($"{i}", new TestDictArg { A = i, B = b, C = new TestDictArg.TestCollectionArg3 { E = "e", F = "f" } });
+        }
+
+        var list3 = Force.DeepCloner.DeepClonerExtensions.DeepClone(list2);
+
+        IResult t22 = AsyncCall(Member.Command, "TestDict", null, new object[] { list2 });
+
+        Assert.AreEqual(t22.State, 1);
+
+        for (int i = 0; i < list2.Count; i++)
+        {
+            Assert.AreEqual(list2[$"{i}"].A, list3[$"{i}"].A + 2);
         }
     }
 

@@ -169,8 +169,20 @@ namespace Business.Auth
                             {
                                 if (item.HasCollectionAttr)
                                 {
-                                    object v2 = currentValue2[c];
-                                    var collectioTask = ArgsResultCollection(item, attrs, v2, iArgGroup, command.OnlyName, c).ContinueWith(c2 =>
+                                    object v2 = null;
+                                    dynamic key = null;
+                                    if (item.HasDictionary)
+                                    {
+                                        var entry = System.Linq.Enumerable.ElementAt(currentValue2, c);
+                                        key = entry.Key;
+                                        v2 = entry.Value;
+                                    }
+                                    else
+                                    {
+                                        v2 = currentValue2[c];
+                                    }
+
+                                    var collectioTask = ArgsResultCollection(item, attrs, v2, iArgGroup, command.OnlyName, c, (object)key).ContinueWith(c2 =>
                                     {
                                         if (null != c2.Exception)
                                         {
@@ -194,7 +206,14 @@ namespace Business.Auth
                                         else
                                         {
                                             result = result2;
-                                            currentValue2[c] = result2.Data.value;
+                                            if (item.HasDictionary)
+                                            {
+                                                currentValue2[key] = result2.Data.value;
+                                            }
+                                            else
+                                            {
+                                                currentValue2[c] = result2.Data.value;
+                                            }
                                         }
                                     });
 
@@ -203,7 +222,19 @@ namespace Business.Auth
                                 //==========HasLower==========//
                                 else if (item.HasLower)
                                 {
-                                    object v2 = currentValue2[c];
+                                    object v2 = null;
+                                    dynamic key = null;
+                                    if (item.HasDictionary)
+                                    {
+                                        var entry = System.Linq.Enumerable.ElementAt(currentValue2, c);
+                                        key = entry.Key;
+                                        v2 = entry.Value;
+                                    }
+                                    else
+                                    {
+                                        v2 = currentValue2[c];
+                                    }
+
                                     var collectioTask2 = ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, v2, c).ContinueWith(c3 =>
                                     {
                                         if (null != c3.Exception)
@@ -228,7 +259,14 @@ namespace Business.Auth
                                         else
                                         {
                                             result = result3;
-                                            currentValue2[c] = result3.Data.value;
+                                            if (item.HasDictionary)
+                                            {
+                                                currentValue2[key] = result3.Data.value;
+                                            }
+                                            else
+                                            {
+                                                currentValue2[c] = result3.Data.value;
+                                            }
                                         }
                                     });
 
@@ -434,7 +472,7 @@ namespace Business.Auth
             }
         }
 
-        async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, IArg arg, int collectionIndex = -1)
+        async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, IArg arg, int collectionIndex = -1, dynamic dictKey = null)
         {
             switch (argAttr.Meta.HasProcesIArg)
             {
@@ -443,12 +481,12 @@ namespace Business.Auth
                 case ArgumentAttribute.MetaData.ProcesMode.ProcesIArg:
                     return await argAttr.Proces(value, arg);
                 case ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection:
-                    return await argAttr.Proces(value, arg, collectionIndex);
+                    return await argAttr.Proces(value, arg, collectionIndex, dictKey);
                 default: return null;
             }
         }
 
-        async System.Threading.Tasks.Task<IResult> ArgsResult(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue, int collectionIndex = -1)
+        async System.Threading.Tasks.Task<IResult> ArgsResult(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue, int collectionIndex = -1, dynamic dictKey = null)
         {
             bool isUpdate = false;
 
@@ -471,7 +509,7 @@ namespace Business.Auth
 
                     if (argAttr.CollectionItem) { first = first.Next; continue; }
 
-                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null, collectionIndex);
+                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null, collectionIndex, dictKey);
 
                     if (1 > result.State)
                     {
@@ -530,8 +568,20 @@ namespace Business.Auth
                         {
                             if (item.HasCollectionAttr)
                             {
-                                object v2 = currentValue3[c];
-                                var collectioTask = ArgsResultCollection(item, attrs, v2, group, methodName, c).ContinueWith(c2 =>
+                                object v2 = null;
+                                dynamic key = null;
+                                if (item.HasDictionary)
+                                {
+                                    var entry = System.Linq.Enumerable.ElementAt(currentValue3, c);
+                                    key = entry.Key;
+                                    v2 = entry.Value;
+                                }
+                                else
+                                {
+                                    v2 = currentValue3[c];
+                                }
+
+                                var collectioTask = ArgsResultCollection(item, attrs, v2, group, methodName, c, (object)key).ContinueWith(c2 =>
                                 {
                                     if (null != c2.Exception)
                                     {
@@ -552,7 +602,14 @@ namespace Business.Auth
                                     else
                                     {
                                         result2 = result4;
-                                        currentValue3[c] = result4.Data.value;
+                                        if (item.HasDictionary)
+                                        {
+                                            currentValue3[key] = result4.Data.value;
+                                        }
+                                        else
+                                        {
+                                            currentValue3[c] = result4.Data.value;
+                                        }
                                     }
                                 });
 
@@ -560,7 +617,19 @@ namespace Business.Auth
                             }
                             else if (item.HasLower)
                             {
-                                object v2 = currentValue3[c];
+                                object v2 = null;
+                                dynamic key = null;
+                                if (item.HasDictionary)
+                                {
+                                    var entry = System.Linq.Enumerable.ElementAt(currentValue3, c);
+                                    key = entry.Key;
+                                    v2 = entry.Value;
+                                }
+                                else
+                                {
+                                    v2 = currentValue3[c];
+                                }
+
                                 var collectioTask2 = ArgsResult(group, item.ArgAttrChild, methodName, v2, c).ContinueWith(c3 =>
                                 {
                                     if (null != c3.Exception)
@@ -582,7 +651,14 @@ namespace Business.Auth
                                     else
                                     {
                                         result2 = result5;
-                                        currentValue3[c] = result5.Data.value;
+                                        if (item.HasDictionary)
+                                        {
+                                            currentValue3[key] = result5.Data.value;
+                                        }
+                                        else
+                                        {
+                                            currentValue3[c] = result5.Data.value;
+                                        }
                                     }
                                 });
 
@@ -624,7 +700,7 @@ namespace Business.Auth
             return ResultFactory.ResultCreate(Configer.ResultType, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
-        async System.Threading.Tasks.Task<IResult> ArgsResultCollection(Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex)
+        async System.Threading.Tasks.Task<IResult> ArgsResultCollection(Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
         {
             bool isUpdate = false;
 
@@ -639,7 +715,7 @@ namespace Business.Auth
 
                 if (!argAttr.CollectionItem) { first = first.Next; continue; }
 
-                var result = await GetProcesResult(argAttr, item.HasCollectionIArg ? iArgIn : currentValue, iArg, collectionIndex);
+                var result = await GetProcesResult(argAttr, item.HasCollectionIArg ? iArgIn : currentValue, iArg, collectionIndex, dictKey);
 
                 if (1 > result.State)
                 {

@@ -967,7 +967,7 @@ namespace Business.Attributes //Annotations
         /// <param name="arg"></param>
         /// <param name="collectionIndex"></param>
         /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex) => this.ResultCreate<dynamic>(value);
+        public virtual async ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic dictKey) => this.ResultCreate<dynamic>(value);
 
         #region Result
 

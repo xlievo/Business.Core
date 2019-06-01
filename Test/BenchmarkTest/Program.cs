@@ -334,7 +334,7 @@ namespace BenchmarkTest
         {
             public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
 
-            public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex = -1)
+            public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex = -1, dynamic key = null)
             {
                 value.A = value.A + 1;
                 return this.ResultCreate(value);
