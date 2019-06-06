@@ -494,7 +494,7 @@ namespace Business.Auth
             {
                 IResult result = null;
 
-                var memberValue = item.Accessor.TryGetter(currentValue);
+                var memberValue = null != currentValue ? item.Accessor.TryGetter(currentValue) : null;
                 //========================================//
 
                 var iArgIn = item.HasIArg ? null != memberValue ? ((IArg)memberValue).In : null : null;
@@ -523,7 +523,10 @@ namespace Business.Auth
                         if (!item.HasIArg)
                         {
                             memberValue = result.Data;
-                            item.Accessor.Setter(currentValue, memberValue);
+                            if (null != currentValue)
+                            {
+                                item.Accessor.Setter(currentValue, memberValue);
+                            }
                             if (!isUpdate) { isUpdate = !isUpdate; }
                         }
                         else
@@ -689,7 +692,10 @@ namespace Business.Auth
                     {
                         if (item.Type.IsValueType || item.HasIArg)
                         {
-                            item.Accessor.Setter(currentValue, currentValue2);
+                            if (null != currentValue)
+                            {
+                                item.Accessor.Setter(currentValue, currentValue2);
+                            }
                         }
 
                         if (!isUpdate) { isUpdate = !isUpdate; }

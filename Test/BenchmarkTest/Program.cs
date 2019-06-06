@@ -119,9 +119,23 @@ namespace BenchmarkTest
 
             watch.Restart();
 
-            System.Threading.Tasks.Parallel.For(0, 1000000, c =>
+            System.Threading.Tasks.Parallel.For(0, 10000, c =>
             {
-                TestCollection();
+                var member = Bind.Create<BusinessMember>().UseType(typeof(Business.Auth.IToken));
+                var cmd = member.Command;
+
+                TestCollection(cmd);
+            });
+
+            watch.Stop();
+            total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+            System.Console.WriteLine($"Bind.Create TestCollection OK Time={total}");
+
+            watch.Restart();
+
+            System.Threading.Tasks.Parallel.For(0, 100000, c =>
+            {
+                TestCollection(Cmd);
             });
 
             watch.Stop();
@@ -189,11 +203,11 @@ namespace BenchmarkTest
         }
 
 
-        public async static void TestCollection()
+        public async static void TestCollection(CommandGroup cmd)
         {
             var list2 = new List<TestCollectionArg>();
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 10; i++)
             {
                 var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
 
@@ -202,7 +216,7 @@ namespace BenchmarkTest
 
             var list3 = Force.DeepCloner.DeepClonerExtensions.DeepClone(list2);
 
-            var t22 = await Cmd.AsyncCall("TestCollection", new object[] { list2 });
+            var t22 = await cmd.AsyncCall("TestCollection", new object[] { list2 });
 
             if (t22.State != 1)
             {

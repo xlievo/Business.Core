@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Threading;
@@ -19,7 +20,7 @@ using Business.Attributes;
 using Business.Auth;
 using Business.Utils;
 using Business.Result;
-using Doc;
+using Swagger.Doc;
 
 #region Socket Support
 
@@ -234,6 +235,22 @@ public class Startup
         //==================The third step==================//
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
 
+        #region SwaggerDoc
+
+        foreach (var item in Configer.BusinessList.Values)
+        {
+            if (null == item.Configer.Doc) { continue; }
+
+            if (System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(wwwroot)))
+            {
+                var doc = GetSwaggerDoc(item).JsonSerialize();
+
+                System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, $"{item.Configer.Info.BusinessName}.doc"), doc, System.Text.Encoding.UTF8);
+            }
+        }
+
+        #endregion
+
         #region AcceptWebSocket
 
         MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
@@ -317,7 +334,7 @@ public class Startup
                     receiveData.a = "API";
                     receiveData.c = "Test004";
                     receiveData.t = "token";
-                    receiveData.d = new List<Args.Test001> { new Args.Test001 { A = "ok", B = "bbb" } }.BinarySerialize();
+                    receiveData.d = new List<Args.Test001> { new Args.Test001 { A = "ok2", B = "bbb" } }.BinarySerialize();
                     receiveData.b = "bbb";
                     //*/
 
@@ -443,71 +460,106 @@ public class Startup
 
     #endregion
 
-    public static Root GetSwagger()
+    public static Root GetSwaggerDoc(IBusiness business)
     {
-        var paths = new System.Dynamic.ExpandoObject() as System.Collections.Generic.IDictionary<string, dynamic>;
+        var paths = new System.Dynamic.ExpandoObject() as IDictionary<string, dynamic>;
 
-        var methods = new System.Dynamic.ExpandoObject() as System.Collections.Generic.IDictionary<string, object>;
-
-        methods.Add("post", new Post
+        foreach (var item in business.Configer.Doc.Members[business.Configer.Info.CommandGroupDefault].Values)
         {
-            tags = new string[] { "name1" },
-            summary = "uploads an image",
-            operationId = "uploadFile",
-            consumes = new string[] { "multipart/form-data" },
-            produces = new string[] { "application/json" },
-            parameters = new Parameters[]
-            {
-                new Parameters
-                {
-                    name = "c",
-                    _in = "path",
-                    description = "ID of pet to update",
-                    required = true,
-                    type = "string",
-                    _default = "ccccccccccccccccc",
-                    format = System.String.Empty
-                },
-                new Parameters
-                {
-                    name = "t",
-                    _in = "query",
-                    description = "ID of pet to update",
-                    required = false,
-                    type = "string",
-                    _default = System.String.Empty,
-                    format = System.String.Empty,
-                         //gropu = "d"
-                },
-                new Parameters
-                {
-                         name = "d",
-                         _in = "query",
-                         description = "ID of pet to update",
-                         required = false,
-                         type = "string",
-                         _default = System.String.Empty,
-                         format = System.String.Empty,
-                         //gropu = "d"
-               }
-            },
-            description = System.String.Empty,
-            responses = new Responses { _200 = new _200 { description = System.String.Empty } }
-        });
+            var methods = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
 
-        //paths.Add("/pet?c=&t=&d=", methods);
-        paths.Add("/pet/{c}", methods);
+            var parameters = new List<IDictionary<string, object>>();
+            var c = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
+            c.Add("name", "c");
+            c.Add("in", "formData");
+            c.Add("type", "string");
+            c.Add("default", item.Name);
+            c.Add("description", "api name");
+            c.Add("required", true);
+            c.Add("x-NotNull", "[Required]");
+            parameters.Add(c);
+            var t = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
+            t.Add("name", "t");
+            t.Add("in", "formData");
+            t.Add("type", "string");
+            t.Add("description", "api token");
+            t.Add("required", true);
+            t.Add("x-NotNull", "[Required]");
+            parameters.Add(t);
+
+            item.ArgList.ForEach(c2 =>
+            {
+                var name = c2.Parent == item.Name ? c2.Path.Substring(c2.Parent.Length, c2.Path.Length - c2.Parent.Length).Trim('.') : c2.Path.Substring(c2.Root.Length, c2.Path.Length - c2.Root.Length).Trim('.');
+
+                var c3 = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
+                c3.Add("name", $"d.{{{name}}}");
+                c3.Add("in", "formData");
+                c3.Add("type", GetSwaggerType(c2.Type));
+                if (c2.HasDefaultValue)
+                {
+                    c3.Add("default", System.Convert.ToString(c2.DefaultValue));
+                }
+                c3.Add("description", c2.Summary ?? System.String.Empty);
+                c3.Add("format", System.String.Empty);
+
+                foreach (var attr in c2.Attrs)
+                {
+                    c3.Add($"x-{attr.Type}", $"{attr.State} {attr.Description}");
+                }
+
+                parameters.Add(c3);
+            });
+
+            methods.Add("post", new Post
+            {
+                tags = new string[] { business.Configer.Info.BusinessName },
+                summary = item.Summary ?? System.String.Empty,
+                consumes = new string[] { "multipart/form-data" },
+                produces = new string[] { "application/json" },
+                parameters = parameters,
+                description = System.String.Empty,
+                responses = new Responses { _200 = new _200 { description = System.String.Empty } }
+            });
+
+            paths.Add($"/{item.Name}", methods);
+        }
 
         var root = new Root
         {
-            info = new Doc.Info { title = "APIs", version = "0.3", license = new Doc.Info.License() },
+            info = new Swagger.Doc.Info { title = "X Project", version = "0.1" },
             host = "localhost:5000",
-            externalDocs = new ExternalDocs { description = "ExternalDocs description", url = "http://www.github.com" },
-            tags = new Tags[] { new Tags { description = "qqqq", name = "name1", externalDocs = new ExternalDocs { description = "sss", url = "http://github.com" } } },
+            externalDocs = new ExternalDocs { description = "ExternalDocs description", url = "https://github.com/xlievo/Business.Core" },
+            tags = new Tags[] { new Tags { name = business.Configer.Info.BusinessName, externalDocs = new ExternalDocs { } } },
             paths = paths,
         };
 
         return root;
+    }
+
+    static string GetSwaggerType(System.Type type)
+    {
+        switch (type.GetTypeCode())
+        {
+            case TypeCode.Boolean: return "boolean";
+            //case TypeCode.Byte: return "string";
+            case TypeCode.Char: return "string";
+            case TypeCode.DateTime: return "date-time";
+            //case TypeCode.DBNull: return "string";
+            case TypeCode.Decimal: return "number";
+            case TypeCode.Double: return "number";
+            //case TypeCode.Empty: return "string";
+            case TypeCode.Int16: return "integer";
+            case TypeCode.Int32: return "integer";
+            case TypeCode.Int64: return "integer";
+            //case TypeCode.Object: return "string";
+            case TypeCode.SByte: return "integer";
+            case TypeCode.Single: return "integer";
+            case TypeCode.String: return "string";
+            case TypeCode.UInt16: return "integer";
+            case TypeCode.UInt32: return "integer";
+            case TypeCode.UInt64: return "integer";
+            default: return "string";
+        }
     }
 }
 
@@ -545,16 +597,16 @@ public class BusinessController : Controller
                 break;
             case "POST":
                 {
-                    if (this.Request.HasFormContentType)
-                    {
-                        //requestData = new RequestData(await this.Request.ReadFormAsync());
-                        var form = await this.Request.ReadFormAsync();
-                        c = form["c"];
-                        t = form["t"];
-                        d = form["d"];
-                        //g = form["g"];
-                        //b = form["b"];
-                    }
+                    //if (this.Request.HasFormContentType)
+                    //{
+                    //}
+                    //requestData = new RequestData(await this.Request.ReadFormAsync());
+                    var form = await this.Request.ReadFormAsync();
+                    c = form["c"];
+                    t = form["t"];
+                    d = form["d"];
+                    //g = form["g"];
+                    //b = form["b"];
                 }
                 break;
             default: return this.NotFound();

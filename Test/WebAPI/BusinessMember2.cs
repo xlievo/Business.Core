@@ -17,6 +17,9 @@ using static Args;
 [assembly: MessagePackArg(Group = "s")]
 [assembly: Command(Group = "s")]
 
+/// <summary>
+/// BusinessMember2。。。
+/// </summary>
 [Logger]
 [Info("API")]
 public class BusinessMember2 : BusinessBase<ResultObject<string>>
@@ -79,6 +82,15 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         };
     }
 
+    /// <summary>
+    /// test doc Test001
+    /// and Test001
+    /// </summary>
+    /// <param name="token"></param>
+    /// <param name="arg">arg!!!</param>
+    /// <param name="mm">mmmmmmmm!</param>
+    /// <returns></returns>
+    [Command("AAA")]
     public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
@@ -176,10 +188,38 @@ public class Args
 {
     public struct Test001
     {
+        /// <summary>
+        /// AAA
+        /// </summary>
         [Test]
         [Nick("password")]
+        [CheckNull(Description ="不允许为空值")]
         public string A { get; set; }
 
+        /// <summary>
+        /// BBB
+        /// </summary>
         public string B { get; set; }
+
+        /// <summary>
+        /// Ccc
+        /// </summary>
+        public Test0010 C { get; set; }
+
+        public struct Test0010
+        {
+            public string C1 { get; set; }
+
+            public string C2 { get; set; }
+
+            public Test0011 C3 { get; set; }
+
+            public struct Test0011
+            {
+                public string C31 { get; set; }
+
+                public string C32 { get; set; }
+            }
+        }
     }
 }

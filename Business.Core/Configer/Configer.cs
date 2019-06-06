@@ -507,15 +507,15 @@ namespace Business
             }
         }
 
-        public static void UseDoc<Doc>(System.Func<System.Collections.Generic.Dictionary<string, Document.Xml.member>, Doc> operation, string outDir = null) where Doc : Document.Doc
-        {
-            var exist = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
+        //public static void UseDoc<Doc>(System.Func<System.Collections.Generic.Dictionary<string, Document.Xml.member>, Doc> operation, string outDir = null) where Doc : Document.Doc
+        //{
+        //    var exist = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
 
-            foreach (var item in BusinessList.Values)
-            {
-                item.UseDoc(operation, exist ? System.IO.Path.Combine(outDir, $"{item.Configer.Info.BusinessName}.doc") : null);
-            }
-        }
+        //    foreach (var item in BusinessList.Values)
+        //    {
+        //        item.UseDoc(operation, exist ? System.IO.Path.Combine(outDir, $"{item.Configer.Info.BusinessName}.doc") : null);
+        //    }
+        //}
 
         /// <summary>
         /// Logger use threadPool, Default true

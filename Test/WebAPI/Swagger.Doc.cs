@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Doc
+﻿namespace Swagger.Doc
 {
     public class Info
     {
@@ -11,13 +9,13 @@ namespace Doc
         /// <summary>
         /// 1.0.0
         /// </summary>
-        public string version { get; set; }
+        public string version { get; set; } = System.String.Empty;
         /// <summary>
         /// Swagger Petstore
         /// </summary>
-        public string title { get; set; }
+        public string title { get; set; } = System.String.Empty;
 
-        public License license { get; set; }
+        //public License license { get; set; }
 
         public class License
         {
@@ -32,11 +30,11 @@ namespace Doc
         /// <summary>
         /// Find out more
         /// </summary>
-        public string description { get; set; }
+        public string description { get; set; } = System.String.Empty;
         /// <summary>
         /// http://swagger.io
         /// </summary>
-        public string url { get; set; }
+        public string url { get; set; } = "http://";
     }
 
     public class Tags
@@ -44,32 +42,33 @@ namespace Doc
         /// <summary>
         /// pet
         /// </summary>
-        public string name { get; set; }
+        public string name { get; set; } = System.String.Empty;
         /// <summary>
         /// Everything about your Pets
         /// </summary>
-        public string description { get; set; }
+        public string description { get; set; } = System.String.Empty;
         /// <summary>
         /// ExternalDocs
         /// </summary>
         public ExternalDocs externalDocs { get; set; }
     }
 
+    /*
     public class Parameters
     {
         /// <summary>
         /// name
         /// </summary>
-        public string name { get; set; }
+        public string name { get; set; } = System.String.Empty;
         /// <summary>
         /// path, formData
         /// </summary>
         [Newtonsoft.Json.JsonProperty(PropertyName = "in")]
-        public string _in { get; set; }
+        public string _in { get; set; } = System.String.Empty;
         /// <summary>
         /// ID of pet to update
         /// </summary>
-        public string description { get; set; }
+        public string description { get; set; } = System.String.Empty;
         /// <summary>
         /// Required
         /// </summary>
@@ -77,31 +76,32 @@ namespace Doc
         /// <summary>
         /// integer
         /// </summary>
-        public string type { get; set; }
+        public string type { get; set; } = System.String.Empty;
         /// <summary>
         /// int64
         /// </summary>
-        public string format { get; set; }
+        public string format { get; set; } = System.String.Empty;
 
         /// <summary>
         /// default
         /// </summary>
         [Newtonsoft.Json.JsonProperty(PropertyName = "default")]
-        public string _default { get; set; }
+        public string defaultValue { get; set; } = System.String.Empty;
 
         /// <summary>
         /// x-data
         /// </summary>
         [Newtonsoft.Json.JsonProperty(PropertyName = "x-data")]
-        public string data { get; set; }
+        public string data { get; set; } = System.String.Empty;
     }
+    */
 
     public class _200
     {
         /// <summary>
         /// successful operation
         /// </summary>
-        public string description { get; set; }
+        public string description { get; set; } = System.String.Empty;
     }
 
     public class _400
@@ -130,15 +130,15 @@ namespace Doc
         /// <summary>
         /// uploads an image
         /// </summary>
-        public string summary { get; set; }
+        public string summary { get; set; } = System.String.Empty;
         /// <summary>
         /// 
         /// </summary>
-        public string description { get; set; }
+        public string description { get; set; } = System.String.Empty;
         /// <summary>
         /// uploadFile
         /// </summary>
-        public string operationId { get; set; }
+        public string operationId { get; set; } = System.String.Empty;
         /// <summary>
         /// Consumes
         /// </summary>
@@ -150,7 +150,7 @@ namespace Doc
         /// <summary>
         /// Parameters
         /// </summary>
-        public Parameters[] parameters { get; set; }
+        public System.Collections.Generic.List<System.Collections.Generic.IDictionary<string, object>> parameters { get; set; }
         /// <summary>
         /// Responses
         /// </summary>
@@ -189,12 +189,12 @@ namespace Doc
         /// <summary>
         /// localhost
         /// </summary>
-        public string host { get; set; }
+        public string host { get; set; } = System.String.Empty;
 
         /// <summary>
-        /// /v2
+        /// /v1
         /// </summary>
-        public string basePath { get; set; } = "/v1";
+        public string basePath { get; set; } = "/";
 
         /// <summary>
         /// Tags

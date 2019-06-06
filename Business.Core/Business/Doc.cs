@@ -215,10 +215,12 @@ namespace Business.Document
                 //===============name==================//
                 public string Name { get; set; }
                 //===============type==================//
-                public string Type { get; set; }
+                [Newtonsoft.Json.JsonIgnore]
+                public virtual System.Type Type { get; set; }
                 //===============type==================//
                 public bool IsEnum { get; set; }
-                public bool IsArray { get; set; }
+                public bool IsCollection { get; set; }
+                public bool IsDictionary { get; set; }
                 public bool IsNumeric { get; set; }
                 public string[] EnumNames { get; set; }
                 public System.Array EnumValues { get; set; }
@@ -226,25 +228,29 @@ namespace Business.Document
                 ////===============position==================//
                 //public int Position { get; set; }
                 ////===============hasDefaultValue==================//
-                //public bool HasDefaultValue { get; set; }
+                public bool HasDefaultValue { get; set; }
                 //===============defaultValue==================//
                 public object DefaultValue { get; set; }
                 //===============argAttr==================//
                 public IEnumerable<Attribute> Attrs { get; set; }
                 //===============hasDefinition==================//
-                public bool HasDefinition { get; set; }
+                //public bool HasDefinition { get; set; }
                 ////==============group===================//
                 //public string Group { get; set; }
                 ////==============hasChild===================//
                 //public virtual bool HasChild { get; set; }
                 //===============child==================//
-                public List<Arg> Child { get; set; }
+                public List<Arg> Childs { get; set; }
                 //==============Summary===================//
                 public string Summary { get; set; }
                 //===============nick==================//
                 public string Nick { get; set; }
 
                 public string Path { get; set; }
+
+                public string Parent { get; set; }
+
+                public string Root { get; set; }
 
                 public class Attribute
                 {
@@ -258,6 +264,8 @@ namespace Business.Document
                     public string Message { get; set; }
 
                     public int State { get; set; }
+
+                    public bool CollectionItem { get; set; }
                 }
             }
         }
