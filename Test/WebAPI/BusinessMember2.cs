@@ -82,6 +82,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         };
     }
 
+    static System.DateTime dd = System.DateTime.Now;
     /// <summary>
     /// test doc Test001
     /// and Test001
@@ -91,7 +92,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
-    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;

@@ -53,49 +53,6 @@
         public ExternalDocs externalDocs { get; set; }
     }
 
-    /*
-    public class Parameters
-    {
-        /// <summary>
-        /// name
-        /// </summary>
-        public string name { get; set; } = System.String.Empty;
-        /// <summary>
-        /// path, formData
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty(PropertyName = "in")]
-        public string _in { get; set; } = System.String.Empty;
-        /// <summary>
-        /// ID of pet to update
-        /// </summary>
-        public string description { get; set; } = System.String.Empty;
-        /// <summary>
-        /// Required
-        /// </summary>
-        public bool required { get; set; }
-        /// <summary>
-        /// integer
-        /// </summary>
-        public string type { get; set; } = System.String.Empty;
-        /// <summary>
-        /// int64
-        /// </summary>
-        public string format { get; set; } = System.String.Empty;
-
-        /// <summary>
-        /// default
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty(PropertyName = "default")]
-        public string defaultValue { get; set; } = System.String.Empty;
-
-        /// <summary>
-        /// x-data
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty(PropertyName = "x-data")]
-        public string data { get; set; } = System.String.Empty;
-    }
-    */
-
     public class _200
     {
         /// <summary>
@@ -121,41 +78,6 @@
         public _200 _200 { get; set; }
     }
 
-    public class Post
-    {
-        /// <summary>
-        /// Tags
-        /// </summary>
-        public string[] tags { get; set; }
-        /// <summary>
-        /// uploads an image
-        /// </summary>
-        public string summary { get; set; } = System.String.Empty;
-        /// <summary>
-        /// 
-        /// </summary>
-        public string description { get; set; } = System.String.Empty;
-        /// <summary>
-        /// uploadFile
-        /// </summary>
-        public string operationId { get; set; } = System.String.Empty;
-        /// <summary>
-        /// Consumes
-        /// </summary>
-        public string[] consumes { get; set; }
-        /// <summary>
-        /// Produces
-        /// </summary>
-        public string[] produces { get; set; }
-        /// <summary>
-        /// Parameters
-        /// </summary>
-        public System.Collections.Generic.List<System.Collections.Generic.IDictionary<string, object>> parameters { get; set; }
-        /// <summary>
-        /// Responses
-        /// </summary>
-        public Responses responses { get; set; }
-    }
 
     //public class pet_petId_uploadImage
     //{

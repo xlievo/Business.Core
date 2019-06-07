@@ -462,45 +462,55 @@ public class Startup
 
     public static Root GetSwaggerDoc(IBusiness business)
     {
-        var paths = new System.Dynamic.ExpandoObject() as IDictionary<string, dynamic>;
+        var paths = new Dictionary<string, object>();
 
         foreach (var item in business.Configer.Doc.Members[business.Configer.Info.CommandGroupDefault].Values)
         {
-            var methods = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
-
+            var methods = new Dictionary<string, object>();
             var parameters = new List<IDictionary<string, object>>();
-            var c = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
-            c.Add("name", "c");
-            c.Add("in", "formData");
-            c.Add("type", "string");
-            c.Add("default", item.Name);
-            c.Add("description", "api name");
-            c.Add("required", true);
-            c.Add("x-NotNull", "[Required]");
-            parameters.Add(c);
-            var t = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
-            t.Add("name", "t");
-            t.Add("in", "formData");
-            t.Add("type", "string");
-            t.Add("description", "api token");
-            t.Add("required", true);
-            t.Add("x-NotNull", "[Required]");
-            parameters.Add(t);
+
+            parameters.Add(new Dictionary<string, object>
+            {
+                { "name", "c" },
+                { "in", "formData" },
+                { "type", "string" },
+                { "default", item.Name },
+                { "description", "api name" },
+                { "required",true },
+                { "x-CheckNull", "Values are not allowed to be empty" },
+            });
+
+            parameters.Add(new Dictionary<string, object>
+            {
+                { "name", "t" },
+                { "in", "formData" },
+                { "type", "string" },
+                { "description", "api token" },
+                //{ "required",true },
+            });
 
             item.ArgList.ForEach(c2 =>
             {
                 var name = c2.Parent == item.Name ? c2.Path.Substring(c2.Parent.Length, c2.Path.Length - c2.Parent.Length).Trim('.') : c2.Path.Substring(c2.Root.Length, c2.Path.Length - c2.Root.Length).Trim('.');
 
-                var c3 = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
-                c3.Add("name", $"d.{{{name}}}");
-                c3.Add("in", "formData");
-                c3.Add("type", GetSwaggerType(c2.Type));
+                var type = GetSwaggerType(c2.Type);
+
+                var c3 = new Dictionary<string, object>
+                {
+                    { "name",  $"d.{{{name}}}" },
+                    { "in", "formData" },
+                    { "type", type.Item1 },
+                    { "description", c2.Summary ?? System.String.Empty }
+                };
+
+                if (!string.IsNullOrWhiteSpace(type.Item1))
+                {
+                    c3.Add("format", type.Item2);
+                }
                 if (c2.HasDefaultValue)
                 {
                     c3.Add("default", System.Convert.ToString(c2.DefaultValue));
                 }
-                c3.Add("description", c2.Summary ?? System.String.Empty);
-                c3.Add("format", System.String.Empty);
 
                 foreach (var attr in c2.Attrs)
                 {
@@ -510,15 +520,16 @@ public class Startup
                 parameters.Add(c3);
             });
 
-            methods.Add("post", new Post
+            methods.Add("post", new Dictionary<string, object>
             {
-                tags = new string[] { business.Configer.Info.BusinessName },
-                summary = item.Summary ?? System.String.Empty,
-                consumes = new string[] { "multipart/form-data" },
-                produces = new string[] { "application/json" },
-                parameters = parameters,
-                description = System.String.Empty,
-                responses = new Responses { _200 = new _200 { description = System.String.Empty } }
+                { "operationId", item.Name },
+                { "tags", new string[] { business.Configer.Info.BusinessName } },
+                { "summary", item.Summary ?? System.String.Empty},
+                { "consumes", new string[] { "multipart/form-data" } },
+                { "produces",new string[] { "application/json" } },
+                { "parameters", parameters },
+                { "description", System.String.Empty },
+                { "responses", new Responses { _200 = new _200 { description = System.String.Empty } } }
             });
 
             paths.Add($"/{item.Name}", methods);
@@ -536,30 +547,35 @@ public class Startup
         return root;
     }
 
-    static string GetSwaggerType(System.Type type)
+    static (string, string) GetSwaggerType(System.Type type)
     {
+        var type2 = "string";
+        var format = System.String.Empty;
+
         switch (type.GetTypeCode())
         {
-            case TypeCode.Boolean: return "boolean";
-            //case TypeCode.Byte: return "string";
-            case TypeCode.Char: return "string";
-            case TypeCode.DateTime: return "date-time";
+            case TypeCode.Boolean: type2 = "boolean"; break;
+            case TypeCode.Byte: format = "binary"; break;
+            //case TypeCode.Char: type2 = "string"; break;
+            case TypeCode.DateTime: format = "date-time"; break;
             //case TypeCode.DBNull: return "string";
-            case TypeCode.Decimal: return "number";
-            case TypeCode.Double: return "number";
+            case TypeCode.Decimal: type2 = "number"; break;
+            case TypeCode.Double: type2 = "number"; break;
             //case TypeCode.Empty: return "string";
-            case TypeCode.Int16: return "integer";
-            case TypeCode.Int32: return "integer";
-            case TypeCode.Int64: return "integer";
+            case TypeCode.Int16: type2 = "integer"; break;
+            case TypeCode.Int32: type2 = "integer"; format = "int32"; break;
+            case TypeCode.Int64: type2 = "integer"; format = "int64"; break;
             //case TypeCode.Object: return "string";
-            case TypeCode.SByte: return "integer";
-            case TypeCode.Single: return "integer";
-            case TypeCode.String: return "string";
-            case TypeCode.UInt16: return "integer";
-            case TypeCode.UInt32: return "integer";
-            case TypeCode.UInt64: return "integer";
-            default: return "string";
+            case TypeCode.SByte: type2 = "integer"; break;
+            case TypeCode.Single: type2 = "number"; format = "float"; break;
+            //case TypeCode.String: type2 = "string"; break;
+            case TypeCode.UInt16: type2 = "integer"; break;
+            case TypeCode.UInt32: type2 = "integer"; format = "int32"; break;
+            case TypeCode.UInt64: type2 = "integer"; format = "int64"; break;
+            default: break;
         }
+
+        return (type2, format);
     }
 }
 
