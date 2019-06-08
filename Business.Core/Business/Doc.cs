@@ -240,7 +240,7 @@ namespace Business.Document
                 ////==============hasChild===================//
                 //public virtual bool HasChild { get; set; }
                 //===============child==================//
-                public List<Arg> Childs { get; set; }
+                public List<Arg> Child { get; set; }
                 //==============Summary===================//
                 public string Summary { get; set; }
                 //===============nick==================//

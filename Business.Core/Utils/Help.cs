@@ -532,7 +532,7 @@ namespace Business.Utils
                 DefaultValue = args.DefaultValue,
                 //Attr = args.ArgAttr.Select(c => new Doc.Member.Arg.Attribute { Key = c.GroupKey(), Description = c.Description, State = c.State, Message = c.Message, Type = c.Type.Name }),
                 //Child = args.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
-                Childs = new System.Collections.Generic.List<Doc.Member.Arg>(),
+                Child = new System.Collections.Generic.List<Doc.Member.Arg>(),
                 //HasDefinition = args.HasDefinition,
                 Summary = summary,
                 Nick = argGroup.Nick,
@@ -555,9 +555,9 @@ namespace Business.Utils
             if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !arg.IsEnum)
             {
                 // && !arg.IsDictionary && !arg.IsCollection
-                foreach (var item in args.ArgAttrChild.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
+                foreach (var item in args.Child.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
                 {
-                    arg.Childs.Add(GetDocArgChild(argList, group, item, xmlMembers));
+                    arg.Child.Add(GetDocArgChild(argList, group, item, xmlMembers));
                 }
             }
 

@@ -235,7 +235,7 @@ namespace Business.Auth
                                         v2 = currentValue2[c];
                                     }
 
-                                    var collectioTask2 = ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, v2, c).ContinueWith(c3 =>
+                                    var collectioTask2 = ArgsResult(iArgGroup, item.Child, command.OnlyName, v2, c).ContinueWith(c3 =>
                                     {
                                         if (null != c3.Exception)
                                         {
@@ -286,7 +286,7 @@ namespace Business.Auth
                         }
                         else
                         {
-                            result = await ArgsResult(iArgGroup, item.ArgAttrChild, command.OnlyName, currentValue);
+                            result = await ArgsResult(iArgGroup, item.Child, command.OnlyName, currentValue);
                             //if (null != result)
                             if (1 > result.State)
                             {
@@ -633,7 +633,7 @@ namespace Business.Auth
                                     v2 = currentValue3[c];
                                 }
 
-                                var collectioTask2 = ArgsResult(group, item.ArgAttrChild, methodName, v2, c).ContinueWith(c3 =>
+                                var collectioTask2 = ArgsResult(group, item.Child, methodName, v2, c).ContinueWith(c3 =>
                                 {
                                     if (null != c3.Exception)
                                     {
@@ -680,7 +680,7 @@ namespace Business.Auth
                     }
                     else
                     {
-                        result2 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue2);
+                        result2 = await ArgsResult(group, item.Child, methodName, currentValue2);
 
                         if (1 > result2.State)
                         {
@@ -753,7 +753,7 @@ namespace Business.Auth
             //==========HasLower==========//
             if (item.HasLower)
             {
-                var result2 = await ArgsResult(group, item.ArgAttrChild, methodName, currentValue);
+                var result2 = await ArgsResult(group, item.Child, methodName, currentValue);
 
                 if (1 > result2.State)
                 {
