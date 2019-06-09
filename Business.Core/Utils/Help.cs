@@ -539,6 +539,7 @@ namespace Business.Utils
                 Type = args.LastType,
                 HasDefaultValue = args.HasDefaultValue,
                 DefaultValue = args.DefaultValue,
+                HasDefinition = args.HasDefinition,
                 UseType = args.UseType,
                 Child = new System.Collections.Generic.List<Doc.Member.Arg>(),
                 ChildAll = !ignoreChild && !args.LastType.IsEnum ?

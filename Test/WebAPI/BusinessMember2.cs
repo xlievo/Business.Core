@@ -194,7 +194,7 @@ public class Args
         /// </summary>
         [Test]
         [Nick("password")]
-        [CheckNull(Description = "不允许为空值")]
+        [CheckNull(Description = "Values are not allowed to be empty")]
         public string A { get; set; }
 
         /// <summary>

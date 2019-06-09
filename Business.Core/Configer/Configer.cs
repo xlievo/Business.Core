@@ -466,6 +466,11 @@ namespace Business
         //public static void LoadBusiness(System.Type type) => Bind.Create(type);
 
         //public static void LoadBusiness(System.Collections.Generic.IEnumerable<string> assemblyFiles = null)
+
+        /// <summary>
+        /// Load all business classes in the run directory
+        /// </summary>
+        /// <param name="assemblyFiles"></param>
         public static void LoadBusiness(params string[] assemblyFiles)
         {
             var business = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(System.AppContext.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
@@ -489,6 +494,10 @@ namespace Business
             }
         }
 
+        /// <summary>
+        /// Inject a parameter type, depending on the parameter name
+        /// </summary>
+        /// <param name="argName"></param>
         public static void UseType(params string[] argName)
         {
             foreach (var item in BusinessList.Values)
@@ -497,6 +506,10 @@ namespace Business
             }
         }
 
+        /// <summary>
+        /// Generating Document Model for All Business Classes
+        /// </summary>
+        /// <param name="outDir"></param>
         public static void UseDoc(string outDir = null)
         {
             var exist = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
@@ -537,6 +550,11 @@ namespace Business
             }
         }
 
+        /// <summary>
+        /// Set the log characteristics of a parameter, depending on the parameter name
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="argName"></param>
         public static void LoggerSet(Attributes.LoggerAttribute logger, params string[] argName)
         {
             foreach (var item in BusinessList.Values)
@@ -545,6 +563,11 @@ namespace Business
             }
         }
 
+        /// <summary>
+        /// Set a parameter's ignore feature, depending on the parameter name
+        /// </summary>
+        /// <param name="ignore"></param>
+        /// <param name="argName"></param>
         public static void IgnoreSet(Attributes.Ignore ignore, params string[] argName)
         {
             foreach (var item in BusinessList.Values)

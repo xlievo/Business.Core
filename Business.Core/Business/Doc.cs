@@ -235,7 +235,7 @@ namespace Business.Document
                 //===============argAttr==================//
                 public IEnumerable<Attribute> Attrs { get; set; }
                 //===============hasDefinition==================//
-                //public bool HasDefinition { get; set; }
+                public bool HasDefinition { get; set; }
                 ////==============group===================//
                 //public string Group { get; set; }
                 ////==============hasChild===================//

@@ -65,6 +65,13 @@
             callback
             </summary>
         </member>
+        <member name="M:Startup.GetSwaggerDoc(Business.IBusiness)">
+            <summary>
+            Generating Swagger documents for business classes
+            </summary>
+            <param name="business"></param>
+            <returns></returns>
+        </member>
         <member name="T:BusinessController">
             <summary>
             A class for an MVC controller with view support.

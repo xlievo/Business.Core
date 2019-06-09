@@ -465,6 +465,11 @@ public class Startup
 
     #endregion
 
+    /// <summary>
+    /// Generating Swagger documents for business classes
+    /// </summary>
+    /// <param name="business"></param>
+    /// <returns></returns>
     public static Root GetSwaggerDoc(IBusiness business)
     {
         var paths = new Dictionary<string, object>();
@@ -487,6 +492,11 @@ public class Startup
 
             item.ArgList.ForEach(c2 =>
             {
+                if (!c2.UseType && c2.HasDefinition)
+                {
+                    return;
+                }
+
                 string name = string.Empty;
                 string description = string.Empty;
 
