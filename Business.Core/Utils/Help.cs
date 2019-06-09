@@ -413,7 +413,14 @@ namespace Business.Utils
 
                 foreach (var item in meta.Args.Where(c3 => !c3.UseType && !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
                 {
-                    member2.Args.Add(GetDocArgChild(member2.ArgList, c2.Value.Key, item, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                    var arg = GetDocArg(c2.Value.Key, item, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text);
+                    member2.Args.Add(arg);
+
+                    if (arg.IsEnum || (!arg.IsEnum && !item.HasDefinition))
+                    {
+                        member2.ArgList.Add(arg);
+                    }
+                    member2.ArgList.AddRange(arg.ChildAll);
                 }
 
                 return member2;
@@ -481,7 +488,7 @@ namespace Business.Utils
 
         const string AttributeSign = "Attribute";
 
-        static Doc.Member.Arg GetDocArgChild(System.Collections.Generic.List<Doc.Member.Arg> argList, string group, Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null)
+        static Doc.Member.Arg GetDocArg(string group, Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null, bool recursion = true)
         {
             Xml.member member = null;
 
@@ -492,7 +499,7 @@ namespace Business.Utils
                     case Meta.Args.ArgTypeCode.No:
                         break;
                     case Meta.Args.ArgTypeCode.Definition:
-                        xmlMembers?.TryGetValue($"T:{ args.ArgTypeFullName}", out member);
+                        xmlMembers?.TryGetValue($"T:{args.ArgTypeFullName}", out member);
                         break;
                     case Meta.Args.ArgTypeCode.Field:
                         xmlMembers?.TryGetValue($"F:{args.ArgTypeFullName}", out member);
@@ -527,13 +534,10 @@ namespace Business.Utils
             {
                 Name = args.Name,
                 Type = args.LastType,
-                //Position = args.Position,
                 HasDefaultValue = args.HasDefaultValue,
                 DefaultValue = args.DefaultValue,
-                //Attr = args.ArgAttr.Select(c => new Doc.Member.Arg.Attribute { Key = c.GroupKey(), Description = c.Description, State = c.State, Message = c.Message, Type = c.Type.Name }),
-                //Child = args.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
                 Child = new System.Collections.Generic.List<Doc.Member.Arg>(),
-                //HasDefinition = args.HasDefinition,
+                ChildAll = args.ChildAll.Where(c => c.LastType.IsEnum || (!c.LastType.IsEnum && !c.HasDefinition)).Select(c => GetDocArg(group, c, xmlMembers, recursion: false)).ToList(),
                 Summary = summary,
                 Nick = argGroup.Nick,
                 Attrs = attrs,
@@ -548,22 +552,16 @@ namespace Business.Utils
                 EnumValues = args.LastType.IsEnum ? args.LastType.GetEnumValues() : null,
             };
 
-            //arg.HasChild = 0 < arg.Child.Count;
-
-            //arg.Child = argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.List<Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArgChild2(ref argList, group, c, xmlMembers));
-
-            if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !arg.IsEnum)
+            if (recursion)
             {
-                // && !arg.IsDictionary && !arg.IsCollection
-                foreach (var item in args.Child.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
+                if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !arg.IsEnum)
                 {
-                    arg.Child.Add(GetDocArgChild(argList, group, item, xmlMembers));
+                    // && !arg.IsDictionary && !arg.IsCollection
+                    foreach (var item in args.Child.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
+                    {
+                        arg.Child.Add(GetDocArg(group, item, xmlMembers));
+                    }
                 }
-            }
-
-            if (arg.IsEnum || (!arg.IsEnum && !args.HasDefinition))
-            {
-                argList.Add(arg);
             }
 
             return arg;

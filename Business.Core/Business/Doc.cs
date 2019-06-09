@@ -241,6 +241,8 @@ namespace Business.Document
                 //public virtual bool HasChild { get; set; }
                 //===============child==================//
                 public List<Arg> Child { get; set; }
+                //===============childAll==================//
+                public List<Arg> ChildAll { get; set; }
                 //==============Summary===================//
                 public string Summary { get; set; }
                 //===============nick==================//
