@@ -21,6 +21,7 @@ using Business.Auth;
 using Business.Utils;
 using Business.Result;
 using Swagger.Doc;
+using System.Collections;
 
 #region Socket Support
 
@@ -214,9 +215,12 @@ public class Startup
         app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto }).UseAuthentication().UseCors("any");
 
         //==================First step==================//
+        //1
         Configer.LoadBusiness();
-        Configer.UseType(typeof(HttpContext), typeof(WebSocket));
+        //Configer.UseType(typeof(HttpContext), typeof(WebSocket));
+        //2
         Configer.UseType("context");
+        Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context");
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
 
         //==================The second step==================//
@@ -233,6 +237,7 @@ public class Startup
         });
 
         //==================The third step==================//
+        //3
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
 
         #region SwaggerDoc
@@ -480,27 +485,30 @@ public class Startup
                 { "x-CheckNull", "Values are not allowed to be empty" },
             });
 
-            parameters.Add(new Dictionary<string, object>
-            {
-                { "name", "t" },
-                { "in", "formData" },
-                { "type", "string" },
-                { "description", "api token" },
-                //{ "required",true },
-            });
-
             item.ArgList.ForEach(c2 =>
             {
-                var name = c2.Parent == item.Name ? c2.Path.Substring(c2.Parent.Length, c2.Path.Length - c2.Parent.Length).Trim('.') : c2.Path.Substring(c2.Root.Length, c2.Path.Length - c2.Root.Length).Trim('.');
+                string name = string.Empty;
+                string description = string.Empty;
+
+                if (typeof(Token).IsAssignableFrom(c2.Type))
+                {
+                    name = "t";
+                    description = "api token";
+                }
+                else
+                {
+                    name = $"d.{{{ (c2.Parent == item.Name ? c2.Path.Substring(c2.Parent.Length, c2.Path.Length - c2.Parent.Length).Trim('.') : c2.Path.Substring(c2.Root.Length, c2.Path.Length - c2.Root.Length).Trim('.'))}}}";
+                    description = c2.Summary ?? string.Empty;
+                }
 
                 var type = GetSwaggerType(c2.Type);
 
                 var c3 = new Dictionary<string, object>
                 {
-                    { "name",  $"d.{{{name}}}" },
+                    { "name", name },
                     { "in", "formData" },
                     { "type", type.Item1 },
-                    { "description", c2.Summary ?? System.String.Empty }
+                    { "description", description }
                 };
 
                 if (!string.IsNullOrWhiteSpace(type.Item1))
@@ -524,12 +532,12 @@ public class Startup
             {
                 { "operationId", item.Name },
                 { "tags", new string[] { business.Configer.Info.BusinessName } },
-                { "summary", item.Summary ?? System.String.Empty},
+                { "summary", item.Summary ?? string.Empty},
                 { "consumes", new string[] { "multipart/form-data" } },
                 { "produces",new string[] { "application/json" } },
                 { "parameters", parameters },
-                { "description", System.String.Empty },
-                { "responses", new Responses { _200 = new _200 { description = System.String.Empty } } }
+                { "description", string.Empty },
+                { "responses", new Responses { _200 = new _200 { description = string.Empty } } }
             });
 
             paths.Add($"/{item.Name}", methods);
@@ -550,7 +558,7 @@ public class Startup
     static (string, string) GetSwaggerType(System.Type type)
     {
         var type2 = "string";
-        var format = System.String.Empty;
+        var format = string.Empty;
 
         switch (type.GetTypeCode())
         {

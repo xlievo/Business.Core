@@ -411,15 +411,16 @@ namespace Business.Utils
                     ArgList = new System.Collections.Generic.List<Doc.Member.Arg>()
                 };
 
-                foreach (var item in meta.Args.Where(c3 => !c3.UseType && !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
+                foreach (var item in meta.Args.Where(c3 => !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
                 {
                     var arg = GetDocArg(c2.Value.Key, item, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text);
                     member2.Args.Add(arg);
 
-                    if (arg.IsEnum || (!arg.IsEnum && !item.HasDefinition))
-                    {
-                        member2.ArgList.Add(arg);
-                    }
+                    //if (arg.IsEnum || (!arg.IsEnum && !item.HasDefinition))
+                    //{
+                    //    member2.ArgList.Add(arg);
+                    //}
+                    member2.ArgList.Add(arg);
                     member2.ArgList.AddRange(arg.ChildAll);
                 }
 
@@ -530,14 +531,20 @@ namespace Business.Utils
                 attr = attr.Next;
             }
 
+            var ignoreChild = argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild);
+
             var arg = new Doc.Member.Arg
             {
                 Name = args.Name,
                 Type = args.LastType,
                 HasDefaultValue = args.HasDefaultValue,
                 DefaultValue = args.DefaultValue,
+                UseType = args.UseType,
                 Child = new System.Collections.Generic.List<Doc.Member.Arg>(),
-                ChildAll = args.ChildAll.Where(c => c.LastType.IsEnum || (!c.LastType.IsEnum && !c.HasDefinition)).Select(c => GetDocArg(group, c, xmlMembers, recursion: false)).ToList(),
+                ChildAll = !ignoreChild && !args.LastType.IsEnum ?
+                //args.ChildAll.Where(c => (c.LastType.IsEnum || (!c.LastType.IsEnum && !c.HasDefinition)) && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArg(group, c, xmlMembers, recursion: false)).ToList() :
+                args.ChildAll.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArg(group, c, xmlMembers, recursion: false)).ToList() :
+                new System.Collections.Generic.List<Doc.Member.Arg>(),
                 Summary = summary,
                 Nick = argGroup.Nick,
                 Attrs = attrs,
@@ -554,10 +561,10 @@ namespace Business.Utils
 
             if (recursion)
             {
-                if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !arg.IsEnum)
+                if (!ignoreChild && !arg.IsEnum)
                 {
                     // && !arg.IsDictionary && !arg.IsCollection
-                    foreach (var item in args.Child.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
+                    foreach (var item in args.Child.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
                     {
                         arg.Child.Add(GetDocArg(group, item, xmlMembers));
                     }
@@ -649,6 +656,82 @@ namespace Business.Utils
                                 {
                                     arg.Group[group.Key].IArgInLogger = GetMetaLogger(arg.Group[group.Key].IArgInLogger, logger, group.Group);
                                 }
+                            }
+                        }
+                    }
+                });
+            });
+
+            return business;
+        }
+
+        public static Business IgnoreSet<Business>(this Business business, Attributes.Ignore ignore, params System.Type[] argType) where Business : IBusiness
+        {
+            if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
+
+            if (null == ignore || null == argType || 0 == argType.Length) { return business; }
+
+            System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
+            {
+                var groups = item.CommandGroup.Values.Where(c => Bind.GroupEquals(ignore, c.Group));
+
+                if (!groups.Any()) { return; }
+
+                ignore.Declaring = Attributes.AttributeBase.DeclaringType.Parameter;
+
+                System.Threading.Tasks.Parallel.ForEach(argType, type =>
+                {
+                    foreach (var group in groups)
+                    {
+                        foreach (var arg in item.Args)
+                        {
+                            if (Equals(arg.Type, type) || Equals(arg.IArgOutType, type))
+                            {
+                                if (arg.Group[group.Key].Ignore.Any(c => ignore.GroupKey() == c.GroupKey()))
+                                {
+                                    continue;
+                                }
+                                arg.Group[group.Key].Ignore.collection.Add(ignore);
+                            }
+                        }
+                    }
+                });
+            });
+
+            return business;
+        }
+
+        public static Business IgnoreSet<Business>(this Business business, Attributes.Ignore ignore, params string[] argName) where Business : IBusiness
+        {
+            if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
+
+            if (null == ignore || null == argName) { return business; }
+
+            var argName2 = argName.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+
+            if (0 == argName2.Count) { return business; }
+
+            System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
+            {
+                var groups = item.CommandGroup.Values.Where(c => Bind.GroupEquals(ignore, c.Group));
+                //checked group
+                if (!groups.Any()) { return; }
+
+                ignore.Declaring = Attributes.AttributeBase.DeclaringType.Parameter;
+
+                System.Threading.Tasks.Parallel.ForEach(argName2, name =>
+                {
+                    foreach (var group in groups)
+                    {
+                        foreach (var arg in item.Args)
+                        {
+                            if (Equals(arg.Name, name))
+                            {
+                                if (arg.Group[group.Key].Ignore.Any(c => ignore.GroupKey() == c.GroupKey()))
+                                {
+                                    continue;
+                                }
+                                arg.Group[group.Key].Ignore.collection.Add(ignore);
                             }
                         }
                     }

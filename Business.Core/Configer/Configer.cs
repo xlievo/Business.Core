@@ -545,6 +545,22 @@ namespace Business
             }
         }
 
+        public static void IgnoreSet(Attributes.Ignore ignore, params string[] argName)
+        {
+            foreach (var item in BusinessList.Values)
+            {
+                item.IgnoreSet(ignore, argName);
+            }
+        }
+
+        public static void IgnoreSet(Attributes.Ignore ignore, params System.Type[] argType)
+        {
+            foreach (var item in BusinessList.Values)
+            {
+                item.IgnoreSet(ignore, argType);
+            }
+        }
+
         //public static System.Collections.Generic.Dictionary<string, Doc> LoadDoc<Business>()
         //{
         //    var dict = Bind.BusinessList.ToDictionary(c => c.Value.GetType().BaseType.Assembly.Location, c => c.Key, System.StringComparer.InvariantCultureIgnoreCase);

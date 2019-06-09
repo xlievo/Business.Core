@@ -92,7 +92,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
-    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.Arg)][Test2]decimal mm = 0.0234m, dynamic context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -194,7 +194,7 @@ public class Args
         /// </summary>
         [Test]
         [Nick("password")]
-        [CheckNull(Description ="不允许为空值")]
+        [CheckNull(Description = "不允许为空值")]
         public string A { get; set; }
 
         /// <summary>

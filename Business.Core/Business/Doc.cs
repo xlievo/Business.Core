@@ -224,7 +224,8 @@ namespace Business.Document
                 public bool IsNumeric { get; set; }
                 public string[] EnumNames { get; set; }
                 public System.Array EnumValues { get; set; }
-
+                //===============useType==================//
+                public bool UseType { get; set; }
                 ////===============position==================//
                 //public int Position { get; set; }
                 ////===============hasDefaultValue==================//

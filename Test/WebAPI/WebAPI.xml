@@ -9,7 +9,7 @@
             BusinessMember2。。。
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Business.Auth.Token,Arg{Args.Test001},Arg{System.DateTime},System.Decimal)">
+        <member name="M:BusinessMember2.Test001(Business.Auth.Token,Arg{Args.Test001},Arg{System.DateTime},System.Decimal,System.Object)">
             <summary>
             test doc Test001
             and Test001

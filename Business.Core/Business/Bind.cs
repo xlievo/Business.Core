@@ -834,16 +834,6 @@ namespace Business
                     var hasUse = null != use || (current.hasIArg ? cfg.UseTypes.Contains(current.inType.FullName) : false);
                     //var nick = argAttrAll.GetAttr<NickAttribute>();
 
-                    argAttrAll = argAttrAll.Distinct(!hasUse ? argAttrs : null);
-
-                    //==================================//
-                    var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
-                    var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
-
-                    var hasDefinition = IsClass(current.outType);
-
-                    var definitions = hasDefinition ? new System.Collections.Generic.List<System.Type> { current.outType } : new System.Collections.Generic.List<System.Type>();
-
                     var hasCollectionAttr = false;
                     if (current.hasCollection)
                     {
@@ -854,6 +844,16 @@ namespace Business
                             argAttrAll.AddRange(collectionAttr);
                         }
                     }
+
+                    argAttrAll = argAttrAll.Distinct(!hasUse ? argAttrs : null);
+
+                    //==================================//
+                    var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
+                    var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
+
+                    var hasDefinition = IsClass(current.outType);
+
+                    var definitions = hasDefinition ? new System.Collections.Generic.List<System.Type> { current.outType } : new System.Collections.Generic.List<System.Type>();
 
                     var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, cfg.ResultType, instance, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
@@ -1070,6 +1070,8 @@ namespace Business
                         argAttrAll.AddRange(collectionAttr);
                     }
                 }
+
+                argAttrAll = argAttrAll.Distinct();
 
                 var argGroup = GetArgGroup(argAttrAll, current, path2, path, commands, resultType, business, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
 
