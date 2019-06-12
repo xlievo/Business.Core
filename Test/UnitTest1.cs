@@ -31,7 +31,7 @@ public class ResultObject<Type> : Business.Result.ResultObject<Type>
     public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
 
     [MessagePack.IgnoreMember]
-    public override System.Type GenericType => base.GenericType;
+    public override System.Type GenericDefinition => base.GenericDefinition;
 
     public override byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
 }

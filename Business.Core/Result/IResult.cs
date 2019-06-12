@@ -78,9 +78,9 @@ namespace Business.Result
         DataType Get<DataType>();
 
         /// <summary>
-        /// 
+        /// System.Type object that represents a generic type definition from which the current generic type can be constructed.
         /// </summary>
-        System.Type GenericType { get; }
+        System.Type GenericDefinition { get; }
     }
 
     public interface IResult<DataType> : IResult
@@ -272,7 +272,7 @@ namespace Business.Result
             //    result2 = ResultCreate(resultType, result.State, result.Message);
             //}
 
-            var result2 = Create(result.GenericType, result.HasData ? result.ToDataBytes() : null, result.State, result.Message);
+            var result2 = Create(result.GenericDefinition, result.HasData ? result.ToDataBytes() : null, result.State, result.Message);
             //====================================//
             result2.Callback = result.Callback;
 
@@ -310,7 +310,7 @@ namespace Business.Result
             //    result2 = ResultCreate(resultType, result.State, result.Message);
             //}
             //var r = result.GetType().GetGenericTypeDefinition();
-            var result2 = Create(result.GenericType, result.HasData ? result.ToDataString() : null, result.State, result.Message);
+            var result2 = Create(result.GenericDefinition, result.HasData ? result.ToDataString() : null, result.State, result.Message);
             //====================================//
             result2.Callback = result.Callback;
 

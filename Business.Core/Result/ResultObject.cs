@@ -120,7 +120,7 @@ namespace Business.Result
 
         System.Type genericType;
         [Newtonsoft.Json.JsonIgnore]
-        public virtual System.Type GenericType => genericType;
+        public virtual System.Type GenericDefinition => genericType;
 
         //ICommand command;
         //[Newtonsoft.Json.JsonIgnore]
