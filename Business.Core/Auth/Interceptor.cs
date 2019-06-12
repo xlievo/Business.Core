@@ -82,7 +82,7 @@ namespace Business.Auth
 
             if (!meta.CommandGroup.TryGetValue(iArgGroup, out CommandAttribute command))
             {
-                invocation.ReturnValue = Bind.GetReturnValue(Bind.CmdError(Configer.ResultType, invocation.Method.Name), meta);
+                invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.CreateMeta(meta, -2, $"Without this Cmd {invocation.Method.Name}"), meta);
                 return invocation.ReturnValue;
             }
 
@@ -112,7 +112,7 @@ namespace Business.Auth
                         {
                             logType = LoggerType.Error;
                             returnValue = result;
-                            invocation.ReturnValue = Bind.GetReturnValue(result, meta);
+                            invocation.ReturnValue = meta.HasIResult ? Bind.GetReturnValueIResult((dynamic)result, meta) : Bind.GetReturnValue(result, meta);
                             return invocation.ReturnValue;
                         }
 
@@ -182,13 +182,13 @@ namespace Business.Auth
                                         v2 = currentValue2[c];
                                     }
 
-                                    var collectioTask = ArgsResultCollection(item, attrs, v2, iArgGroup, command.OnlyName, c, (object)key).ContinueWith(c2 =>
+                                    var collectioTask = ArgsResultCollection(meta, item, attrs, v2, iArgGroup, command.OnlyName, c, (object)key).ContinueWith(c2 =>
                                     {
                                         if (null != c2.Exception)
                                         {
                                             var ex = c2.Exception.ExceptionWrite();
                                             logType = LoggerType.Exception;
-                                            returnValue = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
+                                            returnValue = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
                                             o.Stop();
                                             return;
                                         }
@@ -199,7 +199,7 @@ namespace Business.Auth
                                         {
                                             logType = LoggerType.Error;
                                             returnValue = result2;
-                                            invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
+                                            //invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
                                             o.Stop();
                                             return;
                                         }
@@ -235,40 +235,40 @@ namespace Business.Auth
                                         v2 = currentValue2[c];
                                     }
 
-                                    var collectioTask2 = ArgsResult(iArgGroup, item.Child, command.OnlyName, v2, c).ContinueWith(c3 =>
-                                    {
-                                        if (null != c3.Exception)
-                                        {
-                                            var ex = c3.Exception.ExceptionWrite();
-                                            logType = LoggerType.Exception;
-                                            returnValue = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
-                                            o.Stop();
-                                            return;
-                                        }
+                                    var collectioTask2 = ArgsResult(meta, iArgGroup, item.Child, command.OnlyName, v2, c).ContinueWith(c3 =>
+                                     {
+                                         if (null != c3.Exception)
+                                         {
+                                             var ex = c3.Exception.ExceptionWrite();
+                                             logType = LoggerType.Exception;
+                                             returnValue = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
+                                             o.Stop();
+                                             return;
+                                         }
 
-                                        var result3 = c3.Result;
+                                         var result3 = c3.Result;
 
-                                        if (1 > result3.State)
-                                        {
-                                            logType = LoggerType.Error;
-                                            returnValue = result3;
-                                            invocation.ReturnValue = Bind.GetReturnValue(result3, meta);
-                                            o.Stop();
-                                            return;
-                                        }
-                                        else
-                                        {
-                                            result = result3;
-                                            if (item.HasDictionary)
-                                            {
-                                                currentValue2[key] = result3.Data.value;
-                                            }
-                                            else
-                                            {
-                                                currentValue2[c] = result3.Data.value;
-                                            }
-                                        }
-                                    });
+                                         if (1 > result3.State)
+                                         {
+                                             logType = LoggerType.Error;
+                                             returnValue = result3;
+                                             //invocation.ReturnValue = Bind.GetReturnValue(result3, meta);
+                                             o.Stop();
+                                             return;
+                                         }
+                                         else
+                                         {
+                                             result = result3;
+                                             if (item.HasDictionary)
+                                             {
+                                                 currentValue2[key] = result3.Data.value;
+                                             }
+                                             else
+                                             {
+                                                 currentValue2[c] = result3.Data.value;
+                                             }
+                                         }
+                                     });
 
                                     collectioTasks.Add(collectioTask2);
                                 }
@@ -278,7 +278,7 @@ namespace Business.Auth
 
                             if (null != returnValue)
                             {
-                                invocation.ReturnValue = Bind.GetReturnValue(returnValue, meta);
+                                invocation.ReturnValue = meta.HasIResult ? Bind.GetReturnValueIResult(returnValue, meta) : Bind.GetReturnValue(returnValue, meta);
                                 return invocation.ReturnValue;
                             }
 
@@ -286,13 +286,13 @@ namespace Business.Auth
                         }
                         else
                         {
-                            result = await ArgsResult(iArgGroup, item.Child, command.OnlyName, currentValue);
+                            result = await ArgsResult(meta, iArgGroup, item.Child, command.OnlyName, currentValue);
                             //if (null != result)
                             if (1 > result.State)
                             {
                                 logType = LoggerType.Error;
                                 returnValue = result;
-                                invocation.ReturnValue = Bind.GetReturnValue(result, meta);
+                                invocation.ReturnValue = meta.HasIResult ? Bind.GetReturnValueIResult((dynamic)result, meta) : Bind.GetReturnValue(result, meta);
                                 return invocation.ReturnValue;
                             }
                         }
@@ -330,7 +330,7 @@ namespace Business.Auth
                 if (!meta.HasReturn)
                 {
                     returnValue = null;
-                    invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(Configer.ResultType), meta);
+                    invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.CreateMeta(meta), meta);
                 }
                 else
                 {
@@ -352,10 +352,10 @@ namespace Business.Auth
                 logType = LoggerType.Exception;
 
                 //log
-                returnValue = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
+                returnValue = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
 
                 //result
-                invocation.ReturnValue = Bind.GetReturnValue(returnValue, meta);
+                invocation.ReturnValue = meta.HasIResult ? Bind.GetReturnValueIResult(returnValue, meta) : Bind.GetReturnValue(returnValue, meta);
 
                 //if (!meta.HasAsync)
                 //{
@@ -486,7 +486,7 @@ namespace Business.Auth
             }
         }
 
-        async System.Threading.Tasks.Task<IResult> ArgsResult(string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue, int collectionIndex = -1, dynamic dictKey = null)
+        async System.Threading.Tasks.Task<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue, int collectionIndex = -1, dynamic dictKey = null)
         {
             bool isUpdate = false;
 
@@ -584,12 +584,12 @@ namespace Business.Auth
                                     v2 = currentValue3[c];
                                 }
 
-                                var collectioTask = ArgsResultCollection(item, attrs, v2, group, methodName, c, (object)key).ContinueWith(c2 =>
+                                var collectioTask = ArgsResultCollection(meta, item, attrs, v2, group, methodName, c, (object)key).ContinueWith(c2 =>
                                 {
                                     if (null != c2.Exception)
                                     {
                                         var ex = c2.Exception.ExceptionWrite();
-                                        result3 = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
+                                        result3 = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
                                         o.Stop();
                                         return;
                                     }
@@ -633,12 +633,12 @@ namespace Business.Auth
                                     v2 = currentValue3[c];
                                 }
 
-                                var collectioTask2 = ArgsResult(group, item.Child, methodName, v2, c).ContinueWith(c3 =>
+                                var collectioTask2 = ArgsResult(meta, group, item.Child, methodName, v2, c).ContinueWith(c3 =>
                                 {
                                     if (null != c3.Exception)
                                     {
                                         var ex = c3.Exception.ExceptionWrite();
-                                        result3 = ResultFactory.ResultCreate(Configer.ResultType, 0, System.Convert.ToString(ex));
+                                        result3 = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
                                         o.Stop();
                                         return;
                                     }
@@ -680,7 +680,7 @@ namespace Business.Auth
                     }
                     else
                     {
-                        result2 = await ArgsResult(group, item.Child, methodName, currentValue2);
+                        result2 = await ArgsResult(meta, group, item.Child, methodName, currentValue2);
 
                         if (1 > result2.State)
                         {
@@ -703,10 +703,10 @@ namespace Business.Auth
                 }
             }
 
-            return ResultFactory.ResultCreate(Configer.ResultType, new ArgResult { isUpdate = isUpdate, value = currentValue });
+            return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
-        async System.Threading.Tasks.Task<IResult> ArgsResultCollection(Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
+        async System.Threading.Tasks.Task<IResult> ArgsResultCollection(MetaData meta, Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
         {
             bool isUpdate = false;
 
@@ -753,17 +753,17 @@ namespace Business.Auth
             //==========HasLower==========//
             if (item.HasLower)
             {
-                var result2 = await ArgsResult(group, item.Child, methodName, currentValue);
+                var result2 = await ArgsResult(meta, group, item.Child, methodName, currentValue);
 
                 if (1 > result2.State)
                 {
                     return result2;
                 }
 
-                return ResultFactory.ResultCreate(Configer.ResultType, result2.Data);
+                return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, data: result2.Data);
             }
 
-            return ResultFactory.ResultCreate(Configer.ResultType, new ArgResult { isUpdate = isUpdate, value = currentValue });
+            return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
         static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, LoggerValue logObjs, ArgsLog log)

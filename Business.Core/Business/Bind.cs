@@ -42,9 +42,9 @@ namespace Business
 
     public partial class Bind
     {
-        public static IResult BusinessError(System.Type resultType, string business) => ResultFactory.ResultCreate(resultType, -1, $"Without this Business {business}");
+        public static IResult BusinessError(System.Type resultTypeDefinition, string business) => ResultFactory.ResultCreate(resultTypeDefinition, -1, $"Without this Business {business}");
 
-        public static IResult CmdError(System.Type resultType, string cmd) => ResultFactory.ResultCreate(resultType, -2, $"Without this Cmd {cmd}");
+        public static IResult CmdError(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, $"Without this Cmd {cmd}");
 
         #region Internal
 
@@ -71,7 +71,7 @@ namespace Business
 
         //internal static object GetReturnValue(int state, string message, MetaData meta, System.Type resultType) => GetReturnValue(ResultFactory.ResultCreate(resultType, state, message), meta);
 
-        internal static object GetReturnValue(IResult result, MetaData meta)
+        internal static dynamic GetReturnValue(IResult result, MetaData meta)
         {
             var result2 = (meta.HasIResult || meta.HasObject) ? result : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null;
 
@@ -86,12 +86,60 @@ namespace Business
                 //{
                 //    return System.Threading.Tasks.Task.FromResult(meta.HasReturn ? result2 : null);
                 //}
+                //if (meta.HasIResult)
+                //{
+                //    return System.Threading.Tasks.Task.FromResult(result2 as IResult<dynamic>);
+                //}
 
                 return System.Threading.Tasks.Task.FromResult(meta.HasIResult ? result2 as IResult : meta.HasReturn ? result2 : null);
             }
 
             return result2;
         }
+
+        internal static dynamic GetReturnValueIResult<Data>(IResult<Data> result, MetaData meta)
+        {
+            if (meta.HasAsync)
+            {
+                if (meta.HasIResultGeneric)
+                {
+                    return System.Threading.Tasks.Task.FromResult(result);
+                }
+
+                return System.Threading.Tasks.Task.FromResult(result as IResult);
+            }
+
+            return result;
+        }
+        //internal static dynamic GetReturnValueIResultGeneric<Data>(IResult<Data> result, MetaData meta)
+        //{
+        //    if (meta.HasIResult || meta.HasObject)
+        //    {
+        //        if (meta.HasAsync)
+        //        {
+        //            return System.Threading.Tasks.Task.FromResult(result);
+        //        }
+        //        else
+        //        {
+        //            return result;
+        //        }
+        //    }
+        //    else if (meta.HasReturn && meta.ReturnType.IsValueType)
+        //    {
+        //        var resultObj = System.Activator.CreateInstance(meta.ReturnType);
+
+        //        if (meta.HasAsync)
+        //        {
+        //            return System.Threading.Tasks.Task.FromResult(resultObj);
+        //        }
+        //        else
+        //        {
+        //            return resultObj;
+        //        }
+        //    }
+
+        //    return null;
+        //}
 
         #endregion
 
@@ -673,7 +721,7 @@ namespace Business
 
         public static CommandGroup GetBusinessGroup(IBusiness business, ConcurrentReadOnlyDictionary<string, MetaData> metaData, System.Func<string, MethodInfo, MetaData, Command> action)
         {
-            var group = new CommandGroup(business.Configer.ResultType, business.Configer.Info.CommandGroupDefault);
+            var group = new CommandGroup(business.Configer.ResultTypeDefinition, business.Configer.Info.CommandGroupDefault);
 
             //========================================//
 
@@ -727,7 +775,7 @@ namespace Business
                 //:
                 //MethodInvokerGenerator.CreateDelegate<dynamic>(method, false, key);
 
-                var call = dynamicMethodBuilder.GetDelegate(method) as System.Func<object, object[], dynamic>;
+                var call = dynamicMethodBuilder.GetDelegate(method);// as System.Func<object, object[], dynamic>;
                 /*
 #region Routes
 
@@ -780,6 +828,20 @@ namespace Business
 #endif
             {
                 var method = methodMeta.Value;
+
+                #region method info
+
+                var hasAsync = Help.IsAssignableFrom(typeof(System.Threading.Tasks.Task<>), method.ReturnType, out System.Type[] asyncGeneric) || method.ReturnType == typeof(System.Threading.Tasks.Task);
+                var hasReturn = !(typeof(void) == method.ReturnType || (hasAsync && null == asyncGeneric));
+                var hasAsyncGeneric = hasAsync && null != asyncGeneric;
+                var hasIResult = typeof(IResult<>).IsAssignableFrom(hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType, out System.Type[] resultGeneric) || typeof(IResult).IsAssignableFrom(hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType);
+                var hasIResultGeneric = hasIResult && null != resultGeneric;
+                var hasObject = typeof(object).Equals(hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType);
+                var returnType = hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType;
+                var resultType = cfg.ResultTypeDefinition.MakeGenericType(hasIResultGeneric ? resultGeneric[0] : typeof(string));
+
+                #endregion
+
                 var space = method.DeclaringType.FullName;
                 var attributes2 = AttributeBase.GetAttributes(method).Distinct(cfg.Attributes);
 
@@ -855,11 +917,11 @@ namespace Business
 
                     var definitions = hasDefinition ? new System.Collections.Generic.List<System.Type> { current.outType } : new System.Collections.Generic.List<System.Type>();
 
-                    var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, cfg.ResultType, instance, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
+                    var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, resultType, cfg.ResultTypeDefinition, instance, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
                     var hasLower = false;
                     var childAll2 = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                    var argChild = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? GetArgChild(current.outType, path, commandGroup, ref definitions, cfg.ResultType, instance, cfg.UseTypes, out hasLower, argInfo.Name, childAll2) : new ReadOnlyCollection<Args>(0);
+                    var argChild = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? GetArgChild(current.outType, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, instance, cfg.UseTypes, out hasLower, argInfo.Name, childAll2) : new ReadOnlyCollection<Args>(0);
 
                     var arg = new Args(argInfo.Name,
                     argInfo.ParameterType,
@@ -906,7 +968,7 @@ namespace Business
                 //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
-                var meta = new MetaData(commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, $"{space}.{method.Name}", method.Name, fullName, method.ReturnType.GetTypeInfo(), cfg.ResultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.GetCommandGroup(cfg.Info.CommandGroupDefault, method.Name), useTypePosition, GetMethodTypeFullName(fullName, args));
+                var meta = new MetaData(commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, $"{space}.{method.Name}", method.Name, fullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, hasObject, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.GetCommandGroup(cfg.Info.CommandGroupDefault, method.Name), useTypePosition, GetMethodTypeFullName(fullName, args));
 
                 if (!metaData.dictionary.TryAdd(method.Name, meta))
                 {
@@ -937,14 +999,14 @@ namespace Business
 
         #region GetArgAttr        
 
-        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<AttributeBase> attributes, System.Type memberType, System.Type resultType, dynamic business, string path)
+        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<AttributeBase> attributes, System.Type memberType, System.Type resultType, System.Type resultTypeDefinition, dynamic business, string path)
         {
             var argAttr = attributes.Where(c => c is ArgumentAttribute).Cast<ArgumentAttribute>().ToList();
             GetArgAttrSort(argAttr);
-            return Bind.GetArgAttr(argAttr, resultType, business, path, memberType);
+            return Bind.GetArgAttr(argAttr, resultType, resultTypeDefinition, business, path, memberType);
         }
 
-        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<ArgumentAttribute> argAttr, System.Type resultType, dynamic business, string path, System.Type memberType)
+        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<ArgumentAttribute> argAttr, System.Type resultType, System.Type resultTypeDefinition, dynamic business, string path, System.Type memberType)
         {
             //argAttr = argAttr.FindAll(c => c.Enable);
             //argAttr.Sort(ComparisonHelper<Attributes.ArgumentAttribute>.CreateComparer(c =>c.State.ConvertErrorState()));
@@ -960,6 +1022,7 @@ namespace Business
                 //if (string.IsNullOrWhiteSpace(item.Group)) { item.Group = groupDefault; }
 
                 item.Meta.resultType = resultType;
+                item.Meta.resultTypeDefinition = resultTypeDefinition;
                 item.Meta.Business = business;
                 item.Meta.Member = path;
                 item.Meta.MemberType = memberType;
@@ -997,7 +1060,7 @@ namespace Business
 
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<System.Type> definitions, System.Type resultType, object business, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childAll)
+        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<System.Type> definitions, System.Type resultType, System.Type resultTypeDefinition, object business, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childAll)
         {
             hasLower = false;
 
@@ -1073,11 +1136,11 @@ namespace Business
 
                 argAttrAll = argAttrAll.Distinct();
 
-                var argGroup = GetArgGroup(argAttrAll, current, path2, path, commands, resultType, business, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
+                var argGroup = GetArgGroup(argAttrAll, current, path2, path, commands, resultType, resultTypeDefinition, business, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
 
                 var hasLower3 = false;
                 var childAll2 = hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                var argChild = hasDefinition ? GetArgChild(current.outType, path2, commands, ref definitions, resultType, business, useTypes, out hasLower3, root, childAll2) : new ReadOnlyCollection<Args>(0);
+                var argChild = hasDefinition ? GetArgChild(current.outType, path2, commands, ref definitions, resultType, resultTypeDefinition, business, useTypes, out hasLower3, root, childAll2) : new ReadOnlyCollection<Args>(0);
 
                 if (hasLower2 || hasLower3)
                 {
@@ -1130,12 +1193,12 @@ namespace Business
         /// <returns></returns>
         internal static bool GroupEquals(GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string path, string owner, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, object business, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string path, string owner, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, object business, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
         {
             hasLower = false;
             hasCollectionAttr = false;
 
-            var argAttrs = GetArgAttr(argAttrAll, current.outType, resultType, business, path);
+            var argAttrs = GetArgAttr(argAttrAll, current.outType, resultType, resultTypeDefinition, business, path);
 
             var nick = argAttrAll.GetAttr<NickAttribute>();
 
@@ -1167,6 +1230,7 @@ namespace Business
 
                     attr.Meta.Business = c.Meta.Business;
                     attr.Meta.resultType = c.Meta.resultType;
+                    attr.Meta.resultTypeDefinition = c.Meta.resultTypeDefinition;
                     attr.Meta.MemberType = c.Meta.MemberType;
                     attr.Meta.HasProcesIArg = c.Meta.HasProcesIArg;
 
@@ -1192,7 +1256,7 @@ namespace Business
                 if (default == owner && current.hasIArg && null == argAttr.First.Value)
                 {
                     //if (default == owner) ?? Is the first level added or every level added?
-                    argAttr.TryAdd(new ArgumentDefaultAttribute(resultType) { Declaring = AttributeBase.DeclaringType.Parameter });
+                    argAttr.TryAdd(new ArgumentDefaultAttribute(resultType, resultTypeDefinition) { Declaring = AttributeBase.DeclaringType.Parameter });
 
                     if (!hasLower) { hasLower = true; }
                 }
@@ -1221,13 +1285,13 @@ namespace Business
 
     public class CommandGroup : ConcurrentReadOnlyDictionary<string, ConcurrentReadOnlyDictionary<string, Command>>
     {
-        readonly System.Type resultType;
+        readonly System.Type resultTypeDefinition;
 
         readonly string groupDefault;
 
-        public CommandGroup(System.Type resultType, string groupDefault)
+        public CommandGroup(System.Type resultTypeDefinition, string groupDefault)
         {
-            this.resultType = resultType;
+            this.resultTypeDefinition = resultTypeDefinition;
             this.groupDefault = groupDefault;
         }
 
@@ -1251,7 +1315,7 @@ namespace Business
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? Bind.CmdError(resultType, cmd) : command.Call(args, useObj);
+            return null == command ? Bind.CmdError(resultTypeDefinition, cmd) : command.Call(args, useObj);
         }
 
         public virtual Result Call<Result>(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
@@ -1272,7 +1336,7 @@ namespace Business
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.CmdError(resultType, cmd)) : await command.AsyncCall(args, useObj);
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.CmdError(resultTypeDefinition, cmd)) : await command.AsyncCall(args, useObj);
         }
 
         public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
@@ -1366,7 +1430,7 @@ namespace Business
             }
             catch (System.Exception ex)
             {
-                return ResultFactory.ResultCreate(Meta.ResultType, 0, System.Convert.ToString(Help.ExceptionWrite(ex)));
+                return ResultFactory.CreateMeta(Meta, 0, System.Convert.ToString(Help.ExceptionWrite(ex)));
             }
         }
         public virtual Result Call<Result>(object[] args, params UseEntry[] useObj) => Call(args, useObj);
@@ -1386,12 +1450,20 @@ namespace Business
                 }
                 else
                 {
-                    using (var task = System.Threading.Tasks.Task.Factory.StartNew(obj => { var obj2 = (dynamic)obj; return obj2.call(obj2.args); }, new { call, args = GetAgs(args, useObj) })) { return await task; }
+                    using (var task = System.Threading.Tasks.Task.Factory.StartNew(obj =>
+                    {
+                        var obj2 = (dynamic)obj;
+                        return obj2.call(obj2.args);
+
+                    }, new { call, args = GetAgs(args, useObj) }))
+                    {
+                        return await task;
+                    }
                 }
             }
             catch (System.Exception ex)
             {
-                return await System.Threading.Tasks.Task.FromResult(ResultFactory.ResultCreate(Meta.ResultType, 0, System.Convert.ToString(Help.ExceptionWrite(ex))));
+                return await System.Threading.Tasks.Task.FromResult(ResultFactory.CreateMeta(Meta, 0, System.Convert.ToString(Help.ExceptionWrite(ex))));
             }
         }
 
@@ -1581,12 +1653,19 @@ namespace Business.Meta
         /// </summary>
         /// <param name="commandGroup"></param>
         /// <param name="args"></param>
+        /// <param name="argAll"></param>
         /// <param name="iArgs"></param>
         /// <param name="metaLogger"></param>
         /// <param name="path"></param>
         /// <param name="name"></param>
         /// <param name="fullName"></param>
+        /// <param name="hasAsync"></param>
+        /// <param name="hasReturn"></param>
+        /// <param name="hasIResult"></param>
+        /// <param name="hasIResultGeneric"></param>
+        /// <param name="hasObject"></param>
         /// <param name="returnType"></param>
+        /// <param name="resultTypeDefinition"></param>
         /// <param name="resultType"></param>
         /// <param name="defaultValue"></param>
         /// <param name="attributes"></param>
@@ -1594,7 +1673,7 @@ namespace Business.Meta
         /// <param name="groupDefault"></param>
         /// <param name="useTypePosition"></param>
         /// <param name="methodTypeFullName"></param>
-        public MetaData(ConcurrentReadOnlyDictionary<string, Attributes.CommandAttribute> commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ConcurrentReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, TypeInfo returnType, System.Type resultType, object[] defaultValue, System.Collections.Generic.List<Attributes.AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName)
+        public MetaData(ConcurrentReadOnlyDictionary<string, Attributes.CommandAttribute> commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ConcurrentReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, bool hasObject, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, object[] defaultValue, System.Collections.Generic.List<Attributes.AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName)
         {
             CommandGroup = commandGroup;
             Args = args;
@@ -1608,15 +1687,18 @@ namespace Business.Meta
             //this.returnType = returnType;
             //this.hasAsync = Utils.Help.IsAssignableFrom(typeof(System.Threading.Tasks.Task<>).GetTypeInfo(), returnType, out System.Type[] arguments) || typeof(System.Threading.Tasks.Task).IsAssignableFrom(returnType);
             //typeof(void) != method.ReturnType
-            HasAsync = Help.IsAssignableFrom(typeof(System.Threading.Tasks.Task<>).GetTypeInfo(), returnType, out System.Type[] arguments) || returnType == typeof(System.Threading.Tasks.Task);
-            HasReturn = !(typeof(void) == returnType || (HasAsync && null == arguments));
+            HasAsync = hasAsync;// Help.IsAssignableFrom(typeof(System.Threading.Tasks.Task<>), returnType, out System.Type[] arguments) || returnType == typeof(System.Threading.Tasks.Task);
+            HasReturn = hasReturn;// !(typeof(void) == returnType || (HasAsync && null == asyncArguments));
             //typeof(IResult).IsAssignableFrom(method.ReturnType),
             //typeof(System.Object).Equals(method.ReturnType)
-            var hasGeneric = HasAsync && null != arguments;
-            HasIResult = typeof(Result.IResult).IsAssignableFrom(hasGeneric ? arguments[0] : returnType);
-            HasObject = typeof(object).Equals(hasGeneric ? arguments[0] : returnType);
-            ReturnType = hasGeneric ? arguments[0] : returnType;
-            ResultType = resultType;
+            //var hasAsyncGeneric = HasAsync && null != asyncArguments;
+            HasIResult = hasIResult;// typeof(Result.IResult<>).IsAssignableFrom(hasAsyncGeneric ? asyncArguments[0] : returnType, out System.Type[] resultGeneric) || typeof(Result.IResult).IsAssignableFrom(hasAsyncGeneric ? asyncArguments[0] : returnType);
+            HasIResultGeneric = hasIResultGeneric;
+            HasObject = hasObject;// typeof(object).Equals(hasAsyncGeneric ? asyncArguments[0] : returnType);
+            ReturnType = returnType;// hasAsyncGeneric ? asyncArguments[0] : returnType;
+            ResultTypeDefinition = resultTypeDefinition;
+            //ReturnResult = HasIResult ? resultType.MakeGenericType(null != resultGeneric ? resultGeneric[0] : typeof(string)) : null;
+            ResultType = resultType;// resultType.MakeGenericType(HasIResult && null != resultGeneric ? resultGeneric[0] : typeof(string));
             DefaultValue = defaultValue;
             //this.logAttrs = logAttrs;
             Attributes = attributes;
@@ -1648,10 +1730,14 @@ namespace Business.Meta
         public bool HasReturn { get; private set; }
         //==============hasIResult===================//
         public bool HasIResult { get; private set; }
+        //==============hasIResultGeneric===================//
+        public bool HasIResultGeneric { get; private set; }
         //==============hasObject===================//
         public bool HasObject { get; private set; }
         //==============returnType===================//
         public System.Type ReturnType { get; private set; }
+        //==============resultTypeDefinition===================//
+        public System.Type ResultTypeDefinition { get; private set; }
         //==============resultType===================//
         public System.Type ResultType { get; private set; }
         //==============hasAsync===================//

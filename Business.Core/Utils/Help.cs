@@ -119,7 +119,7 @@ namespace Business.Utils
                         //add default convert
                         if (arg.HasIArg && NodeState.DAT != first.State)
                         {
-                            var attr = new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Declaring = Attributes.AttributeBase.DeclaringType.Parameter };
+                            var attr = new Attributes.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition) { Declaring = Attributes.AttributeBase.DeclaringType.Parameter };
                             item2.Value.Attrs.TryAdd(attr);
                             //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
                         }
@@ -303,7 +303,7 @@ namespace Business.Utils
                         //add default convert
                         if (arg.HasIArg && NodeState.DAT != first.State)
                         {
-                            var attr = new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Declaring = Attributes.AttributeBase.DeclaringType.Parameter };
+                            var attr = new Attributes.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition) { Declaring = Attributes.AttributeBase.DeclaringType.Parameter };
                             item2.Value.Attrs.TryAdd(attr);
                         }
                     }

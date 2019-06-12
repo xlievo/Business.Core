@@ -390,7 +390,7 @@ namespace Business
 
         //internal readonly string ID = System.Guid.NewGuid().ToString("N");
 
-        public Configer(Attributes.Info info, System.Type resultType, System.Collections.Generic.List<Attributes.AttributeBase> attributes, bool loggerUseThreadPool = true)
+        public Configer(Attributes.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Attributes.AttributeBase> attributes, bool loggerUseThreadPool = true)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -401,7 +401,7 @@ namespace Business
                     */
         {
             this.Info = info;
-            this.ResultType = resultType;
+            this.ResultTypeDefinition = resultTypeDefinition;
             //this.token = token;
             //this.requestType = requestType;
             //this.requestDefault = RequestCreate<object>();
@@ -429,7 +429,7 @@ namespace Business
         public ReadOnlyCollection<Attributes.AttributeBase> Attributes { get; private set; }
         public Attributes.Info Info { get; private set; }
         //public bool EnableWatcher { get; }
-        public System.Type ResultType { get; private set; }
+        public System.Type ResultTypeDefinition { get; private set; }
         public ReadOnlyCollection<string> UseTypes { get; private set; }
         public Document.Doc Doc { get; internal set; }
 

@@ -24,10 +24,8 @@ public class ResultObject<Type> : Business.Result.ResultObject<Type>
 {
     //static ResultObject() => MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
 
-    public ResultObject(Type data, System.Type dataType, int state = 1, string message = null, System.Type genericType = null)
-        : base(data, dataType, state, message, genericType) { }
-
-    public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }
+    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericType = null)
+        : base(dataType, data, state, message, genericType) { }
 
     [MessagePack.IgnoreMember]
     public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
@@ -318,29 +316,189 @@ public class BusinessMember : BusinessBase
         dynamic a = new { a = "aaa" };
         return this.ResultCreate(a);
     }
+    public virtual async Task<dynamic> Test005e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test005ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult> Test005a()
+    {
+        dynamic a = new { a = "aaa" };
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult> Test005ae()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<IResult> Test005aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult Test005b()
+    {
+        dynamic a = new { a = "aaa" };
+        return this.ResultCreate(a);
+    }
+    public virtual IResult Test005be()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual IResult Test005bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> Test006()
     {
         string a = "aaa";
         return this.ResultCreate(a);
     }
+    public virtual async Task<dynamic> Test006e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test006ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<string>> Test006a()
+    {
+        string a = "aaa";
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult<string>> Test006ae()
+    {
+        return this.ResultCreate<string>(-999, "test error");
+    }
+    public virtual async Task<IResult<string>> Test006aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<string> Test006b()
+    {
+        string a = "aaa";
+        return this.ResultCreate(a);
+    }
+    public virtual IResult<string> Test006be()
+    {
+        return this.ResultCreate<string>(-999, "test error");
+    }
+    public virtual IResult<string> Test006bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> Test007() => this.ResultCreate(-200m);
+    public virtual async Task<dynamic> Test007e() => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> Test007ex() => throw new System.Exception("exception");
+    public virtual async Task<IResult<decimal>> Test007a() => this.ResultCreate(-200m);
+    public virtual async Task<IResult<decimal>> Test007ae() => this.ResultCreate<decimal>(-999, "test error");
+    public virtual async Task<IResult<decimal>> Test007aex() => throw new System.Exception("exception");
+    public virtual IResult<decimal> Test007b() => this.ResultCreate(-200m);
+    public virtual IResult<decimal> Test007be() => this.ResultCreate<decimal>(-999, "test error");
+    public virtual IResult<decimal> Test007bex() => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> Test008() => this.ResultCreate(data: -200);
+    public virtual async Task<dynamic> Test008e() => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> Test008ex() => throw new System.Exception("exception");
+    public virtual async Task<IResult<int>> Test008a() => this.ResultCreate(data: -200);
+    public virtual async Task<IResult<int>> Test008ae() => this.ResultCreate<int>(-999, "test error");
+    public virtual async Task<IResult<int>> Test008aex() => throw new System.Exception("exception");
+    public virtual IResult<int> Test008b() => this.ResultCreate(data: -200);
+    public virtual IResult<int> Test008be() => this.ResultCreate<int>(-999, "test error");
+    public virtual IResult<int> Test008bex() => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> Test009()
     {
         dynamic a = null;
         return this.ResultCreate(a, "111", 111);
     }
+    public virtual async Task<dynamic> Test009e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test009ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<dynamic>> Test009a()
+    {
+        dynamic a = null;
+        return this.ResultCreate(a, "111", 111);
+    }
+    public virtual async Task<IResult<dynamic>> Test009ae()
+    {
+        return this.ResultCreate<dynamic>(-999, "test error");
+    }
+    public virtual async Task<IResult<dynamic>> Test009aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<dynamic> Test009b()
+    {
+        dynamic a = null;
+        return this.ResultCreate(a, "111", 111);
+    }
+    public virtual IResult<dynamic> Test009be()
+    {
+        return this.ResultCreate<dynamic>(-999, "test error");
+    }
+    public virtual IResult<dynamic> Test009bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> Test010() => this.ResultCreate(null);
+    public virtual async Task<dynamic> Test010e() => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> Test010ex() => throw new System.Exception("exception");
+    public virtual async Task<IResult> Test010a() => this.ResultCreate(null);
+    public virtual async Task<IResult> Test010ae() => this.ResultCreate(-999, "test error");
+    public virtual async Task<IResult> Test010aex() => throw new System.Exception("exception");
+    public virtual IResult Test010b() => this.ResultCreate(null);
+    public virtual IResult Test010be() => this.ResultCreate(-999, "test error");
+    public virtual IResult Test010bex() => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> Test011()
     {
         int? a = null;
         return this.ResultCreate(a);
+    }
+    public virtual async Task<dynamic> Test011e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test011ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<int?>> Test011a()
+    {
+        int? a = null;
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult<int?>> Test011ae()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual async Task<IResult<int?>> Test011aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<int?> Test011b()
+    {
+        int? a = null;
+        return this.ResultCreate(a);
+    }
+    public virtual IResult<int?> Test011be()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual IResult<int?> Test011bex()
+    {
+        throw new System.Exception("exception");
     }
 
     public virtual async Task<dynamic> Test012()
@@ -348,16 +506,83 @@ public class BusinessMember : BusinessBase
         int? a = 111;
         return this.ResultCreate(a);
     }
+    public virtual async Task<dynamic> Test012e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test012ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<int?>> Test012a()
+    {
+        int? a = 111;
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult<int?>> Test012ae()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual async Task<IResult<int?>> Test012aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<int?> Test012b()
+    {
+        int? a = 111;
+        return this.ResultCreate(a);
+    }
+    public virtual IResult<int?> Test012be()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual IResult<int?> Test012bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> TestUse01([Use(true)]dynamic use01) => this.ResultCreate(use01);
+    public virtual async Task<dynamic> TestUse01e([Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestUse01ex([Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual async Task<IResult> TestUse01a([Use(true)]dynamic use01) => this.ResultCreate(use01);
+    public virtual async Task<IResult> TestUse01ae([Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<IResult> TestUse01aex([Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual IResult TestUse01b([Use(true)]dynamic use01) => this.ResultCreate(use01);
+    public virtual IResult TestUse01be([Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual IResult TestUse01bex([Use(true)]dynamic use01) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestUse02(IToken token = default) => this.ResultCreate(token);
+    public virtual async Task<dynamic> TestUse02e(IToken token = default) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestUse02ex(IToken token = default) => throw new System.Exception("exception");
+    public virtual async Task<IResult<IToken>> TestUse02a(IToken token = default) => this.ResultCreate(token);
+    public virtual async Task<IResult<IToken>> TestUse02ae(IToken token = default) => this.ResultCreate<IToken>(-999, "test error");
+    public virtual async Task<IResult<IToken>> TestUse02aex(IToken token = default) => throw new System.Exception("exception");
+    public virtual IResult<IToken> TestUse02b(IToken token = default) => this.ResultCreate(token);
+    public virtual IResult<IToken> TestUse02be(IToken token = default) => this.ResultCreate<IToken>(-999, "test error");
+    public virtual IResult<IToken> TestUse02bex(IToken token = default) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestUse03(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+    public virtual async Task<dynamic> TestUse03e(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestUse03ex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual async Task<IResult<string>> TestUse03a(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+    public virtual async Task<IResult<string>> TestUse03ae(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate<string>(-999, "test error");
+    public virtual async Task<IResult<string>> TestUse03aex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual IResult<string> TestUse03b(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+    public virtual IResult<string> TestUse03be(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate<string>(-999, "test error");
+    public virtual IResult<string> TestUse03bex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestAnonymous(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+    public virtual async Task<dynamic> TestAnonymouse(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestAnonymousex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual async Task<IResult> TestAnonymousa(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+    public virtual async Task<IResult> TestAnonymousae(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<IResult> TestAnonymousaex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual IResult TestAnonymousb(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+    public virtual IResult TestAnonymousbe(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual IResult TestAnonymousbex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestAnonymous2(dynamic a, [Use(true)]dynamic use01) => new { a, b = use01 };
+    public virtual async Task<dynamic> TestAnonymous2e(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
 
     public virtual async Task<dynamic> TestDynamic(dynamic a, [Use(true)]dynamic use01) => use01;
 
@@ -643,29 +868,189 @@ public class BusinessMember2 : BusinessBase<ResultObject<object>>
         dynamic a = new { a = "aaa" };
         return this.ResultCreate(a);
     }
+    public virtual async Task<dynamic> Test005e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test005ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult> Test005a()
+    {
+        dynamic a = new { a = "aaa" };
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult> Test005ae()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<IResult> Test005aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult Test005b()
+    {
+        dynamic a = new { a = "aaa" };
+        return this.ResultCreate(a);
+    }
+    public virtual IResult Test005be()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual IResult Test005bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> Test006()
     {
         string a = "aaa";
         return this.ResultCreate(a);
     }
+    public virtual async Task<dynamic> Test006e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test006ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<string>> Test006a()
+    {
+        string a = "aaa";
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult<string>> Test006ae()
+    {
+        return this.ResultCreate<string>(-999, "test error");
+    }
+    public virtual async Task<IResult<string>> Test006aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<string> Test006b()
+    {
+        string a = "aaa";
+        return this.ResultCreate(a);
+    }
+    public virtual IResult<string> Test006be()
+    {
+        return this.ResultCreate<string>(-999, "test error");
+    }
+    public virtual IResult<string> Test006bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> Test007() => this.ResultCreate(-200m);
+    public virtual async Task<dynamic> Test007e() => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> Test007ex() => throw new System.Exception("exception");
+    public virtual async Task<IResult<decimal>> Test007a() => this.ResultCreate(-200m);
+    public virtual async Task<IResult<decimal>> Test007ae() => this.ResultCreate<decimal>(-999, "test error");
+    public virtual async Task<IResult<decimal>> Test007aex() => throw new System.Exception("exception");
+    public virtual IResult<decimal> Test007b() => this.ResultCreate(-200m);
+    public virtual IResult<decimal> Test007be() => this.ResultCreate<decimal>(-999, "test error");
+    public virtual IResult<decimal> Test007bex() => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> Test008() => this.ResultCreate(data: -200);
+    public virtual async Task<dynamic> Test008e() => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> Test008ex() => throw new System.Exception("exception");
+    public virtual async Task<IResult<int>> Test008a() => this.ResultCreate(data: -200);
+    public virtual async Task<IResult<int>> Test008ae() => this.ResultCreate<int>(-999, "test error");
+    public virtual async Task<IResult<int>> Test008aex() => throw new System.Exception("exception");
+    public virtual IResult<int> Test008b() => this.ResultCreate(data: -200);
+    public virtual IResult<int> Test008be() => this.ResultCreate<int>(-999, "test error");
+    public virtual IResult<int> Test008bex() => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> Test009()
     {
         dynamic a = null;
         return this.ResultCreate(a, "111", 111);
     }
+    public virtual async Task<dynamic> Test009e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test009ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<dynamic>> Test009a()
+    {
+        dynamic a = null;
+        return this.ResultCreate(a, "111", 111);
+    }
+    public virtual async Task<IResult<dynamic>> Test009ae()
+    {
+        return this.ResultCreate<dynamic>(-999, "test error");
+    }
+    public virtual async Task<IResult<dynamic>> Test009aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<dynamic> Test009b()
+    {
+        dynamic a = null;
+        return this.ResultCreate(a, "111", 111);
+    }
+    public virtual IResult<dynamic> Test009be()
+    {
+        return this.ResultCreate<dynamic>(-999, "test error");
+    }
+    public virtual IResult<dynamic> Test009bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> Test010() => this.ResultCreate(null);
+    public virtual async Task<dynamic> Test010e() => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> Test010ex() => throw new System.Exception("exception");
+    public virtual async Task<IResult> Test010a() => this.ResultCreate(null);
+    public virtual async Task<IResult> Test010ae() => this.ResultCreate(-999, "test error");
+    public virtual async Task<IResult> Test010aex() => throw new System.Exception("exception");
+    public virtual IResult Test010b() => this.ResultCreate(null);
+    public virtual IResult Test010be() => this.ResultCreate(-999, "test error");
+    public virtual IResult Test010bex() => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> Test011()
     {
         int? a = null;
         return this.ResultCreate(a);
+    }
+    public virtual async Task<dynamic> Test011e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test011ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<int?>> Test011a()
+    {
+        int? a = null;
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult<int?>> Test011ae()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual async Task<IResult<int?>> Test011aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<int?> Test011b()
+    {
+        int? a = null;
+        return this.ResultCreate(a);
+    }
+    public virtual IResult<int?> Test011be()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual IResult<int?> Test011bex()
+    {
+        throw new System.Exception("exception");
     }
 
     public virtual async Task<dynamic> Test012()
@@ -673,16 +1058,83 @@ public class BusinessMember2 : BusinessBase<ResultObject<object>>
         int? a = 111;
         return this.ResultCreate(a);
     }
+    public virtual async Task<dynamic> Test012e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test012ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<int?>> Test012a()
+    {
+        int? a = 111;
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult<int?>> Test012ae()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual async Task<IResult<int?>> Test012aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<int?> Test012b()
+    {
+        int? a = 111;
+        return this.ResultCreate(a);
+    }
+    public virtual IResult<int?> Test012be()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual IResult<int?> Test012bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> TestUse01([Use(true)]dynamic use01) => this.ResultCreate(use01);
+    public virtual async Task<dynamic> TestUse01e([Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestUse01ex([Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual async Task<IResult> TestUse01a([Use(true)]dynamic use01) => this.ResultCreate(use01);
+    public virtual async Task<IResult> TestUse01ae([Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<IResult> TestUse01aex([Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual IResult TestUse01b([Use(true)]dynamic use01) => this.ResultCreate(use01);
+    public virtual IResult TestUse01be([Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual IResult TestUse01bex([Use(true)]dynamic use01) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestUse02(IToken token = default) => this.ResultCreate(token);
+    public virtual async Task<dynamic> TestUse02e(IToken token = default) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestUse02ex(IToken token = default) => throw new System.Exception("exception");
+    public virtual async Task<IResult<IToken>> TestUse02a(IToken token = default) => this.ResultCreate(token);
+    public virtual async Task<IResult<IToken>> TestUse02ae(IToken token = default) => this.ResultCreate<IToken>(-999, "test error");
+    public virtual async Task<IResult<IToken>> TestUse02aex(IToken token = default) => throw new System.Exception("exception");
+    public virtual IResult<IToken> TestUse02b(IToken token = default) => this.ResultCreate(token);
+    public virtual IResult<IToken> TestUse02be(IToken token = default) => this.ResultCreate<IToken>(-999, "test error");
+    public virtual IResult<IToken> TestUse02bex(IToken token = default) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestUse03(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+    public virtual async Task<dynamic> TestUse03e(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestUse03ex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual async Task<IResult<string>> TestUse03a(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+    public virtual async Task<IResult<string>> TestUse03ae(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate<string>(-999, "test error");
+    public virtual async Task<IResult<string>> TestUse03aex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual IResult<string> TestUse03b(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+    public virtual IResult<string> TestUse03be(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate<string>(-999, "test error");
+    public virtual IResult<string> TestUse03bex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestAnonymous(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+    public virtual async Task<dynamic> TestAnonymouse(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestAnonymousex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual async Task<IResult> TestAnonymousa(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+    public virtual async Task<IResult> TestAnonymousae(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<IResult> TestAnonymousaex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual IResult TestAnonymousb(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+    public virtual IResult TestAnonymousbe(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual IResult TestAnonymousbex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestAnonymous2(dynamic a, [Use(true)]dynamic use01) => new { a, b = use01 };
+    public virtual async Task<dynamic> TestAnonymous2e(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
 
     public virtual async Task<dynamic> TestDynamic(dynamic a, [Use(true)]dynamic use01) => use01;
 }
@@ -707,8 +1159,10 @@ public class BusinessMember3 : IBusiness<ResultObject<object>>
     public Action<Configer> BindBefore { get; set; }
     public IResult ResultCreate(int state) => ResultFactory.ResultCreate(this, state);
     public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.ResultCreate(this, state, message);
-    public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(this, data, message, state);
+    public IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(this, data, message, state);
     public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(this, data, message, state);
+    public IResult<Data> ResultCreate<Data>(int state) => ResultFactory.ResultCreate<Data>(this, state);
+    public IResult<Data> ResultCreate<Data>(int state = 1, string message = null) => ResultFactory.ResultCreate<Data>(this, state, message);
 
     /// <summary>
     /// This is Test001.
@@ -754,29 +1208,189 @@ public class BusinessMember3 : IBusiness<ResultObject<object>>
         dynamic a = new { a = "aaa" };
         return this.ResultCreate(a);
     }
+    public virtual async Task<dynamic> Test005e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test005ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult> Test005a()
+    {
+        dynamic a = new { a = "aaa" };
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult> Test005ae()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<IResult> Test005aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult Test005b()
+    {
+        dynamic a = new { a = "aaa" };
+        return this.ResultCreate(a);
+    }
+    public virtual IResult Test005be()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual IResult Test005bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> Test006()
     {
         string a = "aaa";
         return this.ResultCreate(a);
     }
+    public virtual async Task<dynamic> Test006e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test006ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<string>> Test006a()
+    {
+        string a = "aaa";
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult<string>> Test006ae()
+    {
+        return this.ResultCreate<string>(-999, "test error");
+    }
+    public virtual async Task<IResult<string>> Test006aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<string> Test006b()
+    {
+        string a = "aaa";
+        return this.ResultCreate(a);
+    }
+    public virtual IResult<string> Test006be()
+    {
+        return this.ResultCreate<string>(-999, "test error");
+    }
+    public virtual IResult<string> Test006bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> Test007() => this.ResultCreate(-200m);
+    public virtual async Task<dynamic> Test007e() => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> Test007ex() => throw new System.Exception("exception");
+    public virtual async Task<IResult<decimal>> Test007a() => this.ResultCreate(-200m);
+    public virtual async Task<IResult<decimal>> Test007ae() => this.ResultCreate<decimal>(-999, "test error");
+    public virtual async Task<IResult<decimal>> Test007aex() => throw new System.Exception("exception");
+    public virtual IResult<decimal> Test007b() => this.ResultCreate(-200m);
+    public virtual IResult<decimal> Test007be() => this.ResultCreate<decimal>(-999, "test error");
+    public virtual IResult<decimal> Test007bex() => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> Test008() => this.ResultCreate(data: -200);
+    public virtual async Task<dynamic> Test008e() => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> Test008ex() => throw new System.Exception("exception");
+    public virtual async Task<IResult<int>> Test008a() => this.ResultCreate(data: -200);
+    public virtual async Task<IResult<int>> Test008ae() => this.ResultCreate<int>(-999, "test error");
+    public virtual async Task<IResult<int>> Test008aex() => throw new System.Exception("exception");
+    public virtual IResult<int> Test008b() => this.ResultCreate(data: -200);
+    public virtual IResult<int> Test008be() => this.ResultCreate<int>(-999, "test error");
+    public virtual IResult<int> Test008bex() => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> Test009()
     {
         dynamic a = null;
         return this.ResultCreate(a, "111", 111);
     }
+    public virtual async Task<dynamic> Test009e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test009ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<dynamic>> Test009a()
+    {
+        dynamic a = null;
+        return this.ResultCreate(a, "111", 111);
+    }
+    public virtual async Task<IResult<dynamic>> Test009ae()
+    {
+        return this.ResultCreate<dynamic>(-999, "test error");
+    }
+    public virtual async Task<IResult<dynamic>> Test009aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<dynamic> Test009b()
+    {
+        dynamic a = null;
+        return this.ResultCreate(a, "111", 111);
+    }
+    public virtual IResult<dynamic> Test009be()
+    {
+        return this.ResultCreate<dynamic>(-999, "test error");
+    }
+    public virtual IResult<dynamic> Test009bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> Test010() => this.ResultCreate(null);
+    public virtual async Task<dynamic> Test010e() => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> Test010ex() => throw new System.Exception("exception");
+    public virtual async Task<IResult> Test010a() => this.ResultCreate(null);
+    public virtual async Task<IResult> Test010ae() => this.ResultCreate(-999, "test error");
+    public virtual async Task<IResult> Test010aex() => throw new System.Exception("exception");
+    public virtual IResult Test010b() => this.ResultCreate(null);
+    public virtual IResult Test010be() => this.ResultCreate(-999, "test error");
+    public virtual IResult Test010bex() => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> Test011()
     {
         int? a = null;
         return this.ResultCreate(a);
+    }
+    public virtual async Task<dynamic> Test011e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test011ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<int?>> Test011a()
+    {
+        int? a = null;
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult<int?>> Test011ae()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual async Task<IResult<int?>> Test011aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<int?> Test011b()
+    {
+        int? a = null;
+        return this.ResultCreate(a);
+    }
+    public virtual IResult<int?> Test011be()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual IResult<int?> Test011bex()
+    {
+        throw new System.Exception("exception");
     }
 
     public virtual async Task<dynamic> Test012()
@@ -784,16 +1398,83 @@ public class BusinessMember3 : IBusiness<ResultObject<object>>
         int? a = 111;
         return this.ResultCreate(a);
     }
+    public virtual async Task<dynamic> Test012e()
+    {
+        return this.ResultCreate(-999, "test error");
+    }
+    public virtual async Task<dynamic> Test012ex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual async Task<IResult<int?>> Test012a()
+    {
+        int? a = 111;
+        return this.ResultCreate(a);
+    }
+    public virtual async Task<IResult<int?>> Test012ae()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual async Task<IResult<int?>> Test012aex()
+    {
+        throw new System.Exception("exception");
+    }
+    public virtual IResult<int?> Test012b()
+    {
+        int? a = 111;
+        return this.ResultCreate(a);
+    }
+    public virtual IResult<int?> Test012be()
+    {
+        return this.ResultCreate<int?>(-999, "test error");
+    }
+    public virtual IResult<int?> Test012bex()
+    {
+        throw new System.Exception("exception");
+    }
 
     public virtual async Task<dynamic> TestUse01([Use(true)]dynamic use01) => this.ResultCreate(use01);
+    public virtual async Task<dynamic> TestUse01e([Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestUse01ex([Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual async Task<IResult> TestUse01a([Use(true)]dynamic use01) => this.ResultCreate(use01);
+    public virtual async Task<IResult> TestUse01ae([Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<IResult> TestUse01aex([Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual IResult TestUse01b([Use(true)]dynamic use01) => this.ResultCreate(use01);
+    public virtual IResult TestUse01be([Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual IResult TestUse01bex([Use(true)]dynamic use01) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestUse02(IToken token = default) => this.ResultCreate(token);
+    public virtual async Task<dynamic> TestUse02e(IToken token = default) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestUse02ex(IToken token = default) => throw new System.Exception("exception");
+    public virtual async Task<IResult<IToken>> TestUse02a(IToken token = default) => this.ResultCreate(token);
+    public virtual async Task<IResult<IToken>> TestUse02ae(IToken token = default) => this.ResultCreate<IToken>(-999, "test error");
+    public virtual async Task<IResult<IToken>> TestUse02aex(IToken token = default) => throw new System.Exception("exception");
+    public virtual IResult<IToken> TestUse02b(IToken token = default) => this.ResultCreate(token);
+    public virtual IResult<IToken> TestUse02be(IToken token = default) => this.ResultCreate<IToken>(-999, "test error");
+    public virtual IResult<IToken> TestUse02bex(IToken token = default) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestUse03(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+    public virtual async Task<dynamic> TestUse03e(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestUse03ex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual async Task<IResult<string>> TestUse03a(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+    public virtual async Task<IResult<string>> TestUse03ae(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate<string>(-999, "test error");
+    public virtual async Task<IResult<string>> TestUse03aex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual IResult<string> TestUse03b(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate($"{a}{use01}");
+    public virtual IResult<string> TestUse03be(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate<string>(-999, "test error");
+    public virtual IResult<string> TestUse03bex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestAnonymous(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+    public virtual async Task<dynamic> TestAnonymouse(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestAnonymousex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual async Task<IResult> TestAnonymousa(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+    public virtual async Task<IResult> TestAnonymousae(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<IResult> TestAnonymousaex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
+    public virtual IResult TestAnonymousb(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(new { a, b = use01 });
+    public virtual IResult TestAnonymousbe(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual IResult TestAnonymousbex(dynamic a, [Use(true)]dynamic use01) => throw new System.Exception("exception");
 
     public virtual async Task<dynamic> TestAnonymous2(dynamic a, [Use(true)]dynamic use01) => new { a, b = use01 };
+    public virtual async Task<dynamic> TestAnonymous2e(dynamic a, [Use(true)]dynamic use01) => this.ResultCreate(-999, "test error");
 
     public virtual async Task<dynamic> TestDynamic(dynamic a, [Use(true)]dynamic use01) => use01;
 }
@@ -825,8 +1506,8 @@ public class TestBusinessMember
     [TestMethod]
     public void TestCfgResultType()
     {
-        Assert.AreEqual(Cfg.ResultType, typeof(Business.Result.ResultObject<>).GetGenericTypeDefinition());
-        Assert.AreEqual(typeof(IResult).IsAssignableFrom(Cfg.ResultType), true);
+        Assert.AreEqual(Cfg.ResultTypeDefinition, typeof(Business.Result.ResultObject<>).GetGenericTypeDefinition());
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(Cfg.ResultTypeDefinition), true);
     }
 
     [TestMethod]
@@ -1000,52 +1681,342 @@ public class TestBusinessMember
         var t8 = AsyncCall(business.Command, "Test005");
         Assert.AreEqual(t8.Message, null);
         Assert.AreEqual(t8.Data.a, "aaa");
+        t8 = AsyncCall(business.Command, "Test005e");
+        Assert.AreEqual(t8.Message, "test error");
+        Assert.AreEqual(t8.State, -999);
+        t8 = AsyncCall(business.Command, "Test005ex");
+        Assert.IsTrue(t8.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t8.State, 0);
+        t8 = AsyncCall(business.Command, "Test005a");
+        Assert.AreEqual(t8.Message, null);
+        Assert.AreEqual(t8.Data.a, "aaa");
+        t8 = AsyncCall(business.Command, "Test005ae");
+        Assert.AreEqual(t8.Message, "test error");
+        Assert.AreEqual(t8.State, -999);
+        t8 = AsyncCall(business.Command, "Test005aex");
+        Assert.IsTrue(t8.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t8.State, 0);
+        t8 = AsyncCall(business.Command, "Test005b");
+        Assert.AreEqual(t8.Message, null);
+        Assert.AreEqual(t8.Data.a, "aaa");
+        t8 = AsyncCall(business.Command, "Test005be");
+        Assert.AreEqual(t8.Message, "test error");
+        Assert.AreEqual(t8.State, -999);
+        t8 = AsyncCall(business.Command, "Test005bex");
+        Assert.IsTrue(t8.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t8.State, 0);
 
         var t9 = AsyncCall(business.Command, "Test006");
         Assert.AreEqual(t9.Message, null);
         Assert.AreEqual(t9.Data, "aaa");
+        t9 = AsyncCall(business.Command, "Test006e");
+        Assert.AreEqual(t9.Message, "test error");
+        Assert.AreEqual(t9.State, -999);
+        t9 = AsyncCall(business.Command, "Test006ex");
+        Assert.IsTrue(t9.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t9.State, 0);
+        t9 = AsyncCall(business.Command, "Test006a");
+        Assert.AreEqual(t9.Message, null);
+        Assert.AreEqual(t9.Data, "aaa");
+        t9 = AsyncCall(business.Command, "Test006ae");
+        Assert.AreEqual(t9.Message, "test error");
+        Assert.AreEqual(t9.State, -999);
+        t9 = AsyncCall(business.Command, "Test006aex");
+        Assert.IsTrue(t9.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t9.State, 0);
+        t9 = AsyncCall(business.Command, "Test006b");
+        Assert.AreEqual(t9.Message, null);
+        Assert.AreEqual(t9.Data, "aaa");
+        t9 = AsyncCall(business.Command, "Test006be");
+        Assert.AreEqual(t9.Message, "test error");
+        Assert.AreEqual(t9.State, -999);
+        t9 = AsyncCall(business.Command, "Test006bex");
+        Assert.IsTrue(t9.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t9.State, 0);
 
         var t10 = AsyncCall(business.Command, "Test007");
         Assert.AreEqual(t10.Message, null);
         Assert.AreEqual(t10.Data, -200m);
+        t10 = AsyncCall(business.Command, "Test007e");
+        Assert.AreEqual(t10.Message, "test error");
+        Assert.AreEqual(t10.State, -999);
+        t10 = AsyncCall(business.Command, "Test007ex");
+        Assert.IsTrue(t10.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t10.State, 0);
+        t10 = AsyncCall(business.Command, "Test007a");
+        Assert.AreEqual(t10.Message, null);
+        Assert.AreEqual(t10.Data, -200m);
+        t10 = AsyncCall(business.Command, "Test007ae");
+        Assert.AreEqual(t10.Message, "test error");
+        Assert.AreEqual(t10.State, -999);
+        t10 = AsyncCall(business.Command, "Test007aex");
+        Assert.IsTrue(t10.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t10.State, 0);
+        t10 = AsyncCall(business.Command, "Test007b");
+        Assert.AreEqual(t10.Message, null);
+        Assert.AreEqual(t10.Data, -200m);
+        t10 = AsyncCall(business.Command, "Test007be");
+        Assert.AreEqual(t10.Message, "test error");
+        Assert.AreEqual(t10.State, -999);
+        t10 = AsyncCall(business.Command, "Test007bex");
+        Assert.IsTrue(t10.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t10.State, 0);
 
         var t11 = AsyncCall(business.Command, "Test008");
         Assert.AreEqual(t11.Message, null);
         Assert.AreEqual(t11.Data, -200);
+        t11 = AsyncCall(business.Command, "Test008e");
+        Assert.AreEqual(t11.Message, "test error");
+        Assert.AreEqual(t11.State, -999);
+        t11 = AsyncCall(business.Command, "Test008ex");
+        Assert.IsTrue(t11.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t11.State, 0);
+        t11 = AsyncCall(business.Command, "Test008a");
+        Assert.AreEqual(t11.Message, null);
+        Assert.AreEqual(t11.Data, -200);
+        t11 = AsyncCall(business.Command, "Test008ae");
+        Assert.AreEqual(t11.Message, "test error");
+        Assert.AreEqual(t11.State, -999);
+        t11 = AsyncCall(business.Command, "Test008aex");
+        Assert.IsTrue(t11.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t11.State, 0);
+        t11 = AsyncCall(business.Command, "Test008b");
+        Assert.AreEqual(t11.Message, null);
+        Assert.AreEqual(t11.Data, -200);
+        t11 = AsyncCall(business.Command, "Test008be");
+        Assert.AreEqual(t11.Message, "test error");
+        Assert.AreEqual(t11.State, -999);
+        t11 = AsyncCall(business.Command, "Test008bex");
+        Assert.IsTrue(t11.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t11.State, 0);
 
         var t12 = AsyncCall(business.Command, "Test009");
         Assert.AreEqual(t12.Message, "111");
         Assert.AreEqual(t12.State, 111);
         Assert.AreEqual(t12.Data, null);
+        t12 = AsyncCall(business.Command, "Test009e");
+        Assert.AreEqual(t12.Message, "test error");
+        Assert.AreEqual(t12.State, -999);
+        t12 = AsyncCall(business.Command, "Test009ex");
+        Assert.IsTrue(t12.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t12.State, 0);
+        t12 = AsyncCall(business.Command, "Test009a");
+        Assert.AreEqual(t12.Message, "111");
+        Assert.AreEqual(t12.State, 111);
+        Assert.AreEqual(t12.Data, null);
+        t12 = AsyncCall(business.Command, "Test009ae");
+        Assert.AreEqual(t12.Message, "test error");
+        Assert.AreEqual(t12.State, -999);
+        t12 = AsyncCall(business.Command, "Test009aex");
+        Assert.IsTrue(t12.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t12.State, 0);
+        t12 = AsyncCall(business.Command, "Test009b");
+        Assert.AreEqual(t12.Message, "111");
+        Assert.AreEqual(t12.State, 111);
+        Assert.AreEqual(t12.Data, null);
+        t12 = AsyncCall(business.Command, "Test009be");
+        Assert.AreEqual(t12.Message, "test error");
+        Assert.AreEqual(t12.State, -999);
+        t12 = AsyncCall(business.Command, "Test009bex");
+        Assert.IsTrue(t12.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t12.State, 0);
 
         var t13 = AsyncCall(business.Command, "Test010");
         Assert.AreEqual(t13.Data, null);
+        t13 = AsyncCall(business.Command, "Test010e");
+        Assert.AreEqual(t13.Message, "test error");
+        Assert.AreEqual(t13.State, -999);
+        t13 = AsyncCall(business.Command, "Test010ex");
+        Assert.IsTrue(t13.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t13.State, 0);
+        t13 = AsyncCall(business.Command, "Test010a");
+        Assert.AreEqual(t13.Data, null);
+        t13 = AsyncCall(business.Command, "Test010ae");
+        Assert.AreEqual(t13.Message, "test error");
+        Assert.AreEqual(t13.State, -999);
+        t13 = AsyncCall(business.Command, "Test010aex");
+        Assert.IsTrue(t13.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t13.State, 0);
+        t13 = AsyncCall(business.Command, "Test010b");
+        Assert.AreEqual(t13.Data, null);
+        t13 = AsyncCall(business.Command, "Test010be");
+        Assert.AreEqual(t13.Message, "test error");
+        Assert.AreEqual(t13.State, -999);
+        t13 = AsyncCall(business.Command, "Test010bex");
+        Assert.IsTrue(t13.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t13.State, 0);
 
         var t14 = AsyncCall(business.Command, "Test011");
         Assert.AreEqual(t14.Message, null);
         Assert.AreEqual(t14.Data, null);
+        t14 = AsyncCall(business.Command, "Test011e");
+        Assert.AreEqual(t14.Message, "test error");
+        Assert.AreEqual(t14.State, -999);
+        t14 = AsyncCall(business.Command, "Test011ex");
+        Assert.IsTrue(t14.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t14.State, 0);
+        t14 = AsyncCall(business.Command, "Test011a");
+        Assert.AreEqual(t14.Message, null);
+        Assert.AreEqual(t14.Data, null);
+        t14 = AsyncCall(business.Command, "Test011ae");
+        Assert.AreEqual(t14.Message, "test error");
+        Assert.AreEqual(t14.State, -999);
+        t14 = AsyncCall(business.Command, "Test011aex");
+        Assert.IsTrue(t14.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t14.State, 0);
+        t14 = AsyncCall(business.Command, "Test011b");
+        Assert.AreEqual(t14.Message, null);
+        Assert.AreEqual(t14.Data, null);
+        t14 = AsyncCall(business.Command, "Test011be");
+        Assert.AreEqual(t14.Message, "test error");
+        Assert.AreEqual(t14.State, -999);
+        t14 = AsyncCall(business.Command, "Test011bex");
+        Assert.IsTrue(t14.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t14.State, 0);
 
         var t15 = AsyncCall(business.Command, "Test012");
         Assert.AreEqual(t15.Message, null);
         Assert.AreEqual(t15.Data, 111);
+        t15 = AsyncCall(business.Command, "Test012e");
+        Assert.AreEqual(t15.Message, "test error");
+        Assert.AreEqual(t15.State, -999);
+        t15 = AsyncCall(business.Command, "Test012ex");
+        Assert.IsTrue(t15.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t15.State, 0);
+        t15 = AsyncCall(business.Command, "Test012a");
+        Assert.AreEqual(t15.Message, null);
+        Assert.AreEqual(t15.Data, 111);
+        t15 = AsyncCall(business.Command, "Test012ae");
+        Assert.AreEqual(t15.Message, "test error");
+        Assert.AreEqual(t15.State, -999);
+        t15 = AsyncCall(business.Command, "Test012aex");
+        Assert.IsTrue(t15.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t15.State, 0);
+        t15 = AsyncCall(business.Command, "Test012b");
+        Assert.AreEqual(t15.Message, null);
+        Assert.AreEqual(t15.Data, 111);
+        t15 = AsyncCall(business.Command, "Test012be");
+        Assert.AreEqual(t15.Message, "test error");
+        Assert.AreEqual(t15.State, -999);
+        t15 = AsyncCall(business.Command, "Test012bex");
+        Assert.IsTrue(t15.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t15.State, 0);
 
         var t16 = AsyncCall(business.Command, "TestUse01", null, null, new UseEntry("sss", "use01"));
         Assert.AreEqual(t16.Message, null);
         Assert.AreEqual(t16.Data, "sss");
+        t16 = AsyncCall(business.Command, "TestUse01e", null, null, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t16.Message, "test error");
+        Assert.AreEqual(t16.State, -999);
+        t16 = AsyncCall(business.Command, "TestUse01ex", null, null, new UseEntry("sss", "use01"));
+        Assert.IsTrue(t16.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t16.State, 0);
+        t16 = AsyncCall(business.Command, "TestUse01a", null, null, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t16.Message, null);
+        Assert.AreEqual(t16.Data, "sss");
+        t16 = AsyncCall(business.Command, "TestUse01ae", null, null, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t16.Message, "test error");
+        Assert.AreEqual(t16.State, -999);
+        t16 = AsyncCall(business.Command, "TestUse01aex", null, null, new UseEntry("sss", "use01"));
+        Assert.IsTrue(t16.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t16.State, 0);
+        t16 = AsyncCall(business.Command, "TestUse01b", null, null, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t16.Message, null);
+        Assert.AreEqual(t16.Data, "sss");
+        t16 = AsyncCall(business.Command, "TestUse01be", null, null, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t16.Message, "test error");
+        Assert.AreEqual(t16.State, -999);
+        t16 = AsyncCall(business.Command, "TestUse01bex", null, null, new UseEntry("sss", "use01"));
+        Assert.IsTrue(t16.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t16.State, 0);
 
         var token = new Token { Key = "a", Remote = "b" };
         var t17 = AsyncCall(business.Command, "TestUse02", null, null, new UseEntry(token));
         Assert.AreEqual(t17.Message, null);
         Assert.AreEqual(t17.Data, token);
+        t17 = AsyncCall(business.Command, "TestUse02e", null, null, new UseEntry(token));
+        Assert.AreEqual(t17.Message, "test error");
+        Assert.AreEqual(t17.State, -999);
+        t17 = AsyncCall(business.Command, "TestUse02ex", null, null, new UseEntry(token));
+        Assert.IsTrue(t17.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t17.State, 0);
+        t17 = AsyncCall(business.Command, "TestUse02a", null, null, new UseEntry(token));
+        Assert.AreEqual(t17.Message, null);
+        Assert.AreEqual(t17.Data, token);
+        t17 = AsyncCall(business.Command, "TestUse02ae", null, null, new UseEntry(token));
+        Assert.AreEqual(t17.Message, "test error");
+        Assert.AreEqual(t17.State, -999);
+        t17 = AsyncCall(business.Command, "TestUse02aex", null, null, new UseEntry(token));
+        Assert.IsTrue(t17.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t17.State, 0);
+        t17 = AsyncCall(business.Command, "TestUse02b", null, null, new UseEntry(token));
+        Assert.AreEqual(t17.Message, null);
+        Assert.AreEqual(t17.Data, token);
+        t17 = AsyncCall(business.Command, "TestUse02be", null, null, new UseEntry(token));
+        Assert.AreEqual(t17.Message, "test error");
+        Assert.AreEqual(t17.State, -999);
+        t17 = AsyncCall(business.Command, "TestUse02bex", null, null, new UseEntry(token));
+        Assert.IsTrue(t17.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t17.State, 0);
 
         var t18 = AsyncCall(business.Command, "TestUse03", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
         Assert.AreEqual(t18.Message, null);
         Assert.AreEqual(t18.Data, "abcsss");
+        t18 = AsyncCall(business.Command, "TestUse03e", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t18.Message, "test error");
+        Assert.AreEqual(t18.State, -999);
+        t18 = AsyncCall(business.Command, "TestUse03ex", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.IsTrue(t18.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t18.State, 0);
+        t18 = AsyncCall(business.Command, "TestUse03a", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t18.Message, null);
+        Assert.AreEqual(t18.Data, "abcsss");
+        t18 = AsyncCall(business.Command, "TestUse03ae", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t18.Message, "test error");
+        Assert.AreEqual(t18.State, -999);
+        t18 = AsyncCall(business.Command, "TestUse03aex", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.IsTrue(t18.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t18.State, 0);
+        t18 = AsyncCall(business.Command, "TestUse03b", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t18.Message, null);
+        Assert.AreEqual(t18.Data, "abcsss");
+        t18 = AsyncCall(business.Command, "TestUse03be", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t18.Message, "test error");
+        Assert.AreEqual(t18.State, -999);
+        t18 = AsyncCall(business.Command, "TestUse03bex", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.IsTrue(t18.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t18.State, 0);
 
         var t19 = AsyncCall(business.Command, "TestAnonymous", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
         Assert.AreEqual(t19.Message, null);
         Assert.AreEqual(t19.Data.a, "abc");
         Assert.AreEqual(t19.Data.b, "sss");
+        t19 = AsyncCall(business.Command, "TestAnonymouse", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t19.Message, "test error");
+        Assert.AreEqual(t19.State, -999);
+        t19 = AsyncCall(business.Command, "TestAnonymousex", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.IsTrue(t19.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t19.State, 0);
+        t19 = AsyncCall(business.Command, "TestAnonymousa", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t19.Message, null);
+        Assert.AreEqual(t19.Data.a, "abc");
+        Assert.AreEqual(t19.Data.b, "sss");
+        t19 = AsyncCall(business.Command, "TestAnonymousae", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t19.Message, "test error");
+        Assert.AreEqual(t19.State, -999);
+        t19 = AsyncCall(business.Command, "TestAnonymousaex", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.IsTrue(t19.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t19.State, 0);
+        t19 = AsyncCall(business.Command, "TestAnonymousb", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t19.Message, null);
+        Assert.AreEqual(t19.Data.a, "abc");
+        Assert.AreEqual(t19.Data.b, "sss");
+        t19 = AsyncCall(business.Command, "TestAnonymousbe", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.AreEqual(t19.Message, "test error");
+        Assert.AreEqual(t19.State, -999);
+        t19 = AsyncCall(business.Command, "TestAnonymousbex", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
+        Assert.IsTrue(t19.Message.Contains("System.Exception: exception"));
+        Assert.AreEqual(t19.State, 0);
 
         var t20 = AsyncCall(business.Command, "TestAnonymous2", null, new object[] { "abc" }, new UseEntry("sss", "use01"));
         Assert.AreEqual(t20.a, "abc");

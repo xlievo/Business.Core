@@ -868,6 +868,7 @@ namespace Business.Attributes //Annotations
         public class MetaData
         {
             internal System.Type resultType;
+            internal System.Type resultTypeDefinition;
 
             public dynamic Business { get; internal set; }
 
@@ -976,7 +977,7 @@ namespace Business.Attributes //Annotations
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state) => ResultFactory.ResultCreate(Meta.resultType, state);
+        public IResult ResultCreate(int state) => ResultFactory.CreateMeta(Meta.resultType, Meta.resultTypeDefinition, state);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -984,7 +985,7 @@ namespace Business.Attributes //Annotations
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.ResultCreate(Meta.resultType, state, message);
+        public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.CreateMeta(Meta.resultType, Meta.resultTypeDefinition, state, message);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -993,7 +994,7 @@ namespace Business.Attributes //Annotations
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(Meta.resultType, data, message, state);
+        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.CreateMetaData(Meta.resultTypeDefinition, data, message, state);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -1002,7 +1003,7 @@ namespace Business.Attributes //Annotations
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(Meta.resultType, data, message, state);
+        public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.CreateMetaData(Meta.resultTypeDefinition, data, message, state);
 
         #endregion
 
@@ -1329,7 +1330,11 @@ namespace Business.Attributes //Annotations
 
     public sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
-        internal ArgumentDefaultAttribute(System.Type resultType, int state = -11, string message = null) : base(state, message) => this.Meta.resultType = resultType;
+        internal ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, int state = -11, string message = null) : base(state, message)
+        {
+            this.Meta.resultType = resultType;
+            this.Meta.resultTypeDefinition = resultTypeDefinition;
+        }
 
         public ArgumentDefaultAttribute(int state = -11, string message = null) : base(state, message) { }
     }

@@ -56,12 +56,12 @@ public class Arg<OutType> : Arg<OutType, dynamic>
 
 public class ResultObject<Type> : Business.Result.ResultObject<Type>
 {
-    public static readonly System.Type ResultType = typeof(ResultObject<>).GetGenericTypeDefinition();
+    public static readonly System.Type ResultTypeDefinition = typeof(ResultObject<>).GetGenericTypeDefinition();
 
-    public ResultObject(Type data, System.Type dataType, int state = 1, string message = null, System.Type genericType = null)
-        : base(data, dataType, state, message, genericType) { }
+    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericType = null)
+        : base(dataType, data, state, message, genericType) { }
 
-    public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }
+    public ResultObject(Type data, int state = 1, string message = null) : base(data, state, message) { }
 
     [MessagePack.IgnoreMember]
     public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
@@ -337,15 +337,15 @@ public class Startup
 
                     ///* test data
                     receiveData.a = "API";
-                    receiveData.c = "Test004";
+                    receiveData.c = "Test001";
                     receiveData.t = "token";
-                    receiveData.d = new List<Args.Test001> { new Args.Test001 { A = "ok2", B = "bbb" } }.BinarySerialize();
+                    receiveData.d = new Args.Test001 { A = "error", B = "bbb" }.BinarySerialize();
                     receiveData.b = "bbb";
                     //*/
 
                     if (string.IsNullOrWhiteSpace(receiveData.a) || !Configer.BusinessList.TryGetValue(receiveData.a, out IBusiness business))
                     {
-                        result = Bind.BusinessError(ResultObject<string>.ResultType, receiveData.a);
+                        result = Bind.BusinessError(ResultObject<string>.ResultTypeDefinition, receiveData.a);
                         await SendAsync(result.ToBytes(), id);
                     }
                     else
@@ -378,11 +378,13 @@ public class Startup
                                 result.Callback = receiveData.b;
 
                                 var data = Business.Result.ResultFactory.ResultCreateToDataBytes(result).ToBytes();
-
                                 /* test
                                 var result3 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
                                 var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
                                 */
+
+                                var result4 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
+                                var result5 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Test001Result>(result4.Data);
 
                                 await SendAsync(data, id);
                             }
@@ -391,7 +393,7 @@ public class Startup
                 }
                 catch (System.Exception ex)
                 {
-                    var result = ResultFactory.ResultCreate(ResultObject<string>.ResultType, 0, System.Convert.ToString(ex));
+                    var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, System.Convert.ToString(ex));
                     await SendAsync(result.ToBytes(), id);
                     Help.ExceptionWrite(ex, true, true);
                 }
@@ -411,7 +413,7 @@ public class Startup
         }
         catch (System.Exception ex)
         {
-            var result = ResultFactory.ResultCreate(ResultObject<string>.ResultType, 0, System.Convert.ToString(ex));
+            var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, System.Convert.ToString(ex));
             await SendAsync(result.ToBytes(), id);
             Help.ExceptionWrite(ex, true, true);
         }
@@ -563,37 +565,37 @@ public class Startup
         };
 
         return root;
-    }
 
-    static (string, string) GetSwaggerType(System.Type type)
-    {
-        var type2 = "string";
-        var format = string.Empty;
-
-        switch (type.GetTypeCode())
+        (string, string) GetSwaggerType(System.Type type)
         {
-            case TypeCode.Boolean: type2 = "boolean"; break;
-            case TypeCode.Byte: format = "binary"; break;
-            //case TypeCode.Char: type2 = "string"; break;
-            case TypeCode.DateTime: format = "date-time"; break;
-            //case TypeCode.DBNull: return "string";
-            case TypeCode.Decimal: type2 = "number"; break;
-            case TypeCode.Double: type2 = "number"; break;
-            //case TypeCode.Empty: return "string";
-            case TypeCode.Int16: type2 = "integer"; break;
-            case TypeCode.Int32: type2 = "integer"; format = "int32"; break;
-            case TypeCode.Int64: type2 = "integer"; format = "int64"; break;
-            //case TypeCode.Object: return "string";
-            case TypeCode.SByte: type2 = "integer"; break;
-            case TypeCode.Single: type2 = "number"; format = "float"; break;
-            //case TypeCode.String: type2 = "string"; break;
-            case TypeCode.UInt16: type2 = "integer"; break;
-            case TypeCode.UInt32: type2 = "integer"; format = "int32"; break;
-            case TypeCode.UInt64: type2 = "integer"; format = "int64"; break;
-            default: break;
-        }
+            var type2 = "string";
+            var format = string.Empty;
 
-        return (type2, format);
+            switch (type.GetTypeCode())
+            {
+                case TypeCode.Boolean: type2 = "boolean"; break;
+                case TypeCode.Byte: format = "binary"; break;
+                //case TypeCode.Char: type2 = "string"; break;
+                case TypeCode.DateTime: format = "date-time"; break;
+                //case TypeCode.DBNull: return "string";
+                case TypeCode.Decimal: type2 = "number"; break;
+                case TypeCode.Double: type2 = "number"; break;
+                //case TypeCode.Empty: return "string";
+                case TypeCode.Int16: type2 = "integer"; break;
+                case TypeCode.Int32: type2 = "integer"; format = "int32"; break;
+                case TypeCode.Int64: type2 = "integer"; format = "int64"; break;
+                //case TypeCode.Object: return "string";
+                case TypeCode.SByte: type2 = "integer"; break;
+                case TypeCode.Single: type2 = "number"; format = "float"; break;
+                //case TypeCode.String: type2 = "string"; break;
+                case TypeCode.UInt16: type2 = "integer"; break;
+                case TypeCode.UInt32: type2 = "integer"; format = "int32"; break;
+                case TypeCode.UInt64: type2 = "integer"; format = "int64"; break;
+                default: break;
+            }
+
+            return (type2, format);
+        }
     }
 }
 

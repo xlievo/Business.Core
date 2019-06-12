@@ -35,20 +35,35 @@ namespace Business.Result
         /// <summary>
         /// Activator.CreateInstance
         /// </summary>
-        /// <param name="data"></param>
         /// <param name="dataType"></param>
+        /// <param name="data"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public ResultObject(Type data, System.Type dataType, int state = 1, string message = null, System.Type genericType = null)
+        /// <param name="genericType"></param>
+        public ResultObject(System.Type dataType, Type data,  int state = 1, string message = null, System.Type genericType = null)
         {
-            this.data = data;
             this.dataType = dataType;
+            this.data = data;
             this.state = state;
             this.message = message;
             this.hasData = !System.Object.Equals(null, data);
             this.callback = default;
 
             this.genericType = genericType;
+        }
+
+        /// <summary>
+        /// MessagePack.MessagePackSerializer.Serialize(this)
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        /// <param name="genericType"></param>
+        public ResultObject(Type data, int state = 1, string message = null)
+        {
+            this.data = data;
+            this.state = state;
+            this.message = message;
+            this.hasData = !System.Object.Equals(null, data);
         }
 
         //public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }
