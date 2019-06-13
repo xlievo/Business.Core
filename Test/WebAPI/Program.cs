@@ -58,8 +58,8 @@ public class ResultObject<Type> : Business.Result.ResultObject<Type>
 {
     public static readonly System.Type ResultTypeDefinition = typeof(ResultObject<>).GetGenericTypeDefinition();
 
-    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericType = null)
-        : base(dataType, data, state, message, genericType) { }
+    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericType = null, bool checkData = true)
+        : base(dataType, data, state, message, genericType, checkData) { }
 
     public ResultObject(Type data, int state = 1, string message = null) : base(data, state, message) { }
 
@@ -339,7 +339,7 @@ public class Startup
                     receiveData.a = "API";
                     receiveData.c = "Test001";
                     receiveData.t = "token";
-                    receiveData.d = new Args.Test001 { A = "error", B = "bbb" }.BinarySerialize();
+                    receiveData.d = new Args.Test001 { A = "ok", B = "bbb" }.BinarySerialize();
                     receiveData.b = "bbb";
                     //*/
 
@@ -383,8 +383,8 @@ public class Startup
                                 var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
                                 */
 
-                                var result4 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
-                                var result5 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Test001Result>(result4.Data);
+                                //var result4 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
+                                //var result5 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Test001Result>(result4.Data);
 
                                 await SendAsync(data, id);
                             }

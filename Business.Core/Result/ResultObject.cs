@@ -39,17 +39,18 @@ namespace Business.Result
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        /// <param name="genericType"></param>
-        public ResultObject(System.Type dataType, Type data,  int state = 1, string message = null, System.Type genericType = null)
+        /// <param name="genericDefinition"></param>
+        /// <param name="checkData"></param>
+        public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericDefinition = null, bool checkData = true)
         {
             this.dataType = dataType;
             this.data = data;
             this.state = state;
             this.message = message;
-            this.hasData = !System.Object.Equals(null, data);
+            this.hasData = checkData ? !System.Object.Equals(null, data) : false;
             this.callback = default;
 
-            this.genericType = genericType;
+            this.genericDefinition = genericDefinition;
         }
 
         /// <summary>
@@ -118,9 +119,9 @@ namespace Business.Result
         [Newtonsoft.Json.JsonProperty(PropertyName = "B")]
         public virtual System.String Callback { get => callback; set => callback = value; }
 
-        System.Type genericType;
+        System.Type genericDefinition;
         [Newtonsoft.Json.JsonIgnore]
-        public virtual System.Type GenericDefinition => genericType;
+        public virtual System.Type GenericDefinition => genericDefinition;
 
         //ICommand command;
         //[Newtonsoft.Json.JsonIgnore]

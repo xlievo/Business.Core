@@ -24,8 +24,8 @@ public class ResultObject<Type> : Business.Result.ResultObject<Type>
 {
     //static ResultObject() => MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
 
-    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericType = null)
-        : base(dataType, data, state, message, genericType) { }
+    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericType = null, bool checkData = true)
+        : base(dataType, data, state, message, genericType, checkData) { }
 
     [MessagePack.IgnoreMember]
     public override System.Type DataType { get => base.DataType; set => base.DataType = value; }

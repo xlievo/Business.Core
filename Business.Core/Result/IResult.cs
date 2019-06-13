@@ -98,12 +98,7 @@ namespace Business.Result
         internal static int ConvertErrorState(this int state) => 0 < state ? 0 - System.Math.Abs(state) : state;
 
         // Annotations use
-        internal static IResult CreateMeta(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null)
-        {
-            var type = resultType.GenericTypeArguments[0];
-            var result = (IResult)System.Activator.CreateInstance(resultType, new object[] { type, type.IsValueType ? System.Activator.CreateInstance(type) : null, state, message, resultTypeDefinition });
-            return result;
-        }
+        internal static IResult CreateMeta(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null) => (IResult)System.Activator.CreateInstance(resultType, new object[] { resultType.GenericTypeArguments[0], default, state, message, resultTypeDefinition, false });
 
         // Interceptor use
         internal static IResult CreateMeta(Meta.MetaData meta, int state = 1, string message = null) => CreateMeta(meta.ResultType, meta.ResultTypeDefinition, state, message);
@@ -112,7 +107,7 @@ namespace Business.Result
         internal static IResult<Data> CreateMetaData<Data>(System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1)
         {
             var type = typeof(Data);
-            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition });
+            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, true });
             return result;
         }
 
@@ -124,11 +119,12 @@ namespace Business.Result
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
+        /// <param name="checkData"></param>
         /// <returns></returns>
-        static IResult<Data> Create<Data>(System.Type resultTypeDefinition, Data data = default, int state = 1, string message = null)
+        static IResult<Data> Create<Data>(System.Type resultTypeDefinition, Data data = default, int state = 1, string message = null, bool checkData = true)
         {
             var type = typeof(Data);
-            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition });
+            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, checkData });
             return result;
         }
 
@@ -140,8 +136,9 @@ namespace Business.Result
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
+        /// <param name="checkData"></param>
         /// <returns></returns>
-        static IResult<Data> Create<Data>(IBusiness business, Data data = default, int state = 1, string message = null) => Create(business.Configer.ResultTypeDefinition, data, state, message);
+        static IResult<Data> Create<Data>(IBusiness business, Data data = default, int state = 1, string message = null, bool checkData = true) => Create(business.Configer.ResultTypeDefinition, data, state, message, checkData: checkData);
 
         #region resultType
 
@@ -158,7 +155,7 @@ namespace Business.Result
         /// <param name="resultType"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(System.Type resultTypeDefinition, int state) => Create<string>(resultTypeDefinition, state: state);
+        public static IResult ResultCreate(System.Type resultTypeDefinition, int state) => Create<string>(resultTypeDefinition, state: state, checkData: false);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -167,7 +164,7 @@ namespace Business.Result
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(System.Type resultTypeDefinition, int state = 1, string message = null) => Create<string>(resultTypeDefinition, state: state, message: message);
+        public static IResult ResultCreate(System.Type resultTypeDefinition, int state = 1, string message = null) => Create<string>(resultTypeDefinition, state: state, message: message, checkData: false);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -197,9 +194,9 @@ namespace Business.Result
         /// <param name="business"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(IBusiness business, int state) => Create<string>(business, state: state);
+        public static IResult ResultCreate(IBusiness business, int state) => Create<string>(business, state: state, checkData: false);
 
-        public static IResult<Data> ResultCreate<Data>(IBusiness business, int state) => Create<Data>(business, state: state);
+        public static IResult<Data> ResultCreate<Data>(IBusiness business, int state) => Create<Data>(business, state: state, checkData: false);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -208,9 +205,9 @@ namespace Business.Result
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(IBusiness business, int state = 1, string message = null) => Create<string>(business, state: state, message: message);
+        public static IResult ResultCreate(IBusiness business, int state = 1, string message = null) => Create<string>(business, state: state, message: message, checkData: false);
 
-        public static IResult<Data> ResultCreate<Data>(IBusiness business, int state = 1, string message = null) => Create<Data>(business, state: state, message: message);
+        public static IResult<Data> ResultCreate<Data>(IBusiness business, int state = 1, string message = null) => Create<Data>(business, state: state, message: message, checkData: false);
 
         /// <summary>
         /// Used to create the IResult returns object

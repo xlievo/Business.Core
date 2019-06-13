@@ -451,9 +451,21 @@ namespace Business.Attributes //Annotations
 
     public enum IgnoreMode
     {
+        /// <summary>
+        /// Ignore business methods
+        /// </summary>
         Method = 2,
+        /// <summary>
+        /// Ignore document presentation
+        /// </summary>
         Arg = 4,
+        /// <summary>
+        /// Ignore document child presentation
+        /// </summary>
         ArgChild = 8,
+        /// <summary>
+        /// Ignoring global parameter annotations injection
+        /// </summary>
         BusinessArg = 16,
     }
 
