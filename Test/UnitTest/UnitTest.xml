@@ -58,27 +58,5 @@
             Attr01
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
-            <summary>
-            This is Test001.
-            </summary>
-            <param name="use01">This is use01.</param>
-            <param name="arg01"></param>
-            <param name="b">This is b.</param>
-            <param name="c">This is c.</param>
-            <param name="token">This is token.</param>
-            <returns></returns>
-        </member>
-        <member name="M:BusinessMember3.Test001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
-            <summary>
-            This is Test001.
-            </summary>
-            <param name="use01">This is use01.</param>
-            <param name="arg01"></param>
-            <param name="b">This is b.</param>
-            <param name="c">This is c.</param>
-            <param name="token">This is token.</param>
-            <returns></returns>
-        </member>
     </members>
 </doc>

@@ -454,22 +454,22 @@ namespace Business.Attributes //Annotations
         /// <summary>
         /// Ignore business methods
         /// </summary>
-        Method = 2,
+        Method,
         /// <summary>
         /// Ignore document presentation
         /// </summary>
-        Arg = 4,
+        Arg,
         /// <summary>
         /// Ignore document child presentation
         /// </summary>
-        ArgChild = 8,
+        ArgChild,
         /// <summary>
         /// Ignoring global parameter annotations injection
         /// </summary>
-        BusinessArg = 16,
+        BusinessArg,
     }
 
-    /* 1:Ignore method 2:Ignore document 3:Ignore Business ArgAttr */
+    /* 1:Ignore method 2,3:Ignore document 4:Ignore Business ArgAttr */
     /// <summary>
     /// The Method and Property needs to be ignored and will not be a proxy
     /// </summary>
@@ -488,6 +488,8 @@ namespace Business.Attributes //Annotations
         //public bool Contains(IgnoreMode mode) => 0 != (this.Mode & mode);
 
         public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.Mode.GetName()}";
+
+        //public bool Contains(IgnoreMode mode) => 0 != (this.Mode & mode);
     }
 
     /// <summary>
@@ -775,8 +777,15 @@ namespace Business.Attributes //Annotations
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public sealed class UseAttribute : AttributeBase
     {
+        /// <summary>
+        /// Injecting Objects Corresponding to Parameters
+        /// </summary>
+        /// <param name="parameterName">Use parameter names to correspond to injection objects</param>
         public UseAttribute(bool parameterName = false) => this.ParameterName = parameterName;
 
+        /// <summary>
+        /// Use parameter names to correspond to injection objects
+        /// </summary>
         public bool ParameterName { get; private set; }
     }
 

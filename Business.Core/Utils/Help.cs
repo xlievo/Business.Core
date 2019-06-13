@@ -2191,6 +2191,7 @@ namespace Business.Utils
 
         public static string GetName(this System.Enum value) => null == value ? null : System.Enum.GetName(value.GetType(), value);
         public static int? GetValue(this System.Enum value) => null == value ? new int?() : value.GetHashCode();
+
         public static System.Collections.IList Adde(this System.Collections.IList list, params object[] item)
         {
             if (null == list) { throw new System.ArgumentNullException(nameof(list)); }

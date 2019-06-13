@@ -1699,6 +1699,8 @@ namespace Business.Meta
             ResultTypeDefinition = resultTypeDefinition;
             //ReturnResult = HasIResult ? resultType.MakeGenericType(null != resultGeneric ? resultGeneric[0] : typeof(string)) : null;
             ResultType = resultType;// resultType.MakeGenericType(HasIResult && null != resultGeneric ? resultGeneric[0] : typeof(string));
+            ResultGeneric = resultType.GenericTypeArguments[0];
+
             DefaultValue = defaultValue;
             //this.logAttrs = logAttrs;
             Attributes = attributes;
@@ -1740,6 +1742,8 @@ namespace Business.Meta
         public System.Type ResultTypeDefinition { get; private set; }
         //==============resultType===================//
         public System.Type ResultType { get; private set; }
+        //==============resultGeneric===================//
+        public System.Type ResultGeneric { get; private set; }
         //==============hasAsync===================//
         public bool HasAsync { get; private set; }
         //==============defaultValue===================//

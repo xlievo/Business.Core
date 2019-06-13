@@ -339,7 +339,7 @@ public class Startup
                     receiveData.a = "API";
                     receiveData.c = "Test001";
                     receiveData.t = "token";
-                    receiveData.d = new Args.Test001 { A = "ok", B = "bbb" }.BinarySerialize();
+                    receiveData.d = new Args.Test001 { A = "error", B = "bbb" }.BinarySerialize();
                     receiveData.b = "bbb";
                     //*/
 

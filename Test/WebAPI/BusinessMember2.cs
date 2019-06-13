@@ -26,6 +26,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 {
     static BusinessMember2()
     {
+        /*
         var con = Startup.appSettings.GetSection("Redis").GetSection("ConnectionString").Value;
         System.Console.WriteLine($"Redis={con}");
         var csredis = new CSRedis.CSRedisClient(con);
@@ -36,6 +37,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         RedisHelper.HSetAsync("Role", "value3", "333");
 
         var values = RedisHelper.HGetAll("Role");
+        */
     }
 
     public BusinessMember2()
@@ -98,7 +100,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
-    public virtual async Task<IResult<DateTime>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, dynamic context = null)
+    public virtual async Task<IResult<Test001Result>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, dynamic context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -108,18 +110,17 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
             throw new System.Exception("Method exception!");
         }
 
-        var exit = await RedisHelper.HExistsAsync("Role", "value2");
+        //var exit = await RedisHelper.HExistsAsync("Role", "value2");
 
-        if (exit)
-        {
-            //arg.Out.B = await RedisHelper.HGetAsync("Role", "value2");
-            //return this.ResultCreate<Business.Auth.Token>(null);
+        //if (exit)
+        //{
+        //    //arg.Out.B = await RedisHelper.HGetAsync("Role", "value2");
+        //    //return this.ResultCreate<Business.Auth.Token>(null);
 
-            return this.ResultCreate<DateTime>(-110, "sss");
-        }
+        //    return this.ResultCreate<Test001Result>(-110, "sss");
+        //}
 
-        return this.ResultCreate(DateTime.Now);
-        //return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
+        return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
     }
 
     public virtual async Task Test002(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
@@ -167,13 +168,13 @@ public class TestAttribute : ArgumentAttribute
 
     public override async ValueTask<IResult> Proces(dynamic value)
     {
-        var exit = await RedisHelper.HExistsAsync("Role", "value2");
+        //var exit = await RedisHelper.HExistsAsync("Role", "value2");
 
         switch (value)
         {
             case "ok":
-                return this.ResultCreate(exit ? await RedisHelper.HGetAsync("Role", "value2") : "not!");
-
+                //return this.ResultCreate(exit ? await RedisHelper.HGetAsync("Role", "value2") : "not!");
+                return this.ResultCreate("OK!!!");
             case "error":
                 return this.ResultCreate(this.State, $"{this.Nick} cannot be empty");
 
