@@ -73,7 +73,21 @@ namespace Business
 
         internal static dynamic GetReturnValue(IResult result, MetaData meta)
         {
-            var result2 = (meta.HasIResult || meta.HasObject) ? result : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null;
+            //var result2 = (meta.HasIResult || meta.HasObject) ? result : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null;
+            object result2 = result;
+
+            if (!meta.HasObject)
+            {
+                if (meta.HasReturn && meta.ReturnType.IsValueType)
+                {
+                    result2 = System.Activator.CreateInstance(meta.ReturnType);
+                }
+                else
+                {
+                    result2 = null;
+                }
+            }
+
 
             if (meta.HasAsync)
             {
@@ -837,7 +851,8 @@ namespace Business
                 var hasIResult = typeof(IResult<>).IsAssignableFrom(hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType, out System.Type[] resultGeneric) || typeof(IResult).IsAssignableFrom(hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType);
                 var hasIResultGeneric = hasIResult && null != resultGeneric;
                 var hasObject = typeof(object).Equals(hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType);
-                var returnType = hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType;
+                //var returnType = hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType;
+                var returnType = hasIResultGeneric ? resultGeneric[0] : hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType;
                 var resultType = cfg.ResultTypeDefinition.MakeGenericType(hasIResultGeneric ? resultGeneric[0] : typeof(string));
 
                 #endregion

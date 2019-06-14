@@ -193,6 +193,10 @@ namespace Business.Document
             //==============hasReturn===================//
             public bool HasReturn { get; set; }
 
+            //==============ReturnType===================//
+            [Newtonsoft.Json.JsonIgnore]
+            public System.Type ReturnType { get; set; }
+
             //==============Returns===================//
             public string Returns { get; set; }
 

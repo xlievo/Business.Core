@@ -406,6 +406,7 @@ namespace Business.Utils
                     Name = meta.CommandGroup[c2.Value.Key].OnlyName,
                     HasReturn = meta.HasReturn,
                     Summary = member?.summary?.sub,
+                    ReturnType = meta.ReturnType,
                     Returns = member?.returns?.sub,
                     Args = new System.Collections.Generic.List<Doc.Member.Arg>(),
                     ArgList = new System.Collections.Generic.List<Doc.Member.Arg>()

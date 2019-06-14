@@ -708,6 +708,85 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             default: return this.ResultCreate<DateTime?>();
         }
     }
+    public virtual IResult Test013c(TestMode mode)
+    {
+        switch (mode)
+        {
+            case TestMode.OK:
+                return this.ResultCreate(DateTime.Now);
+            case TestMode.ERROR:
+                return this.ResultCreate<DateTime?>(-999, "test error");
+            case TestMode.Exception:
+                throw new System.Exception("exception");
+            default: return this.ResultCreate<DateTime?>();
+        }
+    }
+    public virtual DateTime Test013d(TestMode mode)
+    {
+        switch (mode)
+        {
+            case TestMode.OK:
+                return DateTime.Now;
+            case TestMode.ERROR:
+                return default;
+            case TestMode.Exception:
+                throw new System.Exception("exception");
+            default: return default;
+        }
+    }
+    public virtual DateTime? Test013e(TestMode mode)
+    {
+        switch (mode)
+        {
+            case TestMode.OK:
+                return DateTime.Now;
+            case TestMode.ERROR:
+                return default;
+            case TestMode.Exception:
+                throw new System.Exception("exception");
+            default: return default;
+        }
+    }
+    //Test014
+    public virtual async Task Test014(TestMode mode)
+    {
+        switch (mode)
+        {
+            case TestMode.OK:
+                break;
+            case TestMode.ERROR:
+                break;
+            case TestMode.Exception:
+                throw new System.Exception("exception");
+            default: break;
+        }
+    }
+    //public virtual async void Test014a(TestMode mode)
+    //{
+    //    switch (mode)
+    //    {
+    //        case TestMode.OK:
+    //            break;
+    //        case TestMode.ERROR:
+    //            break;
+    //        case TestMode.Exception:
+    //            throw new System.Exception("exception");
+    //        default: break;
+    //    }
+    //}
+    public virtual void Test014b(TestMode mode)
+    {
+        switch (mode)
+        {
+            case TestMode.OK:
+                break;
+            case TestMode.ERROR:
+                break;
+            case TestMode.Exception:
+                throw new System.Exception("exception");
+            default: break;
+        }
+    }
 
     //TestUse01
     public virtual async Task<dynamic> TestUse01(TestMode mode, [Use(true)]dynamic use01)
@@ -1281,6 +1360,16 @@ public class TestBusinessMember
 
         return result.Data;
     }
+    static dynamic CheckedNot(string cmd, int state, string message, object[] args, params UseEntry[] useObj)
+    {
+        var result = AsyncCall(Member.Command, cmd, null, (0 < args?.Length ? new object[] { TestMode.ERROR }.Concat(args) : new object[] { TestMode.ERROR }).ToArray(), useObj);
+
+        result = AsyncCall(Member.Command, cmd, null, (0 < args?.Length ? new object[] { TestMode.Exception }.Concat(args) : new object[] { TestMode.Exception }).ToArray(), useObj);
+
+        result = AsyncCall(Member.Command, cmd, null, (0 < args?.Length ? new object[] { TestMode.OK }.Concat(args) : new object[] { TestMode.OK }).ToArray(), useObj);
+
+        return result;
+    }
 
     void TestResult(IBusiness business)
     {
@@ -1378,6 +1467,20 @@ public class TestBusinessMember
         t8 = Checked("Test013a", 1, null, null);
         Assert.AreEqual(t8, null);
         t8 = Checked("Test013b", 1, null, null);
+        Assert.AreEqual(t8, null);
+
+        t8 = CheckedNot("Test013c", 1, null, null);
+        Assert.AreEqual(t8.Data.Date, DateTime.Now.Date);
+        t8 = CheckedNot("Test013d", 1, null, null);
+        Assert.AreEqual(t8.Date, DateTime.Now.Date);
+        t8 = CheckedNot("Test013e", 1, null, null);
+        Assert.AreEqual(t8.Date, DateTime.Now.Date);
+
+        t8 = CheckedNot("Test014", 1, null, null);
+        Assert.AreEqual(t8, null);
+        //t8 = CheckedNot("Test014a", 1, null, null);
+        //Assert.AreEqual(t8, null);
+        t8 = CheckedNot("Test014b", 1, null, null);
         Assert.AreEqual(t8, null);
 
         t8 = Checked("TestUse01", 1, null, null, new UseEntry("sss", "use01"));

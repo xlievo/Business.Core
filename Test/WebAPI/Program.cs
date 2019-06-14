@@ -540,6 +540,20 @@ public class Startup
                 parameters.Add(c3);
             });
 
+            var responses = item.Returns;
+
+            if (string.IsNullOrWhiteSpace(responses))
+            {
+                try
+                {
+                    responses = System.Activator.CreateInstance(item.ReturnType).JsonSerialize();
+                }
+                catch (Exception ex)
+                {
+                    responses = ex.Message;
+                }
+            }
+
             methods.Add("post", new Dictionary<string, object>
             {
                 { "operationId", item.Name },
@@ -549,7 +563,7 @@ public class Startup
                 { "produces",new string[] { "application/json" } },
                 { "parameters", parameters },
                 { "description", string.Empty },
-                { "responses", new Responses { _200 = new _200 { description = string.Empty } } }
+                { "responses", new Responses { _200 = new _200 { description = responses } } }
             });
 
             paths.Add($"/{item.Name}", methods);

@@ -84,6 +84,9 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         };
     }
 
+    /// <summary>
+    /// Test001Result!!!
+    /// </summary>
     public struct Test001Result
     {
         public string A { get; set; }

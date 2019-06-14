@@ -1288,6 +1288,48 @@ namespace Business.Attributes //Annotations
         }
     }
 
+    /// <summary>
+    /// Indicates whether the specified regular expression finds a match in the specified input string, using the specified matching options.
+    /// </summary>
+    public class RegexAttribute : ArgumentAttribute
+    {
+        /// <summary>
+        /// Indicates whether the specified regular expression finds a match in the specified input string, using the specified matching options.
+        /// </summary>
+        /// <param name="pattern">The regular expression pattern to match.</param>
+        /// <param name="options">A bitwise combination of the enumeration values that provide options for matching.</param>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        public RegexAttribute(string pattern, System.Text.RegularExpressions.RegexOptions options = System.Text.RegularExpressions.RegexOptions.None, int state = -805, string message = null) : base(state, message)
+        {
+            this.Pattern = pattern;
+            this.Options = options;
+        }
+
+        /// <summary>
+        /// The regular expression pattern to match.
+        /// </summary>
+        public string Pattern { get; set; }
+
+        /// <summary>
+        /// A bitwise combination of the enumeration values that provide options for matching.
+        /// </summary>
+        public System.Text.RegularExpressions.RegexOptions Options { get; set; } = System.Text.RegularExpressions.RegexOptions.None;
+
+        public override async ValueTask<IResult> Proces(dynamic value)
+        {
+            var result = CheckNull(this, value);
+            if (!result.HasData) { return result; }
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(value.Trim(), Pattern, Options))
+            {
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" char verification failed");
+            }
+
+            return this.ResultCreate();
+        }
+    }
+
     public class MD5Attribute : ArgumentAttribute
     {
         public MD5Attribute(int state = -820, string message = null) : base(state, message) { }
