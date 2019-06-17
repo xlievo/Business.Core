@@ -82,7 +82,7 @@ namespace Business.Auth
 
             if (!meta.CommandGroup.TryGetValue(iArgGroup, out CommandAttribute command))
             {
-                invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.CreateMeta(meta, -2, $"Without this Cmd {invocation.Method.Name}"), meta);
+                invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(meta, -2, $"Without this Cmd {invocation.Method.Name}"), meta);
                 return invocation.ReturnValue;
             }
 
@@ -188,7 +188,7 @@ namespace Business.Auth
                                         {
                                             var ex = c2.Exception.ExceptionWrite();
                                             logType = LoggerType.Exception;
-                                            returnValue = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
+                                            returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
                                             o.Stop();
                                             return;
                                         }
@@ -241,7 +241,7 @@ namespace Business.Auth
                                          {
                                              var ex = c3.Exception.ExceptionWrite();
                                              logType = LoggerType.Exception;
-                                             returnValue = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
+                                             returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
                                              o.Stop();
                                              return;
                                          }
@@ -330,7 +330,7 @@ namespace Business.Auth
                 if (!meta.HasReturn)
                 {
                     returnValue = null;
-                    invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.CreateMeta(meta), meta);
+                    invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(meta), meta);
                 }
                 else
                 {
@@ -352,7 +352,7 @@ namespace Business.Auth
                 logType = LoggerType.Exception;
 
                 //log
-                returnValue = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
+                returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
 
                 //result
                 invocation.ReturnValue = meta.HasIResult ? Bind.GetReturnValueIResult(returnValue, meta) : Bind.GetReturnValue(returnValue, meta);
@@ -589,7 +589,7 @@ namespace Business.Auth
                                     if (null != c2.Exception)
                                     {
                                         var ex = c2.Exception.ExceptionWrite();
-                                        result3 = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
+                                        result3 = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
                                         o.Stop();
                                         return;
                                     }
@@ -638,7 +638,7 @@ namespace Business.Auth
                                     if (null != c3.Exception)
                                     {
                                         var ex = c3.Exception.ExceptionWrite();
-                                        result3 = ResultFactory.CreateMeta(meta, 0, System.Convert.ToString(ex));
+                                        result3 = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
                                         o.Stop();
                                         return;
                                     }
@@ -704,6 +704,7 @@ namespace Business.Auth
             }
 
             return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
+            //return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
         async System.Threading.Tasks.Task<IResult> ArgsResultCollection(MetaData meta, Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
@@ -761,9 +762,11 @@ namespace Business.Auth
                 }
 
                 return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, data: result2.Data);
+                //return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, data: result2.Data);
             }
 
             return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
+            //return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
         static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, LoggerValue logObjs, ArgsLog log)

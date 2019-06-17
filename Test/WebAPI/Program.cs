@@ -563,7 +563,10 @@ public class Startup
                 { "produces",new string[] { "application/json" } },
                 { "parameters", parameters },
                 { "description", string.Empty },
-                { "responses", new Responses { _200 = new _200 { description = responses } } }
+                { "responses",  new Dictionary<string, object> {
+                    {
+                        "200", new Dictionary<string, object> { { "description", responses } }
+                    } } }
             });
 
             paths.Add($"/{item.Name}", methods);

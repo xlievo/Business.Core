@@ -394,7 +394,7 @@ namespace Business.Utils
 
         public static Doc UseDoc<Business>(this Business business, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers) where Business : IBusiness
         {
-            var members = business.Command.ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
+            var members = business.Command.ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).AsParallel().ToDictionary(c2 => c2.Key, c2 =>
             {
                 var meta = c2.Value.Meta;
 
@@ -2217,6 +2217,9 @@ namespace Business.Utils
 
         //public static bool SpinWait(this System.TimeSpan timeout) => System.Threading.SpinWait.SpinUntil(() => false, timeout);
 
+        static readonly System.Collections.Generic.List<string> SysTypes = Assembly.GetExecutingAssembly().GetType().Module.Assembly.GetExportedTypes().Select(c => c.FullName).ToList();
+        public static bool IsDefinition(this System.Type type) => !SysTypes.Contains(type.FullName) && (type.IsClass || (type.IsValueType && !type.IsEnum && !type.IsArray && !type.IsCollection() && !type.IsEnumerable()));
+
         #region Json
 
         public static Type TryJsonDeserialize<Type>(this string value, Newtonsoft.Json.JsonSerializerSettings settings)
@@ -2434,7 +2437,6 @@ namespace Business.Utils
         /// <returns><see langword="true" /> if the type is an array, otherwise <see langword="false" />.</returns>
         public static bool IsArray(this System.Type source)
         {
-
             return source.GetTypeInfo().BaseType == typeof(System.Array);
         }
         /// <summary>

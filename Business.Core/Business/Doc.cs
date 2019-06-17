@@ -19,6 +19,7 @@ namespace Business.Document
 {
     using System.Collections.Generic;
     using System.Linq;
+    using Business.Utils;
 
     [System.Xml.Serialization.XmlRoot("doc")]
     public class Xml
@@ -213,6 +214,18 @@ namespace Business.Document
             public List<Arg> Args { get; set; }
 
             public List<Arg> ArgList { get; set; }
+
+            public static void GetReturnObj(System.Type returnType)
+            {
+                var definitions = returnType.IsDefinition() ? new List<System.Type> { returnType } : new List<System.Type>();
+
+
+            }
+
+            //static ReadOnlyCollection<Args> GetArgChild(System.Type type, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<System.Type> definitions, System.Type resultType, System.Type resultTypeDefinition, object business, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childAll)
+            //{
+
+            //}
 
             public class Arg
             {

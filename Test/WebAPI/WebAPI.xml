@@ -129,21 +129,6 @@
             ExternalDocs
             </summary>
         </member>
-        <member name="P:Swagger.Doc._200.description">
-            <summary>
-            successful operation
-            </summary>
-        </member>
-        <member name="P:Swagger.Doc._400.description">
-            <summary>
-            successful operation
-            </summary>
-        </member>
-        <member name="P:Swagger.Doc.Responses._200">
-            <summary>
-            200
-            </summary>
-        </member>
         <member name="P:Swagger.Doc.Root.swagger">
             <summary>
             2.0

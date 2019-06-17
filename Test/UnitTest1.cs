@@ -183,12 +183,12 @@ public class BusinessMember : IBusiness<ResultObject<object>>
     public Configer Configer { get; set; }
     public Action BindAfter { get; set; }
     public Action<Configer> BindBefore { get; set; }
-    public IResult<Data> ResultCreate<Data>(int state) => ResultFactory.ResultCreate<Data>(this, state);
-    public IResult ResultCreate(int state) => ResultFactory.ResultCreate(this, state);
-    public IResult<Data> ResultCreate<Data>(int state = 1, string message = null) => ResultFactory.ResultCreate<Data>(this, state, message);
-    public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.ResultCreate(this, state, message);
-    public IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(this, data, message, state);
-    public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(this, data, message, state);
+
+    public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => ResultFactory.ResultCreate(this.Configer.MetaData[method], state, message);
+
+    public IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+
+    public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
     #endregion
 
@@ -399,10 +399,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
                 string a = "aaa";
                 return this.ResultCreate(a);
             case TestMode.ERROR:
-                return this.ResultCreate<string>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<string>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult<string> Test006b(TestMode mode)
@@ -413,10 +413,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
                 string a = "aaa";
                 return this.ResultCreate(a);
             case TestMode.ERROR:
-                return this.ResultCreate<string>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<string>();
+            default: return this.ResultCreate();
         }
     }
     //Test007
@@ -440,10 +440,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate(-200m);
             case TestMode.ERROR:
-                return this.ResultCreate<decimal>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<decimal>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult<decimal> Test007b(TestMode mode)
@@ -453,10 +453,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate(-200m);
             case TestMode.ERROR:
-                return this.ResultCreate<decimal>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<decimal>();
+            default: return this.ResultCreate();
         }
     }
     //Test008
@@ -480,10 +480,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate(data: -200);
             case TestMode.ERROR:
-                return this.ResultCreate<int>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<int>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult<int> Test008b(TestMode mode)
@@ -493,10 +493,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate(data: -200);
             case TestMode.ERROR:
-                return this.ResultCreate<int>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<int>();
+            default: return this.ResultCreate();
         }
     }
     //Test009
@@ -522,10 +522,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
                 dynamic a = null;
                 return this.ResultCreate(a, "111", 111);
             case TestMode.ERROR:
-                return this.ResultCreate<dynamic>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<dynamic>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult<dynamic> Test009b(TestMode mode)
@@ -536,10 +536,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
                 dynamic a = null;
                 return this.ResultCreate(a, "111", 111);
             case TestMode.ERROR:
-                return this.ResultCreate<dynamic>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<dynamic>();
+            default: return this.ResultCreate();
         }
     }
     //Test010
@@ -605,10 +605,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
                 int? a = null;
                 return this.ResultCreate(a);
             case TestMode.ERROR:
-                return this.ResultCreate<int?>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<int?>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult<int?> Test011b(TestMode mode)
@@ -619,10 +619,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
                 int? a = null;
                 return this.ResultCreate(a);
             case TestMode.ERROR:
-                return this.ResultCreate<int?>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<int?>();
+            default: return this.ResultCreate();
         }
     }
     //Test012
@@ -646,10 +646,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate(DateTime.Now);
             case TestMode.ERROR:
-                return this.ResultCreate<DateTime>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<DateTime>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult<DateTime> Test012b(TestMode mode)
@@ -659,10 +659,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate(DateTime.Now);
             case TestMode.ERROR:
-                return this.ResultCreate<DateTime>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<DateTime>();
+            default: return this.ResultCreate();
         }
     }
     //Test013
@@ -688,10 +688,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
                 DateTime? a = null;
                 return this.ResultCreate(a);
             case TestMode.ERROR:
-                return this.ResultCreate<DateTime?>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<DateTime?>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult<DateTime?> Test013b(TestMode mode)
@@ -702,10 +702,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
                 DateTime? a = null;
                 return this.ResultCreate(a);
             case TestMode.ERROR:
-                return this.ResultCreate<DateTime?>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<DateTime?>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult Test013c(TestMode mode)
@@ -715,10 +715,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate(DateTime.Now);
             case TestMode.ERROR:
-                return this.ResultCreate<DateTime?>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<DateTime?>();
+            default: return this.ResultCreate();
         }
     }
     public virtual DateTime Test013d(TestMode mode)
@@ -740,6 +740,19 @@ public class BusinessMember : IBusiness<ResultObject<object>>
         {
             case TestMode.OK:
                 return DateTime.Now;
+            case TestMode.ERROR:
+                return default;
+            case TestMode.Exception:
+                throw new System.Exception("exception");
+            default: return default;
+        }
+    }
+    public virtual string Test013f(TestMode mode)
+    {
+        switch (mode)
+        {
+            case TestMode.OK:
+                return DateTime.Now.ToString();
             case TestMode.ERROR:
                 return default;
             case TestMode.Exception:
@@ -849,10 +862,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate(token);
             case TestMode.ERROR:
-                return this.ResultCreate<IToken>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<IToken>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult<IToken> TestUse02b(TestMode mode, IToken token = default)
@@ -862,10 +875,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate(token);
             case TestMode.ERROR:
-                return this.ResultCreate<IToken>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<IToken>();
+            default: return this.ResultCreate();
         }
     }
     //TestUse03
@@ -889,10 +902,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate($"{a}{use01}");
             case TestMode.ERROR:
-                return this.ResultCreate<string>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<string>();
+            default: return this.ResultCreate();
         }
     }
     public virtual IResult<string> TestUse03b(TestMode mode, dynamic a, [Use(true)]dynamic use01)
@@ -902,10 +915,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             case TestMode.OK:
                 return this.ResultCreate($"{a}{use01}");
             case TestMode.ERROR:
-                return this.ResultCreate<string>(-999, "test error");
+                return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
                 throw new System.Exception("exception");
-            default: return this.ResultCreate<string>();
+            default: return this.ResultCreate();
         }
     }
     //TestAnonymous
@@ -1475,6 +1488,8 @@ public class TestBusinessMember
         Assert.AreEqual(t8.Date, DateTime.Now.Date);
         t8 = CheckedNot("Test013e", 1, null, null);
         Assert.AreEqual(t8.Date, DateTime.Now.Date);
+        t8 = CheckedNot("Test013f", 1, null, null);
+        Assert.AreEqual(System.DateTime.Parse(t8).Date, DateTime.Now.Date);
 
         t8 = CheckedNot("Test014", 1, null, null);
         Assert.AreEqual(t8, null);

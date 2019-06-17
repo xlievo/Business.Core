@@ -53,32 +53,6 @@
         public ExternalDocs externalDocs { get; set; }
     }
 
-    public class _200
-    {
-        /// <summary>
-        /// successful operation
-        /// </summary>
-        public string description { get; set; } = System.String.Empty;
-    }
-
-    public class _400
-    {
-        /// <summary>
-        /// successful operation
-        /// </summary>
-        public string description { get; set; }
-    }
-
-    public class Responses
-    {
-        /// <summary>
-        /// 200
-        /// </summary>
-        [Newtonsoft.Json.JsonProperty(PropertyName = "200")]
-        public _200 _200 { get; set; }
-    }
-
-
     //public class pet_petId_uploadImage
     //{
     //    /// <summary>
@@ -131,7 +105,7 @@
         /// <summary>
         /// Paths
         /// </summary>
-        public dynamic paths { get; set; }
+        public System.Collections.Generic.Dictionary<string, object> paths { get; set; }
 
         /// <summary>
         /// ExternalDocs

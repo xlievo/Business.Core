@@ -93,78 +93,36 @@ namespace Business.Result
 
     public static class ResultFactory
     {
-        //public static System.Type GetResultType<Result>() where Result : IResult => typeof(Result).GetGenericTypeDefinition();
-
         internal static int ConvertErrorState(this int state) => 0 < state ? 0 - System.Math.Abs(state) : state;
 
         // Annotations use
-        internal static IResult CreateMeta(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null) => (IResult)System.Activator.CreateInstance(resultType, new object[] { resultType.GenericTypeArguments[0], default, state, message, resultTypeDefinition, false });
-
-        // Interceptor use
-        internal static IResult CreateMeta(Meta.MetaData meta, int state = 1, string message = null) => CreateMeta(meta.ResultType, meta.ResultTypeDefinition, state, message);
+        //internal static IResult<Data> CreateMetaData<Data>(System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1)
+        //{
+        //    var type = typeof(Data);
+        //    var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, true });
+        //    return result;
+        //}
 
         // Annotations use
-        internal static IResult<Data> CreateMetaData<Data>(System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1)
-        {
-            var type = typeof(Data);
-            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, true });
-            return result;
-        }
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <typeparam name="Data"></typeparam>
-        /// <param name="resultTypeDefinition"></param>
-        /// <param name="data"></param>
-        /// <param name="state"></param>
-        /// <param name="message"></param>
-        /// <param name="checkData"></param>
-        /// <returns></returns>
-        static IResult<Data> Create<Data>(System.Type resultTypeDefinition, Data data = default, int state = 1, string message = null, bool checkData = true)
-        {
-            var type = typeof(Data);
-            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, checkData });
-            return result;
-        }
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <typeparam name="Data"></typeparam>
-        /// <param name="business"></param>
-        /// <param name="data"></param>
-        /// <param name="state"></param>
-        /// <param name="message"></param>
-        /// <param name="checkData"></param>
-        /// <returns></returns>
-        static IResult<Data> Create<Data>(IBusiness business, Data data = default, int state = 1, string message = null, bool checkData = true) => Create(business.Configer.ResultTypeDefinition, data, state, message, checkData: checkData);
-
-        #region resultType
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <param name="resultTypeDefinition"></param>
-        /// <returns></returns>
-        //public static IResult ResultCreate(this TypeInfo resultType, string message = null) => Create<string>(resultType, message: message);
-
         /// <summary>
         /// Used to create the IResult returns object
         /// </summary>
         /// <param name="resultType"></param>
-        /// <param name="state"></param>
-        /// <returns></returns>
-        public static IResult ResultCreate(System.Type resultTypeDefinition, int state) => Create<string>(resultTypeDefinition, state: state, checkData: false);
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
         /// <param name="resultTypeDefinition"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(System.Type resultTypeDefinition, int state = 1, string message = null) => Create<string>(resultTypeDefinition, state: state, message: message, checkData: false);
+        public static IResult ResultCreate(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null) => (IResult)System.Activator.CreateInstance(resultType, new object[] { resultType.GenericTypeArguments[0], default, state, message, resultTypeDefinition, false });
+
+        // Interceptor use
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <param name="meta"></param>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static IResult ResultCreate(Meta.MetaData meta, int state = 1, string message = null) => ResultCreate(meta.ResultType, meta.ResultTypeDefinition, state, message);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -174,64 +132,24 @@ namespace Business.Result
         /// <param name="data"></param>
         /// <param name="message"></param>
         /// <param name="state"></param>
+        /// <param name="checkData"></param>
         /// <returns></returns>
-        public static IResult ResultCreate<Data>(System.Type resultTypeDefinition, Data data, string message = null, int state = 1) => Create(resultTypeDefinition, data, 0 > state ? System.Math.Abs(state) : state, message);
-
-        #endregion
-
-        #region business
+        public static IResult<Data> ResultCreate<Data>(System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, bool checkData = true)
+        {
+            var type = typeof(Data);
+            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, checkData });
+            //0 > state ? System.Math.Abs(state) : state
+            return result;
+        }
 
         /// <summary>
         /// Used to create the IResult returns object
         /// </summary>
-        /// <param name="business"></param>
-        /// <returns></returns>
-        //public static IResult ResultCreate(this IBusiness business) => Create<string>(business);
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <param name="business"></param>
-        /// <param name="state"></param>
-        /// <returns></returns>
-        public static IResult ResultCreate(IBusiness business, int state) => Create<string>(business, state: state, checkData: false);
-
-        public static IResult<Data> ResultCreate<Data>(IBusiness business, int state) => Create<Data>(business, state: state, checkData: false);
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <param name="business"></param>
+        /// <param name="resultTypeDefinition"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(IBusiness business, int state = 1, string message = null) => Create<string>(business, state: state, message: message, checkData: false);
-
-        public static IResult<Data> ResultCreate<Data>(IBusiness business, int state = 1, string message = null) => Create<Data>(business, state: state, message: message, checkData: false);
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <typeparam name="Data"></typeparam>
-        /// <param name="business"></param>
-        /// <param name="data"></param>
-        /// <param name="message"></param>
-        /// <param name="state"></param>
-        /// <returns></returns>
-        public static IResult<Data> ResultCreate<Data>(IBusiness business, Data data, string message = null, int state = 1) => Create(business, data, 0 > state ? System.Math.Abs(state) : state, message);
-
-        /*
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <param name="business"></param>
-        /// <param name="filePath"></param>
-        /// <param name="contentType"></param>
-        /// <returns></returns>
-        public static IResult ResultCreate(this IBusiness business, string filePath, string contentType) => Create<HttpFile>(business, new HttpFile { FilePath = filePath, ContentType = contentType });
-        */
-
-        #endregion
+        public static IResult ResultCreate(System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<string>(resultTypeDefinition, state: state, message: message, checkData: false);
 
         /// <summary>
         /// Used to create IResult.Data secondary encapsulation
@@ -269,7 +187,7 @@ namespace Business.Result
             //    result2 = ResultCreate(resultType, result.State, result.Message);
             //}
 
-            var result2 = Create(result.GenericDefinition, result.HasData ? result.ToDataBytes() : null, result.State, result.Message);
+            var result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataBytes() : null, result.Message, result.State);
             //====================================//
             result2.Callback = result.Callback;
 
@@ -307,7 +225,7 @@ namespace Business.Result
             //    result2 = ResultCreate(resultType, result.State, result.Message);
             //}
             //var r = result.GetType().GetGenericTypeDefinition();
-            var result2 = Create(result.GenericDefinition, result.HasData ? result.ToDataString() : null, result.State, result.Message);
+            var result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataString() : null, result.Message, result.State);
             //====================================//
             result2.Callback = result.Callback;
 

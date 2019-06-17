@@ -15,8 +15,6 @@
           ##############
 ==================================*/
 
-using Business.Result;
-
 namespace Business
 {
     public interface IBusiness
@@ -31,13 +29,7 @@ namespace Business
 
         System.Action<Configer> BindBefore { get; set; }
 
-        Result.IResult<Data> ResultCreate<Data>(int state);
-
-        Result.IResult ResultCreate(int state);
-
-        Result.IResult<Data> ResultCreate<Data>(int state = 1, string message = null);
-
-        Result.IResult ResultCreate(int state = 1, string message = null);
+        dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null);
 
         Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1);
 
@@ -64,34 +56,11 @@ namespace Business
         /// <summary>
         /// Used to create the IResult returns object
         /// </summary>
-        /// <typeparam name="Data"></typeparam>
-        /// <param name="state"></param>
-        /// <returns></returns>
-        public IResult<Data> ResultCreate<Data>(int state) => Business.Result.ResultFactory.ResultCreate<Data>(this, state);
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <param name="state"></param>
-        /// <returns></returns>
-        public IResult ResultCreate(int state) => Business.Result.ResultFactory.ResultCreate(this, state);
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <typeparam name="Data"></typeparam>
         /// <param name="state"></param>
         /// <param name="message"></param>
+        /// <param name="method"></param>
         /// <returns></returns>
-        public IResult<Data> ResultCreate<Data>(int state = 1, string message = null) => Business.Result.ResultFactory.ResultCreate<Data>(this, state, message);
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        public IResult ResultCreate(int state = 1, string message = null) => Business.Result.ResultFactory.ResultCreate(this, state, message);
+        public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => Business.Result.ResultFactory.ResultCreate(this.Configer.MetaData[method], state, message);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -101,7 +70,7 @@ namespace Business
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => Business.Result.ResultFactory.ResultCreate(this, data, message, state);
+        public Business.Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => Business.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -110,7 +79,7 @@ namespace Business
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate(object data, string message = null, int state = 1) => Business.Result.ResultFactory.ResultCreate(this, data, message, state);
+        public Business.Result.IResult ResultCreate(object data, string message = null, int state = 1) => Business.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
         #endregion
     }
