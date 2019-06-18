@@ -42,28 +42,6 @@ namespace Business.Utils
 
     public static class Help
     {
-        //public static Business UseType<Business>(this Business business, params System.Type[] type)
-        //   where Business : class, IBusiness
-        //{
-        //    if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
-        //    //this.Configuration.UseTypes.dictionary.TryAdd(type.FullName, type);
-
-        //    //this.Configuration.MetaData.Values.
-        //    //business.Configuration.MetaData[].
-        //    foreach (var item in business.Configuration.MetaData)
-        //    {
-        //        foreach (var item2 in item.Value.ArgAttrs[Bind.CommandGroupDefault].Args)
-        //        {
-        //            if (item2.Type.FullName)
-        //            {
-
-        //            }
-        //        }
-        //    }
-
-        //    return business;
-        //}
-
         public static Business UseType<Business>(this Business business, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -125,133 +103,6 @@ namespace Business.Utils
                         }
                     }
                 }
-
-                //for (int i = 0; i < item.Args.Count; i++)
-                //{
-                //    var first = item.Args[i];
-
-                //    var type2 = first.HasIArg ? first.IArgInType : first.Type;
-
-                //    if (!business.Configer.UseTypes.Contains(type2.FullName) || !item.UseTypePosition.dictionary.TryAdd(first.Position, type2))
-                //    {
-                //        continue;
-                //    }
-
-                //    foreach (var item3 in item.ArgAttrs)
-                //    {
-                //        var arg = item3.Value.Args[i];
-                //        arg.UseType = true;
-
-                //        //remove not parameter attr
-                //        foreach (var attr in arg.ArgAttr)
-                //        {
-                //            if (attr.Source != Attributes.AttributeBase.SourceType.Parameter)
-                //            {
-                //                arg.ArgAttr.Remove(attr);
-                //            }
-                //        }
-                //        //for (int i2 = arg.ArgAttr.Count - 1; i2 >= 0; i2--)
-                //        //{
-                //        //    if (arg.ArgAttr[i2].Source != Attributes.AttributeBase.SourceType.Parameter)
-                //        //    {
-                //        //        arg.ArgAttr.collection.RemoveAt(i2);
-                //        //    }
-                //        //}
-
-                //        //for (int i2 = arg.ArgAttr.Count - 1; i2 >= 0; i2--)
-                //        //{
-                //        //    var attr = arg.ArgAttr.ElementAt(i2);
-                //        //    if (attr.Value.Source != Attributes.AttributeBase.SourceType.Parameter)
-                //        //    {
-                //        //        arg.ArgAttr.Remove(attr.Key);
-                //        //    }
-                //        //}
-
-                //        //add default convert
-                //        if (arg.HasIArg && 0 == arg.ArgAttr.Count)
-                //        {
-                //            var attr = new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter };
-                //            arg.ArgAttr.Add(attr);
-                //            //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
-                //        }
-                //    }
-
-                //    //doc
-                //    if (0 < business.Configer.Doc?.Members?.Count)
-                //    {
-                //        foreach (var item2 in business.Configer.Doc.Members.Values)
-                //        {
-                //            var members = item2.Values.Where(c => c.Name == item.Name);
-
-                //            foreach (var member in members)
-                //            {
-                //                if (null != member)
-                //                {
-                //                    if (member.Args.ContainsKey(first.Name))
-                //                    {
-                //                        member.Args.Remove(first.Name);
-                //                    }
-                //                }
-                //            }
-                //        }
-                //    }
-                //}
-
-                //foreach (var item2 in item.ArgsFirst)
-                //{
-                //    var type2 = item2.HasIArg ? item2.IArgInType : item2.Type;
-
-                //    if (business.Configer.UseTypes.Contains(type2.FullName) && item.UseTypePosition.dictionary.TryAdd(item2.Position, type2))
-                //    {
-                //        foreach (var item33 in item.ArgAttrs.Values)
-                //        {
-                //            //item33.Args[].UseType = true;
-                //            item2.UseType = true;
-                //            for (int i = item2.ArgAttr.Count - 1; i >= 0; i--)
-                //            {
-                //                if (item2.ArgAttr[i].Source != Attributes.AttributeBase.SourceType.Parameter)
-                //                {
-                //                    item2.ArgAttr.collection.RemoveAt(i);
-                //                }
-                //            }
-
-                //            if (item2.HasIArg && 0 == item2.ArgAttr.Count)
-                //            {
-                //                item2.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
-                //            }
-
-                //            //doc
-                //            if (0 < business.Configer.Doc?.Members?.Count)
-                //            {
-                //                foreach (var item4 in business.Configer.Doc.Members.Values)
-                //                {
-                //                    var members = item4.Values.Where(c => c.Name == item.Name);
-
-                //                    foreach (var member in members)
-                //                    {
-                //                        if (null != member)
-                //                        {
-                //                            if (member.Args.ContainsKey(item2.Name))
-                //                            {
-                //                                member.Args.Remove(item2.Name);
-                //                            }
-                //                        }
-                //                    }
-
-                //                    //if (item3.TryGetValue(item.Name, out Doc.Member member))
-                //                    //{
-                //                    //    foreach (var item3 in member.Args.Values)
-                //                    //    {
-                //                    //        if (!item3.ContainsKey(item2.Name)) { break; }
-
-                //                    //        item3.Remove(item2.Name);
-                //                    //    }
-                //                    //}
-                //                }
-                //            }
-                //        }
-                //    }
-                //}
             });
 
             return business;
@@ -347,50 +198,6 @@ namespace Business.Utils
 
             return business;
         }
-
-        //public static Business UseDoc<Business>(this Business business, string outFile = null) where Business : IBusiness
-        //{
-        //    return business.UseDoc(xmlMembers =>
-        //    {
-        //        var members = business.Command.ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
-        //        {
-        //            var meta = c2.Value.Meta;
-
-        //            Xml.member member = null;
-        //            xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
-
-        //            //var key = business.Configer.GetCommandGroup(c.Key, c2.Key);
-
-        //            //if (!meta.ArgAttrs.TryGetValue(key, out Meta.ArgAttrs argsGroup))
-        //            //{
-        //            //    return null;
-        //            //}
-
-        //            var member2 = new Doc.Member
-        //            {
-        //                Name = meta.Name,
-        //                HasReturn = meta.HasReturn,
-        //                Summary = member?.summary?.sub,
-        //                Returns = member?.returns?.sub,
-        //                Args = new System.Collections.Generic.List<Doc.Member.Arg>(),
-        //                ArgList = new System.Collections.Generic.List<Doc.Member.Arg>()
-        //                //Args = argsGroup.Args.Where(c3 => !c3.UseType && !c3.Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c3 => c3.Name, c3 => GetDocArgChild(c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text))
-        //                //Args = meta.Args.Where(c3 => !c3.UseType && !c3.Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c3 => c3.Name, c3 => GetDocArgChild(c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text))
-        //                //Args = meta.Args.Where(c3 => !c3.UseType && !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)).Select(c3 => GetDocArgChild2(ref argList, c2.Value.Key, c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text))
-        //            };
-
-        //            foreach (var item in meta.Args.Where(c3 => !c3.UseType && !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
-        //            {
-        //                member2.Args.Add(GetDocArgChild(member2.ArgList, c2.Value.Key, item, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
-        //            }
-
-        //            return member2;
-        //        }));
-
-        //        return new Doc { Name = business.Configer.Info.BusinessName, Members = members };
-
-        //    }, outFile);
-        //}
 
         public static Doc UseDoc<Business>(this Business business, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers) where Business : IBusiness
         {
@@ -769,181 +576,6 @@ namespace Business.Utils
             return metaLogger;
         }
 
-        //public static Business UseDoc<Business>(this Business business, string outFile = null) where Business : IBusiness
-        //{
-        //    return business.UseDoc(xmlMembers =>
-        //    {
-        //        var members = business.Configer.MetaData.Values.OrderBy(c => c.Position).ToDictionary(c => c.Name, c =>
-        //        {
-        //            Xml.member member = null;
-        //            xmlMembers?.TryGetValue(string.Format("M:{0}", c.MethodTypeFullName), out member);
-
-        //            return new Doc.Member
-        //            {
-        //                //Name = c.Name,
-        //                HasReturn = c.HasReturn,
-        //                Summary = member?.summary?.sub,
-        //                Returns = member?.returns?.sub,
-        //                //Position = c.Position,
-        //                GroupDefault = c.GroupDefault,
-        //                Args = c.ArgAttrs.ToDictionary(c2 => c2.Key, c2 => c2.Value.Args.Where(c3 => !c3.UseType && !c3.Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg) && (null == c3.Ignore || c3.Ignore.Mode != Attributes.IgnoreMode.Arg)).ToDictionary(c3 => c3.Name, c3 => GetDocArgChild(c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.sub)))
-        //                //Args = c.ArgAttrs.ToDictionary(c2 => c2.Key, c2 => c2.Value.Args.Where(c3 => !c3.UseType && !(null != c3.Ignore && !c3.Ignore.IgnoreArgChild)).ToDictionary(c3 => c3.Name, c3 => GetDocArgChild(c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.sub)))
-        //            };
-        //        });//, ComparisonHelper<Doc.Member>.CreateComparer(c2 => c2.Position)
-
-        //        return new Doc { Name = business.Configer.Info.BusinessName, Members = members };
-        //    }, outFile);
-        //}
-        /*
-        public static Business UseDoc2<Business>(this Business business, string outFile = null) where Business : IBusiness
-        {
-            if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
-
-            var ass = business.GetType().BaseType.Assembly;
-
-            var path = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ass.Location), string.Format("{0}.xml", System.IO.Path.GetFileNameWithoutExtension(ass.ManifestModule.Name)));
-
-            Configer.Xmls.TryGetValue(path, out Xml xml);
-
-            if (null == xml && System.IO.File.Exists(path))
-            {
-                xml = Configer.Xmls.dictionary.GetOrAdd(path, Xml.DeserializeDoc(FileReadString(path)));
-            }
-
-            var xmlMembers = xml?.members?.ToDictionary(c => c.name, c => c);
-
-            var members = business.Command.ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
-            {
-                var meta = c2.Value.Meta;
-
-                Xml.member member = null;
-                xmlMembers?.TryGetValue(string.Format("M:{0}", meta.MethodTypeFullName), out member);
-
-                var key = business.Configer.GetCommandGroup(c.Key, c2.Key);
-
-                if (!meta.ArgAttrs.TryGetValue(key, out Meta.ArgAttrs argsGroup))
-                {
-                    return null;
-                }
-
-                return new Doc.Member
-                {
-                    Name = meta.Name,
-                    HasReturn = meta.HasReturn,
-                    Summary = member?.summary?.sub,
-                    Returns = member?.returns?.sub,
-                    Args = argsGroup.Args.Where(c3 => !c3.UseType && !c3.Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c3 => c3.Name, c3 => GetDocArgChild(c3, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text))
-                };
-            }));
-
-            business.Configer.Doc = new Doc { Name = business.Configer.Info.BusinessName, Members = members };
-
-            if (!string.IsNullOrEmpty(outFile) && System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(outFile)))
-            {
-                System.IO.File.WriteAllText(outFile, business.Configer.Doc.JsonSerialize(), System.Text.Encoding.UTF8);
-            }
-
-            return business;
-        }
-        */
-        /*
-        static Doc.Member.Arg GetDocArgChild(Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null)
-        {
-            Xml.member member = null;
-
-            if (string.IsNullOrWhiteSpace(summary))
-            {
-                switch (args.ArgType)
-                {
-                    case Meta.Args.ArgTypeCode.No:
-                        break;
-                    case Meta.Args.ArgTypeCode.Definition:
-                        xmlMembers?.TryGetValue(string.Format("T:{0}", args.ArgTypeFullName), out member);
-                        break;
-                    case Meta.Args.ArgTypeCode.Field:
-                        xmlMembers?.TryGetValue(string.Format("F:{0}", args.ArgTypeFullName), out member);
-                        break;
-                    case Meta.Args.ArgTypeCode.Property:
-                        xmlMembers?.TryGetValue(string.Format("P:{0}", args.ArgTypeFullName), out member);
-                        break;
-                }
-
-                summary = member?.summary?.text;
-            }
-
-            var arg = new Doc.Member.Arg
-            {
-                //Name = args.Name,
-                Type = args.Type.Name,
-                //Position = args.Position,
-                DefaultValue = args.DefaultValue,
-                //HasDefaultValue = args.HasDefaultValue,
-                //Attr = args.ArgAttr.Values.Select(c => new Doc.Member.Arg.Attribute { Key = c.GroupKey(), Description = c.Description, State = c.State, Message = c.Message, Type = c.Type.Name }),
-                Attr = args.ArgAttr.Select(c => new Doc.Member.Arg.Attribute { Key = c.GroupKey(), Description = c.Description, State = c.State, Message = c.Message, Type = c.Type.Name }),
-                HasDefinition = args.HasDefinition,
-                //Group = args.Group,
-                //(null == args.Ignore || !args.Ignore.IgnoreArg)
-
-                //Child = args.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
-                //Child = (null != args.Ignore && args.Ignore.IgnoreArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !(null != c.Ignore && !c.Ignore.IgnoreArgChild)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
-                Summary = summary,
-                Nick = args.Nick,
-            };
-
-            //arg.HasChild = 0 < arg.Child.Count;
-
-            return arg;
-        }
-        */
-
-        //static Doc.Member.Arg GetDocArgChild(Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null)
-        //{
-        //    Xml.member member = null;
-
-        //    if (string.IsNullOrWhiteSpace(summary))
-        //    {
-        //        switch (args.ArgType)
-        //        {
-        //            case Meta.Args.ArgTypeCode.No:
-        //                break;
-        //            case Meta.Args.ArgTypeCode.Definition:
-        //                xmlMembers?.TryGetValue(string.Format("T:{0}", args.ArgTypeFullName), out member);
-        //                break;
-        //            case Meta.Args.ArgTypeCode.Field:
-        //                xmlMembers?.TryGetValue(string.Format("F:{0}", args.ArgTypeFullName), out member);
-        //                break;
-        //            case Meta.Args.ArgTypeCode.Property:
-        //                xmlMembers?.TryGetValue(string.Format("P:{0}", args.ArgTypeFullName), out member);
-        //                break;
-        //        }
-
-        //        summary = member?.summary?.text;
-        //    }
-
-        //    var arg = new Doc.Member.Arg
-        //    {
-        //        //Name = args.Name,
-        //        Type = args.Type.Name,
-        //        //Position = args.Position,
-        //        DefaultValue = args.DefaultValue,
-        //        //HasDefaultValue = args.HasDefaultValue,
-        //        Attr = args.ArgAttr.Select(c => new Doc.Member.Arg.Attribute { Description = c.Description, State = c.State, Message = c.Message }),
-        //        HasDefinition = args.HasDefinition,
-        //        //Group = args.Group,
-        //        //(null == args.Ignore || !args.Ignore.IgnoreArg)
-        //        Child = (null == args.Ignore || args.Ignore.Mode != Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => (null == args.Ignore || args.Ignore.Mode != Attributes.IgnoreMode.Arg)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
-        //        //Child = (null != args.Ignore && args.Ignore.IgnoreArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !(null != c.Ignore && !c.Ignore.IgnoreArgChild)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
-        //        Summary = summary,
-        //        Nick = args.Nick,
-        //    };
-
-        //    //arg.HasChild = 0 < arg.Child.Count;
-
-        //    return arg;
-        //}
-
-        //public static string GetDocKey(this Meta.MetaData metaData) => string.Format("M:{0}{1}", metaData.FullName, 0 == metaData.ArgAttrs[metaData.GroupDefault].Args.Count ? null : string.Format("({0})", string.Join(",", metaData.ArgAttrs[metaData.GroupDefault].Args.Select(c => c.TypeFullName))));
-
         public static string BaseDirectory
         {
             get
@@ -957,90 +589,6 @@ namespace Business.Utils
         }
 
         public static string BaseDirectoryCombine(params string[] path) => System.IO.Path.Combine(new string[] { BaseDirectory }.Concat(path).ToArray());
-
-        //        public static Assembly LoadAssembly(string path)
-        //        {
-        //#if NETFX
-        //            return System.Reflection.Assembly.UnsafeLoadFrom(path);
-        //#else
-        //            //return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyName(System.Runtime.Loader.AssemblyLoadContext.GetAssemblyName(path));
-        //            return System.Reflection.Assembly.UnsafeLoadFrom(path);
-        //#endif
-        //        }
-
-        //public static System.Collections.Generic.List<Assembly> LoadAssemblys(string path, string searchPattern = "*.dll", bool parallel = false, System.Action<Assembly> callback = null)
-        //{
-        //    var ass = new System.Collections.Generic.List<Assembly>();
-
-        //    var files = System.IO.Directory.GetFiles(path, searchPattern);
-
-        //    if (parallel)
-        //    {
-        //        files.AsParallel().ForAll(c =>
-        //        {
-        //            var assembly = LoadAssembly(c);
-
-        //            if (null != assembly)
-        //            {
-        //                ass.Add(assembly);
-
-        //                callback?.Invoke(assembly);
-        //            }
-        //        });
-        //    }
-        //    else
-        //    {
-        //        files.ToList().ForEach(c =>
-        //        {
-        //            var assembly = LoadAssembly(c);
-
-        //            if (null != assembly)
-        //            {
-        //                ass.Add(assembly);
-
-        //                callback?.Invoke(assembly);
-        //            }
-        //        });
-        //    }
-
-        //    return ass;
-        //}
-
-        //public static System.Collections.Generic.List<Assembly> LoadAssemblys(System.Collections.Generic.IEnumerable<string> assemblyFiles, bool parallel = false, System.Action<Assembly> callback = null)
-        //{
-        //    var ass = new System.Collections.Generic.List<Assembly>();
-
-        //    if (parallel)
-        //    {
-        //        assemblyFiles.AsParallel().ForAll(c =>
-        //        {
-        //            var assembly = LoadAssembly(c);
-
-        //            if (null != assembly)
-        //            {
-        //                ass.Add(assembly);
-
-        //                callback?.Invoke(assembly);
-        //            }
-        //        });
-        //    }
-        //    else
-        //    {
-        //        assemblyFiles.ToList().ForEach(c =>
-        //        {
-        //            var assembly = LoadAssembly(c);
-
-        //            if (null != assembly)
-        //            {
-        //                ass.Add(assembly);
-
-        //                callback?.Invoke(assembly);
-        //            }
-        //        });
-        //    }
-
-        //    return ass;
-        //}
 
         public static System.Collections.Generic.List<System.Type> LoadAssemblys(System.Collections.Generic.IEnumerable<string> assemblyFiles, bool parallel = false, System.Func<System.Type, bool> callback = null)
         {
@@ -1091,50 +639,7 @@ namespace Business.Utils
                 }
             }
         }
-        /*
-        public struct AssemblyType
-        {
-            public string assemblyFile;
 
-            public System.Collections.Generic.IEnumerable<string> types;
-        }
-
-        public static System.Collections.Generic.List<Assembly> LoadAssemblys(System.Collections.Generic.IEnumerable<AssemblyType> assemblyFiles, bool parallel = false, System.Action<Assembly, System.Collections.Generic.IEnumerable<string>> callback = null)
-        {
-            var ass = new System.Collections.Generic.List<Assembly>();
-
-            if (parallel)
-            {
-                assemblyFiles.AsParallel().ForAll(c =>
-                {
-                    var assembly = LoadAssembly(c.assemblyFile);
-
-                    if (null != assembly)
-                    {
-                        ass.Add(assembly);
-
-                        callback?.Invoke(assembly, c.types);
-                    }
-                });
-            }
-            else
-            {
-                assemblyFiles.ToList().ForEach(c =>
-                {
-                    var assembly = LoadAssembly(c.assemblyFile);
-
-                    if (null != assembly)
-                    {
-                        ass.Add(assembly);
-
-                        callback?.Invoke(assembly, c.types);
-                    }
-                });
-            }
-
-            return ass;
-        }
-        */
         public static Assembly LoadAssembly(string assemblyFile)
         {
             try
@@ -1152,30 +657,6 @@ namespace Business.Utils
                 return null;
             }
         }
-
-        //public static void LoadAssemblys(string path, System.Action<Assembly, TypeInfo> callback, string searchPattern = "*.dll", bool parallel = false)
-        //{
-        //    if (null == callback) { throw new System.ArgumentNullException("callback"); }
-
-        //    LoadAssemblys(path, searchPattern).ForEach(c =>
-        //    {
-        //        try
-        //        {
-        //            var types = c.GetExportedTypes();
-
-        //            foreach (var type in types)
-        //            {
-        //                var typeInfo = type.GetTypeInfo();
-        //                callback(c, typeInfo);
-        //            }
-        //        }
-        //        catch (System.Exception ex)
-        //        {
-        //            System.Console.WriteLine(c.Location);
-        //            ex.ExceptionWrite(console: true);
-        //        }
-        //    });
-        //}
 
         public static Accessor GetAccessor(this FieldInfo fieldInfo)
         {
@@ -1199,73 +680,7 @@ namespace Business.Utils
 
         #region GetAttributes
 
-        ///// <summary>
-        /////   Gets the attributes.
-        ///// </summary>
-        ///// <param name = "member">The member.</param>
-        ///// <returns>The member attributes.</returns>
-        //public static T[] GetAttributes<T>(this System.Reflection.ICustomAttributeProvider member, bool inherit = true) where T : class
-        //{
-        //    if (null == member) { throw new System.ArgumentNullException("member"); }
-
-        //    if (typeof(T) != typeof(object))
-        //    {
-        //        return (T[])member.GetCustomAttributes(typeof(T), inherit);
-        //    }
-        //    return (T[])member.GetCustomAttributes(inherit);
-        //}
-
-        //public static System.Collections.Generic.List<Attribute> GetAttr<Attribute>(this System.Collections.Generic.IList<Attributes.AttributeBase> attributes, System.Collections.Generic.IEqualityComparer<Attribute> comparer) where Attribute : Attributes.AttributeBase => attributes.Where(c => c is Attribute).Cast<Attribute>().Distinct(comparer).ToList();
-
         public static T Clone<T>(this T attribute) where T : Attributes.AttributeBase => attribute.Clone<T>();
-
-        //public static System.Collections.Generic.List<Attribute> GetAttr<Attribute>(this System.Collections.Generic.List<Attributes.GropuAttribute> attributes) where Attribute : Attributes.GropuAttribute
-        //{
-        //    var all = attributes.FindAll(c => c is Attribute).Cast<Attribute>();
-
-        //    //if (null == comparer) { return all.ToList(); }
-
-        //    var attrs = all.Distinct(Attributes.GropuAttribute.Comparer).Cast<Attribute>().ToList();
-
-        //    foreach (var item in all)
-        //    {
-        //        attributes.Remove(item);
-        //    }
-
-        //    attributes.AddRange(attrs);
-
-        //    //foreach (var item in dd)
-        //    //{
-        //    //    attributes.Remove(item);
-        //    //}
-        //    //all.Except(attrs).ToList().ForEach(c => attributes.Remove(c));
-
-        //    return attrs;
-        //}
-
-        //public static System.Collections.Generic.List<Attribute> GetAttr<Attribute>(this System.Collections.Generic.List<Attributes.AttributeBase> attributes, System.Collections.Generic.IEqualityComparer<Attribute> comparer = null) where Attribute : Attributes.AttributeBase
-        //{
-        //    var all = attributes.FindAll(c => c is Attribute).Cast<Attribute>();
-
-        //    if (null == comparer) { return all.ToList(); }
-
-        //    var attrs = all.Distinct(comparer).ToList();
-
-        //    foreach (var item in all)
-        //    {
-        //        attributes.Remove(item);
-        //    }
-
-        //    attributes.AddRange(attrs);
-
-        //    //foreach (var item in dd)
-        //    //{
-        //    //    attributes.Remove(item);
-        //    //}
-        //    //all.Except(attrs).ToList().ForEach(c => attributes.Remove(c));
-
-        //    return attrs;
-        //}
 
         public static System.Collections.Generic.List<Attribute> Distinct<Attribute>(this System.Collections.Generic.List<Attribute> attributes, System.Collections.Generic.IEnumerable<Attribute> clones = null) where Attribute : Attributes.AttributeBase
         {
@@ -1360,7 +775,6 @@ namespace Business.Utils
             {
                 return attributes.FirstOrDefault(c => c is Attribute && predicate((Attribute)c)) as Attribute;
             }
-            //return attributes.FirstOrDefault(c => c is Attribute) as Attribute;
         }
 
         public static T[] GetAttributes<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
@@ -1593,24 +1007,7 @@ namespace Business.Utils
                 await writer.WriteAsync(value);
             }
         }
-        /*
-        /// <summary>
-        /// gzip to byte[]
-        /// </summary>
-        /// <param name="value">byte[]</param>
-        /// <returns>byte[]</returns>
-        public static System.Byte[] GZipCompressByte(this System.Byte[] value)
-        {
-            if (null == value) { throw new System.ArgumentNullException("value"); }
 
-            using (var m = new System.IO.MemoryStream())
-            {
-                //序列化压缩时要在返回字节数组时必须先关闭压缩对象，不然小于4k大小的字节数组会解压不出来就会产生空置的问题
-                using (var g = new System.IO.Compression.GZipStream(m, System.IO.Compression.CompressionMode.Compress)) { g.Write(value, 0, value.Length); }
-                return m.GetBuffer();
-            }
-        }
-        */
         /// <summary>
         /// gzip to byte[]
         /// </summary>

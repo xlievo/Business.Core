@@ -96,14 +96,6 @@ namespace Business.Result
         internal static int ConvertErrorState(this int state) => 0 < state ? 0 - System.Math.Abs(state) : state;
 
         // Annotations use
-        //internal static IResult<Data> CreateMetaData<Data>(System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1)
-        //{
-        //    var type = typeof(Data);
-        //    var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, true });
-        //    return result;
-        //}
-
-        // Annotations use
         /// <summary>
         /// Used to create the IResult returns object
         /// </summary>

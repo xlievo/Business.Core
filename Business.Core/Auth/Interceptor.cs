@@ -704,7 +704,6 @@ namespace Business.Auth
             }
 
             return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
-            //return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
         async System.Threading.Tasks.Task<IResult> ArgsResultCollection(MetaData meta, Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
@@ -762,11 +761,9 @@ namespace Business.Auth
                 }
 
                 return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, data: result2.Data);
-                //return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, data: result2.Data);
             }
 
             return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
-            //return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
         static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, LoggerValue logObjs, ArgsLog log)
