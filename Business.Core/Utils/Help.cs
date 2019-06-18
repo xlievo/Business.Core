@@ -164,15 +164,15 @@ namespace Business.Utils
             return business;
         }
 
+        public static string GetXmlPath(this Assembly assembly) => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(assembly.Location), $"{System.IO.Path.GetFileNameWithoutExtension(assembly.ManifestModule.Name)}.xml");
+
         public static Business UseDoc<Business>(this Business business, string outFile = null) where Business : IBusiness// where Doc : Document.Doc
             //, System.Func<System.Collections.Generic.Dictionary<string, Xml.member>, Doc> operation, 
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             //if (null == operation) { throw new System.ArgumentNullException(nameof(operation)); }
 
-            var ass = business.GetType().BaseType.Assembly;
-
-            var path = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(ass.Location), $"{System.IO.Path.GetFileNameWithoutExtension(ass.ManifestModule.Name)}.xml");
+            var path = business.GetType().BaseType.Assembly.GetXmlPath();
 
             Configer.Xmls.TryGetValue(path, out Xml xml);
 
@@ -215,21 +215,25 @@ namespace Business.Utils
                     Summary = member?.summary?.sub,
                     ReturnType = meta.ReturnType,
                     Returns = member?.returns?.sub,
-                    Args = new System.Collections.Generic.List<Doc.Member.Arg>(),
-                    ArgList = new System.Collections.Generic.List<Doc.Member.Arg>()
+                    Args = new System.Collections.Generic.List<Doc.Member.Arg>().ToReadOnly(),
+                    ArgList = new System.Collections.Generic.List<Doc.Member.Arg>().ToReadOnly()
                 };
 
                 foreach (var item in meta.Args.Where(c3 => !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
                 {
                     var arg = GetDocArg(c2.Value.Key, item, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text);
-                    member2.Args.Add(arg);
+                    member2.Args.collection.Add(arg);
 
                     //if (arg.IsEnum || (!arg.IsEnum && !item.HasDefinition))
                     //{
                     //    member2.ArgList.Add(arg);
                     //}
-                    member2.ArgList.Add(arg);
-                    member2.ArgList.AddRange(arg.ChildAll);
+                    member2.ArgList.collection.Add(arg);
+
+                    foreach (var child in arg.Childrens)
+                    {
+                        member2.ArgList.collection.Add(child);
+                    }
                 }
 
                 return member2;
@@ -303,17 +307,17 @@ namespace Business.Utils
 
             if (string.IsNullOrWhiteSpace(summary))
             {
-                switch (args.ArgType)
+                switch (args.MemberDefinition)
                 {
-                    case Meta.Args.ArgTypeCode.No:
+                    case Meta.MemberDefinitionCode.No:
                         break;
-                    case Meta.Args.ArgTypeCode.Definition:
+                    case Meta.MemberDefinitionCode.Definition:
                         xmlMembers?.TryGetValue($"T:{args.ArgTypeFullName}", out member);
                         break;
-                    case Meta.Args.ArgTypeCode.Field:
+                    case Meta.MemberDefinitionCode.Field:
                         xmlMembers?.TryGetValue($"F:{args.ArgTypeFullName}", out member);
                         break;
-                    case Meta.Args.ArgTypeCode.Property:
+                    case Meta.MemberDefinitionCode.Property:
                         xmlMembers?.TryGetValue($"P:{args.ArgTypeFullName}", out member);
                         break;
                 }
@@ -349,11 +353,10 @@ namespace Business.Utils
                 DefaultValue = args.DefaultValue,
                 HasDefinition = args.HasDefinition,
                 UseType = args.UseType,
-                Child = new System.Collections.Generic.List<Doc.Member.Arg>(),
-                ChildAll = !ignoreChild && !args.LastType.IsEnum ?
+                Children = new System.Collections.Generic.List<Doc.Member.Arg>().ToReadOnly(),
+                Childrens = !ignoreChild && !args.LastType.IsEnum ?
                 //args.ChildAll.Where(c => (c.LastType.IsEnum || (!c.LastType.IsEnum && !c.HasDefinition)) && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArg(group, c, xmlMembers, recursion: false)).ToList() :
-                args.ChildAll.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArg(group, c, xmlMembers, recursion: false)).ToList() :
-                new System.Collections.Generic.List<Doc.Member.Arg>(),
+                args.Childrens.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArg(group, c, xmlMembers, recursion: false)).ToReadOnly() : new ReadOnlyCollection<Doc.Member.Arg>(),
                 Summary = summary,
                 Nick = argGroup.Nick,
                 Attrs = attrs,
@@ -373,9 +376,9 @@ namespace Business.Utils
                 if (!ignoreChild && !arg.IsEnum)
                 {
                     // && !arg.IsDictionary && !arg.IsCollection
-                    foreach (var item in args.Child.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
+                    foreach (var item in args.Children.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
                     {
-                        arg.Child.Add(GetDocArg(group, item, xmlMembers));
+                        arg.Children.collection.Add(GetDocArg(group, item, xmlMembers));
                     }
                 }
             }

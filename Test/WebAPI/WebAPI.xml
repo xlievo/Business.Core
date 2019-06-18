@@ -22,7 +22,12 @@
             <param name="token"></param>
             <param name="arg">arg!!!</param>
             <param name="mm">mmmmmmmm!</param>
-            <returns></returns>
+            <returns>gggg</returns>
+        </member>
+        <member name="T:Args.Test001">
+            <summary>
+            Test001!!!
+            </summary>
         </member>
         <member name="P:Args.Test001.A">
             <summary>
@@ -37,6 +42,16 @@
         <member name="P:Args.Test001.C">
             <summary>
             Ccc
+            </summary>
+        </member>
+        <member name="T:Args.Test001.Test0010.Test0011">
+            <summary>
+            Test0011!!!
+            </summary>
+        </member>
+        <member name="P:Args.Test001.Test0010.Test0011.C32">
+            <summary>
+            c32!!!
             </summary>
         </member>
         <member name="T:Arg`1">

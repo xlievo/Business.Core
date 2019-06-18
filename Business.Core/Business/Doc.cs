@@ -19,6 +19,7 @@ namespace Business.Document
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using Business.Utils;
 
     [System.Xml.Serialization.XmlRoot("doc")]
@@ -211,21 +212,146 @@ namespace Business.Document
             public string Summary { get; set; }
 
             //==============args===================//
-            public List<Arg> Args { get; set; }
+            public ReadOnlyCollection<Arg> Args { get; set; }
 
-            public List<Arg> ArgList { get; set; }
+            public ReadOnlyCollection<Arg> ArgList { get; set; }
 
-            public static void GetReturnObj(System.Type returnType)
+            public static TypeDefinition GetTypeDefinition(System.Type returnType, Dictionary<string, Xml.member> xmlMembers = null, string summary = null)
             {
-                var definitions = returnType.IsDefinition() ? new List<System.Type> { returnType } : new List<System.Type>();
-
+                var hasDefinition = returnType.IsDefinition();
+                var definitions = hasDefinition ? new List<string> { returnType.FullName } : new List<string>();
+                var childrens = new ReadOnlyCollection<TypeDefinition>();
+                var fullName = returnType.FullName.Replace('+', '.');
+                var memberDefinition = hasDefinition ? Meta.MemberDefinitionCode.Definition : Meta.MemberDefinitionCode.No;
                 //..//
+
+                Xml.member member = null;
+                if (string.IsNullOrWhiteSpace(summary) && memberDefinition == Meta.MemberDefinitionCode.Definition)
+                {
+                    xmlMembers?.TryGetValue($"T:{fullName}", out member);
+
+                    summary = member?.summary?.text;
+                }
+
+                var definition = new TypeDefinition
+                {
+                    Name = returnType.Name,
+                    Type = returnType,
+                    DefaultValue = returnType.IsValueType ? System.Activator.CreateInstance(returnType) : null,
+                    HasCollection = returnType.IsCollection(),
+                    FullName = fullName,
+                    Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, xmlMembers) : new ReadOnlyCollection<TypeDefinition>(),
+                    Childrens = childrens,
+                    MemberDefinition = memberDefinition,
+                    Summary = summary,
+                };
+
+                return definition;
             }
 
-            //static ReadOnlyCollection<Args> GetArgChild(System.Type type, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<System.Type> definitions, System.Type resultType, System.Type resultTypeDefinition, object business, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childAll)
-            //{
+            static ReadOnlyCollection<TypeDefinition> GetTypeDefinition(System.Type type, List<string> definitions, ReadOnlyCollection<TypeDefinition> childrens, Dictionary<string, Xml.member> xmlMembers = null)
+            {
+                var types = new ReadOnlyCollection<TypeDefinition>();
 
-            //}
+                var members = type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.GetField | BindingFlags.GetProperty);
+
+                foreach (var item in members)
+                {
+                    System.Type memberType = null;
+                    var memberDefinition = Meta.MemberDefinitionCode.No;
+
+                    switch (item.MemberType)
+                    {
+                        case MemberTypes.Field:
+                            {
+                                var member = item as FieldInfo;
+                                memberType = member.FieldType;
+                                memberDefinition = Meta.MemberDefinitionCode.Field;
+                            }
+                            break;
+                        case MemberTypes.Property:
+                            {
+                                var member = item as PropertyInfo;
+                                memberType = member.PropertyType;
+                                memberDefinition = Meta.MemberDefinitionCode.Property;
+                            }
+                            break;
+                        default: continue;
+                    }
+
+                    var hasDefinition = memberType.IsDefinition();
+                    if (definitions.Contains(memberType.FullName)) { continue; }
+                    else if (hasDefinition) { definitions.Add(memberType.FullName); }
+                    var childrens2 = new ReadOnlyCollection<TypeDefinition>();
+                    var fullName = $"{type.FullName.Replace('+', '.')}.{item.Name}";
+
+                    Xml.member member2 = null;
+
+                    switch (memberDefinition)
+                    {
+                        case Meta.MemberDefinitionCode.No:
+                            break;
+                        case Meta.MemberDefinitionCode.Definition:
+                            xmlMembers?.TryGetValue($"T:{fullName}", out member2);
+                            break;
+                        case Meta.MemberDefinitionCode.Field:
+                            xmlMembers?.TryGetValue($"F:{fullName}", out member2);
+                            break;
+                        case Meta.MemberDefinitionCode.Property:
+                            xmlMembers?.TryGetValue($"P:{fullName}", out member2);
+                            break;
+                    }
+
+                    var summary = member2?.summary?.text;
+
+                    // .. //
+
+                    var definition = new TypeDefinition
+                    {
+                        Name = item.Name,
+                        Type = memberType,
+                        DefaultValue = memberType.IsValueType ? System.Activator.CreateInstance(memberType) : null,
+                        HasCollection = memberType.IsCollection(),
+                        FullName = fullName,
+                        Children = hasDefinition ? GetTypeDefinition(memberType, definitions, childrens2, xmlMembers) : new ReadOnlyCollection<TypeDefinition>(),
+                        Childrens = childrens2,
+                        MemberDefinition = memberDefinition,
+                        Summary = summary,
+                    };
+
+                    types.collection.Add(definition);
+                    childrens.collection.Add(definition);
+
+                    foreach (var child in childrens2)
+                    {
+                        childrens.collection.Add(child);
+                    }
+                }
+
+                return types;
+            }
+
+            public struct TypeDefinition
+            {
+                public string Name { get; set; }
+
+                [Newtonsoft.Json.JsonIgnore]
+                public System.Type Type { get; set; }
+
+                public object DefaultValue { get; set; }
+
+                public bool HasCollection { get; set; }
+
+                public string FullName { get; set; }
+
+                public string Summary { get; set; }
+
+                public Meta.MemberDefinitionCode MemberDefinition { get; set; }
+
+                public ReadOnlyCollection<TypeDefinition> Children { get; set; }
+
+                public ReadOnlyCollection<TypeDefinition> Childrens { get; set; }
+            }
 
             public class Arg
             {
@@ -257,10 +383,10 @@ namespace Business.Document
                 //public string Group { get; set; }
                 ////==============hasChild===================//
                 //public virtual bool HasChild { get; set; }
-                //===============child==================//
-                public List<Arg> Child { get; set; }
-                //===============childAll==================//
-                public List<Arg> ChildAll { get; set; }
+                //===============children==================//
+                public ReadOnlyCollection<Arg> Children { get; set; }
+                //===============childrens==================//
+                public ReadOnlyCollection<Arg> Childrens { get; set; }
                 //==============Summary===================//
                 public string Summary { get; set; }
                 //===============nick==================//

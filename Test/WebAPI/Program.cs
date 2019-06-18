@@ -58,8 +58,8 @@ public class ResultObject<Type> : Business.Result.ResultObject<Type>
 {
     public static readonly System.Type ResultTypeDefinition = typeof(ResultObject<>).GetGenericTypeDefinition();
 
-    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericType = null, bool checkData = true)
-        : base(dataType, data, state, message, genericType, checkData) { }
+    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericDefinition = null, bool checkData = true)
+        : base(dataType, data, state, message, genericDefinition, checkData) { }
 
     public ResultObject(Type data, int state = 1, string message = null) : base(data, state, message) { }
 
@@ -249,6 +249,10 @@ public class Startup
             if (System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(wwwroot)))
             {
                 var doc = GetSwaggerDoc(item).JsonSerialize();
+
+                Configer.Xmls.TryGetValue(item.GetType().BaseType.Assembly.GetXmlPath(), out Business.Document.Xml xml);
+
+                var definition = Business.Document.Doc.Member.GetTypeDefinition(typeof(Args.Test001), xml?.members?.ToDictionary(c => c.name, c => c));
 
                 System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, $"{item.Configer.Info.BusinessName}.doc"), doc, System.Text.Encoding.UTF8);
             }
@@ -492,20 +496,27 @@ public class Startup
                 { "x-CheckNull", "Values are not allowed to be empty" },
             });
 
-            item.ArgList.ForEach(c2 =>
+            var tokenCount = 0;
+
+            foreach (var c2 in item.ArgList)
             {
                 if (!c2.UseType && c2.HasDefinition)
                 {
-                    return;
+                    continue;
                 }
 
                 string name = string.Empty;
                 string description = string.Empty;
 
-                if (typeof(Token).IsAssignableFrom(c2.Type))
+                if (typeof(IToken).IsAssignableFrom(c2.Type))
                 {
                     name = "t";
                     description = "api token";
+                    tokenCount++;
+                    if (1 < tokenCount)
+                    {
+                        name = $"{name}{tokenCount}";
+                    }
                 }
                 else
                 {
@@ -538,7 +549,7 @@ public class Startup
                 }
 
                 parameters.Add(c3);
-            });
+            }
 
             var responses = item.Returns;
 

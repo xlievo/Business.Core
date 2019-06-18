@@ -855,6 +855,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             default: return this.ResultCreate();
         }
     }
+
     public virtual async Task<IResult<IToken>> TestUse02a(TestMode mode, IToken token = default)
     {
         switch (mode)
@@ -1315,7 +1316,7 @@ public class TestBusinessMember
     {
         var meta = Cmd.GetCommand("Test001").Meta;
 
-        var attr = meta.Args[1].Child[0].Group[meta.GroupDefault].Attrs.First;
+        var attr = meta.Args[1].Children[0].Group[meta.GroupDefault].Attrs.First;
 
         Assert.AreEqual(attr.Value.State, -113);
         attr = attr.Next;
@@ -1846,8 +1847,8 @@ public class TestBusinessMember
         Assert.AreEqual(r.State, -1200);
 
         Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[0].HasLower, true);
-        Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[0].Child[0].Child[0].Child[0].HasLower, false);
-        Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[0].Child[0].Child[0].Child[1].HasLower, true);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[0].Children[0].Children[0].Children[0].HasLower, false);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[0].Children[0].Children[0].Children[1].HasLower, true);
 
         Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[1].HasLower, true);
         Assert.AreEqual(Member.Configer.MetaData["TestHasLower"].Args[2].HasLower, false);
@@ -1868,8 +1869,8 @@ public class TestBusinessMember
         Assert.AreEqual(r.State, -1200);
 
         Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[0].HasLower, true);
-        Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[0].Child[0].Child[0].Child[0].HasLower, false);
-        Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[0].Child[0].Child[0].Child[1].HasLower, true);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[0].Children[0].Children[0].Children[0].HasLower, false);
+        Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[0].Children[0].Children[0].Children[1].HasLower, true);
 
         Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[1].HasLower, true);
         Assert.AreEqual(Member.Configer.MetaData["TestHasLower2"].Args[2].HasLower, false);

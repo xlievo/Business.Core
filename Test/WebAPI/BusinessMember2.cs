@@ -101,7 +101,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="token"></param>
     /// <param name="arg">arg!!!</param>
     /// <param name="mm">mmmmmmmm!</param>
-    /// <returns></returns>
+    /// <returns>gggg</returns>
     [Command("AAA")]
     public virtual async Task<IResult<Test001Result>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, dynamic context = null)
     {
@@ -199,8 +199,25 @@ public class Test2Attribute : ArgumentAttribute
     }
 }
 
+public class CheckNull2Attribute : CheckNullAttribute
+{
+    public CheckNull2Attribute(int state = -800, string message = null) : base(state, message)
+    {
+        this.BindAfter += () =>
+        {
+            Message = "{Nike} 这个参数必须填写";
+
+            Description = "{Message}";
+        };
+    }
+}
+
+
 public class Args
 {
+    /// <summary>
+    /// Test001!!!
+    /// </summary>
     public struct Test001
     {
         /// <summary>
@@ -208,7 +225,7 @@ public class Args
         /// </summary>
         [Test]
         [Nick("password")]
-        [CheckNull(Description = "Values are not allowed to be empty")]
+        [CheckNull2]
         public string A { get; set; }
 
         /// <summary>
@@ -229,10 +246,16 @@ public class Args
 
             public Test0011 C3 { get; set; }
 
+            /// <summary>
+            /// Test0011!!!
+            /// </summary>
             public struct Test0011
             {
                 public string C31 { get; set; }
 
+                /// <summary>
+                /// c32!!!
+                /// </summary>
                 public string C32 { get; set; }
             }
         }

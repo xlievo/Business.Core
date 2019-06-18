@@ -970,13 +970,13 @@ namespace Business
 
                     var hasDefinition = current.outType.IsDefinition();
 
-                    var definitions = hasDefinition ? new System.Collections.Generic.List<System.Type> { current.outType } : new System.Collections.Generic.List<System.Type>();
+                    var definitions = hasDefinition ? new System.Collections.Generic.List<string> { current.outType.FullName } : new System.Collections.Generic.List<string>();
 
                     var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, resultType, cfg.ResultTypeDefinition, instance, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
                     var hasLower = false;
-                    var childAll2 = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                    var argChild = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? GetArgChild(current.outType, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, instance, cfg.UseTypes, out hasLower, argInfo.Name, childAll2) : new ReadOnlyCollection<Args>(0);
+                    var childrens2 = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
+                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? GetArgChild(current.outType, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, instance, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
 
                     var arg = new Args(argInfo.Name,
                     argInfo.ParameterType,
@@ -990,8 +990,8 @@ namespace Business
                     current.hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
                     default,
                     argGroup,
-                    argChild,
-                    childAll2,
+                    children,
+                    childrens2,
                     hasLower,
                     hasDefinition,
                     current.hasIArg,
@@ -1003,12 +1003,12 @@ namespace Business
                     //item.Value.CommandAttr.OnlyName,
                     GetMethodTypeFullName(parameterType),
                     current.outType.FullName.Replace('+', '.'),
-                    hasDefinition ? Args.ArgTypeCode.Definition : Args.ArgTypeCode.No);
+                    hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No);
 
                     args.collection.Add(arg);
                     childAll.collection.Add(arg);
 
-                    foreach (var child in childAll2)
+                    foreach (var child in childrens2)
                     {
                         childAll.collection.Add(child);
                     }
@@ -1115,7 +1115,7 @@ namespace Business
 
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<System.Type> definitions, System.Type resultType, System.Type resultTypeDefinition, object business, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childAll)
+        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, object business, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
         {
             hasLower = false;
 
@@ -1129,7 +1129,7 @@ namespace Business
             {
                 System.Type memberType = null;
                 Accessor accessor = default;
-                Args.ArgTypeCode argType = Args.ArgTypeCode.No;
+                var memberDefinition = MemberDefinitionCode.No;
 
                 switch (item.MemberType)
                 {
@@ -1139,7 +1139,7 @@ namespace Business
                             accessor = member.GetAccessor();
                             if (null == accessor.Getter || null == accessor.Setter) { continue; }
                             memberType = member.FieldType;
-                            argType = Args.ArgTypeCode.Field;
+                            memberDefinition = MemberDefinitionCode.Field;
                         }
                         break;
                     case MemberTypes.Property:
@@ -1148,7 +1148,7 @@ namespace Business
                             accessor = member.GetAccessor();
                             if (null == accessor.Getter || null == accessor.Setter) { continue; }
                             memberType = member.PropertyType;
-                            argType = Args.ArgTypeCode.Property;
+                            memberDefinition = MemberDefinitionCode.Property;
                         }
                         break;
                     default: continue;
@@ -1169,8 +1169,8 @@ namespace Business
 
                 var hasDefinition = current.outType.IsDefinition();
 
-                if (definitions.Contains(current.outType)) { continue; }
-                else if (hasDefinition) { definitions.Add(current.outType); }
+                if (definitions.Contains(current.outType.FullName)) { continue; }
+                else if (hasDefinition) { definitions.Add(current.outType.FullName); }
 
                 var path2 = $"{path}.{item.Name}";
 
@@ -1194,8 +1194,8 @@ namespace Business
                 var argGroup = GetArgGroup(argAttrAll, current, path2, path, commands, resultType, resultTypeDefinition, business, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
 
                 var hasLower3 = false;
-                var childAll2 = hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                var argChild = hasDefinition ? GetArgChild(current.outType, path2, commands, ref definitions, resultType, resultTypeDefinition, business, useTypes, out hasLower3, root, childAll2) : new ReadOnlyCollection<Args>(0);
+                var childrens2 = hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
+                var children = hasDefinition ? GetArgChild(current.outType, path2, commands, ref definitions, resultType, resultTypeDefinition, business, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
 
                 if (hasLower2 || hasLower3)
                 {
@@ -1214,8 +1214,8 @@ namespace Business
                     current.hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
                     accessor,
                     argGroup,
-                    argChild,
-                    childAll2,
+                    children,
+                    childrens2,
                     hasLower2 || hasLower3,
                     hasDefinition,
                     current.hasIArg,
@@ -1226,14 +1226,14 @@ namespace Business
                     hasUse,
                     GetMethodTypeFullName(memberType),
                     $"{type.FullName.Replace('+', '.')}.{item.Name}",
-                    argType);
+                    memberDefinition);
 
                 args.collection.Add(arg);
-                childAll.collection.Add(arg);
+                childrens.collection.Add(arg);
 
-                foreach (var child in childAll2)
+                foreach (var child in childrens2)
                 {
-                    childAll.collection.Add(child);
+                    childrens.collection.Add(child);
                 }
             }
 
@@ -1572,6 +1572,14 @@ namespace Business.Meta
         public MetaLogger IArgInLogger { get; internal set; }
     }
 
+    public enum MemberDefinitionCode
+    {
+        No,
+        Definition,
+        Field,
+        Property,
+    }
+
     /// <summary>
     /// Argument
     /// </summary>
@@ -1580,7 +1588,7 @@ namespace Business.Meta
         //public override string ToString() => string.Format("{0} {1}", Group2, Name);
 
         //argChild
-        public Args(string name, System.Type type, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> child, ReadOnlyCollection<Args> childAll, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, string methodTypeFullName, string argTypeFullName, ArgTypeCode argType)
+        public Args(string name, System.Type type, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, string methodTypeFullName, string argTypeFullName, MemberDefinitionCode memberDefinition)
         {
             Name = name;
             Type = type;
@@ -1593,8 +1601,9 @@ namespace Business.Meta
             //HasString = hasString;
             Accessor = accessor;
             Group = group;
-            Child = child;
-            ChildAll = childAll;
+            Children = children;
+            Childrens = childrens;
+
             HasLower = hasLower;
             HasDefinition = hasDefinition;
             HasIArg = hasIArg;
@@ -1615,7 +1624,7 @@ namespace Business.Meta
             UseType = useType;
             MethodTypeFullName = methodTypeFullName;
             ArgTypeFullName = argTypeFullName;
-            ArgType = argType;
+            MemberDefinition = memberDefinition;
         }
 
         //===============name==================//
@@ -1643,10 +1652,10 @@ namespace Business.Meta
         public ConcurrentReadOnlyDictionary<string, ArgGroup> Group { get; private set; }
         ////===============argAttr==================//
         //public SafeList<Attributes.ArgumentAttribute> ArgAttr { get; private set; }
-        //===============child==================//
-        public ReadOnlyCollection<Args> Child { get; private set; }
-        //===============childAll==================//
-        public ReadOnlyCollection<Args> ChildAll { get; private set; }
+        //===============children==================//
+        public ReadOnlyCollection<Args> Children { get; private set; }
+        //===============childrens==================//
+        public ReadOnlyCollection<Args> Childrens { get; private set; }
         //===============hasLower==================//
         public bool HasLower { get; internal set; }
         //===============hasDefinition==================//
@@ -1677,19 +1686,11 @@ namespace Business.Meta
         public string MethodTypeFullName { get; private set; }
         //==============argTypeFullName===================//
         public string ArgTypeFullName { get; private set; }
-        //==============argType===================//
+        //==============memberDefinition===================//
         /// <summary>
         /// xml using
         /// </summary>
-        public ArgTypeCode ArgType { get; private set; }
-
-        public enum ArgTypeCode
-        {
-            No,
-            Definition,
-            Field,
-            Property,
-        }
+        public MemberDefinitionCode MemberDefinition { get; private set; }
     }
 
     public struct MetaLogger
