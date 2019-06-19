@@ -84,13 +84,17 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         };
     }
 
-    /// <summary>
-    /// Test001Result!!!
-    /// </summary>
+
     public struct Test001Result
     {
+        /// <summary>
+        /// aaa
+        /// </summary>
         public string A { get; set; }
 
+        /// <summary>
+        /// bbb
+        /// </summary>
         public string B { get; set; }
     }
 
@@ -101,9 +105,9 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="token"></param>
     /// <param name="arg">arg!!!</param>
     /// <param name="mm">mmmmmmmm!</param>
-    /// <returns>gggg</returns>
+    /// <returns></returns>
     [Command("AAA")]
-    public virtual async Task<IResult<Test001Result>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, dynamic context = null)
+    public virtual async Task<IResult<Test001Result>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)][Test2]decimal mm = 0.0234m, dynamic context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;

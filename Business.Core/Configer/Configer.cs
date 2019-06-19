@@ -386,8 +386,11 @@ namespace Business
     {
         public static ConcurrentReadOnlyDictionary<string, IBusiness> BusinessList = new ConcurrentReadOnlyDictionary<string, IBusiness>(System.StringComparer.InvariantCultureIgnoreCase);
 
+        // public static ConcurrentReadOnlyDictionary<string, Document.Xml> Xmls = new ConcurrentReadOnlyDictionary<string, Document.Xml>();
+
         public static ConcurrentReadOnlyDictionary<string, Document.Xml> Xmls = new ConcurrentReadOnlyDictionary<string, Document.Xml>();
 
+        //Xml
         //internal readonly string ID = System.Guid.NewGuid().ToString("N");
 
         public Configer(Attributes.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Attributes.AttributeBase> attributes, bool loggerUseThreadPool = true)

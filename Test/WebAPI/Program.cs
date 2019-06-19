@@ -222,20 +222,6 @@ public class Startup
         Configer.UseType("context");
         Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context");
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
-
-        //==================The second step==================//
-        //add route
-        app.UseMvc(routes =>
-        {
-            foreach (var item in Configer.BusinessList)
-            {
-                routes.MapRoute(
-                 name: item.Key,
-                 template: string.Format("{0}/{{*path}}", item.Key),
-                 defaults: new { controller = "Business", action = "Call" });
-            }
-        });
-
         //==================The third step==================//
         //3
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
@@ -250,15 +236,23 @@ public class Startup
             {
                 var doc = GetSwaggerDoc(item).JsonSerialize();
 
-                Configer.Xmls.TryGetValue(item.GetType().BaseType.Assembly.GetXmlPath(), out Business.Document.Xml xml);
-
-                var definition = Business.Document.Doc.Member.GetTypeDefinition(typeof(Args.Test001), xml?.members?.ToDictionary(c => c.name, c => c));
-
                 System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, $"{item.Configer.Info.BusinessName}.doc"), doc, System.Text.Encoding.UTF8);
             }
         }
 
         #endregion
+        //==================The second step==================//
+        //add route
+        app.UseMvc(routes =>
+        {
+            foreach (var item in Configer.BusinessList)
+            {
+                routes.MapRoute(
+                 name: item.Key,
+                 template: string.Format("{0}/{{*path}}", item.Key),
+                 defaults: new { controller = "Business", action = "Call" });
+            }
+        });
 
         #region AcceptWebSocket
 
@@ -551,13 +545,13 @@ public class Startup
                 parameters.Add(c3);
             }
 
-            var responses = item.Returns;
+            var responses = item.Returns.Summary;
 
             if (string.IsNullOrWhiteSpace(responses))
             {
                 try
                 {
-                    responses = System.Activator.CreateInstance(item.ReturnType).JsonSerialize();
+                    responses = item.Returns.JsonSerialize();
                 }
                 catch (Exception ex)
                 {
