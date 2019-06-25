@@ -434,7 +434,7 @@ namespace Business
         //public bool EnableWatcher { get; }
         public System.Type ResultTypeDefinition { get; private set; }
         public ReadOnlyCollection<string> UseTypes { get; private set; }
-        public Document.Doc Doc { get; internal set; }
+        public Document.IDoc Doc { get; internal set; }
 
         /// <summary>
         /// Logger use threadPool, Default true

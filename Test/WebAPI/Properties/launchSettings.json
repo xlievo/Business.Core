@@ -24,6 +24,7 @@
       //"launchUrl": "BusinessMember?d=[\"{\\\"A2\\\":\\\"A2\\\",\\\"B2\\\":{\\\"A3\\\":\\\"A3\\\",\\\"B3\\\":{\\\"A4\\\":\\\"A4\\\",\\\"B4\\\":\\\"B4\\\"}}}\",2233.5678]&c=TestAgs001&t=dddd",
       //"launchUrl": "API?d=[\"{\\\"A\\\":\\\"ok\\\",\\\"B\\\":\\\"bbb\\\"}\",2233.5678]&c=Test001&t=dddd",
       //"launchUrl": "API?d=[\"[{\\\"A\\\":\\\"ok\\\",\\\"B\\\":\\\"bbb\\\"}]\"]&c=Test004&t=dddd",
+      "launchUrl": "doc2", //"doc/API.html",
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

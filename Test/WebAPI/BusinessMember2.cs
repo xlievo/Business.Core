@@ -107,7 +107,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
-    public virtual async Task<IResult<Test001Result>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)][Test2]decimal mm = 0.0234m, dynamic context = null)
+    public virtual async Task<IResult<Test001>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)][Test2]decimal mm = 0.0234m, dynamic context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -127,10 +127,18 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         //    return this.ResultCreate<Test001Result>(-110, "sss");
         //}
 
-        return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
+        return this.ResultCreate(arg.Out);
+        //return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
     }
 
-    public virtual async Task Test002(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="token"></param>
+    /// <param name="arg"></param>
+    /// <param name="mm"></param>
+    /// <returns>test return!!!</returns>
+    public virtual async Task<string> Test002(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -139,6 +147,8 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         {
             throw new System.Exception("Method exception!");
         }
+
+        return "sss";
     }
 
     public virtual async Task Test003(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)

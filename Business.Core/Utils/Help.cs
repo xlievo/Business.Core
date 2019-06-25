@@ -18,6 +18,7 @@
 namespace Business.Utils
 {
     using Business.Document;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
 
@@ -166,7 +167,7 @@ namespace Business.Utils
 
         public static string GetXmlPath(this Assembly assembly) => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(assembly.Location), $"{System.IO.Path.GetFileNameWithoutExtension(assembly.ManifestModule.Name)}.xml");
 
-        public static Business UseDoc<Business>(this Business business, string outFile = null) where Business : IBusiness// where Doc : Document.Doc
+        public static Business UseDoc<Business>(this Business business, string outFile = null, System.Func<DocArgSource, DocArg> argCallback = null) where Business : IBusiness// where Doc : Document.Doc
             //, System.Func<System.Collections.Generic.Dictionary<string, Xml.member>, Doc> operation, 
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -181,7 +182,8 @@ namespace Business.Utils
                 xml = Configer.Xmls.dictionary.GetOrAdd(path, Xml.DeserializeDoc(FileReadString(path)));
             }
 
-            business.Configer.Doc = UseDoc(business, xml?.members?.ToDictionary(c => c.name, c => c));//operation(xml?.members?.ToDictionary(c => c.name, c => c));
+            // c => new DocArg { Children = new Dictionary<string, IDocArg>() }
+            business.Configer.Doc = UseDoc(business, xml?.members?.ToDictionary(c => c.name, c => c), argCallback);//operation(xml?.members?.ToDictionary(c => c.name, c => c));
 
             if (!string.IsNullOrEmpty(outFile))
             {
@@ -199,7 +201,9 @@ namespace Business.Utils
             return business;
         }
 
-        public static Doc UseDoc<Business>(this Business business, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers) where Business : IBusiness
+        //const string AttributeSign = "Attribute";
+        /*
+        public static Doc UseDoc<Business>(this Business business, System.Collections.Generic.IDictionary<string, Xml.member> xmlMembers) where Business : IBusiness
         {
             var members = business.Command.ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).AsParallel().ToDictionary(c2 => c2.Key, c2 =>
             {
@@ -240,67 +244,8 @@ namespace Business.Utils
 
             return new Doc { Name = business.Configer.Info.BusinessName, Members = members };
         }
-        /*
-        static Doc.Member.Arg GetDocArgChild(string group, Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null)
-        {
-            Xml.member member = null;
 
-            if (string.IsNullOrWhiteSpace(summary))
-            {
-                switch (args.ArgType)
-                {
-                    case Meta.Args.ArgTypeCode.No:
-                        break;
-                    case Meta.Args.ArgTypeCode.Definition:
-                        xmlMembers?.TryGetValue($"T:{ args.ArgTypeFullName}", out member);
-                        break;
-                    case Meta.Args.ArgTypeCode.Field:
-                        xmlMembers?.TryGetValue($"F:{args.ArgTypeFullName}", out member);
-                        break;
-                    case Meta.Args.ArgTypeCode.Property:
-                        xmlMembers?.TryGetValue($"P:{args.ArgTypeFullName}", out member);
-                        break;
-                }
-
-                summary = member?.summary?.text;
-            }
-
-            var argGroup = args.Group[group];
-
-            var attrs = new System.Collections.Generic.List<Doc.Member.Arg.Attribute>();
-
-            var attr = argGroup.Attrs.First;
-
-            while (NodeState.DAT == attr.State)
-            {
-                attrs.Add(new Doc.Member.Arg.Attribute { Key = attr.Value.GroupKey(), Description = attr.Value.Description, State = attr.Value.State, Message = attr.Value.Message, Type = attr.Value.Type.Name });
-                attr = attr.Next;
-            }
-
-            var arg = new Doc.Member.Arg
-            {
-                Name = args.Name,
-                Type = args.Type.Name,
-                //Position = args.Position,
-                DefaultValue = args.DefaultValue,
-                //Attr = args.ArgAttr.Select(c => new Doc.Member.Arg.Attribute { Key = c.GroupKey(), Description = c.Description, State = c.State, Message = c.Message, Type = c.Type.Name }),
-                //Child = args.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.Dictionary<string, Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).ToDictionary(c => c.Name, c => GetDocArgChild(c, xmlMembers)),
-                //Child = argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) ? new System.Collections.Generic.List<Doc.Member.Arg>(0) : args.ArgAttrChild.Where(c => !c.UseType && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArgChild(group, c, xmlMembers)),
-                HasDefinition = args.HasDefinition,
-                Summary = summary,
-                Nick = argGroup.Nick,
-                Attrs = attrs
-            };
-
-            //arg.HasChild = 0 < arg.Child.Count;
-
-            return arg;
-        }
-        */
-
-        const string AttributeSign = "Attribute";
-
-        static Doc.Member.Arg GetDocArg(string group, Meta.Args args, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers, string summary = null, bool recursion = true)
+        static Doc.Member.Arg GetDocArg(string group, Meta.Args args, System.Collections.Generic.IDictionary<string, Xml.member> xmlMembers, string summary = null, bool recursion = true)
         {
             Xml.member member = null;
 
@@ -354,7 +299,6 @@ namespace Business.Utils
                 UseType = args.UseType,
                 Children = new System.Collections.Generic.List<Doc.Member.Arg>().ToReadOnly(),
                 Childrens = !ignoreChild && !args.LastType.IsEnum ?
-                //args.ChildAll.Where(c => (c.LastType.IsEnum || (!c.LastType.IsEnum && !c.HasDefinition)) && !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArg(group, c, xmlMembers, recursion: false)).ToList() :
                 args.Childrens.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)).Select(c => GetDocArg(group, c, xmlMembers, recursion: false)).ToReadOnly() : new ReadOnlyCollection<Doc.Member.Arg>(),
                 Summary = summary,
                 Nick = argGroup.Nick,
@@ -384,11 +328,91 @@ namespace Business.Utils
 
             return arg;
         }
+        */
 
-        public static TypeDefinition GetTypeDefinition(this System.Type returnType, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers = null, string summary = null)
+        public static IDoc UseDoc<Business, DocArg>(this Business business, IDictionary<string, Xml.member> xmlMembers, System.Func<DocArgSource, DocArg> argCallback) where Business : IBusiness where DocArg : IDocArg
+        {
+            var members = business.Command.AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
+            {
+                var meta = c2.Value.Meta;
+
+                Xml.member member = null;
+                xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
+
+                var member2 = new Member<DocArg>
+                {
+                    Name = meta.CommandGroup[c2.Value.Key].OnlyName,
+                    HasReturn = meta.HasReturn,
+                    Summary = member?.summary?.sub,
+                    Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
+                    Args = new Dictionary<string, DocArg>(),
+                } as IMember<DocArg>;
+
+                foreach (var item in meta.Args.Where(c3 => !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
+                {
+                    member2.Args.Add(item.Name, GetDocArg(c2.Value.Key, item, xmlMembers, argCallback, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                }
+
+                return member2;
+            }));
+
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Members = members };
+        }
+
+        static DocArg GetDocArg<DocArg>(string group, Meta.Args args, IDictionary<string, Xml.member> xmlMembers, System.Func<DocArgSource, DocArg> argCallback, string summary = null) where DocArg : IDocArg
+        {
+            if (string.IsNullOrWhiteSpace(summary))
+            {
+                Xml.member member = null;
+
+                switch (args.MemberDefinition)
+                {
+                    case Meta.MemberDefinitionCode.No:
+                        break;
+                    case Meta.MemberDefinitionCode.Definition:
+                        xmlMembers?.TryGetValue($"T:{args.ArgTypeFullName}", out member);
+                        break;
+                    case Meta.MemberDefinitionCode.Field:
+                        xmlMembers?.TryGetValue($"F:{args.ArgTypeFullName}", out member);
+                        break;
+                    case Meta.MemberDefinitionCode.Property:
+                        xmlMembers?.TryGetValue($"P:{args.ArgTypeFullName}", out member);
+                        break;
+                }
+
+                summary = member?.summary?.text;
+            }
+
+            var argGroup = args.Group[group];
+
+            var attrs = new List<Attributes.ArgumentAttribute>();
+
+            var attr = argGroup.Attrs.First;
+
+            while (NodeState.DAT == attr.State)
+            {
+                attrs.Add(attr.Value);
+                attr = attr.Next;
+            }
+
+            var arg = argCallback(new DocArgSource { Args = args, Attributes = attrs, Summary = summary });
+
+            if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !args.LastType.IsEnum)
+            {
+                // && !arg.IsDictionary && !arg.IsCollection
+                foreach (var item in args.Children.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
+                {
+                    arg.Children.Add(item.Name, GetDocArg(group, item, xmlMembers, argCallback));
+                }
+            }
+
+            return arg;
+        }
+
+        public static TypeDefinition GetTypeDefinition(this System.Type returnType, IDictionary<string, Xml.member> xmlMembers = null, string summary = null)
         {
             var hasDefinition = returnType.IsDefinition();
-            var definitions = hasDefinition ? new System.Collections.Generic.List<string> { returnType.FullName } : new System.Collections.Generic.List<string>();
+            var definitions = hasDefinition ? new List<string> { returnType.FullName } : new List<string>();
             var childrens = new ReadOnlyCollection<TypeDefinition>();
             var fullName = returnType.FullName.Replace('+', '.');
             var memberDefinition = hasDefinition ? Meta.MemberDefinitionCode.Definition : Meta.MemberDefinitionCode.No;
@@ -407,18 +431,26 @@ namespace Business.Utils
                 Name = returnType.Name,
                 Type = returnType,
                 DefaultValue = returnType.IsValueType && typeof(void) != returnType ? System.Activator.CreateInstance(returnType) : null,
-                HasCollection = returnType.IsCollection(),
+
+                IsNumeric = returnType.IsNumeric(),
+                IsDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(returnType),
+                IsCollection = returnType.IsCollection(),
+                IsEnum = returnType.IsEnum,
+                EnumNames = returnType.IsEnum ? returnType.GetEnumNames() : null,
+                EnumValues = returnType.IsEnum ? returnType.GetEnumValues() : null,
+
                 FullName = fullName,
-                Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, xmlMembers) : new ReadOnlyCollection<TypeDefinition>(),
+                Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, string.Empty, xmlMembers) : new ReadOnlyCollection<TypeDefinition>(),
                 Childrens = childrens,
                 MemberDefinition = memberDefinition,
                 Summary = summary,
+                Path = returnType.Name,
             };
 
             return definition;
         }
 
-        static ReadOnlyCollection<TypeDefinition> GetTypeDefinition(System.Type type, System.Collections.Generic.List<string> definitions, ReadOnlyCollection<TypeDefinition> childrens, System.Collections.Generic.Dictionary<string, Xml.member> xmlMembers = null)
+        static ReadOnlyCollection<TypeDefinition> GetTypeDefinition(System.Type type, List<string> definitions, ReadOnlyCollection<TypeDefinition> childrens, string path, IDictionary<string, Xml.member> xmlMembers = null)
         {
             var types = new ReadOnlyCollection<TypeDefinition>();
 
@@ -474,18 +506,26 @@ namespace Business.Utils
                 var summary = member2?.summary?.text;
 
                 // .. //
-
+                var path2 = !string.IsNullOrWhiteSpace(path) ? $"{path}.{item.Name}" : item.Name;
                 var definition = new TypeDefinition
                 {
                     Name = item.Name,
                     Type = memberType,
                     DefaultValue = memberType.IsValueType ? System.Activator.CreateInstance(memberType) : null,
-                    HasCollection = memberType.IsCollection(),
+
+                    IsNumeric = memberType.IsNumeric(),
+                    IsDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(memberType),
+                    IsCollection = memberType.IsCollection(),
+                    IsEnum = memberType.IsEnum,
+                    EnumNames = memberType.IsEnum ? memberType.GetEnumNames() : null,
+                    EnumValues = memberType.IsEnum ? memberType.GetEnumValues() : null,
+
                     FullName = fullName,
-                    Children = hasDefinition ? GetTypeDefinition(memberType, definitions, childrens2, xmlMembers) : new ReadOnlyCollection<TypeDefinition>(),
+                    Children = hasDefinition ? GetTypeDefinition(memberType, definitions, childrens2, path2, xmlMembers) : new ReadOnlyCollection<TypeDefinition>(),
                     Childrens = childrens2,
                     MemberDefinition = memberDefinition,
                     Summary = summary,
+                    Path = path2,
                 };
 
                 types.collection.Add(definition);
@@ -506,11 +546,23 @@ namespace Business.Utils
 
             public System.Type Type { get; set; }
 
+            public bool IsEnum { get; set; }
+
+            public bool IsCollection { get; set; }
+
+            public bool IsDictionary { get; set; }
+
+            public bool IsNumeric { get; set; }
+
+            public string[] EnumNames { get; set; }
+
+            public System.Array EnumValues { get; set; }
+
             public object DefaultValue { get; set; }
 
-            public bool HasCollection { get; set; }
-
             public string FullName { get; set; }
+
+            public string Path { get; set; }
 
             public string Summary { get; set; }
 
@@ -728,9 +780,9 @@ namespace Business.Utils
 
         public static string BaseDirectoryCombine(params string[] path) => System.IO.Path.Combine(new string[] { BaseDirectory }.Concat(path).ToArray());
 
-        public static System.Collections.Generic.List<System.Type> LoadAssemblys(System.Collections.Generic.IEnumerable<string> assemblyFiles, bool parallel = false, System.Func<System.Type, bool> callback = null)
+        public static List<System.Type> LoadAssemblys(IEnumerable<string> assemblyFiles, bool parallel = false, System.Func<System.Type, bool> callback = null)
         {
-            var ass = new System.Collections.Generic.List<System.Type>();
+            var ass = new List<System.Type>();
 
             if (parallel)
             {
@@ -747,7 +799,7 @@ namespace Business.Utils
             return ass;
         }
 
-        static void LoadAssembly(string assemblyFile, System.Collections.Generic.List<System.Type> ass, System.Func<System.Type, bool> callback = null)
+        static void LoadAssembly(string assemblyFile, List<System.Type> ass, System.Func<System.Type, bool> callback = null)
         {
             var assembly = LoadAssembly(assemblyFile);
 
@@ -820,9 +872,9 @@ namespace Business.Utils
 
         public static T Clone<T>(this T attribute) where T : Attributes.AttributeBase => attribute.Clone<T>();
 
-        public static System.Collections.Generic.List<Attribute> Distinct<Attribute>(this System.Collections.Generic.List<Attribute> attributes, System.Collections.Generic.IEnumerable<Attribute> clones = null) where Attribute : Attributes.AttributeBase
+        public static List<Attribute> Distinct<Attribute>(this List<Attribute> attributes, IEnumerable<Attribute> clones = null) where Attribute : Attributes.AttributeBase
         {
-            var gropus = new System.Collections.Generic.List<Attributes.GropuAttribute>();
+            var gropus = new List<Attributes.GropuAttribute>();
 
             for (int i = attributes.Count - 1; i >= 0; i--)
             {
@@ -867,9 +919,9 @@ namespace Business.Utils
             return attributes;
         }
 
-        public static System.Collections.Generic.List<Attribute> GetAttrs<Attribute>(this System.Collections.Generic.IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null, bool clone = false) where Attribute : Attributes.AttributeBase
+        public static List<Attribute> GetAttrs<Attribute>(this IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null, bool clone = false) where Attribute : Attributes.AttributeBase
         {
-            var list = new System.Collections.Generic.List<Attribute>(attributes.Count);
+            var list = new List<Attribute>(attributes.Count);
 
             foreach (var item in attributes)
             {
@@ -903,7 +955,7 @@ namespace Business.Utils
             return list;
         }
 
-        public static Attribute GetAttr<Attribute>(this System.Collections.Generic.IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null) where Attribute : Attributes.AttributeBase
+        public static Attribute GetAttr<Attribute>(this IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null) where Attribute : Attributes.AttributeBase
         {
             if (null == predicate)
             {
@@ -1305,7 +1357,7 @@ namespace Business.Utils
             }
         }
 
-        public static bool ContainsAndNotNull(this System.Collections.Generic.IDictionary<string, dynamic> dict, string source)
+        public static bool ContainsAndNotNull(this IDictionary<string, dynamic> dict, string source)
         {
             return null != dict && dict.ContainsKey(source) && !object.Equals(null, dict[source]);
         }
@@ -1447,7 +1499,7 @@ namespace Business.Utils
             if (string.IsNullOrWhiteSpace(value)) { return false; }
 
             var _value = value.Trim();
-            var list = new System.Collections.Generic.List<int>();
+            var list = new List<int>();
             for (int i = 0; i < _value.Length; i++) { list.Add(_value[i]); }
 
             if (0 != (mode & CheckCharMode.All))
@@ -1752,7 +1804,7 @@ namespace Business.Utils
 
         //public static bool SpinWait(this System.TimeSpan timeout) => System.Threading.SpinWait.SpinUntil(() => false, timeout);
 
-        static readonly System.Collections.Generic.List<string> SysTypes = Assembly.GetExecutingAssembly().GetType().Module.Assembly.GetExportedTypes().Select(c => c.FullName).ToList();
+        static readonly List<string> SysTypes = Assembly.GetExecutingAssembly().GetType().Module.Assembly.GetExportedTypes().Select(c => c.FullName).ToList();
         public static bool IsDefinition(this System.Type type) => !SysTypes.Contains(type.FullName) && (type.IsClass || (type.IsValueType && !type.IsEnum && !type.IsArray && !type.IsCollection() && !type.IsEnumerable()));
 
         #region Json
@@ -1981,7 +2033,7 @@ namespace Business.Utils
         /// <returns><see langword="true" /> if the type is an collection, otherwise <see langword="false" />.</returns>
         public static bool IsCollection(this System.Type source)
         {
-            var collectionType = typeof(System.Collections.Generic.ICollection<>);
+            var collectionType = typeof(ICollection<>);
 
             return source.GetTypeInfo().IsGenericType && source
                 .GetInterfaces()
@@ -1994,7 +2046,7 @@ namespace Business.Utils
         /// <returns><see langword="true" /> if the type is an enumerable, otherwise <see langword="false" />.</returns>
         public static bool IsEnumerable(this System.Type source)
         {
-            var enumerableType = typeof(System.Collections.Generic.IEnumerable<>);
+            var enumerableType = typeof(IEnumerable<>);
 
             return source.GetTypeInfo().IsGenericType && source.GetGenericTypeDefinition() == enumerableType;
         }
@@ -2043,7 +2095,7 @@ namespace Business.Utils
         /// <typeparam name="TType">The type that all resulting <see cref="Type"/> should be assignable to.</typeparam>
         /// <param name="types">An <see cref="IEnumerable{T}"/> of <see cref="Type"/> instances that should be filtered.</param>
         /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="Type"/> instances.</returns>
-        public static System.Collections.Generic.IEnumerable<System.Type> NotOfType<TType>(this System.Collections.Generic.IEnumerable<System.Type> types)
+        public static IEnumerable<System.Type> NotOfType<TType>(this IEnumerable<System.Type> types)
         {
             return types.Where(t => !typeof(TType).IsAssignableFrom(t));
         }
@@ -2084,11 +2136,11 @@ namespace Business.Utils
 
         #endregion
 
-        public static ReadOnlyCollection<T> ToReadOnly<T>(this System.Collections.Generic.IList<T> list) => new ReadOnlyCollection<T>(list);
+        public static ReadOnlyCollection<T> ToReadOnly<T>(this IList<T> list) => new ReadOnlyCollection<T>(list);
 
-        public static ReadOnlyCollection<T> ToReadOnly<T>(this System.Collections.Generic.IEnumerable<T> values) => new ReadOnlyCollection<T>(values);
+        public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> values) => new ReadOnlyCollection<T>(values);
 
-        public static ConcurrentReadOnlyDictionary<TKey, TElement> ToReadOnlyDictionary<TKey, TSource, TElement>(this System.Collections.Generic.IEnumerable<TSource> source, System.Func<TSource, TKey> keySelector, System.Func<TSource, TElement> elementSelector, System.Collections.Generic.IEqualityComparer<TKey> comparer = null)
+        public static ConcurrentReadOnlyDictionary<TKey, TElement> ToReadOnlyDictionary<TKey, TSource, TElement>(this IEnumerable<TSource> source, System.Func<TSource, TKey> keySelector, System.Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer = null)
         {
             var dictionary = new System.Collections.Concurrent.ConcurrentDictionary<TKey, TElement>(comparer);
 
@@ -2261,7 +2313,7 @@ namespace Business.Utils
 
         public ConcurrentReadOnlyDictionary() : this(new System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>()) { }
 
-        public ConcurrentReadOnlyDictionary(System.Collections.Generic.IEqualityComparer<TKey> comparer) : this(new System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>(comparer)) { }
+        public ConcurrentReadOnlyDictionary(IEqualityComparer<TKey> comparer) : this(new System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>(comparer)) { }
 
         //public virtual TValue TryGetValue(TKey key)
         //{
@@ -2278,15 +2330,15 @@ namespace Business.Utils
 
     public class ReadOnlyCollection<TValue> : System.Collections.ObjectModel.ReadOnlyCollection<TValue>
     {
-        internal System.Collections.Generic.IList<TValue> collection { get => this.Items; }
+        internal IList<TValue> collection { get => this.Items; }
 
-        public ReadOnlyCollection(System.Collections.Generic.IList<TValue> collection) : base(collection) { }
+        public ReadOnlyCollection(IList<TValue> collection) : base(collection) { }
 
-        public ReadOnlyCollection() : this(new System.Collections.Generic.List<TValue>()) { }
+        public ReadOnlyCollection() : this(new List<TValue>()) { }
 
-        public ReadOnlyCollection(int capacity) : this(new System.Collections.Generic.List<TValue>(capacity)) { }
+        public ReadOnlyCollection(int capacity) : this(new List<TValue>(capacity)) { }
 
-        public ReadOnlyCollection(System.Collections.Generic.IEnumerable<TValue> values) : this()
+        public ReadOnlyCollection(IEnumerable<TValue> values) : this()
         {
             if (null == values) { throw new System.ArgumentNullException(nameof(values)); }
 
@@ -2301,21 +2353,21 @@ namespace Business.Utils
 
     public static class Equality<T>
     {
-        public static System.Collections.Generic.IEqualityComparer<T> CreateComparer<V>(System.Func<T, V> keySelector)
+        public static IEqualityComparer<T> CreateComparer<V>(System.Func<T, V> keySelector)
         {
             return new CommonEqualityComparer<V>(keySelector);
         }
-        public static System.Collections.Generic.IEqualityComparer<T> CreateComparer<V>(System.Func<T, V> keySelector, System.Collections.Generic.IEqualityComparer<V> comparer)
+        public static IEqualityComparer<T> CreateComparer<V>(System.Func<T, V> keySelector, IEqualityComparer<V> comparer)
         {
             return new CommonEqualityComparer<V>(keySelector, comparer);
         }
 
-        class CommonEqualityComparer<V> : System.Collections.Generic.IEqualityComparer<T>
+        class CommonEqualityComparer<V> : IEqualityComparer<T>
         {
             private System.Func<T, V> keySelector;
-            private System.Collections.Generic.IEqualityComparer<V> comparer;
+            private IEqualityComparer<V> comparer;
 
-            public CommonEqualityComparer(System.Func<T, V> keySelector, System.Collections.Generic.IEqualityComparer<V> comparer)
+            public CommonEqualityComparer(System.Func<T, V> keySelector, IEqualityComparer<V> comparer)
             {
                 this.keySelector = keySelector;
                 this.comparer = comparer;
@@ -2336,21 +2388,21 @@ namespace Business.Utils
 
     public static class ComparisonHelper<T>
     {
-        public static System.Collections.Generic.IComparer<T> CreateComparer<V>(System.Func<T, V> keySelector)
+        public static IComparer<T> CreateComparer<V>(System.Func<T, V> keySelector)
         {
             return new CommonComparer<V>(keySelector);
         }
-        public static System.Collections.Generic.IComparer<T> CreateComparer<V>(System.Func<T, V> keySelector, System.Collections.Generic.IComparer<V> comparer)
+        public static IComparer<T> CreateComparer<V>(System.Func<T, V> keySelector, IComparer<V> comparer)
         {
             return new CommonComparer<V>(keySelector, comparer);
         }
 
-        class CommonComparer<V> : System.Collections.Generic.IComparer<T>
+        class CommonComparer<V> : IComparer<T>
         {
             private System.Func<T, V> keySelector;
-            private System.Collections.Generic.IComparer<V> comparer;
+            private IComparer<V> comparer;
 
-            public CommonComparer(System.Func<T, V> keySelector, System.Collections.Generic.IComparer<V> comparer)
+            public CommonComparer(System.Func<T, V> keySelector, IComparer<V> comparer)
             {
                 this.keySelector = keySelector;
                 this.comparer = comparer;

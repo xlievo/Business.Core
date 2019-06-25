@@ -29,6 +29,15 @@
             <param name="mm">mmmmmmmm!</param>
             <returns></returns>
         </member>
+        <member name="M:BusinessMember2.Test002(Business.Auth.Token,Arg{Args.Test001},System.Decimal)">
+            <summary>
+            
+            </summary>
+            <param name="token"></param>
+            <param name="arg"></param>
+            <param name="mm"></param>
+            <returns>test return!!!</returns>
+        </member>
         <member name="T:Args.Test001">
             <summary>
             Test001!!!
@@ -89,13 +98,6 @@
             <summary>
             callback
             </summary>
-        </member>
-        <member name="M:Startup.GetSwaggerDoc(Business.IBusiness)">
-            <summary>
-            Generating Swagger documents for business classes
-            </summary>
-            <param name="business"></param>
-            <returns></returns>
         </member>
         <member name="T:BusinessController">
             <summary>

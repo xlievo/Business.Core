@@ -21,7 +21,6 @@ using Business.Auth;
 using Business.Utils;
 using Business.Result;
 using Swagger.Doc;
-using System.Collections;
 
 #region Socket Support
 
@@ -106,7 +105,14 @@ public struct ReceiveData
 
 public class Program
 {
-    public static void Main(string[] args) => CreateWebHostBuilder(args).Build().Run();
+    public static string Host = string.Empty;
+
+    public static void Main(string[] args)
+    {
+        var host = CreateWebHostBuilder(args).Build();
+        Host = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault();
+        host.Run();
+    }
 
     public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
         WebHost.CreateDefaultBuilder(args)
@@ -228,15 +234,24 @@ public class Startup
 
         #region SwaggerDoc
 
-        foreach (var item in Configer.BusinessList.Values)
+        var swaggerPath = System.IO.Path.Combine(wwwroot, "doc");
+        var swaggerFile = System.IO.Path.Combine(swaggerPath, "index.html");
+
+        if (System.IO.File.Exists(swaggerFile))
         {
-            if (null == item.Configer.Doc) { continue; }
+            var swagger = System.IO.File.ReadAllText(swaggerFile, System.Text.Encoding.UTF8);
 
-            if (System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(wwwroot)))
+            foreach (var item in Configer.BusinessList.Values)
             {
-                var doc = GetSwaggerDoc(item).JsonSerialize();
+                if (null == item.Configer.Doc) { continue; }
 
-                System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, $"{item.Configer.Info.BusinessName}.doc"), doc, System.Text.Encoding.UTF8);
+                //var doc = GetSwaggerDoc(item).JsonSerialize();
+
+                //System.IO.File.WriteAllText(System.IO.Path.Combine(swaggerPath, $"{item.Configer.Info.BusinessName}.json"), doc, System.Text.Encoding.UTF8);
+
+                //var swagger2 = swagger.Replace("https://petstore.swagger.io/v2/swagger.json", $"{Program.Host}/doc/{item.Configer.Info.BusinessName}.json");
+
+                //System.IO.File.WriteAllText(System.IO.Path.Combine(swaggerPath, $"{item.Configer.Info.BusinessName}.html"), swagger2, System.Text.Encoding.UTF8);
             }
         }
 
@@ -465,6 +480,7 @@ public class Startup
 
     #endregion
 
+    /*
     /// <summary>
     /// Generating Swagger documents for business classes
     /// </summary>
@@ -547,16 +563,20 @@ public class Startup
 
             var responses = item.Returns.Summary;
 
-            if (string.IsNullOrWhiteSpace(responses))
+            try
             {
-                try
+                if (item.Returns.MemberDefinition == Business.Meta.MemberDefinitionCode.Definition)
                 {
-                    responses = item.Returns.JsonSerialize();
+                    responses = string.Join(System.Environment.NewLine, item.Returns.Childrens.Select(c => $"{c.Path}:{c.Type.Name} {c.Summary}"));
                 }
-                catch (Exception ex)
+                else
                 {
-                    responses = ex.Message;
+                    responses = $"{item.Returns.Name} {item.Returns.Summary}";
                 }
+            }
+            catch (Exception ex)
+            {
+                responses = ex.Message;
             }
 
             methods.Add("post", new Dictionary<string, object>
@@ -619,6 +639,7 @@ public class Startup
             return (type2, format);
         }
     }
+    */
 }
 
 /// <summary>

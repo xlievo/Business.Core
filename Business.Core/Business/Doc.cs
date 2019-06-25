@@ -180,117 +180,277 @@ namespace Business.Document
         }
     }
 
-    public class Doc
+    public interface IDoc
+    {
+        string Name { get; set; }
+
+        dynamic Members { get; }
+    }
+
+    public interface IDoc<DocArg> : IDoc where DocArg : IDocArg
+    {
+        new Dictionary<string, Dictionary<string, IMember<DocArg>>> Members { get; set; }
+    }
+
+    public interface IMember
+    {
+        string Name { get; set; }
+
+        bool HasReturn { get; set; }
+
+        Help.TypeDefinition Returns { get; set; }
+
+        string Summary { get; set; }
+
+        dynamic Args { get; }
+    }
+
+    public interface IMember<DocArg> : IMember where DocArg : IDocArg
+    {
+        new Dictionary<string, DocArg> Args { get; set; }
+    }
+
+    public interface IDocArg
+    {
+        Dictionary<string, IDocArg> Children { get; set; }
+    }
+
+    public class Doc<DocArg> : IDoc<DocArg> where DocArg : IDocArg
     {
         public string Name { get; set; }
 
-        public Dictionary<string, Dictionary<string, Member>> Members { get; set; }
+        public Dictionary<string, Dictionary<string, IMember<DocArg>>> Members { get; set; }
 
-        public class Member
-        {
-            //==============name===================//
-            public string Name { get; set; }
+        dynamic IDoc.Members { get => Members; }
 
-            //==============hasReturn===================//
-            public bool HasReturn { get; set; }
-
-            //==============ReturnType===================//
-            public Help.TypeDefinition Returns { get; set; }
-
-            //==============Returns===================//
-            //public string Returns { get; set; }
-
-            ////===============position==================//
-            //public int Position { get; set; }
-
-            ////==============groupDefault===================//
-            //public virtual string GroupDefault { get; set; }
-
-            //==============Summary===================//
-            public string Summary { get; set; }
-
-            //==============args===================//
-            public ReadOnlyCollection<Arg> Args { get; set; }
-
-            public ReadOnlyCollection<Arg> ArgList { get; set; }
-
-            public class Return
-            {
-                public string Name { get; set; }
-
-                public System.Type Type { get; set; }
-
-                public string Summary { get; set; }
-
-                public object DefaultValue { get; set; }
-
-                public string Nick { get; set; }
-
-                public ReadOnlyCollection<Return> Children { get; set; }
-
-                public ReadOnlyCollection<Return> Childrens { get; set; }
-            }
-
-            public class Arg
-            {
-                //===============name==================//
-                public string Name { get; set; }
-                //===============type==================//
-                public System.Type Type { get; set; }
-                //===============type==================//
-                public bool IsEnum { get; set; }
-                public bool IsCollection { get; set; }
-                public bool IsDictionary { get; set; }
-                public bool IsNumeric { get; set; }
-                public string[] EnumNames { get; set; }
-                public System.Array EnumValues { get; set; }
-                //===============useType==================//
-                public bool UseType { get; set; }
-                ////===============position==================//
-                //public int Position { get; set; }
-                ////===============hasDefaultValue==================//
-                public bool HasDefaultValue { get; set; }
-                //===============defaultValue==================//
-                public object DefaultValue { get; set; }
-                //===============argAttr==================//
-                public IEnumerable<Attribute> Attrs { get; set; }
-                //===============hasDefinition==================//
-                public bool HasDefinition { get; set; }
-                ////==============group===================//
-                //public string Group { get; set; }
-                ////==============hasChild===================//
-                //public virtual bool HasChild { get; set; }
-                //===============children==================//
-                public ReadOnlyCollection<Arg> Children { get; set; }
-                //===============childrens==================//
-                public ReadOnlyCollection<Arg> Childrens { get; set; }
-                //==============Summary===================//
-                public string Summary { get; set; }
-                //===============nick==================//
-                public string Nick { get; set; }
-
-                public string Path { get; set; }
-
-                public string Parent { get; set; }
-
-                public string Root { get; set; }
-
-                public class Attribute
-                {
-                    //public string Nick { get; set; }
-                    public string Key { get; set; }
-
-                    public string Type { get; set; }
-
-                    public string Description { get; set; }
-
-                    public string Message { get; set; }
-
-                    public int State { get; set; }
-
-                    public bool CollectionItem { get; set; }
-                }
-            }
-        }
+        //Dictionary<string, Dictionary<string, IMember>> IDoc.Members { get => Members.ToDictionary(c => c.Key, c => c.Value.ToDictionary(c2 => c2.Key, c2 => c2.Value as IMember)); set => Members = value.ToDictionary(c => c.Key, c => c.Value.ToDictionary(c2 => c2.Key, c2 => c2.Value as IMember<DocArg>)); }
     }
+
+    public class Member<DocArg> : IMember<DocArg> where DocArg : IDocArg
+    {
+        public string Name { get; set; }
+
+        public bool HasReturn { get; set; }
+
+        public Help.TypeDefinition Returns { get; set; }
+
+        public string Summary { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
+        public Dictionary<string, DocArg> Args { get; set; }
+
+        dynamic IMember.Args { get => Args; }
+
+        //Dictionary<string, IDocArg> IMember.Args { get => Args.ToDictionary(c => c.Key, c => c.Value as IDocArg); set => Args = value.ToDictionary(c => c.Key, c => (DocArg)c.Value); }
+    }
+
+    public struct DocArg : IDocArg
+    {
+        [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
+        public Dictionary<string, IDocArg> Children { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "type")]
+        public string Type { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "format")]
+        public string Format { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "title")]
+        public string Title { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "enum")]
+        public string[] Enum { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "description")]
+        public string Description { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "default")]
+        public string DefaultValue { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "items")]
+        public Items Items { get; set; }
+
+        #region
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "minLength")]
+        public string MinLength { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "maxLength")]
+        public string MaxLength { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "minimum")]
+        public string Minimum { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "maximum")]
+        public string Maximum { get; set; }
+
+        #endregion
+    }
+
+    public struct Items
+    {
+        [Newtonsoft.Json.JsonProperty(PropertyName = "type")]
+        public string Type { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "title")]
+        public string Title { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
+        public Dictionary<string, IDocArg> Children { get; set; }
+    }
+
+    public struct DocArgSource
+    {
+        public Meta.Args Args { get; set; }
+
+        public IList<Attributes.ArgumentAttribute> Attributes { get; set; }
+
+        public string Summary { get; set; }
+    }
+    //public class Doc
+    //{
+    //    public string Name { get; set; }
+
+    //    public Dictionary<string, Dictionary<string, Member>> Members { get; set; }
+
+    //    public class Member
+    //    {
+    //        //==============name===================//
+    //        public string Name { get; set; }
+
+    //        //==============hasReturn===================//
+    //        public bool HasReturn { get; set; }
+
+    //        //==============ReturnType===================//
+    //        public Help.TypeDefinition Returns { get; set; }
+
+    //        //==============Returns===================//
+    //        //public string Returns { get; set; }
+
+    //        ////===============position==================//
+    //        //public int Position { get; set; }
+
+    //        ////==============groupDefault===================//
+    //        //public virtual string GroupDefault { get; set; }
+
+    //        //==============Summary===================//
+    //        public string Summary { get; set; }
+
+    //        //==============args===================//
+    //        public ReadOnlyCollection<Arg> Args { get; set; }
+
+    //        public ReadOnlyCollection<Arg> ArgList { get; set; }
+
+    //        public class Arg
+    //        {
+    //            /*
+    //            color
+    //            date
+    //            datetime
+    //            datetime-local
+    //            email
+    //            month
+    //            password
+    //            number
+    //            range
+    //            tel
+    //            text
+    //            textarea
+    //            time
+    //            url
+    //            week
+    //            */
+    //            /*
+    //            string
+    //            array
+    //            object
+    //            integer
+    //            number
+    //            boolean
+    //            null
+    //            */
+    //            public struct json
+    //            {
+    //                public string title { get; set; }
+
+    //                public string type { get; set; }
+
+    //                public string format { get; set; }
+
+    //                [Newtonsoft.Json.JsonProperty(PropertyName = "default")]
+    //                public string _default { get; set; }
+
+    //                public IDictionary<string, object> options { get; set; }
+
+    //                [Newtonsoft.Json.JsonProperty(PropertyName = "enum")]
+    //                public string[] _enum { get; set; }
+
+    //                public string enumSource { get; set; }
+
+    //                public IDictionary<string, object> properties { get; set; }
+
+    //                public string basicCategoryTitle { get; set; }
+
+    //                public IDictionary<string, object> watch { get; set; }
+    //            }
+    //            //===============name==================//
+    //            public string Name { get; set; }
+    //            //===============type==================//
+    //            public System.Type Type { get; set; }
+    //            //===============type==================//
+    //            public bool IsEnum { get; set; }
+    //            public bool IsCollection { get; set; }
+    //            public bool IsDictionary { get; set; }
+    //            public bool IsNumeric { get; set; }
+    //            public string[] EnumNames { get; set; }
+    //            public System.Array EnumValues { get; set; }
+    //            //===============useType==================//
+    //            public bool UseType { get; set; }
+    //            ////===============position==================//
+    //            //public int Position { get; set; }
+    //            ////===============hasDefaultValue==================//
+    //            public bool HasDefaultValue { get; set; }
+    //            //===============defaultValue==================//
+    //            public object DefaultValue { get; set; }
+    //            //===============argAttr==================//
+    //            public IEnumerable<Attribute> Attrs { get; set; }
+    //            //===============hasDefinition==================//
+    //            public bool HasDefinition { get; set; }
+    //            ////==============group===================//
+    //            //public string Group { get; set; }
+    //            ////==============hasChild===================//
+    //            //public virtual bool HasChild { get; set; }
+    //            //===============children==================//
+    //            public ReadOnlyCollection<Arg> Children { get; set; }
+    //            //===============childrens==================//
+    //            public ReadOnlyCollection<Arg> Childrens { get; set; }
+    //            //==============Summary===================//
+    //            public string Summary { get; set; }
+    //            //===============nick==================//
+    //            public string Nick { get; set; }
+
+    //            public string Path { get; set; }
+
+    //            public string Parent { get; set; }
+
+    //            public string Root { get; set; }
+
+    //            public class Attribute
+    //            {
+    //                //public string Nick { get; set; }
+    //                public string Key { get; set; }
+
+    //                public string Type { get; set; }
+
+    //                public string Description { get; set; }
+
+    //                public string Message { get; set; }
+
+    //                public int State { get; set; }
+
+    //                public bool CollectionItem { get; set; }
+    //            }
+    //        }
+    //    }
+    //}
 }
