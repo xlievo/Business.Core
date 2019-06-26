@@ -520,6 +520,10 @@ namespace Business
             foreach (var item in BusinessList.Values)
             {
                 item.UseDoc(exist ? System.IO.Path.Combine(outDir, $"{item.Configer.Info.BusinessName}.doc") : null);
+
+                var arg = item.Configer.Doc.Members as System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, Document.IMember<Document.DocArg>>>;
+
+                var json = arg.First().Value.First().Value.Args.ElementAt(1).Value.JsonSerialize();
             }
         }
 

@@ -1130,7 +1130,6 @@ namespace Business
                 System.Type memberType = null;
                 Accessor accessor = default;
                 var memberDefinition = MemberDefinitionCode.No;
-
                 switch (item.MemberType)
                 {
                     case MemberTypes.Field:

@@ -232,7 +232,7 @@ public class Args
     /// <summary>
     /// Test001!!!
     /// </summary>
-    public struct Test001
+    public class Test001
     {
         /// <summary>
         /// AAA
@@ -240,6 +240,7 @@ public class Args
         [Test]
         [Nick("password")]
         [CheckNull2]
+        [DefaultValue("")]
         public string A { get; set; }
 
         /// <summary>

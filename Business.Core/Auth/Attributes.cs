@@ -449,6 +449,16 @@ namespace Business.Attributes //Annotations
 
     #region
 
+    [System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
+    public class DefaultValue : GropuAttribute
+    {
+        public DefaultValue(object value) => this.Value = value;
+
+        public object Value { get; private set; }
+
+        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{System.Convert.ToString(this.Value)}";
+    }
+
     public enum IgnoreMode
     {
         /// <summary>
@@ -473,7 +483,7 @@ namespace Business.Attributes //Annotations
     /// <summary>
     /// The Method and Property needs to be ignored and will not be a proxy
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property | System.AttributeTargets.Parameter | System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property | System.AttributeTargets.Parameter | System.AttributeTargets.Field | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
     public class Ignore : GropuAttribute
     {
         public Ignore(IgnoreMode mode = IgnoreMode.Method)

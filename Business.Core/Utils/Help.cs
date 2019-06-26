@@ -167,6 +167,72 @@ namespace Business.Utils
 
         public static string GetXmlPath(this Assembly assembly) => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(assembly.Location), $"{System.IO.Path.GetFileNameWithoutExtension(assembly.ManifestModule.Name)}.xml");
 
+        static DocArg GetDocArg(DocArgSource argSource)
+        {
+            var docArg = new DocArg { Children = new Dictionary<string, IDocArg>() };
+            docArg.Title = argSource.Args.Name;
+            docArg.Description = argSource.Summary;
+
+            if (argSource.Args.HasDefaultValue)
+            {
+                docArg.DefaultValue = System.Convert.ToString(argSource.Args.DefaultValue);
+            }
+
+            docArg.Type = argSource.Args.HasDefinition ? "object" : "string";
+            //var format = string.Empty;
+
+            if (argSource.Args.LastType.IsEnum)
+            {
+                docArg.Enum = argSource.Args.LastType.GetEnumNames();
+            }
+
+            if (argSource.Args.HasCollection)
+            {
+                docArg.Type = "array";
+            }
+
+            if (argSource.Args.HasDictionary)
+            {
+                docArg.Type = "array";
+                docArg.Format = "table";
+                docArg.UniqueItems = true;
+                docArg.Items = new Items
+                {
+                    Type = "object",
+                    Children = new Dictionary<string, IDocArg>
+                    {
+                        { "Key", new DocArg { Type = "string" } },
+                        { "Value", new DocArg { Type = "string" } },
+                    }
+                };
+            }
+
+            switch (argSource.Args.LastType.GetTypeCode())
+            {
+                case System.TypeCode.Boolean: docArg.Type = "boolean"; break;
+                case System.TypeCode.Byte: docArg.Format = "binary"; break;
+                //case TypeCode.Char: type2 = "string"; break;
+                case System.TypeCode.DateTime: docArg.Format = "datetime-local"; break;
+                //case TypeCode.DBNull: return "string";
+                case System.TypeCode.Decimal: docArg.Type = "number"; break;
+                case System.TypeCode.Double: docArg.Type = "number"; break;
+                //case System.TypeCode.Empty: break;
+                case System.TypeCode.Int16: docArg.Type = "integer"; break;
+                case System.TypeCode.Int32: docArg.Type = "integer"; docArg.Format = "int32"; break;
+                case System.TypeCode.Int64: docArg.Type = "integer"; docArg.Format = "int64"; break;
+                //case TypeCode.Object: return "string";
+                case System.TypeCode.SByte: docArg.Type = "integer"; break;
+                case System.TypeCode.Single: docArg.Type = "number"; docArg.Format = "float"; break;
+                //case TypeCode.String: type2 = "string"; break;
+                case System.TypeCode.UInt16: docArg.Type = "integer"; break;
+                case System.TypeCode.UInt32: docArg.Type = "integer"; docArg.Format = "int32"; break;
+                case System.TypeCode.UInt64: docArg.Type = "integer"; docArg.Format = "int64"; break;
+                default: break;
+            }
+
+            return docArg;
+        }
+
         public static Business UseDoc<Business>(this Business business, string outFile = null, System.Func<DocArgSource, DocArg> argCallback = null) where Business : IBusiness// where Doc : Document.Doc
             //, System.Func<System.Collections.Generic.Dictionary<string, Xml.member>, Doc> operation, 
         {
@@ -183,7 +249,7 @@ namespace Business.Utils
             }
 
             // c => new DocArg { Children = new Dictionary<string, IDocArg>() }
-            business.Configer.Doc = UseDoc(business, xml?.members?.ToDictionary(c => c.name, c => c), argCallback);//operation(xml?.members?.ToDictionary(c => c.name, c => c));
+            business.Configer.Doc = UseDoc(business, xml?.members?.ToDictionary(c => c.name, c => c), null == argCallback ? c => GetDocArg(c) : argCallback);//operation(xml?.members?.ToDictionary(c => c.name, c => c));
 
             if (!string.IsNullOrEmpty(outFile))
             {

@@ -267,11 +267,14 @@ namespace Business.Document
         [Newtonsoft.Json.JsonProperty(PropertyName = "default")]
         public string DefaultValue { get; set; }
 
+        [Newtonsoft.Json.JsonProperty(PropertyName = "uniqueItems")]
+        public bool UniqueItems { get; set; }
+
         [Newtonsoft.Json.JsonProperty(PropertyName = "items")]
         public Items Items { get; set; }
 
         #region
-
+        /*
         [Newtonsoft.Json.JsonProperty(PropertyName = "minLength")]
         public string MinLength { get; set; }
 
@@ -283,11 +286,11 @@ namespace Business.Document
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "maximum")]
         public string Maximum { get; set; }
-
+        */
         #endregion
     }
 
-    public struct Items
+    public class Items
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "type")]
         public string Type { get; set; }
