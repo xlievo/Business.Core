@@ -169,8 +169,8 @@ namespace Business.Utils
 
         static DocArg GetDocArg(DocArgSource argSource)
         {
-            var docArg = new DocArg { Children = new Dictionary<string, IDocArg>() };
-            docArg.Title = argSource.Args.Name;
+            var docArg = new DocArg { ID = argSource.Args.Group[argSource.Group].Path, Children = new Dictionary<string, IDocArg>() };
+            docArg.Title = $"{argSource.Args.Name} ({argSource.Args.LastType.Name})";
             docArg.Description = argSource.Summary;
 
             if (argSource.Args.HasDefaultValue)
@@ -186,48 +186,50 @@ namespace Business.Utils
                 docArg.Enum = argSource.Args.LastType.GetEnumNames();
             }
 
-            if (argSource.Args.HasCollection)
-            {
-                docArg.Type = "array";
-            }
-
             if (argSource.Args.HasDictionary)
             {
-                docArg.Type = "array";
-                docArg.Format = "table";
-                docArg.UniqueItems = true;
-                docArg.Items = new Items
-                {
-                    Type = "object",
-                    Children = new Dictionary<string, IDocArg>
-                    {
-                        { "Key", new DocArg { Type = "string" } },
-                        { "Value", new DocArg { Type = "string" } },
-                    }
-                };
+                docArg.Type = "object";
+                //docArg.Type = "array";
+                //docArg.Format = "table";
+                //docArg.UniqueItems = true;
+                //docArg.Items = new Items
+                //{
+                //    Type = "object",
+                //    Children = new Dictionary<string, IDocArg>
+                //    {
+                //        { "Key", new DocArg { Type = "string" } },
+                //        { "Value", new DocArg { Type = "string" } },
+                //    }
+                //};
             }
-
-            switch (argSource.Args.LastType.GetTypeCode())
+            else if (argSource.Args.HasCollection)
             {
-                case System.TypeCode.Boolean: docArg.Type = "boolean"; break;
-                case System.TypeCode.Byte: docArg.Format = "binary"; break;
-                //case TypeCode.Char: type2 = "string"; break;
-                case System.TypeCode.DateTime: docArg.Format = "datetime-local"; break;
-                //case TypeCode.DBNull: return "string";
-                case System.TypeCode.Decimal: docArg.Type = "number"; break;
-                case System.TypeCode.Double: docArg.Type = "number"; break;
-                //case System.TypeCode.Empty: break;
-                case System.TypeCode.Int16: docArg.Type = "integer"; break;
-                case System.TypeCode.Int32: docArg.Type = "integer"; docArg.Format = "int32"; break;
-                case System.TypeCode.Int64: docArg.Type = "integer"; docArg.Format = "int64"; break;
-                //case TypeCode.Object: return "string";
-                case System.TypeCode.SByte: docArg.Type = "integer"; break;
-                case System.TypeCode.Single: docArg.Type = "number"; docArg.Format = "float"; break;
-                //case TypeCode.String: type2 = "string"; break;
-                case System.TypeCode.UInt16: docArg.Type = "integer"; break;
-                case System.TypeCode.UInt32: docArg.Type = "integer"; docArg.Format = "int32"; break;
-                case System.TypeCode.UInt64: docArg.Type = "integer"; docArg.Format = "int64"; break;
-                default: break;
+                docArg.Type = "array";
+            }
+            else
+            {
+                switch (argSource.Args.LastType.GetTypeCode())
+                {
+                    case System.TypeCode.Boolean: docArg.Type = "boolean"; break;
+                    case System.TypeCode.Byte: docArg.Format = "binary"; break;
+                    //case TypeCode.Char: type2 = "string"; break;
+                    case System.TypeCode.DateTime: docArg.Format = "datetime-local"; break;
+                    //case TypeCode.DBNull: return "string";
+                    case System.TypeCode.Decimal: docArg.Type = "number"; break;
+                    case System.TypeCode.Double: docArg.Type = "number"; break;
+                    //case System.TypeCode.Empty: break;
+                    case System.TypeCode.Int16: docArg.Type = "integer"; break;
+                    case System.TypeCode.Int32: docArg.Type = "integer"; docArg.Format = "int32"; break;
+                    case System.TypeCode.Int64: docArg.Type = "integer"; docArg.Format = "int64"; break;
+                    //case TypeCode.Object: return "string";
+                    case System.TypeCode.SByte: docArg.Type = "integer"; break;
+                    case System.TypeCode.Single: docArg.Type = "number"; docArg.Format = "float"; break;
+                    //case TypeCode.String: type2 = "string"; break;
+                    case System.TypeCode.UInt16: docArg.Type = "integer"; break;
+                    case System.TypeCode.UInt32: docArg.Type = "integer"; docArg.Format = "int32"; break;
+                    case System.TypeCode.UInt64: docArg.Type = "integer"; docArg.Format = "int64"; break;
+                    default: break;
+                }
             }
 
             return docArg;
@@ -461,7 +463,7 @@ namespace Business.Utils
                 attr = attr.Next;
             }
 
-            var arg = argCallback(new DocArgSource { Args = args, Attributes = attrs, Summary = summary });
+            var arg = argCallback(new DocArgSource { Group = group, Args = args, Attributes = attrs, Summary = summary });
 
             if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !args.LastType.IsEnum)
             {

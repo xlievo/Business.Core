@@ -249,6 +249,9 @@ namespace Business.Document
         [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         public Dictionary<string, IDocArg> Children { get; set; }
 
+        [Newtonsoft.Json.JsonProperty(PropertyName = "id")]
+        public string ID { get; set; }
+
         [Newtonsoft.Json.JsonProperty(PropertyName = "type")]
         public string Type { get; set; }
 
@@ -270,6 +273,9 @@ namespace Business.Document
         [Newtonsoft.Json.JsonProperty(PropertyName = "uniqueItems")]
         public bool UniqueItems { get; set; }
 
+        [Newtonsoft.Json.JsonProperty(PropertyName = "options")]
+        public Options Options { get; set; }
+
         [Newtonsoft.Json.JsonProperty(PropertyName = "items")]
         public Items Items { get; set; }
 
@@ -290,6 +296,37 @@ namespace Business.Document
         #endregion
     }
 
+    public class Options
+    {
+        [Newtonsoft.Json.JsonProperty(PropertyName = "disable_collapse")]
+        public bool Disable_Collapse { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "disable_edit_json")]
+        public bool Disable_Edit_Json { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "disable_properties")]
+        public bool Disable_Properties { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "collapsed")]
+        public bool Collapsed { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "hidden")]
+        public bool Hidden { get; set; }
+
+        #region array
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "disable_array_add")]
+        public bool Disable_Array_Add { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "disable_array_delete")]
+        public bool Disable_Array_Delete { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "disable_array_reorder")]
+        public bool Disable_Array_Reorder { get; set; }
+
+        #endregion
+    }
+
     public class Items
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "type")]
@@ -304,6 +341,8 @@ namespace Business.Document
 
     public struct DocArgSource
     {
+        public string Group { get; set; }
+
         public Meta.Args Args { get; set; }
 
         public IList<Attributes.ArgumentAttribute> Attributes { get; set; }

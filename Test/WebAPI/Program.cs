@@ -266,6 +266,16 @@ public class Startup
                  name: item.Key,
                  template: string.Format("{0}/{{*path}}", item.Key),
                  defaults: new { controller = "Business", action = "Call" });
+
+                var arg = item.Value.Configer.Doc.Members as System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, Business.Document.IMember<Business.Document.DocArg>>>;
+
+                var json = new Business.Document.DocArg
+                {
+                    //Children = arg.First().Value.First().Value.Args.ToDictionary(c => c.Key, c => c.Value as Business.Document.IDocArg),
+                    Type = "object",
+                    
+                }.JsonSerialize();
+                //var json = arg.First().Value.First().Value.Args.Values.JsonSerialize();
             }
         });
 
