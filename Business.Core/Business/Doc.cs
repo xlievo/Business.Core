@@ -187,12 +187,12 @@ namespace Business.Document
         dynamic Members { get; }
     }
 
-    public interface IDoc<DocArg> : IDoc where DocArg : IDocArg
+    public interface IDoc<DocArg> : IDoc where DocArg : IDocArg<DocArg>
     {
         new Dictionary<string, Dictionary<string, IMember<DocArg>>> Members { get; set; }
     }
 
-    public interface IMember
+    public interface IMember<DocArg> where DocArg : IDocArg<DocArg>
     {
         string Name { get; set; }
 
@@ -202,31 +202,24 @@ namespace Business.Document
 
         string Summary { get; set; }
 
-        dynamic Args { get; }
+        Dictionary<string, DocArg> Args { get; set; }
     }
 
-    public interface IMember<DocArg> : IMember where DocArg : IDocArg
+    public interface IDocArg<Arg> where Arg : IDocArg<Arg>
     {
-        new Dictionary<string, DocArg> Args { get; set; }
+        Dictionary<string, Arg> Children { get; set; }
     }
 
-    public interface IDocArg
-    {
-        Dictionary<string, IDocArg> Children { get; set; }
-    }
-
-    public class Doc<DocArg> : IDoc<DocArg> where DocArg : IDocArg
+    public class Doc<DocArg> : IDoc<DocArg> where DocArg : IDocArg<DocArg>
     {
         public string Name { get; set; }
 
         public Dictionary<string, Dictionary<string, IMember<DocArg>>> Members { get; set; }
 
         dynamic IDoc.Members { get => Members; }
-
-        //Dictionary<string, Dictionary<string, IMember>> IDoc.Members { get => Members.ToDictionary(c => c.Key, c => c.Value.ToDictionary(c2 => c2.Key, c2 => c2.Value as IMember)); set => Members = value.ToDictionary(c => c.Key, c => c.Value.ToDictionary(c2 => c2.Key, c2 => c2.Value as IMember<DocArg>)); }
     }
 
-    public class Member<DocArg> : IMember<DocArg> where DocArg : IDocArg
+    public class Member<DocArg> : IMember<DocArg> where DocArg : IDocArg<DocArg>
     {
         public string Name { get; set; }
 
@@ -238,16 +231,12 @@ namespace Business.Document
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         public Dictionary<string, DocArg> Args { get; set; }
-
-        dynamic IMember.Args { get => Args; }
-
-        //Dictionary<string, IDocArg> IMember.Args { get => Args.ToDictionary(c => c.Key, c => c.Value as IDocArg); set => Args = value.ToDictionary(c => c.Key, c => (DocArg)c.Value); }
     }
 
-    public struct DocArg : IDocArg
+    public class DocArg : IDocArg<DocArg>
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
-        public Dictionary<string, IDocArg> Children { get; set; }
+        public Dictionary<string, DocArg> Children { get; set; }
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "id")]
         public string ID { get; set; }
@@ -277,7 +266,7 @@ namespace Business.Document
         public Options Options { get; set; }
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "items")]
-        public Items Items { get; set; }
+        public Items<DocArg> Items { get; set; }
 
         #region
         /*
@@ -327,7 +316,7 @@ namespace Business.Document
         #endregion
     }
 
-    public class Items
+    public class Items<DocArg> where DocArg : IDocArg<DocArg>
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "type")]
         public string Type { get; set; }
@@ -336,7 +325,7 @@ namespace Business.Document
         public string Title { get; set; }
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
-        public Dictionary<string, IDocArg> Children { get; set; }
+        public Dictionary<string, DocArg> Children { get; set; }
     }
 
     public struct DocArgSource

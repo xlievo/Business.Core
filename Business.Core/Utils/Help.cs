@@ -169,7 +169,7 @@ namespace Business.Utils
 
         static DocArg GetDocArg(DocArgSource argSource)
         {
-            var docArg = new DocArg { ID = argSource.Args.Group[argSource.Group].Path, Children = new Dictionary<string, IDocArg>() };
+            var docArg = new DocArg { ID = argSource.Args.Group[argSource.Group].Path, Children = new Dictionary<string, DocArg>() };
             docArg.Title = $"{argSource.Args.Name} ({argSource.Args.LastType.Name})";
             docArg.Description = argSource.Summary;
 
@@ -398,7 +398,7 @@ namespace Business.Utils
         }
         */
 
-        public static IDoc UseDoc<Business, DocArg>(this Business business, IDictionary<string, Xml.member> xmlMembers, System.Func<DocArgSource, DocArg> argCallback) where Business : IBusiness where DocArg : IDocArg
+        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, IDictionary<string, Xml.member> xmlMembers, System.Func<DocArgSource, DocArg> argCallback) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             var members = business.Command.AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
             {
@@ -427,7 +427,7 @@ namespace Business.Utils
             return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Members = members };
         }
 
-        static DocArg GetDocArg<DocArg>(string group, Meta.Args args, IDictionary<string, Xml.member> xmlMembers, System.Func<DocArgSource, DocArg> argCallback, string summary = null) where DocArg : IDocArg
+        static DocArg GetDocArg<DocArg>(string group, Meta.Args args, IDictionary<string, Xml.member> xmlMembers, System.Func<DocArgSource, DocArg> argCallback, string summary = null) where DocArg : IDocArg<DocArg>
         {
             if (string.IsNullOrWhiteSpace(summary))
             {

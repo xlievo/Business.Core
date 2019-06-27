@@ -267,15 +267,23 @@ public class Startup
                  template: string.Format("{0}/{{*path}}", item.Key),
                  defaults: new { controller = "Business", action = "Call" });
 
-                var arg = item.Value.Configer.Doc.Members as System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, Business.Document.IMember<Business.Document.DocArg>>>;
-
-                var json = new Business.Document.DocArg
+                foreach (var group in item.Value.Configer.Doc.Members.Values)
                 {
-                    //Children = arg.First().Value.First().Value.Args.ToDictionary(c => c.Key, c => c.Value as Business.Document.IDocArg),
-                    Type = "object",
-                    
-                }.JsonSerialize();
-                //var json = arg.First().Value.First().Value.Args.Values.JsonSerialize();
+                    foreach (var member in group.Values)
+                    {
+                        var json = new Business.Document.DocArg
+                        {
+                            ID = member.Name,
+                            Title = "d",
+                            Description = member.Summary,
+                            Type = "object",
+                            Children = member.Args,
+                        }.JsonSerialize();
+
+                        var args = member.Args.Values as IEnumerable<Business.Document.DocArg>;
+
+                    }
+                }
             }
         });
 
