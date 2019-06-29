@@ -287,6 +287,12 @@ namespace Business.Document
 
     public class Options
     {
+        [Newtonsoft.Json.JsonProperty(PropertyName = "infoText")]
+        public string InfoText { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "collapsed")]
+        public bool Collapsed { get; set; }
+
         [Newtonsoft.Json.JsonProperty(PropertyName = "disable_collapse")]
         public bool Disable_Collapse { get; set; }
 
@@ -296,11 +302,32 @@ namespace Business.Document
         [Newtonsoft.Json.JsonProperty(PropertyName = "disable_properties")]
         public bool Disable_Properties { get; set; }
 
-        [Newtonsoft.Json.JsonProperty(PropertyName = "collapsed")]
-        public bool Collapsed { get; set; }
+        [Newtonsoft.Json.JsonProperty(PropertyName = "array_controls_top")]
+        public bool Array_Controls_Top { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "enum_titles")]
+        public int[] Enum_Titles { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "expand_height")]
+        public bool Expand_Height { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "grid_columns")]
+        public int Grid_Columns { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "grid_break")]
+        public bool Grid_Break { get; set; }
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "hidden")]
         public bool Hidden { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "input_height")]
+        public int Input_Height { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "input_width")]
+        public int Input_Width { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "remove_empty_properties")]
+        public bool Remove_Empty_Properties { get; set; }
 
         #region array
 
@@ -312,6 +339,12 @@ namespace Business.Document
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "disable_array_reorder")]
         public bool Disable_Array_Reorder { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "disable_array_delete_all_rows")]
+        public bool Disable_Array_Delete_All_Rows { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(PropertyName = "disable_array_delete_last_row")]
+        public bool Disable_Array_Delete_Last_Row { get; set; }
 
         #endregion
     }

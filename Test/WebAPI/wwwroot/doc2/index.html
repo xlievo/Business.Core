@@ -20,6 +20,8 @@
     <script src="/doc2/jsoneditor.min.js"></script>
 
     <script>
+
+        DOC = "http://localhost/API.doc";
         // Set the default CSS theme and icon library globally
         //JSONEditor.defaults.theme = 'foundation5';
         //JSONEditor.defaults.iconlib = 'fontawesome4';
@@ -28,7 +30,8 @@
 
         JSONEditor.defaults.options.disable_properties = true;
         JSONEditor.defaults.options.required_by_default = true;
-        
+        JSONEditor.defaults.options.disable_edit_json = true;
+
     </script>
 </head>
 <body>
@@ -73,77 +76,121 @@
         <div id='editor_holder' class='medium-12 columns'></div>
     </div>
 
+    <div class='container'>
+        <div id='editor_holder2' class='medium-12 columns'></div>
+    </div>
+
     <script>
-      // This is the starting value for the editor
-      // We will use this to seed the initial editor
-      // and to provide a "Restore to Default" button.
-      var starting_value = {
-        name: "John Smith",
-        age: 35,
-        gender: "male",
-        location: {
-          city: "San Francisco",
-          state: "California"
-        },
-        pets: [
-          {
-            name: "Spot",
-            type: "dog",
-            fixed: true
-          },
-          {
-            name: "Whiskers",
-            type: "cat",
-            fixed: false
-          }
-        ]
-      };
+        // This is the starting value for the editor
+        // We will use this to seed the initial editor
+        // and to provide a "Restore to Default" button.
+        var starting_value = {
+            name: "John Smith",
+            age: 35,
+            gender: "male",
+            location: {
+                city: "San Francisco",
+                state: "California"
+            },
+            pets: [
+                {
+                    name: "Spot",
+                    type: "dog",
+                    fixed: true
+                },
+                {
+                    name: "Whiskers",
+                    type: "cat",
+                    fixed: false
+                }
+            ]
+        };
 
-      // Initialize the editor
-      var editor = new JSONEditor(document.getElementById('editor_holder'),{
-        // Enable fetching schemas via ajax
-        ajax: true,
+        // Initialize the editor
+        var editor = new JSONEditor(document.getElementById('editor_holder'), {
+            // Enable fetching schemas via ajax
+            ajax: true,
 
-        // The schema for the editor
-        schema: {
-          $ref: "person.json",
-          format: "grid"
-        },
+            // The schema for the editor
+            schema: {
+                $ref: "person.json",
+                format: "grid"
+            },
 
-        // Seed the form with a starting value
-        startval: starting_value
-      });
+            // Seed the form with a starting value
+            startval: starting_value
+        });
 
-      // Hook up the submit button to log to the console
-      document.getElementById('submit').addEventListener('click',function() {
-        // Get the value from the editor
-        console.log(editor.getValue());
-      });
+        // Hook up the submit button to log to the console
+        document.getElementById('submit').addEventListener('click', function () {
+            // Get the value from the editor
+            console.log(getData(['root.location', 'root.pets']));
+        });
 
-      // Hook up the Restore to Default button
-      document.getElementById('restore').addEventListener('click',function() {
-        editor.setValue(starting_value);
-      });
-
-      // Hook up the validation indicator to update its
-      // status whenever the editor changes
-      editor.on('change',function() {
-        // Get an array of errors from the validator
-        var errors = editor.validate();
-
-        var indicator = document.getElementById('valid_indicator');
-
-        // Not valid
-        if(errors.length) {
-          indicator.className = 'label alert';
-          indicator.textContent = 'not valid';
+        function getData(args) {
+            for (var index = args.length - 1; index >= 0; index--) {
+                args[index] = JSON.stringify(editor.getEditor(args[index]).getValue());
+            }
+            return JSON.stringify(args)
         }
-        // Valid
-        else {
-          indicator.className = 'label success';
-          indicator.textContent = 'valid';
+
+        function getDoc(url) {
+            var fetchUrl = url;
+            //if (fileBase != url.substr(0, fileBase.length) && "http" != url.substr(0, 4) && "/" != url.substr(0, 1)) fetchUrl = fileBase + url;
+
+            var r = new XMLHttpRequest();
+            r.overrideMimeType('application/json');
+            r.open("GET", fetchUrl, true);
+            if (self.options.ajaxCredentials) r.withCredentials = self.options.ajaxCredentials;
+            r.onreadystatechange = function () {
+                if (r.readyState != 4) return;
+                // Request succeeded
+                if (r.status === 200) {
+                    var response;
+                    try {
+                        response = JSON.parse(r.responseText);
+                    }
+                    catch (e) {
+                        window.console.log(e);
+                        throw "Failed to parse external ref " + fetchUrl;
+                    }
+                    if (!(typeof response === "boolean" || typeof response === "object") || response === null || Array.isArray(response)) throw "External ref does not contain a valid schema - " + fetchUrl;
+
+                    self.refs[url] = response;
+                }
+                // Request failed
+                else {
+                    window.console.log(r);
+                    throw "Failed to fetch ref via ajax- " + url;
+                }
+            };
+            r.send();
         }
-      });
+
+        // Hook up the Restore to Default button
+        document.getElementById('restore').addEventListener('click', function () {
+            editor.setValue(starting_value);
+        });
+
+        // Hook up the validation indicator to update its
+        // status whenever the editor changes
+        editor.on('change', function () {
+            // Get an array of errors from the validator
+            var errors = editor.validate();
+
+            var indicator = document.getElementById('valid_indicator');
+
+            // Not valid
+            if (errors.length) {
+                indicator.className = 'label alert';
+                indicator.textContent = 'not valid';
+            }
+            // Valid
+            else {
+                indicator.className = 'label success';
+                indicator.textContent = 'valid';
+            }
+        });
     </script>
 </body>
 </html>

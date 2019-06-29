@@ -179,7 +179,6 @@ namespace Business.Utils
             }
 
             docArg.Type = argSource.Args.HasDefinition ? "object" : "string";
-            //var format = string.Empty;
 
             if (argSource.Args.LastType.IsEnum)
             {
@@ -235,11 +234,28 @@ namespace Business.Utils
             return docArg;
         }
 
-        public static Business UseDoc<Business>(this Business business, string outFile = null, System.Func<DocArgSource, DocArg> argCallback = null) where Business : IBusiness// where Doc : Document.Doc
-            //, System.Func<System.Collections.Generic.Dictionary<string, Xml.member>, Doc> operation, 
+        /// <summary>
+        /// Generate "Business.Document.DocArg" Document Objects for the specified business class.
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="outFile"></param>
+        /// <returns></returns>
+        public static Business UseDoc<Business>(this Business business, string outFile = null) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outFile);
+
+        /// <summary>
+        /// Generate document objects for specified business classes.
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <typeparam name="DocArg"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="argCallback"></param>
+        /// <param name="outFile"></param>
+        /// <returns></returns>
+        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, string outFile = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
-            //if (null == operation) { throw new System.ArgumentNullException(nameof(operation)); }
+            if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
             var path = business.GetType().BaseType.Assembly.GetXmlPath();
 
@@ -250,8 +266,7 @@ namespace Business.Utils
                 xml = Configer.Xmls.dictionary.GetOrAdd(path, Xml.DeserializeDoc(FileReadString(path)));
             }
 
-            // c => new DocArg { Children = new Dictionary<string, IDocArg>() }
-            business.Configer.Doc = UseDoc(business, xml?.members?.ToDictionary(c => c.name, c => c), null == argCallback ? c => GetDocArg(c) : argCallback);//operation(xml?.members?.ToDictionary(c => c.name, c => c));
+            business.Configer.Doc = UseDoc(business, argCallback, xml?.members?.ToDictionary(c => c.name, c => c));
 
             if (!string.IsNullOrEmpty(outFile))
             {
@@ -398,8 +413,20 @@ namespace Business.Utils
         }
         */
 
-        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, IDictionary<string, Xml.member> xmlMembers, System.Func<DocArgSource, DocArg> argCallback) where Business : IBusiness where DocArg : IDocArg<DocArg>
+
+        /// <summary>
+        /// Gets the document object of the specified business class.
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <typeparam name="DocArg"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="argCallback"></param>
+        /// <param name="xmlMembers"></param>
+        /// <returns></returns>
+        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
+            if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
+
             var members = business.Command.AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
             {
                 var meta = c2.Value.Meta;
@@ -418,7 +445,7 @@ namespace Business.Utils
 
                 foreach (var item in meta.Args.Where(c3 => !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
                 {
-                    member2.Args.Add(item.Name, GetDocArg(c2.Value.Key, item, xmlMembers, argCallback, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                    member2.Args.Add(item.Name, GetDocArg(c2.Value.Key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
                 }
 
                 return member2;
@@ -427,8 +454,10 @@ namespace Business.Utils
             return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Members = members };
         }
 
-        static DocArg GetDocArg<DocArg>(string group, Meta.Args args, IDictionary<string, Xml.member> xmlMembers, System.Func<DocArgSource, DocArg> argCallback, string summary = null) where DocArg : IDocArg<DocArg>
+        static DocArg GetDocArg<DocArg>(string group, Meta.Args args, System.Func<DocArgSource, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null) where DocArg : IDocArg<DocArg>
         {
+            if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
+
             if (string.IsNullOrWhiteSpace(summary))
             {
                 Xml.member member = null;
@@ -470,7 +499,7 @@ namespace Business.Utils
                 // && !arg.IsDictionary && !arg.IsCollection
                 foreach (var item in args.Children.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg)))
                 {
-                    arg.Children.Add(item.Name, GetDocArg(group, item, xmlMembers, argCallback));
+                    arg.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
                 }
             }
 

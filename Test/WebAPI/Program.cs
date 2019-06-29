@@ -21,6 +21,7 @@ using Business.Auth;
 using Business.Utils;
 using Business.Result;
 using Swagger.Doc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 #region Socket Support
 
@@ -116,7 +117,12 @@ public class Program
 
     public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
         WebHost.CreateDefaultBuilder(args)
+            .UseKestrel()
             .UseStartup<Startup>();
+            //.ConfigureKestrel((context, options) =>
+            //{
+            //    // Set properties and call methods on options
+            //});
 }
 
 public class Startup
@@ -231,7 +237,7 @@ public class Startup
         //==================The third step==================//
         //3
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
-
+        /*
         #region SwaggerDoc
 
         var swaggerPath = System.IO.Path.Combine(wwwroot, "doc");
@@ -256,6 +262,11 @@ public class Startup
         }
 
         #endregion
+        */
+        #region SwaggerDoc
+
+        #endregion
+
         //==================The second step==================//
         //add route
         app.UseMvc(routes =>
@@ -271,12 +282,13 @@ public class Startup
                 {
                     foreach (var member in group.Values)
                     {
+                        //in
                         var json = new Business.Document.DocArg
                         {
-                            ID = member.Name,
+                            ID = $"{member.Name}.d",
                             Title = "d",
-                            Description = member.Summary,
                             Type = "object",
+                            //Description = member.Summary,
                             Children = member.Args,
                         }.JsonSerialize();
 
