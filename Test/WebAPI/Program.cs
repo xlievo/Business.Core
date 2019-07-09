@@ -119,10 +119,10 @@ public class Program
         WebHost.CreateDefaultBuilder(args)
             .UseKestrel()
             .UseStartup<Startup>();
-            //.ConfigureKestrel((context, options) =>
-            //{
-            //    // Set properties and call methods on options
-            //});
+    //.ConfigureKestrel((context, options) =>
+    //{
+    //    // Set properties and call methods on options
+    //});
 }
 
 public class Startup
@@ -185,6 +185,15 @@ public class Startup
             });
     }
 
+    static Newtonsoft.Json.JsonSerializerSettings JsonSettings = new Newtonsoft.Json.JsonSerializerSettings
+    {
+        ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+        ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver(),
+        DateFormatString = "yyyy-MM-dd HH:mm:ss",
+        DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
+        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+    };
+
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IHostingEnvironment env)
     {
@@ -237,6 +246,10 @@ public class Startup
         //==================The third step==================//
         //3
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
+
+        //var httpClient = System.Net.Http.HttpClientFactory.Create(new System.Net.Http.HttpClientHandler());
+        //var msg = await httpClient.GetStringAsync("http://www.baidu.com");
+
         /*
         #region SwaggerDoc
 
@@ -282,17 +295,48 @@ public class Startup
                 {
                     foreach (var member in group.Values)
                     {
-                        //in
                         var json = new Business.Document.DocArg
                         {
-                            ID = $"{member.Name}.d",
-                            Title = "d",
+                            ID = member.Name,
+                            Title = member.Name,
                             Type = "object",
-                            //Description = member.Summary,
-                            Children = member.Args,
-                        }.JsonSerialize();
+                            Description = member.Summary,
+                            Children = new Dictionary<string, Business.Document.DocArg>
+                            {
+                                { "Input", new Business.Document.DocArg { Children = new Dictionary<string, Business.Document.DocArg>() } },
+                                { "Output", new Business.Document.DocArg { Children = new Dictionary<string, Business.Document.DocArg>() } }
+                            },
+                        };
 
-                        var args = member.Args.Values as IEnumerable<Business.Document.DocArg>;
+                        var args = member.Args as Dictionary<string, Business.Document.DocArg>;
+                        var tokens = args.Where(c => c.Value.Token).ToList();
+                        foreach (var token in tokens)
+                        {
+                            args.Remove(token.Key);
+                        }
+
+                        if (0 < tokens.Count)
+                        {
+                            json.Children["Input"].Children.Add("t", new Business.Document.DocArg
+                            {
+                                ID = $"{member.Name}.t",
+                                Title = "t (String)",
+                                Type = "string",
+                                Description = "API token",
+                            });
+                        }
+
+                        json.Children["Input"].Children.Add("d", new Business.Document.DocArg
+                        {
+                            ID = $"{member.Name}.d",
+                            Title = "d (JsonArray)",
+                            Type = "object",
+                            Children = args,
+                            Description = "API data",
+                        });
+
+                        //in
+                        var data = json.JsonSerialize(JsonSettings);
 
                     }
                 }
@@ -328,18 +372,19 @@ public class Startup
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-
-                    Sockets.TryAdd(context.Connection.Id, webSocket);
+                    using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
+                    {
+                        Sockets.TryAdd(context.Connection.Id, webSocket);
 #if DEBUG
-                    System.Console.WriteLine($"Add:{context.Connection.Id} Sockets:{Sockets.Count}");
+                        System.Console.WriteLine($"Add:{context.Connection.Id} Sockets:{Sockets.Count}");
 #endif
-                    await Keep(context, webSocket);
+                        await Keep(context, webSocket);
 
-                    Sockets.TryRemove(context.Connection.Id, out _);
+                        Sockets.TryRemove(context.Connection.Id, out _);
 #if DEBUG
-                    System.Console.WriteLine($"Remove:{context.Connection.Id} Sockets:{Sockets.Count}");
+                        System.Console.WriteLine($"Remove:{context.Connection.Id} Sockets:{Sockets.Count}");
 #endif
+                    }
                 }
                 else
                 {
@@ -692,7 +737,7 @@ public class BusinessController : Controller
     {
         if (null != path) { return this.NotFound(); }
 
-        string c = null, t = null, d = null, g = null, b = null;
+        string c, t, d, g, b = null;
 
         switch (this.Request.Method)
         {

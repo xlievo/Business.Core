@@ -244,6 +244,9 @@ namespace Business.Document
         [Newtonsoft.Json.JsonProperty(PropertyName = "type")]
         public string Type { get; set; }
 
+        [Newtonsoft.Json.JsonProperty(PropertyName = "token")]
+        public bool Token { get; set; }
+
         [Newtonsoft.Json.JsonProperty(PropertyName = "format")]
         public string Format { get; set; }
 

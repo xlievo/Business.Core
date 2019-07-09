@@ -3,30 +3,53 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>CSS Integration JSON Editor Example</title>
+    <title>APIs Documents</title>
 
-    <!-- Foundation CSS framework (Bootstrap and jQueryUI also supported) -->
-    <!--<link rel='stylesheet' href='//cdn.jsdelivr.net/foundation/5.0.2/css/foundation.min.css'>-->
-    <!-- Font Awesome icons (Bootstrap, Foundation, and jQueryUI also supported) -->
-    <!--<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>-->
-    <!-- Bootstrap3 -->
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="/doc2/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/doc2/bootstrap-3.3.7/css/bootstrap.min.css">
+    <!-- JSON Schema Based Editor -->
+    <script src="/doc2/jsoneditor/jsoneditor.min.js"></script>
+    <!-- Collapse -->
+    <link rel="stylesheet" type="text/css" href="/doc2/houdini/css/houdini.min.css">
+    <script src="/doc2/houdini/js/houdini.polyfills.min.js"></script>
+    <!-- Ajax request -->
+    <script src="/doc2/atomic/atomic.polyfills.min.js"></script>
+    <!-- Ajax.org Cloud9 Editor -->
+    <script src="/doc2/ace/ace.js"></script>
+
     <!--<link rel='stylesheet' href='//cdn.jsdelivr.net/foundation/5.0.2/css/foundation.min.css'>
     <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>-->
     <!-- Optional theme -->
     <!--<link rel="stylesheet" href="/doc2/font-awesome_2.css">-->
+    <!--//tab-content well well-small-->
+    <style type="text/css">
+        /*.tab-content well well-small {
+            padding-top: 0px;
+            padding-right: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+            border-top-width: 0px;
+            border-right-width: 0px;
+            border-bottom-width: 0px;
+            border-left-width: 0px;
+            margin-bottom: 0px;
+        }*/
 
-    <script src="/doc2/jsoneditor.min.js"></script>
+        .panel-padding {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            padding-right: 10px;
+            padding-left: 10px;
+        }
+    </style>
+
 
     <script>
-
-        DOC = "http://localhost/API.doc";
         // Set the default CSS theme and icon library globally
         //JSONEditor.defaults.theme = 'foundation5';
         //JSONEditor.defaults.iconlib = 'fontawesome4';
         JSONEditor.defaults.theme = 'bootstrap3';
         JSONEditor.defaults.iconlib = 'bootstrap3';
+        //JSONEditor.defaults.options.iconlib = "bootstrap2";
 
         JSONEditor.defaults.options.disable_properties = true;
         JSONEditor.defaults.options.required_by_default = true;
@@ -35,55 +58,61 @@
     </script>
 </head>
 <body>
-    <div class='row'>
-        <div class='medium-12 columns'>
-            <h1>CSS Integration JSON Editor Example</h1>
-        </div>
-    </div>
-    <div class='row'>
-        <div class='medium-6 columns'>
-            <p>JSON Editor supports these popular CSS frameworks:</p>
-            <ul>
-                <li>Bootstrap 2</li>
-                <li>Bootstrap 3</li>
-                <li>Foundation 3</li>
-                <li>Foundation 4</li>
-                <li>Foundation 5 (shown here)</li>
-                <li>jQuery UI</li>
-            </ul>
-        </div>
-        <div class='medium-6 columns'>
-            <p>JSON Editor supports these popular icon libraries:</p>
-            <ul>
-                <li>Bootstrap 2 Glyphicons</li>
-                <li>Bootstrap 3 Glyphicons</li>
-                <li>Foundicons 2</li>
-                <li>Foundicons 3</li>
-                <li>jQueryUI</li>
-                <li>Font Awesome 3</li>
-                <li>Font Awesome 4 (shown here)</li>
-            </ul>
-        </div>
-    </div>
-    <div class='row'>
+
+    <div class='container'>
+
+
         <div class='medium-12-columns'>
             <button id='submit' class='tiny'>Submit (console.log)</button>
             <button id='restore' class='secondary tiny'>Restore to Default</button>
             <span id='valid_indicator' class='label'></span>
         </div>
-    </div>
-    <div class='container'>
-        <div id='editor_holder' class='medium-12 columns'></div>
-    </div>
 
-    <div class='container'>
-        <div id='editor_holder2' class='medium-12 columns'></div>
+
+        <div class="panel-group">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4>
+                        <span class="d-inline-block">Well done!</span>
+                        <span class="pull-right">
+                            <a data-houdini-toggle="A">Detailed description</a>
+                        </span>
+                    </h4>
+                    <hr>
+                    <p class="mb-0">Aww yeah, you successfully read this important alert message. This example text is going to run a bit longer so that you can see how spacing within an alert works with this kind of content.</p>
+                </div>
+
+                <div data-houdini id='A' class="panel-padding">
+                    <div id='editor_holder'></div>
+                    <div id='editor_holder2'></div>
+                </div>
+            </div>
+        </div>
+
+
+
+
     </div>
 
     <script>
-        // This is the starting value for the editor
-        // We will use this to seed the initial editor
-        // and to provide a "Restore to Default" button.
+
+        var disclosure = new Houdini('[data-houdini]');
+
+        let doc = null;
+
+        getDoc("http://localhost:5000/API.doc")
+            .then(c => {
+                if (null == c) {
+                    return;
+                }
+                doc = c;
+                console.log(doc);
+
+                
+            });
+
+        //console.log(doc);
+
         var starting_value = {
             name: "John Smith",
             age: 35,
@@ -108,26 +137,157 @@
 
         // Initialize the editor
         var editor = new JSONEditor(document.getElementById('editor_holder'), {
+            //iconlib: "foundation2",
+            //form_name_root: "root",
             // Enable fetching schemas via ajax
             ajax: true,
 
             // The schema for the editor
             schema: {
-                $ref: "person.json",
-                format: "grid"
+                $ref: "person.json"
+                //, format: "grid"
             },
 
             // Seed the form with a starting value
             startval: starting_value
         });
 
+        // Initialize the editor
+        var editor2 = new JSONEditor(document.getElementById('editor_holder2'), {
+            form_name_root: "root2",
+            // Enable fetching schemas via ajax
+            ajax: true,
+            //theme: 'barebones',
+            //// The schema for the editor
+            //schema: {
+            //    type: "string",
+            //    format: "json",
+            //    options: {
+            //        ace: {
+            //            theme: "ace/theme/vibrant_ink",
+            //            tabSize: 2,
+            //            useSoftTabs: true,
+            //            wrap: true,
+            //            readOnly: true,
+            //            minLines: 20,
+            //            maxLines: 100
+            //        }
+            //    }
+            //},
+            schema: {
+                title: "SDK",
+                type: "object",
+                format: "categories",
+                //basicCategoryTitle: "Main",
+                properties: {
+                    NET: {
+                        type: "object",
+                        properties: {
+                            NET: {
+                                type: "string",
+                                format: "json",
+                                options: {
+                                    ace: {
+                                        theme: "ace/theme/vibrant_ink",
+                                        tabSize: 2,
+                                        useSoftTabs: true,
+                                        wrap: true,
+                                        readOnly: true,
+                                        minLines: 20,
+                                        maxLines: 100,
+                                        highlightActiveLine: false,
+                                        highlightSelectedWord: false
+                                    }
+                                }
+                            }
+                        },
+                        options: {
+                            collapsed: false,
+                            disable_collapse: true
+                        }
+                    },
+                    Java: {
+                        type: "object",
+                        properties: {
+                            Java: {
+                                type: "string",
+                                format: "java",
+                                options: {
+                                    ace: {
+                                        theme: "ace/theme/vibrant_ink",
+                                        tabSize: 2,
+                                        useSoftTabs: true,
+                                        wrap: true,
+                                        readOnly: false,
+                                        minLines: 20,
+                                        maxLines: 100
+                                    }
+                                }
+                            }
+                        },
+                        options: {
+                            collapsed: false,
+                            disable_collapse: true
+                        }
+                    },
+                    PHP: {
+                        type: "object",
+                        properties: {
+                            PHP: {
+                                type: "string",
+                                format: "php",
+                                options: {
+                                    ace: {
+                                        theme: "ace/theme/vibrant_ink",
+                                        tabSize: 2,
+                                        useSoftTabs: true,
+                                        wrap: true,
+                                        readOnly: false,
+                                        minLines: 20,
+                                        maxLines: 100
+                                    }
+                                }
+                            }
+                        },
+                        options: {
+                            collapsed: false,
+                            disable_collapse: true
+                        }
+                    }
+                }
+                //,default: ["{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}", "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"]
+            }
+
+            // Seed the form with a starting value
+            , startval: {
+                "NET": {
+                    //"NET": "var httpClient = System.Net.Http.HttpClientFactory.Create(new System.Net.Http.HttpClientHandler());\nvar msg = await httpClient.GetStringAsync(\"http://www.baidu.com\");"
+                    "NET": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
+                },
+                "Java": {
+                    "Java": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
+                },
+                "PHP": {
+                    "PHP": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
+                }
+            }
+        });
+        //
+        document.querySelector('#NET > div > div > h3').style.display = 'none';
+        document.querySelector('#Java > div > div > h3').style.display = 'none';
+        document.querySelector('#PHP > div > div > h3').style.display = 'none';
+        document.querySelector('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
+        document.querySelector('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
+        document.querySelector('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
+        document.querySelector('#editor_holder2 > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
+
         // Hook up the submit button to log to the console
         document.getElementById('submit').addEventListener('click', function () {
             // Get the value from the editor
-            console.log(getData(['root.location', 'root.pets']));
+            console.log(getData(editor, ['root.location', 'root.pets']));
         });
 
-        function getData(args) {
+        function getData(editor, args) {
             for (var index = args.length - 1; index >= 0; index--) {
                 args[index] = JSON.stringify(editor.getEditor(args[index]).getValue());
             }
@@ -135,37 +295,19 @@
         }
 
         function getDoc(url) {
-            var fetchUrl = url;
-            //if (fileBase != url.substr(0, fileBase.length) && "http" != url.substr(0, 4) && "/" != url.substr(0, 1)) fetchUrl = fileBase + url;
-
-            var r = new XMLHttpRequest();
-            r.overrideMimeType('application/json');
-            r.open("GET", fetchUrl, true);
-            if (self.options.ajaxCredentials) r.withCredentials = self.options.ajaxCredentials;
-            r.onreadystatechange = function () {
-                if (r.readyState != 4) return;
-                // Request succeeded
-                if (r.status === 200) {
-                    var response;
-                    try {
-                        response = JSON.parse(r.responseText);
-                    }
-                    catch (e) {
-                        window.console.log(e);
-                        throw "Failed to parse external ref " + fetchUrl;
-                    }
-                    if (!(typeof response === "boolean" || typeof response === "object") || response === null || Array.isArray(response)) throw "External ref does not contain a valid schema - " + fetchUrl;
-
-                    self.refs[url] = response;
-                }
-                // Request failed
-                else {
-                    window.console.log(r);
-                    throw "Failed to fetch ref via ajax- " + url;
-                }
-            };
-            r.send();
+            return atomic(url)
+                .then(function (response) {
+                    //console.log(response.data); // xhr.responseText
+                    //console.log(response.xhr);  // full response
+                    return response.data;
+                })
+                .catch(function (error) {
+                    //console.log(error.status); // xhr.status
+                    //console.log(error.statusText); // xhr.statusText
+                    return null;
+                });
         }
+
 
         // Hook up the Restore to Default button
         document.getElementById('restore').addEventListener('click', function () {
@@ -191,6 +333,9 @@
                 indicator.textContent = 'valid';
             }
         });
+
+
+
     </script>
 </body>
 </html>

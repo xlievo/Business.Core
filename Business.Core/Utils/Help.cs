@@ -180,6 +180,11 @@ namespace Business.Utils
 
             docArg.Type = argSource.Args.HasDefinition ? "object" : "string";
 
+            if (typeof(Auth.IToken).IsAssignableFrom(argSource.Args.LastType))
+            {
+                docArg.Token = true;
+            }
+
             if (argSource.Args.LastType.IsEnum)
             {
                 docArg.Enum = argSource.Args.LastType.GetEnumNames();
