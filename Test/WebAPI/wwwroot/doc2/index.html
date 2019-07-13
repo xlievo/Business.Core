@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <title>APIs Documents</title>
+    <link rel="shortcut icon" href="/doc2/w9.ico" />
 
     <link rel="stylesheet" type="text/css" href="/doc2/bootstrap-3.3.7/css/bootstrap.min.css">
     <!-- JSON Schema Based Editor -->
@@ -15,12 +16,9 @@
     <script src="/doc2/atomic/atomic.polyfills.min.js"></script>
     <!-- Ajax.org Cloud9 Editor -->
     <script src="/doc2/ace/ace.js"></script>
+    <!-- juicer -->
+    <script type="text/javascript" src="/doc2/Juicer/juicer-min.js"></script>
 
-    <!--<link rel='stylesheet' href='//cdn.jsdelivr.net/foundation/5.0.2/css/foundation.min.css'>
-    <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>-->
-    <!-- Optional theme -->
-    <!--<link rel="stylesheet" href="/doc2/font-awesome_2.css">-->
-    <!--//tab-content well well-small-->
     <style type="text/css">
         /*.tab-content well well-small {
             padding-top: 0px;
@@ -42,19 +40,13 @@
         }
     </style>
 
-
     <script>
         // Set the default CSS theme and icon library globally
-        //JSONEditor.defaults.theme = 'foundation5';
-        //JSONEditor.defaults.iconlib = 'fontawesome4';
         JSONEditor.defaults.theme = 'bootstrap3';
         JSONEditor.defaults.iconlib = 'bootstrap3';
-        //JSONEditor.defaults.options.iconlib = "bootstrap2";
-
         JSONEditor.defaults.options.disable_properties = true;
         JSONEditor.defaults.options.required_by_default = true;
         JSONEditor.defaults.options.disable_edit_json = true;
-
     </script>
 </head>
 <body>
@@ -68,247 +60,188 @@
             <span id='valid_indicator' class='label'></span>
         </div>
 
-
-        <div class="panel-group">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h4>
-                        <span class="d-inline-block">Well done!</span>
-                        <span class="pull-right">
-                            <a data-houdini-toggle="A">Detailed description</a>
-                        </span>
-                    </h4>
-                    <hr>
-                    <p class="mb-0">Aww yeah, you successfully read this important alert message. This example text is going to run a bit longer so that you can see how spacing within an alert works with this kind of content.</p>
-                </div>
-
-                <div data-houdini id='A' class="panel-padding">
-                    <div id='editor_holder'></div>
-                    <div id='editor_holder2'></div>
-                </div>
-            </div>
-        </div>
-
-
-
+        <!-- ============================= -->
+        <div class="panel-group" id="members" />
+        <!-- ============================= -->
+        <div id="t" />
 
     </div>
 
+    <script id="tpl" type="text/template">
+        {@each _ as member}
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h4>
+                    <span class="d-inline-block">${member.Name}</span>
+                    <span class="pull-right">
+                        <a data-houdini-toggle="${member.Name}_member">Detailed description</a>
+                    </span>
+                </h4>
+                {@if member.Summary !== null && member.Summary !== 'null'}
+                <hr>
+                <p class="mb-0">${member.Summary}</p>
+                {@/if}
+            </div>
+            <div data-houdini id='${member.Name}_member' class="panel-padding">
+                <div id='${member.Name}_input'></div>
+                <div id='${member.Name}_out'></div>
+                <div id='${member.Name}_sdk'></div>
+            </div>
+        </div>
+        {@/each}
+    </script>
+
     <script>
 
-        var disclosure = new Houdini('[data-houdini]');
+        atomic("http://localhost:5000/API.doc")
+            .then(function (response) {
+                console.log(response.data); // xhr.responseText
+                //console.log(response.xhr);  // full response
+                var doc = response.data;
 
-        let doc = null;
-
-        getDoc("http://localhost:5000/API.doc")
-            .then(c => {
-                if (null == c) {
-                    return;
+                var members = doc.Members["j"];
+                var members2 = []
+                for (var i in members) {
+                    members2.push(members[i]);
                 }
-                doc = c;
-                console.log(doc);
 
-                
-            });
+                var tpl = document.getElementById('tpl').innerHTML;
+                var html = juicer(tpl, members2);
+                document.getElementById('members').innerHTML = html;
 
-        //console.log(doc);
+                //=============================================//
+                members2.forEach(c => {
 
-        var starting_value = {
-            name: "John Smith",
-            age: 35,
-            gender: "male",
-            location: {
-                city: "San Francisco",
-                state: "California"
-            },
-            pets: [
-                {
-                    name: "Spot",
-                    type: "dog",
-                    fixed: true
-                },
-                {
-                    name: "Whiskers",
-                    type: "cat",
-                    fixed: false
-                }
-            ]
-        };
+                    var member = c;
 
-        // Initialize the editor
-        var editor = new JSONEditor(document.getElementById('editor_holder'), {
-            //iconlib: "foundation2",
-            //form_name_root: "root",
-            // Enable fetching schemas via ajax
-            ajax: true,
+                    //==================input==================//
+                    var inputid = member.Name + '_input';
 
-            // The schema for the editor
-            schema: {
-                $ref: "person.json"
-                //, format: "grid"
-            },
-
-            // Seed the form with a starting value
-            startval: starting_value
-        });
-
-        // Initialize the editor
-        var editor2 = new JSONEditor(document.getElementById('editor_holder2'), {
-            form_name_root: "root2",
-            // Enable fetching schemas via ajax
-            ajax: true,
-            //theme: 'barebones',
-            //// The schema for the editor
-            //schema: {
-            //    type: "string",
-            //    format: "json",
-            //    options: {
-            //        ace: {
-            //            theme: "ace/theme/vibrant_ink",
-            //            tabSize: 2,
-            //            useSoftTabs: true,
-            //            wrap: true,
-            //            readOnly: true,
-            //            minLines: 20,
-            //            maxLines: 100
-            //        }
-            //    }
-            //},
-            schema: {
-                title: "SDK",
-                type: "object",
-                format: "categories",
-                //basicCategoryTitle: "Main",
-                properties: {
-                    NET: {
+                    var input = {
+                        title: "Input",
                         type: "object",
                         properties: {
-                            NET: {
+                            t: {
+                                id: member.Name + '.t',
+                                title: "t (String)",
                                 type: "string",
-                                format: "json",
-                                options: {
-                                    ace: {
-                                        theme: "ace/theme/vibrant_ink",
-                                        tabSize: 2,
-                                        useSoftTabs: true,
-                                        wrap: true,
-                                        readOnly: true,
-                                        minLines: 20,
-                                        maxLines: 100,
-                                        highlightActiveLine: false,
-                                        highlightSelectedWord: false
-                                    }
-                                }
+                                description: "API token"
+                            },
+                            d: {
+                                id: member.Name + '.d',
+                                title: "d (JsonArray)",
+                                type: "object",
+                                description: "API data",
+                                properties: {}
                             }
-                        },
-                        options: {
-                            collapsed: false,
-                            disable_collapse: true
                         }
-                    },
-                    Java: {
-                        type: "object",
-                        properties: {
-                            Java: {
-                                type: "string",
-                                format: "java",
-                                options: {
-                                    ace: {
-                                        theme: "ace/theme/vibrant_ink",
-                                        tabSize: 2,
-                                        useSoftTabs: true,
-                                        wrap: true,
-                                        readOnly: false,
-                                        minLines: 20,
-                                        maxLines: 100
-                                    }
-                                }
-                            }
-                        },
-                        options: {
-                            collapsed: false,
-                            disable_collapse: true
-                        }
-                    },
-                    PHP: {
-                        type: "object",
-                        properties: {
-                            PHP: {
-                                type: "string",
-                                format: "php",
-                                options: {
-                                    ace: {
-                                        theme: "ace/theme/vibrant_ink",
-                                        tabSize: 2,
-                                        useSoftTabs: true,
-                                        wrap: true,
-                                        readOnly: false,
-                                        minLines: 20,
-                                        maxLines: 100
-                                    }
-                                }
-                            }
-                        },
-                        options: {
-                            collapsed: false,
-                            disable_collapse: true
+                    };
+
+                    var token = false;
+                    for (var i in member.properties) {
+                        if (member.properties[i].token) {
+                            token = true;
+                        } else {
+                            input.properties.d.properties[i] = member.properties[i];
                         }
                     }
-                }
-                //,default: ["{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}", "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"]
-            }
 
-            // Seed the form with a starting value
-            , startval: {
-                "NET": {
-                    //"NET": "var httpClient = System.Net.Http.HttpClientFactory.Create(new System.Net.Http.HttpClientHandler());\nvar msg = await httpClient.GetStringAsync(\"http://www.baidu.com\");"
-                    "NET": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
-                },
-                "Java": {
-                    "Java": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
-                },
-                "PHP": {
-                    "PHP": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
-                }
-            }
-        });
-        //
-        document.querySelector('#NET > div > div > h3').style.display = 'none';
-        document.querySelector('#Java > div > div > h3').style.display = 'none';
-        document.querySelector('#PHP > div > div > h3').style.display = 'none';
-        document.querySelector('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
-        document.querySelector('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
-        document.querySelector('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
-        document.querySelector('#editor_holder2 > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
+                    if (!token) {
+                        delete input.properties.t;
+                    }
 
-        // Hook up the submit button to log to the console
-        document.getElementById('submit').addEventListener('click', function () {
-            // Get the value from the editor
-            console.log(getData(editor, ['root.location', 'root.pets']));
-        });
+                    new JSONEditor(document.getElementById(inputid), {
+                        // The schema for the editor
+                        schema: input
+                    });
+                    //========================================//
+
+                    //==================sdk==================//
+                    var outid = member.Name + '_out';
+                    var sdkid = member.Name + '_sdk';
+                    new JSONEditor(document.getElementById(sdkid), {
+                        // Enable fetching schemas via ajax
+                        //ajax: true,
+                        schema: {
+                            title: "SDK",
+                            type: "object",
+                            format: "categories",
+                            properties: {
+                                NET: getSdk("json"),
+                                Java: getSdk("java"),
+                                PHP: getSdk("php")
+                            }
+                        }
+
+                        // Seed the form with a starting value
+                        , startval: {
+                            "NET": {
+                                "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
+                            },
+                            "Java": {
+                                "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
+                            },
+                            "PHP": {
+                                "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
+                            }
+                        }
+                    });
+
+                    document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
+                    //========================================//
+                });
+
+                document.querySelectorAll('#NET > div > div > h3').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('#Java > div > div > h3').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('#PHP > div > div > h3').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+
+                new Houdini('[data-houdini]');
+            })
+            .catch(function (error) {
+                console.log(error.status); // xhr.status
+                //console.log(error.statusText); // xhr.statusText
+                return null;
+            });
+
+        function getSdk(format) {
+            return {
+                type: "object",
+                properties: {
+                    value: {
+                        type: "string",
+                        format: format,
+                        options: {
+                            ace: {
+                                theme: "ace/theme/vibrant_ink",
+                                useWorker: false,
+                                tabSize: 2,
+                                readOnly: true,
+                                highlightActiveLine: false,
+                                highlightSelectedWord: false,
+                                minLines: 20,
+                                maxLines: 100
+                            }
+                        }
+                    }
+                },
+                options: {
+                    collapsed: false,
+                    disable_collapse: true
+                }
+            };
+        }
 
         function getData(editor, args) {
-            for (var index = args.length - 1; index >= 0; index--) {
-                args[index] = JSON.stringify(editor.getEditor(args[index]).getValue());
+            for (var i = args.length - 1; i >= 0; i--) {
+                args[i] = JSON.stringify(editor.getEditor(args[i]).getValue());
             }
             return JSON.stringify(args)
         }
 
-        function getDoc(url) {
-            return atomic(url)
-                .then(function (response) {
-                    //console.log(response.data); // xhr.responseText
-                    //console.log(response.xhr);  // full response
-                    return response.data;
-                })
-                .catch(function (error) {
-                    //console.log(error.status); // xhr.status
-                    //console.log(error.statusText); // xhr.statusText
-                    return null;
-                });
-        }
-
-
+        /*
         // Hook up the Restore to Default button
         document.getElementById('restore').addEventListener('click', function () {
             editor.setValue(starting_value);
@@ -333,7 +266,7 @@
                 indicator.textContent = 'valid';
             }
         });
-
+        */
 
 
     </script>
