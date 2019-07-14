@@ -259,6 +259,9 @@ public class Args
 
             public string C2 { get; set; }
 
+            /// <summary>
+            /// 
+            /// </summary>
             public Test0011 C3 { get; set; }
 
             /// <summary>
@@ -266,10 +269,13 @@ public class Args
             /// </summary>
             public struct Test0011
             {
+                /// <summary>
+                /// 
+                /// </summary>
                 public string C31 { get; set; }
 
                 /// <summary>
-                /// c32!!!
+                /// !!!
                 /// </summary>
                 public string C32 { get; set; }
             }

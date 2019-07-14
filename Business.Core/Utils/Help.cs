@@ -483,6 +483,13 @@ namespace Business.Utils
                 }
 
                 summary = member?.summary?.text;
+
+                if (string.IsNullOrWhiteSpace(summary) && args.HasDefinition)
+                {
+                    xmlMembers?.TryGetValue($"T:{args.LastType.FullName.Replace('+', '.')}", out member);
+
+                    summary = member?.summary?.text;
+                }
             }
 
             var argGroup = args.Group[group];

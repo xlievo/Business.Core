@@ -47,6 +47,22 @@
         JSONEditor.defaults.options.disable_properties = true;
         JSONEditor.defaults.options.required_by_default = true;
         JSONEditor.defaults.options.disable_edit_json = true;
+
+        var Theme = JSONEditor.defaults.themes.bootstrap3;
+        JSONEditor.defaults.themes.bootstrap3 = function () {
+            var theme = new Theme()
+            theme.getHeader = function (text) {
+                var el = document.createElement('h4');
+                if (typeof text === "string") {
+                    el.textContent = text;
+                }
+                else {
+                    el.appendChild(text);
+                }
+                return el;
+            }
+            return theme
+        };
     </script>
 </head>
 <body>
@@ -54,17 +70,37 @@
     <div class='container'>
 
 
-        <div class='medium-12-columns'>
-            <button id='submit' class='tiny'>Submit (console.log)</button>
-            <button id='restore' class='secondary tiny'>Restore to Default</button>
-            <span id='valid_indicator' class='label'></span>
+        <!--<div class='medium-12-columns'>
+        <button id='submit' class='tiny'>Submit (console.log)</button>
+        <button id='restore' class='secondary tiny'>Restore to Default</button>
+        <span id='valid_indicator' class='label'></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3"
+             style="background-color: #dedef8;box-shadow:
+     inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing
+                elit.
+            </p>
         </div>
 
+    </div>-->
+
+        <div class="panel panel-default">
+            <div class="input-group input-group-lg">
+                <input type="text" class="form-control">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button">
+                        Go!
+                    </button>
+                </span>
+            </div><!-- /input-group -->
+        </div><!-- /.col-lg-6 -->
         <!-- ============================= -->
         <div class="panel-group" id="members" />
         <!-- ============================= -->
-        <div id="t" />
-
     </div>
 
     <script id="tpl" type="text/template">
@@ -191,9 +227,9 @@
                     //========================================//
                 });
 
-                document.querySelectorAll('#NET > div > div > h3').forEach(c => c.style.display = 'none');
-                document.querySelectorAll('#Java > div > div > h3').forEach(c => c.style.display = 'none');
-                document.querySelectorAll('#PHP > div > div > h3').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('#NET > div > div > h4').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('#Java > div > div > h4').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('#PHP > div > div > h4').forEach(c => c.style.display = 'none');
                 document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
                 document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
                 document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
