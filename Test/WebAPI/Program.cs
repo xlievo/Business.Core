@@ -185,15 +185,6 @@ public class Startup
             });
     }
 
-    static Newtonsoft.Json.JsonSerializerSettings JsonSettings = new Newtonsoft.Json.JsonSerializerSettings
-    {
-        ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-        ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver(),
-        DateFormatString = "yyyy-MM-dd HH:mm:ss",
-        DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
-        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-    };
-
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IHostingEnvironment env)
     {
@@ -297,10 +288,10 @@ public class Startup
                     {
                         var json = new Business.Document.DocArg
                         {
-                            ID = member.Name,
+                            Id = member.Name,
                             Title = member.Name,
                             Type = "object",
-                            Description = member.Summary,
+                            Description = member.Description,
                             Children = new Dictionary<string, Business.Document.DocArg>
                             {
                                 { "Input", new Business.Document.DocArg { Children = new Dictionary<string, Business.Document.DocArg>() } },
@@ -319,7 +310,7 @@ public class Startup
                         {
                             json.Children["Input"].Children.Add("t", new Business.Document.DocArg
                             {
-                                ID = $"{member.Name}.t",
+                                Id = $"{member.Name}.t",
                                 Title = "t (String)",
                                 Type = "string",
                                 Description = "API token",
@@ -328,7 +319,7 @@ public class Startup
 
                         json.Children["Input"].Children.Add("d", new Business.Document.DocArg
                         {
-                            ID = $"{member.Name}.d",
+                            Id = $"{member.Name}.d",
                             Title = "d (JsonArray)",
                             Type = "object",
                             Children = args,
@@ -336,7 +327,7 @@ public class Startup
                         });
 
                         //in
-                        var data = json.JsonSerialize(JsonSettings);
+                       // var data = json.JsonSerialize(Help.JsonSettings);
 
                     }
                 }

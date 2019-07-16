@@ -33,7 +33,7 @@
         }*/
 
         .panel-padding {
-            padding-top: 10px;
+            padding-top: 20px;
             padding-bottom: 10px;
             padding-right: 10px;
             padding-left: 10px;
@@ -41,6 +41,8 @@
     </style>
 
     <script>
+        //const choices = new Choices("choices-single-no-search");
+
         // Set the default CSS theme and icon library globally
         JSONEditor.defaults.theme = 'bootstrap3';
         JSONEditor.defaults.iconlib = 'bootstrap3';
@@ -53,6 +55,8 @@
             var theme = new Theme()
             theme.getHeader = function (text) {
                 var el = document.createElement('h4');
+                el.style.marginTop = '0px';
+                el.style.marginBottom = '5px';
                 if (typeof text === "string") {
                     el.textContent = text;
                 }
@@ -71,33 +75,38 @@
 
 
         <!--<div class='medium-12-columns'>
-        <button id='submit' class='tiny'>Submit (console.log)</button>
-        <button id='restore' class='secondary tiny'>Restore to Default</button>
-        <span id='valid_indicator' class='label'></span>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6 col-md-offset-3"
-             style="background-color: #dedef8;box-shadow:
-     inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing
-                elit.
-            </p>
+            <button id='submit' class='tiny'>Submit (console.log)</button>
+            <button id='restore' class='secondary tiny'>Restore to Default</button>
+            <span id='valid_indicator' class='label'></span>
         </div>
 
-    </div>-->
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3"
+                 style="background-color: #dedef8;box-shadow:
+         inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing
+                    elit.
+                </p>
+            </div>
 
-        <div class="panel panel-default">
-            <div class="input-group input-group-lg">
-                <input type="text" class="form-control">
-                <span class="input-group-btn">
-                    <button class="btn btn-default" type="button">
-                        Go!
-                    </button>
-                </span>
-            </div><!-- /input-group -->
-        </div><!-- /.col-lg-6 -->
+        </div>-->
+
+        <div class="input-group input-group-lg" style="padding-top:20px;padding-bottom:20px;">
+
+            <input type="text" class="form-control">
+            <div class="input-group-btn">
+                <button class="btn btn-default" type="button">
+                    Go!
+                </button>
+                <select class="btn btn-default dropdown-toggle">
+                    <option value="Five">ss</option>
+                    <option value="Five" selected="selected">33 </option>
+                    <option value="Five">j</option>
+                </select>
+
+            </div>
+        </div><!-- /input-group -->
         <!-- ============================= -->
         <div class="panel-group" id="members" />
         <!-- ============================= -->
@@ -108,20 +117,20 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 <h4>
-                    <span class="d-inline-block">${member.Name}</span>
+                    <span class="d-inline-block">${member.name}</span>
                     <span class="pull-right">
-                        <a data-houdini-toggle="${member.Name}_member">Detailed description</a>
+                        <a data-houdini-toggle="${member.name}_member">Detailed description</a>
                     </span>
                 </h4>
-                {@if member.Summary !== null && member.Summary !== 'null'}
+                {@if member.description !== null && member.description !== 'null'}
                 <hr>
-                <p class="mb-0">${member.Summary}</p>
+                <p class="mb-0">${member.description}</p>
                 {@/if}
             </div>
-            <div data-houdini id='${member.Name}_member' class="panel-padding">
-                <div id='${member.Name}_input'></div>
-                <div id='${member.Name}_out'></div>
-                <div id='${member.Name}_sdk'></div>
+            <div data-houdini id='${member.name}_member' class="panel-padding">
+                <div id='${member.name}_input'></div>
+                <div id='${member.name}_out'></div>
+                <div id='${member.name}_sdk'></div>
             </div>
         </div>
         {@/each}
@@ -129,13 +138,15 @@
 
     <script>
 
+        //const choices = new Choices("select");
+
         atomic("http://localhost:5000/API.doc")
             .then(function (response) {
                 console.log(response.data); // xhr.responseText
                 //console.log(response.xhr);  // full response
                 var doc = response.data;
 
-                var members = doc.Members["j"];
+                var members = doc.members["j"];
                 var members2 = []
                 for (var i in members) {
                     members2.push(members[i]);
@@ -151,20 +162,24 @@
                     var member = c;
 
                     //==================input==================//
-                    var inputid = member.Name + '_input';
+                    var inputid = member.name + '_input';
 
                     var input = {
                         title: "Input",
                         type: "object",
                         properties: {
                             t: {
-                                id: member.Name + '.t',
+                                id: member.name + '.t',
                                 title: "t (String)",
                                 type: "string",
-                                description: "API token"
+                                options: {
+                                    inputAttributes: {
+                                        placeholder: "API token"
+                                    }
+                                }
                             },
                             d: {
-                                id: member.Name + '.d',
+                                id: member.name + '.d',
                                 title: "d (JsonArray)",
                                 type: "object",
                                 description: "API data",
@@ -193,8 +208,8 @@
                     //========================================//
 
                     //==================sdk==================//
-                    var outid = member.Name + '_out';
-                    var sdkid = member.Name + '_sdk';
+                    var outid = member.name + '_out';
+                    var sdkid = member.name + '_sdk';
                     new JSONEditor(document.getElementById(sdkid), {
                         // Enable fetching schemas via ajax
                         //ajax: true,
