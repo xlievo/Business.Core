@@ -20,6 +20,7 @@
     <script type="text/javascript" src="/doc2/Juicer/juicer-min.js"></script>
 
     <style type="text/css">
+
         /*.tab-content well well-small {
             padding-top: 0px;
             padding-right: 0px;
@@ -31,13 +32,14 @@
             border-left-width: 0px;
             margin-bottom: 0px;
         }*/
-
+        /*
         .panel-padding {
-            padding-top: 20px;
+            padding-top: 10px;
             padding-bottom: 10px;
             padding-right: 10px;
             padding-left: 10px;
         }
+        */
     </style>
 
     <script>
@@ -49,6 +51,7 @@
         JSONEditor.defaults.options.disable_properties = true;
         JSONEditor.defaults.options.required_by_default = true;
         JSONEditor.defaults.options.disable_edit_json = true;
+        //JSONEditor.defaults.options.disable_collapse = true;
 
         var Theme = JSONEditor.defaults.themes.bootstrap3;
         JSONEditor.defaults.themes.bootstrap3 = function () {
@@ -64,9 +67,12 @@
                     el.appendChild(text);
                 }
                 return el;
-            }
+            };
+
             return theme
         };
+
+
     </script>
 </head>
 <body>
@@ -92,7 +98,8 @@
 
         </div>-->
 
-        <div class="input-group input-group-lg" style="padding-top:20px;padding-bottom:20px;">
+        <div class="input-group input-group-lg" style="padding-top: 20px;
+        padding-bottom: 20px;">
 
             <input type="text" class="form-control">
             <div class="input-group-btn">
@@ -127,10 +134,11 @@
                 <p class="mb-0">${member.description}</p>
                 {@/if}
             </div>
-            <div data-houdini id='${member.name}_member' class="panel-padding">
-                <div id='${member.name}_input'></div>
-                <div id='${member.name}_out'></div>
-                <div id='${member.name}_sdk'></div>
+            <div data-houdini id='${member.name}_member' style="padding: 10px">
+                <div id='${member.name}_input' style="padding-top: 10px;"></div>
+                <!--<div id='${member.name}_input' style="padding-top: 10px;"></div>-->
+                <!--<div id='${member.name}_out' style="padding-top: 10px;"></div>-->
+                <div id='${member.name}_sdk' style="padding-top: 10px;"></div>
             </div>
         </div>
         {@/each}
@@ -201,10 +209,12 @@
                         delete input.properties.t;
                     }
 
-                    new JSONEditor(document.getElementById(inputid), {
+                    var inputeditor = new JSONEditor(document.getElementById(inputid), {
                         // The schema for the editor
                         schema: input
                     });
+
+                    ready(inputeditor, inputid);
                     //========================================//
 
                     //==================sdk==================//
@@ -256,6 +266,53 @@
                 //console.log(error.statusText); // xhr.statusText
                 return null;
             });
+
+        function setEdit(p) {
+            if ("object" == p.type) {
+                for (var i in p.properties) {
+                    setEdit(p.properties[i]);
+                }
+            }
+            else {
+                p.type = "string"
+                p.format = "hidden";
+            }
+        }
+
+        function ready(editor, id) {
+            editor.on('ready', function () {
+                var buttonData = editor.root.getButton('', 'Data', 'Data');
+                button_holder = editor.root.theme.getHeaderButtonHolder();
+                button_holder.appendChild(buttonData);
+                editor.root.header.parentNode.appendChild(button_holder);
+
+                //======================================================//
+
+                var buttonEdit = editor.root.getButton('', 'Edit', 'Edit');
+                button_holder = editor.root.theme.getHeaderButtonHolder();
+                button_holder.appendChild(buttonEdit);
+                editor.root.header.parentNode.appendChild(button_holder);
+                buttonEdit.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var edit = editor.getEditor('root');
+                    var schema = edit.schema;
+
+                    for (var i in schema.properties) {
+                        setEdit(schema.properties[i]);
+                    }
+
+                    if (editor) {
+                        editor.destroy();
+                    }
+                    editor = new window.JSONEditor(document.getElementById(id), {
+                        schema: schema
+                    });
+
+                    ready(editor, id);
+                    console.log(schema);
+                }, false);
+            });
+        }
 
         function getSdk(format) {
             return {
