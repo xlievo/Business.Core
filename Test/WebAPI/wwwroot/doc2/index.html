@@ -20,26 +20,6 @@
     <script type="text/javascript" src="/doc2/Juicer/juicer-min.js"></script>
 
     <style type="text/css">
-
-        /*.tab-content well well-small {
-            padding-top: 0px;
-            padding-right: 0px;
-            padding-bottom: 0px;
-            padding-left: 0px;
-            border-top-width: 0px;
-            border-right-width: 0px;
-            border-bottom-width: 0px;
-            border-left-width: 0px;
-            margin-bottom: 0px;
-        }*/
-        /*
-        .panel-padding {
-            padding-top: 10px;
-            padding-bottom: 10px;
-            padding-right: 10px;
-            padding-left: 10px;
-        }
-        */
     </style>
 
     <script>
@@ -55,7 +35,7 @@
 
         var Theme = JSONEditor.defaults.themes.bootstrap3;
         JSONEditor.defaults.themes.bootstrap3 = function () {
-            var theme = new Theme()
+            var theme = new Theme();
             theme.getHeader = function (text) {
                 var el = document.createElement('h4');
                 el.style.marginTop = '0px';
@@ -69,9 +49,71 @@
                 return el;
             };
 
+            theme.getFormControl = function (label, input, description, infoText) {
+                var group = document.createElement('div');
+
+                if (label && input.type === 'checkbox') {
+                    group.classList.add('checkbox');
+                    label.appendChild(input);
+                    label.style.fontSize = '14px';
+                    group.style.marginTop = '0';
+                    if (infoText) group.appendChild(infoText);
+                    group.appendChild(label);
+                    input.style.position = 'relative';
+                    input.style.cssFloat = 'left';
+                }
+                else {
+                    group.classList.add('form-group');
+                    if (label) {
+                        label.classList.add('control-label');
+                        group.appendChild(label);
+                        group.style.marginBottom = '8px';
+                    }
+
+                    if (infoText) group.appendChild(infoText);
+                    group.appendChild(input);
+                }
+
+                if (description) {
+                    description.style.marginBottom = '5px';
+                    group.appendChild(description);
+                }
+
+                return group;
+            };
+
+            theme.getIndentedPanel = function () {
+                var el = document.createElement('div');
+                el.classList.add('well', 'well-sm');
+                el.style.paddingBottom = '3px';
+                el.style.marginTop = '8px';
+                return el;
+            };
+
             return theme
         };
 
+        var Iconlibs = JSONEditor.defaults.iconlibs.bootstrap3;
+        JSONEditor.defaults.iconlibs.bootstrap3 = function () {
+            var icon = new Iconlibs();
+            icon.mapping = {
+                collapse: 'chevron-down',
+                expand: 'chevron-right',
+                "delete": 'remove',
+                edit: 'edit',
+                add: 'plus',
+                cancel: 'floppy-remove',
+                save: 'floppy-saved',
+                moveup: 'arrow-up',
+                movedown: 'arrow-down',
+                clear: 'remove-circle',
+                time: 'time',
+                calendar: 'calendar',
+                data: 'list-alt'
+            };
+
+            return icon;
+        };
 
     </script>
 </head>
@@ -165,16 +207,14 @@
                 document.getElementById('members').innerHTML = html;
 
                 //=============================================//
-                members2.forEach(c => {
-
-                    var member = c;
-
+                members2.forEach(member => {
                     //==================input==================//
                     var inputid = member.name + '_input';
 
                     var input = {
                         title: "Input",
                         type: "object",
+                        edit: false,
                         properties: {
                             t: {
                                 id: member.name + '.t',
@@ -214,7 +254,7 @@
                         schema: input
                     });
 
-                    ready(inputeditor, inputid);
+                    ready(setEdit(inputeditor, inputid), inputid);
                     //========================================//
 
                     //==================sdk==================//
@@ -267,49 +307,83 @@
                 return null;
             });
 
-        function setEdit(p) {
+        function setEdit2(p, edit) {
             if ("object" == p.type) {
                 for (var i in p.properties) {
-                    setEdit(p.properties[i]);
+                    setEdit2(p.properties[i], edit);
                 }
             }
             else {
-                p.type = "string"
-                p.format = "hidden";
+                if (!edit) {
+                    if (!p.editData) {
+                        p.editData = { type: null, format: null };
+                    }
+                    if (p.type) {
+                        p.editData.type = p.type;
+                    }
+                    if (p.format) {
+                        p.editData.format = p.format;
+                    }
+                    p.type = "string";
+                    p.format = "hidden";
+                    if (p.options && p.options.inputAttributes && p.options.inputAttributes.placeholder) {
+                        p.description = p.options.inputAttributes.placeholder;
+                    }
+                }
+                else {
+                    if (p.editData) {
+                        p.type = p.editData.type;
+                        p.format = p.editData.format;
+                    }
+                    if (p.description) {
+                        if (!p.options) {
+                            p.options = {};
+                        }
+                        if (!p.options.inputAttributes) {
+                            p.options.inputAttributes = {};
+                        }
+                        p.options.inputAttributes.placeholder = p.description;
+                    }
+                    p.description = null;
+                }
             }
+        }
+
+        function setEdit(editor, id) {
+            var schema = editor.getEditor('root').schema;
+            for (var i in schema.properties) {
+                setEdit2(schema.properties[i], schema.edit);
+            }
+            schema.edit = !schema.edit;
+
+            if (editor) {
+                editor.destroy();
+            }
+            editor = new window.JSONEditor(document.getElementById(id), {
+                schema: schema
+            });
+
+            //console.log(schema);
+
+            return editor;
         }
 
         function ready(editor, id) {
             editor.on('ready', function () {
-                var buttonData = editor.root.getButton('', 'Data', 'Data');
-                button_holder = editor.root.theme.getHeaderButtonHolder();
+                var buttonData = editor.root.getButton('', 'data', 'Data');
+                button_holder = editor.root.editors.d.theme.getHeaderButtonHolder();
                 button_holder.appendChild(buttonData);
-                editor.root.header.parentNode.appendChild(button_holder);
+                editor.root.editors.d.header.parentNode.appendChild(button_holder);
 
                 //======================================================//
 
-                var buttonEdit = editor.root.getButton('', 'Edit', 'Edit');
+                var buttonEdit = editor.root.getButton('', 'edit', 'Edit');
                 button_holder = editor.root.theme.getHeaderButtonHolder();
                 button_holder.appendChild(buttonEdit);
                 editor.root.header.parentNode.appendChild(button_holder);
                 buttonEdit.addEventListener('click', function (e) {
                     e.preventDefault();
-                    var edit = editor.getEditor('root');
-                    var schema = edit.schema;
-
-                    for (var i in schema.properties) {
-                        setEdit(schema.properties[i]);
-                    }
-
-                    if (editor) {
-                        editor.destroy();
-                    }
-                    editor = new window.JSONEditor(document.getElementById(id), {
-                        schema: schema
-                    });
-
-                    ready(editor, id);
-                    console.log(schema);
+                    ready(setEdit(editor, id), id);
                 }, false);
             });
         }

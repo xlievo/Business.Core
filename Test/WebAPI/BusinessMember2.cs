@@ -103,7 +103,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// and Test001
     /// </summary>
     /// <param name="token"></param>
-    /// <param name="arg">arg!!!</param>
+    /// <param name="arg"></param>
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
@@ -230,7 +230,7 @@ public class CheckNull2Attribute : CheckNullAttribute
 public class Args
 {
     /// <summary>
-    /// Test001!!!
+    /// 
     /// </summary>
     public class Test001
     {
@@ -265,7 +265,7 @@ public class Args
             public Test0011 C3 { get; set; }
 
             /// <summary>
-            /// Test0011!!!
+            /// 
             /// </summary>
             public struct Test0011
             {

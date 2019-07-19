@@ -194,6 +194,7 @@ namespace Business.Utils
         {
             var docArg = new DocArg { Id = argSource.Args.Group[argSource.Group].Path };
             docArg.Title = $"{argSource.Args.Name} ({argSource.Args.LastType.Name})";
+            docArg.Description = argSource.Summary;
 
             if (argSource.Args.HasDefaultValue)
             {
@@ -202,7 +203,7 @@ namespace Business.Utils
 
             if (argSource.Args.HasDefinition)
             {
-                docArg.Description = argSource.Summary;
+                //docArg.Description = argSource.Summary;
                 docArg.Type = "object";
             }
             else
@@ -212,7 +213,7 @@ namespace Business.Utils
                 {
                     docArg.Options = new Dictionary<string, object>
                     {
-                        { "inputAttributes", new Dictionary<string, object> { { "Placeholder", argSource.Summary } } },
+                        { "inputAttributes", new Dictionary<string, object> { { "placeholder", argSource.Summary } } },
                     };
                 }
             }
