@@ -374,6 +374,10 @@
                 button_holder = editor.root.editors.d.theme.getHeaderButtonHolder();
                 button_holder.appendChild(buttonData);
                 editor.root.editors.d.header.parentNode.appendChild(button_holder);
+                buttonData.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    editor.root.editors.d.container.hidden = true;
+                }, false);
 
                 //======================================================//
 
