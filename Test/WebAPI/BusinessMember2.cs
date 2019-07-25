@@ -40,10 +40,28 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         */
     }
 
+    public struct CallInfo
+    {
+        public DateTime Time;
+
+        public string MethodName;
+    }
+
+    static System.Collections.Concurrent.ConcurrentQueue<CallInfo> CallInfos = new System.Collections.Concurrent.ConcurrentQueue<CallInfo>();
+
     public BusinessMember2()
     {
         this.Logger = x =>
         {
+            CallInfos.Enqueue(new CallInfo { Time = System.DateTime.Now, MethodName = x.Member });
+
+            var count = CallInfos.Count(c => 0 < c.Time.CompareTo(System.DateTime.Now.Subtract(System.TimeSpan.FromSeconds(2))));
+
+            for (int i = 0; i < count; i++)
+            {
+                CallInfos.TryDequeue(out _);
+            }
+
             try
             {
                 System.Threading.SpinWait.SpinUntil(() => false, 3000);
@@ -62,12 +80,12 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
         this.BindBefore = c =>
         {
-            c.CallBefore = async (meta, args) =>
+            c.CallBeforeMethod = async (meta, args) =>
             {
 
             };
 
-            c.CallAfter = async (meta, args, result) =>
+            c.CallAfterMethod = async (meta, args, result) =>
             {
                 if (typeof(System.Threading.Tasks.Task).IsAssignableFrom(result.GetType()))
                 {
@@ -235,7 +253,7 @@ public class Args
     public class Test001
     {
         /// <summary>
-        /// AAA
+        /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
         /// </summary>
         [Test]
         [Nick("password")]
@@ -244,12 +262,12 @@ public class Args
         public string A { get; set; }
 
         /// <summary>
-        /// BBB
+        /// BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
         /// </summary>
         public string B { get; set; }
 
         /// <summary>
-        /// Ccc
+        /// CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
         /// </summary>
         public Test0010 C { get; set; }
 
@@ -275,7 +293,7 @@ public class Args
                 public string C31 { get; set; }
 
                 /// <summary>
-                /// !!!
+                /// 
                 /// </summary>
                 public string C32 { get; set; }
             }

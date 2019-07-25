@@ -39,7 +39,7 @@
             theme.getHeader = function (text) {
                 var el = document.createElement('h4');
                 el.style.marginTop = '0px';
-                el.style.marginBottom = '5px';
+                el.style.marginBottom = '6px';
                 if (typeof text === "string") {
                     el.textContent = text;
                 }
@@ -85,8 +85,9 @@
             theme.getIndentedPanel = function () {
                 var el = document.createElement('div');
                 el.classList.add('well', 'well-sm');
-                el.style.paddingBottom = '3px';
-                el.style.marginTop = '8px';
+                el.style.paddingBottom = '1px';
+                el.style.marginTop = '7px';
+                el.setAttribute('name', 'panel');
                 return el;
             };
 
@@ -389,6 +390,20 @@
                     e.preventDefault();
                     ready(setEdit(editor, id), id);
                 }, false);
+
+                document.querySelectorAll("div[name='panel'] > div > div").forEach(c => {
+                    var rows = c.querySelectorAll(".row");
+                    if (rows.length > 0) {
+                        var form = rows[rows.length - 1].querySelector(".form-group");
+                        if (null != form) {
+                            form.style.marginBottom = '3px';
+                            var input = form.querySelector("input[class='form-control']");
+                            if (null != input) {
+                                input.style.marginBottom = '12px';
+                            }
+                        }
+                    }
+                });
             });
         }
 

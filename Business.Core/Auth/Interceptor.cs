@@ -90,6 +90,11 @@ namespace Business.Auth
 
             try
             {
+                //if (null != Configer.CallBefore)
+                //{
+                //    await Configer.CallBefore(meta);
+                //}
+
                 foreach (var item in meta.Args)
                 {
                     IResult result = null;
@@ -309,10 +314,10 @@ namespace Business.Auth
 
                 //===============================//
                 //watch.Restart();
-                //..CallBefore..//
-                if (null != Configer.CallBefore)
+                //..CallBeforeMethod..//
+                if (null != Configer.CallBeforeMethod)
                 {
-                    await Configer.CallBefore(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }));
+                    await Configer.CallBeforeMethod(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }));
                 }
 
                 proceed.Invoke();
@@ -338,10 +343,10 @@ namespace Business.Auth
                     returnValue = invocation.ReturnValue;
                 }
 
-                //..CallAfter..//
-                if (null != Configer.CallAfter)
+                //..CallAfterMethod..//
+                if (null != Configer.CallAfterMethod)
                 {
-                    await Configer.CallAfter(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), invocation.ReturnValue);
+                    await Configer.CallAfterMethod(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), invocation.ReturnValue);
                 }
 
                 return invocation.ReturnValue;
