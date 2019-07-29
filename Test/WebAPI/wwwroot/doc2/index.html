@@ -378,6 +378,8 @@
             el.dispatchEvent(e);
         };
 
+        var edit = false;
+
         atomic("http://localhost:5000/API.doc")
             .then(function (response) {
                 console.log(response.data); // xhr.responseText
@@ -402,7 +404,7 @@
                     var input = {
                         title: "Input",
                         type: "object",
-                        edit: false,
+                        edit: !edit,
                         properties: {
                             t: {
                                 id: member.name + '.t',
@@ -483,6 +485,8 @@
                     //========================================//
                 });
 
+                setEdit(document, edit);
+
                 document.querySelectorAll('#NET > div > div > h4').forEach(c => c.style.display = 'none');
                 document.querySelectorAll('#Java > div > div > h4').forEach(c => c.style.display = 'none');
                 document.querySelectorAll('#PHP > div > div > h4').forEach(c => c.style.display = 'none');
@@ -498,13 +502,11 @@
                 return null;
             });
 
-        function setEdit(editor) {
-
-            var root = editor.getEditor('root');
-            if (!root.schema.edit) {
-                root.container.querySelectorAll("[tag='input']").forEach(c => { c.style.display = "none"; });
-                root.container.querySelectorAll("[tag='description']").forEach(c => { c.style.display = ""; });
-                root.container.querySelectorAll("button[tag='toggle']").forEach(c => {
+        function setEdit(root, edit) {
+            if (!edit) {
+                root.querySelectorAll("[tag='input']").forEach(c => { c.style.display = "none"; });
+                root.querySelectorAll("[tag='description']").forEach(c => { c.style.display = ""; });
+                root.querySelectorAll("button[tag='toggle']").forEach(c => {
                     c.style.display = "none";
                     if ("false" === c.getAttribute("collapsed")) {
                         $trigger(c, 'click');
@@ -512,19 +514,15 @@
                 });
             }
             else {
-                root.container.querySelectorAll("[tag='input']").forEach(c => { c.style.display = ""; });
-                root.container.querySelectorAll("[tag='description']").forEach(c => { c.style.display = "none"; });
-                root.container.querySelectorAll("button[tag='toggle']").forEach(c => {
+                root.querySelectorAll("[tag='input']").forEach(c => { c.style.display = ""; });
+                root.querySelectorAll("[tag='description']").forEach(c => { c.style.display = "none"; });
+                root.querySelectorAll("button[tag='toggle']").forEach(c => {
                     c.style.display = "";
                     if ("true" === c.getAttribute("collapsed")) {
                         $trigger(c, 'click');
                     }
                 });
             }
-
-            root.schema.edit = !root.schema.edit;
-
-            return editor;
         }
 
         function ready(editor) {
@@ -544,7 +542,10 @@
                 editor.root.header.parentNode.appendChild(button_holder);
                 buttonEdit.addEventListener('click', function (e) {
                     e.preventDefault();
-                    setEdit(editor);
+
+                    var root = editor.getEditor('root');
+                    setEdit(root.container, root.schema.edit);
+                    root.schema.edit = !root.schema.edit;
                 }, false);
 
                 //======================================================//
