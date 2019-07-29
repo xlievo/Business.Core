@@ -12,10 +12,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Args;
 
-[assembly: JsonArg(Group = "j")]
 [assembly: Command(Group = "j")]
-[assembly: MessagePackArg(Group = "s")]
 [assembly: Command(Group = "s")]
+
+[assembly: JsonArg(Group = "j")]
+[assembly: MessagePackArg(Group = "s")]
 
 /// <summary>
 /// BusinessMember2。。。
@@ -237,9 +238,7 @@ public class CheckNull2Attribute : CheckNullAttribute
     {
         this.BindAfter += () =>
         {
-            Message = "{Nike} 这个参数必须填写";
-
-            Description = "{Message}";
+            this.Description = this.Replace("{Nick} 这个参数必须填写");
         };
     }
 }
@@ -247,6 +246,16 @@ public class CheckNull2Attribute : CheckNullAttribute
 
 public class Args
 {
+    /// <summary>
+    /// MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
+    /// </summary>
+    public enum MyEnum
+    {
+        A = 0,
+        B = 2,
+        C = 4,
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -271,21 +280,44 @@ public class Args
         /// </summary>
         public Test0010 C { get; set; }
 
+        public decimal D { get; set; }
+
+        public bool E { get; set; }
+
+        public DateTime F { get; set; }
+
+        [DefaultValue(MyEnum.B)]
+        public MyEnum myEnum { get; set; }
+
         public struct Test0010
         {
+            /// <summary>
+            /// C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
+            /// </summary>
             public string C1 { get; set; }
 
+            /// <summary>
+            /// C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2
+            /// </summary>
             public string C2 { get; set; }
 
             /// <summary>
-            /// 
+            /// C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
             /// </summary>
             public Test0011 C3 { get; set; }
+
+            //public string C22 { get; set; }
+
+            //public Test0011 C33 { get; set; }
+
+            //public Test0011 C34 { get; set; }
+
+            //public string C35 { get; set; }
 
             /// <summary>
             /// 
             /// </summary>
-            public struct Test0011
+            public class Test0011
             {
                 /// <summary>
                 /// 

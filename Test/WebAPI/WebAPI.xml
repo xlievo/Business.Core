@@ -38,6 +38,11 @@
             <param name="mm"></param>
             <returns>test return!!!</returns>
         </member>
+        <member name="T:Args.MyEnum">
+            <summary>
+            MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
+            </summary>
+        </member>
         <member name="T:Args.Test001">
             <summary>
             
@@ -58,9 +63,19 @@
             CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
             </summary>
         </member>
+        <member name="P:Args.Test001.Test0010.C1">
+            <summary>
+            C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
+            </summary>
+        </member>
+        <member name="P:Args.Test001.Test0010.C2">
+            <summary>
+            C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2
+            </summary>
+        </member>
         <member name="P:Args.Test001.Test0010.C3">
             <summary>
-            
+            C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
             </summary>
         </member>
         <member name="T:Args.Test001.Test0010.Test0011">

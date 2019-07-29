@@ -1125,6 +1125,8 @@ namespace Business
 
             var members = type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.GetField | BindingFlags.GetProperty);
 
+            var definitions2 = new System.Collections.Generic.List<string>(definitions);
+
             foreach (var item in members)
             {
                 System.Type memberType = null;
@@ -1169,7 +1171,7 @@ namespace Business
                 var hasDefinition = current.outType.IsDefinition();
 
                 if (definitions.Contains(current.outType.FullName)) { continue; }
-                else if (hasDefinition) { definitions.Add(current.outType.FullName); }
+                else if (hasDefinition) { definitions2.Add(current.outType.FullName); }
 
                 var path2 = $"{path}.{item.Name}";
 
@@ -1194,7 +1196,7 @@ namespace Business
 
                 var hasLower3 = false;
                 var childrens2 = hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                var children = hasDefinition ? GetArgChild(current.outType, path2, commands, ref definitions, resultType, resultTypeDefinition, business, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
+                var children = hasDefinition ? GetArgChild(current.outType, path2, commands, ref definitions2, resultType, resultTypeDefinition, business, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
 
                 if (hasLower2 || hasLower3)
                 {

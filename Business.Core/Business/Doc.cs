@@ -208,10 +208,10 @@ namespace Business.Document
         Dictionary<string, DocArg> Args { get; set; }
     }
 
-    public interface IDocArg<Arg> where Arg : IDocArg<Arg>
+    public interface IDocArg<DocArg> where DocArg : IDocArg<DocArg>
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
-        Dictionary<string, Arg> Children { get; set; }
+        Dictionary<string, DocArg> Children { get; set; }
     }
 
     public class Doc<DocArg> : IDoc<DocArg> where DocArg : IDocArg<DocArg>
@@ -300,6 +300,8 @@ namespace Business.Document
 
         public string InfoText { get; set; }
 
+        public bool Compact { get; set; } //title hidden
+
         public bool Hidden { get; set; }
 
         public bool Collapsed { get; set; }
@@ -369,7 +371,7 @@ namespace Business.Document
 
         public Meta.Args Args { get; set; }
 
-        public IList<Attributes.ArgumentAttribute> Attributes { get; set; }
+        public IList<string> Attributes { get; set; }
 
         public string Summary { get; set; }
     }

@@ -196,6 +196,14 @@ namespace Business.Utils
             docArg.Title = $"{argSource.Args.Name} ({argSource.Args.LastType.Name})";
             docArg.Description = argSource.Summary;
 
+            var attrs = System.String.Empty;
+            for (int i = 0; i < argSource.Attributes.Count; i++)
+            {
+                attrs += $"<h5 style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : 10)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
+            }
+
+            docArg.Description += attrs;
+
             if (argSource.Args.HasDefaultValue)
             {
                 docArg.DefaultValue = System.Convert.ToString(argSource.Args.DefaultValue);
@@ -327,8 +335,6 @@ namespace Business.Utils
             return business;
         }
 
-        //const string AttributeSign = "Attribute";
-
         /// <summary>
         /// Gets the document object of the specified business class.
         /// </summary>
@@ -369,6 +375,8 @@ namespace Business.Utils
             return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Members = members };
         }
 
+        const string AttributeSign = "Attribute";
+
         static DocArg GetDocArg<DocArg>(string group, Meta.Args args, System.Func<DocArgSource, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null) where DocArg : IDocArg<DocArg>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -404,13 +412,13 @@ namespace Business.Utils
 
             var argGroup = args.Group[group];
 
-            var attrs = new List<Attributes.ArgumentAttribute>();
+            var attrs = new List<string>();
 
             var attr = argGroup.Attrs.First;
 
             while (NodeState.DAT == attr.State)
             {
-                attrs.Add(attr.Value);
+                attrs.Add(string.IsNullOrWhiteSpace(attr.Value.Description) ? attr.Value.Type.Name.EndsWith(AttributeSign) ? attr.Value.Type.Name.Substring(0, attr.Value.Type.Name.Length - AttributeSign.Length) : attr.Value.Type.Name : attr.Value.Description);
                 attr = attr.Next;
             }
 

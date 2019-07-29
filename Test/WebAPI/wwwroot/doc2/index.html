@@ -18,13 +18,14 @@
     <script src="/doc2/ace/ace.js"></script>
     <!-- juicer -->
     <script type="text/javascript" src="/doc2/Juicer/juicer-min.js"></script>
+    <!-- DOMPurify -->
+    <script type="text/javascript" src="/doc2/DOMPurify/purify.min.js"></script>
 
     <style type="text/css">
     </style>
 
     <script>
         //const choices = new Choices("choices-single-no-search");
-
         // Set the default CSS theme and icon library globally
         JSONEditor.defaults.theme = 'bootstrap3';
         JSONEditor.defaults.iconlib = 'bootstrap3';
@@ -39,7 +40,8 @@
             theme.getHeader = function (text) {
                 var el = document.createElement('h4');
                 el.style.marginTop = '0px';
-                el.style.marginBottom = '6px';
+                el.style.marginBottom = '10px';
+                el.setAttribute('tag', 'h4');
                 if (typeof text === "string") {
                     el.textContent = text;
                 }
@@ -76,6 +78,7 @@
 
                 if (description) {
                     description.style.marginBottom = '5px';
+                    description.style.marginTop = '0px';
                     group.appendChild(description);
                 }
 
@@ -86,13 +89,192 @@
                 var el = document.createElement('div');
                 el.classList.add('well', 'well-sm');
                 el.style.paddingBottom = '1px';
-                el.style.marginTop = '7px';
-                el.setAttribute('name', 'panel');
+                el.style.marginTop = '9px';
+                el.style.marginBottom = '10px';
+                el.setAttribute('tag', 'panel');
+                return el;
+            };
+
+            theme.getSelectInput = function (options) {
+                var select = document.createElement('select');
+                if (options) this.setSelectOptions(select, options);
+                select.classList.add('form-control');
+                select.setAttribute('tag', 'input');
+                return select;
+            };
+
+            theme.getTextareaInput = function () {
+                var el = document.createElement('textarea');
+                el.classList.add('form-control');
+                el.setAttribute('tag', 'input');
+                return el;
+            };
+
+            theme.getFormInputField = function (type) {
+                var el = document.createElement('input');
+                el.setAttribute('type', type);
+                el.setAttribute('tag', 'input');
+                if (type !== "checkbox") {
+                    el.classList.add("form-control");
+                }
+                return el;
+            };
+
+            //theme.getDescription = function (text) {
+            //    var el = document.createElement('p');
+            //    el.setAttribute('tag', 'description');
+            //    if (window.DOMPurify) el.innerHTML = window.DOMPurify.sanitize(text);
+            //    else el.textContent = this.cleanText(text);
+            //    return el;
+            //};
+
+            theme.getFormInputDescription = function (text) {
+                var el = document.createElement('p');
+                el.setAttribute('tag', 'description');
+                el.classList.add('help-block');
+                if (window.DOMPurify) el.innerHTML = window.DOMPurify.sanitize(text);
+                else el.textContent = this.cleanText(text);
                 return el;
             };
 
             return theme
         };
+
+        JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
+            addControls: function () {
+                var self = this;
+
+                this.collapsed = false;
+                this.toggle_button = this.getButton('', 'collapse', this.translate('button_collapse'));
+                this.toggle_button.setAttribute('tag', 'toggle');
+                this.toggle_button.setAttribute('collapsed', this.collapsed);
+                this.toggle_button.classList.add('json-editor-btntype-toggle');
+                this.title_controls.appendChild(this.toggle_button);
+                var row_holder_display = self.row_holder.style.display;
+                var controls_display = self.controls.style.display;
+                this.toggle_button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (self.collapsed) {
+                        self.collapsed = false;
+                        if (self.panel) self.panel.style.display = '';
+                        self.row_holder.style.display = row_holder_display;
+                        if (self.tabs_holder) self.tabs_holder.style.display = '';
+                        self.controls.style.display = controls_display;
+                        self.setButtonText(this, '', 'collapse', self.translate('button_collapse'));
+                    }
+                    else {
+                        self.collapsed = true;
+                        self.row_holder.style.display = 'none';
+                        if (self.tabs_holder) self.tabs_holder.style.display = 'none';
+                        self.controls.style.display = 'none';
+                        if (self.panel) self.panel.style.display = 'none';
+                        self.setButtonText(this, '', 'expand', self.translate('button_expand'));
+                    }
+                    self.toggle_button.setAttribute('collapsed', self.collapsed);
+                });
+
+                // If it should start collapsed
+                if (this.options.collapsed) {
+                    $trigger(this.toggle_button, 'click');
+                }
+
+                // Collapse button disabled
+                if (this.schema.options && typeof this.schema.options.disable_collapse !== "undefined") {
+                    if (this.schema.options.disable_collapse) this.toggle_button.style.display = 'none';
+                }
+                else if (this.jsoneditor.options.disable_collapse) {
+                    this.toggle_button.style.display = 'none';
+                }
+
+                // Add "new row" and "delete last" buttons below editor
+                this.add_row_button = this.getButton(this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
+                this.add_row_button.classList.add('json-editor-btntype-add');
+                this.add_row_button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var i = self.rows.length;
+                    if (self.row_cache[i]) {
+                        self.rows[i] = self.row_cache[i];
+                        self.rows[i].setValue(self.rows[i].getDefault(), true);
+                        self.rows[i].container.style.display = '';
+                        if (self.rows[i].tab) self.rows[i].tab.style.display = '';
+                        self.rows[i].register();
+                    }
+                    else {
+                        self.addRow();
+                    }
+                    self.active_tab = self.rows[i].tab;
+                    self.refreshTabs();
+                    self.refreshValue();
+                    self.onChange(true);
+                    self.jsoneditor.trigger('addRow');
+                });
+                self.controls.appendChild(this.add_row_button);
+
+                this.delete_last_row_button = this.getButton(this.translate('button_delete_last', [this.getItemTitle()]), 'delete', this.translate('button_delete_last_title', [this.getItemTitle()]));
+                this.delete_last_row_button.classList.add('json-editor-btntype-deletelast');
+                this.delete_last_row_button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (!self.askConfirmation()) {
+                        return false;
+                    }
+
+                    var rows = self.getValue();
+                    var new_active_tab = null;
+
+                    rows.pop();
+                    self.empty(true);
+                    self.setValue(rows);
+
+                    if (self.rows[self.rows.length - 1]) {
+                        new_active_tab = self.rows[self.rows.length - 1].tab;
+                    }
+
+                    if (new_active_tab) {
+                        self.active_tab = new_active_tab;
+                        self.refreshTabs();
+                    }
+
+                    self.onChange(true);
+                    self.jsoneditor.trigger('deleteRow');
+                });
+                self.controls.appendChild(this.delete_last_row_button);
+
+                this.remove_all_rows_button = this.getButton(this.translate('button_delete_all'), 'delete', this.translate('button_delete_all_title'));
+                this.remove_all_rows_button.classList.add('json-editor-btntype-deleteall');
+                this.remove_all_rows_button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (!self.askConfirmation()) {
+                        return false;
+                    }
+
+                    self.empty(true);
+                    self.setValue([]);
+                    self.onChange(true);
+                    self.jsoneditor.trigger('deleteAllRows');
+                });
+                self.controls.appendChild(this.remove_all_rows_button);
+
+                if (self.tabs) {
+                    this.add_row_button.style.width = '100%';
+                    this.add_row_button.style.textAlign = 'left';
+                    this.add_row_button.style.marginBottom = '3px';
+
+                    this.delete_last_row_button.style.width = '100%';
+                    this.delete_last_row_button.style.textAlign = 'left';
+                    this.delete_last_row_button.style.marginBottom = '3px';
+
+                    this.remove_all_rows_button.style.width = '100%';
+                    this.remove_all_rows_button.style.textAlign = 'left';
+                    this.remove_all_rows_button.style.marginBottom = '3px';
+                }
+            }
+        });
 
         var Iconlibs = JSONEditor.defaults.iconlibs.bootstrap3;
         JSONEditor.defaults.iconlibs.bootstrap3 = function () {
@@ -190,6 +372,11 @@
     <script>
 
         //const choices = new Choices("select");
+        var $trigger = function (el, event) {
+            var e = document.createEvent('HTMLEvents');
+            e.initEvent(event, true, true);
+            el.dispatchEvent(e);
+        };
 
         atomic("http://localhost:5000/API.doc")
             .then(function (response) {
@@ -221,6 +408,7 @@
                                 id: member.name + '.t',
                                 title: "t (String)",
                                 type: "string",
+                                description: "API token",
                                 options: {
                                     inputAttributes: {
                                         placeholder: "API token"
@@ -255,7 +443,9 @@
                         schema: input
                     });
 
-                    ready(setEdit(inputeditor, inputid), inputid);
+                    ready(inputeditor);
+                    //ready(setEdit(inputeditor));
+                    //ready(inputeditor, inputid);
                     //========================================//
 
                     //==================sdk==================//
@@ -303,73 +493,41 @@
                 new Houdini('[data-houdini]');
             })
             .catch(function (error) {
-                console.log(error.status); // xhr.status
+                console.log(error.stack); // xhr.status
                 //console.log(error.statusText); // xhr.statusText
                 return null;
             });
 
-        function setEdit2(p, edit) {
-            if ("object" == p.type) {
-                for (var i in p.properties) {
-                    setEdit2(p.properties[i], edit);
-                }
+        function setEdit(editor) {
+
+            var root = editor.getEditor('root');
+            if (!root.schema.edit) {
+                root.container.querySelectorAll("[tag='input']").forEach(c => { c.style.display = "none"; });
+                root.container.querySelectorAll("[tag='description']").forEach(c => { c.style.display = ""; });
+                root.container.querySelectorAll("button[tag='toggle']").forEach(c => {
+                    c.style.display = "none";
+                    if ("false" === c.getAttribute("collapsed")) {
+                        $trigger(c, 'click');
+                    }
+                });
             }
             else {
-                if (!edit) {
-                    if (!p.editData) {
-                        p.editData = { type: null, format: null };
+                root.container.querySelectorAll("[tag='input']").forEach(c => { c.style.display = ""; });
+                root.container.querySelectorAll("[tag='description']").forEach(c => { c.style.display = "none"; });
+                root.container.querySelectorAll("button[tag='toggle']").forEach(c => {
+                    c.style.display = "";
+                    if ("true" === c.getAttribute("collapsed")) {
+                        $trigger(c, 'click');
                     }
-                    if (p.type) {
-                        p.editData.type = p.type;
-                    }
-                    if (p.format) {
-                        p.editData.format = p.format;
-                    }
-                    p.type = "string";
-                    p.format = "hidden";
-                    if (p.options && p.options.inputAttributes && p.options.inputAttributes.placeholder) {
-                        p.description = p.options.inputAttributes.placeholder;
-                    }
-                }
-                else {
-                    if (p.editData) {
-                        p.type = p.editData.type;
-                        p.format = p.editData.format;
-                    }
-                    if (p.description) {
-                        if (!p.options) {
-                            p.options = {};
-                        }
-                        if (!p.options.inputAttributes) {
-                            p.options.inputAttributes = {};
-                        }
-                        p.options.inputAttributes.placeholder = p.description;
-                    }
-                    p.description = null;
-                }
+                });
             }
-        }
 
-        function setEdit(editor, id) {
-            var schema = editor.getEditor('root').schema;
-            for (var i in schema.properties) {
-                setEdit2(schema.properties[i], schema.edit);
-            }
-            schema.edit = !schema.edit;
-
-            if (editor) {
-                editor.destroy();
-            }
-            editor = new window.JSONEditor(document.getElementById(id), {
-                schema: schema
-            });
-
-            //console.log(schema);
+            root.schema.edit = !root.schema.edit;
 
             return editor;
         }
 
-        function ready(editor, id) {
+        function ready(editor) {
             editor.on('ready', function () {
                 var buttonData = editor.root.getButton('', 'data', 'Data');
                 button_holder = editor.root.editors.d.theme.getHeaderButtonHolder();
@@ -380,18 +538,49 @@
                     editor.root.editors.d.container.hidden = true;
                 }, false);
 
-                //======================================================//
-
                 var buttonEdit = editor.root.getButton('', 'edit', 'Edit');
                 button_holder = editor.root.theme.getHeaderButtonHolder();
                 button_holder.appendChild(buttonEdit);
                 editor.root.header.parentNode.appendChild(button_holder);
                 buttonEdit.addEventListener('click', function (e) {
                     e.preventDefault();
-                    ready(setEdit(editor, id), id);
+                    setEdit(editor);
                 }, false);
 
-                document.querySelectorAll("div[name='panel'] > div > div").forEach(c => {
+                //======================================================//
+                //p hide
+                var h4 = document.querySelectorAll("h4[tag='h4']");
+                h4.forEach(c => {
+                    //console.log(c.firstChild.innerHTML);
+                    //var parent = c.parentNode;
+                    ////parent.childNodes.forEach(c2=>c2.);
+                    //if (null != parent.querySelector("p:only-child")) {
+                    //    c.style.marginBottom = '6px';
+                    //}
+
+                    //var row = c.parentNode.parentNode;
+                    //if (null == row || "row" != row.className) { return; }
+
+                    //var pre = row.previousSibling;
+                    //if (null == pre || "row" != pre.className) { return; }
+
+                    //c.style.marginTop = '3px';
+                    //var p = pre.querySelector("p[class='help-block']");
+                    //if (null == p) {//if edit == false
+                    //    c.style.marginTop = '0px';
+                    //}
+
+                    c.style.marginBottom = '10px';
+                    c.parentNode.childNodes.forEach(c2 => {
+                        //console.log(c2.tagName);
+                        if ("P" == c2.tagName) {
+                            c.style.marginBottom = '6px';
+                        }
+                    });
+                });
+
+                //
+                document.querySelectorAll("div[tag='panel'] > div > div").forEach(c => {
                     var rows = c.querySelectorAll(".row");
                     if (rows.length > 0) {
                         var form = rows[rows.length - 1].querySelector(".form-group");
@@ -402,6 +591,11 @@
                                 input.style.marginBottom = '12px';
                             }
                         }
+
+                        //var h4 = c.querySelectorAll("h4[name='h4']");
+                        //if (1 == h4.length) {
+                        //    //h4[0].style.marginTop = '9px';
+                        //}
                     }
                 });
             });
