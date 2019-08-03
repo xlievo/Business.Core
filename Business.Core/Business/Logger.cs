@@ -18,6 +18,119 @@
 namespace Business
 {
     using System.Linq;
+    using Utils;
+
+    public class Logger
+    {
+        /// <summary>
+        /// Return log number, default 1
+        /// </summary>
+        public int LoggerNumber { get; set; } = 1;
+
+        System.TimeSpan loggerTimeOut = System.TimeSpan.Zero;
+
+        /// <summary>
+        /// Return log timeout, default System.TimeSpan.Zero equals not enabled
+        /// </summary>
+        public System.TimeSpan LoggerTimeOut
+        {
+            get => loggerTimeOut;
+            set
+            {
+                if (0 == System.TimeSpan.Zero.CompareTo(value))
+                {
+                    watch.Reset();
+                }
+                else
+                {
+                    watch.Start();
+                }
+
+                loggerTimeOut = value;
+            }
+        }
+
+        /// <summary>
+        /// Whether the callback log uses a new thread
+        /// </summary>
+        public bool UseThread { get; set; }
+
+        /// <summary>
+        /// Logger
+        /// </summary>
+        public System.Action<System.Collections.Generic.IEnumerable<LoggerData>> Call { get; private set; }
+
+        internal readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue = new System.Collections.Concurrent.BlockingCollection<LoggerData>();
+
+        readonly System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+
+        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? loggerNumber = null, System.TimeSpan? loggerTimeOut = null, bool useThread = false)
+        {
+            if (loggerNumber.HasValue)
+            {
+                this.LoggerNumber = loggerNumber.Value;
+            }
+
+            if (loggerTimeOut.HasValue)
+            {
+                this.LoggerTimeOut = loggerTimeOut.Value;
+            }
+
+            if (null != call)
+            {
+                this.Call = call;
+            }
+
+            if (null != Call)
+            {
+                System.Threading.Tasks.Task.Factory.StartNew(() =>
+                {
+                    var list = new System.Collections.Generic.List<LoggerData>(LoggerNumber);
+
+                    var wait = new System.Threading.SpinWait();
+
+                    while (!LoggerQueue.IsCompleted)
+                    {
+                        if (LoggerNumber <= list.Count || (watch.IsRunning && 0 < watch.Elapsed.CompareTo(LoggerTimeOut) && 0 < list.Count))
+                        {
+                            if (UseThread)
+                            {
+                                System.Threading.Tasks.Task.Run(() => Call(list.ToArray())).ContinueWith(c =>
+                                {
+                                    if (null != c.Exception)
+                                    {
+                                        c.Exception.Console();
+                                    }
+                                });
+                            }
+                            else
+                            {
+                                try { Call(list.ToArray()); }
+                                catch (System.Exception ex) { ex.Console(); }
+                            }
+
+                            list.Clear();
+
+                            if (watch.IsRunning)
+                            {
+                                watch.Restart();
+                            }
+                        }
+
+                        if (LoggerQueue.TryTake(out LoggerData logger))
+                        {
+                            list.Add(logger);
+                        }
+
+                        wait.SpinOnce();
+                    }
+
+                    watch.Stop();
+                    list.Clear();// count > 0 ?
+                }, System.Threading.Tasks.TaskCreationOptions.DenyChildAttach | System.Threading.Tasks.TaskCreationOptions.LongRunning);
+            }
+        }
+    }
 
     /// <summary>
     /// Needs of the logging categories

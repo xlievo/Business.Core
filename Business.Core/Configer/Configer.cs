@@ -393,7 +393,7 @@ namespace Business
         //Xml
         //internal readonly string ID = System.Guid.NewGuid().ToString("N");
 
-        public Configer(Attributes.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Attributes.AttributeBase> attributes, bool loggerUseThreadPool = true)
+        public Configer(Attributes.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Attributes.AttributeBase> attributes)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -414,7 +414,7 @@ namespace Business
             this.UseTypes = new ReadOnlyCollection<string>();
 
             //GetCommandGroupDefault = name => GetCommandGroup(CommandGroupDefault, name);
-            this.LoggerUseThreadPool = loggerUseThreadPool;
+            //this.LoggerUseThreadPool = loggerUseThreadPool;
         }
 
         ///// <summary>
@@ -436,10 +436,27 @@ namespace Business
         public ReadOnlyCollection<string> UseTypes { get; private set; }
         public Document.IDoc Doc { get; internal set; }
 
+        ///// <summary>
+        ///// Logger use threadPool, Default true
+        ///// </summary>
+        //public bool LoggerUseThreadPool { get; internal set; } = true;
+
+        ///// <summary>
+        ///// The default callback is up to 500
+        ///// </summary>
+        //public int LoggerNumber { get; internal set; } = 500;
+
+        ///// <summary>
+        ///// 3 seconds
+        ///// </summary>
+        //public System.TimeSpan LoggerTime { get; internal set; } = System.TimeSpan.FromSeconds(3);
+
+        //public System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue = new System.Collections.Concurrent.BlockingCollection<LoggerData>();
+
         /// <summary>
-        /// Logger use threadPool, Default true
+        /// Logger
         /// </summary>
-        public bool LoggerUseThreadPool { get; internal set; } = true;
+        public Logger Logger { get; set; }
 
         ///// <summary>
         ///// Before the invoked
@@ -544,17 +561,17 @@ namespace Business
         //    }
         //}
 
-        /// <summary>
-        /// Logger use threadPool, Default true
-        /// </summary>
-        /// <param name="use"></param>
-        public static void LoggerUseThreadPoolAll(bool use = true)
-        {
-            foreach (var item in BusinessList.Values)
-            {
-                item.Configer.LoggerUseThreadPool = use;
-            }
-        }
+        ///// <summary>
+        ///// Logger use threadPool, Default true
+        ///// </summary>
+        ///// <param name="use"></param>
+        //public static void LoggerUseThreadPoolAll(bool use = true)
+        //{
+        //    foreach (var item in BusinessList.Values)
+        //    {
+        //        item.Configer.LoggerUseThreadPool = use;
+        //    }
+        //}
 
         public static void LoggerSet(Attributes.LoggerAttribute logger, params System.Type[] argType)
         {

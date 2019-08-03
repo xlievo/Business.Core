@@ -196,10 +196,11 @@ namespace Business.Utils
             docArg.Title = $"{argSource.Args.Name} ({argSource.Args.LastType.Name})";
             docArg.Description = argSource.Summary;
 
+            //var hasDescription = string.IsNullOrWhiteSpace(docArg.Description);
             var attrs = System.String.Empty;
             for (int i = 0; i < argSource.Attributes.Count; i++)
             {
-                attrs += $"<h5 style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : 10)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
+                attrs += $"<h5 style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : argSource.Args.HasDefinition ? 15 : 4)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
             }
 
             docArg.Description += attrs;
@@ -607,18 +608,18 @@ namespace Business.Utils
             public ReadOnlyCollection<TypeDefinition> Childrens { get; set; }
         }
 
-        /// <summary>
-        /// Logger use threadPool, Default true
-        /// </summary>
-        /// <typeparam name="Business"></typeparam>
-        /// <param name="business"></param>
-        /// <param name="use"></param>
-        /// <returns></returns>
-        public static Business LoggerUseThreadPool<Business>(this Business business, bool use = true) where Business : IBusiness
-        {
-            business.Configer.LoggerUseThreadPool = use;
-            return business;
-        }
+        ///// <summary>
+        ///// Logger use threadPool, Default true
+        ///// </summary>
+        ///// <typeparam name="Business"></typeparam>
+        ///// <param name="business"></param>
+        ///// <param name="use"></param>
+        ///// <returns></returns>
+        //public static Business LoggerUseThreadPool<Business>(this Business business, bool use = true) where Business : IBusiness
+        //{
+        //    business.Configer.LoggerUseThreadPool = use;
+        //    return business;
+        //}
 
         public static Business LoggerSet<Business>(this Business business, Attributes.LoggerAttribute logger, params System.Type[] argType) where Business : IBusiness
         {
@@ -1427,6 +1428,8 @@ namespace Business.Utils
 
             return inner;
         }
+
+        public static void Console(this System.Exception ex, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff") => ex.ExceptionWrite(console: true, dateFormat: dateFormat);
 
         static readonly System.Threading.ReaderWriterLockSlim locker = new System.Threading.ReaderWriterLockSlim();
 

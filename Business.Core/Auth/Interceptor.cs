@@ -28,8 +28,6 @@ namespace Business.Auth
     /// </summary>
     public interface IInterceptor : Castle.DynamicProxy.IInterceptor
     {
-        System.Action<LoggerData> Logger { get; set; }
-
         ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; set; }
 
         Configer Configer { get; set; }
@@ -376,7 +374,7 @@ namespace Business.Auth
             }
             finally
             {
-                Finally(command, meta, returnValue, logType, iArgs, argsObj, methodName, this.Logger, Configer.LoggerUseThreadPool, watch);
+                Finally(command, meta, returnValue, logType, iArgs, argsObj, methodName, watch);
             }
         }
 
@@ -422,7 +420,7 @@ namespace Business.Auth
         }
         */
 
-        async void Finally(CommandAttribute command, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Action<LoggerData> logger, bool loggerUseThreadPool, System.Diagnostics.Stopwatch watch)
+        async void Finally(CommandAttribute command, MetaData meta, dynamic returnValue, LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch)
         {
             if (meta.HasAsync)
             {
@@ -462,18 +460,19 @@ namespace Business.Auth
             watch.Stop();
             var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
 
-            if (null == logger) { return; }
+            if (null == Configer.Logger?.Call) { return; }
 
             if (canWrite)
             {
-                if (loggerUseThreadPool)
-                {
-                    System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }));
-                }
-                else
-                {
-                    System.Threading.Tasks.Task.Factory.StartNew(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }), System.Threading.Tasks.TaskCreationOptions.DenyChildAttach | System.Threading.Tasks.TaskCreationOptions.LongRunning);
-                }
+                Configer.Logger?.LoggerQueue.Add(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group });
+                //if (loggerUseThreadPool)
+                //{
+                //    System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }));
+                //}
+                //else
+                //{
+                //    System.Threading.Tasks.Task.Factory.StartNew(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }), System.Threading.Tasks.TaskCreationOptions.DenyChildAttach | System.Threading.Tasks.TaskCreationOptions.LongRunning);
+                //}
             }
         }
 
@@ -880,11 +879,6 @@ namespace Business.Auth
         /// MetaData
         /// </summary>
         public ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; set; }
-
-        /// <summary>
-        /// Logger
-        /// </summary>
-        public System.Action<LoggerData> Logger { get; set; }
 
         ///// <summary>
         ///// ResultType

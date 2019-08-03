@@ -26,11 +26,11 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
 
     public BusinessMember()
     {
-        this.Logger = x =>
+        this.Logger = new Logger(x =>
         {
             try
             {
-                x.Value = x.Value?.ToValue();
+                //x.Value = x.Value?.ToValue();
 
                 var log = x.JsonSerialize();
 
@@ -40,7 +40,7 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
             {
                 Help.ExceptionWrite(exception, true, true);
             }
-        };
+        });
 
         this.BindAfter = () =>
         {

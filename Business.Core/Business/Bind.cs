@@ -348,7 +348,7 @@ namespace Business
 
                 business.Command = GetBusinessCommand(business);
 
-                interceptor.Logger = business.Logger;
+                cfg.Logger = business.Logger;
 
                 Configer.BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
 

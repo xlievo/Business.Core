@@ -19,7 +19,7 @@ namespace Business
 {
     public interface IBusiness
     {
-        System.Action<LoggerData> Logger { get; set; }
+        Logger Logger { get; set; }
 
         CommandGroup Command { get; set; }
 
@@ -41,7 +41,7 @@ namespace Business
     public abstract class BusinessBase<Result> : IBusiness<Result>
         where Result : Business.Result.IResult
     {
-        public System.Action<LoggerData> Logger { get; set; }
+        public Logger Logger { get; set; }
 
         public CommandGroup Command { get; set; }
 

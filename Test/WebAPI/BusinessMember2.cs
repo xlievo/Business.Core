@@ -48,36 +48,30 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         public string MethodName;
     }
 
-    static System.Collections.Concurrent.ConcurrentQueue<CallInfo> CallInfos = new System.Collections.Concurrent.ConcurrentQueue<CallInfo>();
-
     public BusinessMember2()
     {
-        this.Logger = x =>
+        this.Logger = new Logger(x =>
         {
-            CallInfos.Enqueue(new CallInfo { Time = System.DateTime.Now, MethodName = x.Member });
-
-            var count = CallInfos.Count(c => 0 < c.Time.CompareTo(System.DateTime.Now.Subtract(System.TimeSpan.FromSeconds(2))));
-
-            for (int i = 0; i < count; i++)
-            {
-                CallInfos.TryDequeue(out _);
-            }
-
             try
             {
-                System.Threading.SpinWait.SpinUntil(() => false, 3000);
+                //System.Threading.SpinWait.SpinUntil(() => false, 3000);
 
-                x.Value = x.Value?.ToValue();
+                //x.Value = x.Value?.ToValue();
 
-                var log = x.JsonSerialize();
+                //var log = x.JsonSerialize();
 
-                Help.WriteLocal(log, console: true, write: x.Type == LoggerType.Exception);
+                foreach (var item in x)
+                {
+                    var log = item.JsonSerialize();
+
+                    Help.WriteLocal(log, console: true, write: item.Type == LoggerType.Exception);
+                }
             }
             catch (Exception exception)
             {
                 Help.ExceptionWrite(exception, true, true);
             }
-        };
+        });
 
         this.BindBefore = c =>
         {

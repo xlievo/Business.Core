@@ -37,10 +37,23 @@
         var Theme = JSONEditor.defaults.themes.bootstrap3;
         JSONEditor.defaults.themes.bootstrap3 = function () {
             var theme = new Theme();
+
+            theme.getGridRow = function () {
+                var el = document.createElement('div');
+                el.classList.add('row');
+                el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
+                el.style.marginTop = '8px';
+                el.style.marginBottom = '8px';
+                return el;
+            };
+
             theme.getHeader = function (text) {
                 var el = document.createElement('h4');
-                el.style.marginTop = '0px';
-                el.style.marginBottom = '10px';
+                el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
+                //el.style.marginTop = '0px';
+                //el.style.marginBottom = '0px';
+                //el.style.marginTop = '0px';
+                //el.style.marginBottom = '5px';
                 el.setAttribute('tag', 'h4');
                 if (typeof text === "string") {
                     el.textContent = text;
@@ -53,12 +66,12 @@
 
             theme.getFormControl = function (label, input, description, infoText) {
                 var group = document.createElement('div');
+                group.style.paddingTop = group.style.paddingBottom = group.style.marginTop = group.style.marginBottom = '0px';
 
                 if (label && input.type === 'checkbox') {
                     group.classList.add('checkbox');
                     label.appendChild(input);
                     label.style.fontSize = '14px';
-                    group.style.marginTop = '0';
                     if (infoText) group.appendChild(infoText);
                     group.appendChild(label);
                     input.style.position = 'relative';
@@ -69,7 +82,7 @@
                     if (label) {
                         label.classList.add('control-label');
                         group.appendChild(label);
-                        group.style.marginBottom = '8px';
+                        //group.style.marginBottom = '10px';
                     }
 
                     if (infoText) group.appendChild(infoText);
@@ -77,8 +90,9 @@
                 }
 
                 if (description) {
-                    description.style.marginBottom = '5px';
-                    description.style.marginTop = '0px';
+                    //description.style.marginTop = '0px';
+                    //description.style.marginBottom = '0px';
+                    //description.setAttribute('tag', 'description');
                     group.appendChild(description);
                 }
 
@@ -88,9 +102,12 @@
             theme.getIndentedPanel = function () {
                 var el = document.createElement('div');
                 el.classList.add('well', 'well-sm');
-                el.style.paddingBottom = '1px';
-                el.style.marginTop = '9px';
-                el.style.marginBottom = '10px';
+                el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
+                el.style.marginTop = '8px';
+                //el.style.paddingBottom = '6px';
+                //el.style.paddingTop = '18px';
+                //el.style.marginTop = '9px';
+                //el.style.marginBottom = '12px';
                 el.setAttribute('tag', 'panel');
                 return el;
             };
@@ -120,16 +137,19 @@
                 return el;
             };
 
-            //theme.getDescription = function (text) {
-            //    var el = document.createElement('p');
-            //    el.setAttribute('tag', 'description');
-            //    if (window.DOMPurify) el.innerHTML = window.DOMPurify.sanitize(text);
-            //    else el.textContent = this.cleanText(text);
-            //    return el;
-            //};
+            theme.getDescription = function (text) {
+                var el = document.createElement('p');
+                el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
+                el.style.marginTop = '6px';
+                el.setAttribute('tag', 'description');
+                if (window.DOMPurify) el.innerHTML = window.DOMPurify.sanitize(text);
+                else el.textContent = this.cleanText(text);
+                return el;
+            };
 
             theme.getFormInputDescription = function (text) {
                 var el = document.createElement('p');
+                el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
                 el.setAttribute('tag', 'description');
                 el.classList.add('help-block');
                 if (window.DOMPurify) el.innerHTML = window.DOMPurify.sanitize(text);
@@ -360,7 +380,7 @@
                 {@/if}
             </div>
             <div data-houdini id='${member.name}_member' style="padding: 10px">
-                <div id='${member.name}_input' style="padding-top: 10px;"></div>
+                <div id='${member.name}_input' style="padding-top: 0px;"></div>
                 <!--<div id='${member.name}_input' style="padding-top: 10px;"></div>-->
                 <!--<div id='${member.name}_out' style="padding-top: 10px;"></div>-->
                 <div id='${member.name}_sdk' style="padding-top: 10px;"></div>
@@ -446,8 +466,6 @@
                     });
 
                     ready(inputeditor);
-                    //ready(setEdit(inputeditor));
-                    //ready(inputeditor, inputid);
                     //========================================//
 
                     //==================sdk==================//
@@ -485,6 +503,7 @@
                     //========================================//
                 });
 
+                //set all edit
                 setEdit(document, edit);
 
                 document.querySelectorAll('#NET > div > div > h4').forEach(c => c.style.display = 'none');
@@ -497,8 +516,7 @@
                 new Houdini('[data-houdini]');
             })
             .catch(function (error) {
-                console.log(error.stack); // xhr.status
-                //console.log(error.statusText); // xhr.statusText
+                console.log(error.stack);
                 return null;
             });
 
@@ -571,27 +589,33 @@
                     //    c.style.marginTop = '0px';
                     //}
 
-                    c.style.marginBottom = '10px';
-                    c.parentNode.childNodes.forEach(c2 => {
-                        //console.log(c2.tagName);
-                        if ("P" == c2.tagName) {
-                            c.style.marginBottom = '6px';
-                        }
-                    });
+                    //c.style.marginBottom = '10px';
+                    //c.parentNode.childNodes.forEach(c2 => {
+                    //    //console.log(c2.tagName);
+                    //    if ("P" == c2.tagName) {
+                    //        c.style.marginBottom = '6px';
+                    //    }
+                    //});
                 });
 
+                document.querySelectorAll("div[tag='description']").forEach(c => {
+                    var h5 = c.querySelectorAll("h5");
+                    if (h5.length > 0) {
+
+                    }
+                });
                 //
                 document.querySelectorAll("div[tag='panel'] > div > div").forEach(c => {
                     var rows = c.querySelectorAll(".row");
                     if (rows.length > 0) {
-                        var form = rows[rows.length - 1].querySelector(".form-group");
-                        if (null != form) {
-                            form.style.marginBottom = '3px';
-                            var input = form.querySelector("input[class='form-control']");
-                            if (null != input) {
-                                input.style.marginBottom = '12px';
-                            }
-                        }
+                        //var form = rows[rows.length - 1].querySelector(".form-group");
+                        //if (null != form) {
+                        //    form.style.marginBottom = '3px';
+                        //    var input = form.querySelector("[class='form-control']");
+                        //    if (null != input) {
+                        //        input.style.marginBottom = '10px';
+                        //    }
+                        //}
 
                         //var h4 = c.querySelectorAll("h4[name='h4']");
                         //if (1 == h4.length) {
