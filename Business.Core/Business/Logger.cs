@@ -60,12 +60,24 @@ namespace Business
         /// </summary>
         public System.Action<System.Collections.Generic.IEnumerable<LoggerData>> Call { get; private set; }
 
-        internal readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue = new System.Collections.Concurrent.BlockingCollection<LoggerData>();
+        /// <summary>
+        /// Gets the max capacity of this logger queue
+        /// </summary>
+        public int? MaxCapacity { get; private set; }
+
+        internal readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue;
 
         readonly System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
 
-        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? loggerNumber = null, System.TimeSpan? loggerTimeOut = null, bool useThread = false)
+        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? maxCapacity = null, int? loggerNumber = null, System.TimeSpan? loggerTimeOut = null, bool useThread = false)
         {
+            if (maxCapacity.HasValue && -1 < maxCapacity.Value)
+            {
+                this.MaxCapacity = maxCapacity;
+            }
+
+            LoggerQueue = MaxCapacity.HasValue ? new System.Collections.Concurrent.BlockingCollection<LoggerData>(MaxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<LoggerData>();
+
             if (loggerNumber.HasValue)
             {
                 this.LoggerNumber = loggerNumber.Value;
@@ -91,11 +103,11 @@ namespace Business
 
                     while (!LoggerQueue.IsCompleted)
                     {
-                        if (LoggerNumber <= list.Count || (watch.IsRunning && 0 < watch.Elapsed.CompareTo(LoggerTimeOut) && 0 < list.Count))
+                        if ((0 < LoggerNumber && LoggerNumber <= list.Count) || (watch.IsRunning && 0 < watch.Elapsed.CompareTo(LoggerTimeOut) && 0 < list.Count))
                         {
                             if (UseThread)
                             {
-                                System.Threading.Tasks.Task.Run(() => Call(list.ToArray())).ContinueWith(c =>
+                                System.Threading.Tasks.Task.Factory.StartNew((c) => Call(c as LoggerData[]), list.ToArray()).ContinueWith(c =>
                                 {
                                     if (null != c.Exception)
                                     {
@@ -117,7 +129,7 @@ namespace Business
                             }
                         }
 
-                        if (LoggerQueue.TryTake(out LoggerData logger))
+                        if ((0 < LoggerNumber || watch.IsRunning) && LoggerQueue.TryTake(out LoggerData logger))
                         {
                             list.Add(logger);
                         }

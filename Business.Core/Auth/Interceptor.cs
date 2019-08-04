@@ -464,7 +464,12 @@ namespace Business.Auth
 
             if (canWrite)
             {
-                Configer.Logger?.LoggerQueue.Add(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group });
+                if (Configer.Logger?.MaxCapacity <= Configer.Logger?.LoggerQueue.Count)
+                {
+                    return;
+                }
+
+                Configer.Logger?.LoggerQueue.TryAdd(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group });
                 //if (loggerUseThreadPool)
                 //{
                 //    System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }));
