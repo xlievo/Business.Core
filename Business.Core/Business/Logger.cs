@@ -25,16 +25,16 @@ namespace Business
         /// <summary>
         /// Return log number, default 1
         /// </summary>
-        public int LoggerNumber { get; set; } = 1;
+        public int Number { get; set; } = 1;
 
-        System.TimeSpan loggerTimeOut = System.TimeSpan.Zero;
+        System.TimeSpan timeOut = System.TimeSpan.Zero;
 
         /// <summary>
         /// Return log timeout, default System.TimeSpan.Zero equals not enabled
         /// </summary>
-        public System.TimeSpan LoggerTimeOut
+        public System.TimeSpan TimeOut
         {
-            get => loggerTimeOut;
+            get => timeOut;
             set
             {
                 if (0 == System.TimeSpan.Zero.CompareTo(value))
@@ -46,7 +46,7 @@ namespace Business
                     watch.Start();
                 }
 
-                loggerTimeOut = value;
+                timeOut = value;
             }
         }
 
@@ -69,8 +69,10 @@ namespace Business
 
         readonly System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
 
-        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? maxCapacity = null, int? loggerNumber = null, System.TimeSpan? loggerTimeOut = null, bool useThread = false)
+        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? maxCapacity = null, int? number = null, System.TimeSpan? timeOut = null, bool useThread = false)
         {
+            this.UseThread = useThread;
+
             if (maxCapacity.HasValue && -1 < maxCapacity.Value)
             {
                 this.MaxCapacity = maxCapacity;
@@ -78,14 +80,14 @@ namespace Business
 
             LoggerQueue = MaxCapacity.HasValue ? new System.Collections.Concurrent.BlockingCollection<LoggerData>(MaxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<LoggerData>();
 
-            if (loggerNumber.HasValue)
+            if (number.HasValue)
             {
-                this.LoggerNumber = loggerNumber.Value;
+                this.Number = number.Value;
             }
 
-            if (loggerTimeOut.HasValue)
+            if (timeOut.HasValue)
             {
-                this.LoggerTimeOut = loggerTimeOut.Value;
+                this.TimeOut = timeOut.Value;
             }
 
             if (null != call)
@@ -97,13 +99,13 @@ namespace Business
             {
                 System.Threading.Tasks.Task.Factory.StartNew(() =>
                 {
-                    var list = new System.Collections.Generic.List<LoggerData>(LoggerNumber);
+                    var list = new System.Collections.Generic.List<LoggerData>(Number);
 
                     var wait = new System.Threading.SpinWait();
 
                     while (!LoggerQueue.IsCompleted)
                     {
-                        if ((0 < LoggerNumber && LoggerNumber <= list.Count) || (watch.IsRunning && 0 < watch.Elapsed.CompareTo(LoggerTimeOut) && 0 < list.Count))
+                        if (0 < list.Count && ((0 < Number && Number <= list.Count) || (watch.IsRunning && 0 < watch.Elapsed.CompareTo(TimeOut))))
                         {
                             if (UseThread)
                             {
@@ -129,7 +131,7 @@ namespace Business
                             }
                         }
 
-                        if ((0 < LoggerNumber || watch.IsRunning) && LoggerQueue.TryTake(out LoggerData logger))
+                        if ((0 < Number || watch.IsRunning) && LoggerQueue.TryTake(out LoggerData logger))
                         {
                             list.Add(logger);
                         }

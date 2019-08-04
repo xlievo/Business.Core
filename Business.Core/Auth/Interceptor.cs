@@ -469,6 +469,11 @@ namespace Business.Auth
                     return;
                 }
 
+                if (1 > Configer.Logger?.Number && 0 == System.TimeSpan.Zero.CompareTo(Configer.Logger?.TimeOut))
+                {
+                    return;
+                }
+
                 Configer.Logger?.LoggerQueue.TryAdd(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group });
                 //if (loggerUseThreadPool)
                 //{

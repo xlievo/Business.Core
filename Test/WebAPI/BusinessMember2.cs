@@ -54,7 +54,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         {
             try
             {
-                //System.Threading.SpinWait.SpinUntil(() => false, 3000);
+                System.Threading.SpinWait.SpinUntil(() => false, 3000);
 
                 //x.Value = x.Value?.ToValue();
 
@@ -73,8 +73,8 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
             }
         }, 500)
         {
-            LoggerTimeOut = System.TimeSpan.FromSeconds(1000),
-            LoggerNumber = 5,
+            TimeOut = System.TimeSpan.FromSeconds(1000),
+            Number = 2,
             UseThread = false,
         };
 
