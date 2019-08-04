@@ -99,7 +99,7 @@ namespace Business
             {
                 System.Threading.Tasks.Task.Factory.StartNew(() =>
                 {
-                    var list = new System.Collections.Generic.List<LoggerData>(Number);
+                    var list = 0 <= Number ? new System.Collections.Generic.List<LoggerData>(Number) : new System.Collections.Generic.List<LoggerData>();
 
                     var wait = new System.Threading.SpinWait();
 

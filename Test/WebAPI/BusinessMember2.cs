@@ -73,7 +73,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
             }
         }, 500)
         {
-            TimeOut = System.TimeSpan.FromSeconds(1000),
+            TimeOut = System.TimeSpan.FromSeconds(10),
             Number = 2,
             UseThread = false,
         };
