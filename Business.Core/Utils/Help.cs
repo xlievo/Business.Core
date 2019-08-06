@@ -203,7 +203,10 @@ namespace Business.Utils
                 attrs += $"<h5 style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : argSource.Args.HasDefinition ? 15 : 4)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
             }
 
-            docArg.Description += attrs;
+            if (!string.IsNullOrWhiteSpace(attrs))
+            {
+                docArg.Description += System.Environment.NewLine + attrs;
+            }
 
             if (argSource.Args.HasDefaultValue)
             {

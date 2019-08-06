@@ -264,7 +264,7 @@ namespace Business
 
     public partial class Bind : System.IDisposable
     {
-        public object Instance { get; private set; }
+        public object Instance;
 
         public Bind(System.Type type, Auth.IInterceptor interceptor, params object[] constructorArguments)
         {
@@ -334,7 +334,7 @@ namespace Business
 
             business?.BindBefore?.Invoke(cfg);
 
-            interceptor.MetaData = GetInterceptorMetaData(cfg, methods, Instance);
+            interceptor.MetaData = GetInterceptorMetaData(cfg, methods);
 
             //interceptor.ResultType = cfg.ResultType;
 
@@ -871,7 +871,7 @@ namespace Business
             return name;
         }
 
-        static ConcurrentReadOnlyDictionary<string, MetaData> GetInterceptorMetaData(Configer cfg, System.Collections.Generic.Dictionary<int, MethodInfo> methods, object instance)
+        static ConcurrentReadOnlyDictionary<string, MetaData> GetInterceptorMetaData(Configer cfg, System.Collections.Generic.Dictionary<int, MethodInfo> methods)
         {
             var metaData = new ConcurrentReadOnlyDictionary<string, MetaData>();
 
@@ -968,15 +968,15 @@ namespace Business
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
                     var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
 
+                    var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
+
                     var hasDefinition = current.outType.IsDefinition();
 
                     var definitions = hasDefinition ? new System.Collections.Generic.List<string> { current.outType.FullName } : new System.Collections.Generic.List<string>();
 
-                    var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, resultType, cfg.ResultTypeDefinition, instance, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
-
                     var hasLower = false;
                     var childrens2 = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? GetArgChild(current.outType, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, instance, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
+                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : hasDefinition ? GetArgChild(current.outType, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
 
                     var arg = new Args(argInfo.Name,
                     argInfo.ParameterType,
@@ -1038,13 +1038,14 @@ namespace Business
             return metaData;
         }
 
-        struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; }
+        struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type orgType; }
 
         static CurrentType GetCurrentType(System.Type type)
         {
             var hasIArg = typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType);
 
             var current = new CurrentType { hasIArg = hasIArg, outType = hasIArg ? iArgOutType[0] : type, inType = hasIArg ? iArgOutType[1] : type };
+            current.orgType = current.outType;
 
             current.hasCollection = current.outType.IsCollection();
             current.hasDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(current.outType);
@@ -1054,14 +1055,14 @@ namespace Business
 
         #region GetArgAttr        
 
-        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<AttributeBase> attributes, System.Type memberType, System.Type resultType, System.Type resultTypeDefinition, dynamic business, string path)
+        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<AttributeBase> attributes, System.Type memberType, System.Type resultType, System.Type resultTypeDefinition, string path)
         {
             var argAttr = attributes.Where(c => c is ArgumentAttribute).Cast<ArgumentAttribute>().ToList();
             GetArgAttrSort(argAttr);
-            return Bind.GetArgAttr(argAttr, resultType, resultTypeDefinition, business, path, memberType);
+            return Bind.GetArgAttr(argAttr, resultType, resultTypeDefinition, path, memberType);
         }
 
-        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<ArgumentAttribute> argAttr, System.Type resultType, System.Type resultTypeDefinition, dynamic business, string path, System.Type memberType)
+        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<ArgumentAttribute> argAttr, System.Type resultType, System.Type resultTypeDefinition, string path, System.Type memberType)
         {
             //argAttr = argAttr.FindAll(c => c.Enable);
             //argAttr.Sort(ComparisonHelper<Attributes.ArgumentAttribute>.CreateComparer(c =>c.State.ConvertErrorState()));
@@ -1078,7 +1079,7 @@ namespace Business
 
                 item.Meta.resultType = resultType;
                 item.Meta.resultTypeDefinition = resultTypeDefinition;
-                item.Meta.Business = business;
+                //item.Meta.Business = business;
                 item.Meta.Member = path;
                 item.Meta.MemberType = memberType;
 
@@ -1115,7 +1116,7 @@ namespace Business
 
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, object business, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
+        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
         {
             hasLower = false;
 
@@ -1192,11 +1193,11 @@ namespace Business
 
                 argAttrAll = argAttrAll.Distinct();
 
-                var argGroup = GetArgGroup(argAttrAll, current, path2, path, commands, resultType, resultTypeDefinition, business, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
+                var argGroup = GetArgGroup(argAttrAll, current, path2, path, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
 
                 var hasLower3 = false;
                 var childrens2 = hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                var children = hasDefinition ? GetArgChild(current.outType, path2, commands, ref definitions2, resultType, resultTypeDefinition, business, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
+                var children = hasDefinition ? GetArgChild(current.outType, path2, commands, ref definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
 
                 if (hasLower2 || hasLower3)
                 {
@@ -1249,12 +1250,12 @@ namespace Business
         /// <returns></returns>
         internal static bool GroupEquals(GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string path, string owner, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, object business, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string path, string owner, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
         {
             hasLower = false;
             hasCollectionAttr = false;
 
-            var argAttrs = GetArgAttr(argAttrAll, current.outType, resultType, resultTypeDefinition, business, path);
+            var argAttrs = GetArgAttr(argAttrAll, current.orgType, resultType, resultTypeDefinition, path);
 
             var nick = argAttrAll.GetAttr<NickAttribute>();
 
@@ -1284,7 +1285,7 @@ namespace Business
                     attr.Meta.Method = item.Value.OnlyName;
                     attr.Meta.Member = path2;
 
-                    attr.Meta.Business = c.Meta.Business;
+                    //attr.Meta.Business = c.Meta.Business;
                     attr.Meta.resultType = c.Meta.resultType;
                     attr.Meta.resultTypeDefinition = c.Meta.resultTypeDefinition;
                     attr.Meta.MemberType = c.Meta.MemberType;

@@ -901,7 +901,7 @@ namespace Business.Attributes //Annotations
             internal System.Type resultType;
             internal System.Type resultTypeDefinition;
 
-            public dynamic Business { get; internal set; }
+            //public dynamic Business { get; internal set; }
 
             public string Method { get; internal set; }
 

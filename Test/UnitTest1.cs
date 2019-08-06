@@ -101,12 +101,17 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
 {
     public BusinessLoggerAndArg()
     {
-        this.Logger = logger =>
+        this.Logger = new Logger(logger =>
         {
-            var data = logger.Value?.ToValue();
+            //var data = logger.Value?.ToValue();
 
-            Console.WriteLine(data.JsonSerialize());
-        };
+            foreach (var item in logger)
+            {
+                item.Value = item.Value?.ToValue();
+            }
+
+            Console.WriteLine(logger.JsonSerialize());
+        });
     }
 
     public virtual async Task<dynamic> TestLoggerAndArg(
@@ -141,44 +146,44 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 {
     public BusinessMember()
     {
-        this.Logger = logger =>
-        {
-            logger.Value = logger.Value?.ToValue();
+        //this.Logger = logger =>
+        //{
+        //    logger.Value = logger.Value?.ToValue();
 
-            Console.WriteLine(logger.JsonSerialize());
-            System.Diagnostics.Debug.WriteLine(logger.JsonSerialize());
+        //    Console.WriteLine(logger.JsonSerialize());
+        //    System.Diagnostics.Debug.WriteLine(logger.JsonSerialize());
 
-            if (logger.Member == "BusinessMember.Test0011" || logger.Member == "BusinessMember.Test0012")
-            {
-                switch (logger.Type)
-                {
-                    case LoggerType.Record:
-                        {
-                            Assert.IsNull(logger.Result);
-                        }
-                        break;
-                    case LoggerType.Error:
-                        {
-                            Assert.AreEqual(typeof(IResult).IsAssignableFrom(logger.Result.GetType()), true);
-                            var result = logger.Result as IResult;
-                            Assert.AreEqual(1 > result.State, true);
-                            Assert.IsNotNull(result.Message);
-                        }
-                        break;
-                    case LoggerType.Exception:
-                        {
+        //    if (logger.Member == "BusinessMember.Test0011" || logger.Member == "BusinessMember.Test0012")
+        //    {
+        //        switch (logger.Type)
+        //        {
+        //            case LoggerType.Record:
+        //                {
+        //                    Assert.IsNull(logger.Result);
+        //                }
+        //                break;
+        //            case LoggerType.Error:
+        //                {
+        //                    Assert.AreEqual(typeof(IResult).IsAssignableFrom(logger.Result.GetType()), true);
+        //                    var result = logger.Result as IResult;
+        //                    Assert.AreEqual(1 > result.State, true);
+        //                    Assert.IsNotNull(result.Message);
+        //                }
+        //                break;
+        //            case LoggerType.Exception:
+        //                {
 
-                        }
-                        break;
-                    default: break;
-                }
-            }
-        };
+        //                }
+        //                break;
+        //            default: break;
+        //        }
+        //    }
+        //};
     }
 
     #region realization
 
-    public Action<LoggerData> Logger { get; set; }
+    public Logger Logger { get; set; }
     public CommandGroup Command { get; set; }
     public Configer Configer { get; set; }
     public Action BindAfter { get; set; }
@@ -1021,6 +1026,17 @@ public class BusinessMember : IBusiness<ResultObject<object>>
         }
     }
 
+    public class CheckedMemberTypeAttribute : ArgumentAttribute
+    {
+        public CheckedMemberTypeAttribute(int state = -2000, string message = null) : base(state, message) { }
+
+        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic key)
+        {
+            Assert.IsTrue(this.Meta.MemberType.IsCollection());
+            return this.ResultCreate();
+        }
+    }
+
     [TestCollection4]
     public class TestCollectionArg
     {
@@ -1039,6 +1055,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
         public int A { get; set; }
 
         [CheckNull(-1105)]
+        [CheckedMemberType]
         public List<TestCollectionArg2> B { get; set; }
 
         public TestCollectionArg3 C { get; set; }
@@ -1249,7 +1266,7 @@ public class TestBusinessMember
 
         Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Description, "This is Test001.");
         Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args["use01"].Description, "This is use01.");
-        Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args["arg01"].Description, "This is Arg01.");
+        Assert.IsTrue(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args["arg01"].Description.StartsWith("This is Arg01."));
     }
 
     [TestMethod]
