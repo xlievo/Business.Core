@@ -17,7 +17,7 @@ namespace BenchmarkTest
         static BusinessMember Member;
         static CommandGroup Cmd;
         static Configer Cfg;
-        public static int WorkTime = -1;
+        public static int WorkTime = 1200;
 
         public struct Dto
         {
@@ -32,7 +32,7 @@ namespace BenchmarkTest
             Cfg = Member.Configer;
 
 #if DEBUG
-            var count = 10000;
+            var count = 1000;
 
 #else
             var count = 100000;
@@ -50,14 +50,7 @@ namespace BenchmarkTest
 
             //===========================================================//
 
-            Configer.LoggerUseThreadPoolAll();
-
-            System.Console.WriteLine($"LoggerUseThreadPool = {Cfg.LoggerUseThreadPool}");
-
-            if (Cfg.LoggerUseThreadPool)
-            {
-                //System.Threading.ThreadPool.SetMinThreads(800, 300);
-            }
+            //System.Threading.ThreadPool.SetMinThreads(800, 300);
 
             System.Threading.ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
             System.Threading.ThreadPool.GetMaxThreads(out int workerThreads2, out int completionPortThreads2);
@@ -89,6 +82,8 @@ namespace BenchmarkTest
 
             //Task.WaitAll(tasks.ToArray());
 
+            System.Threading.SpinWait.SpinUntil(() => results.Count + 1 == Loggers.Count);
+
             watch.Stop();
             var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
 
@@ -117,38 +112,40 @@ namespace BenchmarkTest
             //Console.WriteLine($"ResultCount={results.Count} TaskCount={tasks.Count}  Loggers={BusinessMember.Loggers.Count} Time={total}");
             Console.WriteLine($"ResultCount={results.Count} Loggers={BusinessMember.Loggers.Count} Time={total} Avg={Help.Scale(results.Count / total)}");
 
-            watch.Restart();
+            Console.WriteLine($"{string.Join(",", BusinessMember.Logs)}");
 
-            System.Threading.Tasks.Parallel.For(0, 10000, c =>
-            {
-                var member = Bind.Create<BusinessMember>().UseType(typeof(Business.Auth.IToken));
-                var cmd = member.Command;
+            //watch.Restart();
 
-                TestCollection(cmd);
-            });
+            //System.Threading.Tasks.Parallel.For(0, 1000, c =>
+            //{
+            //    var member = Bind.Create<BusinessMember>().UseType(typeof(Business.Auth.IToken));
+            //    var cmd = member.Command;
 
-            watch.Stop();
-            total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
-            System.Console.WriteLine($"Bind.Create TestCollection OK Time={total}");
+            //    TestCollection(cmd);
+            //});
 
-            watch.Restart();
+            //watch.Stop();
+            //total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+            //System.Console.WriteLine($"Bind.Create TestCollection OK Time={total}");
 
-            System.Threading.Tasks.Parallel.For(0, 100000, c =>
-            {
-                TestCollection(Cmd);
-            });
+            //watch.Restart();
 
-            watch.Stop();
-            total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
-            System.Console.WriteLine($"TestCollection OK Time={total}");
+            //System.Threading.Tasks.Parallel.For(0, 10000, c =>
+            //{
+            //    TestCollection(Cmd);
+            //});
 
-            watch.Restart();
+            //watch.Stop();
+            //total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+            //System.Console.WriteLine($"TestCollection OK Time={total}");
 
-            TestCollection2();
+            //watch.Restart();
 
-            watch.Stop();
-            total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
-            System.Console.WriteLine($"TestCollection2 OK Time={total}");
+            //TestCollection2();
+
+            //watch.Stop();
+            //total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+            //System.Console.WriteLine($"TestCollection2 OK Time={total}");
 
             //===========================================================//
             /*
@@ -236,7 +233,7 @@ namespace BenchmarkTest
         {
             var list2 = new List<TestCollectionArg>();
 
-            for (int i = 0; i < 1 * 1000000; i++)
+            for (int i = 0; i < 1 * 100000; i++)
             {
                 var b = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = $"{i}", D = i } };
 
@@ -289,14 +286,31 @@ namespace BenchmarkTest
 
         public static bool SpinWait(int millisecondsTimeout) => System.Threading.SpinWait.SpinUntil(() => false, millisecondsTimeout);
 
-        public BusinessMember() => this.Logger = logger =>
+        public static ConcurrentBag<int> Logs = new ConcurrentBag<int>();
+
+        public BusinessMember() => this.Logger = new Logger(loggers =>
         {
             if (-1 != Program.WorkTime)
             {
                 SpinWait(Program.WorkTime);
             }
+            //System.Console.WriteLine(loggers.Count());
 
-            Loggers.Add(logger);
+            foreach (var item in loggers)
+            {
+                item.Value = item.Value?.ToValue();
+                //item.Type = LoggerType.Error;
+                Loggers.Add(item);
+            }
+
+            Logs.Add(loggers.ToList().Count);
+        })
+        {
+            Batch = new Logger.BatchOptions
+            {
+                Interval = System.TimeSpan.FromSeconds(6),
+                //MaxNumber = 100
+            }
         };
 
         public virtual dynamic Test000([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);

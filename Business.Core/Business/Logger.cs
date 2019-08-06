@@ -22,43 +22,35 @@ namespace Business
 
     public class Logger
     {
-        /// <summary>
-        /// Return log number, default 1
-        /// </summary>
-        public int Number { get; set; } = 1;
-
-        System.TimeSpan timeOut = System.TimeSpan.Zero;
-
-        /// <summary>
-        /// Return log timeout, default System.TimeSpan.Zero equals not enabled
-        /// </summary>
-        public System.TimeSpan TimeOut
+        public struct BatchOptions
         {
-            get => timeOut;
-            set
-            {
-                if (0 == System.TimeSpan.Zero.CompareTo(value))
-                {
-                    watch.Reset();
-                }
-                else
-                {
-                    watch.Start();
-                }
+            /// <summary>
+            /// Return log time interval, default System.TimeSpan.Zero equals not enabled
+            /// </summary>
+            public System.TimeSpan Interval { get; set; }
 
-                timeOut = value;
-            }
+            /// <summary>
+            /// Return log number, less than 1 no restrictions
+            /// </summary>
+            public int MaxNumber { get; set; }
         }
 
-        /// <summary>
-        /// Whether the callback log uses a new thread
-        /// </summary>
-        public bool UseThread { get; set; }
+        public BatchOptions Batch { get; set; } = new BatchOptions { Interval = System.TimeSpan.FromSeconds(3) };
+
+        ///// <summary>
+        ///// Whether the callback log uses a new thread
+        ///// </summary>
+        //public bool UseThread { get; set; }
 
         /// <summary>
         /// Logger
         /// </summary>
         public System.Action<System.Collections.Generic.IEnumerable<LoggerData>> Call { get; private set; }
+
+        /// <summary>
+        /// Gets the maximum take thread for this logger queue, default 100
+        /// </summary>
+        public int TakeThread { get; private set; } = 100;
 
         /// <summary>
         /// Gets the max capacity of this logger queue
@@ -67,11 +59,12 @@ namespace Business
 
         internal readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue;
 
-        readonly System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
-
-        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? maxCapacity = null, int? number = null, System.TimeSpan? timeOut = null, bool useThread = false)
+        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? takeThread = null, int? maxCapacity = null)
         {
-            this.UseThread = useThread;
+            if (takeThread.HasValue && 0 < takeThread.Value)
+            {
+                this.TakeThread = takeThread.Value;
+            }
 
             if (maxCapacity.HasValue && -1 < maxCapacity.Value)
             {
@@ -80,16 +73,6 @@ namespace Business
 
             LoggerQueue = MaxCapacity.HasValue ? new System.Collections.Concurrent.BlockingCollection<LoggerData>(MaxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<LoggerData>();
 
-            if (number.HasValue)
-            {
-                this.Number = number.Value;
-            }
-
-            if (timeOut.HasValue)
-            {
-                this.TimeOut = timeOut.Value;
-            }
-
             if (null != call)
             {
                 this.Call = call;
@@ -97,51 +80,73 @@ namespace Business
 
             if (null != Call)
             {
-                System.Threading.Tasks.Task.Factory.StartNew(() =>
+                for (int i = 0; i < TakeThread; i++)
                 {
-                    var list = 0 <= Number ? new System.Collections.Generic.List<LoggerData>(Number) : new System.Collections.Generic.List<LoggerData>();
-
-                    var wait = new System.Threading.SpinWait();
-
-                    while (!LoggerQueue.IsCompleted)
+                    System.Threading.Tasks.Task.Factory.StartNew(() =>
                     {
-                        if (0 < list.Count && ((0 < Number && Number <= list.Count) || (watch.IsRunning && 0 < watch.Elapsed.CompareTo(TimeOut))))
+                        var list = new System.Collections.Generic.LinkedList<LoggerData>();
+
+                        var wait = new System.Threading.SpinWait();
+                        var watch = new System.Diagnostics.Stopwatch();
+
+                        while (!LoggerQueue.IsCompleted)
                         {
-                            if (UseThread)
+                            var isRunning = 0 != System.TimeSpan.Zero.CompareTo(Batch.Interval);
+
+                            if (!watch.IsRunning && isRunning)
                             {
-                                System.Threading.Tasks.Task.Factory.StartNew((c) => Call(c as LoggerData[]), list.ToArray()).ContinueWith(c =>
-                                {
-                                    if (null != c.Exception)
-                                    {
-                                        c.Exception.Console();
-                                    }
-                                });
+                                watch.Start();
                             }
-                            else
+                            else if (!isRunning && watch.IsRunning)
                             {
-                                try { Call(list.ToArray()); }
+                                watch.Stop();
+                            }
+
+                            if (0 < list.Count && (!isRunning || (isRunning && (0 < watch.Elapsed.CompareTo(Batch.Interval) || (0 < Batch.MaxNumber && Batch.MaxNumber <= list.Count)))))
+                            {
+                                //if (UseThread)
+                                //{
+                                //    System.Threading.Tasks.Task.Factory.StartNew((c) => Call(c as LoggerData[]), list.ToArray()).ContinueWith(c =>
+                                //    {
+                                //        if (null != c.Exception)
+                                //        {
+                                //            c.Exception.Console();
+                                //        }
+                                //    });
+                                //}
+                                //else
+                                //{
+                                //    try { Call(list.ToArray()); }
+                                //    catch (System.Exception ex) { ex.Console(); }
+                                //}
+
+                                try { Call(list); }
                                 catch (System.Exception ex) { ex.Console(); }
+
+                                list.Clear();
+
+                                if (watch.IsRunning)
+                                {
+                                    watch.Restart();
+                                }
                             }
 
-                            list.Clear();
-
-                            if (watch.IsRunning)
+                            if (isRunning && LoggerQueue.TryTake(out LoggerData logger))
                             {
-                                watch.Restart();
+                                list.AddLast(logger);
                             }
+
+                            wait.SpinOnce();
                         }
 
-                        if ((0 < Number || watch.IsRunning) && LoggerQueue.TryTake(out LoggerData logger))
+                        if (watch.IsRunning)
                         {
-                            list.Add(logger);
+                            watch.Stop();
                         }
 
-                        wait.SpinOnce();
-                    }
-
-                    watch.Stop();
-                    list.Clear();// count > 0 ?
-                }, System.Threading.Tasks.TaskCreationOptions.DenyChildAttach | System.Threading.Tasks.TaskCreationOptions.LongRunning);
+                        list.Clear();// count > 0 ?
+                    }, System.Threading.Tasks.TaskCreationOptions.DenyChildAttach | System.Threading.Tasks.TaskCreationOptions.LongRunning);
+                }
             }
         }
     }
@@ -176,7 +181,7 @@ namespace Business
     /// <summary>
     /// Logger data object
     /// </summary>
-    public struct LoggerData
+    public class LoggerData
     {
         /// <summary>
         /// Logger type
@@ -272,7 +277,7 @@ namespace Business
         /// <returns></returns>
         public override string ToString()
         {
-            return Utils.Help.JsonSerialize(this);
+            return Help.JsonSerialize(this);
         }
     }
 }

@@ -469,7 +469,7 @@ namespace Business.Auth
                     return;
                 }
 
-                if (1 > Configer.Logger?.Number && 0 == System.TimeSpan.Zero.CompareTo(Configer.Logger?.TimeOut))
+                if (0 == System.TimeSpan.Zero.CompareTo(Configer.Logger?.Batch.Interval))
                 {
                     return;
                 }

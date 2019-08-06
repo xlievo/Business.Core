@@ -71,12 +71,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
             {
                 Help.ExceptionWrite(exception, true, true);
             }
-        }, 500)
-        {
-            TimeOut = System.TimeSpan.FromSeconds(10),
-            Number = 2,
-            UseThread = false,
-        };
+        });
 
         this.BindBefore = c =>
         {
