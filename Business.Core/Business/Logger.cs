@@ -20,6 +20,9 @@ namespace Business
     using System.Linq;
     using Utils;
 
+    /// <summary>
+    /// Log subscription queue
+    /// </summary>
     public class Logger
     {
         public struct BatchOptions
@@ -35,7 +38,7 @@ namespace Business
             public int MaxNumber { get; set; }
         }
 
-        public BatchOptions Batch { get; set; } = new BatchOptions { Interval = System.TimeSpan.FromSeconds(3) };
+        public BatchOptions Batch { get; set; } = new BatchOptions { Interval = System.TimeSpan.Zero };
 
         ///// <summary>
         ///// Whether the callback log uses a new thread
@@ -48,9 +51,9 @@ namespace Business
         public System.Action<System.Collections.Generic.IEnumerable<LoggerData>> Call { get; private set; }
 
         /// <summary>
-        /// Gets the maximum take thread for this logger queue, default 100
+        /// Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately. 100 is reasonable.
         /// </summary>
-        public int TakeThread { get; private set; } = 100;
+        public int TakeThread { get; private set; } = 1;
 
         /// <summary>
         /// Gets the max capacity of this logger queue
@@ -71,7 +74,7 @@ namespace Business
                 this.MaxCapacity = maxCapacity;
             }
 
-            LoggerQueue = MaxCapacity.HasValue ? new System.Collections.Concurrent.BlockingCollection<LoggerData>(MaxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<LoggerData>();
+            LoggerQueue = MaxCapacity.HasValue && 0 < MaxCapacity.Value ? new System.Collections.Concurrent.BlockingCollection<LoggerData>(MaxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<LoggerData>();
 
             if (null != call)
             {
@@ -131,7 +134,8 @@ namespace Business
                                 }
                             }
 
-                            if (isRunning && LoggerQueue.TryTake(out LoggerData logger))
+                            //if (isRunning && LoggerQueue.TryTake(out LoggerData logger))
+                            if (LoggerQueue.TryTake(out LoggerData logger))
                             {
                                 list.AddLast(logger);
                             }

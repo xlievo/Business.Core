@@ -1340,6 +1340,9 @@ namespace Business
         #endregion
     }
 
+    /// <summary>
+    /// Command grouping
+    /// </summary>
     public class CommandGroup : ConcurrentReadOnlyDictionary<string, ConcurrentReadOnlyDictionary<string, Command>>
     {
         readonly System.Type resultTypeDefinition;

@@ -304,7 +304,7 @@ namespace BenchmarkTest
             }
 
             Logs.Add(loggers.ToList().Count);
-        })
+        }, 100)
         {
             Batch = new Logger.BatchOptions
             {

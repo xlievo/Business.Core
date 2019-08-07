@@ -177,11 +177,12 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
     public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context)
     {
-        Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
+        Microsoft.AspNetCore.Http.HttpContext httpContext = context.Controller.HttpContext;
 
         //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
         //return this.ResultCreate();
-        return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
+        return this.ResultCreate(new { token, arg = arg?.Out, State = httpContext.Connection.RemoteIpAddress.ToString() });
+        //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
     public struct Result
