@@ -101,7 +101,7 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
 {
     public BusinessLoggerAndArg()
     {
-        this.Logger = new Logger(logger =>
+        this.Logger = new Logger(async logger =>
         {
             //var data = logger.Value?.ToValue();
 

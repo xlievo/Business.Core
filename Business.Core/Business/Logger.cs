@@ -48,7 +48,8 @@ namespace Business
         /// <summary>
         /// Logger
         /// </summary>
-        public System.Action<System.Collections.Generic.IEnumerable<LoggerData>> Call { get; private set; }
+        //public System.Action<System.Collections.Generic.IEnumerable<LoggerData>> Call { get; private set; }
+        public System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> Call { get; private set; }
 
         /// <summary>
         /// Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately. 100 is reasonable.
@@ -62,7 +63,7 @@ namespace Business
 
         internal readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue;
 
-        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? threadNumber = null, int? maxCapacity = null)
+        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> call, int? threadNumber = null, int? maxCapacity = null)
         {
             if (threadNumber.HasValue && 0 < threadNumber.Value)
             {
@@ -85,7 +86,7 @@ namespace Business
             {
                 for (int i = 0; i < ThreadNumber; i++)
                 {
-                    System.Threading.Tasks.Task.Factory.StartNew(() =>
+                    System.Threading.Tasks.Task.Factory.StartNew(async () =>
                     {
                         var list = new System.Collections.Generic.LinkedList<LoggerData>();
 
@@ -123,7 +124,7 @@ namespace Business
                                 //    catch (System.Exception ex) { ex.Console(); }
                                 //}
 
-                                try { Call(list.ToArray()); }
+                                try { await Call(list.ToArray()); }
                                 catch (System.Exception ex) { ex.Console(); }
 
                                 list.Clear();
@@ -134,7 +135,6 @@ namespace Business
                                 }
                             }
 
-                            //if (isRunning && LoggerQueue.TryTake(out LoggerData logger))
                             if (LoggerQueue.TryTake(out LoggerData logger))
                             {
                                 list.AddLast(logger);

@@ -288,7 +288,7 @@ namespace BenchmarkTest
 
         public static ConcurrentBag<int> Logs = new ConcurrentBag<int>();
 
-        public BusinessMember() => this.Logger = new Logger(loggers =>
+        public BusinessMember() => this.Logger = new Logger(async loggers =>
         {
             if (-1 != Program.WorkTime)
             {

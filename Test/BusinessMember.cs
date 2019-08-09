@@ -26,7 +26,7 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
 
     public BusinessMember()
     {
-        this.Logger = new Logger(x =>
+        this.Logger = new Logger(async x =>
         {
             try
             {

@@ -50,7 +50,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
     public BusinessMember2()
     {
-        this.Logger = new Logger(x =>
+        this.Logger = new Logger(async x =>
         {
             try
             {
@@ -252,7 +252,7 @@ public class Args
     }
 
     /// <summary>
-    /// 
+    /// Test001Test001Test001Test001Test001Test001
     /// </summary>
     public class Test001
     {

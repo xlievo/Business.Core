@@ -181,7 +181,8 @@
             theme.getDescription = function (text) {
                 var el = document.createElement('p');
                 el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
-                el.style.marginTop = '6px';
+                el.style.marginTop = '8px';
+                el.style.marginBottom = '2px';
                 el.setAttribute('tag', 'description');
                 if (window.DOMPurify) el.innerHTML = window.DOMPurify.sanitize(text);
                 else el.textContent = this.cleanText(text);
@@ -191,6 +192,7 @@
             theme.getFormInputDescription = function (text) {
                 var el = document.createElement('p');
                 el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
+                el.style.marginBottom = '2px';
                 el.setAttribute('tag', 'description');
                 el.classList.add('help-block');
                 if (window.DOMPurify) el.innerHTML = window.DOMPurify.sanitize(text);
@@ -616,7 +618,7 @@
                     var row = c.parentNode.parentNode.parentNode.nextSibling;
                     var h5 = c.querySelector("h5");
                     if (null != h5 && null != row && row.className === "row") {
-                        c.style.marginBottom = '4px';
+                        c.style.marginBottom = '6px';
                     }
                 });
             });
