@@ -200,7 +200,7 @@ namespace Business.Utils
             var attrs = System.String.Empty;
             for (int i = 0; i < argSource.Attributes.Count; i++)
             {
-                attrs += $"<h5 style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : argSource.Args.HasDefinition ? 15 : 4)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
+                attrs += $"<h5 style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : argSource.Args.HasDefinition ? 15 : 2)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
             }
 
             if (!string.IsNullOrWhiteSpace(attrs))
@@ -940,7 +940,7 @@ namespace Business.Utils
 
                         if (!attrs.ContainsKey(groupKey))
                         {
-                            attrs.Add(groupKey, item2.Clone<Attributes.GropuAttribute>());
+                            attrs.Add(groupKey, item2.Clone());
                         }
                         //gropus.Add(item.Clone<Attributes.GropuAttribute>());
                     }

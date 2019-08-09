@@ -403,7 +403,7 @@ namespace Business.Attributes //Annotations
         {
             if (this.Type.IsAbstract) { return default; }
 
-            return Force.DeepCloner.DeepClonerExtensions.DeepClone(this) as T;
+            return Force.DeepCloner.DeepClonerExtensions.DeepClone(this as T);
 
             /*
             if (!Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta))

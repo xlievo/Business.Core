@@ -24,11 +24,7 @@ namespace Business.Result
     //[ProtoBuf.ProtoContract(SkipConstructor = true)]
     public class ResultObject<Type> : IResult<Type>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="value"></param>
-        public static implicit operator ResultObject<Type>(string value) => Utils.Help.TryJsonDeserialize<ResultObject<Type>>(value);
+        //public static implicit operator ResultObject<Type>(string value) => Utils.Help.TryJsonDeserialize<ResultObject<Type>>(value);
 
         //public static implicit operator ResultObject<Type>(byte[] value) => Utils.Help.TryProtoBufDeserialize<ResultObject<Type>>(value);
 

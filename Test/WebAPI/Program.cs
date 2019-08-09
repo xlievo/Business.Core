@@ -327,7 +327,7 @@ public class Startup
                         });
 
                         //in
-                       // var data = json.JsonSerialize(Help.JsonSettings);
+                        // var data = json.JsonSerialize(Help.JsonSettings);
 
                     }
                 }
@@ -714,6 +714,7 @@ public class Startup
 [Use]
 //Internal object do not write logs
 [Logger(canWrite: false)]
+[RequestFormLimits(ValueCountLimit = int.MaxValue, ValueLengthLimit = int.MaxValue, MultipartHeadersLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
 public class BusinessController : Controller
 {
     /// <summary>

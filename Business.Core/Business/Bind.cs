@@ -334,7 +334,15 @@ namespace Business
 
             business?.BindBefore?.Invoke(cfg);
 
-            interceptor.MetaData = GetInterceptorMetaData(cfg, methods);
+            try
+            {
+                interceptor.MetaData = GetInterceptorMetaData(cfg, methods);
+            }
+            catch (System.Exception ex)
+            {
+
+                throw ex;
+            }
 
             //interceptor.ResultType = cfg.ResultType;
 

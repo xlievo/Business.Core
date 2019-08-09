@@ -53,7 +53,7 @@ namespace Business
         /// <summary>
         /// Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately. 100 is reasonable.
         /// </summary>
-        public int TakeThread { get; private set; } = 1;
+        public int ThreadNumber { get; private set; } = 1;
 
         /// <summary>
         /// Gets the max capacity of this logger queue
@@ -62,11 +62,11 @@ namespace Business
 
         internal readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue;
 
-        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? takeThread = null, int? maxCapacity = null)
+        public Logger(System.Action<System.Collections.Generic.IEnumerable<LoggerData>> call, int? threadNumber = null, int? maxCapacity = null)
         {
-            if (takeThread.HasValue && 0 < takeThread.Value)
+            if (threadNumber.HasValue && 0 < threadNumber.Value)
             {
-                this.TakeThread = takeThread.Value;
+                this.ThreadNumber = threadNumber.Value;
             }
 
             if (maxCapacity.HasValue && -1 < maxCapacity.Value)
@@ -83,7 +83,7 @@ namespace Business
 
             if (null != Call)
             {
-                for (int i = 0; i < TakeThread; i++)
+                for (int i = 0; i < ThreadNumber; i++)
                 {
                     System.Threading.Tasks.Task.Factory.StartNew(() =>
                     {
@@ -123,7 +123,7 @@ namespace Business
                                 //    catch (System.Exception ex) { ex.Console(); }
                                 //}
 
-                                try { Call(list); }
+                                try { Call(list.ToArray()); }
                                 catch (System.Exception ex) { ex.Console(); }
 
                                 list.Clear();

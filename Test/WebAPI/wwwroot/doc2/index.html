@@ -38,6 +38,55 @@
         JSONEditor.defaults.themes.bootstrap3 = function () {
             var theme = new Theme();
 
+            theme.getButton = function (text, icon, title) {
+                var el = document.createElement('button');
+                el.classList.add('btn', 'btn-default');
+                el.type = 'button';
+                this.setButtonText(el, text, icon, title);
+                el.setAttribute('tag', 'collapse');
+                if (el.title === 'Collapse') {
+                    el.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        var h5 = null;
+                        var row = el.parentNode.parentNode.parentNode.parentNode.nextSibling;
+                        var description = el.parentNode.parentNode.nextSibling;
+                        if (null != description && description.tagName == "P") {
+                            var h5s = description.querySelectorAll("h5");
+                            if (0 < h5s.length) {
+                                h5 = h5s[h5s.length - 1];
+                            }
+                        }
+
+                        if (el.title === 'Collapse') {
+                            if (null != h5) {
+                                h5.style.marginBottom = null == row ? '2px' : '4px';
+                            }
+                        } else {
+                            if (null != h5) {
+                                h5.style.marginBottom = '15px';
+                            }
+                        }
+                    });
+                }
+                return el;
+            };
+            theme.setButtonText = function (button, text, icon, title) {
+                // Clear previous contents. https://jsperf.com/innerhtml-vs-removechild/37
+                while (button.firstChild) {
+                    button.removeChild(button.firstChild);
+                }
+                if (icon) {
+                    button.appendChild(icon);
+                    text = ' ' + text;
+                }
+                var spanEl = document.createElement('span');
+                spanEl.appendChild(document.createTextNode(text));
+                button.appendChild(spanEl);
+                if (title) button.setAttribute('title', title);
+            };
+
             theme.getGridRow = function () {
                 var el = document.createElement('div');
                 el.classList.add('row');
@@ -50,10 +99,6 @@
             theme.getHeader = function (text) {
                 var el = document.createElement('h4');
                 el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
-                //el.style.marginTop = '0px';
-                //el.style.marginBottom = '0px';
-                //el.style.marginTop = '0px';
-                //el.style.marginBottom = '5px';
                 el.setAttribute('tag', 'h4');
                 if (typeof text === "string") {
                     el.textContent = text;
@@ -104,10 +149,6 @@
                 el.classList.add('well', 'well-sm');
                 el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
                 el.style.marginTop = '8px';
-                //el.style.paddingBottom = '6px';
-                //el.style.paddingTop = '18px';
-                //el.style.marginTop = '9px';
-                //el.style.marginBottom = '12px';
                 el.setAttribute('tag', 'panel');
                 return el;
             };
@@ -512,6 +553,9 @@
                 document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
                 document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
                 document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+                document.querySelectorAll('#NET > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
+                document.querySelectorAll('#Java > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
+                document.querySelectorAll('#PHP > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
 
                 new Houdini('[data-houdini]');
             })
@@ -567,60 +611,12 @@
                 }, false);
 
                 //======================================================//
-                //p hide
-                var h4 = document.querySelectorAll("h4[tag='h4']");
-                h4.forEach(c => {
-                    //console.log(c.firstChild.innerHTML);
-                    //var parent = c.parentNode;
-                    ////parent.childNodes.forEach(c2=>c2.);
-                    //if (null != parent.querySelector("p:only-child")) {
-                    //    c.style.marginBottom = '6px';
-                    //}
-
-                    //var row = c.parentNode.parentNode;
-                    //if (null == row || "row" != row.className) { return; }
-
-                    //var pre = row.previousSibling;
-                    //if (null == pre || "row" != pre.className) { return; }
-
-                    //c.style.marginTop = '3px';
-                    //var p = pre.querySelector("p[class='help-block']");
-                    //if (null == p) {//if edit == false
-                    //    c.style.marginTop = '0px';
-                    //}
-
-                    //c.style.marginBottom = '10px';
-                    //c.parentNode.childNodes.forEach(c2 => {
-                    //    //console.log(c2.tagName);
-                    //    if ("P" == c2.tagName) {
-                    //        c.style.marginBottom = '6px';
-                    //    }
-                    //});
-                });
-
-                document.querySelectorAll("div[tag='description']").forEach(c => {
-                    var h5 = c.querySelectorAll("h5");
-                    if (h5.length > 0) {
-
-                    }
-                });
-                //
-                document.querySelectorAll("div[tag='panel'] > div > div").forEach(c => {
-                    var rows = c.querySelectorAll(".row");
-                    if (rows.length > 0) {
-                        //var form = rows[rows.length - 1].querySelector(".form-group");
-                        //if (null != form) {
-                        //    form.style.marginBottom = '3px';
-                        //    var input = form.querySelector("[class='form-control']");
-                        //    if (null != input) {
-                        //        input.style.marginBottom = '10px';
-                        //    }
-                        //}
-
-                        //var h4 = c.querySelectorAll("h4[name='h4']");
-                        //if (1 == h4.length) {
-                        //    //h4[0].style.marginTop = '9px';
-                        //}
+                
+                document.querySelectorAll("p[tag='description']").forEach(c => {
+                    var row = c.parentNode.parentNode.parentNode.nextSibling;
+                    var h5 = c.querySelector("h5");
+                    if (null != h5 && null != row && row.className === "row") {
+                        c.style.marginBottom = '4px';
                     }
                 });
             });
