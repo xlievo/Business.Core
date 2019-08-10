@@ -196,11 +196,17 @@ namespace Business.Utils
             docArg.Title = $"{argSource.Args.Name} ({argSource.Args.LastType.Name})";
             docArg.Description = argSource.Summary;
 
+            docArg.Token = typeof(Auth.IToken).IsAssignableFrom(argSource.Args.LastType);
+            if (docArg.Token)
+            {
+                docArg.Type = "string";
+            }
+
             //var hasDescription = string.IsNullOrWhiteSpace(docArg.Description);
             var attrs = System.String.Empty;
             for (int i = 0; i < argSource.Attributes.Count; i++)
             {
-                attrs += $"<h5 style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : argSource.Args.HasDefinition ? 15 : 2)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
+                attrs += $"<h5 tag=\"h5\" style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : !docArg.Token && argSource.Args.HasDefinition ? 15 : 2)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
             }
 
             if (!string.IsNullOrWhiteSpace(attrs))
@@ -211,6 +217,11 @@ namespace Business.Utils
             if (argSource.Args.HasDefaultValue)
             {
                 docArg.DefaultValue = System.Convert.ToString(argSource.Args.DefaultValue);
+            }
+
+            if (docArg.Token)
+            {
+                return docArg;
             }
 
             if (argSource.Args.HasDefinition)
@@ -228,11 +239,6 @@ namespace Business.Utils
                         { "inputAttributes", new Dictionary<string, object> { { "placeholder", argSource.Summary } } },
                     };
                 }
-            }
-
-            if (typeof(Auth.IToken).IsAssignableFrom(argSource.Args.LastType))
-            {
-                docArg.Token = true;
             }
 
             if (argSource.Args.LastType.IsEnum)
@@ -1658,6 +1664,23 @@ namespace Business.Utils
             if (null == methodInfo) { throw new System.ArgumentNullException(nameof(methodInfo)); }
 
             return $"{ methodInfo.DeclaringType.FullName}.{ methodInfo.Name}";
+        }
+
+        public static IEnumerable<T[]> Split<T>(this IEnumerable<T> source, int length)
+        {
+            if (null == source) { throw new System.ArgumentNullException(nameof(source)); }
+
+            var source2 = source.ToArray();
+            var span = new System.Span<T>(source2);
+
+            var sp = new LinkedList<T[]>();
+
+            for (int i = 0; i < source2.Length; i += length)
+            {
+                sp.AddLast(span.Slice(i, i + length > source2.Length ? source2.Length - i : length).ToArray());
+            }
+
+            return sp;
         }
 
         public static bool CompareEquals<T>(this T objectFromCompare, T objectToCompare)

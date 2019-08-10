@@ -115,12 +115,12 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// test doc Test001
     /// and Test001
     /// </summary>
-    /// <param name="token"></param>
+    /// <param name="token">A token sample</param>
     /// <param name="arg"></param>
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
-    public virtual async Task<IResult<Test001>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)][Test2]decimal mm = 0.0234m, dynamic context = null)
+    public virtual async Task<IResult<Test001>> Test001([Test2]Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)][Test2]decimal mm = 0.0234m, dynamic context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -164,6 +164,13 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         return "sss";
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="token"></param>
+    /// <param name="arg"></param>
+    /// <param name="mm"></param>
+    /// <returns></returns>
     public virtual async Task Test003(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
@@ -184,6 +191,10 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         return this.ResultCreate(new { token, arg = arg?.Out, State = httpContext.Connection.RemoteIpAddress.ToString() });
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
+
+    public virtual async Task<dynamic> Test005(Business.Auth.Token token) => this.ResultCreate();
+
+    public virtual async Task<dynamic> Test006(Arg<Test001> arg) => this.ResultCreate();
 
     public struct Result
     {

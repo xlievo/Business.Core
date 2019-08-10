@@ -24,7 +24,7 @@
             test doc Test001
             and Test001
             </summary>
-            <param name="token"></param>
+            <param name="token">A token sample</param>
             <param name="arg"></param>
             <param name="mm">mmmmmmmm!</param>
             <returns></returns>
@@ -37,6 +37,15 @@
             <param name="arg"></param>
             <param name="mm"></param>
             <returns>test return!!!</returns>
+        </member>
+        <member name="M:BusinessMember2.Test003(Business.Auth.Token,Arg{Args.Test001},System.Decimal)">
+            <summary>
+            
+            </summary>
+            <param name="token"></param>
+            <param name="arg"></param>
+            <param name="mm"></param>
+            <returns></returns>
         </member>
         <member name="T:Args.MyEnum">
             <summary>

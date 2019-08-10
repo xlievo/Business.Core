@@ -91,6 +91,7 @@
                 var el = document.createElement('div');
                 el.classList.add('row');
                 el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
+                el.setAttribute('tag', 'row');
                 el.style.marginTop = '8px';
                 el.style.marginBottom = '8px';
                 return el;
@@ -126,6 +127,7 @@
                     group.classList.add('form-group');
                     if (label) {
                         label.classList.add('control-label');
+                        label.setAttribute('tag', 'label');
                         group.appendChild(label);
                         //group.style.marginBottom = '10px';
                     }
@@ -490,18 +492,32 @@
                         }
                     };
 
-                    var token = false;
+                    var hasToken = false;
+                    var token = null;
                     for (var i in member.properties) {
                         if (member.properties[i].token) {
-                            token = true;
+                            hasToken = true;
+                            token = member.properties[i];
                         } else {
                             input.properties.d.properties[i] = member.properties[i];
                         }
                     }
 
-                    if (!token) {
+                    if (!hasToken) {
                         delete input.properties.t;
                     }
+                    else {
+                        input.properties.t = token;
+                        input.properties.t.title = "t (String)";
+                    }
+
+                    if ("{}" == JSON.stringify(input.properties.d.properties)) {
+                        delete input.properties.d;
+                    }
+
+                    //if (input.properties.t || input.properties.d) {
+                    //    input.type = "null";
+                    //}
 
                     var inputeditor = new JSONEditor(document.getElementById(inputid), {
                         // The schema for the editor
@@ -509,6 +525,7 @@
                     });
 
                     ready(inputeditor);
+
                     //========================================//
 
                     //==================sdk==================//
@@ -591,34 +608,62 @@
 
         function ready(editor) {
             editor.on('ready', function () {
-                var buttonData = editor.root.getButton('', 'data', 'Data');
-                button_holder = editor.root.editors.d.theme.getHeaderButtonHolder();
-                button_holder.appendChild(buttonData);
-                editor.root.editors.d.header.parentNode.appendChild(button_holder);
-                buttonData.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    editor.root.editors.d.container.hidden = true;
-                }, false);
+                if (editor.root.editors.t || editor.root.editors.d) {
+                    var buttonEdit = editor.root.getButton('', 'edit', 'Edit');
+                    button_holder = editor.root.theme.getHeaderButtonHolder();
+                    button_holder.appendChild(buttonEdit);
+                    editor.root.header.parentNode.appendChild(button_holder);
+                    buttonEdit.addEventListener('click', function (e) {
+                        e.preventDefault();
 
-                var buttonEdit = editor.root.getButton('', 'edit', 'Edit');
-                button_holder = editor.root.theme.getHeaderButtonHolder();
-                button_holder.appendChild(buttonEdit);
-                editor.root.header.parentNode.appendChild(button_holder);
-                buttonEdit.addEventListener('click', function (e) {
-                    e.preventDefault();
+                        var root = editor.getEditor('root');
+                        setEdit(root.container, root.schema.edit);
+                        root.schema.edit = !root.schema.edit;
+                    }, false);
+                }
 
-                    var root = editor.getEditor('root');
-                    setEdit(root.container, root.schema.edit);
-                    root.schema.edit = !root.schema.edit;
-                }, false);
+                if (editor.root.editors.t && editor.root.editors.d) {
+                    var buttonData = editor.root.getButton('', 'data', 'Data');
+                    button_holder = editor.root.editors.d.theme.getHeaderButtonHolder();
+                    button_holder.appendChild(buttonData);
+                    editor.root.editors.d.header.parentNode.appendChild(button_holder);
+                    buttonData.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        editor.root.editors.d.container.hidden = true;
+                    }, false);
+                }
 
                 //======================================================//
-                
+
                 document.querySelectorAll("p[tag='description']").forEach(c => {
                     var row = c.parentNode.parentNode.parentNode.nextSibling;
                     var h5 = c.querySelector("h5");
                     if (null != h5 && null != row && row.className === "row") {
                         c.style.marginBottom = '6px';
+                    }
+                });
+
+                document.querySelectorAll("label[tag='label']").forEach(c => {
+                    var row = c.parentNode.parentNode.parentNode;
+                    if (null == row.nextSibling && row.className === "row") {
+                        row.style.marginBottom = '4px';
+                        var input = row.querySelector("[tag='input']");
+                        if (null != input) {
+                            input.style.marginBottom = '4px';
+                        }
+                    }
+                });
+
+                document.querySelectorAll("div[tag='row']").forEach(c => {
+                    if (null == c.nextSibling) {
+                        if (null != c.querySelector("h5")) {
+                            c.style.marginBottom = '8px';
+                        }
+
+                        var p = c.querySelector("p[tag='description']");
+                        if (null != p) {
+                            p.style.marginBottom = '0px';
+                        }
                     }
                 });
             });
