@@ -282,55 +282,55 @@ public class Startup
                  template: string.Format("{0}/{{*path}}", item.Key),
                  defaults: new { controller = "Business", action = "Call" });
 
-                foreach (var group in item.Value.Configer.Doc.Members.Values)
-                {
-                    foreach (var member in group.Values)
-                    {
-                        var json = new Business.Document.DocArg
-                        {
-                            Id = member.Name,
-                            Title = member.Name,
-                            Type = "object",
-                            Description = member.Description,
-                            Children = new Dictionary<string, Business.Document.DocArg>
-                            {
-                                { "Input", new Business.Document.DocArg { Children = new Dictionary<string, Business.Document.DocArg>() } },
-                                { "Output", new Business.Document.DocArg { Children = new Dictionary<string, Business.Document.DocArg>() } }
-                            },
-                        };
+                //foreach (var group in item.Value.Configer.Doc.Members.Values)
+                //{
+                //    foreach (var member in group.Values)
+                //    {
+                //        var json = new Business.Document.DocArg
+                //        {
+                //            Id = member.Name,
+                //            Title = member.Name,
+                //            Type = "object",
+                //            Description = member.Description,
+                //            Children = new Dictionary<string, Business.Document.DocArg>
+                //            {
+                //                { "Input", new Business.Document.DocArg { Children = new Dictionary<string, Business.Document.DocArg>() } },
+                //                { "Output", new Business.Document.DocArg { Children = new Dictionary<string, Business.Document.DocArg>() } }
+                //            },
+                //        };
 
-                        var args = member.Args as Dictionary<string, Business.Document.DocArg>;
-                        var tokens = args.Where(c => c.Value.Token).ToList();
-                        foreach (var token in tokens)
-                        {
-                            args.Remove(token.Key);
-                        }
+                //        var args = member.Args as Dictionary<string, Business.Document.DocArg>;
+                //        var tokens = args.Where(c => c.Value.Token).ToList();
+                //        foreach (var token in tokens)
+                //        {
+                //            args.Remove(token.Key);
+                //        }
 
-                        if (0 < tokens.Count)
-                        {
-                            json.Children["Input"].Children.Add("t", new Business.Document.DocArg
-                            {
-                                Id = $"{member.Name}.t",
-                                Title = "t (String)",
-                                Type = "string",
-                                Description = "API token",
-                            });
-                        }
+                //        if (0 < tokens.Count)
+                //        {
+                //            json.Children["Input"].Children.Add("t", new Business.Document.DocArg
+                //            {
+                //                Id = $"{member.Name}.t",
+                //                Title = "t (String)",
+                //                Type = "string",
+                //                Description = "API token",
+                //            });
+                //        }
 
-                        json.Children["Input"].Children.Add("d", new Business.Document.DocArg
-                        {
-                            Id = $"{member.Name}.d",
-                            Title = "d (JsonArray)",
-                            Type = "object",
-                            Children = args,
-                            Description = "API data",
-                        });
+                //        json.Children["Input"].Children.Add("d", new Business.Document.DocArg
+                //        {
+                //            Id = $"{member.Name}.d",
+                //            Title = "d (JsonArray)",
+                //            Type = "object",
+                //            Children = args,
+                //            Description = "API data",
+                //        });
 
-                        //in
-                        // var data = json.JsonSerialize(Help.JsonSettings);
+                //        //in
+                //        // var data = json.JsonSerialize(Help.JsonSettings);
 
-                    }
-                }
+                //    }
+                //}
             }
         });
 

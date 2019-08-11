@@ -147,7 +147,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="token"></param>
+    /// <param name="token">A token sample</param>
     /// <param name="arg"></param>
     /// <param name="mm"></param>
     /// <returns>test return!!!</returns>

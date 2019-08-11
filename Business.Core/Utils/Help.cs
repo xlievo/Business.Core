@@ -219,12 +219,7 @@ namespace Business.Utils
                 docArg.DefaultValue = System.Convert.ToString(argSource.Args.DefaultValue);
             }
 
-            if (docArg.Token)
-            {
-                return docArg;
-            }
-
-            if (argSource.Args.HasDefinition)
+            if (!docArg.Token && argSource.Args.HasDefinition)
             {
                 //docArg.Description = argSource.Summary;
                 docArg.Type = "object";

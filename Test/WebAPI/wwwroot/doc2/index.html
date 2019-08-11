@@ -205,6 +205,37 @@
             return theme
         };
 
+        JSONEditor.defaults.editors.object = JSONEditor.defaults.editors.object.extend({
+            showEditJSON: function () {
+                //if (!this.editjson_holder) return;
+                //this.hideAddProperty();
+
+                // Position the form directly beneath the button
+                // TODO: edge detection
+
+                var holder = this.jsoneditor.editors.root.editors.d.header.parentNode;
+                var buttonData = holder.querySelector("#data");
+
+                this.editjson_holder.style.left = buttonData.offsetLeft + 11 + "px";
+                this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
+
+                var d = []
+                for (var i in this.jsoneditor.editors.root.editors.d.editors) {
+                    d.push("root.d." + i);
+                }
+
+                // Start the textarea with the current value
+                this.editjson_textarea.value = getData(this.jsoneditor, d);
+
+                // Disable the rest of the form while editing JSON
+                this.disable();
+
+                this.editjson_holder.style.display = '';
+                buttonData.disabled = false;
+                this.editing_json = true;
+            }
+        });
+
         JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             addControls: function () {
                 var self = this;
@@ -471,17 +502,7 @@
                         type: "object",
                         edit: !edit,
                         properties: {
-                            t: {
-                                id: member.name + '.t',
-                                title: "t (String)",
-                                type: "string",
-                                description: "API token",
-                                options: {
-                                    inputAttributes: {
-                                        placeholder: "API token"
-                                    }
-                                }
-                            },
+                            t: {},
                             d: {
                                 id: member.name + '.d',
                                 title: "d (JsonArray)",
@@ -508,7 +529,8 @@
                     }
                     else {
                         input.properties.t = token;
-                        input.properties.t.title = "t (String)";
+                        input.properties.t.id = member.name + '.t',
+                            input.properties.t.title = "t (String)";
                     }
 
                     if ("{}" == JSON.stringify(input.properties.d.properties)) {
@@ -622,15 +644,23 @@
                     }, false);
                 }
 
-                if (editor.root.editors.t && editor.root.editors.d) {
+                if (editor.root.editors.d) {
                     var buttonData = editor.root.getButton('', 'data', 'Data');
+                    buttonData.id = "data";
                     button_holder = editor.root.editors.d.theme.getHeaderButtonHolder();
                     button_holder.appendChild(buttonData);
                     editor.root.editors.d.header.parentNode.appendChild(button_holder);
+                    //this.editjson_controls.appendChild(this.buttonData);
                     buttonData.addEventListener('click', function (e) {
                         e.preventDefault();
-                        editor.root.editors.d.container.hidden = true;
+                        e.stopPropagation();
+                        //editor.root.editors.d.container.hidden = true; test
+                        editor.root.editors.d.toggleEditJSON();
                     }, false);
+
+                    editor.root.editors.d.editjson_textarea.removeAttribute('tag');
+                    editor.root.editors.d.editjson_textarea.style.display = '';
+                    editor.root.editors.d.editjson_save.style.display = 'none';
                 }
 
                 //======================================================//
@@ -699,9 +729,9 @@
 
         function getData(editor, args) {
             for (var i = args.length - 1; i >= 0; i--) {
-                args[i] = JSON.stringify(editor.getEditor(args[i]).getValue());
+                args[i] = editor.getEditor(args[i]).getValue();//JSON.stringify(editor.getEditor(args[i]).getValue(), null, 2);
             }
-            return JSON.stringify(args)
+            return JSON.stringify(args, null, 2)
         }
 
         /*
