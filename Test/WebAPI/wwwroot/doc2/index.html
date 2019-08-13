@@ -224,8 +224,12 @@
                     d.push("root.d." + i);
                 }
 
+                this.editjson_textarea.value = this.jsoneditor.schema.argSingle ?
+                    JSON.stringify(this.jsoneditor.getEditor("root.d").getValue(), null, 2) :
+                    this.editjson_textarea.value = getData(this.jsoneditor, d);
+
                 // Start the textarea with the current value
-                this.editjson_textarea.value = getData(this.jsoneditor, d);
+                //this.editjson_textarea.value = getData(this.jsoneditor, d);
 
                 // Disable the rest of the form while editing JSON
                 this.disable();
@@ -501,6 +505,7 @@
                         title: "Input",
                         type: "object",
                         edit: !edit,
+                        argSingle: member.argSingle,
                         properties: {
                             t: {},
                             d: {
@@ -735,10 +740,14 @@
         }
 
         function getData(editor, args) {
+            //schema = Object {title: "Input", type: "object", edit: true, …}
+            if (1 == args.length) {
+                return JSON.stringify(editor.getEditor(args[0]).getValue(), null, 2);
+            }
             for (var i = args.length - 1; i >= 0; i--) {
                 args[i] = editor.getEditor(args[i]).getValue();//JSON.stringify(editor.getEditor(args[i]).getValue(), null, 2);
             }
-            return JSON.stringify(args, null, 2)
+            return JSON.stringify(args, null, 2);
         }
 
         /*
