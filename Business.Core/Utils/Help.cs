@@ -104,6 +104,8 @@ namespace Business.Utils
                         }
                     }
                 }
+
+                //item.HasArgSingle = 1 >= item.Args.Count(c => !c.UseType);
             });
 
             return business;
@@ -160,6 +162,8 @@ namespace Business.Utils
                         }
                     }
                 }
+
+                //item.HasArgSingle = 1 >= item.Args.Count(c => !c.UseType);
             });
 
             return business;
@@ -192,11 +196,11 @@ namespace Business.Utils
 
         static DocArg GetDocArg(DocArgSource argSource)
         {
-            var docArg = new DocArg { Id = argSource.Args.Group[argSource.Group].Path };
-            docArg.Title = $"{argSource.Args.Name} ({argSource.Args.LastType.Name})";
+            var docArg = new DocArg { Id = argSource.Args.Group[argSource.Group].Path, LastType = argSource.Args.LastType.Name };
+            docArg.Title = $"{argSource.Args.Name} ({docArg.LastType})";
             docArg.Description = argSource.Summary;
 
-            docArg.Token = typeof(Auth.IToken).IsAssignableFrom(argSource.Args.LastType);
+            docArg.Token = argSource.Args.HasToken;
             if (docArg.Token)
             {
                 docArg.Type = "string";
@@ -367,9 +371,10 @@ namespace Business.Utils
                     Description = member?.summary?.sub,
                     //Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
                     Args = new Dictionary<string, DocArg>(),
+                    ArgSingle = c2.Value.HasArgSingle,
                 } as IMember<DocArg>;
 
-                foreach (var item in meta.Args.Where(c3 => !c3.Group[c2.Value.Key].Ignore.Any(c4 => c4.Mode == Attributes.IgnoreMode.Arg)))
+                foreach (var item in meta.Args.Where(c3 => !c3.Group[c2.Value.Key].IgnoreArg))
                 {
                     member2.Args.Add(item.Name, GetDocArg(c2.Value.Key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
                 }
@@ -432,7 +437,7 @@ namespace Business.Utils
             if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !args.LastType.IsEnum)
             {
                 // && !arg.IsDictionary && !arg.IsCollection
-                var childrens = args.Children.Where(c => !c.Group[group].Ignore.Any(c2 => c2.Mode == Attributes.IgnoreMode.Arg));
+                var childrens = args.Children.Where(c => !c.Group[group].IgnoreArg);
 
                 if (childrens.Any())
                 {
@@ -725,11 +730,14 @@ namespace Business.Utils
                         {
                             if (Equals(arg.Type, type) || Equals(arg.IArgOutType, type))
                             {
-                                if (arg.Group[group.Key].Ignore.Any(c => ignore.GroupKey() == c.GroupKey()))
+                                var g = arg.Group[group.Key];
+                                if (g.Ignore.Any(c => ignore.GroupKey() == c.GroupKey()))
                                 {
                                     continue;
                                 }
-                                arg.Group[group.Key].Ignore.collection.Add(ignore);
+                                g.Ignore.collection.Add(ignore);
+                                g.IgnoreArg = g.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.Arg);
+                                business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.Group[group.Key].IgnoreArg);
                             }
                         }
                     }
@@ -765,11 +773,14 @@ namespace Business.Utils
                         {
                             if (Equals(arg.Name, name))
                             {
-                                if (arg.Group[group.Key].Ignore.Any(c => ignore.GroupKey() == c.GroupKey()))
+                                var g = arg.Group[group.Key];
+                                if (g.Ignore.Any(c => ignore.GroupKey() == c.GroupKey()))
                                 {
                                     continue;
                                 }
-                                arg.Group[group.Key].Ignore.collection.Add(ignore);
+                                g.Ignore.collection.Add(ignore);
+                                g.IgnoreArg = g.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.Arg);
+                                business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.Group[group.Key].IgnoreArg);
                             }
                         }
                     }

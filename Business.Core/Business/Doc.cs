@@ -206,6 +206,8 @@ namespace Business.Document
 
         [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         Dictionary<string, DocArg> Args { get; set; }
+
+        bool ArgSingle { get; set; }
     }
 
     public interface IDocArg<DocArg> where DocArg : IDocArg<DocArg>
@@ -242,6 +244,8 @@ namespace Business.Document
         public string Description { get; set; }
 
         public Dictionary<string, DocArg> Args { get; set; }
+
+        public bool ArgSingle { get; set; }
     }
 
     public class DocArg : IDocArg<DocArg>
@@ -254,6 +258,8 @@ namespace Business.Document
         public string Id { get; set; }
 
         public string Type { get; set; }
+
+        public string LastType { get; set; }
 
         public bool Token { get; set; }
 

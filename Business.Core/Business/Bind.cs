@@ -1008,6 +1008,7 @@ namespace Business
                     //path,
                     use,
                     hasUse,
+                    typeof(Auth.IToken).IsAssignableFrom(current.outType),
                     //item.Value.CommandAttr.OnlyName,
                     GetMethodTypeFullName(parameterType),
                     current.outType.FullName.Replace('+', '.'),
@@ -1234,6 +1235,7 @@ namespace Business
                     //path2,
                     use,
                     hasUse,
+                    typeof(Auth.IToken).IsAssignableFrom(current.outType),
                     GetMethodTypeFullName(memberType),
                     $"{type.FullName.Replace('+', '.')}.{item.Name}",
                     memberDefinition);
@@ -1276,7 +1278,8 @@ namespace Business
                 var ignoreBusinessArg = ignores.Any(c => c.Mode == IgnoreMode.BusinessArg);
                 // || (item.Group == c.Group || string.IsNullOrWhiteSpace(c.Group))
 
-                var argAttrChild = (hasUse || item.Value.IgnoreBusinessArg || ignoreBusinessArg) ?
+                //var argAttrChild = (hasUse || item.Value.IgnoreBusinessArg || ignoreBusinessArg) ?
+                var argAttrChild = (hasUse || ignoreBusinessArg) ?
                     argAttrs.FindAll(c => GroupEquals(c, item.Value.Group) && c.Declaring == AttributeBase.DeclaringType.Parameter).Select(c => c.Clone()).ToList() :
                     argAttrs.FindAll(c => GroupEquals(c, item.Value.Group)).Select(c => c.Clone()).ToList();
 
@@ -1327,7 +1330,7 @@ namespace Business
                 }
 
                 //owner ?? Do need only the superior, not the superior path? For doc
-                var group = new ArgGroup(ignores.ToReadOnly(), argAttr, nickValue, path2, default == owner ? item.Value.OnlyName : $"{item.Value.OnlyName}.{owner}", $"{item.Value.OnlyName}.{root}");
+                var group = new ArgGroup(ignores.ToReadOnly(), ignores.Any(c => c.Mode == IgnoreMode.Arg), argAttr, nickValue, path2, default == owner ? item.Value.OnlyName : $"{item.Value.OnlyName}.{owner}", $"{item.Value.OnlyName}.{root}");
 
                 if (0 < log?.Count)
                 {
@@ -1423,6 +1426,7 @@ namespace Business
             this.call = call;
             this.Meta = meta;
             this.Key = key;
+            this.HasArgSingle = 1 >= this.Meta.Args.Count(c => !c.HasToken && !c.Group[Key].IgnoreArg);
         }
 
         //===============member==================//
@@ -1544,21 +1548,23 @@ namespace Business
         public readonly string Key;
 
         public MetaData Meta { get; private set; }
+
+        public bool HasArgSingle { get; internal set; }
     }
 }
 
 namespace Business.Meta
 {
     using Business.Utils;
-    using System.Reflection;
 
     #region Meta
 
     public class ArgGroup
     {
-        public ArgGroup(ReadOnlyCollection<Attributes.Ignore> ignore, ConcurrentLinkedList<Attributes.ArgumentAttribute> attrs, string nick, string path, string owner, string root)
+        public ArgGroup(ReadOnlyCollection<Attributes.Ignore> ignore, bool ignoreArg, ConcurrentLinkedList<Attributes.ArgumentAttribute> attrs, string nick, string path, string owner, string root)
         {
             Ignore = ignore;
+            IgnoreArg = ignoreArg;
             Attrs = attrs;
             Path = path;
             Nick = nick;
@@ -1569,6 +1575,8 @@ namespace Business.Meta
         }
 
         public ReadOnlyCollection<Attributes.Ignore> Ignore { get; private set; }
+
+        public bool IgnoreArg { get; internal set; }
 
         public ConcurrentLinkedList<Attributes.ArgumentAttribute> Attrs { get; private set; }
 
@@ -1601,7 +1609,7 @@ namespace Business.Meta
         //public override string ToString() => string.Format("{0} {1}", Group2, Name);
 
         //argChild
-        public Args(string name, System.Type type, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, string methodTypeFullName, string argTypeFullName, MemberDefinitionCode memberDefinition)
+        public Args(string name, System.Type type, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string argTypeFullName, MemberDefinitionCode memberDefinition)
         {
             Name = name;
             Type = type;
@@ -1635,6 +1643,7 @@ namespace Business.Meta
             //Ignore = ignore;
             Use = use;
             UseType = useType;
+            HasToken = hasToken;
             MethodTypeFullName = methodTypeFullName;
             ArgTypeFullName = argTypeFullName;
             MemberDefinition = memberDefinition;
@@ -1695,6 +1704,8 @@ namespace Business.Meta
         public Attributes.UseAttribute Use { get; internal set; }
         //==============useType===================//
         public bool UseType { get; internal set; }
+        //===============hasToken==================//
+        public bool HasToken { get; private set; }
         //==============methodTypeFullName===================//
         public string MethodTypeFullName { get; private set; }
         //==============argTypeFullName===================//
@@ -1717,30 +1728,7 @@ namespace Business.Meta
     {
         public override string ToString() => Name;
 
-        /// <summary>
-        /// MetaData
-        /// </summary>
-        /// <param name="commandGroup"></param>
-        /// <param name="args"></param>
-        /// <param name="argAll"></param>
-        /// <param name="iArgs"></param>
-        /// <param name="metaLogger"></param>
-        /// <param name="path"></param>
-        /// <param name="name"></param>
-        /// <param name="fullName"></param>
-        /// <param name="hasAsync"></param>
-        /// <param name="hasReturn"></param>
-        /// <param name="hasIResult"></param>
-        /// <param name="hasIResultGeneric"></param>
-        /// <param name="returnType"></param>
-        /// <param name="resultTypeDefinition"></param>
-        /// <param name="resultType"></param>
-        /// <param name="defaultValue"></param>
-        /// <param name="attributes"></param>
-        /// <param name="position"></param>
-        /// <param name="groupDefault"></param>
-        /// <param name="useTypePosition"></param>
-        /// <param name="methodTypeFullName"></param>
+        //MetaData
         public MetaData(ConcurrentReadOnlyDictionary<string, Attributes.CommandAttribute> commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ConcurrentReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, object[] defaultValue, System.Collections.Generic.List<Attributes.AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName)
         {
             CommandGroup = commandGroup;
@@ -1779,6 +1767,7 @@ namespace Business.Meta
             UseTypePosition = useTypePosition;
             MethodTypeFullName = methodTypeFullName;
             //Ignore = ignore;
+            //HasArgSingle = hasArgSingle;
         }
 
         //==============commandAttr===================//
@@ -1831,6 +1820,8 @@ namespace Business.Meta
         public string MethodTypeFullName { get; private set; }
         ////==============ignore===================//
         //public Attributes.Ignore Ignore { get; private set; }
+        //==============hasArgSingle===================//
+        //public bool HasArgSingle { get; internal set; }
     }
 
     #endregion

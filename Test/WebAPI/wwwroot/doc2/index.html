@@ -505,7 +505,7 @@
                             t: {},
                             d: {
                                 id: member.name + '.d',
-                                title: "d (JsonArray)",
+                                title: "d (Array)",
                                 type: "object",
                                 description: "API data",
                                 properties: {}
@@ -520,7 +520,14 @@
                             hasToken = true;
                             token = member.properties[i];
                         } else {
-                            input.properties.d.properties[i] = member.properties[i];
+                            if (member.argSingle) {
+                                input.properties.d = member.properties[i];
+                                input.properties.d.id = member.name + '.d';
+                                input.properties.d.title = "d (" + member.properties[i].lastType + ")";
+                            }
+                            else {
+                                input.properties.d.properties[i] = member.properties[i];
+                            }
                         }
                     }
 
@@ -529,8 +536,8 @@
                     }
                     else {
                         input.properties.t = token;
-                        input.properties.t.id = member.name + '.t',
-                            input.properties.t.title = "t (String)";
+                        input.properties.t.id = member.name + '.t';
+                        input.properties.t.title = "t (String)";
                     }
 
                     if ("{}" == JSON.stringify(input.properties.d.properties)) {

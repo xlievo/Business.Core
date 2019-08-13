@@ -50,6 +50,28 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
     public BusinessMember2()
     {
+        var s = "[{ \"a\": \"333\",\"b\": \"\", \"c\": { \"c1\": \"\",\"c2\": \"\",\"c3\": { \"c31\": \"\",\"c32\": \"uuu\"} },\"d\": 0, \"e\": true, \"myEnum\": 1}, 0.2345]";
+
+        //var ddd = System.Text.Json.JsonSerializer.Serialize(new Test001());
+
+        var data = System.Text.Json.JsonSerializer.Deserialize<object[]>(s);
+
+        var d = data[0].ToString();
+
+        var options = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            AllowTrailingCommas = true
+        };
+        var test001 = System.Text.Json.JsonSerializer.Deserialize<Test001>(d, options);
+
+        var d2 = data[1].ToString();
+
+        if (null == data)
+        {
+
+        }
+
         this.Logger = new Logger(async x =>
         {
             try

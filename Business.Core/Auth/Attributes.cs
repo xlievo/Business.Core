@@ -1068,7 +1068,7 @@ namespace Business.Attributes //Annotations
 
         public string OnlyName { get; set; }
 
-        public bool IgnoreBusinessArg { get; set; }
+        //public bool IgnoreBusinessArg { get; set; }
 
         public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.OnlyName}";
 

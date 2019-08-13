@@ -62,7 +62,6 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
         }
     }
 
-    [JsonArg]
     public struct Ags2
     {
         [A2]
@@ -102,6 +101,7 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
+            if (null == value) { return this.ResultCreate(); }
             BusinessController col = value;
 
             if (!col.Request.HasFormContentType) { return this.ResultCreate(); }
@@ -120,12 +120,12 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
         }
     }
 
-    public virtual async Task<dynamic> TestAgs001(BusinessController control, Arg<Ags2> a, decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default, Business.Auth.Token token = default)
+    public virtual async Task<dynamic> TestAgs001(dynamic context, Arg<Ags2> a, [Ignore(IgnoreMode.BusinessArg)]decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default, Business.Auth.Token token = default)
     {
         return this.ResultCreate(a.Out);
 
-        return this.ResultCreate(new { a = a.In, Remote = string.Format("{0}:{1}", control.HttpContext.Connection.RemoteIpAddress.ToString(), control.HttpContext.Connection.RemotePort), control.Request.Cookies });
+        //return this.ResultCreate(new { a = a.In, Remote = string.Format("{0}:{1}", control.HttpContext.Connection.RemoteIpAddress.ToString(), control.HttpContext.Connection.RemotePort), control.Request.Cookies });
 
-        return control.Redirect("https://www.github.com");
+        //return control.Redirect("https://www.github.com");
     }
 }

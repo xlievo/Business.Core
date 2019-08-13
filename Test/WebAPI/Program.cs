@@ -727,7 +727,7 @@ public class BusinessController : Controller
     [EnableCors("any")]
     public async Task<dynamic> Call(string path)
     {
-        if (null != path) { return this.NotFound(); }
+        if (null != path || !Configer.BusinessList.TryGetValue(this.Request.Path.Value.TrimStart('/').Split('/')[0], out IBusiness business)) { return this.NotFound(); }
 
         string c, t, d, g, b = null;
 
@@ -765,13 +765,16 @@ public class BusinessController : Controller
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
 
-        var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCall(
+        var cmd = business.Command.GetCommand(
             //the cmd of this request.
             c,
-            //the data of this request, allow null.
-            d.TryJsonDeserialize(out object[] data) ? data : new object[] { d },
             //the group of this request.
-            g,
+            g);
+
+        //var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCall(
+        var result = await cmd.AsyncCall(
+            //the data of this request, allow null.
+            cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserialize<object[]>(),
             //the incoming use object
             new UseEntry(dict, "context"), //context
             new UseEntry(new Token //token
