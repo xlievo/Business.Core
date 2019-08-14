@@ -6,6 +6,25 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Net.Http;
+
+public class GitHubClient
+{
+    public HttpClient Client { get; private set; }
+
+    public GitHubClient(HttpClient httpClient)
+    {
+        httpClient.BaseAddress = new Uri("https://api.github.com/");
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-Sample");
+        Client = httpClient;
+    }
+
+    public async Task<string> GetData()
+    {
+        return await Client.GetStringAsync("/");
+    }
+}
 
 [Logger]
 public class BusinessMember : BusinessBase<ResultObject<object>>
@@ -24,7 +43,13 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
         */
     }
 
-    public BusinessMember()
+    System.Net.Http.IHttpClientFactory httpClientFactory;
+
+    GitHubClient gitHubClient;
+
+    public BusinessMember() { }
+
+    public BusinessMember(Host host)
     {
         this.Logger = new Logger(async x =>
         {
@@ -41,6 +66,21 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
                 Help.ExceptionWrite(exception, true, true);
             }
         });
+
+        this.BindBefore = cfg =>
+        {
+            cfg.MemberSetAfter = (name, obj) =>
+            {
+                switch (name)
+                {
+                    case "httpClientFactory":
+                        var httpClientFactory = obj as System.Net.Http.IHttpClientFactory;
+                        gitHubClient = new GitHubClient(httpClientFactory?.CreateClient("github"));
+                        break;
+                    default: break;
+                }
+            };
+        };
 
         this.BindAfter = () =>
         {
@@ -122,7 +162,13 @@ public class BusinessMember : BusinessBase<ResultObject<object>>
 
     public virtual async Task<dynamic> TestAgs001(dynamic context, Arg<Ags2> a, [Ignore(IgnoreMode.BusinessArg)]decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default, Business.Auth.Token token = default)
     {
-        return this.ResultCreate(a.Out);
+        return await gitHubClient.GetData();
+
+        //var client = httpClientFactory.CreateClient("github");
+        //string result = await client.GetStringAsync("https://www.github.com");
+        //return this.ResultCreate(result);
+
+        //return this.ResultCreate(a.Out);
 
         //return this.ResultCreate(new { a = a.In, Remote = string.Format("{0}:{1}", control.HttpContext.Connection.RemoteIpAddress.ToString(), control.HttpContext.Connection.RemotePort), control.Request.Cookies });
 

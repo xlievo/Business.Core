@@ -108,22 +108,6 @@ namespace Business
 
                             if (0 < list.Count && (!isRunning || (isRunning && (0 < watch.Elapsed.CompareTo(Batch.Interval) || (0 < Batch.MaxNumber && Batch.MaxNumber <= list.Count)))))
                             {
-                                //if (UseThread)
-                                //{
-                                //    System.Threading.Tasks.Task.Factory.StartNew((c) => Call(c as LoggerData[]), list.ToArray()).ContinueWith(c =>
-                                //    {
-                                //        if (null != c.Exception)
-                                //        {
-                                //            c.Exception.Console();
-                                //        }
-                                //    });
-                                //}
-                                //else
-                                //{
-                                //    try { Call(list.ToArray()); }
-                                //    catch (System.Exception ex) { ex.Console(); }
-                                //}
-
                                 try { await Call(list.ToArray()); }
                                 catch (System.Exception ex) { ex.Console(); }
 

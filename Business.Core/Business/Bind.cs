@@ -203,10 +203,7 @@ namespace Business
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
         public static Business Create<Business>(params object[] constructorArguments)
-            where Business : class
-        {
-            return (Business)Create(typeof(Business), null, constructorArguments);
-        }
+            where Business : class => (Business)Create(typeof(Business), null, constructorArguments);
 
         /// <summary>
         /// Initialize a Generic proxy class
@@ -216,10 +213,7 @@ namespace Business
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
         public static Business Create<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments)
-            where Business : class
-        {
-            return (Business)Create(typeof(Business), interceptor, constructorArguments);
-        }
+            where Business : class => (Business)Create(typeof(Business), interceptor, constructorArguments);
 
         /// <summary>
         /// Initialize a Type proxy class
@@ -227,10 +221,7 @@ namespace Business
         /// <param name="type"></param>
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
-        public static object Create(System.Type type, params object[] constructorArguments)
-        {
-            return Create(type, null, constructorArguments);
-        }
+        public static object Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments);
 
         /// <summary>
         /// Initialize a Type proxy class
@@ -239,10 +230,7 @@ namespace Business
         /// <param name="interceptor"></param>
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
-        public static object Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments)
-        {
-            return new Bind(type, interceptor ?? new Auth.Interceptor(), constructorArguments).Instance;
-        }
+        public static object Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments) => new Bind(type, interceptor ?? new Auth.Interceptor(), constructorArguments).Instance;
 
         #endregion
     }
@@ -276,7 +264,11 @@ namespace Business
 
             try
             {
-                Instance = proxy.CreateClassProxy(type, constructorArguments, interceptor);
+                var types = constructorArguments?.Select(c => c.GetType())?.ToArray();
+
+                var constructor = null == types ? null : type.GetConstructor(types);
+
+                Instance = proxy.CreateClassProxy(type, null == constructor ? null : constructorArguments, interceptor);
             }
             catch (System.Exception ex)
             {
@@ -359,6 +351,8 @@ namespace Business
                 cfg.Logger = business.Logger;
 
                 Configer.BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
+
+                type.LoadAccessors(Configer.Accessors, business.Configer.Info.BusinessName);
 
                 business.BindAfter?.Invoke();
             }
@@ -1140,7 +1134,7 @@ namespace Business
             foreach (var item in members)
             {
                 System.Type memberType = null;
-                Accessor accessor = default;
+                Utils.Accessor accessor = default;
                 var memberDefinition = MemberDefinitionCode.No;
                 switch (item.MemberType)
                 {
@@ -1535,7 +1529,7 @@ namespace Business
             }
             catch (System.Exception ex)
             {
-                return await System.Threading.Tasks.Task.FromResult(ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(Help.ExceptionWrite(ex))));
+                return await System.Threading.Tasks.Task.FromResult(ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(ex.ExceptionWrite())));
             }
         }
 

@@ -20,8 +20,7 @@ using Business.Attributes;
 using Business.Auth;
 using Business.Utils;
 using Business.Result;
-using Swagger.Doc;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+//using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 #region Socket Support
 
@@ -104,14 +103,32 @@ public struct ReceiveData
 
 #endregion
 
+/// <summary>
+/// Business constructor would match given arguments
+/// </summary>
+public struct Host
+{
+    public string Addresses { get; set; }
+
+    public IConfigurationSection AppSettings { get; set; }
+
+    public IHostingEnvironment ENV { get; set; }
+}
+
 public class Program
 {
-    public static string Host = string.Empty;
+    public static string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{System.AppDomain.CurrentDomain.FriendlyName}.log.txt");
+
+    public static string Addresses = string.Empty;
 
     public static void Main(string[] args)
     {
+        System.AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as System.Exception)?.ExceptionWrite(true, true, LogPath);
+
+        System.Console.WriteLine($"LogPath:{LogPath}");
+
         var host = CreateWebHostBuilder(args).Build();
-        Host = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault();
+        Addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault();
         host.Run();
     }
 
@@ -127,7 +144,7 @@ public class Program
 
 public class Startup
 {
-    public static IConfigurationSection appSettings = null;
+    public static IConfigurationSection AppSettings = null;
 
     public static int ReceiveBufferSize;
 
@@ -154,7 +171,7 @@ public class Startup
         System.Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
 
         Configuration = configuration;
-        appSettings = Configuration.GetSection("AppSettings");
+        AppSettings = Configuration.GetSection("AppSettings");
 
         //var doc = GetSwagger().JsonSerialize();
     }
@@ -183,11 +200,17 @@ public class Startup
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
             });
+
+        //AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
     }
+
+    public static IHostingEnvironment ENV;
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IHostingEnvironment env)
     {
+        ENV = env;
+
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -228,7 +251,7 @@ public class Startup
 
         //==================First step==================//
         //1
-        Configer.LoadBusiness();
+        Configer.LoadBusiness(new object[] { new Host { Addresses = Program.Addresses, AppSettings = AppSettings, ENV = env } });
         //Configer.UseType(typeof(HttpContext), typeof(WebSocket));
         //2
         Configer.UseType("context");
@@ -237,39 +260,6 @@ public class Startup
         //==================The third step==================//
         //3
         Configer.UseDoc(System.IO.Path.Combine(wwwroot));
-
-        //var httpClient = System.Net.Http.HttpClientFactory.Create(new System.Net.Http.HttpClientHandler());
-        //var msg = await httpClient.GetStringAsync("http://www.baidu.com");
-
-        /*
-        #region SwaggerDoc
-
-        var swaggerPath = System.IO.Path.Combine(wwwroot, "doc");
-        var swaggerFile = System.IO.Path.Combine(swaggerPath, "index.html");
-
-        if (System.IO.File.Exists(swaggerFile))
-        {
-            var swagger = System.IO.File.ReadAllText(swaggerFile, System.Text.Encoding.UTF8);
-
-            foreach (var item in Configer.BusinessList.Values)
-            {
-                if (null == item.Configer.Doc) { continue; }
-
-                //var doc = GetSwaggerDoc(item).JsonSerialize();
-
-                //System.IO.File.WriteAllText(System.IO.Path.Combine(swaggerPath, $"{item.Configer.Info.BusinessName}.json"), doc, System.Text.Encoding.UTF8);
-
-                //var swagger2 = swagger.Replace("https://petstore.swagger.io/v2/swagger.json", $"{Program.Host}/doc/{item.Configer.Info.BusinessName}.json");
-
-                //System.IO.File.WriteAllText(System.IO.Path.Combine(swaggerPath, $"{item.Configer.Info.BusinessName}.html"), swagger2, System.Text.Encoding.UTF8);
-            }
-        }
-
-        #endregion
-        */
-        #region SwaggerDoc
-
-        #endregion
 
         //==================The second step==================//
         //add route
@@ -338,7 +328,7 @@ public class Startup
 
         MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
 
-        var webSocketcfg = appSettings.GetSection("WebSocket");
+        var webSocketcfg = AppSettings.GetSection("WebSocket");
         var keepAliveInterval = GetValue(webSocketcfg, "KeepAliveInterval", 120);
         ReceiveBufferSize = GetValue(webSocketcfg, "ReceiveBufferSize", 4096);
         MaxDegreeOfParallelism = GetValue(webSocketcfg, "MaxDegreeOfParallelism", -1);
@@ -414,13 +404,13 @@ public class Startup
 
                     dynamic result;
 
-                    ///* test data
+                    //* test data
                     receiveData.a = "API";
                     receiveData.c = "Test001";
                     receiveData.t = "token";
                     receiveData.d = new Args.Test001 { A = "error", B = "bbb" }.BinarySerialize();
                     receiveData.b = "bbb";
-                    //*/
+                    //*
 
                     if (string.IsNullOrWhiteSpace(receiveData.a) || !Configer.BusinessList.TryGetValue(receiveData.a, out IBusiness business))
                     {
@@ -430,6 +420,9 @@ public class Startup
                     else
                     {
                         var dict = new System.Dynamic.ExpandoObject() as IDictionary<string, object>; // context objects
+                        //dict.Add("Addresses", Program.Addresses);
+                        //dict.Add("AppSettings", Startup.AppSettings);
+                        //dict.Add("ENV", Startup.ENV);
                         dict.Add("HttpContext", context);
                         dict.Add("WebSocket", webSocket);
 
@@ -472,9 +465,9 @@ public class Startup
                 }
                 catch (System.Exception ex)
                 {
+                    Help.ExceptionWrite(ex, true, true, Program.LogPath);
                     var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, System.Convert.ToString(ex));
                     await SendAsync(result.ToBytes(), id);
-                    Help.ExceptionWrite(ex, true, true);
                 }
 
                 if (webSocket.State != WebSocketState.Open)
@@ -492,9 +485,9 @@ public class Startup
         }
         catch (System.Exception ex)
         {
+            Help.ExceptionWrite(ex, true, true, Program.LogPath);
             var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, System.Convert.ToString(ex));
             await SendAsync(result.ToBytes(), id);
-            Help.ExceptionWrite(ex, true, true);
         }
     }
 
@@ -545,167 +538,6 @@ public class Startup
     #endregion
 
     #endregion
-
-    /*
-    /// <summary>
-    /// Generating Swagger documents for business classes
-    /// </summary>
-    /// <param name="business"></param>
-    /// <returns></returns>
-    public static Root GetSwaggerDoc(IBusiness business)
-    {
-        var paths = new Dictionary<string, object>();
-
-        foreach (var item in business.Configer.Doc.Members[business.Configer.Info.CommandGroupDefault].Values)
-        {
-            var methods = new Dictionary<string, object>();
-            var parameters = new List<IDictionary<string, object>>();
-
-            parameters.Add(new Dictionary<string, object>
-            {
-                { "name", "c" },
-                { "in", "formData" },
-                { "type", "string" },
-                { "default", item.Name },
-                { "description", "api name" },
-                { "required",true },
-                { "x-CheckNull", "Values are not allowed to be empty" },
-            });
-
-            var tokenCount = 0;
-
-            foreach (var c2 in item.ArgList)
-            {
-                if (!c2.UseType && c2.HasDefinition)
-                {
-                    continue;
-                }
-
-                string name = string.Empty;
-                string description = string.Empty;
-
-                if (typeof(IToken).IsAssignableFrom(c2.Type))
-                {
-                    name = "t";
-                    description = "api token";
-                    tokenCount++;
-                    if (1 < tokenCount)
-                    {
-                        name = $"{name}{tokenCount}";
-                    }
-                }
-                else
-                {
-                    name = $"d.{{{ (c2.Parent == item.Name ? c2.Path.Substring(c2.Parent.Length, c2.Path.Length - c2.Parent.Length).Trim('.') : c2.Path.Substring(c2.Root.Length, c2.Path.Length - c2.Root.Length).Trim('.'))}}}";
-                    description = c2.Summary ?? string.Empty;
-                }
-
-                var type = GetSwaggerType(c2.Type);
-
-                var c3 = new Dictionary<string, object>
-                {
-                    { "name", name },
-                    { "in", "formData" },
-                    { "type", type.Item1 },
-                    { "description", description }
-                };
-
-                if (!string.IsNullOrWhiteSpace(type.Item1))
-                {
-                    c3.Add("format", type.Item2);
-                }
-                if (c2.HasDefaultValue)
-                {
-                    c3.Add("default", System.Convert.ToString(c2.DefaultValue));
-                }
-
-                foreach (var attr in c2.Attrs)
-                {
-                    c3.Add($"x-{attr.Type}", $"{attr.State} {attr.Description}");
-                }
-
-                parameters.Add(c3);
-            }
-
-            var responses = item.Returns.Summary;
-
-            try
-            {
-                if (item.Returns.MemberDefinition == Business.Meta.MemberDefinitionCode.Definition)
-                {
-                    responses = string.Join(System.Environment.NewLine, item.Returns.Childrens.Select(c => $"{c.Path}:{c.Type.Name} {c.Summary}"));
-                }
-                else
-                {
-                    responses = $"{item.Returns.Name} {item.Returns.Summary}";
-                }
-            }
-            catch (Exception ex)
-            {
-                responses = ex.Message;
-            }
-
-            methods.Add("post", new Dictionary<string, object>
-            {
-                { "operationId", item.Name },
-                { "tags", new string[] { business.Configer.Info.BusinessName } },
-                { "summary", item.Summary ?? string.Empty},
-                { "consumes", new string[] { "multipart/form-data" } },
-                { "produces",new string[] { "application/json" } },
-                { "parameters", parameters },
-                { "description", string.Empty },
-                { "responses",  new Dictionary<string, object> {
-                    {
-                        "200", new Dictionary<string, object> { { "description", responses } }
-                    } } }
-            });
-
-            paths.Add($"/{item.Name}", methods);
-        }
-
-        var root = new Root
-        {
-            info = new Swagger.Doc.Info { title = "X Project", version = "0.1" },
-            host = "localhost:5000",
-            externalDocs = new ExternalDocs { description = "ExternalDocs description", url = "https://github.com/xlievo/Business.Core" },
-            tags = new Tags[] { new Tags { name = business.Configer.Info.BusinessName, externalDocs = new ExternalDocs { } } },
-            paths = paths,
-        };
-
-        return root;
-
-        (string, string) GetSwaggerType(System.Type type)
-        {
-            var type2 = "string";
-            var format = string.Empty;
-
-            switch (type.GetTypeCode())
-            {
-                case TypeCode.Boolean: type2 = "boolean"; break;
-                case TypeCode.Byte: format = "binary"; break;
-                //case TypeCode.Char: type2 = "string"; break;
-                case TypeCode.DateTime: format = "date-time"; break;
-                //case TypeCode.DBNull: return "string";
-                case TypeCode.Decimal: type2 = "number"; break;
-                case TypeCode.Double: type2 = "number"; break;
-                //case TypeCode.Empty: return "string";
-                case TypeCode.Int16: type2 = "integer"; break;
-                case TypeCode.Int32: type2 = "integer"; format = "int32"; break;
-                case TypeCode.Int64: type2 = "integer"; format = "int64"; break;
-                //case TypeCode.Object: return "string";
-                case TypeCode.SByte: type2 = "integer"; break;
-                case TypeCode.Single: type2 = "number"; format = "float"; break;
-                //case TypeCode.String: type2 = "string"; break;
-                case TypeCode.UInt16: type2 = "integer"; break;
-                case TypeCode.UInt32: type2 = "integer"; format = "int32"; break;
-                case TypeCode.UInt64: type2 = "integer"; format = "int64"; break;
-                default: break;
-            }
-
-            return (type2, format);
-        }
-    }
-    */
 }
 
 /// <summary>
@@ -744,8 +576,6 @@ public class BusinessController : Controller
             case "POST":
                 {
                     //if (this.Request.HasFormContentType)
-                    //{
-                    //}
                     //requestData = new RequestData(await this.Request.ReadFormAsync());
                     var form = await this.Request.ReadFormAsync();
                     c = form["c"];
@@ -759,6 +589,9 @@ public class BusinessController : Controller
         }
 
         var dict = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
+        //dict.Add("Addresses", Program.Addresses);
+        //dict.Add("AppSettings", Startup.AppSettings);
+        //dict.Add("ENV", Startup.ENV);
         dict.Add("Controller", this);
 
         g = "j";//fixed grouping

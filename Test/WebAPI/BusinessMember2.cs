@@ -48,8 +48,14 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         public string MethodName;
     }
 
-    public BusinessMember2()
+    readonly Host host;
+
+    System.Net.Http.IHttpClientFactory httpClientFactory;
+
+    public BusinessMember2(Host host)
     {
+        this.host = host;
+
         var s = "[{ \"a\": \"333\",\"b\": \"\", \"c\": { \"c1\": \"\",\"c2\": \"\",\"c3\": { \"c31\": \"\",\"c32\": \"uuu\"} },\"d\": 0, \"e\": true, \"myEnum\": 1}, 0.2345]";
 
         //var ddd = System.Text.Json.JsonSerializer.Serialize(new Test001());

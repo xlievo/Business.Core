@@ -41,8 +41,48 @@ namespace Business.Utils
         }
     }
 
+    public struct Accessors
+    {
+        public ConcurrentReadOnlyDictionary<string, Accessor> Accessor;
+
+        public object[] ConstructorArgs;
+    }
+
     public static class Help
     {
+        public static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null)
+        {
+            var key2 = string.IsNullOrWhiteSpace(key) ? type.FullName : key;
+
+            if (type.IsAbstract || accessors.ContainsKey(key2)) { return; }
+
+            var member = accessors.dictionary.GetOrAdd(key2, _ => new Accessors { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() });
+
+            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                if (typeof(System.MulticastDelegate).IsAssignableFrom(field.FieldType))
+                {
+                    continue;
+                }
+
+                var accessor = field.GetAccessor();
+                if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                member.Accessor.dictionary.TryAdd(field.Name, accessor);
+            }
+
+            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                if (typeof(System.MulticastDelegate).IsAssignableFrom(property.PropertyType))
+                {
+                    continue;
+                }
+
+                var accessor = property.GetAccessor();
+                if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                member.Accessor.dictionary.TryAdd(property.Name, accessor);
+            }
+        }
+
         public static Business UseType<Business>(this Business business, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -790,6 +830,25 @@ namespace Business.Utils
             return business;
         }
 
+        public static Business MemberSet<Business>(this Business business, string memberName, object memberObj, bool skipNull = false) where Business : IBusiness
+        {
+            if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
+
+            if (!Configer.Accessors.TryGetValue(business.Configer.Info.BusinessName, out Accessors meta) || !meta.Accessor.TryGetValue(memberName, out Accessor accessor)) { return business; }
+
+            if (skipNull && !object.Equals(null, accessor.Getter(business)))
+            {
+                return business;
+            }
+
+            var value = Help.ChangeType(memberObj, accessor.Type);
+            accessor.Setter(business, value);
+
+            business.Configer.MemberSetAfter?.Invoke(memberName, value);
+
+            return business;
+        }
+
         static Meta.MetaLogger GetMetaLogger(Meta.MetaLogger metaLogger, Attributes.LoggerAttribute logger, string group)
         {
             var logger2 = logger.Clone();
@@ -875,7 +934,7 @@ namespace Business.Utils
                 catch (System.Exception ex)
                 {
                     System.Console.WriteLine(assembly?.Location);
-                    ex.ExceptionWrite(console: true);
+                    ex.Console();
                 }
             }
         }
@@ -892,7 +951,7 @@ namespace Business.Utils
             {
 #if DEBUG
                 System.Console.WriteLine(assemblyFile);
-                ex.ExceptionWrite(console: true);
+                ex.Console();
 #endif
                 return null;
             }

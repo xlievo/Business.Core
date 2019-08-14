@@ -205,6 +205,29 @@
             return theme
         };
 
+        var $each = function (obj, callback) {
+            if (!obj || typeof obj !== "object") return;
+            var i;
+            if (Array.isArray(obj) || (typeof obj.length === 'number' && obj.length > 0 && (obj.length - 1) in obj)) {
+                for (i = 0; i < obj.length; i++) {
+                    if (callback(i, obj[i]) === false) return;
+                }
+            }
+            else {
+                if (Object.keys) {
+                    var keys = Object.keys(obj);
+                    for (i = 0; i < keys.length; i++) {
+                        if (callback(keys[i], obj[keys[i]]) === false) return;
+                    }
+                }
+                else {
+                    for (i in obj) {
+                        if (!obj.hasOwnProperty(i)) continue;
+                        if (callback(i, obj[i]) === false) return;
+                    }
+                }
+            }
+        };
         JSONEditor.defaults.editors.object = JSONEditor.defaults.editors.object.extend({
             showEditJSON: function () {
                 //if (!this.editjson_holder) return;
@@ -224,9 +247,7 @@
                     d.push("root.d." + i);
                 }
 
-                this.editjson_textarea.value = this.jsoneditor.schema.argSingle ?
-                    JSON.stringify(this.jsoneditor.getEditor("root.d").getValue(), null, 2) :
-                    this.editjson_textarea.value = getData(this.jsoneditor, d);
+                this.editjson_textarea.value = getData(this.jsoneditor, d);
 
                 // Start the textarea with the current value
                 //this.editjson_textarea.value = getData(this.jsoneditor, d);
@@ -241,6 +262,192 @@
         });
 
         JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
+            build: function () {
+                var self = this;
+
+                if (!this.options.compact) {
+                    this.header = document.createElement('label');
+                    this.header.textContent = this.getTitle();
+                    this.title = this.theme.getHeader(this.header);
+                    this.container.appendChild(this.title);
+                    this.title_controls = this.theme.getHeaderButtonHolder();
+                    this.title.appendChild(this.title_controls);
+                    if (this.schema.description) {
+                        this.description = this.theme.getDescription(this.schema.description);
+                        this.container.appendChild(this.description);
+                    }
+                    this.error_holder = document.createElement('div');
+                    this.container.appendChild(this.error_holder);
+
+                    if (this.schema.format === 'tabs-top') {
+                        this.controls = this.theme.getHeaderButtonHolder();
+                        this.title.appendChild(this.controls);
+                        this.tabs_holder = this.theme.getTopTabHolder(this.getValidId(this.getItemTitle()));
+                        this.container.appendChild(this.tabs_holder);
+                        this.row_holder = this.theme.getTopTabContentHolder(this.tabs_holder);
+
+                        this.active_tab = null;
+                    }
+                    else if (this.schema.format === 'tabs') {
+                        this.controls = this.theme.getHeaderButtonHolder();
+                        this.title.appendChild(this.controls);
+                        this.tabs_holder = this.theme.getTabHolder(this.getValidId(this.getItemTitle()));
+                        this.container.appendChild(this.tabs_holder);
+                        this.row_holder = this.theme.getTabContentHolder(this.tabs_holder);
+
+                        this.active_tab = null;
+                    }
+                    else {
+                        this.panel = this.theme.getIndentedPanel();
+                        this.container.appendChild(this.panel);
+                        this.row_holder = document.createElement('div');
+                        this.panel.appendChild(this.row_holder);
+                        this.controls = this.theme.getButtonHolder();
+                        if (this.array_controls_top) {
+                            this.title.appendChild(this.controls);
+                        }
+                        else {
+                            this.panel.appendChild(this.controls);
+                        }
+                    }
+                }
+                else {
+                    this.panel = this.theme.getIndentedPanel();
+                    this.container.appendChild(this.panel);
+                    this.title_controls = this.theme.getHeaderButtonHolder();
+                    this.panel.appendChild(this.title_controls);
+                    this.controls = this.theme.getButtonHolder();
+                    this.panel.appendChild(this.controls);
+                    this.row_holder = document.createElement('div');
+                    this.panel.appendChild(this.row_holder);
+                }
+
+                // Edit JSON modal
+                this.editjson_holder = this.theme.getModal();
+                this.editjson_textarea = this.theme.getTextareaInput();
+                this.editjson_textarea.style.height = '170px';
+                this.editjson_textarea.style.width = '300px';
+                this.editjson_textarea.style.display = 'block';
+                this.editjson_save = this.getButton('Save', 'save', 'Save');
+                this.editjson_save.classList.add('json-editor-btntype-save');
+                this.editjson_save.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    self.saveJSON();
+                });
+                this.editjson_copy = this.getButton('Copy', 'copy', 'Copy');
+                this.editjson_copy.classList.add('json-editor-btntype-copy');
+                this.editjson_copy.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    self.copyJSON();
+                });
+                this.editjson_cancel = this.getButton('Cancel', 'cancel', 'Cancel');
+                this.editjson_cancel.classList.add('json-editor-btntype-cancel');
+                this.editjson_cancel.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    self.hideEditJSON();
+                });
+                this.editjson_holder.appendChild(this.editjson_textarea);
+                this.editjson_holder.appendChild(this.editjson_save);
+                this.editjson_holder.appendChild(this.editjson_copy);
+                this.editjson_holder.appendChild(this.editjson_cancel);
+
+                this.editjson_controls = this.theme.getHeaderButtonHolder();
+                this.title.appendChild(this.editjson_controls);
+
+                // Edit JSON Button
+                this.editjson_button = this.getButton('JSON', 'edit', 'Edit JSON');
+                this.editjson_button.classList.add('json-editor-btntype-editjson');
+                this.editjson_button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    self.toggleEditJSON();
+                });
+                this.editjson_controls.appendChild(this.editjson_button);
+                this.editjson_controls.appendChild(this.editjson_holder);
+
+                // Add controls
+                this.addControls();
+            },
+            showEditJSON: function () {
+                //if (!this.editjson_holder) return;
+                //this.hideAddProperty();
+
+                // Position the form directly beneath the button
+                // TODO: edge detection
+
+                var holder = this.jsoneditor.editors.root.editors.d.header.parentNode;
+                var buttonData = holder.querySelector("#data");
+
+                this.editjson_holder.style.left = buttonData.offsetLeft + 11 + "px";
+                this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
+
+                var d = []
+                for (var i in this.jsoneditor.editors.root.editors.d.editors) {
+                    d.push("root.d." + i);
+                }
+
+                this.editjson_textarea.value = getData(this.jsoneditor, d);
+
+                // Start the textarea with the current value
+                //this.editjson_textarea.value = getData(this.jsoneditor, d);
+
+                // Disable the rest of the form while editing JSON
+                this.disable();
+
+                this.editjson_holder.style.display = '';
+                buttonData.disabled = false;
+                this.editing_json = true;
+            },
+            hideEditJSON: function () {
+                if (!this.editjson_holder) return;
+                if (!this.editing_json) return;
+
+                this.editjson_holder.style.display = 'none';
+                this.enable();
+                this.editing_json = false;
+            },
+            copyJSON: function () {
+                if (!this.editjson_holder) return;
+                var ta = document.createElement('textarea');
+                ta.value = this.editjson_textarea.value;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'absolute';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            },
+            saveJSON: function () {
+                if (!this.editjson_holder) return;
+
+                try {
+                    var json = JSON.parse(this.editjson_textarea.value);
+                    this.setValue(json);
+                    this.hideEditJSON();
+                    this.onChange(true);
+                }
+                catch (e) {
+                    window.alert('invalid JSON');
+                    throw e;
+                }
+            },
+            toggleEditJSON: function () {
+                if (this.editing_json) this.hideEditJSON();
+                else this.showEditJSON();
+            },
+            hideAddProperty: function () {
+                if (!this.addproperty_holder) return;
+                if (!this.adding_property) return;
+
+                this.addproperty_holder.style.display = 'none';
+                this.enable();
+
+                this.adding_property = false;
+            },
             addControls: function () {
                 var self = this;
 
@@ -672,7 +879,7 @@
 
                     editor.root.editors.d.editjson_textarea.removeAttribute('tag');
                     editor.root.editors.d.editjson_textarea.style.display = '';
-                    editor.root.editors.d.editjson_save.style.display = 'none';
+                    //editor.root.editors.d.editjson_save.style.display = 'none';
                 }
 
                 //======================================================//
@@ -740,14 +947,15 @@
         }
 
         function getData(editor, args) {
-            //schema = Object {title: "Input", type: "object", edit: true, …}
-            if (1 == args.length) {
-                return JSON.stringify(editor.getEditor(args[0]).getValue(), null, 2);
+            if (editor.schema.argSingle) {
+                return JSON.stringify(editor.getEditor("root.d").getValue(), null, 2);
             }
-            for (var i = args.length - 1; i >= 0; i--) {
-                args[i] = editor.getEditor(args[i]).getValue();//JSON.stringify(editor.getEditor(args[i]).getValue(), null, 2);
+            else {
+                for (var i = args.length - 1; i >= 0; i--) {
+                    args[i] = editor.getEditor(args[i]).getValue();//JSON.stringify(editor.getEditor(args[i]).getValue(), null, 2);
+                }
+                return JSON.stringify(args, null, 2);
             }
-            return JSON.stringify(args, null, 2);
         }
 
         /*

@@ -29,45 +29,7 @@ namespace Business.Attributes //Annotations
     {
         #region MetaData
 
-        public struct AttributeAccessor
-        {
-            public ConcurrentReadOnlyDictionary<string, Accessor> Accessor;
-
-            public object[] ConstructorArgs;
-        }
-
-        public static readonly ConcurrentReadOnlyDictionary<string, AttributeAccessor> Accessors = new ConcurrentReadOnlyDictionary<string, AttributeAccessor>();
-
-        internal static void LoadAttributes(System.Type type)
-        {
-            if (type.IsAbstract || Accessors.ContainsKey(type.FullName)) { return; }
-
-            var member = Accessors.dictionary.GetOrAdd(type.FullName, key => new AttributeAccessor { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() });
-
-            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
-            {
-                if (typeof(System.MulticastDelegate).IsAssignableFrom(field.FieldType))
-                {
-                    continue;
-                }
-
-                var accessor = field.GetAccessor();
-                if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                member.Accessor.dictionary.TryAdd(field.Name, accessor);
-            }
-
-            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
-            {
-                if (typeof(System.MulticastDelegate).IsAssignableFrom(property.PropertyType))
-                {
-                    continue;
-                }
-
-                var accessor = property.GetAccessor();
-                if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                member.Accessor.dictionary.TryAdd(property.Name, accessor);
-            }
-        }
+        static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 
         #region GetAttributes
 
@@ -155,54 +117,6 @@ namespace Business.Attributes //Annotations
 
         #endregion
 
-        /*
-        static AttributeBase()
-        {
-            MetaData = new ConcurrentReadOnlyDictionary<string, ConcurrentReadOnlyDictionary<string, Accessor>>();
-
-#if !Mobile
-            var ass = System.AppDomain.CurrentDomain.GetAssemblies().Where(c => !c.IsDynamic);
-
-            foreach (var assembly in ass)
-            {
-                try
-                {
-                    var types = assembly.GetExportedTypes();
-
-                    foreach (var type in types)
-                    {
-                        var typeInfo = type.GetTypeInfo();
-
-                        if (typeInfo.IsSubclassOf(typeof(AttributeBase)) && !typeInfo.IsAbstract)
-                        {
-                            var member = new ConcurrentReadOnlyDictionary<string, Accessor>();
-
-                            foreach (var field in typeInfo.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
-                            {
-                                var accessor = field.GetAccessor();
-                                if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                                member.dictionary.TryAdd(field.Name, accessor);
-                            }
-
-                            foreach (var property in typeInfo.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy))
-                            {
-                                var accessor = property.GetAccessor();
-                                if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                                member.dictionary.TryAdd(property.Name, accessor);
-                            }
-
-                            MetaData.dictionary.GetOrAdd(typeInfo.FullName, member);
-                        }
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    System.Console.WriteLine(assembly.Location);
-                    ex.ExceptionWrite(console: true);
-                }
-            }
-            */
-
         #endregion
 
         /// <summary>
@@ -214,13 +128,13 @@ namespace Business.Attributes //Annotations
         {
             get
             {
-                if (!Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return null; }
+                if (!Accessors.TryGetValue(this.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return null; }
 
                 return accessor.Getter(this);
             }
             set
             {
-                if (!Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return; }
+                if (!Accessors.TryGetValue(this.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return; }
 
                 try
                 {
@@ -334,7 +248,7 @@ namespace Business.Attributes //Annotations
             //    this.Inherited = usage.Inherited;
             //}
 
-            LoadAttributes(this.Type);
+            this.Type.LoadAccessors(Accessors);
 
             //this.config = config;
         }
@@ -424,7 +338,7 @@ namespace Business.Attributes //Annotations
 
         public virtual string Replace(string value)
         {
-            if (string.IsNullOrWhiteSpace(value) || !Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta))
+            if (string.IsNullOrWhiteSpace(value) || !Accessors.TryGetValue(this.Type.FullName, out Accessors meta))
             {
                 return value;
             }

@@ -384,6 +384,8 @@ namespace Business
 
     public partial class Configer
     {
+        internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
+
         public static ConcurrentReadOnlyDictionary<string, IBusiness> BusinessList = new ConcurrentReadOnlyDictionary<string, IBusiness>(System.StringComparer.InvariantCultureIgnoreCase);
 
         // public static ConcurrentReadOnlyDictionary<string, Document.Xml> Xmls = new ConcurrentReadOnlyDictionary<string, Document.Xml>();
@@ -473,6 +475,11 @@ namespace Business
         /// </summary>
         public System.Func<MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>, dynamic, System.Threading.Tasks.Task> CallAfterMethod { get; set; }
 
+        /// <summary>
+        /// After the MemberSet has been successfully invoked
+        /// </summary>
+        public System.Action<string, object> MemberSetAfter { get; set; }
+
         //public Configuration UseType(params System.Type[] type)
         //{
         //    if (null == type) { return this; }
@@ -501,14 +508,15 @@ namespace Business
         /// <summary>
         /// Load all business classes in the run directory
         /// </summary>
+        /// <param name="constructorArguments"></param>
         /// <param name="assemblyFiles"></param>
-        public static void LoadBusiness(params string[] assemblyFiles)
+        public static void LoadBusiness(object[] constructorArguments = null, params string[] assemblyFiles)
         {
             var business = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(System.AppContext.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {
-                    Bind.Create(type);
+                    Bind.Create(type, constructorArguments);
 
                     return true;
                 }
@@ -612,6 +620,14 @@ namespace Business
             foreach (var item in BusinessList.Values)
             {
                 item.IgnoreSet(ignore, argType);
+            }
+        }
+
+        public static void MemberSet(string memberName, object memberObj, bool skipNull = false)
+        {
+            foreach (var item in BusinessList.Values)
+            {
+                item.MemberSet(memberName, memberObj, skipNull);
             }
         }
 

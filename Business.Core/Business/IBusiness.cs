@@ -71,6 +71,15 @@ namespace Business
         /// <param name="state"></param>
         /// <returns></returns>
         Result.IResult ResultCreate(object data, string message = null, int state = 1);
+
+        /*
+        /// <summary>
+        /// Business member accessor
+        /// </summary>
+        /// <param name="member"></param>
+        /// <returns></returns>
+        object this[string member] { get; set; }
+        */
     }
 
     public interface IBusiness<Result> : IBusiness where Result : Business.Result.IResult { }
@@ -134,6 +143,34 @@ namespace Business
         public Business.Result.IResult ResultCreate(object data, string message = null, int state = 1) => Business.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
         #endregion
+
+        /*
+        /// <summary>
+        /// Business member accessor
+        /// </summary>
+        /// <param name="member"></param>
+        /// <returns></returns>
+        public object this[string member]
+        {
+            get
+            {
+                if (!Configer.Accessors.TryGetValue(this.Configer.Info.BusinessName, out Utils.Accessors meta) || !meta.Accessor.TryGetValue(member, out Utils.Accessor accessor)) { return null; }
+
+                return accessor.Getter(this);
+            }
+            set
+            {
+                if (!Configer.Accessors.TryGetValue(this.Configer.Info.BusinessName, out Utils.Accessors meta) || !meta.Accessor.TryGetValue(member, out Utils.Accessor accessor)) { return; }
+
+                try
+                {
+                    var value2 = Utils.Help.ChangeType(value, accessor.Type);
+                    accessor.Setter(this, value2);
+                }
+                catch { }
+            }
+        }
+        */
     }
 
     public abstract class BusinessBase : BusinessBase<Result.ResultObject<string>> { }
