@@ -129,7 +129,7 @@
                         label.classList.add('control-label');
                         label.setAttribute('tag', 'label');
                         group.appendChild(label);
-                        //group.style.marginBottom = '10px';
+                        label.style.margin = '0px';
                     }
 
                     if (infoText) group.appendChild(infoText);
@@ -160,6 +160,7 @@
                 if (options) this.setSelectOptions(select, options);
                 select.classList.add('form-control');
                 select.setAttribute('tag', 'input');
+                select.style.marginTop = '5px';
                 return select;
             };
 
@@ -167,6 +168,7 @@
                 var el = document.createElement('textarea');
                 el.classList.add('form-control');
                 el.setAttribute('tag', 'input');
+                el.style.marginTop = '5px';
                 return el;
             };
 
@@ -174,6 +176,7 @@
                 var el = document.createElement('input');
                 el.setAttribute('type', type);
                 el.setAttribute('tag', 'input');
+                el.style.marginTop = '5px';
                 if (type !== "checkbox") {
                     el.classList.add("form-control");
                 }
@@ -195,6 +198,7 @@
                 var el = document.createElement('p');
                 el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
                 el.style.marginBottom = '2px';
+                el.style.marginTop = '5px';
                 el.setAttribute('tag', 'description');
                 el.classList.add('help-block');
                 if (window.DOMPurify) el.innerHTML = window.DOMPurify.sanitize(text);
