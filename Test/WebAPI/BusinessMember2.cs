@@ -312,8 +312,9 @@ public class Args
     public class Test001
     {
         /// <summary>
-        /// AAA@@@
+        /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
         /// </summary>
+        [Test]
         public List<string> AAA { get; set; }
 
         /// <summary>
@@ -361,7 +362,6 @@ public class Args
             /// <summary>
             /// C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
             /// </summary>
-            [Test]
             public Test0011 C3 { get; set; }
 
             //public string C22 { get; set; }

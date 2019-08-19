@@ -281,7 +281,9 @@
                         el.textContent = text;
                     }
                     else {
-                        text.style.paddingTop = text.style.paddingBottom = text.style.marginTop = text.style.marginBottom = '0px';
+                        //text.style.paddingTop = text.style.paddingBottom = text.style.marginTop = text.style.marginBottom = '0px';
+                        text.classList.add('control-label');
+                        text.style.marginBottom = "0px";
                         return text;
                     }
                 }
@@ -299,7 +301,7 @@
                     el.style.marginTop = '8px';
                 }
                 else {
-                    el.style.marginTop = '6px';
+                    //el.style.marginTop = '5px';
                     el.classList.add('help-block');
                 }
                 return el;
@@ -1193,22 +1195,27 @@
 
                 document.querySelectorAll("p[tag='description']").forEach(c => {
                     var row = c.parentNode.parentNode.parentNode.nextSibling;
+
+                    if ("array" == c.parentNode.getAttribute("data-schematype")) {
+                        row = c.parentNode.parentNode.nextSibling;
+                    }
+
                     var h5 = c.querySelector("h5");
                     if (null != h5 && null != row && row.className === "row") {
                         c.style.marginBottom = '8px';
                     }
                 });
 
-                document.querySelectorAll("label[tag='label']").forEach(c => {
-                    var row = c.parentNode.parentNode.parentNode;
-                    if (null == row.nextSibling && row.className === "row") {
-                        row.style.marginBottom = '4px';
-                        var input = row.querySelector("[tag='input']");
-                        if (null != input) {
-                            input.style.marginBottom = '4px';
-                        }
-                    }
-                });
+                //document.querySelectorAll("label[tag='label']").forEach(c => {
+                //    var row = c.parentNode.parentNode.parentNode;
+                //    if (null == row.nextSibling && row.className === "row") {
+                //        //row.style.marginBottom = '4px';
+                //        var input = row.querySelector("[tag='input']");
+                //        if (null != input) {
+                //            input.style.marginBottom = '4px';
+                //        }
+                //    }
+                //});
 
                 document.querySelectorAll("div[tag='row']").forEach(c => {
                     if (null == c.nextSibling) {
@@ -1225,15 +1232,21 @@
 
                 document.querySelectorAll("div[tag='panel']").forEach(c => {
                     var rows = c.querySelectorAll("div[tag='row']");
-                    if (0 < rows.length) {
-                        var row = rows[rows.length - 1];
-                        var h5 = row.querySelector("h5");
-                        if (null != h5) {
-                            if (null !== row.querySelector("button[tag='array']")) {
+                    rows.forEach(row => {
+                        if (null !== row.querySelector("[data-schematype='array']")) {
+                            var h5 = row.querySelector("h5");
+                            if (null != h5) {
                                 h5.style.marginBottom = '2px';
                             }
                         }
-                    }
+
+                        if (null !== row.querySelector("[data-schematype='object']")) {
+                            var h5 = row.querySelector("h5");
+                            if (null != h5) {
+                                h5.style.marginBottom = '15px';
+                            }
+                        }
+                    });
                 });
             });
         }
