@@ -263,29 +263,21 @@
 
         JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             getHeader: function (text, root) {
+                var el = null;
                 if (root) {
-                    var el = document.createElement('h4');
+                    el = document.createElement('h4');
                     el.setAttribute('tag', 'h4');
-                    el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
-                    if (typeof text === "string") {
-                        el.textContent = text;
-                    }
-                    else {
-                        el.appendChild(text);
-                    }
                 }
                 else {
-                    if (typeof text === "string") {
-                        var el = document.createElement('label');
-                        el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
-                        el.textContent = text;
-                    }
-                    else {
-                        //text.style.paddingTop = text.style.paddingBottom = text.style.marginTop = text.style.marginBottom = '0px';
-                        text.classList.add('control-label');
-                        text.style.marginBottom = "0px";
-                        return text;
-                    }
+                    var el = document.createElement('div');
+                }
+
+                el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
+                if (typeof text === "string") {
+                    el.textContent = text;
+                }
+                else {
+                    el.appendChild(text);
                 }
                 return el;
             },
@@ -866,19 +858,17 @@
 
                 var h4 = ret.header.parentNode;
                 if ("H4" == h4.tagName) {
-                    var label = h4.querySelector("label");
-                    if (null != label) {
-                        h4.childNodes.forEach(c => {
-                            if (c !== label) {
-                                label.appendChild(c);
-                            }
-                        });
-
-                        var parent = h4.parentNode;
-                        var next = h4.nextSibling;
-                        parent.removeChild(h4);
-                        parent.insertBefore(label, next);
+                    var el = document.createElement('div');
+                    el.style.paddingTop = el.style.paddingBottom = el.style.marginTop = el.style.marginBottom = '0px';
+                    var next = null
+                    for (var i = h4.children.length - 1; i >= 0; i--) {
+                        next = el.insertBefore(h4.children[i], next);
                     }
+
+                    var parent = h4.parentNode;
+                    next = h4.nextSibling;
+                    parent.removeChild(h4);
+                    parent.insertBefore(el, next);
                 }
 
                 return ret;
@@ -1037,7 +1027,12 @@
                             if (member.argSingle) {
                                 input.properties.d = member.properties[i];
                                 input.properties.d.id = member.name + '.d';
-                                input.properties.d.title = "d (" + member.properties[i].lastType + ")";
+
+                                var title = member.properties[i].lastType;
+                                if (member.properties[i].array) {
+                                    title += " Array";
+                                }
+                                input.properties.d.title = "d (" + title + ")";
                             }
                             else {
                                 input.properties.d.properties[i] = member.properties[i];

@@ -281,6 +281,8 @@ namespace Business.Document
 
         public string[] Enum { get; set; }
 
+        public bool Array { get; set; }
+
         public string Description { get; set; }
 
         public bool UniqueItems { get; set; }

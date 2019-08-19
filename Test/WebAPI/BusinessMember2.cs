@@ -60,23 +60,23 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
         //var ddd = System.Text.Json.JsonSerializer.Serialize(new Test001());
 
-        var data = System.Text.Json.JsonSerializer.Deserialize<object[]>(s);
+        //var data = System.Text.Json.JsonSerializer.Deserialize<object[]>(s);
 
-        var d = data[0].ToString();
+        //var d = data[0].ToString();
 
-        var options = new System.Text.Json.JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            AllowTrailingCommas = true
-        };
-        var test001 = System.Text.Json.JsonSerializer.Deserialize<Test001>(d, options);
+        //var options = new System.Text.Json.JsonSerializerOptions
+        //{
+        //    PropertyNameCaseInsensitive = true,
+        //    AllowTrailingCommas = true
+        //};
+        //var test001 = System.Text.Json.JsonSerializer.Deserialize<Test001>(d, options);
 
-        var d2 = data[1].ToString();
+        //var d2 = data[1].ToString();
 
-        if (null == data)
-        {
+        //if (null == data)
+        //{
 
-        }
+        //}
 
         this.Logger = new Logger(async x =>
         {
@@ -362,7 +362,7 @@ public class Args
             /// <summary>
             /// C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
             /// </summary>
-            public Test0011 C3 { get; set; }
+            public List<Test0011> C3 { get; set; }
 
             //public string C22 { get; set; }
 

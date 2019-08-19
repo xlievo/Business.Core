@@ -236,7 +236,7 @@ namespace Business.Utils
 
         static DocArg GetDocArg(DocArgSource argSource)
         {
-            var docArg = new DocArg { Id = argSource.Args.Group[argSource.Group].Path, LastType = argSource.Args.LastType.Name };
+            var docArg = new DocArg { Id = argSource.Args.Group[argSource.Group].Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection };
             docArg.Title = $"{argSource.Args.Name} ({docArg.LastType})";
             docArg.Description = argSource.Summary;
 
@@ -299,6 +299,7 @@ namespace Business.Utils
             else if (argSource.Args.HasCollection)
             {
                 docArg.Type = "array";
+                docArg.Title = $"{argSource.Args.Name} ({docArg.LastType} Array)";
                 docArg.Items = new Items<DocArg>();
                 docArg.Options = new Dictionary<string, object> { { "disable_array_delete_last_row", true }, { "array_controls_top", true } };
 
