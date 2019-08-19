@@ -268,7 +268,7 @@ namespace Business
 
                 var constructor = null == types ? null : type.GetConstructor(types);
 
-                Instance = proxy.CreateClassProxy(type, null == constructor ? null : constructorArguments, interceptor);
+                Instance = proxy.CreateClassProxy(type, null == constructor ? type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() : constructorArguments, interceptor);
             }
             catch (System.Exception ex)
             {

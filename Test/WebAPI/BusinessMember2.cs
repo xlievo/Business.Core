@@ -210,7 +210,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         }
     }
 
-    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context)
+    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.Controller.HttpContext;
 
@@ -222,7 +222,13 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
     public virtual async Task<dynamic> Test005(Business.Auth.Token token) => this.ResultCreate();
 
-    public virtual async Task<dynamic> Test006(Arg<Test001> arg) => this.ResultCreate();
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="arg"></param>
+    /// <param name="arg2">arg2!!!</param>
+    /// <returns></returns>
+    public virtual async Task<dynamic> Test006(Arg<Test001> arg, Arg<List<string>> arg2) => this.ResultCreate();
 
     public struct Result
     {
@@ -296,6 +302,11 @@ public class Args
     public class Test001
     {
         /// <summary>
+        /// AAA@@@
+        /// </summary>
+        public List<string> AAA { get; set; }
+
+        /// <summary>
         /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
         /// </summary>
         [Test]
@@ -312,6 +323,7 @@ public class Args
         /// <summary>
         /// CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
         /// </summary>
+        [Test]
         public Test0010 C { get; set; }
 
         public decimal D { get; set; }
@@ -328,6 +340,7 @@ public class Args
             /// <summary>
             /// C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
             /// </summary>
+            [Test]
             public string C1 { get; set; }
 
             /// <summary>
@@ -338,6 +351,7 @@ public class Args
             /// <summary>
             /// C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
             /// </summary>
+            [Test]
             public Test0011 C3 { get; set; }
 
             //public string C22 { get; set; }
@@ -362,6 +376,11 @@ public class Args
                 /// 
                 /// </summary>
                 public string C32 { get; set; }
+
+                /// <summary>
+                /// AAA@@@
+                /// </summary>
+                public List<string> AAA { get; set; }
             }
         }
     }

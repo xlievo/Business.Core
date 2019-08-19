@@ -241,10 +241,6 @@ namespace Business.Utils
             docArg.Description = argSource.Summary;
 
             docArg.Token = argSource.Args.HasToken;
-            if (docArg.Token)
-            {
-                docArg.Type = "string";
-            }
 
             //var hasDescription = string.IsNullOrWhiteSpace(docArg.Description);
             var attrs = System.String.Empty;
@@ -265,7 +261,6 @@ namespace Business.Utils
 
             if (!docArg.Token && argSource.Args.HasDefinition)
             {
-                //docArg.Description = argSource.Summary;
                 docArg.Type = "object";
             }
             else
@@ -304,34 +299,72 @@ namespace Business.Utils
             else if (argSource.Args.HasCollection)
             {
                 docArg.Type = "array";
+                docArg.Items = new Items<DocArg>();
+                docArg.Options = new Dictionary<string, object> { { "disable_array_delete_last_row", true }, { "array_controls_top", true } };
+
+                if (argSource.Args.HasDefinition)
+                {
+                    docArg.Items.Type = "object";
+                }
+                else
+                {
+                    var type = GetDocArgType(argSource.Args.LastType.GetTypeCode());
+                    if (default != type)
+                    {
+                        docArg.Items.Type = type.Item1;
+                        docArg.Items.Format = type.Item2;
+                    }
+                }
             }
             else
             {
-                switch (argSource.Args.LastType.GetTypeCode())
+                var type = GetDocArgType(argSource.Args.LastType.GetTypeCode());
+                if (default != type)
                 {
-                    case System.TypeCode.Boolean: docArg.Type = "boolean"; break;
-                    case System.TypeCode.Byte: docArg.Format = "binary"; break;
-                    //case TypeCode.Char: type2 = "string"; break;
-                    case System.TypeCode.DateTime: docArg.Format = "datetime-local"; break;
-                    //case TypeCode.DBNull: return "string";
-                    case System.TypeCode.Decimal: docArg.Type = "number"; break;
-                    case System.TypeCode.Double: docArg.Type = "number"; break;
-                    //case System.TypeCode.Empty: break;
-                    case System.TypeCode.Int16: docArg.Type = "integer"; break;
-                    case System.TypeCode.Int32: docArg.Type = "integer"; docArg.Format = "int32"; break;
-                    case System.TypeCode.Int64: docArg.Type = "integer"; docArg.Format = "int64"; break;
-                    //case TypeCode.Object: return "string";
-                    case System.TypeCode.SByte: docArg.Type = "integer"; break;
-                    case System.TypeCode.Single: docArg.Type = "number"; docArg.Format = "float"; break;
-                    //case TypeCode.String: type2 = "string"; break;
-                    case System.TypeCode.UInt16: docArg.Type = "integer"; break;
-                    case System.TypeCode.UInt32: docArg.Type = "integer"; docArg.Format = "int32"; break;
-                    case System.TypeCode.UInt64: docArg.Type = "integer"; docArg.Format = "int64"; break;
-                    default: break;
+                    docArg.Type = type.Item1;
+                    docArg.Format = type.Item2;
                 }
             }
 
             return docArg;
+        }
+
+        static (string, string) GetDocArgType(System.TypeCode typeCode)
+        {
+            switch (typeCode)
+            {
+                case System.TypeCode.Boolean:
+                    return ("boolean", string.Empty);
+                case System.TypeCode.Byte:
+                    return ("string", "binary");
+                case System.TypeCode.DBNull:
+                case System.TypeCode.Empty:
+                case System.TypeCode.Char:
+                case System.TypeCode.String:
+                    return ("string", string.Empty);
+                case System.TypeCode.DateTime:
+                    return ("string", "datetime-local");
+                case System.TypeCode.Decimal:
+                case System.TypeCode.Double:
+                    return ("number", string.Empty);
+                case System.TypeCode.Int16:
+                    return ("integer", string.Empty);
+                case System.TypeCode.Int32:
+                    return ("integer", "int32");
+                case System.TypeCode.Int64:
+                    return ("integer", "int64");
+                case System.TypeCode.SByte:
+                    return ("integer", string.Empty);
+                case System.TypeCode.Single:
+                    return ("number", "float");
+                case System.TypeCode.UInt16:
+                    return ("integer", string.Empty);
+                case System.TypeCode.UInt32:
+                    return ("integer", "int32");
+                case System.TypeCode.UInt64:
+                    return ("integer", "int64");
+                default: return default;
+            }
         }
 
         /// <summary>
@@ -481,12 +514,26 @@ namespace Business.Utils
 
                 if (childrens.Any())
                 {
-                    arg.Children = new Dictionary<string, DocArg>();
-                }
+                    if ("array" == arg.Type)
+                    {
+                        arg.Items.Children = new Dictionary<string, DocArg>();
+                    }
+                    else
+                    {
+                        arg.Children = new Dictionary<string, DocArg>();
+                    }
 
-                foreach (var item in childrens)
-                {
-                    arg.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
+                    foreach (var item in childrens)
+                    {
+                        if ("array" == arg.Type)
+                        {
+                            arg.Items.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
+                        }
+                        else
+                        {
+                            arg.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
+                        }
+                    }
                 }
             }
 

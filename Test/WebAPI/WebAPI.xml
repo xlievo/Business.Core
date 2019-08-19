@@ -47,6 +47,14 @@
             <param name="mm"></param>
             <returns></returns>
         </member>
+        <member name="M:BusinessMember2.Test006(Arg{Args.Test001},Arg{System.Collections.Generic.List{System.String}})">
+            <summary>
+            
+            </summary>
+            <param name="arg"></param>
+            <param name="arg2">arg2!!!</param>
+            <returns></returns>
+        </member>
         <member name="T:Args.MyEnum">
             <summary>
             MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
@@ -55,6 +63,11 @@
         <member name="T:Args.Test001">
             <summary>
             Test001Test001Test001Test001Test001Test001
+            </summary>
+        </member>
+        <member name="P:Args.Test001.AAA">
+            <summary>
+            AAA@@@
             </summary>
         </member>
         <member name="P:Args.Test001.A">
@@ -100,6 +113,11 @@
         <member name="P:Args.Test001.Test0010.Test0011.C32">
             <summary>
             
+            </summary>
+        </member>
+        <member name="P:Args.Test001.Test0010.Test0011.AAA">
+            <summary>
+            AAA@@@
             </summary>
         </member>
         <member name="T:Arg`1">

@@ -201,6 +201,7 @@ public class Startup
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
             });
 
+        services.AddHttpClient();
         //AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
     }
 
@@ -549,6 +550,8 @@ public class Startup
 [RequestFormLimits(ValueCountLimit = int.MaxValue, ValueLengthLimit = int.MaxValue, MultipartHeadersLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
 public class BusinessController : Controller
 {
+    public BusinessController(System.Net.Http.IHttpClientFactory httpClientFactory) => Configer.MemberSet("httpClientFactory", httpClientFactory, true);
+
     /// <summary>
     /// Call
     /// </summary>

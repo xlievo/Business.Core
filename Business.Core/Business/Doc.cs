@@ -214,6 +214,18 @@ namespace Business.Document
     {
         [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         Dictionary<string, DocArg> Children { get; set; }
+
+        Items<DocArg> Items { get; set; }
+
+        string Type { get; set; }
+
+        //bool Token { get; set; }
+
+        //Dictionary<string, object> Options { get; set; }
+
+        //string Format { get; set; }
+
+        //string[] Enum { get; set; }
     }
 
     public class Doc<DocArg> : IDoc<DocArg> where DocArg : IDocArg<DocArg>
@@ -294,9 +306,14 @@ namespace Business.Document
     {
         public string Type { get; set; }
 
+        public string Format { get; set; }
+
         public string Title { get; set; }
 
+        [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         public Dictionary<string, DocArg> Children { get; set; }
+
+        //public Dictionary<string, object> Options { get; set; }
     }
 
     /*
