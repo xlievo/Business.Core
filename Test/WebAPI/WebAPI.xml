@@ -47,7 +47,7 @@
             <param name="mm"></param>
             <returns></returns>
         </member>
-        <member name="M:BusinessMember2.Test006(Arg{Args.Test001},Arg{System.Collections.Generic.List{System.String}})">
+        <member name="M:BusinessMember2.Test007(Arg{Args.Test001},Arg{System.Collections.Generic.List{System.String}})">
             <summary>
             
             </summary>

@@ -862,6 +862,23 @@
                 ret.header.style.marginTop = "2px";
                 ret.header.style.marginBottom = "0px";
 
+                var h4 = ret.header.parentNode;
+                if ("H4" == h4.tagName) {
+                    var label = h4.querySelector("label");
+                    if (null != label) {
+                        h4.childNodes.forEach(c => {
+                            if (c !== label) {
+                                label.appendChild(c);
+                            }
+                        });
+
+                        var parent = h4.parentNode;
+                        var next = h4.nextSibling;
+                        parent.removeChild(h4);
+                        parent.insertBefore(label, next);
+                    }
+                }
+
                 return ret;
             }
         });

@@ -220,7 +220,17 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
-    public virtual async Task<dynamic> Test005(Business.Auth.Token token) => this.ResultCreate();
+    public virtual async Task<dynamic> Test005(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context)
+    {
+        Microsoft.AspNetCore.Http.HttpContext httpContext = context.Controller.HttpContext;
+
+        //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
+        //return this.ResultCreate();
+        return this.ResultCreate(new { token, arg = arg?.Out, State = httpContext.Connection.RemoteIpAddress.ToString() });
+        //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
+    }
+
+    public virtual async Task<dynamic> Test006(Business.Auth.Token token) => this.ResultCreate();
 
     /// <summary>
     /// 
@@ -228,7 +238,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="arg"></param>
     /// <param name="arg2">arg2!!!</param>
     /// <returns></returns>
-    public virtual async Task<dynamic> Test006(Arg<Test001> arg, Arg<List<string>> arg2) => this.ResultCreate();
+    public virtual async Task<dynamic> Test007(Arg<Test001> arg, Arg<List<string>> arg2) => this.ResultCreate();
 
     public struct Result
     {
