@@ -654,6 +654,7 @@
                 // Edit JSON modal
                 this.editjson_holder = this.theme.getModal();
                 this.editjson_textarea = this.theme.getTextareaInput();
+                this.editjson_textarea.style.marginTop = "0px";
                 this.editjson_textarea.style.height = '170px';
                 this.editjson_textarea.style.width = '300px';
                 this.editjson_textarea.style.display = 'block';
@@ -1356,18 +1357,18 @@
                             }
                         }
 
-                        // Seed the form with a starting value
-                        , startval: {
-                            "NET": {
-                                "value": "\nvar http = System.Net.Http.HttpClientFactory.Create();\nvar result = await http.GetStringAsync(\"https://www.github.com\");"
-                            },
-                            "Java": {
-                                "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
-                            },
-                            "PHP": {
-                                "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
-                            }
-                        }
+                        //// Seed the form with a starting value
+                        //, startval: {
+                        //    "NET": {
+                        //        "value": "\nvar http = System.Net.Http.HttpClientFactory.Create();\nvar result = await http.GetStringAsync(\"https://www.github.com\");"
+                        //    },
+                        //    "Java": {
+                        //        "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
+                        //    },
+                        //    "PHP": {
+                        //        "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
+                        //    }
+                        //}
                     });
 
                     document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
@@ -1383,23 +1384,23 @@
                 document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
                 document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
                 document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-                document.querySelectorAll('#NET > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
-                document.querySelectorAll('#Java > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
-                document.querySelectorAll('#PHP > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
+                //document.querySelectorAll('#NET > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
+                //document.querySelectorAll('#Java > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
+                //document.querySelectorAll('#PHP > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
                 //document.querySelectorAll('#NET > div').forEach(c => c.style.marginTop = '0px');
                 //document.querySelectorAll('#Java > div').forEach(c => c.style.marginTop = '0px');
                 //document.querySelectorAll('#PHP > div').forEach(c => c.style.marginTop = '0px');
-                document.querySelectorAll('#NET > div > div').forEach(c => c.removeAttribute("class"));
-                document.querySelectorAll("#NET > div > div > div[tag='panel']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
-                document.querySelectorAll("#NET > div > div > div[tag='panel'] > div > div > div[tag='row']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
+                //document.querySelectorAll('#NET > div > div').forEach(c => c.removeAttribute("class"));
+                //document.querySelectorAll("#NET > div > div > div[tag='panel']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
+                //document.querySelectorAll("#NET > div > div > div[tag='panel'] > div > div > div[tag='row']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
 
-                document.querySelectorAll('#Java > div > div').forEach(c => c.removeAttribute("class"));
-                document.querySelectorAll("#Java > div > div > div[tag='panel']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
-                document.querySelectorAll("#Java > div > div > div[tag='panel'] > div > div > div[tag='row']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
+                //document.querySelectorAll('#Java > div > div').forEach(c => c.removeAttribute("class"));
+                //document.querySelectorAll("#Java > div > div > div[tag='panel']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
+                //document.querySelectorAll("#Java > div > div > div[tag='panel'] > div > div > div[tag='row']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
 
-                document.querySelectorAll('#PHP > div > div').forEach(c => c.removeAttribute("class"));
-                document.querySelectorAll("#PHP > div > div > div[tag='panel']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
-                document.querySelectorAll("#PHP > div > div > div[tag='panel'] > div > div > div[tag='row']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
+                //document.querySelectorAll('#PHP > div > div').forEach(c => c.removeAttribute("class"));
+                //document.querySelectorAll("#PHP > div > div > div[tag='panel']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
+                //document.querySelectorAll("#PHP > div > div > div[tag='panel'] > div > div > div[tag='row']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
 
                 new Houdini('[data-houdini]');
             })
@@ -1519,8 +1520,42 @@
                     });
                 });
 
-                var sdk = editor.sdkeditor;
+                editor.on('change', function () {
+                    // Do something
+                    var value = this.root.editors.d ? JSON.stringify(this.root.editors.d.getValue()) : null;
+
+                    this.sdkeditor.setValue({
+                        NET: { value: JSON.stringify(value) },
+                        Java: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" },
+                        PHP: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" }
+                    });
+
+                    setSdk(this.sdkeditor);
+                });
             });
+        }
+
+        function setSdk(sdkeditor) {
+            var sdk = sdkeditor.root.container.querySelector("div[id='SDK']");
+            sdk.style.padding = sdk.style.margin = sdk.style.border = "0px";
+
+            sdk.querySelector('#NET > div > div').removeAttribute("class");
+            var panel = sdk.querySelector("#NET > div > div > div[tag='panel']");
+            panel.removeAttribute("class"); panel.removeAttribute("style");
+            var row = sdk.querySelector("#NET > div > div > div[tag='panel'] > div > div > div[tag='row']");
+            row.removeAttribute("class"); row.removeAttribute("style");
+
+            sdk.querySelector('#Java > div > div').removeAttribute("class");
+            var panel = sdk.querySelector("#Java > div > div > div[tag='panel']");
+            panel.removeAttribute("class"); panel.removeAttribute("style");
+            var row = sdk.querySelector("#Java > div > div > div[tag='panel'] > div > div > div[tag='row']");
+            row.removeAttribute("class"); row.removeAttribute("style");
+
+            sdk.querySelector('#PHP > div > div').removeAttribute("class");
+            var panel = sdk.querySelector("#PHP > div > div > div[tag='panel']");
+            panel.removeAttribute("class"); panel.removeAttribute("style");
+            var row = sdk.querySelector("#PHP > div > div > div[tag='panel'] > div > div > div[tag='row']");
+            row.removeAttribute("class"); row.removeAttribute("style");
         }
 
         function getSdk(format) {
