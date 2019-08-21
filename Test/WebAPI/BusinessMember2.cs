@@ -57,6 +57,9 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         this.host = host;
 
         var s = "[{ \"a\": \"333\",\"b\": \"\", \"c\": { \"c1\": \"\",\"c2\": \"\",\"c3\": { \"c31\": \"\",\"c32\": \"uuu\"} },\"d\": 0, \"e\": true, \"myEnum\": 1}, 0.2345]";
+        //using System.Net.Http;
+        //var http = HttpClientFactory.Create();
+        //var result = await http.GetStringAsync("https://www.github.com");
 
         //var ddd = System.Text.Json.JsonSerializer.Serialize(new Test001());
 

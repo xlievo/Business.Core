@@ -1190,32 +1190,11 @@
 
             return icon;
         };
-
     </script>
 </head>
 <body>
 
     <div class='container'>
-
-
-        <!--<div class='medium-12-columns'>
-            <button id='submit' class='tiny'>Submit (console.log)</button>
-            <button id='restore' class='secondary tiny'>Restore to Default</button>
-            <span id='valid_indicator' class='label'></span>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 col-md-offset-3"
-                 style="background-color: #dedef8;box-shadow:
-         inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing
-                    elit.
-                </p>
-            </div>
-
-        </div>-->
-
         <div class="input-group input-group-lg" style="padding-top: 20px;
         padding-bottom: 20px;">
 
@@ -1363,7 +1342,7 @@
                     //==================sdk==================//
                     var outid = member.name + '_out';
                     var sdkid = member.name + '_sdk';
-                    new JSONEditor(document.getElementById(sdkid), {
+                    inputeditor.sdkeditor = new JSONEditor(document.getElementById(sdkid), {
                         // Enable fetching schemas via ajax
                         //ajax: true,
                         schema: {
@@ -1371,7 +1350,7 @@
                             type: "object",
                             format: "categories",
                             properties: {
-                                NET: getSdk("json"),
+                                NET: getSdk("csharp"),
                                 Java: getSdk("java"),
                                 PHP: getSdk("php")
                             }
@@ -1380,7 +1359,7 @@
                         // Seed the form with a starting value
                         , startval: {
                             "NET": {
-                                "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
+                                "value": "\nvar http = System.Net.Http.HttpClientFactory.Create();\nvar result = await http.GetStringAsync(\"https://www.github.com\");"
                             },
                             "Java": {
                                 "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
@@ -1465,7 +1444,7 @@
                     editor.root.header.parentNode.appendChild(button_holder);
                     buttonEdit.addEventListener('click', function (e) {
                         e.preventDefault();
-
+                        e.stopPropagation();
                         var root = editor.getEditor('root');
                         setEdit(root.container, root.schema.edit);
                         root.schema.edit = !root.schema.edit;
@@ -1508,17 +1487,6 @@
                     }
                 });
 
-                //document.querySelectorAll("label[tag='label']").forEach(c => {
-                //    var row = c.parentNode.parentNode.parentNode;
-                //    if (null == row.nextSibling && row.className === "row") {
-                //        //row.style.marginBottom = '4px';
-                //        var input = row.querySelector("[tag='input']");
-                //        if (null != input) {
-                //            input.style.marginBottom = '4px';
-                //        }
-                //    }
-                //});
-
                 document.querySelectorAll("div[tag='row']").forEach(c => {
                     if (null == c.nextSibling) {
                         if (null != c.querySelector("h5")) {
@@ -1550,6 +1518,8 @@
                         }
                     });
                 });
+
+                var sdk = editor.sdkeditor;
             });
         }
 
