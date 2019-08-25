@@ -43,10 +43,10 @@ namespace BenchmarkTest
             //var tasks = new ConcurrentBag<Task>();
             var watch = new System.Diagnostics.Stopwatch();
 
-            //~preheat
-            var t = Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = 123 } }, new UseEntry[] { new UseEntry("sss", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" }) });
-            t.Wait();
-            //~end
+            ////~preheat
+            //var t = Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = 123 } }, new UseEntry[] { new UseEntry("sss", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" }) });
+            //t.Wait();
+            ////~end
 
             //===========================================================//
 
@@ -81,11 +81,13 @@ namespace BenchmarkTest
             });
 
             //Task.WaitAll(tasks.ToArray());
+            var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+            Console.WriteLine($"ResultCount={results.Count} Loggers={BusinessMember.Loggers.Count} Time={total} Avg={Help.Scale(results.Count / total)}");
 
-            System.Threading.SpinWait.SpinUntil(() => results.Count + 1 == Loggers.Count);
+            System.Threading.SpinWait.SpinUntil(() => results.Count == Loggers.Count);
 
             watch.Stop();
-            var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+            total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
 
             var results2 = new int[results.Count];
 
@@ -107,6 +109,13 @@ namespace BenchmarkTest
             if (!Enumerable.SequenceEqual(results2, results3))
             {
                 throw new System.Exception("result error!");
+            }
+
+            var results4 = Loggers.Select<LoggerData, int>(c => c.Result.Data).OrderBy(c => c);
+
+            if (!Enumerable.SequenceEqual(results2, results4))
+            {
+                throw new System.Exception("logs error!");
             }
 
             //Console.WriteLine($"ResultCount={results.Count} TaskCount={tasks.Count}  Loggers={BusinessMember.Loggers.Count} Time={total}");
@@ -288,30 +297,34 @@ namespace BenchmarkTest
 
         public static ConcurrentBag<int> Logs = new ConcurrentBag<int>();
 
-        public BusinessMember() => this.Logger = new Logger(async loggers =>
+        public BusinessMember()
         {
-            if (-1 != Program.WorkTime)
+            this.Logger = new Logger(async loggers =>
             {
-                SpinWait(Program.WorkTime);
-            }
-            //System.Console.WriteLine(loggers.Count());
+                if (-1 != Program.WorkTime)
+                {
+                    SpinWait(Program.WorkTime);
+                }
+                //System.Console.WriteLine(loggers.Count());
 
-            foreach (var item in loggers)
-            {
-                item.Value = item.Value?.ToValue();
-                //item.Type = LoggerType.Error;
-                Loggers.Add(item);
-            }
+                foreach (var item in loggers)
+                {
+                    item.Value = item.Value?.ToValue();
+                    //item.Type = LoggerType.Error;
+                    Loggers.Add(item);
+                }
 
-            Logs.Add(loggers.ToList().Count);
-        }, 100)
-        {
-            Batch = new Logger.BatchOptions
+                Logs.Add(loggers.ToList().Count);
+            }, 30)
             {
-                Interval = System.TimeSpan.FromSeconds(6),
-                //MaxNumber = 100
-            }
-        };
+                Batch = new Logger.BatchOptions
+                {
+                    Interval = System.TimeSpan.FromSeconds(10),
+                    MaxNumber = 1000
+                },
+                ThreadCall = true
+            };
+        }
 
         public virtual dynamic Test000([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
 

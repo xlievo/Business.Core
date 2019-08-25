@@ -464,8 +464,12 @@ namespace Business.Auth
 
             if (canWrite)
             {
-                if (Configer.Logger?.MaxCapacity <= Configer.Logger?.LoggerQueue.Count)
+                var data = new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group };
+
+                if (null == Configer.Logger || Configer.Logger.MaxCapacity <= Configer.Logger.LoggerQueue.Count
+                    || !Configer.Logger.LoggerQueue.TryAdd(data))
                 {
+                    Help.Console(data.TryJsonSerialize());
                     return;
                 }
 
@@ -474,7 +478,6 @@ namespace Business.Auth
                 //    return;
                 //}
 
-                Configer.Logger?.LoggerQueue.TryAdd(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group });
                 //if (loggerUseThreadPool)
                 //{
                 //    System.Threading.Tasks.Task.Run(() => logger(new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group }));

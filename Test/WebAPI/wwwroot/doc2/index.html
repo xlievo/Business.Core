@@ -535,15 +535,8 @@
                 this.editjson_holder.style.left = buttonData.offsetLeft + 11 + "px";
                 this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
 
-                var d = []
-                for (var i in this.jsoneditor.editors.root.editors.d.editors) {
-                    d.push("root.d." + i);
-                }
-
-                this.editjson_textarea.value = getData(this.jsoneditor, d);
-
                 // Start the textarea with the current value
-                //this.editjson_textarea.value = getData(this.jsoneditor, d);
+                this.editjson_textarea.value = getData(this.jsoneditor).d;
 
                 // Disable the rest of the form while editing JSON
                 this.disable();
@@ -726,15 +719,8 @@
                 this.editjson_holder.style.left = buttonData.offsetLeft + 11 + "px";
                 this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
 
-                var d = []
-                for (var i in this.jsoneditor.editors.root.editors.d.editors) {
-                    d.push("root.d." + i);
-                }
-
-                this.editjson_textarea.value = getData(this.jsoneditor, d);
-
                 // Start the textarea with the current value
-                //this.editjson_textarea.value = getData(this.jsoneditor, d);
+                this.editjson_textarea.value = getData(this.jsoneditor).d;
 
                 // Disable the rest of the form while editing JSON
                 this.disable();
@@ -1194,7 +1180,6 @@
     </script>
 </head>
 <body>
-
     <div class='container'>
         <div class="input-group input-group-lg" style="padding-top: 20px;
         padding-bottom: 20px;">
@@ -1229,7 +1214,7 @@
                 </h4>
                 {@if member.description !== null && member.description !== 'null'}
                 <hr>
-                <p class="mb-0">${member.description}</p>
+                <p class="mb-0">$${member.description}</p>
                 {@/if}
             </div>
             <div data-houdini id='${member.name}_member' style="padding: 10px">
@@ -1521,18 +1506,65 @@
                 });
 
                 editor.on('change', function () {
-                    // Do something
-                    var value = this.root.editors.d ? JSON.stringify(this.root.editors.d.getValue()) : null;
-
+                    var data = getData(this, false);
                     this.sdkeditor.setValue({
-                        NET: { value: JSON.stringify(value) },
+                        NET: { value: GetSdkNet("ccc", data.t, JSON.stringify(data.d)) },
                         Java: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" },
                         PHP: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" }
                     });
 
                     setSdk(this.sdkeditor);
+
+                    //console.log(this.sdkeditor.getValue());
                 });
             });
+        }
+
+        function GetSdkNet(c, t, d) {
+            return "\
+using System;\n\
+using System.Net.Http;\n\
+using System.Net.Http.Headers;\n\
+using System.Threading.Tasks;\n\
+using Microsoft.Extensions.DependencyInjection;\n\
+using Newtonsoft.Json;\n\
+\n\
+class Program\n\
+{\n\
+    static IHttpClientFactory httpClientFactory;\n\
+\n\
+    async static Task Main(string[] args)\n\
+    {\n\
+        var serviceProvider = new ServiceCollection()\n\
+            .AddHttpClient()\n\
+            .BuildServiceProvider();\n\
+\n\
+        httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
+\n\
+        var result = await Call(\"" + c + "\", \"" + t + "\", " + d + ");\n\
+\n\
+        Console.WriteLine(result);\n\
+\n\
+        Console.Read();\n\
+    }\n\
+\n\
+    public async static Task<string> Call(string c, string t, string d)\n\
+    {\n\
+        dynamic data = new System.Dynamic.ExpandoObject();\n\
+        data.c = c;\n\
+        data.t = t;\n\
+        data.d = d;\n\
+\n\
+        using var request = new HttpRequestMessage(HttpMethod.Post, \"https://localhost:8000/API\");\n\
+        using var content = new StringContent(JsonConvert.SerializeObject(data));\n\
+        content.Headers.ContentType = new MediaTypeHeaderValue(\"application/json\");\n\
+        request.Content = content;\n\
+        var client = httpClientFactory.CreateClient();\n\
+        using var response = await client.SendAsync(request);\n\
+        response.EnsureSuccessStatusCode();\n\
+        return await response.Content.ReadAsStringAsync();\n\
+    }\n\
+}";
         }
 
         function setSdk(sdkeditor) {
@@ -1569,12 +1601,12 @@
                             ace: {
                                 theme: "ace/theme/vibrant_ink",
                                 useWorker: false,
-                                tabSize: 2,
+                                tabSize: 4,
                                 readOnly: true,
                                 highlightActiveLine: false,
                                 highlightSelectedWord: false,
                                 minLines: 20,
-                                maxLines: 100
+                                maxLines: 20
                             }
                         }
                     }
@@ -1586,16 +1618,25 @@
             };
         }
 
-        function getData(editor, args) {
-            if (editor.schema.argSingle) {
-                return JSON.stringify(editor.getEditor("root.d").getValue(), null, 2);
-            }
-            else {
-                for (var i = args.length - 1; i >= 0; i--) {
-                    args[i] = editor.getEditor(args[i]).getValue();//JSON.stringify(editor.getEditor(args[i]).getValue(), null, 2);
+        function getData(editor, format = true) {
+            var d = null;
+            if (editor.editors.root.editors.d) {
+                if (editor.schema.argSingle) {
+                    d = JSON.stringify(editor.getEditor("root.d").getValue(), null, format ? 2 : 0);
                 }
-                return JSON.stringify(args, null, 2);
+                else {
+                    var args = []
+                    for (var i in editor.editors.root.editors.d.editors) {
+                        args.push("root.d." + i);
+                    }
+
+                    for (var i = args.length - 1; i >= 0; i--) {
+                        args[i] = editor.getEditor(args[i]).getValue();//JSON.stringify(editor.getEditor(args[i]).getValue(), null, 2);
+                    }
+                    d =  JSON.stringify(args, null, format ? 2 : 0);
+                }
             }
+            return { t:editor.editors.root.editors.t ? editor.getEditor("root.t").getValue() : null, d:d };
         }
 
         /*

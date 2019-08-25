@@ -238,7 +238,7 @@ namespace Business.Utils
         {
             var docArg = new DocArg { Id = argSource.Args.Group[argSource.Group].Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection };
             docArg.Title = $"{argSource.Args.Name} ({docArg.LastType})";
-            docArg.Description = argSource.Summary;
+            docArg.Description = argSource.Summary?.Replace(System.Environment.NewLine, "<br/>");
 
             docArg.Token = argSource.Args.HasToken;
 
@@ -442,7 +442,7 @@ namespace Business.Utils
                 {
                     Name = meta.CommandGroup[c2.Value.Key].OnlyName,
                     HasReturn = meta.HasReturn,
-                    Description = member?.summary?.sub,
+                    Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
                     //Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
                     Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
@@ -2089,6 +2089,18 @@ namespace Business.Utils
         public static string JsonSerialize<Type>(this Type value, Newtonsoft.Json.JsonSerializerSettings settings)
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(value, settings);
+        }
+
+        public static string TryJsonSerialize<Type>(this Type value, Newtonsoft.Json.JsonSerializerSettings settings = null)
+        {
+            try
+            {
+                return Newtonsoft.Json.JsonConvert.SerializeObject(value, settings);
+            }
+            catch (System.Exception ex)
+            {
+                return Newtonsoft.Json.JsonConvert.SerializeObject(ex);
+            }
         }
 
         #endregion

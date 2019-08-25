@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
 using Microsoft.Net.Http.Headers;
 using Business;
 using Business.Attributes;
@@ -113,13 +114,15 @@ public struct Host
     public IConfigurationSection AppSettings { get; set; }
 
     public IHostingEnvironment ENV { get; set; }
+
+    public IHttpClientFactory HttpClientFactory { get; set; }
 }
 
 public class Program
 {
     public static string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{System.AppDomain.CurrentDomain.FriendlyName}.log.txt");
 
-    public static string Addresses = string.Empty;
+    public static string addresses = string.Empty;
 
     public static void Main(string[] args)
     {
@@ -128,7 +131,7 @@ public class Program
         System.Console.WriteLine($"LogPath:{LogPath}");
 
         var host = CreateWebHostBuilder(args).Build();
-        Addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault();
+        addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault();
         host.Run();
     }
 
@@ -144,7 +147,9 @@ public class Program
 
 public class Startup
 {
-    public static IConfigurationSection AppSettings = null;
+    public IConfigurationSection appSettings = null;
+    public IHostingEnvironment env;
+    public System.Net.Http.IHttpClientFactory httpClientFactory;
 
     public static int ReceiveBufferSize;
 
@@ -171,7 +176,7 @@ public class Startup
         System.Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
 
         Configuration = configuration;
-        AppSettings = Configuration.GetSection("AppSettings");
+        appSettings = Configuration.GetSection("AppSettings");
 
         //var doc = GetSwagger().JsonSerialize();
     }
@@ -201,16 +206,14 @@ public class Startup
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
             });
 
-        services.AddHttpClient();
+        httpClientFactory = services.AddHttpClient().BuildServiceProvider().GetService<IHttpClientFactory>();
         //AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
     }
-
-    public static IHostingEnvironment ENV;
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IHostingEnvironment env)
     {
-        ENV = env;
+        this.env = env;
 
         if (env.IsDevelopment())
         {
@@ -252,7 +255,7 @@ public class Startup
 
         //==================First step==================//
         //1
-        Configer.LoadBusiness(new object[] { new Host { Addresses = Program.Addresses, AppSettings = AppSettings, ENV = env } });
+        Configer.LoadBusiness(new object[] { new Host { Addresses = Program.addresses, AppSettings = appSettings, ENV = env, HttpClientFactory = httpClientFactory } });
         //Configer.UseType(typeof(HttpContext), typeof(WebSocket));
         //2
         Configer.UseType("context");
@@ -329,7 +332,7 @@ public class Startup
 
         MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
 
-        var webSocketcfg = AppSettings.GetSection("WebSocket");
+        var webSocketcfg = appSettings.GetSection("WebSocket");
         var keepAliveInterval = GetValue(webSocketcfg, "KeepAliveInterval", 120);
         ReceiveBufferSize = GetValue(webSocketcfg, "ReceiveBufferSize", 4096);
         MaxDegreeOfParallelism = GetValue(webSocketcfg, "MaxDegreeOfParallelism", -1);

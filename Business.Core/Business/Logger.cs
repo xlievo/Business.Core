@@ -28,7 +28,7 @@ namespace Business
         public struct BatchOptions
         {
             /// <summary>
-            /// Return log time interval, default System.TimeSpan.Zero equals not enabled
+            /// Return log time interval, default System.TimeSpan.Zero equals not enabled,5 seconds is reasonable
             /// </summary>
             public System.TimeSpan Interval { get; set; }
 
@@ -38,12 +38,7 @@ namespace Business
             public int MaxNumber { get; set; }
         }
 
-        public BatchOptions Batch { get; set; } = new BatchOptions { Interval = System.TimeSpan.Zero };
-
-        ///// <summary>
-        ///// Whether the callback log uses a new thread
-        ///// </summary>
-        //public bool UseThread { get; set; }
+        public BatchOptions Batch { get; set; } = new BatchOptions();
 
         /// <summary>
         /// Logger
@@ -52,22 +47,33 @@ namespace Business
         public System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> Call { get; private set; }
 
         /// <summary>
-        /// Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately. 100 is reasonable.
+        /// Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately.
         /// </summary>
-        public int ThreadNumber { get; private set; } = 1;
+        public int WorkThreads { get; private set; } = 1;
 
         /// <summary>
         /// Gets the max capacity of this logger queue
         /// </summary>
         public int? MaxCapacity { get; private set; }
 
+        /// <summary>
+        /// Whether the callback log uses a new thread
+        /// </summary>
+        public bool ThreadCall { get; set; }
+
         internal readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue;
 
-        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> call, int? threadNumber = null, int? maxCapacity = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="call"></param>
+        /// <param name="workThreads">Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately.</param>
+        /// <param name="maxCapacity">Gets the max capacity of this logger queue</param>
+        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> call, int? workThreads = null, int? maxCapacity = null)
         {
-            if (threadNumber.HasValue && 0 < threadNumber.Value)
+            if (workThreads.HasValue && 0 < workThreads.Value)
             {
-                this.ThreadNumber = threadNumber.Value;
+                this.WorkThreads = workThreads.Value;
             }
 
             if (maxCapacity.HasValue && -1 < maxCapacity.Value)
@@ -84,7 +90,7 @@ namespace Business
 
             if (null != Call)
             {
-                for (int i = 0; i < ThreadNumber; i++)
+                for (int i = 0; i < WorkThreads; i++)
                 {
                     System.Threading.Tasks.Task.Factory.StartNew(async () =>
                     {
@@ -108,8 +114,15 @@ namespace Business
 
                             if (0 < list.Count && (!isRunning || (isRunning && (0 < watch.Elapsed.CompareTo(Batch.Interval) || (0 < Batch.MaxNumber && Batch.MaxNumber <= list.Count)))))
                             {
-                                try { await Call(list.ToArray()); }
-                                catch (System.Exception ex) { ex.Console(); }
+                                if (ThreadCall)
+                                {
+                                    System.Threading.Tasks.Task.Factory.StartNew(async obj => await Call(obj as LoggerData[]), list.ToArray()).ContinueWith(c => c.Exception?.Console());
+                                }
+                                else
+                                {
+                                    try { await Call(list.ToArray()); }
+                                    catch (System.Exception ex) { ex.Console(); }
+                                }
 
                                 list.Clear();
 
