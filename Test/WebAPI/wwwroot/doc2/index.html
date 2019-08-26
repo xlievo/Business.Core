@@ -1183,10 +1183,10 @@
     <div class='container'>
         <div class="input-group input-group-lg" style="padding-top: 20px;
         padding-bottom: 20px;">
-
-            <input type="text" class="form-control">
+            <!--http://localhost:5000/API.doc-->
+            <input id="url" type="text" class="form-control" value="http://localhost:5000/API.doc">
             <div class="input-group-btn">
-                <button class="btn btn-default" type="button">
+                <button class="btn btn-default" type="button" onclick="go()">
                     Go!
                 </button>
                 <select class="btn btn-default dropdown-toggle">
@@ -1236,163 +1236,141 @@
             el.dispatchEvent(e);
         };
 
+        var disclosure = null;
+        var compiled_tpl = juicer(document.getElementById('tpl').innerHTML);
         var edit = false;
 
-        atomic("http://localhost:5000/API.doc")
-            .then(function (response) {
-                console.log(response.data); // xhr.responseText
-                //console.log(response.xhr);  // full response
-                var doc = response.data;
-
-                var members = doc.members["j"];
-                var members2 = []
-                for (var i in members) {
-                    members2.push(members[i]);
-                }
-
-                var tpl = document.getElementById('tpl').innerHTML;
-                var html = juicer(tpl, members2);
-                document.getElementById('members').innerHTML = html;
-
-                //=============================================//
-                members2.forEach(member => {
-                    //==================input==================//
-                    var inputid = member.name + '_input';
-
-                    var input = {
-                        title: "Input",
-                        type: "object",
-                        edit: !edit,
-                        argSingle: member.argSingle,
-                        properties: {
-                            t: {},
-                            d: {
-                                id: member.name + '.d',
-                                title: "d (Array)",
-                                type: "object",
-                                description: "API data",
-                                properties: {}
-                            }
-                        }
-                    };
-
-                    var hasToken = false;
-                    var token = null;
-                    for (var i in member.properties) {
-                        if (member.properties[i].token) {
-                            hasToken = true;
-                            token = member.properties[i];
-                        } else {
-                            if (member.argSingle) {
-                                input.properties.d = member.properties[i];
-                                input.properties.d.id = member.name + '.d';
-
-                                var title = member.properties[i].lastType;
-                                if (member.properties[i].array) {
-                                    title += " Array";
-                                }
-                                input.properties.d.title = "d (" + title + ")";
-                            }
-                            else {
-                                input.properties.d.properties[i] = member.properties[i];
-                            }
-                        }
+        function go() {
+            atomic(document.querySelector("#url").value)
+                .then(function (response) {
+                    if (null != disclosure) {
+                        disclosure.destroy();
                     }
 
-                    if (!hasToken) {
-                        delete input.properties.t;
-                    }
-                    else {
-                        input.properties.t = token;
-                        input.properties.t.id = member.name + '.t';
-                        input.properties.t.title = "t (String)";
-                    }
+                    console.log(response.data); // xhr.responseText
+                    //console.log(response.xhr);  // full response
+                    var doc = response.data;
 
-                    if ("{}" == JSON.stringify(input.properties.d.properties)) {
-                        delete input.properties.d;
+                    var members = doc.members["j"];
+                    var members2 = []
+                    for (var i in members) {
+                        members2.push(members[i]);
                     }
 
-                    //if (input.properties.t || input.properties.d) {
-                    //    input.type = "null";
-                    //}
+                    var html = compiled_tpl.render(members2);
+                    document.getElementById('members').innerHTML = html;
 
-                    var inputeditor = new JSONEditor(document.getElementById(inputid), {
-                        // The schema for the editor
-                        schema: input
-                    });
+                    //=============================================//
+                    members2.forEach(member => {
+                        //==================input==================//
+                        var inputid = member.name + '_input';
 
-                    ready(inputeditor);
-
-                    //========================================//
-
-                    //==================sdk==================//
-                    var outid = member.name + '_out';
-                    var sdkid = member.name + '_sdk';
-                    inputeditor.sdkeditor = new JSONEditor(document.getElementById(sdkid), {
-                        // Enable fetching schemas via ajax
-                        //ajax: true,
-                        schema: {
-                            title: "SDK",
+                        var input = {
+                            title: "Input",
                             type: "object",
-                            format: "categories",
+                            edit: !edit,
+                            argSingle: member.argSingle,
+                            name: member.name,
                             properties: {
-                                NET: getSdk("csharp"),
-                                Java: getSdk("java"),
-                                PHP: getSdk("php")
+                                t: {},
+                                d: {
+                                    id: member.name + '.d',
+                                    title: "d (Array)",
+                                    type: "object",
+                                    description: "API data",
+                                    properties: {}
+                                }
+                            }
+                        };
+
+                        var hasToken = false;
+                        var token = null;
+                        for (var i in member.properties) {
+                            if (member.properties[i].token) {
+                                hasToken = true;
+                                token = member.properties[i];
+                            } else {
+                                if (member.argSingle) {
+                                    input.properties.d = member.properties[i];
+                                    input.properties.d.id = member.name + '.d';
+
+                                    var title = member.properties[i].lastType;
+                                    if (member.properties[i].array) {
+                                        title += " Array";
+                                    }
+                                    input.properties.d.title = "d (" + title + ")";
+                                }
+                                else {
+                                    input.properties.d.properties[i] = member.properties[i];
+                                }
                             }
                         }
 
-                        //// Seed the form with a starting value
-                        //, startval: {
-                        //    "NET": {
-                        //        "value": "\nvar http = System.Net.Http.HttpClientFactory.Create();\nvar result = await http.GetStringAsync(\"https://www.github.com\");"
-                        //    },
-                        //    "Java": {
-                        //        "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
-                        //    },
-                        //    "PHP": {
-                        //        "value": "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}"
-                        //    }
+                        if (!hasToken) {
+                            delete input.properties.t;
+                        }
+                        else {
+                            input.properties.t = token;
+                            input.properties.t.id = member.name + '.t';
+                            input.properties.t.title = "t (String)";
+                        }
+
+                        if ("{}" == JSON.stringify(input.properties.d.properties)) {
+                            delete input.properties.d;
+                        }
+
+                        //if (input.properties.t || input.properties.d) {
+                        //    input.type = "null";
                         //}
+
+                        var inputeditor = new JSONEditor(document.getElementById(inputid), {
+                            // The schema for the editor
+                            schema: input
+                        });
+
+                        ready(inputeditor);
+
+                        //========================================//
+
+                        //==================sdk==================//
+                        var outid = member.name + '_out';
+                        var sdkid = member.name + '_sdk';
+                        inputeditor.sdkeditor = new JSONEditor(document.getElementById(sdkid), {
+                            // Enable fetching schemas via ajax
+                            //ajax: true,
+                            schema: {
+                                title: "SDK",
+                                type: "object",
+                                format: "categories",
+                                properties: {
+                                    NET: getSdk("csharp"),
+                                    Java: getSdk("java"),
+                                    PHP: getSdk("php")
+                                }
+                            }
+                        });
+
+                        document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
+                        //========================================//
                     });
 
-                    document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
-                    //========================================//
+                    //set all edit
+                    setEdit(document, edit);
+
+                    document.querySelectorAll('#NET > div > div > h4').forEach(c => c.style.display = 'none');
+                    document.querySelectorAll('#Java > div > div > h4').forEach(c => c.style.display = 'none');
+                    document.querySelectorAll('#PHP > div > div > h4').forEach(c => c.style.display = 'none');
+                    document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+                    document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+                    document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+
+                    disclosure = new Houdini('[data-houdini]');
+                })
+                .catch(function (error) {
+                    console.log(error);
+                    return null;
                 });
-
-                //set all edit
-                setEdit(document, edit);
-
-                document.querySelectorAll('#NET > div > div > h4').forEach(c => c.style.display = 'none');
-                document.querySelectorAll('#Java > div > div > h4').forEach(c => c.style.display = 'none');
-                document.querySelectorAll('#PHP > div > div > h4').forEach(c => c.style.display = 'none');
-                document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-                document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-                document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-                //document.querySelectorAll('#NET > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
-                //document.querySelectorAll('#Java > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
-                //document.querySelectorAll('#PHP > div > div > div.well.well-sm').forEach(c => c.style.marginTop = '0px');
-                //document.querySelectorAll('#NET > div').forEach(c => c.style.marginTop = '0px');
-                //document.querySelectorAll('#Java > div').forEach(c => c.style.marginTop = '0px');
-                //document.querySelectorAll('#PHP > div').forEach(c => c.style.marginTop = '0px');
-                //document.querySelectorAll('#NET > div > div').forEach(c => c.removeAttribute("class"));
-                //document.querySelectorAll("#NET > div > div > div[tag='panel']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
-                //document.querySelectorAll("#NET > div > div > div[tag='panel'] > div > div > div[tag='row']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
-
-                //document.querySelectorAll('#Java > div > div').forEach(c => c.removeAttribute("class"));
-                //document.querySelectorAll("#Java > div > div > div[tag='panel']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
-                //document.querySelectorAll("#Java > div > div > div[tag='panel'] > div > div > div[tag='row']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
-
-                //document.querySelectorAll('#PHP > div > div').forEach(c => c.removeAttribute("class"));
-                //document.querySelectorAll("#PHP > div > div > div[tag='panel']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
-                //document.querySelectorAll("#PHP > div > div > div[tag='panel'] > div > div > div[tag='row']").forEach(c => { c.removeAttribute("class"); c.removeAttribute("style"); });
-
-                new Houdini('[data-houdini]');
-            })
-            .catch(function (error) {
-                console.log(error.stack);
-                return null;
-            });
+        }
 
         function setEdit(root, edit) {
             if (!edit) {
@@ -1508,7 +1486,7 @@
                 editor.on('change', function () {
                     var data = getData(this, false);
                     this.sdkeditor.setValue({
-                        NET: { value: GetSdkNet("ccc", data.t, JSON.stringify(data.d)) },
+                        NET: { value: GetSdkNet(this.schema.name, data.t, JSON.stringify(data.d)) },
                         Java: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" },
                         PHP: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" }
                     });
@@ -1531,39 +1509,39 @@ using Newtonsoft.Json;\n\
 \n\
 class Program\n\
 {\n\
-    static IHttpClientFactory httpClientFactory;\n\
+        static IHttpClientFactory httpClientFactory;\n\
 \n\
-    async static Task Main(string[] args)\n\
-    {\n\
-        var serviceProvider = new ServiceCollection()\n\
-            .AddHttpClient()\n\
-            .BuildServiceProvider();\n\
+        async static Task Main(string[] args)\n\
+        {\n\
+            var serviceProvider = new ServiceCollection()\n\
+                .AddHttpClient()\n\
+                .BuildServiceProvider();\n\
 \n\
-        httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
+            httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
 \n\
-        var result = await Call(\"" + c + "\", \"" + t + "\", " + d + ");\n\
+            var result = await Call(\"" + c + "\", \"" + t + "\", " + d + ");\n\
 \n\
-        Console.WriteLine(result);\n\
+            Console.WriteLine(result);\n\
 \n\
-        Console.Read();\n\
-    }\n\
+            Console.Read();\n\
+        }\n\
 \n\
-    public async static Task<string> Call(string c, string t, string d)\n\
-    {\n\
-        dynamic data = new System.Dynamic.ExpandoObject();\n\
-        data.c = c;\n\
-        data.t = t;\n\
-        data.d = d;\n\
+        public async static Task<string> Call(string c, string t, string d)\n\
+        {\n\
+            dynamic data = new System.Dynamic.ExpandoObject();\n\
+            data.c = c;\n\
+            data.t = t;\n\
+            data.d = d;\n\
 \n\
-        using var request = new HttpRequestMessage(HttpMethod.Post, \"https://localhost:8000/API\");\n\
-        using var content = new StringContent(JsonConvert.SerializeObject(data));\n\
-        content.Headers.ContentType = new MediaTypeHeaderValue(\"application/json\");\n\
-        request.Content = content;\n\
-        var client = httpClientFactory.CreateClient();\n\
-        using var response = await client.SendAsync(request);\n\
-        response.EnsureSuccessStatusCode();\n\
-        return await response.Content.ReadAsStringAsync();\n\
-    }\n\
+            using var request = new HttpRequestMessage(HttpMethod.Post, \"https://localhost:8000/API\");\n\
+            using var content = new StringContent(JsonConvert.SerializeObject(data));\n\
+            content.Headers.ContentType = new MediaTypeHeaderValue(\"application/json\");\n\
+            request.Content = content;\n\
+            var client = httpClientFactory.CreateClient();\n\
+            using var response = await client.SendAsync(request);\n\
+            response.EnsureSuccessStatusCode();\n\
+            return await response.Content.ReadAsStringAsync();\n\
+        }\n\
 }";
         }
 
@@ -1633,10 +1611,10 @@ class Program\n\
                     for (var i = args.length - 1; i >= 0; i--) {
                         args[i] = editor.getEditor(args[i]).getValue();//JSON.stringify(editor.getEditor(args[i]).getValue(), null, 2);
                     }
-                    d =  JSON.stringify(args, null, format ? 2 : 0);
+                    d = JSON.stringify(args, null, format ? 2 : 0);
                 }
             }
-            return { t:editor.editors.root.editors.t ? editor.getEditor("root.t").getValue() : null, d:d };
+            return { t: editor.editors.root.editors.t ? editor.getEditor("root.t").getValue() : null, d: d };
         }
 
         /*

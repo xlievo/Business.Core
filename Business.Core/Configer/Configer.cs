@@ -549,13 +549,13 @@ namespace Business
         /// Generating Document Model for All Business Classes
         /// </summary>
         /// <param name="outDir"></param>
-        public static void UseDoc(string outDir = null)
+        public static void UseDoc(string outDir = null, string requestPath = null)
         {
             var exist = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
 
             foreach (var item in BusinessList.Values)
             {
-                item.UseDoc(exist ? System.IO.Path.Combine(outDir, $"{item.Configer.Info.BusinessName}.doc") : null);
+                item.UseDoc(exist ? System.IO.Path.Combine(outDir, $"{item.Configer.Info.BusinessName}.doc") : null, requestPath);
             }
         }
 

@@ -375,7 +375,7 @@ namespace Business.Utils
         /// <param name="business"></param>
         /// <param name="outFile"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(this Business business, string outFile = null) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outFile);
+        public static Business UseDoc<Business>(this Business business, string outFile = null, string requestPath = null) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outFile, requestPath);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -386,7 +386,7 @@ namespace Business.Utils
         /// <param name="argCallback"></param>
         /// <param name="outFile"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, string outFile = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, string outFile = null, string requestPath = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -411,6 +411,9 @@ namespace Business.Utils
 
                 if (System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(outFile)))
                 {
+                    business.Configer.Info.DocPhysicalPath = outFile;
+                    business.Configer.Info.DocRequestPath = System.IO.Path.Combine(string.IsNullOrEmpty(requestPath) ? "http://localhost:5000" : requestPath, System.IO.Path.GetFileName(outFile));
+
                     System.IO.File.WriteAllText(outFile, business.Configer.Doc.ToString(), UTF8);
                 }
             }

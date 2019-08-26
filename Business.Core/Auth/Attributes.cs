@@ -442,7 +442,20 @@ namespace Business.Attributes //Annotations
             //this.ConfigFileName = System.IO.Path.Combine(Help.BaseDirectory, configFileName);
         }
 
+        /// <summary>
+        /// Business Friendly Name
+        /// </summary>
         public string BusinessName { get; internal set; }
+
+        /// <summary>
+        /// Document physical path
+        /// </summary>
+        public string DocPhysicalPath { get; internal set; }
+
+        /// <summary>
+        /// Document Web request path
+        /// </summary>
+        public string DocRequestPath { get; internal set; }
 
         /// <summary>
         /// Default

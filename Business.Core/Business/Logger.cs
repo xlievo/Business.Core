@@ -57,9 +57,9 @@ namespace Business
         public int? MaxCapacity { get; private set; }
 
         /// <summary>
-        /// Whether the callback log uses a new thread
+        /// Whether the callback log uses a new thread, default true.
         /// </summary>
-        public bool ThreadCall { get; set; }
+        public bool ThreadCall { get; set; } = true;
 
         internal readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue;
 

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net.Http;
 using Microsoft.Net.Http.Headers;
 using Business;
@@ -128,10 +129,12 @@ public class Program
     {
         System.AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as System.Exception)?.ExceptionWrite(true, true, LogPath);
 
-        System.Console.WriteLine($"LogPath:{LogPath}");
+        System.Console.WriteLine($"LogPath = {LogPath}");
 
         var host = CreateWebHostBuilder(args).Build();
         addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault();
+
+        System.Console.WriteLine($"Addresses = {addresses}");
         host.Run();
     }
 
@@ -206,7 +209,15 @@ public class Startup
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
             });
 
-        httpClientFactory = services.AddHttpClient().BuildServiceProvider().GetService<IHttpClientFactory>();
+        httpClientFactory = services.AddHttpClient("")
+        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+        {
+            AllowAutoRedirect = false,
+            UseDefaultCredentials = true,
+        })
+        .Services
+        .BuildServiceProvider()
+        .GetService<IHttpClientFactory>();
         //AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
     }
 
@@ -226,6 +237,9 @@ public class Startup
         {
             System.IO.Directory.CreateDirectory(wwwroot);
         }
+
+        var requestPath = string.Empty;
+
         // Set up custom content types -associating file extension to MIME type
         var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
         //provider.Mappings[".yaml"] = "text/yaml";
@@ -233,6 +247,7 @@ public class Startup
         app.UseDefaultFiles().UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwroot),
+            RequestPath = requestPath,
             ContentTypeProvider = provider,
             OnPrepareResponse = c =>
             {
@@ -263,7 +278,12 @@ public class Startup
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
         //==================The third step==================//
         //3
-        Configer.UseDoc(System.IO.Path.Combine(wwwroot));
+        Uri.TryCreate(System.IO.Path.Combine(Program.addresses, requestPath), UriKind.Absolute, out Uri uri);
+        Configer.UseDoc(System.IO.Path.Combine(wwwroot), uri?.AbsoluteUri);
+        ////4
+        //var docPath = System.IO.Path.Combine(wwwroot, "doc2", "index.html");
+        //var doc = System.IO.File.ReadAllText(docPath, System.Text.Encoding.UTF8);
+        //System.IO.File.WriteAllText(docPath, doc.Replace("{URL}", Program.addresses), System.Text.Encoding.UTF8);
 
         //==================The second step==================//
         //add route
@@ -271,6 +291,12 @@ public class Startup
         {
             foreach (var item in Configer.BusinessList)
             {
+                var docPath = item.Value.Configer.Info.DocRequestPath;
+                if (!string.IsNullOrWhiteSpace(docPath))
+                {
+                    //..
+                }
+
                 routes.MapRoute(
                  name: item.Key,
                  template: string.Format("{0}/{{*path}}", item.Key),
