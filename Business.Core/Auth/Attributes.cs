@@ -453,7 +453,7 @@ namespace Business.Attributes //Annotations
         public string DocPhysicalPath { get; internal set; }
 
         /// <summary>
-        /// Document Web request path
+        /// Document web request path
         /// </summary>
         public string DocRequestPath { get; internal set; }
 

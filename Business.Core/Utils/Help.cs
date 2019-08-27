@@ -373,9 +373,9 @@ namespace Business.Utils
         /// </summary>
         /// <typeparam name="Business"></typeparam>
         /// <param name="business"></param>
-        /// <param name="outFile"></param>
+        /// <param name="outDir"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(this Business business, string outFile = null, string requestPath = null) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outFile, requestPath);
+        public static Business UseDoc<Business>(this Business business, string outDir = null, string requestPath = null) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, requestPath);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -384,9 +384,9 @@ namespace Business.Utils
         /// <typeparam name="DocArg"></typeparam>
         /// <param name="business"></param>
         /// <param name="argCallback"></param>
-        /// <param name="outFile"></param>
+        /// <param name="outDir"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, string outFile = null, string requestPath = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, string outDir = null, string requestPath = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -402,19 +402,23 @@ namespace Business.Utils
 
             business.Configer.Doc = UseDoc(business, argCallback, xml?.members?.ToDictionary(c => c.name, c => c));
 
-            if (!string.IsNullOrEmpty(outFile))
+            if (!string.IsNullOrEmpty(outDir))
             {
-                if (outFile.Contains("{BusinessName}"))
-                {
-                    outFile = outFile.Replace("{BusinessName}", business.Configer.Info.BusinessName);
-                }
+                //if (outFile.Contains("{BusinessName}"))
+                //{
+                //    outFile = outFile.Replace("{BusinessName}", business.Configer.Info.BusinessName);
+                //}
 
-                if (System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(outFile)))
-                {
-                    business.Configer.Info.DocPhysicalPath = outFile;
-                    business.Configer.Info.DocRequestPath = System.IO.Path.Combine(string.IsNullOrEmpty(requestPath) ? "http://localhost:5000" : requestPath, System.IO.Path.GetFileName(outFile));
+                var dir = System.IO.Path.GetDirectoryName(outDir);
 
-                    System.IO.File.WriteAllText(outFile, business.Configer.Doc.ToString(), UTF8);
+                if (System.IO.Directory.Exists(dir))
+                {
+                    var file = System.IO.Path.Combine(dir, $"{business.Configer.Info.BusinessName}.doc");
+
+                    business.Configer.Info.DocPhysicalPath = file;
+                    business.Configer.Info.DocRequestPath = System.IO.Path.Combine(string.IsNullOrEmpty(requestPath) ? "http://localhost:5000" : requestPath, System.IO.Path.GetFileName(file));
+
+                    System.IO.File.WriteAllText(file, business.Configer.Doc.ToString(), UTF8);
                 }
             }
 

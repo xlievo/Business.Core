@@ -123,7 +123,7 @@ public class Program
 {
     public static string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{System.AppDomain.CurrentDomain.FriendlyName}.log.txt");
 
-    public static string addresses = string.Empty;
+    public static Host Host = new Host();
 
     public static void Main(string[] args)
     {
@@ -132,9 +132,9 @@ public class Program
         System.Console.WriteLine($"LogPath = {LogPath}");
 
         var host = CreateWebHostBuilder(args).Build();
-        addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault();
+        Host.Addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault();
 
-        System.Console.WriteLine($"Addresses = {addresses}");
+        System.Console.WriteLine($"Addresses = {Host.Addresses}");
         host.Run();
     }
 
@@ -150,10 +150,6 @@ public class Program
 
 public class Startup
 {
-    public IConfigurationSection appSettings = null;
-    public IHostingEnvironment env;
-    public System.Net.Http.IHttpClientFactory httpClientFactory;
-
     public static int ReceiveBufferSize;
 
     public static int MaxDegreeOfParallelism;
@@ -179,7 +175,7 @@ public class Startup
         System.Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
 
         Configuration = configuration;
-        appSettings = Configuration.GetSection("AppSettings");
+        Program.Host.AppSettings = Configuration.GetSection("AppSettings");
 
         //var doc = GetSwagger().JsonSerialize();
     }
@@ -209,11 +205,22 @@ public class Startup
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
             });
 
-        httpClientFactory = services.AddHttpClient("")
-        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+
+        Program.Host.HttpClientFactory = services.AddHttpClient("")
+        .ConfigurePrimaryHttpMessageHandler(() =>
         {
-            AllowAutoRedirect = false,
-            UseDefaultCredentials = true,
+            var handler = new HttpClientHandler()
+            {
+                AllowAutoRedirect = false,
+                UseDefaultCredentials = true,
+            };
+
+            if (Program.Host.ENV.IsDevelopment())
+            {
+                handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            }
+
+            return handler;
         })
         .Services
         .BuildServiceProvider()
@@ -224,7 +231,7 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IHostingEnvironment env)
     {
-        this.env = env;
+        Program.Host.ENV = env;
 
         if (env.IsDevelopment())
         {
@@ -270,7 +277,7 @@ public class Startup
 
         //==================First step==================//
         //1
-        Configer.LoadBusiness(new object[] { new Host { Addresses = Program.addresses, AppSettings = appSettings, ENV = env, HttpClientFactory = httpClientFactory } });
+        Configer.LoadBusiness(new object[] { Program.Host });
         //Configer.UseType(typeof(HttpContext), typeof(WebSocket));
         //2
         Configer.UseType("context");
@@ -278,7 +285,7 @@ public class Startup
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
         //==================The third step==================//
         //3
-        Uri.TryCreate(System.IO.Path.Combine(Program.addresses, requestPath), UriKind.Absolute, out Uri uri);
+        Uri.TryCreate(System.IO.Path.Combine(Program.Host.Addresses, requestPath), UriKind.Absolute, out Uri uri);
         Configer.UseDoc(System.IO.Path.Combine(wwwroot), uri?.AbsoluteUri);
         ////4
         //var docPath = System.IO.Path.Combine(wwwroot, "doc2", "index.html");
@@ -358,7 +365,7 @@ public class Startup
 
         MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
 
-        var webSocketcfg = appSettings.GetSection("WebSocket");
+        var webSocketcfg = Program.Host.AppSettings.GetSection("WebSocket");
         var keepAliveInterval = GetValue(webSocketcfg, "KeepAliveInterval", 120);
         ReceiveBufferSize = GetValue(webSocketcfg, "ReceiveBufferSize", 4096);
         MaxDegreeOfParallelism = GetValue(webSocketcfg, "MaxDegreeOfParallelism", -1);
