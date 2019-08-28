@@ -182,6 +182,8 @@ namespace Business.Document
 
     public interface IDoc
     {
+        string Host { get; set; }
+
         string Name { get; set; }
 
         string Description { get; set; }
@@ -230,12 +232,14 @@ namespace Business.Document
 
     public class Doc<DocArg> : IDoc<DocArg> where DocArg : IDocArg<DocArg>
     {
+        public string Host { get; set; }
+
         public string Name { get; set; }
 
         public Dictionary<string, Dictionary<string, IMember<DocArg>>> Members { get; set; }
 
         public string Description { get; set; }
-
+       
         dynamic IDoc.Members { get => Members; }
 
         /// <summary>

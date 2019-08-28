@@ -549,11 +549,12 @@ namespace Business
         /// Generating Document Model for All Business Classes
         /// </summary>
         /// <param name="outDir"></param>
-        public static void UseDoc(string outDir = null, string requestPath = null)
+        /// <param name="host"></param>
+        public static void UseDoc(string outDir = null, string host = null)
         {
             foreach (var item in BusinessList.Values)
             {
-                item.UseDoc(outDir, requestPath);
+                item.UseDoc(outDir, host);
             }
         }
 

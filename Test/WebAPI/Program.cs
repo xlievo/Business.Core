@@ -245,8 +245,6 @@ public class Startup
             System.IO.Directory.CreateDirectory(wwwroot);
         }
 
-        var requestPath = string.Empty;
-
         // Set up custom content types -associating file extension to MIME type
         var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
         //provider.Mappings[".yaml"] = "text/yaml";
@@ -254,7 +252,6 @@ public class Startup
         app.UseDefaultFiles().UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwroot),
-            RequestPath = requestPath,
             ContentTypeProvider = provider,
             OnPrepareResponse = c =>
             {
@@ -285,12 +282,13 @@ public class Startup
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
         //==================The third step==================//
         //3
-        Uri.TryCreate(System.IO.Path.Combine(Program.Host.Addresses, requestPath), UriKind.Absolute, out Uri uri);
-        Configer.UseDoc(System.IO.Path.Combine(wwwroot), uri?.AbsoluteUri);
-        ////4
-        //var docPath = System.IO.Path.Combine(wwwroot, "doc2", "index.html");
-        //var doc = System.IO.File.ReadAllText(docPath, System.Text.Encoding.UTF8);
-        //System.IO.File.WriteAllText(docPath, doc.Replace("{URL}", Program.addresses), System.Text.Encoding.UTF8);
+        //Uri.TryCreate(System.IO.Path.Combine(Program.Host.Addresses, requestPath), UriKind.Absolute, out Uri uri);
+        Configer.UseDoc(System.IO.Path.Combine(wwwroot), Program.Host.Addresses);
+        //4
+        var docPath = System.IO.Path.Combine(wwwroot, "doc2", "index.tmp");
+        var doc = System.IO.File.ReadAllText(docPath, System.Text.Encoding.UTF8);
+        var docRequestPath = Configer.BusinessList.FirstOrDefault().Value.Configer.Info.DocRequestPath;
+        System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, "doc2", "index.html"), doc.Replace("{URL}", docRequestPath), System.Text.Encoding.UTF8);
 
         //==================The second step==================//
         //add route
@@ -298,12 +296,6 @@ public class Startup
         {
             foreach (var item in Configer.BusinessList)
             {
-                var docPath = item.Value.Configer.Info.DocRequestPath;
-                if (!string.IsNullOrWhiteSpace(docPath))
-                {
-                    //..
-                }
-
                 routes.MapRoute(
                  name: item.Key,
                  template: string.Format("{0}/{{*path}}", item.Key),

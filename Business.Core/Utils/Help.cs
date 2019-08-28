@@ -18,6 +18,7 @@
 namespace Business.Utils
 {
     using Business.Document;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -374,8 +375,9 @@ namespace Business.Utils
         /// <typeparam name="Business"></typeparam>
         /// <param name="business"></param>
         /// <param name="outDir"></param>
+        /// <param name="host"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(this Business business, string outDir = null, string requestPath = null) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, requestPath);
+        public static Business UseDoc<Business>(this Business business, string outDir = null, string host = null) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, host);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -385,8 +387,9 @@ namespace Business.Utils
         /// <param name="business"></param>
         /// <param name="argCallback"></param>
         /// <param name="outDir"></param>
+        /// <param name="host"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, string outDir = null, string requestPath = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, string outDir = null, string host = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -400,7 +403,7 @@ namespace Business.Utils
                 xml = Configer.Xmls.dictionary.GetOrAdd(path, Xml.DeserializeDoc(FileReadString(path)));
             }
 
-            business.Configer.Doc = UseDoc(business, argCallback, xml?.members?.ToDictionary(c => c.name, c => c));
+            business.Configer.Doc = UseDoc(business, argCallback, xml?.members?.ToDictionary(c => c.name, c => c), host);
 
             if (!string.IsNullOrEmpty(outDir))
             {
@@ -416,7 +419,8 @@ namespace Business.Utils
                     var file = System.IO.Path.Combine(dir, $"{business.Configer.Info.BusinessName}.doc");
 
                     business.Configer.Info.DocPhysicalPath = file;
-                    business.Configer.Info.DocRequestPath = System.IO.Path.Combine(string.IsNullOrEmpty(requestPath) ? "http://localhost:5000" : requestPath, System.IO.Path.GetFileName(file));
+
+                    business.Configer.Info.DocRequestPath = Uri.TryCreate($"{host ?? string.Empty}/{System.IO.Path.GetFileName(file)}", UriKind.Absolute, out Uri uri) ? uri.AbsoluteUri : $"http://localhost:5000{"/"}{System.IO.Path.GetFileName(file)}";
 
                     System.IO.File.WriteAllText(file, business.Configer.Doc.ToString(), UTF8);
                 }
@@ -433,8 +437,9 @@ namespace Business.Utils
         /// <param name="business"></param>
         /// <param name="argCallback"></param>
         /// <param name="xmlMembers"></param>
+        /// <param name="host"></param>
         /// <returns></returns>
-        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string host = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
@@ -463,7 +468,7 @@ namespace Business.Utils
                 return member2;
             }));
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Members = members };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Members = members, Host = Uri.TryCreate(host, UriKind.Absolute, out Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : "http://localhost:5000" };
         }
 
         const string AttributeSign = "Attribute";
