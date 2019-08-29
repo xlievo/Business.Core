@@ -1189,13 +1189,10 @@
                 <!--<button class="btn btn-default" type="button" onclick="go()">
                     Go!
                 </button>-->
-                <select id="business" class="btn btn-default" onchange="selectOnchang(this)">
+                <select id="business" class="btn btn-default" onchange="businessOnchang(this)">
                     {Business}
                 </select>
-                <select id="group" class="btn btn-default dropdown-toggle">
-                    <!--<option value="">ss</option>
-                    <option value="" selected="selected">33 </option>
-                    <option value="">j</option>-->
+                <select id="group" class="btn btn-default dropdown-toggle" onchange="groupOnchang(this)">
                 </select>
             </div>
         </div><!-- /input-group -->
@@ -1230,165 +1227,188 @@
     </script>
 
     <script>
+        var doc = null;
+        var disclosure = null;
+        var compiled_tpl = juicer(document.getElementById('tpl').innerHTML);
+        var edit = false;
 
-        selectOnchang(document.getElementById('business'));
-
-        //const choices = new Choices("select");
         var $trigger = function (el, event) {
             var e = document.createEvent('HTMLEvents');
             e.initEvent(event, true, true);
             el.dispatchEvent(e);
         };
 
-        var disclosure = null;
-        var compiled_tpl = juicer(document.getElementById('tpl').innerHTML);
-        var edit = false;
+        businessOnchang(document.getElementById('business'));
 
-        function selectOnchang(obj) {
+        function businessOnchang(obj) {
             document.querySelector("#url").value = obj.options[obj.selectedIndex].value;
             go();
         }
 
-        function go() {
-            document.getElementById('members').innerHTML = null;
+        function groupOnchang(obj) {
+            if (null != doc) {
+                load(doc.group[obj.options[obj.selectedIndex].value]);
+            }
+        }
 
+        function destroy(all = false) {
+            document.querySelector("#members").innerHTML = null;
             if (null != disclosure) {
                 disclosure.destroy();
                 disclosure = null;
             }
 
+            if (all) {
+                document.querySelector("#group").options.length = 0;
+                doc = null;
+            }
+        }
+
+        function go() {
+            destroy(true);
+
             atomic(document.querySelector("#url").value)
                 .then(function (response) {
                     //console.log(response.data); // xhr.responseText
                     //console.log(response.xhr);  // full response
-                    var doc = response.data;
+                    doc = response.data;
 
-                    var group = doc.members;
-
+                    var def = count = 0;
                     var groupElement = document.querySelector("#group");
-                    groupElement.options.length=0
-                    for (var i in group) {
+                    for (var i in doc.group) {
+                        if (i === doc.groupDefault) {
+                            def = count;
+                        }
+                        count++;
                         groupElement.options.add(new Option(i, i));
                     }
 
-                    var members = group["j"];
-                    var members2 = []
-                    for (var i in members) {
-                        members2.push(members[i]);
-                    }
+                    if (0 == count) { return; }
 
-                    var html = compiled_tpl.render(members2);
-                    document.getElementById('members').innerHTML = html;
-
-                    //=============================================//
-                    members2.forEach(member => {
-                        //==================input==================//
-                        var inputid = member.name + '_input';
-
-                        var input = {
-                            title: "Input",
-                            type: "object",
-                            edit: !edit,
-                            argSingle: member.argSingle,
-                            name: member.name,
-                            properties: {
-                                t: {},
-                                d: {
-                                    id: member.name + '.d',
-                                    title: "d (Array)",
-                                    type: "object",
-                                    description: "API data",
-                                    properties: {}
-                                }
-                            }
-                        };
-
-                        var hasToken = false;
-                        var token = null;
-                        for (var i in member.properties) {
-                            if (member.properties[i].token) {
-                                hasToken = true;
-                                token = member.properties[i];
-                            } else {
-                                if (member.argSingle) {
-                                    input.properties.d = member.properties[i];
-                                    input.properties.d.id = member.name + '.d';
-
-                                    var title = member.properties[i].lastType;
-                                    if (member.properties[i].array) {
-                                        title += " Array";
-                                    }
-                                    input.properties.d.title = "d (" + title + ")";
-                                }
-                                else {
-                                    input.properties.d.properties[i] = member.properties[i];
-                                }
-                            }
-                        }
-
-                        if (!hasToken) {
-                            delete input.properties.t;
-                        }
-                        else {
-                            input.properties.t = token;
-                            input.properties.t.id = member.name + '.t';
-                            input.properties.t.title = "t (String)";
-                        }
-
-                        if ("{}" == JSON.stringify(input.properties.d.properties)) {
-                            delete input.properties.d;
-                        }
-
-                        //if (input.properties.t || input.properties.d) {
-                        //    input.type = "null";
-                        //}
-
-                        var inputeditor = new JSONEditor(document.getElementById(inputid), {
-                            // The schema for the editor
-                            schema: input
-                        });
-
-                        ready(inputeditor);
-
-                        //========================================//
-
-                        //==================sdk==================//
-                        var outid = member.name + '_out';
-                        var sdkid = member.name + '_sdk';
-                        inputeditor.sdkeditor = new JSONEditor(document.getElementById(sdkid), {
-                            // Enable fetching schemas via ajax
-                            //ajax: true,
-                            schema: {
-                                title: "SDK",
-                                type: "object",
-                                format: "categories",
-                                properties: {
-                                    NET: getSdk("csharp"),
-                                    Java: getSdk("java"),
-                                    PHP: getSdk("php")
-                                }
-                            }
-                        });
-
-                        document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
-                        //========================================//
-                    });
-
-                    //set all edit
-                    setEdit(document, edit);
-
-                    document.querySelectorAll('#NET > div > div > h4').forEach(c => c.style.display = 'none');
-                    document.querySelectorAll('#Java > div > div > h4').forEach(c => c.style.display = 'none');
-                    document.querySelectorAll('#PHP > div > div > h4').forEach(c => c.style.display = 'none');
-                    document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-                    document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-                    document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-
-                    disclosure = new Houdini('[data-houdini]');
+                    groupElement.options.selectedIndex = def;
+                    groupOnchang(document.querySelector("#group"));
                 })
                 .catch(function (error) {
                     console.log(error);
                 });
+        }
+
+        function load(members) {
+            destroy();
+
+            var members2 = []
+            for (var i in members) {
+                members2.push(members[i]);
+            }
+
+            var html = compiled_tpl.render(members2);
+            document.getElementById('members').innerHTML = html;
+
+            //=============================================//
+            members2.forEach(member => {
+                //==================input==================//
+                var inputid = member.name + '_input';
+
+                var input = {
+                    title: "Input",
+                    type: "object",
+                    edit: !edit,
+                    argSingle: member.argSingle,
+                    name: member.name,
+                    properties: {
+                        t: {},
+                        d: {
+                            id: member.name + '.d',
+                            title: "d (Array)",
+                            type: "object",
+                            description: "API data",
+                            properties: {}
+                        }
+                    }
+                };
+
+                var hasToken = false;
+                var token = null;
+                for (var i in member.properties) {
+                    if (member.properties[i].token) {
+                        hasToken = true;
+                        token = member.properties[i];
+                    } else {
+                        if (member.argSingle) {
+                            input.properties.d = member.properties[i];
+                            input.properties.d.id = member.name + '.d';
+
+                            var title = member.properties[i].lastType;
+                            if (member.properties[i].array) {
+                                title += " Array";
+                            }
+                            input.properties.d.title = "d (" + title + ")";
+                        }
+                        else {
+                            input.properties.d.properties[i] = member.properties[i];
+                        }
+                    }
+                }
+
+                if (!hasToken) {
+                    delete input.properties.t;
+                }
+                else {
+                    input.properties.t = token;
+                    input.properties.t.id = member.name + '.t';
+                    input.properties.t.title = "t (String)";
+                }
+
+                if ("{}" == JSON.stringify(input.properties.d.properties)) {
+                    delete input.properties.d;
+                }
+
+                //if (input.properties.t || input.properties.d) {
+                //    input.type = "null";
+                //}
+
+                var inputeditor = new JSONEditor(document.getElementById(inputid), {
+                    // The schema for the editor
+                    schema: input
+                });
+
+                ready(inputeditor);
+
+                //========================================//
+
+                //==================sdk==================//
+                var outid = member.name + '_out';
+                var sdkid = member.name + '_sdk';
+                inputeditor.sdkeditor = new JSONEditor(document.getElementById(sdkid), {
+                    // Enable fetching schemas via ajax
+                    //ajax: true,
+                    schema: {
+                        title: "SDK",
+                        type: "object",
+                        format: "categories",
+                        properties: {
+                            NET: getSdk("csharp"),
+                            Java: getSdk("java"),
+                            PHP: getSdk("php")
+                        }
+                    }
+                });
+
+                document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
+                //========================================//
+            });
+
+            //set all edit
+            setEdit(document, edit);
+
+            document.querySelectorAll('#NET > div > div > h4').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('#Java > div > div > h4').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('#PHP > div > div > h4').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+
+            disclosure = new Houdini('[data-houdini]');
         }
 
         function setEdit(root, edit) {

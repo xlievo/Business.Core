@@ -188,12 +188,14 @@ namespace Business.Document
 
         string Description { get; set; }
 
-        dynamic Members { get; }
+        dynamic Group { get; }
+
+        string GroupDefault { get; set; }
     }
 
     public interface IDoc<DocArg> : IDoc where DocArg : IDocArg<DocArg>
     {
-        new Dictionary<string, Dictionary<string, IMember<DocArg>>> Members { get; set; }
+        new Dictionary<string, Dictionary<string, IMember<DocArg>>> Group { get; set; }
     }
 
     public interface IMember<DocArg> where DocArg : IDocArg<DocArg>
@@ -236,11 +238,13 @@ namespace Business.Document
 
         public string Name { get; set; }
 
-        public Dictionary<string, Dictionary<string, IMember<DocArg>>> Members { get; set; }
+        public Dictionary<string, Dictionary<string, IMember<DocArg>>> Group { get; set; }
 
         public string Description { get; set; }
        
-        dynamic IDoc.Members { get => Members; }
+        dynamic IDoc.Group { get => Group; }
+
+        public string GroupDefault { get; set; }
 
         /// <summary>
         /// Json format

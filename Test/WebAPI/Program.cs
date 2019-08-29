@@ -290,7 +290,7 @@ public class Startup
         {
             var business = new System.Text.StringBuilder(null);
 
-            foreach (var item in Configer.BusinessList)
+            foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
             {
                 var selected = 0 == business.Length ? " selected = \"selected\"" : string.Empty;
                 business.AppendLine($"<option value = \"{item.Value.Configer.Info.DocRequestPath}\"{selected}>{item.Value.Configer.Info.BusinessName}</option >");

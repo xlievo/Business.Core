@@ -422,6 +422,16 @@ namespace Business.Utils
             return business;
         }
 
+        public static string FirstCharToLower(this string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return input;
+            }
+
+            return input.First().ToString().ToLower() + input.Substring(1);
+        }
+
         /// <summary>
         /// Gets the document object of the specified business class.
         /// </summary>
@@ -436,32 +446,32 @@ namespace Business.Utils
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
-            var members = business.Command.AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
-            {
-                var meta = c2.Value.Meta;
+            var group = business.Command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
+              {
+                  var meta = c2.Value.Meta;
 
-                Xml.member member = null;
-                xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
+                  Xml.member member = null;
+                  xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
 
-                var member2 = new Member<DocArg>
-                {
-                    Name = meta.CommandGroup[c2.Value.Key].OnlyName,
-                    HasReturn = meta.HasReturn,
-                    Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
+                  var member2 = new Member<DocArg>
+                  {
+                      Name = meta.CommandGroup[c2.Value.Key].OnlyName,
+                      HasReturn = meta.HasReturn,
+                      Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
                     //Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
                     Args = new Dictionary<string, DocArg>(),
-                    ArgSingle = c2.Value.HasArgSingle,
-                } as IMember<DocArg>;
+                      ArgSingle = c2.Value.HasArgSingle,
+                  } as IMember<DocArg>;
 
-                foreach (var item in meta.Args.Where(c3 => !c3.Group[c2.Value.Key].IgnoreArg))
-                {
-                    member2.Args.Add(item.Name, GetDocArg(c2.Value.Key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
-                }
+                  foreach (var item in meta.Args.Where(c3 => !c3.Group[c2.Value.Key].IgnoreArg))
+                  {
+                      member2.Args.Add(item.Name, GetDocArg(c2.Value.Key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                  }
 
-                return member2;
-            }));
+                  return member2;
+              }));
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Members = members, Host = Uri.TryCreate(host, UriKind.Absolute, out Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : "http://localhost:5000" };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = business.Configer.Info.CommandGroupDefault.FirstCharToLower(), Host = Uri.TryCreate(host, UriKind.Absolute, out Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : "http://localhost:5000" };
         }
 
         const string AttributeSign = "Attribute";

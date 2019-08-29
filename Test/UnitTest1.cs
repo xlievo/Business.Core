@@ -1255,18 +1255,18 @@ public class TestBusinessMember
     public void TestCfgDoc()
     {
         Assert.AreNotEqual(Cfg.Doc, null);
-        Assert.AreEqual(Cfg.Doc.Members.Count, 3);
-        Assert.AreEqual(Cfg.Doc.Members.ContainsKey(CommandGroupDefault.Group), true);
-        Assert.AreEqual(Cfg.Doc.Members.ContainsKey("G01"), true);
-        Assert.AreEqual(Cfg.Doc.Members.ContainsKey("G02"), true);
+        Assert.AreEqual(Cfg.Doc.Group.Count, 3);
+        Assert.AreEqual(Cfg.Doc.Group.ContainsKey(CommandGroupDefault.Group), true);
+        Assert.AreEqual(Cfg.Doc.Group.ContainsKey("G01"), true);
+        Assert.AreEqual(Cfg.Doc.Group.ContainsKey("G02"), true);
 
-        Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group].ContainsKey("Test001"), true);
-        Assert.AreEqual(Cfg.Doc.Members["G01"].ContainsKey("G01Test001"), true);
-        Assert.AreEqual(Cfg.Doc.Members["G01"].ContainsKey("G01Test002"), true);
+        Assert.AreEqual(Cfg.Doc.Group[CommandGroupDefault.Group].ContainsKey("Test001"), true);
+        Assert.AreEqual(Cfg.Doc.Group["G01"].ContainsKey("G01Test001"), true);
+        Assert.AreEqual(Cfg.Doc.Group["G01"].ContainsKey("G01Test002"), true);
 
-        Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Description, "This is Test001.");
-        Assert.AreEqual(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args["use01"].Description, "This is use01.");
-        Assert.IsTrue(Cfg.Doc.Members[CommandGroupDefault.Group]["Test001"].Args["arg01"].Description.StartsWith("This is Arg01."));
+        Assert.AreEqual(Cfg.Doc.Group[CommandGroupDefault.Group]["Test001"].Description, "This is Test001.");
+        Assert.AreEqual(Cfg.Doc.Group[CommandGroupDefault.Group]["Test001"].Args["use01"].Description, "This is use01.");
+        Assert.IsTrue(Cfg.Doc.Group[CommandGroupDefault.Group]["Test001"].Args["arg01"].Description.StartsWith("This is Arg01."));
     }
 
     [TestMethod]
