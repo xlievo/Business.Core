@@ -282,24 +282,23 @@ public class Startup
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
         //==================The third step==================//
         //3
-        //Uri.TryCreate(System.IO.Path.Combine(Program.Host.Addresses, requestPath), UriKind.Absolute, out Uri uri);
         Configer.UseDoc(System.IO.Path.Combine(wwwroot), Program.Host.Addresses);
-        //4
-        var docPath = System.IO.Path.Combine(wwwroot, "doc2", "index.tmp");
-        var doc = System.IO.File.ReadAllText(docPath, System.Text.Encoding.UTF8);
-        var docRequestPath = Configer.BusinessList.FirstOrDefault().Value.Configer.Info.DocRequestPath;
-        System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, "doc2", "index.html"), doc.Replace("{URL}", docRequestPath), System.Text.Encoding.UTF8);
 
         //==================The second step==================//
         //add route
         app.UseMvc(routes =>
         {
+            var business = new System.Text.StringBuilder(null);
+
             foreach (var item in Configer.BusinessList)
             {
+                var selected = 0 == business.Length ? " selected = \"selected\"" : string.Empty;
+                business.AppendLine($"<option value = \"{item.Value.Configer.Info.DocRequestPath}\"{selected}>{item.Value.Configer.Info.BusinessName}</option >");
+
                 routes.MapRoute(
-                 name: item.Key,
-                 template: string.Format("{0}/{{*path}}", item.Key),
-                 defaults: new { controller = "Business", action = "Call" });
+                name: item.Key,
+                template: string.Format("{0}/{{*path}}", item.Key),
+                defaults: new { controller = "Business", action = "Call" });
 
                 //foreach (var group in item.Value.Configer.Doc.Members.Values)
                 //{
@@ -351,6 +350,11 @@ public class Startup
                 //    }
                 //}
             }
+
+            //4
+            var docPath = System.IO.Path.Combine(wwwroot, "doc2", "index.tmp");
+            var doc = System.IO.File.ReadAllText(docPath, System.Text.Encoding.UTF8);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, "doc2", "index.html"), doc.Replace("{URL}", Configer.BusinessList.FirstOrDefault().Value.Configer.Info.DocRequestPath).Replace("{Business}", business.ToString()), System.Text.Encoding.UTF8);
         });
 
         #region AcceptWebSocket

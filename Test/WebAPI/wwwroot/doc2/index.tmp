@@ -22,6 +22,7 @@
     <script type="text/javascript" src="/doc2/DOMPurify/purify.min.js"></script>
 
     <style type="text/css">
+
     </style>
 
     <script>
@@ -1183,25 +1184,19 @@
     <div class='container'>
         <div class="input-group input-group-lg" style="padding-top: 20px;
         padding-bottom: 20px;">
-            <!--<div class="input-group-btn">
-                <select class="btn btn-default">
-                    <option value="Five">ss</option>
-                    <option value="Five" selected="selected">33 </option>
-                    <option value="Five">j</option>
-                </select>
-            </div>-->
-            <!--http://localhost:5000/API.doc-->
             <input id="url" type="text" class="form-control" value="{URL}">
             <div class="input-group-btn">
-                <button class="btn btn-default" type="button" onclick="go()">
+                <!--<button class="btn btn-default" type="button" onclick="go()">
                     Go!
-                </button>
-                <select class="btn btn-default dropdown-toggle">
-                    <option value="Five">ss</option>
-                    <option value="Five" selected="selected">33 </option>
-                    <option value="Five">j</option>
+                </button>-->
+                <select id="business" class="btn btn-default" onchange="selectOnchang(this)">
+                    {Business}
                 </select>
-
+                <select id="group" class="btn btn-default dropdown-toggle">
+                    <!--<option value="">ss</option>
+                    <option value="" selected="selected">33 </option>
+                    <option value="">j</option>-->
+                </select>
             </div>
         </div><!-- /input-group -->
         <!-- ============================= -->
@@ -1236,6 +1231,8 @@
 
     <script>
 
+        selectOnchang(document.getElementById('business'));
+
         //const choices = new Choices("select");
         var $trigger = function (el, event) {
             var e = document.createEvent('HTMLEvents');
@@ -1247,18 +1244,34 @@
         var compiled_tpl = juicer(document.getElementById('tpl').innerHTML);
         var edit = false;
 
+        function selectOnchang(obj) {
+            document.querySelector("#url").value = obj.options[obj.selectedIndex].value;
+            go();
+        }
+
         function go() {
+            document.getElementById('members').innerHTML = null;
+
+            if (null != disclosure) {
+                disclosure.destroy();
+                disclosure = null;
+            }
+
             atomic(document.querySelector("#url").value)
                 .then(function (response) {
-                    if (null != disclosure) {
-                        disclosure.destroy();
-                    }
-
-                    console.log(response.data); // xhr.responseText
+                    //console.log(response.data); // xhr.responseText
                     //console.log(response.xhr);  // full response
                     var doc = response.data;
 
-                    var members = doc.members["j"];
+                    var group = doc.members;
+
+                    var groupElement = document.querySelector("#group");
+                    groupElement.options.length=0
+                    for (var i in group) {
+                        groupElement.options.add(new Option(i, i));
+                    }
+
+                    var members = group["j"];
                     var members2 = []
                     for (var i in members) {
                         members2.push(members[i]);
@@ -1375,7 +1388,6 @@
                 })
                 .catch(function (error) {
                     console.log(error);
-                    return null;
                 });
         }
 

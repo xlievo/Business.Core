@@ -407,16 +407,9 @@ namespace Business.Utils
 
             if (!string.IsNullOrEmpty(outDir))
             {
-                //if (outFile.Contains("{BusinessName}"))
-                //{
-                //    outFile = outFile.Replace("{BusinessName}", business.Configer.Info.BusinessName);
-                //}
-
-                var dir = System.IO.Path.GetDirectoryName(outDir);
-
-                if (System.IO.Directory.Exists(dir))
+                if (System.IO.Directory.Exists(outDir))
                 {
-                    var file = System.IO.Path.Combine(dir, $"{business.Configer.Info.BusinessName}.doc");
+                    var file = System.IO.Path.Combine(outDir, $"{business.Configer.Info.BusinessName}.doc");
 
                     business.Configer.Info.DocPhysicalPath = file;
 
