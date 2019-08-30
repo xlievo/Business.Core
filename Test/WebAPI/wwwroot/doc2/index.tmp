@@ -22,7 +22,34 @@
     <script type="text/javascript" src="/doc2/DOMPurify/purify.min.js"></script>
 
     <style type="text/css">
+    </style>
+    <style id="emacsMode">
+        .emacs-mode .ace_cursor {
+            border: 1px rgba(50,250,50,0.8) solid !important;
+            box-sizing: border-box !important;
+            background-color: rgba(0,250,0,0.9);
+            opacity: 0.5;
+        }
 
+        .emacs-mode .ace_hidden-cursors .ace_cursor {
+            opacity: 1;
+            background-color: transparent;
+        }
+
+        .emacs-mode .ace_overwrite-cursors .ace_cursor {
+            opacity: 1;
+            background-color: transparent;
+            border-width: 0 0 2px 2px !important;
+        }
+
+        .emacs-mode .ace_text-layer {
+            z-index: 4
+        }
+
+        .emacs-mode .ace_cursor-layer {
+            z-index: 2
+        }
+        /*# sourceURL=ace/css/emacsMode */
     </style>
 
     <script>
@@ -1593,18 +1620,21 @@ class Program\n\
             panel.removeAttribute("class"); panel.removeAttribute("style");
             var row = sdk.querySelector("#NET > div > div > div[tag='panel'] > div > div > div[tag='row']");
             row.removeAttribute("class"); row.removeAttribute("style");
+            sdk.querySelector("#NET > div > div > div[tag='panel'] > div > div > div[tag='row'] > div").classList.add("emacs-mode");
 
             sdk.querySelector('#Java > div > div').removeAttribute("class");
             var panel = sdk.querySelector("#Java > div > div > div[tag='panel']");
             panel.removeAttribute("class"); panel.removeAttribute("style");
             var row = sdk.querySelector("#Java > div > div > div[tag='panel'] > div > div > div[tag='row']");
             row.removeAttribute("class"); row.removeAttribute("style");
+            sdk.querySelector("#Java > div > div > div[tag='panel'] > div > div > div[tag='row'] > div").classList.add("emacs-mode");
 
             sdk.querySelector('#PHP > div > div').removeAttribute("class");
             var panel = sdk.querySelector("#PHP > div > div > div[tag='panel']");
             panel.removeAttribute("class"); panel.removeAttribute("style");
             var row = sdk.querySelector("#PHP > div > div > div[tag='panel'] > div > div > div[tag='row']");
             row.removeAttribute("class"); row.removeAttribute("style");
+            sdk.querySelector("#PHP > div > div > div[tag='panel'] > div > div > div[tag='row'] > div").classList.add("emacs-mode");
         }
 
         function getSdk(format) {
@@ -1617,6 +1647,7 @@ class Program\n\
                         options: {
                             ace: {
                                 theme: "ace/theme/vibrant_ink",
+                                wrap: true,
                                 useWorker: false,
                                 tabSize: 4,
                                 readOnly: true,

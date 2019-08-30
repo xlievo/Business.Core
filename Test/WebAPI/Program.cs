@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net.Http;
 using Microsoft.Net.Http.Headers;
 using Business;
@@ -175,9 +174,6 @@ public class Startup
         System.Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
 
         Configuration = configuration;
-        Program.Host.AppSettings = Configuration.GetSection("AppSettings");
-
-        //var doc = GetSwagger().JsonSerialize();
     }
 
     public IConfiguration Configuration { get; }
@@ -205,7 +201,6 @@ public class Startup
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
             });
 
-
         Program.Host.HttpClientFactory = services.AddHttpClient("")
         .ConfigurePrimaryHttpMessageHandler(() =>
         {
@@ -231,8 +226,6 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IHostingEnvironment env)
     {
-        Program.Host.ENV = env;
-
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -272,6 +265,8 @@ public class Startup
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto }).UseAuthentication().UseCors("any");
 
+        Program.Host.AppSettings = Configuration.GetSection("AppSettings");
+        Program.Host.ENV = env;
         //==================First step==================//
         //1
         Configer.LoadBusiness(new object[] { Program.Host });
