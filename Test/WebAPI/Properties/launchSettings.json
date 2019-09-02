@@ -26,8 +26,8 @@
       //"launchUrl": "API?d=[\"[{\\\"A\\\":\\\"ok\\\",\\\"B\\\":\\\"bbb\\\"}]\"]&c=Test004&t=dddd",
       "launchUrl": "doc2/index.html", //"doc/API.html",
       //"launchUrl": "/index.html", //"doc/API.html",
-      //"applicationUrl": "http://localhost:5000",
-      "applicationUrl": "http://192.168.1.107:5000",
+      "applicationUrl": "http://localhost:5000",
+      //"applicationUrl": "http://192.168.1.107:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

@@ -19,7 +19,7 @@
             bbb
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Business.Auth.Token,Arg{Args.Test001},Arg{System.DateTime},System.Decimal,System.Object)">
+        <member name="M:BusinessMember2.Test001(Business.Auth.Token,Arg{Args.Test001},Arg{System.DateTime},Arg{System.Collections.Generic.Dictionary{System.String,System.Object}},System.Decimal,System.Int32)">
             <summary>
             test doc Test001
             and Test001

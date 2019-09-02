@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -126,7 +125,7 @@ public class Program
 
     public static void Main(string[] args)
     {
-        System.AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as System.Exception)?.ExceptionWrite(true, true, LogPath);
+        System.AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as Exception)?.ExceptionWrite(true, true, LogPath);
 
         System.Console.WriteLine($"LogPath = {LogPath}");
 
@@ -265,16 +264,24 @@ public class Startup
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto }).UseAuthentication().UseCors("any");
 
-        Program.Host.AppSettings = Configuration.GetSection("AppSettings");
+        Newtonsoft.Json.JsonConvert.DefaultSettings = (() =>
+        {
+            var settings = Help.JsonSettings;
+            settings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+            return settings;
+        });
+
         Program.Host.ENV = env;
+        Program.Host.AppSettings = Configuration.GetSection("AppSettings");
+        
         //==================First step==================//
         //1
         Configer.LoadBusiness(new object[] { Program.Host });
         //Configer.UseType(typeof(HttpContext), typeof(WebSocket));
         //2
-        Configer.UseType("context");
-        Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context");
-        Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context");
+        Configer.UseType("context", "socket");
+        Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket");
+        Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
         //==================The third step==================//
         //3
         Configer.UseDoc(System.IO.Path.Combine(wwwroot), Program.Host.Addresses);
@@ -294,56 +301,6 @@ public class Startup
                 name: item.Key,
                 template: string.Format("{0}/{{*path}}", item.Key),
                 defaults: new { controller = "Business", action = "Call" });
-
-                //foreach (var group in item.Value.Configer.Doc.Members.Values)
-                //{
-                //    foreach (var member in group.Values)
-                //    {
-                //        var json = new Business.Document.DocArg
-                //        {
-                //            Id = member.Name,
-                //            Title = member.Name,
-                //            Type = "object",
-                //            Description = member.Description,
-                //            Children = new Dictionary<string, Business.Document.DocArg>
-                //            {
-                //                { "Input", new Business.Document.DocArg { Children = new Dictionary<string, Business.Document.DocArg>() } },
-                //                { "Output", new Business.Document.DocArg { Children = new Dictionary<string, Business.Document.DocArg>() } }
-                //            },
-                //        };
-
-                //        var args = member.Args as Dictionary<string, Business.Document.DocArg>;
-                //        var tokens = args.Where(c => c.Value.Token).ToList();
-                //        foreach (var token in tokens)
-                //        {
-                //            args.Remove(token.Key);
-                //        }
-
-                //        if (0 < tokens.Count)
-                //        {
-                //            json.Children["Input"].Children.Add("t", new Business.Document.DocArg
-                //            {
-                //                Id = $"{member.Name}.t",
-                //                Title = "t (String)",
-                //                Type = "string",
-                //                Description = "API token",
-                //            });
-                //        }
-
-                //        json.Children["Input"].Children.Add("d", new Business.Document.DocArg
-                //        {
-                //            Id = $"{member.Name}.d",
-                //            Title = "d (JsonArray)",
-                //            Type = "object",
-                //            Children = args,
-                //            Description = "API data",
-                //        });
-
-                //        //in
-                //        // var data = json.JsonSerialize(Help.JsonSettings);
-
-                //    }
-                //}
             }
 
             //4
@@ -442,18 +399,11 @@ public class Startup
 
                     if (string.IsNullOrWhiteSpace(receiveData.a) || !Configer.BusinessList.TryGetValue(receiveData.a, out IBusiness business))
                     {
-                        result = Bind.BusinessError(ResultObject<string>.ResultTypeDefinition, receiveData.a);
+                        result = ResultObject<string>.ResultTypeDefinition.ErrorBusiness(receiveData.a);// Bind.BusinessError(ResultObject<string>.ResultTypeDefinition, receiveData.a);
                         await SendAsync(result.ToBytes(), id);
                     }
                     else
                     {
-                        var dict = new System.Dynamic.ExpandoObject() as IDictionary<string, object>; // context objects
-                        //dict.Add("Addresses", Program.Addresses);
-                        //dict.Add("AppSettings", Startup.AppSettings);
-                        //dict.Add("ENV", Startup.ENV);
-                        dict.Add("HttpContext", context);
-                        dict.Add("WebSocket", webSocket);
-
                         result = await business.Command.AsyncCall(
                         //the cmd of this request.
                         receiveData.c,
@@ -462,7 +412,8 @@ public class Startup
                         //the group of this request.
                         "s", //fixed grouping
                         //the incoming use object
-                        new UseEntry(dict, "context"), //controller
+                        new UseEntry(context, "context"), //context
+                        new UseEntry(webSocket, "socket"), //webSocket
                         new UseEntry(new Token //token
                         {
                             Key = receiveData.t,
@@ -491,7 +442,7 @@ public class Startup
                         }
                     }
                 }
-                catch (System.Exception ex)
+                catch (Exception ex)
                 {
                     Help.ExceptionWrite(ex, true, true, Program.LogPath);
                     var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, System.Convert.ToString(ex));
@@ -511,7 +462,7 @@ public class Startup
                 await webSocket.CloseAsync(socketResult.CloseStatus.Value, socketResult.CloseStatusDescription, CancellationToken.None);
             }
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Help.ExceptionWrite(ex, true, true, Program.LogPath);
             var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, System.Convert.ToString(ex));
@@ -577,7 +528,7 @@ public class Startup
 [RequestFormLimits(ValueCountLimit = int.MaxValue, ValueLengthLimit = int.MaxValue, MultipartHeadersLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
 public class BusinessController : Controller
 {
-    public BusinessController(System.Net.Http.IHttpClientFactory httpClientFactory) => Configer.MemberSet("httpClientFactory", httpClientFactory, true);
+    public BusinessController(IHttpClientFactory httpClientFactory) => Configer.MemberSet("httpClientFactory", httpClientFactory, true);
 
     /// <summary>
     /// Call
@@ -618,12 +569,6 @@ public class BusinessController : Controller
             default: return this.NotFound();
         }
 
-        var dict = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
-        //dict.Add("Addresses", Program.Addresses);
-        //dict.Add("AppSettings", Startup.AppSettings);
-        //dict.Add("ENV", Startup.ENV);
-        dict.Add("Controller", this);
-
         g = "j";//fixed grouping
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
@@ -634,12 +579,17 @@ public class BusinessController : Controller
             //the group of this request.
             g);
 
+        if (null == cmd)
+        {
+            return business.ErrorCmd(c);
+        }
+
         //var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCall(
         var result = await cmd.AsyncCall(
             //the data of this request, allow null.
             cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserialize<object[]>(),
             //the incoming use object
-            new UseEntry(dict, "context"), //context
+            new UseEntry(this, "context"), //context
             new UseEntry(new Token //token
             {
                 Key = t,

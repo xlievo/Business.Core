@@ -1352,9 +1352,32 @@ namespace Business.Attributes //Annotations
 
             try
             {
-                return this.ResultCreate(Newtonsoft.Json.JsonConvert.DeserializeObject(value, this.Meta.MemberType, Settings));
+                return this.ResultCreate(data: Newtonsoft.Json.JsonConvert.DeserializeObject(value?.ToString(), this.Meta.MemberType, Settings));
             }
             catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
+        }
+    }
+
+    public class HttpFileAttribute : ArgumentAttribute
+    {
+        public HttpFileAttribute(int state = 830, string message = null) : base(state, message) { }
+
+        public override async ValueTask<IResult> Proces(dynamic value)
+        {
+            var result = CheckNull(this, value);
+            if (!result.HasData) { return result; }
+
+            var files = new System.Collections.Generic.Dictionary<string, dynamic>();
+
+            if (value.Request.HasFormContentType)
+            {
+                foreach (var item in value.HttpContext.Request.Form.Files)
+                {
+                    files.Add(item.Name, item);
+                }
+            }
+
+            return this.ResultCreate(files);
         }
     }
     /*

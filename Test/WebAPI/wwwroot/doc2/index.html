@@ -1567,11 +1567,10 @@
         function GetSdkNet(c, t, d) {
             return "\
 using System;\n\
+using System.Collections.Generic;\n\
 using System.Net.Http;\n\
-using System.Net.Http.Headers;\n\
 using System.Threading.Tasks;\n\
 using Microsoft.Extensions.DependencyInjection;\n\
-using Newtonsoft.Json;\n\
 \n\
 class Program\n\
 {\n\
@@ -1594,15 +1593,14 @@ class Program\n\
 \n\
     public async static Task<string> Call(string c, string t, string d)\n\
     {\n\
-        dynamic data = new System.Dynamic.ExpandoObject();\n\
-        data.c = c;\n\
-        data.t = t;\n\
-        data.d = d;\n\
+        using var content = new FormUrlEncodedContent(new Dictionary<string, string>()\n\
+        {\n\
+            {\"c\", c},\n\
+            {\"t\", t},\n\
+            {\"d\", d}\n\
+        });\n\
 \n\
-        using var request = new HttpRequestMessage(HttpMethod.Post, \"https://localhost:8000/API\");\n\
-        using var content = new StringContent(JsonConvert.SerializeObject(data));\n\
-        content.Headers.ContentType = new MediaTypeHeaderValue(\"application/json\");\n\
-        request.Content = content;\n\
+        using var request = new HttpRequestMessage(HttpMethod.Post, \"http://localhost:5000/API\") { Content = content };\n\
         var client = httpClientFactory.CreateClient();\n\
         using var response = await client.SendAsync(request);\n\
         response.EnsureSuccessStatusCode();\n\

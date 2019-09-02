@@ -129,7 +129,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
-    public virtual async Task<IResult<Test001>> Test001([Test2]Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)][Test2]decimal mm = 0.0234m, dynamic context = null)
+    public virtual async Task<IResult<Test001>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [HttpFile]Arg<Dictionary<string, dynamic>> context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -193,7 +193,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
     public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
-        Microsoft.AspNetCore.Http.HttpContext httpContext = context.Controller.HttpContext;
+        Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
         //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
         //return this.ResultCreate();
@@ -203,7 +203,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
     public virtual async Task<dynamic> Test005(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context)
     {
-        Microsoft.AspNetCore.Http.HttpContext httpContext = context.Controller.HttpContext;
+        Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
         //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
         //return this.ResultCreate();
@@ -296,13 +296,13 @@ public class Args
         /// <summary>
         /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
         /// </summary>
-        [Test]
+        //[Test]
         public List<string> AAA { get; set; }
 
         /// <summary>
         /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
         /// </summary>
-        [Test]
+        //[Test]
         [Nick("password")]
         [CheckNull2]
         [DefaultValue("")]
@@ -316,7 +316,7 @@ public class Args
         /// <summary>
         /// CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
         /// </summary>
-        [Test]
+        //[Test]
         public Test0010 C { get; set; }
 
         public decimal D { get; set; }
@@ -333,7 +333,7 @@ public class Args
             /// <summary>
             /// C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
             /// </summary>
-            [Test]
+            //[Test]
             public string C1 { get; set; }
 
             /// <summary>

@@ -458,8 +458,8 @@ namespace Business.Utils
                       Name = meta.CommandGroup[c2.Value.Key].OnlyName,
                       HasReturn = meta.HasReturn,
                       Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
-                    //Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
-                    Args = new Dictionary<string, DocArg>(),
+                      //Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
+                      Args = new Dictionary<string, DocArg>(),
                       ArgSingle = c2.Value.HasArgSingle,
                   } as IMember<DocArg>;
 
@@ -911,6 +911,10 @@ namespace Business.Utils
 
             return business;
         }
+
+        public static Result.IResult ErrorBusiness(this System.Type resultTypeDefinition, string businessName) => Bind.ErrorBusiness(resultTypeDefinition, businessName);
+
+        public static Result.IResult ErrorCmd(this IBusiness business, string cmd) => Bind.ErrorBusiness(business.Configer.ResultTypeDefinition, cmd);
 
         static Meta.MetaLogger GetMetaLogger(Meta.MetaLogger metaLogger, Attributes.LoggerAttribute logger, string group)
         {

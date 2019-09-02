@@ -42,9 +42,9 @@ namespace Business
 
     public partial class Bind
     {
-        public static IResult BusinessError(System.Type resultTypeDefinition, string business) => ResultFactory.ResultCreate(resultTypeDefinition, -1, $"Without this Business {business}");
+        internal static IResult ErrorBusiness(System.Type resultTypeDefinition, string business) => ResultFactory.ResultCreate(resultTypeDefinition, -1, string.Format("Without this Business{0}", string.IsNullOrEmpty(business) ? null : $" {business}"));
 
-        public static IResult CmdError(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, $"Without this Cmd {cmd}");
+        internal static IResult ErrorCmd(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, string.Format("Without this Cmd{0}", string.IsNullOrEmpty(cmd) ? null : $" {cmd}"));
 
         #region Internal
 
@@ -867,7 +867,7 @@ namespace Business
 
             if (type.IsConstructedGenericType)
             {
-                name = $"{name}{{{string.Join(", ", type.GenericTypeArguments.Select(c => GetMethodTypeFullName(c)))}}}";
+                name = $"{name}{{{string.Join(",", type.GenericTypeArguments.Select(c => GetMethodTypeFullName(c)))}}}";
             }
 
             return name;
@@ -1380,7 +1380,7 @@ namespace Business
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? Bind.CmdError(resultTypeDefinition, cmd) : command.Call(args, useObj);
+            return null == command ? Bind.ErrorCmd(resultTypeDefinition, cmd) : command.Call(args, useObj);
         }
 
         public virtual Result Call<Result>(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
@@ -1401,7 +1401,7 @@ namespace Business
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.CmdError(resultTypeDefinition, cmd)) : await command.AsyncCall(args, useObj);
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(args, useObj);
         }
 
         public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
@@ -1435,12 +1435,12 @@ namespace Business
                 int l = 0;
                 for (int i = 0; i < args2.Length; i++)
                 {
+                    var arg = Meta.Args[i];
+
                     if (Meta.UseTypePosition.ContainsKey(i))
                     {
                         if (0 < useObj?.Length)
                         {
-                            var arg = Meta.Args[i];
-
                             if (arg.Use?.ParameterName ?? false)
                             {
                                 foreach (var use in useObj)
@@ -1467,17 +1467,21 @@ namespace Business
 
                         continue;
                     }
+                    else if (arg.Group[Key].IgnoreArg)
+                    {
+                        continue;
+                    }
 
                     if (null != args && 0 < args.Length)
                     {
-                        if (args.Length < l++)
-                        {
-                            break;
-                        }
+                        //if (args.Length < l)
+                        //{
+                        //    break;
+                        //}
 
-                        if (l - 1 < args.Length)
+                        if (l < args.Length)
                         {
-                            args2[i] = args[l - 1];
+                            args2[i] = args[l++];
                         }
                     }
                 }
