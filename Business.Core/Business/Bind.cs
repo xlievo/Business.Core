@@ -123,16 +123,31 @@ namespace Business
         internal static dynamic GetReturnValue(IResult result, MetaData meta)
         {
             object result2 = result;
-
             if (meta.HasReturn)
             {
-                if (meta.ReturnType.IsValueType)
+                if (!meta.HasObject)
+                {
+                    dynamic result3;
+
+                    if (meta.ReturnType.IsValueType)
+                    {
+                        result3 = System.Activator.CreateInstance(meta.ReturnType);
+                    }
+                    else
+                    {
+                        result3 = Create(meta.ReturnType);
+                    }
+
+                    if (meta.HasAsync)
+                    {
+                        return System.Threading.Tasks.Task.FromResult(result3);
+                    }
+
+                    return result3;
+                }
+                else if (meta.ReturnType.IsValueType)
                 {
                     result2 = System.Activator.CreateInstance(meta.ReturnType);
-                }
-                else if (!meta.HasObject)
-                {
-                    result2 = null;
                 }
             }
             else
@@ -146,6 +161,48 @@ namespace Business
             }
 
             return result2;
+        }
+
+        /// <summary>
+        /// general object creation
+        /// </summary>
+        /// <param name="targetType"></param>
+        /// <returns></returns>
+        public static dynamic Create(System.Type targetType)
+        {
+            //string test first - it has no parameterless constructor
+            if (System.Type.GetTypeCode(targetType) == System.TypeCode.String)
+            {
+                return string.Empty;
+            }
+
+            // get the default constructor and instantiate
+            var types = new System.Type[0];
+            var info = targetType.GetConstructor(types);
+            object targetObject = null;
+
+            if (info == null) //must not have found the constructor
+            {
+                if (targetType.BaseType.UnderlyingSystemType.FullName.Contains("Enum"))
+                {
+                    targetObject = System.Activator.CreateInstance(targetType);
+                }
+                else
+                {
+                    throw new System.ArgumentException("Unable to instantiate type: " + targetType.AssemblyQualifiedName + " - Constructor not found");
+                }
+            }
+            else
+            {
+                targetObject = info.Invoke(null);
+            }
+
+            if (targetObject == null)
+            {
+                throw new System.ArgumentException("Unable to instantiate type: " + targetType.AssemblyQualifiedName + " - Unknown Error");
+            }
+
+            return targetObject;
         }
 
         internal static dynamic GetReturnValueIResult<Data>(IResult<Data> result, MetaData meta)

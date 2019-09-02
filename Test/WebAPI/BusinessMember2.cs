@@ -100,7 +100,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
                     //    System.Threading.Thread.Sleep(3000);
                     //});
 
-                    result2.State = 111;
+                    //result2.State = 111;
                 }
             };
         };
@@ -153,6 +153,13 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         //return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
     }
 
+    public enum MyEnum
+    {
+        A,
+        B,
+        C
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -160,7 +167,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="arg"></param>
     /// <param name="mm"></param>
     /// <returns>test return!!!</returns>
-    public virtual async Task<string> Test002(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task<dynamic> Test002(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -170,6 +177,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
             throw new System.Exception("Method exception!");
         }
 
+        //return MyEnum.C;
         return "sss";
     }
 
