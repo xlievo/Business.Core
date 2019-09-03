@@ -332,6 +332,11 @@ namespace Business.Auth
                 //result
                 if (!meta.HasReturn)
                 {
+                    if (meta.HasAsync)
+                    {
+                        await (invocation.ReturnValue as System.Threading.Tasks.Task);
+                    }
+
                     //log
                     invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(meta), meta);
                 }
