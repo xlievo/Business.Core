@@ -332,14 +332,11 @@ namespace Business.Auth
                 //result
                 if (!meta.HasReturn)
                 {
-                    returnValue = null;
+                    //log
                     invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(meta), meta);
                 }
-                else
-                {
-                    //log
-                    returnValue = invocation.ReturnValue;
-                }
+
+                returnValue = invocation.ReturnValue;
 
                 //..CallAfterMethod..//
                 if (null != Configer.CallAfterMethod)

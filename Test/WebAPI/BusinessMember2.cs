@@ -91,7 +91,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
 
             c.CallAfterMethod = async (meta, args, result) =>
             {
-                if (typeof(System.Threading.Tasks.Task).IsAssignableFrom(result.GetType()))
+                if (typeof(System.Threading.Tasks.Task).IsAssignableFrom(result?.GetType()))
                 {
                     var result2 = await result;
 
@@ -229,6 +229,17 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="arg2">arg2!!!</param>
     /// <returns></returns>
     public virtual async Task<dynamic> Test007(Arg<Test001> arg, Arg<List<string>> arg2) => this.ResultCreate();
+
+    public virtual async void Test0033(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    {
+        dynamic args = new System.Dynamic.ExpandoObject();
+        args.token = token;
+        args.arg = arg.Out;
+        if (arg.Out.B == "ex")
+        {
+            throw new System.Exception("Method exception!");
+        }
+    }
 
     public struct Result
     {
