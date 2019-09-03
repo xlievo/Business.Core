@@ -598,7 +598,7 @@ public class BusinessController : Controller
             }, "session") //[Use(true)]
             );
 
-        if (null != result)
+        if (!System.Object.Equals(null, result))
         {
             if (typeof(IResult).IsAssignableFrom(result.GetType()))
             {

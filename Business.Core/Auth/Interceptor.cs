@@ -424,10 +424,10 @@ namespace Business.Auth
         {
             if (meta.HasAsync)
             {
-                var task = returnValue as System.Threading.Tasks.Task<dynamic>;
-                if (null != task)
+                if (returnValue is System.Threading.Tasks.Task task)
                 {
-                    returnValue = await task;
+                    await task;
+                    returnValue = returnValue.Result;
                 }
             }
 
