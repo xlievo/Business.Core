@@ -914,7 +914,7 @@ namespace Business.Utils
 
         public static Result.IResult ErrorBusiness(this System.Type resultTypeDefinition, string businessName) => Bind.ErrorBusiness(resultTypeDefinition, businessName);
 
-        public static Result.IResult ErrorCmd(this IBusiness business, string cmd) => Bind.ErrorBusiness(business.Configer.ResultTypeDefinition, cmd);
+        public static Result.IResult ErrorCmd(this IBusiness business, string cmd) => Bind.ErrorCmd(business.Configer.ResultTypeDefinition, cmd);
 
         static Meta.MetaLogger GetMetaLogger(Meta.MetaLogger metaLogger, Attributes.LoggerAttribute logger, string group)
         {

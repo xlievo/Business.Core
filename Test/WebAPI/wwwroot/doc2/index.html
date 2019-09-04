@@ -24,6 +24,7 @@
     <style type="text/css">
     </style>
     <style id="emacsMode">
+
         .emacs-mode .ace_cursor {
             border: 1px rgba(50,250,50,0.8) solid !important;
             box-sizing: border-box !important;
@@ -1413,9 +1414,11 @@
                         type: "object",
                         format: "categories",
                         properties: {
+                            JavaScript: getSdk("javascript"),
                             NET: getSdk("csharp"),
                             Java: getSdk("java"),
-                            PHP: getSdk("php")
+                            PHP: getSdk("php"),
+                            Debug: getSdk("json")
                         }
                     }
                 });
@@ -1427,12 +1430,17 @@
             //set all edit
             setEdit(document, edit);
 
+            document.querySelectorAll('#JavaScript > div > div > h4').forEach(c => c.style.display = 'none');
             document.querySelectorAll('#NET > div > div > h4').forEach(c => c.style.display = 'none');
             document.querySelectorAll('#Java > div > div > h4').forEach(c => c.style.display = 'none');
             document.querySelectorAll('#PHP > div > div > h4').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('#Debug > div > div > h4').forEach(c => c.style.display = 'none');
+
+            document.querySelectorAll('#JavaScript > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
             document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
             document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
             document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
+            document.querySelectorAll('#Debug > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
 
             disclosure = new Houdini('[data-houdini]');
         }
@@ -1461,6 +1469,83 @@
                         c.querySelector("button[tag='array']").style.display = "";
                     }
                 });
+            }
+        }
+
+        var ajax = {};
+        ajax.x = function () {
+            if (typeof XMLHttpRequest !== 'undefined') {
+                return new XMLHttpRequest();
+            }
+            var versions = [
+                "MSXML2.XmlHttp.6.0",
+                "MSXML2.XmlHttp.5.0",
+                "MSXML2.XmlHttp.4.0",
+                "MSXML2.XmlHttp.3.0",
+                "MSXML2.XmlHttp.2.0",
+                "Microsoft.XmlHttp"
+            ];
+
+            var xhr;
+            for (var i = 0; i < versions.length; i++) {
+                try {
+                    xhr = new ActiveXObject(versions[i]);
+                    break;
+                } catch (e) {
+                }
+            }
+            return xhr;
+        };
+
+        ajax.send = function (url, callback, method, data, async) {
+            if (async === undefined) {
+                async = true;
+            }
+            var x = ajax.x();
+            x.open(method, url, async);
+            x.onreadystatechange = function () {
+                if (x.readyState == 4) {
+                    callback(x.responseText)
+                }
+            };
+            if (method == 'POST') {
+                x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            }
+            x.send(data)
+        };
+
+        ajax.get = function (url, data, callback, async) {
+            var query = [];
+            for (var key in data) {
+                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+            }
+            ajax.send(url + (query.length ? '?' + query.join('&') : ''), callback, 'GET', null, async)
+        };
+
+        ajax.post = function (url, data, callback, async) {
+            var query = [];
+            for (var key in data) {
+                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+            }
+            ajax.send(url, callback, 'POST', query.join('&'), async)
+        };
+
+        function hasJson(value) {
+            if (value) {
+                if (typeof value == 'string') {
+                    try {
+                        let obj = JSON.parse(value);
+                        if (typeof (obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } catch (e) {
+                        return false;
+                    }
+                }
+            } else {
+                return true;
             }
         }
 
@@ -1503,6 +1588,15 @@
 
                 //======================================================//
                 var debug = editor.sdkeditor;
+
+                var javascriptValue = debug.editors["root.JavaScript.value"];
+                var netValue = debug.editors["root.NET.value"];
+                var javaValue = debug.editors["root.Java.value"];
+                var phpValue = debug.editors["root.PHP.value"];
+                var debugValue = debug.editors["root.Debug.value"];
+
+                var tab = debug.root.container.querySelector("a[aria-controls='Debug']");
+                var collapse = debug.root_container.querySelector("button[tag='collapse']");
                 var buttonDebug = debug.root.getButton('', 'debug', 'Debug');
                 button_holder = debug.root.theme.getHeaderButtonHolder();
                 button_holder.appendChild(buttonDebug);
@@ -1510,9 +1604,32 @@
                 buttonDebug.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    //var root = debug.getEditor('root');
-                    //setEdit(root.container, root.schema.edit);
-                    //root.schema.edit = !root.schema.edit;
+
+                    debugValue.setValue(null);
+                    $trigger(tab, 'click');
+                    if ("Expand" === collapse.getAttribute("title")) {
+                        $trigger(collapse, 'click');
+                    }
+
+                    var data = getData(editor, false);
+                    ajax.post('http://localhost:5000/API',
+                        { c: editor.schema.name, t: data.t, d: data.d },
+                        function (response, xml) {
+                            //succcess
+                            if ("" !== response) {
+                                if (hasJson(response)) {
+                                    debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
+                                }
+                                else {
+                                    debugValue.setValue(response);
+                                }
+                            }
+                        }, function (status) {
+                            //fail
+                            debugValue.setValue(status);
+                            console.log(status);
+                        }, true);
+
                 }, false);
 
                 //======================================================//
@@ -1564,11 +1681,12 @@
 
                 editor.on('change', function () {
                     var data = getData(this, false);
-                    this.sdkeditor.setValue({
-                        NET: { value: GetSdkNet(this.schema.name, data.t, JSON.stringify(data.d)) },
-                        Java: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" },
-                        PHP: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" }
-                    });
+                    netValue.setValue(GetSdkNet(this.schema.name, data.t, JSON.stringify(data.d)));
+                    //this.sdkeditor.setValue({
+                    //    NET: { value: GetSdkNet(this.schema.name, data.t, JSON.stringify(data.d)) },
+                    //    Java: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" },
+                    //    PHP: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" }
+                    //});
 
                     setSdk(this.sdkeditor);
 
@@ -1626,6 +1744,13 @@ class Program\n\
             var sdk = sdkeditor.root.container.querySelector("div[id='SDK & Debug']");
             sdk.style.padding = sdk.style.margin = sdk.style.border = "0px";
 
+            sdk.querySelector('#JavaScript > div > div').removeAttribute("class");
+            var panel = sdk.querySelector("#JavaScript > div > div > div[tag='panel']");
+            panel.removeAttribute("class"); panel.removeAttribute("style");
+            var row = sdk.querySelector("#JavaScript > div > div > div[tag='panel'] > div > div > div[tag='row']");
+            row.removeAttribute("class"); row.removeAttribute("style");
+            sdk.querySelector("#JavaScript > div > div > div[tag='panel'] > div > div > div[tag='row'] > div").classList.add("emacs-mode");
+
             sdk.querySelector('#NET > div > div').removeAttribute("class");
             var panel = sdk.querySelector("#NET > div > div > div[tag='panel']");
             panel.removeAttribute("class"); panel.removeAttribute("style");
@@ -1646,6 +1771,13 @@ class Program\n\
             var row = sdk.querySelector("#PHP > div > div > div[tag='panel'] > div > div > div[tag='row']");
             row.removeAttribute("class"); row.removeAttribute("style");
             sdk.querySelector("#PHP > div > div > div[tag='panel'] > div > div > div[tag='row'] > div").classList.add("emacs-mode");
+
+            sdk.querySelector('#Debug > div > div').removeAttribute("class");
+            var panel = sdk.querySelector("#Debug > div > div > div[tag='panel']");
+            panel.removeAttribute("class"); panel.removeAttribute("style");
+            var row = sdk.querySelector("#Debug > div > div > div[tag='panel'] > div > div > div[tag='row']");
+            row.removeAttribute("class"); row.removeAttribute("style");
+            sdk.querySelector("#Debug > div > div > div[tag='panel'] > div > div > div[tag='row'] > div").classList.add("emacs-mode");
         }
 
         function getSdk(format) {
