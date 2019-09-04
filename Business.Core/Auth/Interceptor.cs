@@ -330,24 +330,26 @@ namespace Business.Auth
                 }
 
                 //result
-                if (!meta.HasReturn)
+                if (!meta.HasReturn && !meta.HasAsync)
                 {
-                    if (meta.HasAsync)
-                    {
-                        await (invocation.ReturnValue as System.Threading.Tasks.Task);
-                    }
-
                     //log
                     invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(meta), meta);
                 }
-
-                returnValue = invocation.ReturnValue;
 
                 //..CallAfterMethod..//
                 if (null != Configer.CallAfterMethod)
                 {
                     await Configer.CallAfterMethod(meta, meta.Args.ToDictionary(c => c.Name, c => new MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), invocation.ReturnValue);
                 }
+
+                if (!meta.HasReturn && meta.HasAsync)
+                {
+                    await (invocation.ReturnValue as System.Threading.Tasks.Task);
+
+                    invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(meta), meta);
+                }
+
+                returnValue = invocation.ReturnValue;
 
                 return invocation.ReturnValue;
             }

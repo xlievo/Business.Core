@@ -93,7 +93,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
             {
                 if (typeof(System.Threading.Tasks.Task).IsAssignableFrom(result?.GetType()))
                 {
-                    var result2 = await result;
+                    //var result2 = await result;
 
                     //await System.Threading.Tasks.Task.Run(() =>
                     //{
