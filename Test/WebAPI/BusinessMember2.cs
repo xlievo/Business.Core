@@ -93,7 +93,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
             {
                 if (typeof(System.Threading.Tasks.Task).IsAssignableFrom(result?.GetType()))
                 {
-                    //var result2 = await result;
+                    //await result;
 
                     //await System.Threading.Tasks.Task.Run(() =>
                     //{
@@ -191,6 +191,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <returns></returns>
     public virtual async Task Test003(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
+        await System.Threading.Tasks.Task.Delay(10000);
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
         args.arg = arg.Out;

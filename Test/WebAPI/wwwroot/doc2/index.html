@@ -1248,7 +1248,6 @@
             <div data-houdini id='${member.name}_member' style="padding: 10px">
                 <div id='${member.name}_input' style="padding-top: 0px;"></div>
                 <!--<div id='${member.name}_out' style="padding-top: 10px;"></div>-->
-                <div id='${member.name}_debug' style="padding-top: 10px;"></div>
                 <div id='${member.name}_sdk' style="padding-top: 10px;"></div>
             </div>
         </div>
@@ -1403,38 +1402,6 @@
 
                 ready(inputeditor);
 
-                //========================================//
-                var debugid = member.name + '_debug';
-                inputeditor.debugeditor = new JSONEditor(document.getElementById(debugid), {
-                    schema: {
-                        title: "Debug",
-                        type: "object",
-                        properties: {
-                            value: {
-                                type: "string",
-                                format: "json",
-                                options: {
-                                    ace: {
-                                        theme: "ace/theme/vibrant_ink",
-                                        wrap: true,
-                                        useWorker: false,
-                                        tabSize: 4,
-                                        readOnly: true,
-                                        highlightActiveLine: false,
-                                        highlightSelectedWord: false,
-                                        minLines: 20,
-                                        maxLines: 20
-                                    }
-                                }
-                            }
-                        },
-                        options: {
-                            collapsed: false,
-                            disable_collapse: true
-                        }
-                    }
-                });
-
                 //==================sdk==================//
                 var outid = member.name + '_out';
                 var sdkid = member.name + '_sdk';
@@ -1442,7 +1409,7 @@
                     // Enable fetching schemas via ajax
                     //ajax: true,
                     schema: {
-                        title: "SDK",
+                        title: "SDK & Debug",
                         type: "object",
                         format: "categories",
                         properties: {
@@ -1535,18 +1502,18 @@
                 }
 
                 //======================================================//
-                var debug = editor.debugeditor;
+                var debug = editor.sdkeditor;
                 var buttonDebug = debug.root.getButton('', 'debug', 'Debug');
-                    button_holder = debug.root.theme.getHeaderButtonHolder();
-                    button_holder.appendChild(buttonDebug);
-                    debug.root.header.parentNode.appendChild(button_holder);
-                    buttonDebug.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        //var root = debug.getEditor('root');
-                        //setEdit(root.container, root.schema.edit);
-                        //root.schema.edit = !root.schema.edit;
-                    }, false);
+                button_holder = debug.root.theme.getHeaderButtonHolder();
+                button_holder.appendChild(buttonDebug);
+                debug.root.header.parentNode.appendChild(button_holder);
+                buttonDebug.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    //var root = debug.getEditor('root');
+                    //setEdit(root.container, root.schema.edit);
+                    //root.schema.edit = !root.schema.edit;
+                }, false);
 
                 //======================================================//
 
@@ -1620,43 +1587,43 @@ using Microsoft.Extensions.DependencyInjection;\n\
 \n\
 class Program\n\
 {\n\
-        static IHttpClientFactory httpClientFactory;\n\
+            static IHttpClientFactory httpClientFactory;\n\
 \n\
-        async static Task Main(string[] args)\n\
-        {\n\
-            var serviceProvider = new ServiceCollection()\n\
-                .AddHttpClient()\n\
-                .BuildServiceProvider();\n\
-\n\
-            httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
-\n\
-            var result = await Call(\"" + c + "\", \"" + t + "\", " + d + ");\n\
-\n\
-            Console.WriteLine(result);\n\
-\n\
-            Console.Read();\n\
-        }\n\
-\n\
-        public async static Task<string> Call(string c, string t, string d)\n\
-        {\n\
-            using var content = new FormUrlEncodedContent(new Dictionary<string, string>()\n\
+            async static Task Main(string[] args)\n\
             {\n\
-                {\"c\", c},\n\
-                {\"t\", t},\n\
-                {\"d\", d}\n\
-            });\n\
+                var serviceProvider = new ServiceCollection()\n\
+                    .AddHttpClient()\n\
+                    .BuildServiceProvider();\n\
 \n\
-            using var request = new HttpRequestMessage(HttpMethod.Post, \"http://localhost:5000/API\") { Content = content };\n\
-            var client = httpClientFactory.CreateClient();\n\
-            using var response = await client.SendAsync(request);\n\
-            response.EnsureSuccessStatusCode();\n\
-            return await response.Content.ReadAsStringAsync();\n\
-        }\n\
+                httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
+\n\
+                var result = await Call(\"" + c + "\", \"" + t + "\", " + d + ");\n\
+\n\
+                Console.WriteLine(result);\n\
+\n\
+                Console.Read();\n\
+            }\n\
+\n\
+            public async static Task<string> Call(string c, string t, string d)\n\
+            {\n\
+                using var content = new FormUrlEncodedContent(new Dictionary<string, string>()\n\
+                {\n\
+                    {\"c\", c},\n\
+                    {\"t\", t},\n\
+                    {\"d\", d}\n\
+                });\n\
+\n\
+                using var request = new HttpRequestMessage(HttpMethod.Post, \"http://localhost:5000/API\") { Content = content };\n\
+                var client = httpClientFactory.CreateClient();\n\
+                using var response = await client.SendAsync(request);\n\
+                response.EnsureSuccessStatusCode();\n\
+                return await response.Content.ReadAsStringAsync();\n\
+            }\n\
 }";
         }
 
         function setSdk(sdkeditor) {
-            var sdk = sdkeditor.root.container.querySelector("div[id='SDK']");
+            var sdk = sdkeditor.root.container.querySelector("div[id='SDK & Debug']");
             sdk.style.padding = sdk.style.margin = sdk.style.border = "0px";
 
             sdk.querySelector('#NET > div > div').removeAttribute("class");
