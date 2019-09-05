@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="/doc2/houdini/css/houdini.min.css">
     <script src="/doc2/houdini/js/houdini.polyfills.min.js"></script>
     <!-- Ajax request -->
-    <script src="/doc2/atomic/atomic.polyfills.min.js"></script>
+    <!--<script src="/doc2/atomic/atomic.polyfills.min.js"></script>-->
     <!-- Ajax.org Cloud9 Editor -->
     <script src="/doc2/ace/ace.js"></script>
     <!-- juicer -->
@@ -1258,8 +1258,76 @@
     <script>
         var doc = null;
         var disclosure = null;
+        var business = null;
         var compiled_tpl = juicer(document.getElementById('tpl').innerHTML);
         var edit = false;
+
+        var ajax = {};
+        ajax.x = function () {
+            if (typeof XMLHttpRequest !== 'undefined') {
+                return new XMLHttpRequest();
+            }
+            var versions = [
+                "MSXML2.XmlHttp.6.0",
+                "MSXML2.XmlHttp.5.0",
+                "MSXML2.XmlHttp.4.0",
+                "MSXML2.XmlHttp.3.0",
+                "MSXML2.XmlHttp.2.0",
+                "Microsoft.XmlHttp"
+            ];
+
+            var xhr;
+            for (var i = 0; i < versions.length; i++) {
+                try {
+                    xhr = new ActiveXObject(versions[i]);
+                    break;
+                } catch (e) {
+                }
+            }
+            return xhr;
+        };
+
+        ajax.send = function (url, callback, failed, method, data, async) {
+            if (async === undefined) {
+                async = true;
+            }
+            var x = ajax.x();
+            x.open(method, url, async);
+            x.onreadystatechange = function () {
+                if (x.readyState !== 4) return;
+
+                if (x.status >= 200 && x.status < 300) {
+                    callback(x.responseText)
+                }
+                else {
+                    failed({
+						status: x.status,
+						statusText: x.statusText,
+						responseText : x.responseText
+					})
+                }
+            };
+            if (method == 'POST') {
+                x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            }
+            x.send(data)
+        };
+
+        ajax.get = function (url, data, callback, failed, async) {
+            var query = [];
+            for (var key in data) {
+                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+            }
+            ajax.send(url + (query.length ? '?' + query.join('&') : ''), callback, failed, 'GET', null, async)
+        };
+
+        ajax.post = function (url, data, callback, failed, async) {
+            var query = [];
+            for (var key in data) {
+                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+            }
+            ajax.send(url, callback, failed, 'POST', query.join('&'), async)
+        };
 
         var $trigger = function (el, event) {
             var e = document.createEvent('HTMLEvents');
@@ -1271,6 +1339,7 @@
 
         function businessOnchang(obj) {
             document.querySelector("#url").value = obj.options[obj.selectedIndex].value;
+            business = obj.options[obj.selectedIndex].text;
             go();
         }
 
@@ -1296,29 +1365,52 @@
         function go() {
             destroy(true);
 
-            atomic(document.querySelector("#url").value)
-                .then(function (response) {
-                    //console.log(response.data); // xhr.responseText
-                    //console.log(response.xhr);  // full response
-                    doc = response.data;
+            //atomic(document.querySelector("#url").value)
+            //    .then(function (response) {
+            //        //console.log(response.data); // xhr.responseText
+            //        //console.log(response.xhr);  // full response
+            //        doc = response.data;
+            //        var def = count = 0;
+            //        var groupElement = document.querySelector("#group");
+            //        for (var i in doc.group) {
+            //            if (i === doc.groupDefault) {
+            //                def = count;
+            //            }
+            //            count++;
+            //            groupElement.options.add(new Option(i, i));
+            //        }
 
-                    var def = count = 0;
-                    var groupElement = document.querySelector("#group");
-                    for (var i in doc.group) {
-                        if (i === doc.groupDefault) {
-                            def = count;
+            //        if (0 == count) { return; }
+
+            //        groupElement.options.selectedIndex = def;
+            //        groupOnchang(document.querySelector("#group"));
+            //    })
+            //    .catch(function (error) {
+            //        console.log(error);
+            //    });
+            ajax.get(document.querySelector("#url").value, null,
+                function (response) {
+                    try {
+                        doc = JSON.parse(response);
+                        var def = count = 0;
+                        var groupElement = document.querySelector("#group");
+                        for (var i in doc.group) {
+                            if (i === doc.groupDefault) {
+                                def = count;
+                            }
+                            count++;
+                            groupElement.options.add(new Option(i, i));
                         }
-                        count++;
-                        groupElement.options.add(new Option(i, i));
+
+                        if (0 == count) { return; }
+
+                        groupElement.options.selectedIndex = def;
+                        groupOnchang(document.querySelector("#group"));
+                    } catch (e) {
+                        console.log(e);
                     }
-
-                    if (0 == count) { return; }
-
-                    groupElement.options.selectedIndex = def;
-                    groupOnchang(document.querySelector("#group"));
-                })
-                .catch(function (error) {
-                    console.log(error);
+                }, function (response) {
+                    console.log(response);
                 });
         }
 
@@ -1472,82 +1564,24 @@
             }
         }
 
-        var ajax = {};
-        ajax.x = function () {
-            if (typeof XMLHttpRequest !== 'undefined') {
-                return new XMLHttpRequest();
-            }
-            var versions = [
-                "MSXML2.XmlHttp.6.0",
-                "MSXML2.XmlHttp.5.0",
-                "MSXML2.XmlHttp.4.0",
-                "MSXML2.XmlHttp.3.0",
-                "MSXML2.XmlHttp.2.0",
-                "Microsoft.XmlHttp"
-            ];
-
-            var xhr;
-            for (var i = 0; i < versions.length; i++) {
-                try {
-                    xhr = new ActiveXObject(versions[i]);
-                    break;
-                } catch (e) {
-                }
-            }
-            return xhr;
-        };
-
-        ajax.send = function (url, callback, method, data, async) {
-            if (async === undefined) {
-                async = true;
-            }
-            var x = ajax.x();
-            x.open(method, url, async);
-            x.onreadystatechange = function () {
-                if (x.readyState == 4) {
-                    callback(x.responseText)
-                }
-            };
-            if (method == 'POST') {
-                x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            }
-            x.send(data)
-        };
-
-        ajax.get = function (url, data, callback, async) {
-            var query = [];
-            for (var key in data) {
-                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-            }
-            ajax.send(url + (query.length ? '?' + query.join('&') : ''), callback, 'GET', null, async)
-        };
-
-        ajax.post = function (url, data, callback, async) {
-            var query = [];
-            for (var key in data) {
-                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-            }
-            ajax.send(url, callback, 'POST', query.join('&'), async)
-        };
-
-        function hasJson(value) {
-            if (value) {
-                if (typeof value == 'string') {
-                    try {
-                        let obj = JSON.parse(value);
-                        if (typeof (obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    } catch (e) {
-                        return false;
-                    }
-                }
-            } else {
-                return true;
-            }
-        }
+        //function hasJson(value) {
+        //    if (value) {
+        //        if (typeof value == 'string') {
+        //            try {
+        //                let obj = JSON.parse(value);
+        //                if (typeof (obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length) {
+        //                    return true;
+        //                } else {
+        //                    return false;
+        //                }
+        //            } catch (e) {
+        //                return false;
+        //            }
+        //        }
+        //    } else {
+        //        return true;
+        //    }
+        //}
 
         function ready(editor) {
             editor.on('ready', function () {
@@ -1612,23 +1646,20 @@
                     }
 
                     var data = getData(editor, false);
-                    ajax.post('http://localhost:5000/API',
+                    ajax.post(doc.host + "/" + business,
                         { c: editor.schema.name, t: data.t, d: data.d },
-                        function (response, xml) {
+                        function (response) {
                             //succcess
-                            if ("" !== response) {
-                                if (hasJson(response)) {
-                                    debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
-                                }
-                                else {
-                                    debugValue.setValue(response);
-                                }
+                            try {
+                                debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
+                            } catch (e) {
+                                debugValue.setValue(response);
                             }
-                        }, function (status) {
+                        }, function (response) {
                             //fail
-                            debugValue.setValue(status);
-                            console.log(status);
-                        }, true);
+                            debugValue.setValue(response);
+                            console.log(response);
+                        });
 
                 }, false);
 
@@ -1681,7 +1712,9 @@
 
                 editor.on('change', function () {
                     var data = getData(this, false);
-                    netValue.setValue(GetSdkNet(this.schema.name, data.t, JSON.stringify(data.d)));
+                    var h = doc.host + "/" + business;
+                    javascriptValue.setValue(GetSdkJavaScript(h, this.schema.name, data.t, JSON.stringify(data.d)));
+                    netValue.setValue(GetSdkNet(h, this.schema.name, data.t, JSON.stringify(data.d)));
                     //this.sdkeditor.setValue({
                     //    NET: { value: GetSdkNet(this.schema.name, data.t, JSON.stringify(data.d)) },
                     //    Java: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" },
@@ -1695,7 +1728,7 @@
             });
         }
 
-        function GetSdkNet(c, t, d) {
+        function GetSdkNet(h, c, t, d) {
             return "\
 using System;\n\
 using System.Collections.Generic;\n\
@@ -1705,39 +1738,109 @@ using Microsoft.Extensions.DependencyInjection;\n\
 \n\
 class Program\n\
 {\n\
-            static IHttpClientFactory httpClientFactory;\n\
+    static IHttpClientFactory httpClientFactory;\n\
 \n\
-            async static Task Main(string[] args)\n\
-            {\n\
-                var serviceProvider = new ServiceCollection()\n\
-                    .AddHttpClient()\n\
-                    .BuildServiceProvider();\n\
+    async static Task Main(string[] args)\n\
+    {\n\
+        var serviceProvider = new ServiceCollection()\n\
+            .AddHttpClient()\n\
+            .BuildServiceProvider();\n\
 \n\
-                httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
+        httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
 \n\
-                var result = await Call(\"" + c + "\", \"" + t + "\", " + d + ");\n\
+        var result = await Call(\"" + c + "\", \"" + t + "\", " + d + ");\n\
 \n\
-                Console.WriteLine(result);\n\
+        Console.WriteLine(result);\n\
 \n\
-                Console.Read();\n\
-            }\n\
+        Console.Read();\n\
+    }\n\
 \n\
-            public async static Task<string> Call(string c, string t, string d)\n\
-            {\n\
-                using var content = new FormUrlEncodedContent(new Dictionary<string, string>()\n\
-                {\n\
-                    {\"c\", c},\n\
-                    {\"t\", t},\n\
-                    {\"d\", d}\n\
-                });\n\
+    public async static Task<string> Call(string c, string t, string d)\n\
+    {\n\
+        using var content = new FormUrlEncodedContent(new Dictionary<string, string>()\n\
+        {\n\
+            {\"c\", c},\n\
+            {\"t\", t},\n\
+            {\"d\", d}\n\
+        });\n\
 \n\
-                using var request = new HttpRequestMessage(HttpMethod.Post, \"http://localhost:5000/API\") { Content = content };\n\
-                var client = httpClientFactory.CreateClient();\n\
-                using var response = await client.SendAsync(request);\n\
-                response.EnsureSuccessStatusCode();\n\
-                return await response.Content.ReadAsStringAsync();\n\
-            }\n\
+        using var request = new HttpRequestMessage(HttpMethod.Post, \"" + h + "\") { Content = content };\n\
+        var client = httpClientFactory.CreateClient();\n\
+        using var response = await client.SendAsync(request);\n\
+        response.EnsureSuccessStatusCode();\n\
+        return await response.Content.ReadAsStringAsync();\n\
+    }\n\
 }";
+        }
+
+        function GetSdkJavaScript(h, c, t, d) {
+            return "ajax.post(\"" + h + "\",\n\
+    { c: \"" + c + "\", t: \"" + t + "\", d: " + d + " },\n\
+    function (response, xml) {\n\
+        //succcess\n\
+        console.log(response);\n\
+    }, function (status) {\n\
+        //fail\n\
+        console.log(status);\n\
+    });\n\
+\n\
+var ajax = {};\n\
+ajax.x = function () {\n\
+    if (typeof XMLHttpRequest !== 'undefined') {\n\
+        return new XMLHttpRequest();\n\
+    }\n\
+    var versions = [\n\
+        \"MSXML2.XmlHttp.6.0\",\n\
+        \"MSXML2.XmlHttp.5.0\",\n\
+        \"MSXML2.XmlHttp.4.0\",\n\
+        \"MSXML2.XmlHttp.3.0\",\n\
+        \"MSXML2.XmlHttp.2.0\",\n\
+        \"Microsoft.XmlHttp\"\n\
+        ];\n\
+\n\
+    var xhr;\n\
+    for (var i = 0; i < versions.length; i++) {\n\
+        try {\n\
+            xhr = new ActiveXObject(versions[i]);\n\
+            break;\n\
+        } catch (e) {\n\
+        }\n\
+    }\n\
+    return xhr;\n\
+    };\n\
+\n\
+ajax.send = function (url, callback, method, data, async) {\n\
+    if (async === undefined) {\n\
+        async = true;\n\
+    }\n\
+    var x = ajax.x();\n\
+    x.open(method, url, async);\n\
+    x.onreadystatechange = function () {\n\
+        if (x.readyState == 4) {\n\
+            callback(x.responseText)\n\
+        }\n\
+    };\n\
+    if (method == 'POST') {\n\
+        x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');\n\
+    }\n\
+    x.send(data)\n\
+    };\n\
+\n\
+ajax.get = function (url, data, callback, async) {\n\
+    var query = [];\n\
+    for (var key in data) {\n\
+        query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));\n\
+    }\n\
+    ajax.send(url + (query.length ? '?' + query.join('&') : ''), callback, 'GET', null, async)\n\
+    };\n\
+    \n\
+ajax.post = function (url, data, callback, async) {\n\
+    var query = [];\n\
+    for (var key in data) {\n\
+        query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));\n\
+    }\n\
+    ajax.send(url, callback, 'POST', query.join('&'), async)\n\
+    };";
         }
 
         function setSdk(sdkeditor) {
