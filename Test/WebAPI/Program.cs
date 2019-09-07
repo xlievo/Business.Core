@@ -284,7 +284,7 @@ public class Startup
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
         //==================The third step==================//
         //3
-        Configer.UseDoc(System.IO.Path.Combine(wwwroot), Program.Host.Addresses);
+        Configer.UseDoc(System.IO.Path.Combine(wwwroot));
 
         //==================The second step==================//
         //add route
@@ -294,8 +294,9 @@ public class Startup
 
             foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
             {
+                Uri.TryCreate($"{Program.Host.Addresses}{"/"}{item.Value.Configer.Info.DocFileName}", UriKind.Absolute, out Uri uri);
                 var selected = 0 == business.Length ? " selected = \"selected\"" : string.Empty;
-                business.AppendLine($"<option value = \"{item.Value.Configer.Info.DocRequestPath}\"{selected}>{item.Value.Configer.Info.BusinessName}</option >");
+                business.AppendLine($"<option value = \"{uri?.AbsoluteUri}\"{selected}>{item.Value.Configer.Info.BusinessName}</option >");
 
                 routes.MapRoute(
                 name: item.Key,
@@ -306,7 +307,7 @@ public class Startup
             //4
             //var docPath = System.IO.Path.Combine(wwwroot, "doc2", "index.tmp");
             //var doc = System.IO.File.ReadAllText(docPath, System.Text.Encoding.UTF8);
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, "doc2", "index.html"), doc.Replace("{URL}", Configer.BusinessList.FirstOrDefault().Value.Configer.Info.DocRequestPath).Replace("{Business}", business.ToString()), System.Text.Encoding.UTF8);
+            //System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, "doc2", "index.html"), doc.Replace("{Business}", business.ToString()), System.Text.Encoding.UTF8);
         });
 
         #region AcceptWebSocket

@@ -4,22 +4,22 @@
 <head>
     <meta charset="utf-8" />
     <title>APIs Documents</title>
-    <link rel="shortcut icon" href="/doc2/w9.ico" />
+    <link rel="shortcut icon" href="/doc/w9.ico" />
 
-    <link rel="stylesheet" type="text/css" href="/doc2/bootstrap-3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/doc/bootstrap-3.3.7/css/bootstrap.min.css">
     <!-- JSON Schema Based Editor -->
-    <script src="/doc2/jsoneditor/jsoneditor.min.js"></script>
+    <script src="/doc/jsoneditor/jsoneditor.min.js"></script>
     <!-- Collapse -->
-    <link rel="stylesheet" type="text/css" href="/doc2/houdini/css/houdini.min.css">
-    <script src="/doc2/houdini/js/houdini.polyfills.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/doc/houdini/css/houdini.min.css">
+    <script src="/doc/houdini/js/houdini.polyfills.min.js"></script>
     <!-- Ajax request -->
-    <!--<script src="/doc2/atomic/atomic.polyfills.min.js"></script>-->
+    <!--<script src="/doc/atomic/atomic.polyfills.min.js"></script>-->
     <!-- Ajax.org Cloud9 Editor -->
-    <script src="/doc2/ace/ace.js"></script>
+    <script src="/doc/ace/ace.js"></script>
     <!-- juicer -->
-    <script type="text/javascript" src="/doc2/Juicer/juicer-min.js"></script>
+    <script type="text/javascript" src="/doc/Juicer/juicer-min.js"></script>
     <!-- DOMPurify -->
-    <script type="text/javascript" src="/doc2/DOMPurify/purify.min.js"></script>
+    <script type="text/javascript" src="/doc/DOMPurify/purify.min.js"></script>
 
     <style type="text/css">
     </style>
@@ -1212,7 +1212,7 @@
     <div class='container'>
         <div class="input-group input-group-lg" style="padding-top: 20px;
         padding-bottom: 20px;">
-            <input id="url" type="text" class="form-control" value="{URL}">
+            <input id="url" type="text" class="form-control">
             <div class="input-group-btn">
                 <!--<button class="btn btn-default" type="button" onclick="go()">
                     Go!
@@ -1392,6 +1392,9 @@
                 function (response) {
                     try {
                         doc = JSON.parse(response);
+                        if (doc.host == null || doc.host == undefined || doc.host === '') {
+                            doc.host = document.location.origin;
+                        }
                         var def = count = 0;
                         var groupElement = document.querySelector("#group");
                         for (var i in doc.group) {

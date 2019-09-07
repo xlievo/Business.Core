@@ -237,8 +237,17 @@ namespace Business.Utils
 
         static DocArg GetDocArg(DocArgSource argSource)
         {
-            var docArg = new DocArg { Id = argSource.Args.Group[argSource.Group].Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection };
-            docArg.Title = $"{argSource.Args.Name} ({docArg.LastType})";
+            var group = argSource.Args.Group[argSource.Group];
+            var nick = group.Nick;
+            if (!string.IsNullOrWhiteSpace(nick))
+            {
+                nick = $" {nick}";
+            }
+
+            var docArg = new DocArg { Id = group.Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection };
+
+            docArg.Title = $"{argSource.Args.Name} ({docArg.LastType}){nick}";
+            //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary?.Replace(System.Environment.NewLine, "<br/>");
 
             docArg.Token = argSource.Args.HasToken;
@@ -300,7 +309,7 @@ namespace Business.Utils
             else if (argSource.Args.HasCollection)
             {
                 docArg.Type = "array";
-                docArg.Title = $"{argSource.Args.Name} ({docArg.LastType} Array)";
+                docArg.Title = $"{argSource.Args.Name} ({docArg.LastType} Array){nick}";
                 docArg.Items = new Items<DocArg>();
                 docArg.Options = new Dictionary<string, object> { { "disable_array_delete_last_row", true }, { "array_controls_top", true } };
 
@@ -405,15 +414,17 @@ namespace Business.Utils
 
             business.Configer.Doc = UseDoc(business, argCallback, xml?.members?.ToDictionary(c => c.name, c => c), host);
 
+            business.Configer.Info.DocFileName = $"{business.Configer.Info.BusinessName}.doc";
+
             if (!string.IsNullOrEmpty(outDir))
             {
                 if (System.IO.Directory.Exists(outDir))
                 {
-                    var file = System.IO.Path.Combine(outDir, $"{business.Configer.Info.BusinessName}.doc");
+                    var file = System.IO.Path.Combine(outDir, business.Configer.Info.DocFileName);
 
                     business.Configer.Info.DocPhysicalPath = file;
 
-                    business.Configer.Info.DocRequestPath = Uri.TryCreate($"{host ?? string.Empty}/{System.IO.Path.GetFileName(file)}", UriKind.Absolute, out Uri uri) ? uri.AbsoluteUri : $"http://localhost:5000{"/"}{System.IO.Path.GetFileName(file)}";
+                    //business.Configer.Info.DocRequestPath = Uri.TryCreate($"{host ?? string.Empty}/{System.IO.Path.GetFileName(file)}", UriKind.Absolute, out Uri uri) ? uri.AbsoluteUri : $"http://localhost:5000{"/"}{System.IO.Path.GetFileName(file)}";
 
                     System.IO.File.WriteAllText(file, business.Configer.Doc.ToString(), UTF8);
                 }
@@ -471,7 +482,7 @@ namespace Business.Utils
                   return member2;
               }));
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = business.Configer.Info.CommandGroupDefault.FirstCharToLower(), Host = Uri.TryCreate(host, UriKind.Absolute, out Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : "http://localhost:5000" };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = business.Configer.Info.CommandGroupDefault.FirstCharToLower(), Host = Uri.TryCreate(host, UriKind.Absolute, out Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty };
         }
 
         const string AttributeSign = "Attribute";
