@@ -29,9 +29,9 @@
             <param name="mm">mmmmmmmm!</param>
             <returns></returns>
         </member>
-        <member name="M:BusinessMember2.Test002(Business.Auth.Token,Arg{Args.Test001},System.Decimal)">
+        <member name="M:BusinessMember2.Test002(Business.Auth.Token,Arg{Args.Test001},System.Decimal,Arg{System.Collections.Generic.Dictionary{System.String,System.Object}})">
             <summary>
-            
+            222
             </summary>
             <param name="token">A token sample</param>
             <param name="arg"></param>

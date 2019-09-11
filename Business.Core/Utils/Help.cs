@@ -18,7 +18,6 @@
 namespace Business.Utils
 {
     using Business.Document;
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -459,6 +458,7 @@ namespace Business.Utils
 
             var group = business.Command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
               {
+                  var key = c2.Value.Key;
                   var meta = c2.Value.Meta;
 
                   Xml.member member = null;
@@ -466,23 +466,24 @@ namespace Business.Utils
 
                   var member2 = new Member<DocArg>
                   {
-                      Name = meta.CommandGroup[c2.Value.Key].OnlyName,
+                      Name = meta.CommandGroup[key].OnlyName,
                       HasReturn = meta.HasReturn,
                       Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
                       //Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
                       Args = new Dictionary<string, DocArg>(),
                       ArgSingle = c2.Value.HasArgSingle,
+                      HttpFile = c2.Value.HasHttpFile,
                   } as IMember<DocArg>;
 
-                  foreach (var item in meta.Args.Where(c3 => !c3.Group[c2.Value.Key].IgnoreArg))
+                  foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))
                   {
-                      member2.Args.Add(item.Name, GetDocArg(c2.Value.Key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                      member2.Args.Add(item.Name, GetDocArg(key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
                   }
 
                   return member2;
               }));
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = business.Configer.Info.CommandGroupDefault.FirstCharToLower(), Host = Uri.TryCreate(host, UriKind.Absolute, out Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = business.Configer.Info.CommandGroupDefault.FirstCharToLower(), Host = System.Uri.TryCreate(host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty };
         }
 
         const string AttributeSign = "Attribute";
@@ -525,9 +526,14 @@ namespace Business.Utils
             var attrs = new List<string>();
 
             var attr = argGroup.Attrs.First;
-
             while (NodeState.DAT == attr.State)
             {
+                if ("Business.Attributes.ArgumentDefaultAttribute" == attr.Value.Type.FullName)
+                {
+                    attr = attr.Next;
+                    continue;
+                }
+
                 attrs.Add(string.IsNullOrWhiteSpace(attr.Value.Description) ? attr.Value.Type.Name.EndsWith(AttributeSign) ? attr.Value.Type.Name.Substring(0, attr.Value.Type.Name.Length - AttributeSign.Length) : attr.Value.Type.Name : attr.Value.Description);
                 attr = attr.Next;
             }

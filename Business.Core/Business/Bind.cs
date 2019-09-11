@@ -960,7 +960,7 @@ namespace Business
                 var space = method.DeclaringType.FullName;
                 var attributes2 = AttributeBase.GetAttributes(method).Distinct(cfg.Attributes);
 
-                var argAttrs = attributes2.GetAttrs<ArgumentAttribute>();
+                var argAttrs = attributes2.GetAttrs<ArgumentAttribute>(c => !typeof(HttpFileAttribute).IsAssignableFrom(c.Type));
 
                 //======LogAttribute======//
                 var loggers = attributes2.GetAttrs<LoggerAttribute>();
@@ -1341,6 +1341,8 @@ namespace Business
 
                 var path2 = $"{item.Value.OnlyName}.{path}";
 
+                var httpFile = false;
+
                 foreach (var c in argAttrChild)
                 {
                     var attr = string.IsNullOrWhiteSpace(c.Group) ? c.Clone() : c;
@@ -1369,6 +1371,11 @@ namespace Business
                     if (!hasLower) { hasLower = true; }
 
                     if (c.CollectionItem && !hasCollectionAttr) { hasCollectionAttr = true; }//checked hasCollectionAttr 2
+
+                    if (typeof(HttpFileAttribute).IsAssignableFrom(c.Type) && !httpFile)
+                    {
+                        httpFile = true;
+                    }
                 }
 
                 //add default convert
@@ -1382,7 +1389,7 @@ namespace Business
                 }
 
                 //owner ?? Do need only the superior, not the superior path? For doc
-                var group = new ArgGroup(ignores.ToReadOnly(), ignores.Any(c => c.Mode == IgnoreMode.Arg), argAttr, nickValue, path2, default == owner ? item.Value.OnlyName : $"{item.Value.OnlyName}.{owner}", $"{item.Value.OnlyName}.{root}");
+                var group = new ArgGroup(ignores.ToReadOnly(), ignores.Any(c => c.Mode == IgnoreMode.Arg), argAttr, nickValue, path2, default == owner ? item.Value.OnlyName : $"{item.Value.OnlyName}.{owner}", $"{item.Value.OnlyName}.{root}", httpFile);
 
                 if (0 < log?.Count)
                 {
@@ -1479,6 +1486,7 @@ namespace Business
             this.Meta = meta;
             this.Key = key;
             this.HasArgSingle = 1 >= this.Meta.Args.Count(c => !c.HasToken && !c.Group[Key].IgnoreArg);
+            this.HasHttpFile = this.Meta.Args.Any(c => c.Group[Key].HttpFile) || this.Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Type));
         }
 
         //===============member==================//
@@ -1606,6 +1614,8 @@ namespace Business
         public MetaData Meta { get; private set; }
 
         public bool HasArgSingle { get; internal set; }
+
+        public bool HasHttpFile { get; internal set; }
     }
 }
 
@@ -1617,7 +1627,7 @@ namespace Business.Meta
 
     public class ArgGroup
     {
-        public ArgGroup(ReadOnlyCollection<Attributes.Ignore> ignore, bool ignoreArg, ConcurrentLinkedList<Attributes.ArgumentAttribute> attrs, string nick, string path, string owner, string root)
+        public ArgGroup(ReadOnlyCollection<Attributes.Ignore> ignore, bool ignoreArg, ConcurrentLinkedList<Attributes.ArgumentAttribute> attrs, string nick, string path, string owner, string root, bool httpFile)
         {
             Ignore = ignore;
             IgnoreArg = ignoreArg;
@@ -1628,6 +1638,7 @@ namespace Business.Meta
             Root = root;
             Logger = default;
             IArgInLogger = default;
+            HttpFile = httpFile;
         }
 
         public ReadOnlyCollection<Attributes.Ignore> Ignore { get; private set; }
@@ -1647,6 +1658,8 @@ namespace Business.Meta
         public MetaLogger Logger { get; internal set; }
 
         public MetaLogger IArgInLogger { get; internal set; }
+
+        public bool HttpFile { get; private set; }
     }
 
     public enum MemberDefinitionCode

@@ -266,6 +266,8 @@ namespace Business.Document
         public Dictionary<string, DocArg> Args { get; set; }
 
         public bool ArgSingle { get; set; }
+
+        public bool HttpFile { get; set; }
     }
 
     public class DocArg : IDocArg<DocArg>

@@ -415,7 +415,7 @@ namespace Business.Attributes //Annotations
 
         //public bool Contains(IgnoreMode mode) => 0 != (this.Mode & mode);
     }
-
+    
     /// <summary>
     /// Token
     /// </summary>
@@ -1348,7 +1348,7 @@ namespace Business.Attributes //Annotations
     {
         public JsonArgAttribute(int state = -12, string message = null) : base(state, message) => this.CanNull = false;
 
-        public Newtonsoft.Json.JsonSerializerSettings Settings { get; set; }
+        //public Newtonsoft.Json.JsonSerializerSettings Settings { get; set; }
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
@@ -1357,12 +1357,13 @@ namespace Business.Attributes //Annotations
 
             try
             {
-                return this.ResultCreate(data: Newtonsoft.Json.JsonConvert.DeserializeObject(value?.ToString(), this.Meta.MemberType, Settings));
+                return this.ResultCreate(data: Newtonsoft.Json.JsonConvert.DeserializeObject(value?.ToString(), this.Meta.MemberType));
             }
             catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
         }
     }
 
+    [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public class HttpFileAttribute : ArgumentAttribute
     {
         public HttpFileAttribute(int state = 830, string message = null) : base(state, message) { }

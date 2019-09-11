@@ -161,13 +161,14 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     }
 
     /// <summary>
-    /// 
+    /// 222
     /// </summary>
     /// <param name="token">A token sample</param>
     /// <param name="arg"></param>
     /// <param name="mm"></param>
     /// <returns>test return!!!</returns>
-    public virtual async Task<dynamic> Test002(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    [HttpFile]
+    public virtual async Task<dynamic> Test002(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, Arg<Dictionary<string, dynamic>> context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
