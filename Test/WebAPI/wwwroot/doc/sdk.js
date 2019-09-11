@@ -1,72 +1,87 @@
 ﻿
 function GetSdkJavaScript(h, c, t, d) {
     return "ajax.post(\"" + h + "\",\n\
-        { c: \"" + c + "\", t: \"" + t + "\", d: " + d + " },\n\
-        function (response, xml) {\n\
-            //succcess\n\
-            console.log(response);\n\
-        }, function (status) {\n\
-            //fail\n\
-            console.log(status);\n\
-        });\n\
+    { c: \"" + c + "\", t: \"" + t + "\", d: " + d + " },\n\
+    function (response) {\n\
+        //succcess\n\
+        console.log(response);\n\
+    }, function (response) {\n\
+        //fail\n\
+        console.log(response);\n\
+    });\n\
 \n\
 var ajax = {};\n\
 ajax.x = function () {\n\
-        if (typeof XMLHttpRequest !== 'undefined') {\n\
-            return new XMLHttpRequest();\n\
-        }\n\
-        var versions = [\n\
-            \"MSXML2.XmlHttp.6.0\",\n\
-            \"MSXML2.XmlHttp.5.0\",\n\
-            \"MSXML2.XmlHttp.4.0\",\n\
-            \"MSXML2.XmlHttp.3.0\",\n\
-            \"MSXML2.XmlHttp.2.0\",\n\
-            \"Microsoft.XmlHttp\"\n\
-            ];\n\
+	if (typeof XMLHttpRequest !== 'undefined') {\n\
+		return new XMLHttpRequest();\n\
+	}\n\
+	var versions = [\n\
+		\"MSXML2.XmlHttp.6.0\",\n\
+		\"MSXML2.XmlHttp.5.0\",\n\
+		\"MSXML2.XmlHttp.4.0\",\n\
+		\"MSXML2.XmlHttp.3.0\",\n\
+		\"MSXML2.XmlHttp.2.0\",\n\
+		\"Microsoft.XmlHttp\"\n\
+	];\n\
 \n\
-        var xhr;\n\
-        for (var i = 0; i < versions.length; i++) {\n\
-            try {\n\
-                xhr = new ActiveXObject(versions[i]);\n\
-                break;\n\
-            } catch (e) {\n\
-            }\n\
-        }\n\
-        return xhr;\n\
-        };\n\
+	var xhr;\n\
+	for (var i = 0; i < versions.length; i++) {\n\
+		try {\n\
+			xhr = new ActiveXObject(versions[i]);\n\
+			break;\n\
+		} catch (e) {\n\
+		}\n\
+	}\n\
+	return xhr;\n\
+};\n\
 \n\
-ajax.send = function (url, callback, method, data, async) {\n\
-        if (async === undefined) {\n\
-            async = true;\n\
-        }\n\
-        var x = ajax.x();\n\
-        x.open(method, url, async);\n\
-        x.onreadystatechange = function () {\n\
-            if (x.readyState == 4) {\n\
-                callback(x.responseText)\n\
-            }\n\
-        };\n\
-        if (method == 'POST') {\n\
-            x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');\n\
-        }\n\
-        x.send(data)\n\
-        };\n\
+ajax.send = function (url, callback, failed, method, data, async, contentType = 'application/x-www-form-urlencoded') {\n\
+	if (async === undefined) {\n\
+		async = true;\n\
+	}\n\
+	var x = ajax.x();\n\
+	x.open(method, url, async);\n\
+	x.onreadystatechange = function () {\n\
+		if (x.readyState !== 4) return;\n\
 \n\
-ajax.get = function (url, data, callback, async) {\n\
-        var query = [];\n\
-        for (var key in data) {\n\
-            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));\n\
-        }\n\
-        ajax.send(url + (query.length ? '?' + query.join('&') : ''), callback, 'GET', null, async)\n\
-        };\n\
-        \n\
-ajax.post = function (url, data, callback, async) {\n\
-        var query = [];\n\
-        for (var key in data) {\n\
-            query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));\n\
-        }\n\
-        ajax.send(url, callback, 'POST', query.join('&'), async)\n\
-        };";
+		if (x.status >= 200 && x.status < 300) {\n\
+			callback(x.responseText)\n\
+		}\n\
+		else {\n\
+			failed({\n\
+				status: x.status,\n\
+				statusText: x.statusText,\n\
+				responseText: x.responseText\n\
+			})\n\
+		}\n\
+	};\n\
+	if (method == 'POST') {\n\
+		if (null !== contentType && '' !== contentType) {\n\
+			x.setRequestHeader('Content-type', contentType);\n\
+		}\n\
+	}\n\
+	x.send(data);\n\
+};\n\
+\n\
+ajax.get = function (url, data, callback, failed, async) {\n\
+	var query = [];\n\
+	for (var key in data) {\n\
+		query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));\n\
+	}\n\
+	ajax.send(url + (query.length ? '?' + query.join('&') : ''), callback, failed, 'GET', null, async)\n\
+};\n\
+\n\
+ajax.post = function (url, data, callback, failed, async) {\n\
+	var query = [];\n\
+	for (var key in data) {\n\
+		query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));\n\
+	}\n\
+	ajax.send(url, callback, failed, 'POST', query.join('&'), async)\n\
+};\n\
+\n\
+ajax.postForm = function (url, data, callback, failed, async) {\n\
+	ajax.send(url, callback, failed, 'POST', data, async, null)\n\
+};";
 }
 
 function GetSdkNet(h, c, t, d) {

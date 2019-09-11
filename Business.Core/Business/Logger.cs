@@ -182,7 +182,7 @@ namespace Business
     /// <summary>
     /// Logger data object
     /// </summary>
-    public class LoggerData
+    public struct LoggerData
     {
         /// <summary>
         /// Logger type

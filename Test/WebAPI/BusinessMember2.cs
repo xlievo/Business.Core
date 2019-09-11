@@ -129,7 +129,8 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
-    public virtual async Task<IResult<Test001>> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [HttpFile]Arg<Dictionary<string, dynamic>> context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
+    //Task<IResult<Test001>>
+    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [HttpFile]Arg<Dictionary<string, dynamic>> context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -149,7 +150,9 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         //    return this.ResultCreate<Test001Result>(-110, "sss");
         //}
 
-        return this.ResultCreate(arg.Out);
+        var files = context.Out.Select(c => new { key = c.Value.FileName, length = c.Value.Length });
+
+        return this.ResultCreate(new { arg = arg.Out, files });
         //return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
     }
 

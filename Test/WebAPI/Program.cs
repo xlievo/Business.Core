@@ -526,6 +526,7 @@ public class Startup
 [Use]
 //Internal object do not write logs
 [Logger(canWrite: false)]
+[RequestSizeLimit(long.MaxValue)]
 [RequestFormLimits(ValueCountLimit = int.MaxValue, ValueLengthLimit = int.MaxValue, MultipartHeadersLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
 public class BusinessController : Controller
 {

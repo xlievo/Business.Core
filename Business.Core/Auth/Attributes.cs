@@ -1379,7 +1379,10 @@ namespace Business.Attributes //Annotations
             {
                 foreach (var item in value.HttpContext.Request.Form.Files)
                 {
-                    files.Add(item.Name, item);
+                    if (!files.ContainsKey(item.Name))
+                    {
+                        files.Add(item.Name, item);
+                    }
                 }
             }
 

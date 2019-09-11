@@ -80,7 +80,7 @@ namespace Business.Auth
 
             if (!meta.CommandGroup.TryGetValue(iArgGroup, out CommandAttribute command))
             {
-                invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(meta, -2, $"Without this Cmd {invocation.Method.Name}"), meta);
+                invocation.ReturnValue = Bind.GetReturnValue(ResultFactory.ResultCreate(meta, -3, $"Without this Group {iArgGroup}"), meta);
                 return invocation.ReturnValue;
             }
 
