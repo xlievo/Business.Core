@@ -305,9 +305,9 @@ public class Startup
             }
 
             //4
-            //var docPath = System.IO.Path.Combine(wwwroot, "doc2", "index.tmp");
-            //var doc = System.IO.File.ReadAllText(docPath, System.Text.Encoding.UTF8);
-            //System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, "doc2", "index.html"), doc.Replace("{Business}", business.ToString()), System.Text.Encoding.UTF8);
+            var docPath = System.IO.Path.Combine(wwwroot, "doc", "index.tmp");
+            var doc = System.IO.File.ReadAllText(docPath, System.Text.Encoding.UTF8);
+            System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, "doc", "index.html"), doc.Replace("{Business}", business.ToString()), System.Text.Encoding.UTF8);
         });
 
         #region AcceptWebSocket

@@ -1,5 +1,4 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -7,6 +6,9 @@
     <link rel="shortcut icon" href="/doc/w9.ico" />
 
     <link rel="stylesheet" type="text/css" href="/doc/bootstrap-3.3.7/css/bootstrap.min.css">
+
+    <script type="text/javascript" src="/doc/sdk.js"></script>
+
     <!-- JSON Schema Based Editor -->
     <script src="/doc/jsoneditor/jsoneditor.min.js"></script>
     <!-- Collapse -->
@@ -23,8 +25,8 @@
 
     <style type="text/css">
     </style>
-    <style id="emacsMode">
 
+    <style id="emacsMode">
         .emacs-mode .ace_cursor {
             border: 1px rgba(50,250,50,0.8) solid !important;
             box-sizing: border-box !important;
@@ -51,9 +53,55 @@
             z-index: 2
         }
         /*# sourceURL=ace/css/emacsMode */
+
+        /*a  upload */
+        .a-upload {
+            line-height: 20px;
+            position: relative;
+            cursor: pointer;
+            color: #333;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+            display: inline-block;
+            *display: inline;
+            *zoom: 1
+        }
+
+            .a-upload input {
+                position: absolute;
+                font-size: 100px;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                opacity: 0;
+                filter: alpha(opacity=0);
+                cursor: pointer
+            }
+
+            .a-upload:hover {
+                color: #333;
+                background: #d4d4d4;
+                border-color: #8c8c8c;
+                text-decoration: none
+            }
     </style>
 
     <script>
+        function renderSize(value) {
+            if (null == value || value == '') {
+                return "0 Bytes";
+            }
+            var unitArr = new Array("Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB");
+            var index = 0;
+            var srcsize = parseFloat(value);
+            index = Math.floor(Math.log(srcsize) / Math.log(1024));
+            var size = srcsize / Math.pow(1024, index);
+            size = size.toFixed(2);
+            return size + unitArr[index];
+        }
+
         //const choices = new Choices("choices-single-no-search");
         // Set the default CSS theme and icon library globally
         JSONEditor.defaults.theme = 'bootstrap3';
@@ -208,6 +256,9 @@
                 el.style.marginTop = '5px';
                 if (type !== "checkbox") {
                     el.classList.add("form-control");
+                }
+                if (el.type == "file") {
+                    el.style.paddingTop = '4px';
                 }
                 return el;
             };
@@ -807,11 +858,8 @@
                 //}
 
                 // Add "new row" and "delete last" buttons below editor
-                this.add_row_button = this.getButton(this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
-                this.add_row_button.classList.add('json-editor-btntype-add');
-                this.add_row_button.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+
+                function click() {
                     var i = self.rows.length;
                     if (self.row_cache[i]) {
                         self.rows[i] = self.row_cache[i];
@@ -842,7 +890,37 @@
                     else {
                         row.style.paddingBottom = "5px";
                     }
-                });
+                }
+
+                if ("root[f]" === this.formname) {
+                    this.add_row_button = document.createElement('a');
+                    this.add_row_button.type = 'a';
+                    this.add_row_button.style.display = '';
+                    this.setButtonText(this.add_row_button, this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
+
+                    var file = document.createElement('input');
+                    file.type = 'file';
+                    file.id = "file";
+                    this.add_row_button.classList.add("btn", "json-editor-btntype-add", "a-upload");
+                    this.add_row_button.appendChild(file);
+                    file.addEventListener('change', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (0 < e.target.files.length) {
+                            click();
+                        }
+                    }, false);
+                }
+                else {
+                    this.add_row_button = this.getButton(this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
+                    this.add_row_button.classList.add('json-editor-btntype-add');
+                    this.add_row_button.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        click();
+                    });
+                }
+
                 self.controls.appendChild(this.add_row_button);
 
                 this.delete_last_row_button = this.getButton(this.translate('button_delete_last', [this.getItemTitle()]), 'delete', this.translate('button_delete_last_title', [this.getItemTitle()]));
@@ -911,9 +989,13 @@
                     this.remove_all_rows_button.style.marginBottom = '3px';
                 }
 
-                this.add_row_button.setAttribute('tag', 'input');
-                this.panel.setAttribute('tag', 'input');
-                this.remove_all_rows_button.setAttribute('tag', 'array');
+                if ("root[f]" !== this.formname) {
+                    this.add_row_button.setAttribute('tag', 'input');
+                    this.panel.setAttribute('tag', 'input');
+                    this.remove_all_rows_button.setAttribute('tag', 'array');
+                }
+
+                this.panel.style.display = 'none';
             },
 
             //copyJSON: function () {
@@ -958,6 +1040,19 @@
 
                 self.rows[i] = this.getElementEditor(i);
                 self.row_cache[i] = self.rows[i];
+
+                if ("root[f]" === this.formname) {
+                    self.rows[i].input.removeAttribute("tag");
+                    self.rows[i].input.style.display = 'none';
+
+                    var file = self.header.parentNode.querySelector("#file");
+                    if (null !== file && 0 < file.files.length) {
+                        self.rows[i].label.setAttribute("tag", "file");
+                        self.rows[i].label.file = file.files[0];
+                        self.rows[i].label.innerText = file.files[0].name + "  " + renderSize(file.files[0].size);
+                        file.value = '';
+                    }
+                }
 
                 if (self.tabs_holder) {
                     self.rows[i].tab_text = document.createElement('span');
@@ -1005,8 +1100,27 @@
                             }
                         });
 
+                        if (null !== file) {
+                            var files = [];
+                            $each(self.rows, function (j, row) {
+                                if (j !== i) {
+                                    files.push(row.label.file);
+                                }
+                            });
+                        }
+
                         self.empty(true);
                         self.setValue(newval);
+
+                        if (null !== file) {
+                            if (null !== file) {
+                                $each(files, function (j, row) {
+                                    self.rows[j].label.setAttribute("tag", "file");
+                                    self.rows[j].label.file = row;
+                                    self.rows[j].label.innerText = row.name + "  " + renderSize(row.size);
+                                });
+                            }
+                        }
 
                         if (self.rows[i]) {
                             new_active_tab = self.rows[i].tab;
@@ -1025,6 +1139,18 @@
                         if (0 == self.rows.length) {
                             self.panel.style.display = 'none';
                         }
+
+                        self.rows.forEach(c => {
+                            var row = c.container;
+                            if ("object" == row.getAttribute("data-schematype")) {
+                                if (1 < self.rows.length) {
+                                    row.style.paddingTop = "5px";
+                                }
+                            }
+                            else {
+                                row.style.paddingBottom = "5px";
+                            }
+                        });
                     });
 
                     if (controls_holder) {
@@ -1032,87 +1158,89 @@
                     }
                 }
 
-                //Button to copy an array element and add it as last element
-                if (self.show_copy_button) {
-                    self.rows[i].copy_button = this.getButton(self.getItemTitle(), 'copy', 'Copy ' + self.getItemTitle());
-                    self.rows[i].copy_button.classList.add('copy', 'json-editor-btntype-copy');
-                    self.rows[i].copy_button.setAttribute('data-i', i);
-                    self.rows[i].copy_button.addEventListener('click', function (e) {
-                        var value = self.getValue();
-                        e.preventDefault();
-                        e.stopPropagation();
-                        var i = this.getAttribute('data-i') * 1;
+                if (null == file) {
+                    //Button to copy an array element and add it as last element
+                    if (self.show_copy_button) {
+                        self.rows[i].copy_button = this.getButton(self.getItemTitle(), 'copy', 'Copy ' + self.getItemTitle());
+                        self.rows[i].copy_button.classList.add('copy', 'json-editor-btntype-copy');
+                        self.rows[i].copy_button.setAttribute('data-i', i);
+                        self.rows[i].copy_button.addEventListener('click', function (e) {
+                            var value = self.getValue();
+                            e.preventDefault();
+                            e.stopPropagation();
+                            var i = this.getAttribute('data-i') * 1;
 
-                        $each(value, function (j, row) {
-                            if (j === i) {
-                                value.push(row);
-                            }
+                            $each(value, function (j, row) {
+                                if (j === i) {
+                                    value.push(row);
+                                }
+                            });
+
+                            self.setValue(value);
+                            self.refreshValue(true);
+                            self.onChange(true);
+
                         });
 
-                        self.setValue(value);
-                        self.refreshValue(true);
-                        self.onChange(true);
-
-                    });
-
-                    controls_holder.appendChild(self.rows[i].copy_button);
-                }
-
-
-                if (i && !self.hide_move_buttons) {
-                    self.rows[i].moveup_button = this.getButton('', 'moveup', this.translate('button_move_up_title'));
-                    self.rows[i].moveup_button.classList.add('moveup', 'json-editor-btntype-move');
-                    self.rows[i].moveup_button.setAttribute('data-i', i);
-                    self.rows[i].moveup_button.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        var i = this.getAttribute('data-i') * 1;
-
-                        if (i <= 0) return;
-                        var rows = self.getValue();
-                        var tmp = rows[i - 1];
-                        rows[i - 1] = rows[i];
-                        rows[i] = tmp;
-
-                        self.setValue(rows);
-                        self.active_tab = self.rows[i - 1].tab;
-                        self.refreshTabs();
-
-                        self.onChange(true);
-
-                        self.jsoneditor.trigger('moveRow');
-                    });
-
-                    if (controls_holder) {
-                        controls_holder.appendChild(self.rows[i].moveup_button);
+                        controls_holder.appendChild(self.rows[i].copy_button);
                     }
-                }
 
-                if (!self.hide_move_buttons) {
-                    self.rows[i].movedown_button = this.getButton('', 'movedown', this.translate('button_move_down_title'));
-                    self.rows[i].movedown_button.classList.add('movedown', 'json-editor-btntype-move');
-                    self.rows[i].movedown_button.setAttribute('data-i', i);
-                    self.rows[i].movedown_button.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        var i = this.getAttribute('data-i') * 1;
 
-                        var rows = self.getValue();
-                        if (i >= rows.length - 1) return;
-                        var tmp = rows[i + 1];
-                        rows[i + 1] = rows[i];
-                        rows[i] = tmp;
+                    if (i && !self.hide_move_buttons) {
+                        self.rows[i].moveup_button = this.getButton('', 'moveup', this.translate('button_move_up_title'));
+                        self.rows[i].moveup_button.classList.add('moveup', 'json-editor-btntype-move');
+                        self.rows[i].moveup_button.setAttribute('data-i', i);
+                        self.rows[i].moveup_button.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            var i = this.getAttribute('data-i') * 1;
 
-                        self.setValue(rows);
-                        self.active_tab = self.rows[i + 1].tab;
-                        self.refreshTabs();
-                        self.onChange(true);
+                            if (i <= 0) return;
+                            var rows = self.getValue();
+                            var tmp = rows[i - 1];
+                            rows[i - 1] = rows[i];
+                            rows[i] = tmp;
 
-                        self.jsoneditor.trigger('moveRow');
-                    });
+                            self.setValue(rows);
+                            self.active_tab = self.rows[i - 1].tab;
+                            self.refreshTabs();
 
-                    if (controls_holder) {
-                        controls_holder.appendChild(self.rows[i].movedown_button);
+                            self.onChange(true);
+
+                            self.jsoneditor.trigger('moveRow');
+                        });
+
+                        if (controls_holder) {
+                            controls_holder.appendChild(self.rows[i].moveup_button);
+                        }
+                    }
+
+                    if (!self.hide_move_buttons) {
+                        self.rows[i].movedown_button = this.getButton('', 'movedown', this.translate('button_move_down_title'));
+                        self.rows[i].movedown_button.classList.add('movedown', 'json-editor-btntype-move');
+                        self.rows[i].movedown_button.setAttribute('data-i', i);
+                        self.rows[i].movedown_button.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            var i = this.getAttribute('data-i') * 1;
+
+                            var rows = self.getValue();
+                            if (i >= rows.length - 1) return;
+                            var tmp = rows[i + 1];
+                            rows[i + 1] = rows[i];
+                            rows[i] = tmp;
+
+                            self.setValue(rows);
+                            self.active_tab = self.rows[i + 1].tab;
+                            self.refreshTabs();
+                            self.onChange(true);
+
+                            self.jsoneditor.trigger('moveRow');
+                        });
+
+                        if (controls_holder) {
+                            controls_holder.appendChild(self.rows[i].movedown_button);
+                        }
                     }
                 }
 
@@ -1206,7 +1334,8 @@
 
             return icon;
         };
-    </script>
+
+        /**/</script>
 </head>
 <body>
     <div class='container'>
@@ -1218,11 +1347,11 @@
                     Go!
                 </button>-->
                 <select id="business" class="btn btn-default" onchange="businessOnchang(this)">
-                    <!--{Business}-->
-                    <option value="http://localhost:5000/API.doc" selected="selected">API</option>
+                    {Business}
+                    <!--<option value="http://localhost:5000/API.doc" selected="selected">API</option>-->
                 </select>
                 <select id="group" class="btn btn-default dropdown-toggle" onchange="groupOnchang(this)">
-                    <option value="j">j</option>
+                    <!--<option value="j">j</option>-->
                 </select>
             </div>
         </div><!-- /input-group -->
@@ -1287,7 +1416,7 @@
             return xhr;
         };
 
-        ajax.send = function (url, callback, failed, method, data, async) {
+        ajax.send = function (url, callback, failed, method, data, async, contentType = 'application/x-www-form-urlencoded') {
             if (async === undefined) {
                 async = true;
             }
@@ -1301,16 +1430,18 @@
                 }
                 else {
                     failed({
-						status: x.status,
-						statusText: x.statusText,
-						responseText : x.responseText
-					})
+                        status: x.status,
+                        statusText: x.statusText,
+                        responseText: x.responseText
+                    })
                 }
             };
             if (method == 'POST') {
-                x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                if (null !== contentType && '' !== contentType) {
+                    x.setRequestHeader('Content-type', contentType);
+                }
             }
-            x.send(data)
+            x.send(data);
         };
 
         ajax.get = function (url, data, callback, failed, async) {
@@ -1327,6 +1458,10 @@
                 query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
             }
             ajax.send(url, callback, failed, 'POST', query.join('&'), async)
+        };
+
+        ajax.postForm = function (url, data, callback, failed, async) {
+            ajax.send(url, callback, failed, 'POST', data, async, null)
         };
 
         var $trigger = function (el, event) {
@@ -1438,6 +1573,7 @@
                     type: "object",
                     edit: !edit,
                     argSingle: member.argSingle,
+                    httpFile: member.httpFile,
                     name: member.name,
                     properties: {
                         t: {},
@@ -1447,6 +1583,22 @@
                             type: "object",
                             description: "API data",
                             properties: {}
+                        },
+                        f: {
+                            title: "files",
+                            type: "array",
+                            options: {
+                                disable_array_delete_last_row: true,
+                                array_controls_top: true
+                            },
+                            items: {
+                                type: "string",
+                                title: "file"
+                                //format: "url",
+                                //options: {
+                                //    upload: true
+                                //}
+                            }
                         }
                     }
                 };
@@ -1485,6 +1637,10 @@
 
                 if ("{}" == JSON.stringify(input.properties.d.properties)) {
                     delete input.properties.d;
+                }
+
+                if (!member.httpFile) {
+                    delete input.properties.f;
                 }
 
                 //if (input.properties.t || input.properties.d) {
@@ -1558,33 +1714,22 @@
                 root.querySelectorAll("div[data-schematype='array']").forEach(c => {
                     var items = c.querySelectorAll("button[tag='del']");
                     if (0 == items.length) {
-                        c.querySelector("div[tag='input']").style.display = "none";
+                        var p = c.querySelector("div[tag='input']");
+                        if (null !== p) {
+                            p.style.display = "none";
+                        }
                     }
                     else if (1 < items.length) {
-                        c.querySelector("button[tag='array']").style.display = "";
+                        var b = c.querySelector("button[tag='array']");
+                        if (null !== b) {
+                            b.style.display = "";
+                        }
                     }
                 });
             }
-        }
 
-        //function hasJson(value) {
-        //    if (value) {
-        //        if (typeof value == 'string') {
-        //            try {
-        //                let obj = JSON.parse(value);
-        //                if (typeof (obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length) {
-        //                    return true;
-        //                } else {
-        //                    return false;
-        //                }
-        //            } catch (e) {
-        //                return false;
-        //            }
-        //        }
-        //    } else {
-        //        return true;
-        //    }
-        //}
+            //root.querySelectorAll("[tag='input']")
+        }
 
         function ready(editor) {
             editor.on('ready', function () {
@@ -1648,22 +1793,48 @@
                         $trigger(collapse, 'click');
                     }
 
-                    var data = getData(editor, false);
-                    ajax.post(doc.host + "/" + business,
-                        { c: editor.schema.name, t: data.t, d: data.d },
-                        function (response) {
-                            //succcess
-                            try {
-                                debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
-                            } catch (e) {
-                                debugValue.setValue(response);
-                            }
-                        }, function (response) {
-                            //fail
-                            debugValue.setValue(response);
-                            console.log(response);
+                    if (editor.root.editors.f) {
+                        var form = new FormData();
+                        var data = getData(editor, false);
+                        form.append("c", editor.schema.name);
+                        form.append("t", data.t);
+                        form.append("d", data.d);
+
+                        var files = editor.root.container.querySelectorAll("[tag='file']");
+                        files.forEach(c => {
+                            form.append(c.file.name, c.file);
                         });
 
+                        ajax.postForm(doc.host + "/" + business,
+                            form,
+                            function (response) {
+                                //succcess
+                                try {
+                                    debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
+                                } catch (e) {
+                                    debugValue.setValue(response);
+                                }
+                            }, function (response) {
+                                //fail
+                                debugValue.setValue(response.responseText);
+                            });
+                    }
+                    else {
+                        var data = getData(editor, false);
+                        ajax.post(doc.host + "/" + business,
+                            { c: editor.schema.name, t: data.t, d: data.d },
+                            function (response) {
+                                //succcess
+                                try {
+                                    debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
+                                } catch (e) {
+                                    debugValue.setValue(response);
+                                }
+                            }, function (response) {
+                                //fail
+                                debugValue.setValue(response);
+                            });
+                    }
                 }, false);
 
                 //======================================================//
@@ -1718,132 +1889,12 @@
                     var h = doc.host + "/" + business;
                     javascriptValue.setValue(GetSdkJavaScript(h, this.schema.name, data.t, JSON.stringify(data.d)));
                     netValue.setValue(GetSdkNet(h, this.schema.name, data.t, JSON.stringify(data.d)));
-                    //this.sdkeditor.setValue({
-                    //    NET: { value: GetSdkNet(this.schema.name, data.t, JSON.stringify(data.d)) },
-                    //    Java: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" },
-                    //    PHP: { value: "{\n  \"type\": \"string\",\n  \"format\": \"json\",\n  \"options\": {\n    \"ace\": {\n      \"theme\": \"ace/theme/vibrant_ink\",\n      \"tabSize\": 2,\n      \"useSoftTabs\": true,\n      \"wrap\": true,\n      \"readOnly\": true,\n      \"newLineMode\": \"windows\"\n    }\n  }\n}" }
-                    //});
 
                     setSdk(this.sdkeditor);
 
                     //console.log(this.sdkeditor.getValue());
                 });
             });
-        }
-
-        function GetSdkNet(h, c, t, d) {
-            return "\
-using System;\n\
-using System.Collections.Generic;\n\
-using System.Net.Http;\n\
-using System.Threading.Tasks;\n\
-using Microsoft.Extensions.DependencyInjection;\n\
-\n\
-class Program\n\
-{\n\
-    static IHttpClientFactory httpClientFactory;\n\
-\n\
-    async static Task Main(string[] args)\n\
-    {\n\
-        var serviceProvider = new ServiceCollection()\n\
-            .AddHttpClient()\n\
-            .BuildServiceProvider();\n\
-\n\
-        httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
-\n\
-        var result = await Call(\"" + c + "\", \"" + t + "\", " + d + ");\n\
-\n\
-        Console.WriteLine(result);\n\
-\n\
-        Console.Read();\n\
-    }\n\
-\n\
-    public async static Task<string> Call(string c, string t, string d)\n\
-    {\n\
-        using var content = new FormUrlEncodedContent(new Dictionary<string, string>()\n\
-        {\n\
-            {\"c\", c},\n\
-            {\"t\", t},\n\
-            {\"d\", d}\n\
-        });\n\
-\n\
-        using var request = new HttpRequestMessage(HttpMethod.Post, \"" + h + "\") { Content = content };\n\
-        var client = httpClientFactory.CreateClient();\n\
-        using var response = await client.SendAsync(request);\n\
-        response.EnsureSuccessStatusCode();\n\
-        return await response.Content.ReadAsStringAsync();\n\
-    }\n\
-}";
-        }
-
-        function GetSdkJavaScript(h, c, t, d) {
-            return "ajax.post(\"" + h + "\",\n\
-    { c: \"" + c + "\", t: \"" + t + "\", d: " + d + " },\n\
-    function (response, xml) {\n\
-        //succcess\n\
-        console.log(response);\n\
-    }, function (status) {\n\
-        //fail\n\
-        console.log(status);\n\
-    });\n\
-\n\
-var ajax = {};\n\
-ajax.x = function () {\n\
-    if (typeof XMLHttpRequest !== 'undefined') {\n\
-        return new XMLHttpRequest();\n\
-    }\n\
-    var versions = [\n\
-        \"MSXML2.XmlHttp.6.0\",\n\
-        \"MSXML2.XmlHttp.5.0\",\n\
-        \"MSXML2.XmlHttp.4.0\",\n\
-        \"MSXML2.XmlHttp.3.0\",\n\
-        \"MSXML2.XmlHttp.2.0\",\n\
-        \"Microsoft.XmlHttp\"\n\
-        ];\n\
-\n\
-    var xhr;\n\
-    for (var i = 0; i < versions.length; i++) {\n\
-        try {\n\
-            xhr = new ActiveXObject(versions[i]);\n\
-            break;\n\
-        } catch (e) {\n\
-        }\n\
-    }\n\
-    return xhr;\n\
-    };\n\
-\n\
-ajax.send = function (url, callback, method, data, async) {\n\
-    if (async === undefined) {\n\
-        async = true;\n\
-    }\n\
-    var x = ajax.x();\n\
-    x.open(method, url, async);\n\
-    x.onreadystatechange = function () {\n\
-        if (x.readyState == 4) {\n\
-            callback(x.responseText)\n\
-        }\n\
-    };\n\
-    if (method == 'POST') {\n\
-        x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');\n\
-    }\n\
-    x.send(data)\n\
-    };\n\
-\n\
-ajax.get = function (url, data, callback, async) {\n\
-    var query = [];\n\
-    for (var key in data) {\n\
-        query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));\n\
-    }\n\
-    ajax.send(url + (query.length ? '?' + query.join('&') : ''), callback, 'GET', null, async)\n\
-    };\n\
-    \n\
-ajax.post = function (url, data, callback, async) {\n\
-    var query = [];\n\
-    for (var key in data) {\n\
-        query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));\n\
-    }\n\
-    ajax.send(url, callback, 'POST', query.join('&'), async)\n\
-    };";
         }
 
         function setSdk(sdkeditor) {
@@ -1928,7 +1979,7 @@ ajax.post = function (url, data, callback, async) {\n\
                     }
 
                     for (var i = args.length - 1; i >= 0; i--) {
-                        args[i] = editor.getEditor(args[i]).getValue();//JSON.stringify(editor.getEditor(args[i]).getValue(), null, 2);
+                        args[i] = editor.getEditor(args[i]).getValue();
                     }
                     d = JSON.stringify(args, null, format ? 2 : 0);
                 }
