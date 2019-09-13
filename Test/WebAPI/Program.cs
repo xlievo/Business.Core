@@ -420,7 +420,7 @@ public class Startup
                             Key = receiveData.t,
                             Remote = string.Format("{0}:{1}", context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
                             Callback = receiveData.b
-                        }, "session") //[Use(true)]
+                        })
                         );
 
                         if (null != result)
@@ -597,7 +597,7 @@ public class BusinessController : Controller
                 Key = t,
                 Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
                 //Callback = b
-            }, "session") //[Use(true)]
+            })
             );
 
         if (!System.Object.Equals(null, result))

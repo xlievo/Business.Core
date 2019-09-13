@@ -1060,7 +1060,7 @@ namespace Business
                     //path,
                     use,
                     hasUse,
-                    typeof(Auth.IToken).IsAssignableFrom(current.outType),
+                    typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType),
                     //item.Value.CommandAttr.OnlyName,
                     GetMethodTypeFullName(parameterType),
                     current.outType.FullName.Replace('+', '.'),
@@ -1287,7 +1287,7 @@ namespace Business
                     //path2,
                     use,
                     hasUse,
-                    typeof(Auth.IToken).IsAssignableFrom(current.outType),
+                    typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType),
                     GetMethodTypeFullName(memberType),
                     $"{type.FullName.Replace('+', '.')}.{item.Name}",
                     memberDefinition);

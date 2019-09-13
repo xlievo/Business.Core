@@ -89,6 +89,7 @@
     </style>
 
     <script>
+
         function renderSize(value) {
             if (null == value || value == '') {
                 return "0 Bytes";
@@ -1335,7 +1336,7 @@
             return icon;
         };
 
-        /**/</script>
+    </script>
 </head>
 <body>
     <div class='container'>
@@ -1390,6 +1391,8 @@
         var business = null;
         var compiled_tpl = juicer(document.getElementById('tpl').innerHTML);
         var edit = false;
+        var group = document.querySelector("#group");
+        var members = document.getElementById('members');
 
         var ajax = {};
         ajax.x = function () {
@@ -1480,19 +1483,21 @@
 
         function groupOnchang(obj) {
             if (null != doc) {
+                console.time("timer");
                 load(doc.group[obj.options[obj.selectedIndex].value]);
+                console.timeEnd("timer");
             }
         }
 
         function destroy(all = false) {
-            document.querySelector("#members").innerHTML = null;
             if (null != disclosure) {
                 disclosure.destroy();
                 disclosure = null;
             }
+            members.innerHTML = null;
 
             if (all) {
-                document.querySelector("#group").options.length = 0;
+                group.options.length = 0;
                 doc = null;
             }
         }
@@ -1531,19 +1536,18 @@
                             doc.host = document.location.origin;
                         }
                         var def = count = 0;
-                        var groupElement = document.querySelector("#group");
                         for (var i in doc.group) {
                             if (i === doc.groupDefault) {
                                 def = count;
                             }
                             count++;
-                            groupElement.options.add(new Option(i, i));
+                            group.options.add(new Option(i, i));
                         }
 
                         if (0 == count) { return; }
 
-                        groupElement.options.selectedIndex = def;
-                        groupOnchang(document.querySelector("#group"));
+                        group.options.selectedIndex = def;
+                        groupOnchang(group);
                     } catch (e) {
                         console.log(e);
                     }
@@ -1552,17 +1556,17 @@
                 });
         }
 
-        function load(members) {
+        function load(m) {
             destroy();
 
             var members2 = []
-            for (var i in members) {
-                members2.push(members[i]);
+            for (var i in m) {
+                members2.push(m[i]);
             }
 
             var html = compiled_tpl.render(members2);
-            document.getElementById('members').innerHTML = html;
-
+            members.innerHTML = html;
+            //console.time("timer");
             //=============================================//
             members2.forEach(member => {
                 //==================input==================//
@@ -1674,26 +1678,63 @@
                     }
                 });
 
-                document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
+                //document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
                 //========================================//
             });
 
             //set all edit
             setEdit(document, edit);
 
-            document.querySelectorAll('#JavaScript > div > div > h4').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('#NET > div > div > h4').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('#Java > div > div > h4').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('#PHP > div > div > h4').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('#Debug > div > div > h4').forEach(c => c.style.display = 'none');
-
-            document.querySelectorAll('#JavaScript > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-            document.querySelectorAll('#Debug > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').forEach(c => c.style.display = 'none');
-
             disclosure = new Houdini('[data-houdini]');
+
+            //console.timeEnd("timer");
+
+            document.querySelectorAll("div[id='SDK & Debug']").forEach(c => setSdk(c));
+
+            document.querySelectorAll("p[tag='description']").forEach(c => {
+                var row = c.parentNode.parentNode.parentNode.nextSibling;
+
+                if ("array" == c.parentNode.getAttribute("data-schematype")) {
+                    row = c.parentNode.parentNode.nextSibling;
+                }
+
+                var h5 = c.querySelector("h5");
+                if (null != h5 && null != row && row.className === "row") {
+                    c.style.marginBottom = '8px';
+                }
+            });
+
+            document.querySelectorAll("div[tag='row']").forEach(c => {
+                if (null == c.nextSibling) {
+                    if (null != c.querySelector("h5")) {
+                        c.style.marginBottom = '8px';
+                    }
+
+                    var p = c.querySelector("p[tag='description']");
+                    if (null != p) {
+                        p.style.marginBottom = '0px';
+                    }
+                }
+            });
+
+            document.querySelectorAll("div[tag='panel']").forEach(c => {
+                var rows = c.querySelectorAll("div[tag='row']");
+                rows.forEach(row => {
+                    if (null !== row.querySelector("[data-schematype='array']")) {
+                        var h5 = row.querySelector("h5");
+                        if (null != h5) {
+                            h5.style.marginBottom = '2px';
+                        }
+                    }
+
+                    if (null !== row.querySelector("[data-schematype='object']")) {
+                        var h5 = row.querySelector("h5");
+                        if (null != h5) {
+                            h5.style.marginBottom = '15px';
+                        }
+                    }
+                });
+            });
         }
 
         function setEdit(root, edit) {
@@ -1733,6 +1774,7 @@
 
         function ready(editor) {
             editor.on('ready', function () {
+                //console.time("timer");
                 if (editor.root.editors.t || editor.root.editors.d) {
                     var buttonEdit = editor.root.getButton('', 'edit', 'Edit');
                     button_holder = editor.root.theme.getHeaderButtonHolder();
@@ -1767,7 +1809,7 @@
                         //editor.root.editors.d.editjson_save.style.display = 'none';
                     }
                 }
-
+                //console.timeEnd("timer");
                 //======================================================//
                 var debug = editor.sdkeditor;
 
@@ -1839,66 +1881,32 @@
 
                 //======================================================//
 
-                document.querySelectorAll("p[tag='description']").forEach(c => {
-                    var row = c.parentNode.parentNode.parentNode.nextSibling;
-
-                    if ("array" == c.parentNode.getAttribute("data-schematype")) {
-                        row = c.parentNode.parentNode.nextSibling;
-                    }
-
-                    var h5 = c.querySelector("h5");
-                    if (null != h5 && null != row && row.className === "row") {
-                        c.style.marginBottom = '8px';
-                    }
-                });
-
-                document.querySelectorAll("div[tag='row']").forEach(c => {
-                    if (null == c.nextSibling) {
-                        if (null != c.querySelector("h5")) {
-                            c.style.marginBottom = '8px';
-                        }
-
-                        var p = c.querySelector("p[tag='description']");
-                        if (null != p) {
-                            p.style.marginBottom = '0px';
-                        }
-                    }
-                });
-
-                document.querySelectorAll("div[tag='panel']").forEach(c => {
-                    var rows = c.querySelectorAll("div[tag='row']");
-                    rows.forEach(row => {
-                        if (null !== row.querySelector("[data-schematype='array']")) {
-                            var h5 = row.querySelector("h5");
-                            if (null != h5) {
-                                h5.style.marginBottom = '2px';
-                            }
-                        }
-
-                        if (null !== row.querySelector("[data-schematype='object']")) {
-                            var h5 = row.querySelector("h5");
-                            if (null != h5) {
-                                h5.style.marginBottom = '15px';
-                            }
-                        }
-                    });
-                });
-
                 editor.on('change', function () {
                     var data = getData(this, false);
                     var h = doc.host + "/" + business;
                     javascriptValue.setValue(GetSdkJavaScript(h, this.schema.name, data.t, JSON.stringify(data.d)));
                     netValue.setValue(GetSdkNet(h, this.schema.name, data.t, JSON.stringify(data.d)));
 
-                    setSdk(this.sdkeditor);
-
                     //console.log(this.sdkeditor.getValue());
                 });
+                //console.timeEnd("timer");
             });
         }
 
-        function setSdk(sdkeditor) {
-            var sdk = sdkeditor.root.container.querySelector("div[id='SDK & Debug']");
+        function setSdk(sdk) {
+            sdk.querySelector('#JavaScript > div > div > h4').style.display = 'none';
+            sdk.querySelector('#NET > div > div > h4').style.display = 'none';
+            sdk.querySelector('#Java > div > div > h4').style.display = 'none';
+            sdk.querySelector('#PHP > div > div > h4').style.display = 'none';
+            sdk.querySelector('#Debug > div > div > h4').style.display = 'none';
+
+            sdk.querySelector('#JavaScript > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
+            sdk.querySelector('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
+            sdk.querySelector('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
+            sdk.querySelector('#PHP > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
+            sdk.querySelector('#Debug > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
+
+            //var sdk = sdkeditor.root.container.querySelector("div[id='SDK & Debug']");
             sdk.style.padding = sdk.style.margin = sdk.style.border = "0px";
 
             sdk.querySelector('#JavaScript > div > div').removeAttribute("class");
@@ -1986,34 +1994,6 @@
             }
             return { t: editor.editors.root.editors.t ? editor.getEditor("root.t").getValue() : null, d: d };
         }
-
-        /*
-        // Hook up the Restore to Default button
-        document.getElementById('restore').addEventListener('click', function () {
-            editor.setValue(starting_value);
-        });
-
-        // Hook up the validation indicator to update its
-        // status whenever the editor changes
-        editor.on('change', function () {
-            // Get an array of errors from the validator
-            var errors = editor.validate();
-
-            var indicator = document.getElementById('valid_indicator');
-
-            // Not valid
-            if (errors.length) {
-                indicator.className = 'label alert';
-                indicator.textContent = 'not valid';
-            }
-            // Valid
-            else {
-                indicator.className = 'label success';
-                indicator.textContent = 'valid';
-            }
-        });
-        */
-
 
     </script>
 </body>
