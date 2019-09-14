@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ClassLibrary1</name>
+    </assembly>
+    <members>
+        <member name="T:BusinessMember2">
+            <summary>
+            ddddddddddddddddddddd!!!
+            </summary>
+        </member>
+        <member name="T:SessionAttribute">
+            <summary>
+            Session~~~~~~~~~~~~~~~
+            </summary>
+        </member>
+        <member name="T:Session">
+            <summary>
+            Session！！！
+            </summary>
+        </member>
+    </members>
+</doc>

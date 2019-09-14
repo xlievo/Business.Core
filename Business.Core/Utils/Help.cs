@@ -402,16 +402,36 @@ namespace Business.Utils
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
-            var path = business.GetType().BaseType.Assembly.GetXmlPath();
+            //var path = business.GetType().BaseType.Assembly.GetXmlPath();
 
-            Configer.Xmls.TryGetValue(path, out Xml xml);
+            //Configer.Xmls.TryGetValue(path, out Xml xml);
 
-            if (null == xml && System.IO.File.Exists(path))
+            //if (null == xml && System.IO.File.Exists(path))
+            //{
+            //    xml = Configer.Xmls.dictionary.GetOrAdd(path, Xml.DeserializeDoc(FileReadString(path)));
+            //}
+
+            //business.Configer.Doc = UseDoc(business, argCallback, xml?.members?.ToDictionary(c => c.name, c => c), host);
+
+            if (null == Configer.Xmls)
             {
-                xml = Configer.Xmls.dictionary.GetOrAdd(path, Xml.DeserializeDoc(FileReadString(path)));
+                Configer.Xmls = new ConcurrentReadOnlyDictionary<string, Xml.member>();
+
+                System.IO.Directory.GetFiles(System.AppContext.BaseDirectory, "*.xml").AsParallel().ForAll(path =>
+                {
+                    var doc = Xml.DeserializeDoc(FileReadString(path));
+
+                    if (null != doc?.members)
+                    {
+                        foreach (var item in doc.members)
+                        {
+                            Configer.Xmls.dictionary.TryAdd(item.name, item);
+                        }
+                    }
+                });
             }
 
-            business.Configer.Doc = UseDoc(business, argCallback, xml?.members?.ToDictionary(c => c.name, c => c), host);
+            business.Configer.Doc = UseDoc(business, argCallback, Configer.Xmls, host);
 
             business.Configer.Info.DocFileName = $"{business.Configer.Info.BusinessName}.doc";
 

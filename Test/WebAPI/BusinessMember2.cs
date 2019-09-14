@@ -106,32 +106,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         };
     }
 
-    public class SessionAttribute : ArgumentAttribute
-    {
-        public SessionAttribute(int state = -800, string message = null) : base(state, message)
-        {
-            this.BindAfter += () =>
-            {
-                this.Description = this.Replace("{Nick} 这个参数必须填写");
-            };
-        }
-
-        public async override ValueTask<IResult> Proces(dynamic value)
-        {
-            var session = new Session { UserName = value.Key };
-            return this.ResultCreate(session);
-        }
-    }
-
-    [Session]
-    public class Session
-    {
-        public int UserId { get; set; }
-        public string UserName { get; set; }
-        public List<string> Roles { get; set; }
-    }
-
-    public class SessionArg : Arg<Session, Business.Auth.Token> { }
+    
 
     public struct Test001Result
     {

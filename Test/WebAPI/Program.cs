@@ -284,7 +284,7 @@ public class Startup
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
         //==================The third step==================//
         //3
-        Configer.UseDoc(System.IO.Path.Combine(wwwroot));
+        Configer.UseDoc(wwwroot);
 
         //==================The second step==================//
         //add route
@@ -297,7 +297,7 @@ public class Startup
                 Uri.TryCreate($"{Program.Host.Addresses}{"/"}{item.Value.Configer.Info.DocFileName}", UriKind.Absolute, out Uri uri);
                 var selected = 0 == business.Length ? " selected = \"selected\"" : string.Empty;
                 business.AppendLine($"<option value = \"{uri?.AbsoluteUri}\"{selected}>{item.Value.Configer.Info.BusinessName}</option >");
-
+                //=========================================//
                 routes.MapRoute(
                 name: item.Key,
                 template: string.Format("{0}/{{*path}}", item.Key),

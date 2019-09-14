@@ -1,16 +1,6 @@
 ﻿
 function GetSdkJavaScript(h, c, t, d) {
-    return "ajax.post(\"" + h + "\",\n\
-    { c: \"" + c + "\", t: \"" + t + "\", d: " + d + " },\n\
-    function (response) {\n\
-        //succcess\n\
-        console.log(response);\n\
-    }, function (response) {\n\
-        //fail\n\
-        console.log(response);\n\
-    });\n\
-\n\
-var ajax = {};\n\
+    return "var ajax = {};\n\
 ajax.x = function () {\n\
 	if (typeof XMLHttpRequest !== 'undefined') {\n\
 		return new XMLHttpRequest();\n\
@@ -81,7 +71,17 @@ ajax.post = function (url, data, callback, failed, async) {\n\
 \n\
 ajax.postForm = function (url, data, callback, failed, async) {\n\
 	ajax.send(url, callback, failed, 'POST', data, async, null)\n\
-};";
+};\n\
+\n\
+ajax.post(\"" + h + "\",\n\
+    { c: \"" + c + "\", t: \"" + t + "\", d: " + d + " },\n\
+    function (response) {\n\
+        //succcess\n\
+        console.log(response);\n\
+    }, function (response) {\n\
+        //fail\n\
+        console.log(response);\n\
+    });";
 }
 
 function GetSdkNet(h, c, t, d) {

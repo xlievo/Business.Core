@@ -28,12 +28,12 @@ namespace Business.Document
         {
             if (null == xml) { throw new System.ArgumentNullException(nameof(xml)); }
 
-            using (var reader = new System.IO.StringReader(xml))
+            try
             {
-                var xmldes = new System.Xml.Serialization.XmlSerializer(typeof(Xml));
-
-                try
+                using (var reader = new System.IO.StringReader(xml))
                 {
+                    var xmldes = new System.Xml.Serialization.XmlSerializer(typeof(Xml));
+
                     var doc = (Xml)xmldes.Deserialize(reader);
 
                     foreach (var member in doc.members)
@@ -94,10 +94,10 @@ namespace Business.Document
 
                     return doc;
                 }
-                catch// (System.Exception ex)
-                {
-                    return default;
-                }
+            }
+            catch// (System.Exception ex)
+            {
+                return default;
             }
         }
 
@@ -241,7 +241,7 @@ namespace Business.Document
         public Dictionary<string, Dictionary<string, IMember<DocArg>>> Group { get; set; }
 
         public string Description { get; set; }
-       
+
         dynamic IDoc.Group { get => Group; }
 
         public string GroupDefault { get; set; }
