@@ -151,7 +151,7 @@ JSONEditor.defaults.themes.bootstrap3 = function () {
 
                 if (el.title === 'Collapse') {
                     if (null != h5) {
-                        h5.style.marginBottom = null == row ? '2px' : '4px';
+                        h5.style.marginBottom = null == row ? '2px' : '6px';
                     }
                 } else {
                     if (null != h5) {
