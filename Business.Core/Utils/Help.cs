@@ -413,6 +413,9 @@ namespace Business.Utils
 
             //business.Configer.Doc = UseDoc(business, argCallback, xml?.members?.ToDictionary(c => c.name, c => c), host);
 
+            /* Note
+            The XML documentation comments are not metadata; they are not included in the compiled assembly and therefore they are not accessible through reflection.
+            */
             if (null == Configer.Xmls)
             {
                 Configer.Xmls = new ConcurrentReadOnlyDictionary<string, Xml.member>();

@@ -90,13 +90,12 @@
     <div class='container'>
         <div class="input-group input-group-lg" style="padding-top: 20px;
         padding-bottom: 20px;">
-            <input id="url" type="text" class="form-control">
+            <input id="url" type="text" class="form-control" value="{URL}">
             <div class="input-group-btn">
                 <!--<button class="btn btn-default" type="button" onclick="go()">
                     Go!
                 </button>-->
                 <select id="business" class="btn btn-default" onchange="businessOnchang(this)">
-                    {Business}
                     <!--<option value="http://localhost:5000/API.doc" selected="selected">API</option>-->
                 </select>
                 <select id="group" class="btn btn-default dropdown-toggle" onchange="groupOnchang(this)">

@@ -1325,24 +1325,45 @@ JSONEditor.defaults.iconlibs.bootstrap3 = function () {
     return icon;
 };
 
-var doc = null;
 var disclosure = null;
-var business = null;
+var doc = null;
+var businessKey = null;
+var businessName = null;
+//var business = null;
 var compiled_tpl = juicer(document.getElementById('tpl').innerHTML);
 var edit = false;
-var group = document.querySelector("#group");
+var businessSelect = document.getElementById('business');
+var groupSelect = document.querySelector("#group");
 var members = document.getElementById('members');
 
 function businessOnchang(obj) {
-    document.querySelector("#url").value = obj.options[obj.selectedIndex].value;
-    business = obj.options[obj.selectedIndex].text;
-    go();
+    if (-1 !== obj.selectedIndex) {
+        var select = obj.options[obj.selectedIndex];
+        businessKey = select.value;
+        businessName = select.text;
+        var business = doc[businessKey];
+
+        groupSelect.options.length = 0;
+        var def = count = 0;
+        for (var i in business.group) {
+            if (i === business.groupDefault) {
+                def = count;
+            }
+            count++;
+            groupSelect.options.add(new Option(i, i));
+        }
+
+        if (0 == count) { return; }
+
+        groupSelect.options.selectedIndex = def;
+        groupOnchang(groupSelect);
+    }
 }
 
 function groupOnchang(obj) {
-    if (null != doc) {
+    if (null != doc && null != businessKey) {
         console.time("timer");
-        load(doc.group[obj.options[obj.selectedIndex].value]);
+        load(doc[businessKey].group[obj.options[obj.selectedIndex].value]);
         console.timeEnd("timer");
     }
 }
@@ -1355,8 +1376,9 @@ function destroy(all = false) {
     members.innerHTML = null;
 
     if (all) {
-        group.options.length = 0;
+        groupSelect.options.length = 0;
         doc = null;
+        businessKey = null;
     }
 }
 
@@ -1390,22 +1412,15 @@ function go() {
         function (response) {
             try {
                 doc = JSON.parse(response);
-                if (doc.host == null || doc.host == undefined || doc.host === '') {
-                    doc.host = document.location.origin;
-                }
-                var def = count = 0;
-                for (var i in doc.group) {
-                    if (i === doc.groupDefault) {
-                        def = count;
+                var businessSelect = document.getElementById('business');
+                for (var i in doc) {
+                    businessSelect.options.add(new Option(doc[i].name, i));
+
+                    if (doc[i].host == null || doc[i].host == undefined || doc[i].host === '') {
+                        doc[i].host = document.location.origin;
                     }
-                    count++;
-                    group.options.add(new Option(i, i));
                 }
-
-                if (0 == count) { return; }
-
-                group.options.selectedIndex = def;
-                groupOnchang(group);
+                businessOnchang(businessSelect);
             } catch (e) {
                 console.log(e);
             }
@@ -1743,7 +1758,7 @@ function ready(editor) {
                     form.append(c.file.name, c.file);
                 });
 
-                ajax.postForm(doc.host + "/" + business,
+                ajax.postForm(doc[businessKey].host + "/" + businessName,
                     form,
                     function (response) {
                         //succcess
@@ -1759,7 +1774,7 @@ function ready(editor) {
             }
             else {
                 var data = getData(editor, false);
-                ajax.post(doc.host + "/" + business,
+                ajax.post(doc[businessKey].host + "/" + businessName,
                     { c: editor.schema.name, t: data.t, d: data.d },
                     function (response) {
                         //succcess
@@ -1779,7 +1794,7 @@ function ready(editor) {
 
         editor.on('change', function () {
             var data = getData(this, false);
-            var h = doc.host + "/" + business;
+            var h = doc[businessKey].host + "/" + businessName;
             javascriptValue.setValue(GetSdkJavaScript(h, this.schema.name, data.t, JSON.stringify(data.d)));
             netValue.setValue(GetSdkNet(h, this.schema.name, data.t, JSON.stringify(data.d)));
 
@@ -1893,4 +1908,4 @@ function getData(editor, format = true) {
     return { t: editor.editors.root.editors.t ? editor.getEditor("root.t").getValue() : null, d: d };
 }
 
-businessOnchang(document.getElementById('business'));
+go();

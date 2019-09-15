@@ -549,12 +549,31 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// </summary>
         /// <param name="outDir"></param>
         /// <param name="host"></param>
-        public static void UseDoc(string outDir = null, string host = null)
+        /// <returns></returns>
+        public static string UseDoc(string outDir = null, string host = null)
         {
-            foreach (var item in BusinessList.Values)
+            var exists = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
+            var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
+
+            foreach (var item in BusinessList.OrderBy(c => c.Key))
             {
-                item.UseDoc(outDir, host);
+                item.Value.UseDoc(null, host);
+
+                if (exists)
+                {
+                    doc.Add(item.Value.Configer.Doc.Name, item.Value.Configer.Doc);
+                }
             }
+
+            if (exists)
+            {
+                var fileName = "business.doc";
+                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, fileName), doc.JsonSerialize(Help.JsonSettings), Help.UTF8);
+
+                return fileName;
+            }
+
+            return null;
         }
 
         //public static void UseDoc<Doc>(System.Func<System.Collections.Generic.Dictionary<string, Document.Xml.member>, Doc> operation, string outDir = null) where Doc : Document.Doc

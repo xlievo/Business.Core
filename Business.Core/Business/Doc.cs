@@ -250,7 +250,7 @@ namespace Business.Document
         /// Json format
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => this.JsonSerialize(Help.JsonSettings);
+        public override string ToString() => new Dictionary<string, Doc<DocArg>> { { this.Name, this } }.JsonSerialize(Help.JsonSettings);
     }
 
     public class Member<DocArg> : IMember<DocArg> where DocArg : IDocArg<DocArg>

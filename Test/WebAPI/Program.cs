@@ -284,7 +284,12 @@ public class Startup
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
         //==================The third step==================//
         //3
-        Configer.UseDoc(wwwroot);
+        var docName = Configer.UseDoc(wwwroot);
+        //writ url to page
+        var docPage = System.IO.Path.Combine(wwwroot, "doc", "index.html");
+        Uri.TryCreate($"{Program.Host.Addresses}{"/"}{docName}", UriKind.Absolute, out Uri uri);
+        var doc = System.IO.File.ReadAllText(docPage, System.Text.Encoding.UTF8);
+        System.IO.File.WriteAllText(docPage, doc.Replace("{URL}", uri?.AbsoluteUri), System.Text.Encoding.UTF8);
 
         //==================The second step==================//
         //add route
@@ -292,22 +297,13 @@ public class Startup
         {
             var business = new System.Text.StringBuilder(null);
 
-            foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
+            foreach (var item in Configer.BusinessList)
             {
-                Uri.TryCreate($"{Program.Host.Addresses}{"/"}{item.Value.Configer.Info.DocFileName}", UriKind.Absolute, out Uri uri);
-                var selected = 0 == business.Length ? " selected = \"selected\"" : string.Empty;
-                business.AppendLine($"<option value = \"{uri?.AbsoluteUri}\"{selected}>{item.Value.Configer.Info.BusinessName}</option >");
-                //=========================================//
                 routes.MapRoute(
                 name: item.Key,
                 template: string.Format("{0}/{{*path}}", item.Key),
                 defaults: new { controller = "Business", action = "Call" });
             }
-
-            //4
-            var docPath = System.IO.Path.Combine(wwwroot, "doc", "index.tmp");
-            var doc = System.IO.File.ReadAllText(docPath, System.Text.Encoding.UTF8);
-            System.IO.File.WriteAllText(System.IO.Path.Combine(wwwroot, "doc", "index.html"), doc.Replace("{Business}", business.ToString()), System.Text.Encoding.UTF8);
         });
 
         #region AcceptWebSocket
