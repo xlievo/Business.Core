@@ -273,7 +273,7 @@ public class Startup
 
         Program.Host.ENV = env;
         Program.Host.AppSettings = Configuration.GetSection("AppSettings");
-        
+        //System.ComponentModel.DataAnnotations.EmailAddressAttribute
         //==================First step==================//
         //1
         Configer.LoadBusiness(new object[] { Program.Host });
@@ -286,10 +286,7 @@ public class Startup
         //3
         var docName = Configer.UseDoc(wwwroot);
         //writ url to page
-        var docPage = System.IO.Path.Combine(wwwroot, "doc", "index.html");
-        Uri.TryCreate($"{Program.Host.Addresses}{"/"}{docName}", UriKind.Absolute, out Uri uri);
-        var doc = System.IO.File.ReadAllText(docPage, System.Text.Encoding.UTF8);
-        System.IO.File.WriteAllText(docPage, doc.Replace("{URL}", uri?.AbsoluteUri), System.Text.Encoding.UTF8);
+        Business.DocUI.UI.WritePage($"{Program.Host.Addresses}{"/"}{docName}");
 
         //==================The second step==================//
         //add route
@@ -596,7 +593,7 @@ public class BusinessController : Controller
             })
             );
 
-        if (!System.Object.Equals(null, result))
+        if (!object.Equals(null, result))
         {
             if (typeof(IResult).IsAssignableFrom(result.GetType()))
             {

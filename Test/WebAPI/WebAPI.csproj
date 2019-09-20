@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Build\Business.DocUI\Business.DocUI.csproj" />
     <ProjectReference Include="..\..\Build\Business.Standard\Business.Standard.csproj" />
     <ProjectReference Include="..\ClassLibrary1\ClassLibrary1.csproj" />
   </ItemGroup>
@@ -168,7 +169,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\doc\index.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\doc\jsoneditor\jsoneditor.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

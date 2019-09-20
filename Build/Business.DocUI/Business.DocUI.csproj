@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="doc\ace\ace.js" />
+    <None Remove="doc\ace\mode-csharp.js" />
+    <None Remove="doc\ace\mode-java.js" />
+    <None Remove="doc\ace\mode-javascript.js" />
+    <None Remove="doc\ace\mode-json.js" />
+    <None Remove="doc\ace\mode-php.js" />
+    <None Remove="doc\ace\theme-vibrant_ink.js" />
+    <None Remove="doc\bootstrap-3.3.7\css\bootstrap-theme.css" />
+    <None Remove="doc\bootstrap-3.3.7\css\bootstrap-theme.css.map" />
+    <None Remove="doc\bootstrap-3.3.7\css\bootstrap-theme.min.css" />
+    <None Remove="doc\bootstrap-3.3.7\css\bootstrap-theme.min.css.map" />
+    <None Remove="doc\bootstrap-3.3.7\css\bootstrap.css" />
+    <None Remove="doc\bootstrap-3.3.7\css\bootstrap.css.map" />
+    <None Remove="doc\bootstrap-3.3.7\css\bootstrap.min.css" />
+    <None Remove="doc\bootstrap-3.3.7\css\bootstrap.min.css.map" />
+    <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.eot" />
+    <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg" />
+    <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf" />
+    <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff" />
+    <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2" />
+    <None Remove="doc\doc.js" />
+    <None Remove="doc\DOMPurify\purify.min.js" />
+    <None Remove="doc\houdini\css\houdini.css" />
+    <None Remove="doc\houdini\css\houdini.min.css" />
+    <None Remove="doc\houdini\js\houdini.js" />
+    <None Remove="doc\houdini\js\houdini.min.js" />
+    <None Remove="doc\houdini\js\houdini.polyfills.js" />
+    <None Remove="doc\houdini\js\houdini.polyfills.min.js" />
+    <None Remove="doc\index.html" />
+    <None Remove="doc\jsoneditor\jsoneditor.js" />
+    <None Remove="doc\jsoneditor\jsoneditor.min.js" />
+    <None Remove="doc\Juicer\juicer-min.js" />
+    <None Remove="doc\sdk.js" />
+    <None Remove="doc\w9.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="doc\ace\ace.js" />
+    <EmbeddedResource Include="doc\ace\mode-csharp.js" />
+    <EmbeddedResource Include="doc\ace\mode-java.js" />
+    <EmbeddedResource Include="doc\ace\mode-javascript.js" />
+    <EmbeddedResource Include="doc\ace\mode-json.js" />
+    <EmbeddedResource Include="doc\ace\mode-php.js" />
+    <EmbeddedResource Include="doc\ace\theme-vibrant_ink.js" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap-theme.css" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap-theme.css.map" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap-theme.min.css" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap-theme.min.css.map" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap.css" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap.css.map" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap.min.css" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap.min.css.map" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.eot" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff" />
+    <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2" />
+    <EmbeddedResource Include="doc\doc.js" />
+    <EmbeddedResource Include="doc\DOMPurify\purify.min.js" />
+    <EmbeddedResource Include="doc\houdini\css\houdini.css" />
+    <EmbeddedResource Include="doc\houdini\css\houdini.min.css" />
+    <EmbeddedResource Include="doc\houdini\js\houdini.js" />
+    <EmbeddedResource Include="doc\houdini\js\houdini.min.js" />
+    <EmbeddedResource Include="doc\houdini\js\houdini.polyfills.js" />
+    <EmbeddedResource Include="doc\houdini\js\houdini.polyfills.min.js" />
+    <EmbeddedResource Include="doc\index.html" />
+    <EmbeddedResource Include="doc\jsoneditor\jsoneditor.js" />
+    <EmbeddedResource Include="doc\jsoneditor\jsoneditor.min.js" />
+    <EmbeddedResource Include="doc\Juicer\juicer-min.js" />
+    <EmbeddedResource Include="doc\sdk.js" />
+    <EmbeddedResource Include="doc\w9.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Business.DocUI.csproj" />
+  </ItemGroup>
+
+</Project>

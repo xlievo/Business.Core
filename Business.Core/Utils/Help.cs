@@ -492,7 +492,7 @@ namespace Business.Utils
                       Name = meta.CommandGroup[key].OnlyName,
                       HasReturn = meta.HasReturn,
                       Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
-                      //Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
+                      Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
                       Args = new Dictionary<string, DocArg>(),
                       ArgSingle = c2.Value.HasArgSingle,
                       HttpFile = c2.Value.HasHttpFile,
