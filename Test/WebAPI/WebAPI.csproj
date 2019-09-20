@@ -14,6 +14,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="doc-dict\**" />
+    <Content Remove="doc-dict\**" />
+    <EmbeddedResource Remove="doc-dict\**" />
+    <None Remove="doc-dict\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\BusinessMember.cs" Link="BusinessMember.cs" />
   </ItemGroup>
 
