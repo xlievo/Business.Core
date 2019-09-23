@@ -47,17 +47,14 @@
             }
         }
 
-        public static void WritePage(string docRequestPath, string pageOutDir = null)
+        public static void Write(string docRequestPath, string pageOutDir = "wwwroot", bool modify = false)
         {
             if (string.IsNullOrWhiteSpace(docRequestPath))
             {
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(pageOutDir))
-            {
-                pageOutDir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
-            }
+            pageOutDir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, string.IsNullOrWhiteSpace(pageOutDir) ? "wwwroot" : pageOutDir);
 
             if (!System.IO.Directory.Exists(pageOutDir))
             {
@@ -72,38 +69,56 @@
                 }
             }
 
-            Doc.AsParallel().ForAll(c =>
+            if (!modify)
             {
-                var path = System.IO.Path.Combine(pageOutDir, c.Key);
-                var dir = System.IO.Path.GetDirectoryName(path);
-
-                if (!System.IO.Directory.Exists(dir))
+                Doc.AsParallel().ForAll(c =>
                 {
-                    System.IO.Directory.CreateDirectory(dir);
-                }
+                    var path = System.IO.Path.Combine(pageOutDir, c.Key);
+                    var dir = System.IO.Path.GetDirectoryName(path);
 
-                var ex = System.IO.Path.GetExtension(c.Key);
-
-                if (".html" == ex || ".js" == ex || ".css" == ex || ".map" == ex)
-                {
-                    var text = StreamReadString(c.Value);
-
-                    if (Index == c.Key)
+                    if (!System.IO.Directory.Exists(dir))
                     {
-                        text = text.Replace("{URL}", docRequestPath);
+                        System.IO.Directory.CreateDirectory(dir);
                     }
 
-                    System.IO.File.WriteAllText(path, text, System.Text.Encoding.UTF8);
-                }
-                else
+                    var ex = System.IO.Path.GetExtension(c.Key);
+
+                    if (".html" == ex || ".js" == ex || ".css" == ex || ".map" == ex)
+                    {
+                        var text = StreamReadString(c.Value);
+
+                        if (Index == c.Key)
+                        {
+                            text = text.Replace("{URL}", docRequestPath);
+                        }
+
+                        System.IO.File.WriteAllText(path, text, System.Text.Encoding.UTF8);
+                    }
+                    else
+                    {
+                        var bytes = StreamReadByte(c.Value);
+                        System.IO.File.WriteAllBytes(path, bytes);
+                    }
+                });
+            }
+            else
+            {
+                var path = System.IO.Path.Combine(pageOutDir, Index);
+
+                if (!System.IO.File.Exists(path))
                 {
-                    var bytes = StreamReadByte(c.Value);
-                    System.IO.File.WriteAllBytes(path, bytes);
+                    return;
                 }
-            });
+
+                var text = System.IO.File.ReadAllText(path, System.Text.Encoding.UTF8);
+
+                text = text.Replace("{URL}", docRequestPath);
+
+                System.IO.File.WriteAllText(path, text, System.Text.Encoding.UTF8);
+            }
         }
 
-        public static string StreamReadString(System.IO.Stream stream)
+        static string StreamReadString(System.IO.Stream stream)
         {
             using (var reader = new System.IO.StreamReader(stream, System.Text.Encoding.UTF8))
             {
@@ -111,7 +126,7 @@
             }
         }
 
-        public static byte[] StreamReadByte(System.IO.Stream stream)
+        static byte[] StreamReadByte(System.IO.Stream stream)
         {
             if (null == stream) { throw new System.ArgumentNullException(nameof(stream)); }
 

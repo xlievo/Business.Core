@@ -545,12 +545,12 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         }
 
         /// <summary>
-        /// Generating Document Model for All Business Classes
+        /// Generating Document Model for All Business Classes. business.doc
         /// </summary>
         /// <param name="outDir"></param>
         /// <param name="host"></param>
         /// <returns></returns>
-        public static string UseDoc(string outDir = null, string host = null)
+        public static void UseDoc(string outDir = null, string host = null)
         {
             var exists = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
             var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
@@ -567,13 +567,8 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
             if (exists)
             {
-                var fileName = "business.doc";
-                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, fileName), doc.JsonSerialize(Help.JsonSettings), Help.UTF8);
-
-                return fileName;
+                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Help.JsonSettings), Help.UTF8);
             }
-
-            return null;
         }
 
         //public static void UseDoc<Doc>(System.Func<System.Collections.Generic.Dictionary<string, Document.Xml.member>, Doc> operation, string outDir = null) where Doc : Document.Doc

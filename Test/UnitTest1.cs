@@ -101,16 +101,17 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
 {
     public BusinessLoggerAndArg()
     {
-        this.Logger = new Logger(async logger =>
+        this.Logger = new Logger(async loggers =>
         {
             //var data = logger.Value?.ToValue();
 
-            foreach (var item in logger)
+            loggers.Select(c =>
             {
-                item.Value = item.Value?.ToValue();
-            }
+                c.Value = c.Value?.ToValue();
+                return c;
+            });
 
-            Console.WriteLine(logger.JsonSerialize());
+            Console.WriteLine(loggers.JsonSerialize());
         });
     }
 

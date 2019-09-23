@@ -106,7 +106,7 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         };
     }
 
-    
+
 
     public struct Test001Result
     {
@@ -161,10 +161,25 @@ public class BusinessMember2 : BusinessBase<ResultObject<string>>
         //    return this.ResultCreate<Test001Result>(-110, "sss");
         //}
 
-        var files = context.Out.Select(c => new { key = c.Value.FileName, length = c.Value.Length });
-
+        var files = context.Out.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
+        
         return this.ResultCreate(new { arg = arg.Out, files });
         //return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
+    }
+
+    static string GetFileName(string path)
+    {
+        var invalid = System.IO.Path.GetInvalidPathChars();
+
+        foreach (var item in invalid)
+        {
+            if (path.Contains(item))
+            {
+                path = path.Replace(item, new char());
+            }
+        }
+
+        return System.IO.Path.GetFileName(path);
     }
 
     public enum MyEnum

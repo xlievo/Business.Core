@@ -119,20 +119,22 @@ public struct Host
 
 public class Program
 {
-    public static string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{System.AppDomain.CurrentDomain.FriendlyName}.log.txt");
+    public static string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{AppDomain.CurrentDomain.FriendlyName}.log.txt");
 
     public static Host Host = new Host();
 
     public static void Main(string[] args)
     {
-        System.AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as Exception)?.ExceptionWrite(true, true, LogPath);
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as Exception)?.ExceptionWrite(true, true, LogPath);
 
-        System.Console.WriteLine($"LogPath = {LogPath}");
+        Console.WriteLine($"LogPath = {LogPath}");
 
-        var host = CreateWebHostBuilder(args).Build();
-        Host.Addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault();
+        var host = CreateWebHostBuilder(args)
+            //.UseUrls("http://localhost:5002")
+            .Build();
+        Host.Addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault() ?? "http://localhost:5000";
 
-        System.Console.WriteLine($"Addresses = {Host.Addresses}");
+        Console.WriteLine($"Addresses = {Host.Addresses}");
         host.Run();
     }
 
@@ -165,12 +167,12 @@ public class Startup
 
     public Startup(IConfiguration configuration)
     {
-        System.Threading.ThreadPool.SetMinThreads(50, 50);
-        System.Threading.ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
-        System.Threading.ThreadPool.GetMaxThreads(out int workerThreads2, out int completionPortThreads2);
+        ThreadPool.SetMinThreads(50, 50);
+        ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
+        ThreadPool.GetMaxThreads(out int workerThreads2, out int completionPortThreads2);
 
-        System.Console.WriteLine($"Min {workerThreads}, {completionPortThreads}");
-        System.Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
+        Console.WriteLine($"Min {workerThreads}, {completionPortThreads}");
+        Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
 
         Configuration = configuration;
     }
@@ -230,7 +232,7 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
-        var wwwroot = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
+        var wwwroot = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
 
         if (!System.IO.Directory.Exists(wwwroot))
         {
@@ -277,16 +279,15 @@ public class Startup
         //==================First step==================//
         //1
         Configer.LoadBusiness(new object[] { Program.Host });
-        //Configer.UseType(typeof(HttpContext), typeof(WebSocket));
         //2
         Configer.UseType("context", "socket");
         Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket");
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
         //==================The third step==================//
         //3
-        var docName = Configer.UseDoc(wwwroot);
+        Configer.UseDoc(wwwroot);
         //writ url to page
-        Business.DocUI.UI.WritePage($"{Program.Host.Addresses}{"/"}{docName}");
+        Business.DocUI.UI.Write($"{Program.Host.Addresses}{"/"}business.doc");
 
         //==================The second step==================//
         //add route
@@ -336,13 +337,13 @@ public class Startup
                     {
                         Sockets.TryAdd(context.Connection.Id, webSocket);
 #if DEBUG
-                        System.Console.WriteLine($"Add:{context.Connection.Id} Sockets:{Sockets.Count}");
+                        Console.WriteLine($"Add:{context.Connection.Id} Sockets:{Sockets.Count}");
 #endif
                         await Keep(context, webSocket);
 
                         Sockets.TryRemove(context.Connection.Id, out _);
 #if DEBUG
-                        System.Console.WriteLine($"Remove:{context.Connection.Id} Sockets:{Sockets.Count}");
+                        Console.WriteLine($"Remove:{context.Connection.Id} Sockets:{Sockets.Count}");
 #endif
                     }
                 }
@@ -439,7 +440,7 @@ public class Startup
                 catch (Exception ex)
                 {
                     Help.ExceptionWrite(ex, true, true, Program.LogPath);
-                    var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, System.Convert.ToString(ex));
+                    var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
                     await SendAsync(result.ToBytes(), id);
                 }
 
@@ -459,7 +460,7 @@ public class Startup
         catch (Exception ex)
         {
             Help.ExceptionWrite(ex, true, true, Program.LogPath);
-            var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, System.Convert.ToString(ex));
+            var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
             await SendAsync(result.ToBytes(), id);
         }
     }
@@ -579,7 +580,6 @@ public class BusinessController : Controller
             return business.ErrorCmd(c);
         }
 
-        //var result = await Configer.BusinessList[this.Request.Path.Value.TrimStart('/').Split('/')[0]].Command.AsyncCall(
         var result = await cmd.AsyncCall(
             //the data of this request, allow null.
             cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserialize<object[]>(),

@@ -307,12 +307,12 @@ namespace BenchmarkTest
                 }
                 //System.Console.WriteLine(loggers.Count());
 
-                foreach (var item in loggers)
+                loggers.Select(c =>
                 {
-                    item.Value = item.Value?.ToValue();
-                    //item.Type = LoggerType.Error;
-                    Loggers.Add(item);
-                }
+                    c.Value = c.Value?.ToValue();
+                    Loggers.Add(c);
+                    return c;
+                });
 
                 Logs.Add(loggers.ToList().Count);
             }, 30)
