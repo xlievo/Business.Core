@@ -17,124 +17,19 @@ using System.Net.Http;
 using Microsoft.Net.Http.Headers;
 using Business;
 using Business.Attributes;
-using Business.Auth;
 using Business.Utils;
 using Business.Result;
 //using Microsoft.AspNetCore.Server.Kestrel.Core;
 
-#region Socket Support
-
-public class MessagePackArgAttribute : ArgumentAttribute
-{
-    public MessagePackArgAttribute(int state = -13, string message = null) : base(state, message) => this.CanNull = false;
-
-    public override async ValueTask<IResult> Proces(dynamic value, IArg arg)
-    {
-        var result = CheckNull(this, value);
-        if (!result.HasData) { return result; }
-
-        try
-        {
-            return this.ResultCreate(arg.ToOut(value));
-        }
-        catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} MessagePack deserialize error"); }
-    }
-}
-
-/// <summary>
-/// This is a parameter package, used to transform parameters
-/// </summary>
-/// <typeparam name="OutType"></typeparam>
-public class Arg<OutType> : Arg<OutType, dynamic>
-{
-    public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
-    public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
-    public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
-    public override dynamic ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
-}
-
-public class ResultObject<Type> : Business.Result.ResultObject<Type>
-{
-    public static readonly System.Type ResultTypeDefinition = typeof(ResultObject<>).GetGenericTypeDefinition();
-
-    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericDefinition = null, bool checkData = true)
-        : base(dataType, data, state, message, genericDefinition, checkData) { }
-
-    public ResultObject(Type data, int state = 1, string message = null) : base(data, state, message) { }
-
-    [MessagePack.IgnoreMember]
-    public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
-
-    [MessagePack.IgnoreMember]
-    public override System.Type GenericDefinition => base.GenericDefinition;
-
-    public override byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
-
-    public override byte[] ToDataBytes() => MessagePack.MessagePackSerializer.Serialize(this.Data);
-}
-
-public struct ReceiveData
-{
-    /// <summary>
-    /// business
-    /// </summary>
-    public string a { get; set; }
-
-    /// <summary>
-    /// cmd
-    /// </summary>
-    public string c { get; set; }
-
-    /// <summary>
-    /// token
-    /// </summary>
-    public string t { get; set; }
-
-    /// <summary>
-    /// data
-    /// </summary>
-    public byte[] d { get; set; }
-
-    /// <summary>
-    /// callback
-    /// </summary>
-    public string b { get; set; }
-}
-
-#endregion
-
-/// <summary>
-/// Business constructor would match given arguments
-/// </summary>
-public struct Host
-{
-    public string Addresses { get; set; }
-
-    public IConfigurationSection AppSettings { get; set; }
-
-    public IHostingEnvironment ENV { get; set; }
-
-    public IHttpClientFactory HttpClientFactory { get; set; }
-}
-
 public class Program
 {
-    public static string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{AppDomain.CurrentDomain.FriendlyName}.log.txt");
-
-    public static Host Host = new Host();
-
     public static void Main(string[] args)
     {
-        AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as Exception)?.ExceptionWrite(true, true, LogPath);
-
-        Console.WriteLine($"LogPath = {LogPath}");
-
         var host = CreateWebHostBuilder(args)
-            //.UseUrls("http://localhost:5002")
             .Build();
-        Host.Addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault() ?? "http://localhost:5000";
+        Common.Host.Addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault() ?? "http://localhost:5000";
 
-        Console.WriteLine($"Addresses = {Host.Addresses}");
+        Console.WriteLine($"Addresses: {Common.Host.Addresses}");
         host.Run();
     }
 
@@ -165,17 +60,7 @@ public class Startup
         catch { return defaultValue; }
     }
 
-    public Startup(IConfiguration configuration)
-    {
-        ThreadPool.SetMinThreads(50, 50);
-        ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
-        ThreadPool.GetMaxThreads(out int workerThreads2, out int completionPortThreads2);
-
-        Console.WriteLine($"Min {workerThreads}, {completionPortThreads}");
-        Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
-
-        Configuration = configuration;
-    }
+    public Startup(IConfiguration configuration) => Configuration = configuration;
 
     public IConfiguration Configuration { get; }
 
@@ -188,13 +73,13 @@ public class Startup
             {
                 builder.AllowAnyOrigin()
                 .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials();
+                .AllowAnyHeader();
+                //.AllowCredentials();
             });
         });
 
-        services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-            .AddJsonOptions(options =>
+        services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+            .AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
@@ -202,7 +87,7 @@ public class Startup
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
             });
 
-        Program.Host.HttpClientFactory = services.AddHttpClient("")
+        Common.Host.HttpClientFactory = services.AddHttpClient("")
         .ConfigurePrimaryHttpMessageHandler(() =>
         {
             var handler = new HttpClientHandler()
@@ -211,7 +96,7 @@ public class Startup
                 UseDefaultCredentials = true,
             };
 
-            if (Program.Host.ENV.IsDevelopment())
+            if (Common.Host.ENV.IsDevelopment())
             {
                 handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             }
@@ -266,35 +151,26 @@ public class Startup
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto }).UseAuthentication().UseCors("any");
 
-        Newtonsoft.Json.JsonConvert.DefaultSettings = (() =>
-        {
-            var settings = Help.JsonSettings;
-            settings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-            return settings;
-        });
-
-        Program.Host.ENV = env;
-        Program.Host.AppSettings = Configuration.GetSection("AppSettings");
         //System.ComponentModel.DataAnnotations.EmailAddressAttribute
         //==================First step==================//
-        //1
-        Configer.LoadBusiness(new object[] { Program.Host });
-        //2
-        Configer.UseType("context", "socket");
-        Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket");
-        Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
-        //==================The third step==================//
-        //3
-        Configer.UseDoc(wwwroot);
-        //writ url to page
-        Business.DocUI.UI.Write($"{Program.Host.Addresses}{"/"}business.doc");
-
+        Common.Host.ENV = env;
+        Common.Host.AppSettings = Configuration.GetSection("AppSettings");
+        ////1
+        //Configer.LoadBusiness(new object[] { Common.Host });
+        ////2
+        //Configer.UseType("context", "socket");
+        //Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket");
+        //Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
+        ////==================The third step==================//
+        ////3
+        //Configer.UseDoc(wwwroot);
+        ////writ url to page
+        //Business.DocUI.UI.Write($"{Common.Host.Addresses}{"/"}business.doc");
+        Common.InitBusiness(wwwroot);
         //==================The second step==================//
         //add route
         app.UseMvc(routes =>
         {
-            var business = new System.Text.StringBuilder(null);
-
             foreach (var item in Configer.BusinessList)
             {
                 routes.MapRoute(
@@ -306,9 +182,7 @@ public class Startup
 
         #region AcceptWebSocket
 
-        MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
-
-        var webSocketcfg = Program.Host.AppSettings.GetSection("WebSocket");
+        var webSocketcfg = Common.Host.AppSettings.GetSection("WebSocket");
         var keepAliveInterval = GetValue(webSocketcfg, "KeepAliveInterval", 120);
         ReceiveBufferSize = GetValue(webSocketcfg, "ReceiveBufferSize", 4096);
         MaxDegreeOfParallelism = GetValue(webSocketcfg, "MaxDegreeOfParallelism", -1);
@@ -421,9 +295,10 @@ public class Startup
                         {
                             if (typeof(IResult).IsAssignableFrom(result.GetType()))
                             {
-                                result.Callback = receiveData.b;
+                                var result2 = result as IResult;
+                                result2.Callback = receiveData.b;
 
-                                var data = Business.Result.ResultFactory.ResultCreateToDataBytes(result).ToBytes();
+                                var data = Business.Result.ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
                                 /* test
                                 var result3 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
                                 var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
@@ -439,7 +314,7 @@ public class Startup
                 }
                 catch (Exception ex)
                 {
-                    Help.ExceptionWrite(ex, true, true, Program.LogPath);
+                    Help.ExceptionWrite(ex, true, true, Common.LogPath);
                     var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
                     await SendAsync(result.ToBytes(), id);
                 }
@@ -459,7 +334,7 @@ public class Startup
         }
         catch (Exception ex)
         {
-            Help.ExceptionWrite(ex, true, true, Program.LogPath);
+            Help.ExceptionWrite(ex, true, true, Common.LogPath);
             var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
             await SendAsync(result.ToBytes(), id);
         }
@@ -524,8 +399,6 @@ public class Startup
 [RequestFormLimits(ValueCountLimit = int.MaxValue, ValueLengthLimit = int.MaxValue, MultipartHeadersLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
 public class BusinessController : Controller
 {
-    public BusinessController(IHttpClientFactory httpClientFactory) => Configer.MemberSet("httpClientFactory", httpClientFactory, true);
-
     /// <summary>
     /// Call
     /// </summary>
@@ -597,7 +470,9 @@ public class BusinessController : Controller
         {
             if (typeof(IResult).IsAssignableFrom(result.GetType()))
             {
-                result.Callback = b;
+                var result2 = result as IResult;
+                result2.Callback = b;
+                return result2;
             }
         }
 
