@@ -123,11 +123,9 @@ public class SessionObj
 public class Session : Arg<SessionObj, Token> { }
 
 [Command(Group = "j")]
-[Command(Group = "s")]
-
 [JsonArg(Group = "j")]
+[Command(Group = "s")]
 [MessagePackArg(Group = "s")]
-
 [Logger]
 public abstract class BusinessBase : BusinessBase<ResultObject<string>>
 {
@@ -188,6 +186,8 @@ public class Common
 
     public static void InitBusiness(string docDir = null)
     {
+        LinqToDB.Data.DataConnection.DefaultSettings = new LinqToDB.LinqToDBSection(Host.AppSettings.GetSection("ConnectionStrings").GetChildren().Select(c => new LinqToDB.ConnectionStringSettings { Name = c.Key, ConnectionString = c.GetValue<string>("ConnectionString"), ProviderName = c.GetValue<string>("ProviderName") }));
+
         //1
         Configer.LoadBusiness(new object[] { Host });
         //2
