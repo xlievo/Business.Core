@@ -21,6 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="WebAPI.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\BusinessMember.cs" Link="BusinessMember.cs" />
   </ItemGroup>
 
