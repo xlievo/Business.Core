@@ -1385,6 +1385,16 @@ function destroy(all = false) {
 function go() {
     destroy(true);
 
+    var url = document.getElementById('url').value;
+    if (url == null || url == undefined || url === '') {
+        return;
+    }
+    var http = "http://*:";
+    var https = "https://*:";
+    if (0 == url.toLowerCase().indexOf(http) || 0 == url.toLowerCase().indexOf(https)) {
+        url = url.replace('*', document.location.hostname);
+        document.getElementById('url').setAttribute("value", url);
+    }
     //atomic(document.querySelector("#url").value)
     //    .then(function (response) {
     //        //console.log(response.data); // xhr.responseText
@@ -1408,7 +1418,7 @@ function go() {
     //    .catch(function (error) {
     //        console.log(error);
     //    });
-    ajax.get(document.querySelector("#url").value, null,
+    ajax.get(url, null,
         function (response) {
             try {
                 doc = JSON.parse(response);
