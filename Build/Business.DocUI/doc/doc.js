@@ -1387,14 +1387,19 @@ function go() {
 
     var url = document.getElementById('url').value;
     if (url == null || url == undefined || url === '') {
-        return;
+        url = document.location.origin + "/business.doc"
     }
-    var http = "http://*:";
-    var https = "https://*:";
-    if (0 == url.toLowerCase().indexOf(http) || 0 == url.toLowerCase().indexOf(https)) {
-        url = url.replace('*', document.location.hostname);
-        document.getElementById('url').setAttribute("value", url);
+    else {
+        var http = "http://*:";
+        var https = "https://*:";
+        var http2 = "http://+:";
+        var https2 = "https://+:";
+        if (0 == url.toLowerCase().indexOf(http) || 0 == url.toLowerCase().indexOf(https) || 0 == url.toLowerCase().indexOf(http2) || 0 == url.toLowerCase().indexOf(https2)) {
+            url = url.replace('*', document.location.hostname).replace('+', document.location.hostname);
+        }
     }
+    document.getElementById('url').setAttribute("value", url);
+
     //atomic(document.querySelector("#url").value)
     //    .then(function (response) {
     //        //console.log(response.data); // xhr.responseText

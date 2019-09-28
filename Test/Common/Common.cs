@@ -198,6 +198,6 @@ public class Common
         //3
         Configer.UseDoc(docDir);
         //writ url to page
-        Business.DocUI.UI.Write($"{Host.Addresses}{"/"}business.doc");
+        DocUI.Write($"{Host.Addresses}{"/"}business.doc");
     }
 }
