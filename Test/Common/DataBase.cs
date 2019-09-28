@@ -1,6 +1,6 @@
 ﻿using Business.Utils;
 using System.Runtime.CompilerServices;
-/*
+
 public class DataBase : Business.Data.DataBase<DataModel.Connection>
 {
     public static readonly DataBase DB = new DataBase();
@@ -29,4 +29,3 @@ public class DataBase : Business.Data.DataBase<DataModel.Connection>
 
     public override DataModel.Connection GetConnection([CallerMemberName] string callMethod = null) => new DataModel.Connection(LinqToDB.Data.DataConnection.DefaultSettings.DefaultConfiguration) { TraceMethod = callMethod };
 }
-*/

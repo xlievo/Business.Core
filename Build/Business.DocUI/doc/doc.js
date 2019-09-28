@@ -1362,9 +1362,9 @@ function businessOnchang(obj) {
 
 function groupOnchang(obj) {
     if (null != doc && null != businessKey) {
-        console.time("timer");
+        //console.time("timer");
         load(doc[businessKey].group[obj.options[obj.selectedIndex].value]);
-        console.timeEnd("timer");
+        //console.timeEnd("timer");
     }
 }
 

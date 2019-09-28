@@ -5,7 +5,7 @@
     public class DocUI
     {
         const string Csproj = "Business.DocUI.csproj";
-        const string Index = "doc\\index.html";
+        static readonly string Index = "doc\\index.html";
         static readonly System.Collections.Generic.Dictionary<string, System.IO.Stream> Doc = new System.Collections.Generic.Dictionary<string, System.IO.Stream>();
 
         static DocUI()
@@ -14,15 +14,51 @@
             var assName = ass.GetName().Name;
             var csproj = $"{assName}.{Csproj}";
 
-            var resourceList = System.Xml.Linq.XDocument.Load(ass.GetManifestResourceStream(csproj)).Descendants("EmbeddedResource").Select(c2 => c2.Attribute("Include")?.Value).Where(c2 => null != c2 && Csproj != c2).ToDictionary(c =>
+            switch (System.Environment.OSVersion.Platform)
+            {
+                case System.PlatformID.MacOSX:
+                case System.PlatformID.Unix:
+                    Index = "doc/index.html";
+                    break;
+            }
+
+            var resourceList = System.Xml.Linq.XDocument.Load(ass.GetManifestResourceStream(csproj)).Descendants("EmbeddedResource").Select(c2 =>
+            {
+                var v = c2.Attribute("Include")?.Value;
+                switch (System.Environment.OSVersion.Platform)
+                {
+                    case System.PlatformID.MacOSX:
+                    case System.PlatformID.Unix:
+                        v = v?.Replace("\\", "/");
+                        break;
+                }
+                return v;
+            })
+                .Where(c2 => null != c2 && Csproj != c2).ToDictionary(c =>
             {
                 var file = System.IO.Path.GetFileName(c);
+                //System.Console.WriteLine($"file {file}");
                 var c2 = c.Substring(0, c.Length - file.Length);
-                var c3 = c2.Replace(".", "._").Replace("-", "_").Replace("\\", ".");
+                var c3 = c2.Replace(".", "._").Replace("-", "_");
+
+                switch (System.Environment.OSVersion.Platform)
+                {
+                    case System.PlatformID.MacOSX:
+                    case System.PlatformID.Unix:
+                        c3 = c3.Replace("/", ".");
+                        break;
+                    default:
+                        c3 = c3.Replace("\\", ".");
+                        break;
+                }
+
+                //System.Console.WriteLine($"{c3}{file}");
                 return $"{c3}{file}";
             }, c => c);
 
             var start = $"{assName}.";
+            //resourceList.Keys.ToList().ForEach(c => System.Console.WriteLine($"key {c}"));
+            //System.Console.WriteLine($"start {System.Xml.Linq.XDocument.Load(ass.GetManifestResourceStream(csproj)).ToString()}");
 
             foreach (var c in ass.GetManifestResourceNames())
             {
