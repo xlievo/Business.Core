@@ -27,67 +27,13 @@ public class GitHubClient
 }
 
 [Logger]
-public class BusinessMember : BusinessBase<ResultObject<object>>
+public class BusinessMember : BusinessBase
 {
-    static BusinessMember()
-    {
-        /*
-#if DEBUG
-        var con = Startup.appSettings.GetSection("Redis").GetSection("ConnectionString").Value;
-#else
-        var con = Startup.appSettings.GetSection("Redis").GetSection("ConnectionString2").Value;
-#endif
-        System.Console.WriteLine($"Redis={con}");
-        var csredis = new CSRedis.CSRedisClient(con);
-        RedisHelper.Initialization(csredis);
-        */
-    }
-
-    System.Net.Http.IHttpClientFactory httpClientFactory;
-
     GitHubClient gitHubClient;
 
-    public BusinessMember() { }
-
-    public BusinessMember(Host host)
+    public BusinessMember(Host host) : base(host)
     {
-        this.Logger = new Logger(async x =>
-        {
-            try
-            {
-                //x.Value = x.Value?.ToValue();
-
-                var log = x.JsonSerialize();
-
-                //Help.WriteLocal(log, console: true, write: x.Type == LoggerType.Exception);
-            }
-            catch (Exception exception)
-            {
-                Help.ExceptionWrite(exception, true, true);
-            }
-        });
-
-        this.BindBefore = cfg =>
-        {
-            cfg.MemberSetAfter = (name, obj) =>
-            {
-                switch (name)
-                {
-                    case "httpClientFactory":
-                        var httpClientFactory = obj as System.Net.Http.IHttpClientFactory;
-                        gitHubClient = new GitHubClient(httpClientFactory?.CreateClient("github"));
-                        break;
-                    default: break;
-                }
-            };
-        };
-
-        this.BindAfter = () =>
-        {
-
-        };
-
-        //this.Config += cfg => cfg.UseType(typeof(BusinessController));
+        gitHubClient = new GitHubClient(host.HttpClientFactory?.CreateClient("github"));
     }
 
     public class A2 : ArgumentAttribute

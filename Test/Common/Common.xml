@@ -50,5 +50,11 @@
             my session
             </summary>
         </member>
+        <member name="M:Common.InitBusiness(System.String)">
+            <summary>
+            Call this method after environment initialization is complete
+            </summary>
+            <param name="docDir"></param>
+        </member>
     </members>
 </doc>

@@ -34,43 +34,8 @@ public class BusinessMember2 : BusinessBase
         */
     }
 
-    public struct CallInfo
-    {
-        public DateTime Time;
-
-        public string MethodName;
-    }
-
-    System.Net.Http.IHttpClientFactory httpClientFactory;
-
     public BusinessMember2(Host host) : base(host)
     {
-        var s = "[{ \"a\": \"333\",\"b\": \"\", \"c\": { \"c1\": \"\",\"c2\": \"\",\"c3\": { \"c31\": \"\",\"c32\": \"uuu\"} },\"d\": 0, \"e\": true, \"myEnum\": 1}, 0.2345]";
-
-
-        this.Logger = new Logger(async x =>
-        {
-            try
-            {
-                System.Threading.SpinWait.SpinUntil(() => false, 3000);
-
-                //x.Value = x.Value?.ToValue();
-
-                //var log = x.JsonSerialize();
-
-                foreach (var item in x)
-                {
-                    var log = item.JsonSerialize();
-
-                    Help.WriteLocal(log, console: true, write: item.Type == LoggerType.Exception);
-                }
-            }
-            catch (Exception exception)
-            {
-                Help.ExceptionWrite(exception, true, true);
-            }
-        });
-
         this.BindBefore = c =>
         {
             c.CallBeforeMethod = async (meta, args) =>

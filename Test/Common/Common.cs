@@ -137,13 +137,21 @@ public abstract class BusinessBase : BusinessBase<ResultObject<string>>
 
         this.Logger = new Logger(async x =>
         {
-            var logs = x.Select(c =>
+            try
             {
-                c.Value = c.Value.ToValue();
-                return c;
-            });
+                var logs = x.Select(c =>
+                {
+                    c.Value = c.Value.ToValue();
+                    System.Console.WriteLine(c.JsonSerialize());
+                    return c;
+                }).ToList();
 
-            System.Console.WriteLine(logs.JsonSerialize());
+                //System.Console.WriteLine(logs.JsonSerialize());
+            }
+            catch (Exception ex)
+            {
+                Help.ExceptionWrite(ex, true, true);
+            }
         }, maxCapacity: 1000)
         {
             //Batch = new Logger.BatchOptions
@@ -157,7 +165,7 @@ public abstract class BusinessBase : BusinessBase<ResultObject<string>>
 
 public class Common
 {
-    public static string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{AppDomain.CurrentDomain.FriendlyName}.log.txt");
+    public static readonly string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{AppDomain.CurrentDomain.FriendlyName}.log.txt");
 
     public static Host Host = new Host();
 
@@ -184,8 +192,24 @@ public class Common
         });
     }
 
+    /// <summary>
+    /// Call this method after environment initialization is complete
+    /// </summary>
+    /// <param name="docDir"></param>
     public static void InitBusiness(string docDir = null)
     {
+        /*
+#if DEBUG
+        var con = Startup.appSettings.GetSection("Redis").GetSection("ConnectionString").Value;
+#else
+        var con = Startup.appSettings.GetSection("Redis").GetSection("ConnectionString2").Value;
+#endif
+        System.Console.WriteLine($"Redis={con}");
+        var csredis = new CSRedis.CSRedisClient(con);
+        RedisHelper.Initialization(csredis);
+        */
+
+        //Initialize the database
         LinqToDB.Data.DataConnection.DefaultSettings = new LinqToDB.LinqToDBSection(Host.AppSettings.GetSection("ConnectionStrings").GetChildren().Select(c => new LinqToDB.ConnectionStringSettings { Name = c.Key, ConnectionString = c.GetValue<string>("ConnectionString"), ProviderName = c.GetValue<string>("ProviderName") }));
 
         //1
