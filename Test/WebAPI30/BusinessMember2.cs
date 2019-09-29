@@ -1,4 +1,5 @@
 ﻿using Business;
+using Business.Annotations;
 using Business.Attributes;
 using Business.Result;
 using Business.Utils;
@@ -453,17 +454,6 @@ public class Test2Attribute : ArgumentAttribute
     }
 }
 
-public class CheckNull2Attribute : CheckNullAttribute
-{
-    public CheckNull2Attribute(int state = -800, string message = null) : base(state, message)
-    {
-        this.BindAfter += () =>
-        {
-            this.Description = this.Replace("{Nick} 这个参数必须填写");
-        };
-    }
-}
-
 
 public class Args
 {
@@ -494,7 +484,7 @@ public class Args
         /// </summary>
         //[Test]
         [Nick("password")]
-        [CheckNull2]
+        [@CheckNull]
         [DefaultValue("")]
         public string A { get; set; }
 

@@ -1292,7 +1292,7 @@ namespace Business.Attributes //Annotations
     /// <summary>
     /// AES return to item1=Data and item2=Salt
     /// </summary>
-    public class AES : ArgumentAttribute
+    public class AESAttribute : ArgumentAttribute
     {
         /// <summary>
         /// key
@@ -1306,7 +1306,7 @@ namespace Business.Attributes //Annotations
 
         public System.Text.Encoding Encoding { get; set; }
 
-        public AES(string key = null, int state = -821, string message = null) : base(state, message) => this.Key = key;
+        public AESAttribute(string key = null, int state = -821, string message = null) : base(state, message) => this.Key = key;
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {

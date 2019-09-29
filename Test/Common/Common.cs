@@ -7,27 +7,11 @@ using System.Net.Http;
 using Business;
 using Business.Utils;
 using Business.Attributes;
+using Business.Annotations;
 using Business.Result;
 using System.Collections.Generic;
 
 #region Socket Support
-
-public class MessagePackArgAttribute : ArgumentAttribute
-{
-    public MessagePackArgAttribute(int state = -13, string message = null) : base(state, message) => this.CanNull = false;
-
-    public override async ValueTask<IResult> Proces(dynamic value, IArg arg)
-    {
-        var result = CheckNull(this, value);
-        if (!result.HasData) { return result; }
-
-        try
-        {
-            return this.ResultCreate(arg.ToOut(value));
-        }
-        catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} MessagePack deserialize error"); }
-    }
-}
 
 /// <summary>
 /// This is a parameter package, used to transform parameters
@@ -123,9 +107,9 @@ public class SessionObj
 public class Session : Arg<SessionObj, Token> { }
 
 [Command(Group = "j")]
-[JsonArg(Group = "j")]
+[@JsonArg(Group = "j")]
 [Command(Group = "s")]
-[MessagePackArg(Group = "s")]
+[@MessagePackArg(Group = "s")]
 [Logger]
 public abstract class BusinessBase : BusinessBase<ResultObject<string>>
 {
@@ -142,7 +126,7 @@ public abstract class BusinessBase : BusinessBase<ResultObject<string>>
                 var logs = x.Select(c =>
                 {
                     c.Value = c.Value.ToValue();
-                    System.Console.WriteLine(c.JsonSerialize());
+                    Console.WriteLine(c.JsonSerialize());
                     return c;
                 }).ToList();
 
