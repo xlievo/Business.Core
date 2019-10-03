@@ -351,6 +351,7 @@ JSONEditor.defaults.editors.object = JSONEditor.defaults.editors.object.extend({
             this.editjson_textarea.style.width = '300px';
             this.editjson_textarea.style.display = 'block';
             this.editjson_save = this.getButton('Save', 'save', 'Save');
+            this.editjson_save.style.display = 'none';
             this.editjson_save.classList.add('json-editor-btntype-save');
             this.editjson_save.addEventListener('click', function (e) {
                 e.preventDefault();

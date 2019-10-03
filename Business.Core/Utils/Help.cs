@@ -224,7 +224,7 @@ namespace Business.Utils
             protected override string ResolvePropertyName(string propertyName) => resolvePropertyName(propertyName);
         }
         */
-
+        /*
         public static Newtonsoft.Json.JsonSerializerSettings JsonSettings = new Newtonsoft.Json.JsonSerializerSettings
         {
             ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
@@ -233,8 +233,10 @@ namespace Business.Utils
             DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
             NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
         };
+        */
 
-        static DocArg GetDocArg(DocArgSource argSource)
+        static DocArg GetDocArg<TypeDefinition>(DocArgSource<TypeDefinition> argSource)
+            where TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
         {
             var group = argSource.Args.Group[argSource.Group];
             var nick = group.Nick;
@@ -397,7 +399,7 @@ namespace Business.Utils
         /// <param name="outDir"></param>
         /// <param name="host"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, string outDir = null, string host = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Meta.Args>, DocArg> argCallback, string outDir = null, string host = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -475,7 +477,7 @@ namespace Business.Utils
         /// <param name="xmlMembers"></param>
         /// <param name="host"></param>
         /// <returns></returns>
-        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string host = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Meta.Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string host = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
@@ -487,12 +489,14 @@ namespace Business.Utils
                   Xml.member member = null;
                   xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
 
+                  var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, business.Configer.Info.CommandGroupDefault);
+
                   var member2 = new Member<DocArg>
                   {
                       Name = meta.CommandGroup[key].OnlyName,
                       HasReturn = meta.HasReturn,
                       Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
-                      Returns = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub),
+                      Returns = GetDocArg(business.Configer.Info.CommandGroupDefault, returnType, c3 => GetDocArg(c3), xmlMembers, member?._params?.Find(c4 => c4.name == returnType.Name)?.text),
                       Args = new Dictionary<string, DocArg>(),
                       ArgSingle = c2.Value.HasArgSingle,
                       HttpFile = c2.Value.HasHttpFile,
@@ -510,7 +514,7 @@ namespace Business.Utils
         }
 
         const string AttributeSign = "Attribute";
-
+        /*
         static DocArg GetDocArg<DocArg>(string group, Meta.Args args, System.Func<DocArgSource, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null) where DocArg : IDocArg<DocArg>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -524,13 +528,13 @@ namespace Business.Utils
                     case Meta.MemberDefinitionCode.No:
                         break;
                     case Meta.MemberDefinitionCode.Definition:
-                        xmlMembers?.TryGetValue($"T:{args.ArgTypeFullName}", out member);
+                        xmlMembers?.TryGetValue($"T:{args.FullName}", out member);
                         break;
                     case Meta.MemberDefinitionCode.Field:
-                        xmlMembers?.TryGetValue($"F:{args.ArgTypeFullName}", out member);
+                        xmlMembers?.TryGetValue($"F:{args.FullName}", out member);
                         break;
                     case Meta.MemberDefinitionCode.Property:
-                        xmlMembers?.TryGetValue($"P:{args.ArgTypeFullName}", out member);
+                        xmlMembers?.TryGetValue($"P:{args.FullName}", out member);
                         break;
                 }
 
@@ -561,7 +565,7 @@ namespace Business.Utils
                 attr = attr.Next;
             }
 
-            var arg = argCallback(new DocArgSource { Group = group, Args = args, Attributes = attrs, Summary = summary });
+            var arg = argCallback(new DocArgSource<TypeDefinition> { Group = group, Args = args, Attributes = attrs, Summary = summary });
 
             if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !args.LastType.IsEnum)
             {
@@ -595,8 +599,95 @@ namespace Business.Utils
 
             return arg;
         }
+        */
+        static DocArg GetDocArg<DocArg, TypeDefinition>(string group, Meta.ITypeDefinition<TypeDefinition> args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null)
+            where DocArg : IDocArg<DocArg>
+            where TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
+        {
+            if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
-        public static TypeDefinition GetTypeDefinition(this System.Type returnType, IDictionary<string, Xml.member> xmlMembers = null, string summary = null)
+            if (string.IsNullOrWhiteSpace(summary))
+            {
+                Xml.member member = null;
+
+                switch (args.MemberDefinition)
+                {
+                    case Meta.MemberDefinitionCode.No:
+                        break;
+                    case Meta.MemberDefinitionCode.Definition:
+                        xmlMembers?.TryGetValue($"T:{args.FullName}", out member);
+                        break;
+                    case Meta.MemberDefinitionCode.Field:
+                        xmlMembers?.TryGetValue($"F:{args.FullName}", out member);
+                        break;
+                    case Meta.MemberDefinitionCode.Property:
+                        xmlMembers?.TryGetValue($"P:{args.FullName}", out member);
+                        break;
+                }
+
+                summary = member?.summary?.text;
+
+                if (string.IsNullOrWhiteSpace(summary) && args.HasDefinition)
+                {
+                    xmlMembers?.TryGetValue($"T:{args.LastType.FullName.Replace('+', '.')}", out member);
+
+                    summary = member?.summary?.text;
+                }
+            }
+
+            var argGroup = args.Group[group];
+
+            var attrs = new List<string>();
+
+            var attr = argGroup.Attrs?.First;
+            while (null != attr && NodeState.DAT == attr.State)
+            {
+                if ("Business.Attributes.ArgumentDefaultAttribute" == attr.Value.Type.FullName)
+                {
+                    attr = attr.Next;
+                    continue;
+                }
+
+                attrs.Add(string.IsNullOrWhiteSpace(attr.Value.Description) ? attr.Value.Type.Name.EndsWith(AttributeSign) ? attr.Value.Type.Name.Substring(0, attr.Value.Type.Name.Length - AttributeSign.Length) : attr.Value.Type.Name : attr.Value.Description);
+                attr = attr.Next;
+            }
+
+            var arg = argCallback(new DocArgSource<TypeDefinition> { Group = group, Args = args, Attributes = attrs, Summary = summary });
+
+            if ((null == argGroup.Ignore || !argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild)) && !args.LastType.IsEnum)
+            {
+                // && !arg.IsDictionary && !arg.IsCollection
+                var childrens = args.Children.Where(c => !c.Group[group].IgnoreArg);
+
+                if (childrens.Any())
+                {
+                    if ("array" == arg.Type)
+                    {
+                        arg.Items.Children = new Dictionary<string, DocArg>();
+                    }
+                    else
+                    {
+                        arg.Children = new Dictionary<string, DocArg>();
+                    }
+
+                    foreach (var item in childrens)
+                    {
+                        if ("array" == arg.Type)
+                        {
+                            arg.Items.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
+                        }
+                        else
+                        {
+                            arg.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
+                        }
+                    }
+                }
+            }
+
+            return arg;
+        }
+
+        public static TypeDefinition GetTypeDefinition(this System.Type returnType, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "")
         {
             var hasDefinition = returnType.IsDefinition();
             var definitions = hasDefinition ? new List<string> { returnType.FullName } : new List<string>();
@@ -613,31 +704,37 @@ namespace Business.Utils
                 summary = member?.summary?.text;
             }
 
+            var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
+            group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(null, false, null, null, returnType.Name, null, "", false));
+
             var definition = new TypeDefinition
             {
                 Name = returnType.Name,
                 Type = returnType,
+                LastType = returnType,
+                HasDefinition = hasDefinition,
                 DefaultValue = returnType.IsValueType && typeof(void) != returnType ? System.Activator.CreateInstance(returnType) : null,
 
-                IsNumeric = returnType.IsNumeric(),
-                IsDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(returnType),
-                IsCollection = returnType.IsCollection(),
-                IsEnum = returnType.IsEnum,
+                HasNumeric = returnType.IsNumeric(),
+                HasDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(returnType),
+                HasCollection = returnType.IsCollection(),
+                HasEnum = returnType.IsEnum,
                 EnumNames = returnType.IsEnum ? returnType.GetEnumNames() : null,
                 EnumValues = returnType.IsEnum ? returnType.GetEnumValues() : null,
 
                 FullName = fullName,
-                Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, string.Empty, xmlMembers) : new ReadOnlyCollection<TypeDefinition>(),
+                Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, string.Empty, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                 Childrens = childrens,
                 MemberDefinition = memberDefinition,
                 Summary = summary,
                 Path = returnType.Name,
+                Group = group
             };
 
             return definition;
         }
 
-        static ReadOnlyCollection<TypeDefinition> GetTypeDefinition(System.Type type, List<string> definitions, ReadOnlyCollection<TypeDefinition> childrens, string path, IDictionary<string, Xml.member> xmlMembers = null)
+        static ReadOnlyCollection<TypeDefinition> GetTypeDefinition(System.Type type, List<string> definitions, ReadOnlyCollection<TypeDefinition> childrens, string path, IDictionary<string, Xml.member> xmlMembers = null, string groupKey = "")
         {
             var types = new ReadOnlyCollection<TypeDefinition>();
 
@@ -694,25 +791,32 @@ namespace Business.Utils
 
                 // .. //
                 var path2 = !string.IsNullOrWhiteSpace(path) ? $"{path}.{item.Name}" : item.Name;
+
+                var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
+                group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(null, false, null, null, path2, null, "", false));
+
                 var definition = new TypeDefinition
                 {
                     Name = item.Name,
                     Type = memberType,
+                    LastType = memberType,
+                    HasDefinition = hasDefinition,
                     DefaultValue = memberType.IsValueType ? System.Activator.CreateInstance(memberType) : null,
 
-                    IsNumeric = memberType.IsNumeric(),
-                    IsDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(memberType),
-                    IsCollection = memberType.IsCollection(),
-                    IsEnum = memberType.IsEnum,
+                    HasNumeric = memberType.IsNumeric(),
+                    HasDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(memberType),
+                    HasCollection = memberType.IsCollection(),
+                    HasEnum = memberType.IsEnum,
                     EnumNames = memberType.IsEnum ? memberType.GetEnumNames() : null,
                     EnumValues = memberType.IsEnum ? memberType.GetEnumValues() : null,
 
                     FullName = fullName,
-                    Children = hasDefinition ? GetTypeDefinition(memberType, definitions, childrens2, path2, xmlMembers) : new ReadOnlyCollection<TypeDefinition>(),
+                    Children = hasDefinition ? GetTypeDefinition(memberType, definitions, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                     Childrens = childrens2,
                     MemberDefinition = memberDefinition,
                     Summary = summary,
                     Path = path2,
+                    Group = group
                 };
 
                 types.collection.Add(definition);
@@ -727,37 +831,49 @@ namespace Business.Utils
             return types;
         }
 
-        public struct TypeDefinition
+        public struct TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
         {
             public string Name { get; set; }
 
             public System.Type Type { get; set; }
 
-            public bool IsEnum { get; set; }
+            public System.Type LastType { get; set; }
 
-            public bool IsCollection { get; set; }
+            public bool HasDefinition { get; set; }
 
-            public bool IsDictionary { get; set; }
+            public bool HasCollection { get; set; }
 
-            public bool IsNumeric { get; set; }
-
-            public string[] EnumNames { get; set; }
-
-            public System.Array EnumValues { get; set; }
+            public bool HasDictionary { get; set; }
 
             public object DefaultValue { get; set; }
 
             public string FullName { get; set; }
 
-            public string Path { get; set; }
-
-            public string Summary { get; set; }
-
             public Meta.MemberDefinitionCode MemberDefinition { get; set; }
+
+            public bool HasToken { get; set; }
+
+            public bool HasDefaultValue { get; set; }
+
+            public ConcurrentReadOnlyDictionary<string, Meta.ArgGroup> Group { get; set; }
 
             public ReadOnlyCollection<TypeDefinition> Children { get; set; }
 
             public ReadOnlyCollection<TypeDefinition> Childrens { get; set; }
+
+            //==========================================================//
+
+            public bool HasEnum { get; set; }
+
+            public bool HasNumeric { get; set; }
+
+            public string[] EnumNames { get; set; }
+
+            public System.Array EnumValues { get; set; }
+
+            public string Path { get; set; }
+
+            public string Summary { get; set; }
         }
 
         ///// <summary>

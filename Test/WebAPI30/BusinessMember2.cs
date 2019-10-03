@@ -46,7 +46,7 @@ public class BusinessMember2 : BusinessBase
 
             c.CallAfterMethod = async (meta, args, result) =>
             {
-                if (typeof(System.Threading.Tasks.Task).IsAssignableFrom(result?.GetType()))
+                if (typeof(Task).IsAssignableFrom(result?.GetType()))
                 {
                     //await result;
 
@@ -76,12 +76,12 @@ public class BusinessMember2 : BusinessBase
         public string B { get; set; }
     }
 
-    public virtual async Task<IResult<Test001>> Test00X(Business.Auth.Token token2, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test00X(Token token2, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
 
-    public virtual async Task<IResult<Test001>> Test000(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test000(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
@@ -90,13 +90,13 @@ public class BusinessMember2 : BusinessBase
     /// test doc Test001
     /// and Test001
     /// </summary>
-    /// <param name="token">A token sample</param>
+    /// <param name="token">A token sample222</param>
     /// <param name="arg"></param>
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
     //Task<IResult<Test001>>
-    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [HttpFile]Arg<Dictionary<string, dynamic>> context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
+    public virtual async Task<dynamic> Test001(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, HttpFile context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -111,7 +111,7 @@ public class BusinessMember2 : BusinessBase
         //if (exit)
         //{
         //    //arg.Out.B = await RedisHelper.HGetAsync("Role", "value2");
-        //    //return this.ResultCreate<Business.Auth.Token>(null);
+        //    //return this.ResultCreate<Token>(null);
 
         //    return this.ResultCreate<Test001Result>(-110, "sss");
         //}
@@ -152,7 +152,7 @@ public class BusinessMember2 : BusinessBase
     /// <param name="mm"></param>
     /// <returns>test return!!!</returns>
     [HttpFile]
-    public virtual async Task<dynamic> Test002(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, Arg<Dictionary<string, dynamic>> context = null)
+    public virtual async Task<dynamic> Test002(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, Arg<Dictionary<string, dynamic>> context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -174,7 +174,7 @@ public class BusinessMember2 : BusinessBase
     /// <param name="arg"></param>
     /// <param name="mm"></param>
     /// <returns></returns>
-    public virtual async Task Test003(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task Test003(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         await System.Threading.Tasks.Task.Delay(10000);
         dynamic args = new System.Dynamic.ExpandoObject();
@@ -186,7 +186,7 @@ public class BusinessMember2 : BusinessBase
         }
     }
 
-    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task<dynamic> Test004(Token token, Arg<List<Test001>> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
@@ -196,7 +196,7 @@ public class BusinessMember2 : BusinessBase
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
-    public virtual async Task<dynamic> Test005(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context)
+    public virtual async Task<dynamic> Test005(Token token, Arg<List<Test001>> arg, dynamic context)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
@@ -206,189 +206,189 @@ public class BusinessMember2 : BusinessBase
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
-    public virtual async Task<dynamic> Test006(Business.Auth.Token token) => this.ResultCreate();
+    public virtual async Task<dynamic> Test006(Token token) => this.ResultCreate();
 
-    public virtual async Task<IResult<Test001>> Test0010(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0010(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0011(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0011(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0012(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0012(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0013(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0013(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0014(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0014(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0015(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0015(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0016(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0016(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0017(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0017(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0018(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0018(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0019(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0019(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0020(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0020(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0021(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0021(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0022(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0022(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0023(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0023(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0024(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0024(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0025(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0025(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0026(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0026(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0027(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0027(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0028(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0028(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0029(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0029(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0030(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0030(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0031(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0031(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0032(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0032(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test00333(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test00333(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0034(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0034(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0035(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0035(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0036(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0036(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0037(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0037(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0038(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0038(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0039(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0039(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0040(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0040(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0041(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0041(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0042(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0042(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0043(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0043(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0044(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0044(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0045(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0045(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0046(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0046(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0047(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0047(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0048(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0048(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0049(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0049(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0050(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0050(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0051(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0051(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0052(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0052(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0053(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0053(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0054(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0054(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
-    public virtual async Task<IResult<Test001>> Test0055(Session session, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test0055(SessionArg session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
@@ -401,7 +401,7 @@ public class BusinessMember2 : BusinessBase
     /// <returns></returns>
     public virtual async Task<dynamic> Test007(Arg<Test001> arg, Arg<List<string>> arg2) => this.ResultCreate();
 
-    public virtual async void Test0033(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async void Test0033(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -414,7 +414,7 @@ public class BusinessMember2 : BusinessBase
 
     public struct Result
     {
-        public Business.Auth.Token token { get; set; }
+        public Token token { get; set; }
 
         public List<Test001> arg { get; set; }
     }

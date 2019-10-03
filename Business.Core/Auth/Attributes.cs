@@ -415,7 +415,7 @@ namespace Business.Attributes //Annotations
 
         //public bool Contains(IgnoreMode mode) => 0 != (this.Mode & mode);
     }
-    
+
     /// <summary>
     /// Token
     /// </summary>
@@ -1346,9 +1346,17 @@ namespace Business.Attributes //Annotations
 
     public class JsonArgAttribute : ArgumentAttribute
     {
-        public JsonArgAttribute(int state = -12, string message = null) : base(state, message) => this.CanNull = false;
+        public static Newtonsoft.Json.JsonSerializerSettings Settings = new Newtonsoft.Json.JsonSerializerSettings
+        {
+            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
+            DateFormatString = "yyyy-MM-dd HH:mm:ss",
+            DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
+            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+            Converters = new System.Collections.Generic.List<Newtonsoft.Json.JsonConverter> { new Newtonsoft.Json.Converters.StringEnumConverter() }
+        };
 
-        //public Newtonsoft.Json.JsonSerializerSettings Settings { get; set; }
+        public JsonArgAttribute(int state = -12, string message = null) : base(state, message) => this.CanNull = false;
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
@@ -1357,7 +1365,7 @@ namespace Business.Attributes //Annotations
 
             try
             {
-                return this.ResultCreate(data: Newtonsoft.Json.JsonConvert.DeserializeObject(value?.ToString(), this.Meta.MemberType));
+                return this.ResultCreate(data: Newtonsoft.Json.JsonConvert.DeserializeObject(value?.ToString(), this.Meta.MemberType, Settings));
             }
             catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
         }

@@ -204,7 +204,7 @@ namespace Business.Document
 
         bool HasReturn { get; set; }
 
-        Help.TypeDefinition Returns { get; set; }
+        Document.DocArg Returns { get; set; }
 
         string Description { get; set; }
 
@@ -250,7 +250,7 @@ namespace Business.Document
         /// Json format
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => new Dictionary<string, Doc<DocArg>> { { this.Name, this } }.JsonSerialize(Help.JsonSettings);
+        public override string ToString() => new Dictionary<string, Doc<DocArg>> { { this.Name, this } }.JsonSerialize(Configer.DocJsonSettings);
     }
 
     public class Member<DocArg> : IMember<DocArg> where DocArg : IDocArg<DocArg>
@@ -259,7 +259,7 @@ namespace Business.Document
 
         public bool HasReturn { get; set; }
 
-        public Help.TypeDefinition Returns { get; set; }
+        public Document.DocArg Returns { get; set; }
 
         public string Description { get; set; }
 
@@ -400,11 +400,12 @@ namespace Business.Document
     }
     */
 
-    public struct DocArgSource
+    public struct DocArgSource<TypeDefinition>
+        where TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
     {
         public string Group { get; set; }
 
-        public Meta.Args Args { get; set; }
+        public Meta.ITypeDefinition<TypeDefinition> Args { get; set; }
 
         public IList<string> Attributes { get; set; }
 

@@ -42,12 +42,22 @@
         </member>
         <member name="T:Token">
             <summary>
-            my toekn
+            my token
             </summary>
         </member>
-        <member name="T:SessionObj">
+        <member name="T:Session">
             <summary>
             my session
+            </summary>
+        </member>
+        <member name="T:SessionArg">
+            <summary>
+            Session arg object
+            </summary>
+        </member>
+        <member name="T:HttpFile">
+            <summary>
+            parameter name: context
             </summary>
         </member>
         <member name="M:Common.InitBusiness(System.String)">

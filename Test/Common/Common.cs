@@ -90,21 +90,32 @@ public struct Host
 }
 
 /// <summary>
-/// my toekn
+/// my token
 /// </summary>
+[TokenCheck]
 public class Token : Business.Auth.Token { }
 
 /// <summary>
 /// my session
 /// </summary>
-public class SessionObj
+public class Session
 {
     public string Account { get; set; }
     public int Nick { get; set; }
     public List<string> Roles { get; set; }
 }
 
-public class Session : Arg<SessionObj, Token> { }
+/// <summary>
+/// Session arg object
+/// </summary>
+[SessionCheck]
+public class SessionArg : Arg<Session, Token> { }
+
+/// <summary>
+/// parameter name: context
+/// </summary>
+[HttpFile]
+public class HttpFile : Arg<Dictionary<string, dynamic>> { }
 
 [Command(Group = "j")]
 [@JsonArg(Group = "j")]
@@ -167,13 +178,6 @@ public class Common
         Console.WriteLine($"LogPath: {LogPath}");
 
         MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
-
-        Newtonsoft.Json.JsonConvert.DefaultSettings = (() =>
-        {
-            var settings = Help.JsonSettings;
-            settings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-            return settings;
-        });
     }
 
     /// <summary>

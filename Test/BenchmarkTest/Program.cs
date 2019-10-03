@@ -17,7 +17,7 @@ namespace BenchmarkTest
         static BusinessMember Member;
         static CommandGroup Cmd;
         static Configer Cfg;
-        public static int WorkTime = 1200;
+        public static int WorkTime = -1;
 
         public struct Dto
         {
@@ -307,22 +307,21 @@ namespace BenchmarkTest
                 }
                 //System.Console.WriteLine(loggers.Count());
 
-                loggers.Select(c =>
+                var logs = loggers.Select(c =>
                 {
                     c.Value = c.Value?.ToValue();
                     Loggers.Add(c);
                     return c;
-                });
+                }).ToList();
 
-                Logs.Add(loggers.ToList().Count);
+                Logs.Add(logs.Count);
             }, 30)
             {
                 Batch = new Logger.BatchOptions
                 {
-                    Interval = System.TimeSpan.FromSeconds(10),
-                    MaxNumber = 1000
-                },
-                ThreadCall = true
+                    Interval = System.TimeSpan.FromSeconds(6),
+                    //MaxNumber = 1000
+                }
             };
         }
 

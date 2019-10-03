@@ -4,6 +4,7 @@
 
     public class DocUI
     {
+        static readonly bool Unix = false;
         const string Csproj = "Business.DocUI.csproj";
         static readonly string Index = "doc\\index.html";
         static readonly System.Collections.Generic.Dictionary<string, System.IO.Stream> Doc = new System.Collections.Generic.Dictionary<string, System.IO.Stream>();
@@ -18,22 +19,13 @@
             {
                 case System.PlatformID.MacOSX:
                 case System.PlatformID.Unix:
+                    Unix = true;
                     Index = "doc/index.html";
                     break;
             }
 
-            var resourceList = System.Xml.Linq.XDocument.Load(ass.GetManifestResourceStream(csproj)).Descendants("EmbeddedResource").Select(c2 =>
-            {
-                var v = c2.Attribute("Include")?.Value;
-                switch (System.Environment.OSVersion.Platform)
-                {
-                    case System.PlatformID.MacOSX:
-                    case System.PlatformID.Unix:
-                        v = v?.Replace("\\", "/");
-                        break;
-                }
-                return v;
-            })
+            var resourceList = System.Xml.Linq.XDocument.Load(ass.GetManifestResourceStream(csproj)).Descendants("EmbeddedResource")
+                .Select(c2 => Unix ? c2.Attribute("Include")?.Value?.Replace("\\", "/") : c2.Attribute("Include")?.Value)
                 .Where(c2 => null != c2 && Csproj != c2).ToDictionary(c =>
             {
                 var file = System.IO.Path.GetFileName(c);
@@ -41,16 +33,7 @@
                 var c2 = c.Substring(0, c.Length - file.Length);
                 var c3 = c2.Replace(".", "._").Replace("-", "_");
 
-                switch (System.Environment.OSVersion.Platform)
-                {
-                    case System.PlatformID.MacOSX:
-                    case System.PlatformID.Unix:
-                        c3 = c3.Replace("/", ".");
-                        break;
-                    default:
-                        c3 = c3.Replace("\\", ".");
-                        break;
-                }
+                c3 = Unix ? c3.Replace("/", ".") : c3.Replace("\\", ".");
 
                 //System.Console.WriteLine($"{c3}{file}");
                 return $"{c3}{file}";

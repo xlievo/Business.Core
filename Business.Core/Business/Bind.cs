@@ -1670,15 +1670,58 @@ namespace Business.Meta
         Property,
     }
 
+    public interface ITypeDefinition<TypeDefinition> where TypeDefinition : ITypeDefinition<TypeDefinition>
+    {
+        string Name { get; }
+
+        System.Type Type { get; }
+
+        System.Type LastType { get; }
+
+        bool HasDefinition { get; }
+
+        bool HasCollection { get; }
+
+        bool HasDictionary { get; }
+
+        //bool IsEnum { get; set; }
+
+        //bool HasNumeric { get; set; }
+
+        //string[] EnumNames { get; set; }
+
+        //System.Array EnumValues { get; set; }
+
+        //string Path { get; set; }
+
+        //string Summary { get; set; }
+
+        object DefaultValue { get; }
+
+        string FullName { get; }
+
+        MemberDefinitionCode MemberDefinition { get; }
+
+        bool HasToken { get; }
+
+        bool HasDefaultValue { get; }
+
+        ConcurrentReadOnlyDictionary<string, ArgGroup> Group { get; }
+
+        ReadOnlyCollection<TypeDefinition> Children { get; }
+
+        ReadOnlyCollection<TypeDefinition> Childrens { get; }
+    }
+
     /// <summary>
     /// Argument
     /// </summary>
-    public class Args
+    public class Args : ITypeDefinition<Args>
     {
         //public override string ToString() => string.Format("{0} {1}", Group2, Name);
 
         //argChild
-        public Args(string name, System.Type type, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string argTypeFullName, MemberDefinitionCode memberDefinition)
+        public Args(string name, System.Type type, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition)
         {
             Name = name;
             Type = type;
@@ -1714,7 +1757,7 @@ namespace Business.Meta
             UseType = useType;
             HasToken = hasToken;
             MethodTypeFullName = methodTypeFullName;
-            ArgTypeFullName = argTypeFullName;
+            FullName = fullName;
             MemberDefinition = memberDefinition;
         }
 
@@ -1778,7 +1821,7 @@ namespace Business.Meta
         //==============methodTypeFullName===================//
         public string MethodTypeFullName { get; private set; }
         //==============argTypeFullName===================//
-        public string ArgTypeFullName { get; private set; }
+        public string FullName { get; private set; }
         //==============memberDefinition===================//
         /// <summary>
         /// xml using

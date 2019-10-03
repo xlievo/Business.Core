@@ -103,4 +103,48 @@ namespace Business.Annotations
             this.Description = "AES";
         }
     }
+
+    public class SessionCheck : ArgumentAttribute
+    {
+        public SessionCheck(int state = -81, string message = null) : base(state, message)
+        {
+            this.CanNull = false;
+            this.Description = "Session check";
+        }
+
+        public override async ValueTask<IResult> Proces(dynamic value)
+        {
+            var result = CheckNull(this, value);
+            if (!result.HasData) { return result; }
+
+            var key = value.Key as string;
+
+            //..1: check 2: convert
+
+            var session = new Session { Account = "test" };
+
+            return this.ResultCreate(session);//return session
+        }
+    }
+
+    public class TokenCheck : ArgumentAttribute
+    {
+        public TokenCheck(int state = -80, string message = null) : base(state, message)
+        {
+            this.CanNull = false;
+            this.Description = "Token check";
+        }
+
+        public override async ValueTask<IResult> Proces(dynamic value)
+        {
+            var result = CheckNull(this, value);
+            if (!result.HasData) { return result; }
+
+            var key = value.Key as string;
+
+            //..1: check token key
+
+            return this.ResultCreate(); //ok
+        }
+    }
 }

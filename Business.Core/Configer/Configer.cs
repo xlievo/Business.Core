@@ -567,9 +567,18 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
             if (exists)
             {
-                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Help.JsonSettings), Help.UTF8);
+                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings), Help.UTF8);
             }
         }
+
+        public static Newtonsoft.Json.JsonSerializerSettings DocJsonSettings = new Newtonsoft.Json.JsonSerializerSettings
+        {
+            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
+            DateFormatString = "yyyy-MM-dd HH:mm:ss",
+            DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
+            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+        };
 
         //public static void UseDoc<Doc>(System.Func<System.Collections.Generic.Dictionary<string, Document.Xml.member>, Doc> operation, string outDir = null) where Doc : Document.Doc
         //{
