@@ -481,22 +481,25 @@ namespace Business.Utils
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
+            var groupDefault = business.Configer.Info.CommandGroupDefault;
+
             var group = business.Command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
               {
                   var key = c2.Value.Key;
                   var meta = c2.Value.Meta;
+                  var onlyName = meta.CommandGroup[key].OnlyName;
 
                   Xml.member member = null;
                   xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
 
-                  var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, business.Configer.Info.CommandGroupDefault);
+                  var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, groupDefault, $"{onlyName}.Returns");
 
                   var member2 = new Member<DocArg>
                   {
-                      Name = meta.CommandGroup[key].OnlyName,
+                      Name = onlyName,
                       HasReturn = meta.HasReturn,
                       Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
-                      Returns = GetDocArg(business.Configer.Info.CommandGroupDefault, returnType, c3 => GetDocArg(c3), xmlMembers, member?._params?.Find(c4 => c4.name == returnType.Name)?.text),
+                      Returns = GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3), xmlMembers, member?._params?.Find(c4 => c4.name == returnType.Name)?.text),
                       Args = new Dictionary<string, DocArg>(),
                       ArgSingle = c2.Value.HasArgSingle,
                       HttpFile = c2.Value.HasHttpFile,
@@ -510,7 +513,7 @@ namespace Business.Utils
                   return member2;
               }));
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = business.Configer.Info.CommandGroupDefault.FirstCharToLower(), Host = System.Uri.TryCreate(host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault.FirstCharToLower(), Host = System.Uri.TryCreate(host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty };
         }
 
         const string AttributeSign = "Attribute";
@@ -687,7 +690,7 @@ namespace Business.Utils
             return arg;
         }
 
-        public static TypeDefinition GetTypeDefinition(this System.Type returnType, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "")
+        public static TypeDefinition GetTypeDefinition(this System.Type returnType, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null)
         {
             var hasDefinition = returnType.IsDefinition();
             var definitions = hasDefinition ? new List<string> { returnType.FullName } : new List<string>();
@@ -705,7 +708,7 @@ namespace Business.Utils
             }
 
             var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
-            group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(null, false, null, null, returnType.Name, null, "", false));
+            group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(pathRoot ?? returnType.Name));
 
             var definition = new TypeDefinition
             {
@@ -723,7 +726,7 @@ namespace Business.Utils
                 EnumValues = returnType.IsEnum ? returnType.GetEnumValues() : null,
 
                 FullName = fullName,
-                Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, string.Empty, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
+                Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                 Childrens = childrens,
                 MemberDefinition = memberDefinition,
                 Summary = summary,
@@ -793,7 +796,7 @@ namespace Business.Utils
                 var path2 = !string.IsNullOrWhiteSpace(path) ? $"{path}.{item.Name}" : item.Name;
 
                 var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
-                group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(null, false, null, null, path2, null, "", false));
+                group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(path2));
 
                 var definition = new TypeDefinition
                 {

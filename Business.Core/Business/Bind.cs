@@ -1627,6 +1627,8 @@ namespace Business.Meta
 
     public class ArgGroup
     {
+        public ArgGroup(string path) => Path = path;
+
         public ArgGroup(ReadOnlyCollection<Attributes.Ignore> ignore, bool ignoreArg, ConcurrentLinkedList<Attributes.ArgumentAttribute> attrs, string nick, string path, string owner, string root, bool httpFile)
         {
             Ignore = ignore;
