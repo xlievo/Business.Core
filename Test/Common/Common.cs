@@ -180,6 +180,38 @@ public class Common
         MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
     }
 
+    static void InitRedis()
+    {
+        RedisHelper.Initialization(new CSRedis.CSRedisClient("mymaster,password=123456,prefix=", new[] { "192.168.1.121:26379", "192.168.1.122:26379", "192.168.1.123:26379" }));
+
+        /* test sentinel
+docker run -d --name redis -e REDIS_PASSWORD="123456" -e REDIS_REPLICATION_MODE=master -p 6379:6379 bitnami/redis:latest
+
+docker run -d --name redis -e REDIS_PASSWORD="123456" -e REDIS_REPLICATION_MODE=slave -e REDIS_MASTER_HOST=192.168.1.121 -e REDIS_MASTER_PORT_NUMBER=6379 -e REDIS_MASTER_PASSWORD=123456 -p 6379:6379 bitnami/redis:latest
+
+docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDIS_MASTER_PORT_NUMBER=6379 -e REDIS_MASTER_PASSWORD="123456" -p 26379:26379 bitnami/redis-sentinel:latest
+        */
+
+        /*
+        Exception ex = null;
+
+        do
+        {
+            try
+            {
+                RedisHelper.Set("aaa", "a1");
+                ex = null;
+            }
+            catch (Exception exception)
+            {
+                ex = exception;
+                ex.Console();
+                System.Threading.Thread.Sleep(TimeSpan.FromSeconds(3));
+            }
+        } while (null != ex);
+        */
+    }
+
     /// <summary>
     /// Call this method after environment initialization is complete
     /// </summary>
@@ -196,6 +228,8 @@ public class Common
         var csredis = new CSRedis.CSRedisClient(con);
         RedisHelper.Initialization(csredis);
         */
+
+        //InitRedis();
 
         //Initialize the database
         LinqToDB.Data.DataConnection.DefaultSettings = new LinqToDB.LinqToDBSection(Host.AppSettings.GetSection("ConnectionStrings").GetChildren().Select(c => new LinqToDB.ConnectionStringSettings { Name = c.Key, ConnectionString = c.GetValue<string>("ConnectionString"), ProviderName = c.GetValue<string>("ProviderName") }));
