@@ -184,7 +184,9 @@ public class Common
     {
         RedisHelper.Initialization(new CSRedis.CSRedisClient("mymaster,password=123456,prefix=", new[] { "192.168.1.121:26379", "192.168.1.122:26379", "192.168.1.123:26379" }));
 
-        /* test sentinel
+        /* test sentinel https://redis.io/topics/sentinel
+         * If everything appears to be normal for 30 second, the TILT mode is exited.
+         
 docker run -d --name redis -e REDIS_PASSWORD="123456" -e REDIS_REPLICATION_MODE=master -p 6379:6379 bitnami/redis:latest
 
 docker run -d --name redis -e REDIS_PASSWORD="123456" -e REDIS_REPLICATION_MODE=slave -e REDIS_MASTER_HOST=192.168.1.121 -e REDIS_MASTER_PORT_NUMBER=6379 -e REDIS_MASTER_PASSWORD=123456 -p 6379:6379 bitnami/redis:latest
