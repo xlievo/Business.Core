@@ -147,7 +147,7 @@ public abstract class BusinessBase : BusinessBase<ResultObject<string>>
             {
                 Help.ExceptionWrite(ex, true, true);
             }
-        }, maxCapacity: 1000)
+        }, maxCapacity: 10000)
         {
             //Batch = new Logger.BatchOptions
             //{
@@ -184,17 +184,22 @@ public class Common
     {
         RedisHelper.Initialization(new CSRedis.CSRedisClient("mymaster,password=123456,prefix=", new[] { "192.168.1.121:26379", "192.168.1.122:26379", "192.168.1.123:26379" }));
 
-        /* test sentinel https://redis.io/topics/sentinel
+        /* https://redis.io/topics/sentinel
          * If everything appears to be normal for 30 second, the TILT mode is exited.
+
+mkdir -p /root/workspace/redis && chown -R 1001 /root/workspace/redis && mkdir -p /root/workspace/redis-sentinel && chown -R 1001 /root/workspace/redis-sentinel
          
-docker run -d --name redis -e REDIS_PASSWORD="123456" -e REDIS_REPLICATION_MODE=master -p 6379:6379 bitnami/redis:latest
+docker run -d --name redis -e REDIS_PASSWORD="123456" -e REDIS_REPLICATION_MODE=master -v /root/workspace/redis:/bitnami/redis/data -p 6379:6379 bitnami/redis:latest
 
-docker run -d --name redis -e REDIS_PASSWORD="123456" -e REDIS_REPLICATION_MODE=slave -e REDIS_MASTER_HOST=192.168.1.121 -e REDIS_MASTER_PORT_NUMBER=6379 -e REDIS_MASTER_PASSWORD=123456 -p 6379:6379 bitnami/redis:latest
+docker run -d --name redis -e REDIS_PASSWORD="123456" -e REDIS_REPLICATION_MODE=slave -e REDIS_MASTER_HOST=192.168.1.121 -e REDIS_MASTER_PORT_NUMBER=6379 -e REDIS_MASTER_PASSWORD=123456 -v /root/workspace/redis:/bitnami/redis/data -p 6379:6379 bitnami/redis:latest
 
-docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDIS_MASTER_PORT_NUMBER=6379 -e REDIS_MASTER_PASSWORD="123456" -p 26379:26379 bitnami/redis-sentinel:latest
+docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDIS_MASTER_PORT_NUMBER=6379 -e REDIS_MASTER_PASSWORD="123456" -v /root/workspace/redis-sentinel:/bitnami/redis-sentinel/conf -p 26379:26379 bitnami/redis-sentinel:latest
+
+        docker run -it --rm bitnami/redis redis-cli -h 172.17.0.1 -p 6379 -a 123456 info Replication
+        docker run -it --rm bitnami/redis redis-cli -h 172.17.0.1 -p 6379 -a 123456 set aaa 111
         */
 
-        /*
+        /* test sentinel
         Exception ex = null;
 
         do
