@@ -1195,6 +1195,9 @@ namespace Business.Attributes //Annotations
         }
     }
 
+    /// <summary>
+    /// https://github.com/Microsoft/referencesource/blob/master/System.ComponentModel.DataAnnotations/DataAnnotations/EmailAddressAttribute.cs
+    /// </summary>
     public class CheckEmailAttribute : ArgumentAttribute
     {
         public CheckEmailAttribute(int state = -803, string message = null) : base(state, message) { }
@@ -1204,11 +1207,74 @@ namespace Business.Attributes //Annotations
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            if (!Utils.Help.CheckEmail(value))
+            //if (!Utils.Help.CheckEmail(value))
+            if (!IsValid(value))
             {
                 return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" email error");
             }
             return this.ResultCreate();
+        }
+
+        bool IsValid(dynamic value)
+        {
+            if (value == null)
+            {
+                return true;
+            }
+
+            string valueAsString = value as string;
+
+            // Use RegEx implementation if it has been created, otherwise use a non RegEx version.
+            if (_regex != null)
+            {
+                return valueAsString != null && _regex.Match(valueAsString).Length > 0;
+            }
+            else
+            {
+                int atCount = 0;
+
+                foreach (char c in valueAsString)
+                {
+                    if (c == '@')
+                    {
+                        atCount++;
+                    }
+                }
+
+                return (valueAsString != null
+                && atCount == 1
+                && valueAsString[0] != '@'
+                && valueAsString[valueAsString.Length - 1] != '@');
+            }
+        }
+
+        // This attribute provides server-side email validation equivalent to jquery validate,
+        // and therefore shares the same regular expression.  See unit tests for examples.
+        private static System.Text.RegularExpressions.Regex _regex = CreateRegEx();
+
+        private static System.Text.RegularExpressions.Regex CreateRegEx()
+        {
+            const string pattern = @"^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$";
+            const System.Text.RegularExpressions.RegexOptions options = System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.ExplicitCapture;
+
+            // Set explicit regex match timeout, sufficient enough for email parsing
+            // Unless the global REGEX_DEFAULT_MATCH_TIMEOUT is already set
+            var matchTimeout = System.TimeSpan.FromSeconds(2);
+
+            try
+            {
+                if (System.AppDomain.CurrentDomain.GetData("REGEX_DEFAULT_MATCH_TIMEOUT") == null)
+                {
+                    return new System.Text.RegularExpressions.Regex(pattern, options, matchTimeout);
+                }
+            }
+            catch
+            {
+                // Fallback on error
+            }
+
+            // Legacy fallback (without explicit match timeout)
+            return new System.Text.RegularExpressions.Regex(pattern, options);
         }
     }
 
@@ -1232,6 +1298,7 @@ namespace Business.Attributes //Annotations
 
     /// <summary>
     /// Indicates whether the specified regular expression finds a match in the specified input string, using the specified matching options.
+    /// https://github.com/microsoft/referencesource/blob/master/System.ComponentModel.DataAnnotations/DataAnnotations/RegularExpressionAttribute.cs
     /// </summary>
     public class RegexAttribute : ArgumentAttribute
     {
@@ -1242,33 +1309,342 @@ namespace Business.Attributes //Annotations
         /// <param name="options">A bitwise combination of the enumeration values that provide options for matching.</param>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public RegexAttribute(string pattern, System.Text.RegularExpressions.RegexOptions options = System.Text.RegularExpressions.RegexOptions.None, int state = -805, string message = null) : base(state, message)
+        public RegexAttribute(string pattern, int state = -805, string message = null) : base(state, message)
         {
             this.Pattern = pattern;
-            this.Options = options;
+            //this.Options = options;
         }
-
-        /// <summary>
-        /// The regular expression pattern to match.
-        /// </summary>
-        public string Pattern { get; set; }
 
         /// <summary>
         /// A bitwise combination of the enumeration values that provide options for matching.
         /// </summary>
-        public System.Text.RegularExpressions.RegexOptions Options { get; set; } = System.Text.RegularExpressions.RegexOptions.None;
+        //public System.Text.RegularExpressions.RegexOptions Options { get; set; } = System.Text.RegularExpressions.RegexOptions.None;
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            if (!System.Text.RegularExpressions.Regex.IsMatch(value.Trim(), Pattern, Options))
+            //if (!System.Text.RegularExpressions.Regex.IsMatch(value.Trim(), Pattern, Options))
+            if (!IsValid(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" char verification failed");
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" regular expression verification failed");
             }
 
             return this.ResultCreate();
+        }
+
+        bool IsValid(object value)
+        {
+            this.SetupRegex();
+
+            // Convert the value to a string
+            string stringValue = System.Convert.ToString(value, System.Globalization.CultureInfo.CurrentCulture);
+
+            // Automatically pass if value is null or empty. RequiredAttribute should be used to assert a value is not empty.
+            if (System.String.IsNullOrEmpty(stringValue))
+            {
+                return true;
+            }
+
+            var m = this.Regex.Match(stringValue);
+
+            // We are looking for an exact match, not just a search hit. This matches what
+            // the RegularExpressionValidator control does
+            return (m.Success && m.Index == 0 && m.Length == stringValue.Length);
+        }
+
+        /// <summary>
+        /// Gets the regular expression pattern to use
+        /// </summary>
+        public string Pattern { get; private set; }
+
+        /// <summary>
+        ///     Gets or sets the timeout to use when matching the regular expression pattern (in milliseconds)
+        ///     (-1 means never timeout).
+        /// </summary>
+        public int MatchTimeoutInMilliseconds
+        {
+            get
+            {
+                return _matchTimeoutInMilliseconds;
+            }
+            set
+            {
+                _matchTimeoutInMilliseconds = value;
+                _matchTimeoutSet = true;
+            }
+        }
+
+        private int _matchTimeoutInMilliseconds;
+        private bool _matchTimeoutSet;
+
+        private System.Text.RegularExpressions.Regex Regex { get; set; }
+
+        /// <summary>
+        /// Sets up the <see cref="Regex"/> property from the <see cref="Pattern"/> property.
+        /// </summary>
+        /// <exception cref="ArgumentException"> is thrown if the current <see cref="Pattern"/> cannot be parsed</exception>
+        /// <exception cref="InvalidOperationException"> is thrown if the current attribute is ill-formed.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"> thrown if <see cref="MatchTimeoutInMilliseconds" /> is negative (except -1),
+        /// zero or greater than approximately 24 days </exception>
+        private void SetupRegex()
+        {
+            if (this.Regex == null)
+            {
+                if (string.IsNullOrEmpty(this.Pattern))
+                {
+                    throw new System.ArgumentException(this.Pattern);
+                }
+
+                if (!_matchTimeoutSet)
+                {
+                    MatchTimeoutInMilliseconds = GetDefaultTimeout();
+                }
+
+                Regex = MatchTimeoutInMilliseconds == -1
+                    ? new System.Text.RegularExpressions.Regex(Pattern)
+                    : Regex = new System.Text.RegularExpressions.Regex(Pattern, default(System.Text.RegularExpressions.RegexOptions), System.TimeSpan.FromMilliseconds((double)MatchTimeoutInMilliseconds));
+            }
+        }
+
+        /// <summary>
+        /// Returns the default MatchTimeout based on UseLegacyRegExTimeout switch.
+        /// </summary>
+        private static int GetDefaultTimeout()
+        {
+            return 2000;
+        }
+    }
+
+    /// <summary>
+    /// https://github.com/microsoft/referencesource/blob/master/System.ComponentModel.DataAnnotations/DataAnnotations/PhoneAttribute.cs
+    /// </summary>
+    public class CheckPhoneAttribute : ArgumentAttribute
+    {
+        public CheckPhoneAttribute(int state = -806, string message = null) : base(state, message) { }
+
+        public override async ValueTask<IResult> Proces(dynamic value)
+        {
+            var result = CheckNull(this, value);
+            if (!result.HasData) { return result; }
+
+            if (!IsValid(value))
+            {
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" phone error");
+            }
+            return this.ResultCreate();
+        }
+
+        bool IsValid(dynamic value)
+        {
+            if (value == null)
+            {
+                return true;
+            }
+
+            string valueAsString = value as string;
+
+            // Use RegEx implementation if it has been created, otherwise use a non RegEx version.
+            if (_regex != null)
+            {
+                return valueAsString != null && _regex.Match(valueAsString).Length > 0;
+            }
+            else
+            {
+                if (valueAsString == null)
+                {
+                    return false;
+                }
+
+                valueAsString = valueAsString.Replace("+", string.Empty).TrimEnd();
+                valueAsString = RemoveExtension(valueAsString);
+
+                bool digitFound = false;
+                foreach (char c in valueAsString)
+                {
+                    if (char.IsDigit(c))
+                    {
+                        digitFound = true;
+                        break;
+                    }
+                }
+
+                if (!digitFound)
+                {
+                    return false;
+                }
+
+                foreach (char c in valueAsString)
+                {
+                    if (!(char.IsDigit(c)
+                        || char.IsWhiteSpace(c)
+                        || _additionalPhoneNumberCharacters.IndexOf(c) != -1))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        private static System.Text.RegularExpressions.Regex _regex = CreateRegEx();
+        private const string _additionalPhoneNumberCharacters = "-.()";
+
+        private static System.Text.RegularExpressions.Regex CreateRegEx()
+        {
+            const string pattern = @"^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$";
+            const System.Text.RegularExpressions.RegexOptions options = System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.ExplicitCapture;
+
+            // Set explicit regex match timeout, sufficient enough for phone parsing
+            // Unless the global REGEX_DEFAULT_MATCH_TIMEOUT is already set
+            var matchTimeout = System.TimeSpan.FromSeconds(2);
+
+            try
+            {
+                if (System.AppDomain.CurrentDomain.GetData("REGEX_DEFAULT_MATCH_TIMEOUT") == null)
+                {
+                    return new System.Text.RegularExpressions.Regex(pattern, options, matchTimeout);
+                }
+            }
+            catch
+            {
+                // Fallback on error
+            }
+
+            // Legacy fallback (without explicit match timeout)
+            return new System.Text.RegularExpressions.Regex(pattern, options);
+        }
+
+        private static string RemoveExtension(string potentialPhoneNumber)
+        {
+            int lastIndexOfExtension = potentialPhoneNumber
+                .LastIndexOf("ext.", System.StringComparison.InvariantCultureIgnoreCase);
+            if (lastIndexOfExtension >= 0)
+            {
+                string extension = potentialPhoneNumber.Substring(lastIndexOfExtension + 4);
+                if (MatchesExtension(extension))
+                {
+                    return potentialPhoneNumber.Substring(0, lastIndexOfExtension);
+                }
+            }
+
+            lastIndexOfExtension = potentialPhoneNumber
+                .LastIndexOf("ext", System.StringComparison.InvariantCultureIgnoreCase);
+            if (lastIndexOfExtension >= 0)
+            {
+                string extension = potentialPhoneNumber.Substring(lastIndexOfExtension + 3);
+                if (MatchesExtension(extension))
+                {
+                    return potentialPhoneNumber.Substring(0, lastIndexOfExtension);
+                }
+            }
+
+
+            lastIndexOfExtension = potentialPhoneNumber
+                .LastIndexOf("x", System.StringComparison.InvariantCultureIgnoreCase);
+            if (lastIndexOfExtension >= 0)
+            {
+                string extension = potentialPhoneNumber.Substring(lastIndexOfExtension + 1);
+                if (MatchesExtension(extension))
+                {
+                    return potentialPhoneNumber.Substring(0, lastIndexOfExtension);
+                }
+            }
+
+            return potentialPhoneNumber;
+        }
+
+        private static bool MatchesExtension(string potentialExtension)
+        {
+            potentialExtension = potentialExtension.TrimStart();
+            if (potentialExtension.Length == 0)
+            {
+                return false;
+            }
+
+            foreach (char c in potentialExtension)
+            {
+                if (!char.IsDigit(c))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// https://github.com/microsoft/referencesource/blob/master/System.ComponentModel.DataAnnotations/DataAnnotations/UrlAttribute.cs
+    /// </summary>
+    public class CheckUrlAttribute : ArgumentAttribute
+    {
+        public CheckUrlAttribute(int state = -807, string message = null) : base(state, message) { }
+
+        public override async ValueTask<IResult> Proces(dynamic value)
+        {
+            var result = CheckNull(this, value);
+            if (!result.HasData) { return result; }
+
+            if (!IsValid(value))
+            {
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" url error");
+            }
+            return this.ResultCreate();
+        }
+
+        bool IsValid(object value)
+        {
+            if (value == null)
+            {
+                return true;
+            }
+
+            string valueAsString = value as string;
+
+            // Use RegEx implementation if it has been created, otherwise use a non RegEx version.
+            if (_regex != null)
+            {
+                return valueAsString != null && _regex.Match(valueAsString).Length > 0;
+            }
+            else
+            {
+                return valueAsString != null &&
+                (valueAsString.StartsWith("http://", System.StringComparison.InvariantCultureIgnoreCase)
+                 || valueAsString.StartsWith("https://", System.StringComparison.InvariantCultureIgnoreCase)
+                 || valueAsString.StartsWith("ftp://", System.StringComparison.InvariantCultureIgnoreCase));
+            }
+        }
+
+        // This attribute provides server-side url validation equivalent to jquery validate,
+        // and therefore shares the same regular expression.  See unit tests for examples.
+        private static System.Text.RegularExpressions.Regex _regex = CreateRegEx();
+
+        private static System.Text.RegularExpressions.Regex CreateRegEx()
+        {
+            const string pattern = @"^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$";
+
+            const System.Text.RegularExpressions.RegexOptions options = System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.ExplicitCapture;
+
+            // Set explicit regex match timeout, sufficient enough for url parsing
+            // Unless the global REGEX_DEFAULT_MATCH_TIMEOUT is already set
+            var matchTimeout = System.TimeSpan.FromSeconds(2);
+
+            try
+            {
+                if (System.AppDomain.CurrentDomain.GetData("REGEX_DEFAULT_MATCH_TIMEOUT") == null)
+                {
+                    return new System.Text.RegularExpressions.Regex(pattern, options, matchTimeout);
+                }
+            }
+            catch
+            {
+                // Fallback on error
+            }
+
+            // Legacy fallback (without explicit match timeout)
+            return new System.Text.RegularExpressions.Regex(pattern, options);
         }
     }
 

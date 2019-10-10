@@ -155,17 +155,6 @@ public class Startup
         //==================First step==================//
         Common.Host.ENV = env;
         Common.Host.AppSettings = Configuration.GetSection("AppSettings");
-        ////1
-        //Configer.LoadBusiness(new object[] { Common.Host });
-        ////2
-        //Configer.UseType("context", "socket");
-        //Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket");
-        //Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
-        ////==================The third step==================//
-        ////3
-        //Configer.UseDoc(wwwroot);
-        ////writ url to page
-        //Business.DocUI.UI.Write($"{Common.Host.Addresses}{"/"}business.doc");
         Common.InitBusiness(wwwroot);
         //==================The second step==================//
         //add route
@@ -298,7 +287,7 @@ public class Startup
                                 var result2 = result as IResult;
                                 result2.Callback = receiveData.b;
 
-                                var data = Business.Result.ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
+                                var data = ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
                                 /* test
                                 var result3 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
                                 var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);

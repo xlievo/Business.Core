@@ -485,6 +485,8 @@ public class Args
         //[Test]
         [Nick("password")]
         [@CheckNull]
+        //[@CheckEmail]
+        [@CheckUrl]
         [DefaultValue("")]
         public string A { get; set; }
 

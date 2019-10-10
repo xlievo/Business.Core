@@ -88,6 +88,24 @@ namespace Business.Annotations
         }
     }
 
+    public class CheckPhone : CheckPhoneAttribute
+    {
+        public CheckPhone(int state = -806, string message = null) : base(state, message)
+        {
+            this.Description = "{Nick} Check the validity of phone number";
+            this.Message = "{Nick} Illegal phone number";
+        }
+    }
+
+    public class CheckUrl : CheckUrlAttribute
+    {
+        public CheckUrl(int state = -807, string message = null) : base(state, message)
+        {
+            this.Description = "{Nick} Check the validity of url";
+            this.Message = "{Nick} Illegal url";
+        }
+    }
+
     public class MD5 : MD5Attribute
     {
         public MD5(int state = -820, string message = null) : base(state, message)
