@@ -496,16 +496,22 @@ public class Args
         public string B { get; set; }
 
         /// <summary>
-        /// CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+        /// CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC12
         /// </summary>
         //[Test]
-        public Test0010 C { get; set; }
+        public Test0010? C { get; set; }
 
-        public decimal D { get; set; }
+        /// <summary>
+        /// DDD
+        /// </summary>
+        public decimal? D { get; set; }
 
         public bool E { get; set; }
 
-        public DateTime F { get; set; }
+        /// <summary>
+        /// FF
+        /// </summary>
+        public DateTime? F { get; set; }
 
         [DefaultValue(MyEnum.B)]
         public MyEnum myEnum { get; set; }

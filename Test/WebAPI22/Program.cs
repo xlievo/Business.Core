@@ -26,7 +26,6 @@ public class Program
     public static void Main(string[] args)
     {
         var host = CreateWebHostBuilder(args)
-            //.UseUrls("http://*:5000")
             .Build();
         Common.Host.Addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault() ?? "http://localhost:5000";
         Console.WriteLine($"Addresses: {Common.Host.Addresses}");

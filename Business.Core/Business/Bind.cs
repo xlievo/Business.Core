@@ -1048,6 +1048,7 @@ namespace Business
                     current.hasCollection,
                     hasCollectionAttr || hasCollectionAttr2,
                     current.hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
+                    current.nullable,
                     default,
                     argGroup,
                     children,
@@ -1099,13 +1100,19 @@ namespace Business
             return metaData;
         }
 
-        struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type orgType; }
+        struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type orgType; public bool nullable; }
 
         static CurrentType GetCurrentType(System.Type type)
         {
             var hasIArg = typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType);
 
             var current = new CurrentType { hasIArg = hasIArg, outType = hasIArg ? iArgOutType[0] : type, inType = hasIArg ? iArgOutType[1] : type };
+            var nullType = System.Nullable.GetUnderlyingType(current.outType);
+            if (null != nullType)
+            {
+                current.outType = nullType;
+                current.nullable = true;
+            }
             current.orgType = current.outType;
 
             current.hasCollection = current.outType.IsCollection();
@@ -1275,6 +1282,7 @@ namespace Business
                     current.hasCollection,
                     hasCollectionAttr || hasCollectionAttr2,
                     current.hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
+                    current.nullable,
                     accessor,
                     argGroup,
                     children,
@@ -1700,6 +1708,8 @@ namespace Business.Meta
 
         object DefaultValue { get; }
 
+        bool Nullable { get; }
+
         string FullName { get; }
 
         MemberDefinitionCode MemberDefinition { get; }
@@ -1723,7 +1733,7 @@ namespace Business.Meta
         //public override string ToString() => string.Format("{0} {1}", Group2, Name);
 
         //argChild
-        public Args(string name, System.Type type, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition)
+        public Args(string name, System.Type type, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Attributes.UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition)
         {
             Name = name;
             Type = type;
@@ -1733,6 +1743,7 @@ namespace Business.Meta
             HasCollection = hasCollection;
             HasCollectionAttr = hasCollectionAttr;
             HasCollectionIArg = hasCollectionIArg;
+            Nullable = nullable;
             //HasString = hasString;
             Accessor = accessor;
             Group = group;
@@ -1782,6 +1793,8 @@ namespace Business.Meta
         public bool HasCollectionAttr { get; internal set; }
         //===============hasCollectionIArg==================//
         public bool HasCollectionIArg { get; internal set; }
+        //===============nullable==================//
+        public bool Nullable { get; private set; }
         //===============accessor==================//
         public Accessor Accessor { get; private set; }
         //===============group==================//

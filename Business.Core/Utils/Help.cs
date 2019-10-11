@@ -710,6 +710,14 @@ namespace Business.Utils
             var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
             group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(pathRoot ?? returnType.Name));
 
+            var nullable = false;
+            var nullType = System.Nullable.GetUnderlyingType(returnType);
+            if (null != nullType)
+            {
+                returnType = nullType;
+                nullable = true;
+            }
+
             var definition = new TypeDefinition
             {
                 Name = returnType.Name,
@@ -724,6 +732,7 @@ namespace Business.Utils
                 HasEnum = returnType.IsEnum,
                 EnumNames = returnType.IsEnum ? returnType.GetEnumNames() : null,
                 EnumValues = returnType.IsEnum ? returnType.GetEnumValues() : null,
+                Nullable = nullable,
 
                 FullName = fullName,
                 Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
@@ -798,6 +807,14 @@ namespace Business.Utils
                 var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
                 group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(path2));
 
+                var nullable = false;
+                var nullType = System.Nullable.GetUnderlyingType(memberType);
+                if (null != nullType)
+                {
+                    memberType = nullType;
+                    nullable = true;
+                }
+
                 var definition = new TypeDefinition
                 {
                     Name = item.Name,
@@ -812,6 +829,7 @@ namespace Business.Utils
                     HasEnum = memberType.IsEnum,
                     EnumNames = memberType.IsEnum ? memberType.GetEnumNames() : null,
                     EnumValues = memberType.IsEnum ? memberType.GetEnumValues() : null,
+                    Nullable = nullable,
 
                     FullName = fullName,
                     Children = hasDefinition ? GetTypeDefinition(memberType, definitions, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
@@ -849,6 +867,8 @@ namespace Business.Utils
             public bool HasDictionary { get; set; }
 
             public object DefaultValue { get; set; }
+
+            public bool Nullable { get; set; }
 
             public string FullName { get; set; }
 
@@ -2092,15 +2112,15 @@ namespace Business.Utils
             }
         }
 
-        public static bool CheckEmail(this string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                return false;
-            }
+        //public static bool CheckEmail(this string email)
+        //{
+        //    if (string.IsNullOrWhiteSpace(email))
+        //    {
+        //        return false;
+        //    }
 
-            return System.Text.RegularExpressions.Regex.IsMatch(email.Trim(), @"^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})$");
-        }
+        //    return System.Text.RegularExpressions.Regex.IsMatch(email.Trim(), @"^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})$");
+        //}
 
         public static double Scale(this double value, int size = 2)
         {

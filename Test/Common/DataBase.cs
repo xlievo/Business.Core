@@ -1,5 +1,7 @@
-﻿using Business.Utils;
+﻿using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Configuration;
+using Business.Utils;
 
 public class DataBase : Business.Data.DataBase<DataModel.Connection>
 {
@@ -7,6 +9,9 @@ public class DataBase : Business.Data.DataBase<DataModel.Connection>
 
     static DataBase()
     {
+        //Initialize the database
+        LinqToDB.Data.DataConnection.DefaultSettings = new LinqToDB.LinqToDBSection(Common.Host.AppSettings.GetSection("ConnectionStrings").GetChildren().Select(c => new LinqToDB.ConnectionStringSettings { Name = c.Key, ConnectionString = c.GetValue<string>("ConnectionString"), ProviderName = c.GetValue<string>("ProviderName") }));
+
         LinqToDB.Common.Configuration.Linq.AllowMultipleQuery = true;
         LinqToDB.Data.DataConnection.TurnTraceSwitchOn();
         LinqToDB.Data.DataConnection.OnTrace = c =>

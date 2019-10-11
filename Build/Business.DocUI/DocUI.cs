@@ -66,13 +66,13 @@
             }
         }
 
-        public static void Write(string docRequestPath = null, string pageOutDir = "wwwroot", bool update = false)
+        public static void Write(string outDir = "wwwroot", string docRequestPath = null, bool update = false)
         {
-            pageOutDir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, string.IsNullOrWhiteSpace(pageOutDir) ? "wwwroot" : pageOutDir);
+            outDir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, string.IsNullOrWhiteSpace(outDir) ? "wwwroot" : outDir);
 
             if (!update)
             {
-                var pageOutDir2 = System.IO.Path.Combine(pageOutDir, "doc");
+                var pageOutDir2 = System.IO.Path.Combine(outDir, "doc");
 
                 if (!System.IO.Directory.Exists(pageOutDir2))
                 {
@@ -114,7 +114,7 @@
 
                 Doc.AsParallel().ForAll(c =>
                 {
-                    var path = System.IO.Path.Combine(pageOutDir, c.Key);
+                    var path = System.IO.Path.Combine(outDir, c.Key);
                     var dir = System.IO.Path.GetDirectoryName(path);
 
                     if (!System.IO.Directory.Exists(dir))
@@ -144,7 +144,7 @@
             }
             else
             {
-                var path = System.IO.Path.Combine(pageOutDir, Index);
+                var path = System.IO.Path.Combine(outDir, Index);
 
                 if (!System.IO.File.Exists(path))
                 {

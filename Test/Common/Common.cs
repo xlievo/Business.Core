@@ -238,9 +238,6 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         //InitRedis();
 
-        //Initialize the database
-        LinqToDB.Data.DataConnection.DefaultSettings = new LinqToDB.LinqToDBSection(Host.AppSettings.GetSection("ConnectionStrings").GetChildren().Select(c => new LinqToDB.ConnectionStringSettings { Name = c.Key, ConnectionString = c.GetValue<string>("ConnectionString"), ProviderName = c.GetValue<string>("ProviderName") }));
-
         //1
         Configer.LoadBusiness(new object[] { Host });
         //2

@@ -83,7 +83,17 @@
         </member>
         <member name="P:Args.Test001.C">
             <summary>
-            CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+            CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC12
+            </summary>
+        </member>
+        <member name="P:Args.Test001.D">
+            <summary>
+            DDD
+            </summary>
+        </member>
+        <member name="P:Args.Test001.F">
+            <summary>
+            FF
             </summary>
         </member>
         <member name="P:Args.Test001.Test0010.C1">
