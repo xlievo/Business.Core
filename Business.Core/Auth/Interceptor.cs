@@ -62,6 +62,8 @@ namespace Business.Auth
         /// <param name="invocation"></param>
         public virtual async System.Threading.Tasks.Task<dynamic> InterceptAsync(Castle.DynamicProxy.IInvocation invocation)
         {
+            if (null == this.MetaData) { return null; }
+
             var proceed = invocation.CaptureProceedInfo();
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
@@ -470,11 +472,34 @@ namespace Business.Auth
             {
                 var data = new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group };
 
-                if (null == Configer.Logger || Configer.Logger.MaxCapacity <= Configer.Logger.LoggerQueue.Count
-                    || !Configer.Logger.LoggerQueue.TryAdd(data))
+                if (null == Configer.Logger || Configer.Logger.MaxCapacity <= Configer.Logger.LoggerQueue.Count)
                 {
                     Help.Console(data.TryJsonSerialize());
                     return;
+                }
+
+                var batch = Configer.Logger.Batch;
+                var isRunning = 0 != System.TimeSpan.Zero.CompareTo(batch.Interval);
+                var one = (isRunning && 1 == batch.MaxNumber) || !isRunning;
+
+                if (one)
+                {
+                    if (Configer.Logger.ThreadCall)
+                    {
+                        System.Threading.Tasks.Task.Run(() => Configer.Logger.Call(new LoggerData[] { data })).ContinueWith(c => c.Exception?.Console());
+                    }
+                    else
+                    {
+                        try { await Configer.Logger.Call(new LoggerData[] { data }); }
+                        catch (System.Exception ex) { ex.Console(); }
+                    }
+                }
+                else
+                {
+                    if (!Configer.Logger.LoggerQueue.TryAdd(data))
+                    {
+                        Help.Console(data.TryJsonSerialize());
+                    }
                 }
 
                 //if (0 == System.TimeSpan.Zero.CompareTo(Configer.Logger?.Batch.Interval))

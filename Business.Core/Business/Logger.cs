@@ -218,7 +218,7 @@ namespace Business
         /// Json format
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => Utils.Help.JsonSerialize(this);
+        public override string ToString() => this.JsonSerialize();
     }
 
     /// <summary>
@@ -278,7 +278,7 @@ namespace Business
         /// <returns></returns>
         public override string ToString()
         {
-            return Help.JsonSerialize(this);
+            return this.JsonSerialize();
         }
     }
 }

@@ -368,6 +368,7 @@ namespace Business
 #endregion
             */
             var info = attributes.GetAttr<Info>() ?? new Info(type.Name);
+            info.TypeFullName = type.FullName.Replace('+', '.');
 
             if (string.IsNullOrWhiteSpace(info.BusinessName))
             {

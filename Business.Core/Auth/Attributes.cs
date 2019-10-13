@@ -448,6 +448,11 @@ namespace Business.Attributes //Annotations
         public string BusinessName { get; internal set; }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public string TypeFullName { get; internal set; }
+
+        /// <summary>
         /// Document physical path
         /// </summary>
         public string DocPhysicalPath { get; internal set; }
@@ -1225,27 +1230,7 @@ namespace Business.Attributes //Annotations
             string valueAsString = value as string;
 
             // Use RegEx implementation if it has been created, otherwise use a non RegEx version.
-            if (_regex != null)
-            {
-                return valueAsString != null && _regex.Match(valueAsString).Length > 0;
-            }
-            else
-            {
-                int atCount = 0;
-
-                foreach (char c in valueAsString)
-                {
-                    if (c == '@')
-                    {
-                        atCount++;
-                    }
-                }
-
-                return (valueAsString != null
-                && atCount == 1
-                && valueAsString[0] != '@'
-                && valueAsString[valueAsString.Length - 1] != '@');
-            }
+            return valueAsString != null && _regex.Match(valueAsString).Length > 0;
         }
 
         // This attribute provides server-side email validation equivalent to jquery validate,
@@ -1342,7 +1327,7 @@ namespace Business.Attributes //Annotations
             string stringValue = System.Convert.ToString(value, System.Globalization.CultureInfo.CurrentCulture);
 
             // Automatically pass if value is null or empty. RequiredAttribute should be used to assert a value is not empty.
-            if (System.String.IsNullOrEmpty(stringValue))
+            if (string.IsNullOrEmpty(stringValue))
             {
                 return true;
             }
@@ -1446,50 +1431,10 @@ namespace Business.Attributes //Annotations
             string valueAsString = value as string;
 
             // Use RegEx implementation if it has been created, otherwise use a non RegEx version.
-            if (_regex != null)
-            {
-                return valueAsString != null && _regex.Match(valueAsString).Length > 0;
-            }
-            else
-            {
-                if (valueAsString == null)
-                {
-                    return false;
-                }
-
-                valueAsString = valueAsString.Replace("+", string.Empty).TrimEnd();
-                valueAsString = RemoveExtension(valueAsString);
-
-                bool digitFound = false;
-                foreach (char c in valueAsString)
-                {
-                    if (char.IsDigit(c))
-                    {
-                        digitFound = true;
-                        break;
-                    }
-                }
-
-                if (!digitFound)
-                {
-                    return false;
-                }
-
-                foreach (char c in valueAsString)
-                {
-                    if (!(char.IsDigit(c)
-                        || char.IsWhiteSpace(c)
-                        || _additionalPhoneNumberCharacters.IndexOf(c) != -1))
-                    {
-                        return false;
-                    }
-                }
-                return true;
-            }
+            return valueAsString != null && _regex.Match(valueAsString).Length > 0;
         }
 
         private static System.Text.RegularExpressions.Regex _regex = CreateRegEx();
-        private const string _additionalPhoneNumberCharacters = "-.()";
 
         private static System.Text.RegularExpressions.Regex CreateRegEx()
         {
@@ -1514,64 +1459,6 @@ namespace Business.Attributes //Annotations
 
             // Legacy fallback (without explicit match timeout)
             return new System.Text.RegularExpressions.Regex(pattern, options);
-        }
-
-        private static string RemoveExtension(string potentialPhoneNumber)
-        {
-            int lastIndexOfExtension = potentialPhoneNumber
-                .LastIndexOf("ext.", System.StringComparison.InvariantCultureIgnoreCase);
-            if (lastIndexOfExtension >= 0)
-            {
-                string extension = potentialPhoneNumber.Substring(lastIndexOfExtension + 4);
-                if (MatchesExtension(extension))
-                {
-                    return potentialPhoneNumber.Substring(0, lastIndexOfExtension);
-                }
-            }
-
-            lastIndexOfExtension = potentialPhoneNumber
-                .LastIndexOf("ext", System.StringComparison.InvariantCultureIgnoreCase);
-            if (lastIndexOfExtension >= 0)
-            {
-                string extension = potentialPhoneNumber.Substring(lastIndexOfExtension + 3);
-                if (MatchesExtension(extension))
-                {
-                    return potentialPhoneNumber.Substring(0, lastIndexOfExtension);
-                }
-            }
-
-
-            lastIndexOfExtension = potentialPhoneNumber
-                .LastIndexOf("x", System.StringComparison.InvariantCultureIgnoreCase);
-            if (lastIndexOfExtension >= 0)
-            {
-                string extension = potentialPhoneNumber.Substring(lastIndexOfExtension + 1);
-                if (MatchesExtension(extension))
-                {
-                    return potentialPhoneNumber.Substring(0, lastIndexOfExtension);
-                }
-            }
-
-            return potentialPhoneNumber;
-        }
-
-        private static bool MatchesExtension(string potentialExtension)
-        {
-            potentialExtension = potentialExtension.TrimStart();
-            if (potentialExtension.Length == 0)
-            {
-                return false;
-            }
-
-            foreach (char c in potentialExtension)
-            {
-                if (!char.IsDigit(c))
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
     }
 
@@ -1604,17 +1491,7 @@ namespace Business.Attributes //Annotations
             string valueAsString = value as string;
 
             // Use RegEx implementation if it has been created, otherwise use a non RegEx version.
-            if (_regex != null)
-            {
-                return valueAsString != null && _regex.Match(valueAsString).Length > 0;
-            }
-            else
-            {
-                return valueAsString != null &&
-                (valueAsString.StartsWith("http://", System.StringComparison.InvariantCultureIgnoreCase)
-                 || valueAsString.StartsWith("https://", System.StringComparison.InvariantCultureIgnoreCase)
-                 || valueAsString.StartsWith("ftp://", System.StringComparison.InvariantCultureIgnoreCase));
-            }
+            return valueAsString != null && _regex.Match(valueAsString).Length > 0;
         }
 
         // This attribute provides server-side url validation equivalent to jquery validate,

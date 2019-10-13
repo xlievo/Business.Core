@@ -484,36 +484,39 @@ namespace Business.Utils
             var groupDefault = business.Configer.Info.CommandGroupDefault;
 
             var group = business.Command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
-              {
-                  var key = c2.Value.Key;
-                  var meta = c2.Value.Meta;
-                  var onlyName = meta.CommandGroup[key].OnlyName;
+            {
+                var key = c2.Value.Key;
+                var meta = c2.Value.Meta;
+                var onlyName = meta.CommandGroup[key].OnlyName;
 
-                  Xml.member member = null;
-                  xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
+                Xml.member member = null;
+                xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
 
-                  var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, groupDefault, $"{onlyName}.Returns");
+                var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, groupDefault, $"{onlyName}.Returns");
 
-                  var member2 = new Member<DocArg>
-                  {
-                      Name = onlyName,
-                      HasReturn = meta.HasReturn,
-                      Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
-                      Returns = GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3), xmlMembers, member?._params?.Find(c4 => c4.name == returnType.Name)?.text),
-                      Args = new Dictionary<string, DocArg>(),
-                      ArgSingle = c2.Value.HasArgSingle,
-                      HttpFile = c2.Value.HasHttpFile,
-                  } as IMember<DocArg>;
+                var member2 = new Member<DocArg>
+                {
+                    Name = onlyName,
+                    HasReturn = meta.HasReturn,
+                    Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
+                    Returns = GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3), xmlMembers, member?._params?.Find(c4 => c4.name == returnType.Name)?.text),
+                    Args = new Dictionary<string, DocArg>(),
+                    ArgSingle = c2.Value.HasArgSingle,
+                    HttpFile = c2.Value.HasHttpFile,
+                } as IMember<DocArg>;
 
-                  foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))
-                  {
-                      member2.Args.Add(item.Name, GetDocArg(key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
-                  }
+                foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))
+                {
+                    member2.Args.Add(item.Name, GetDocArg(key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                }
 
-                  return member2;
-              }));
+                return member2;
+            }));
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault.FirstCharToLower(), Host = System.Uri.TryCreate(host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty };
+            Xml.member member3 = null;
+            xmlMembers?.TryGetValue($"T:{business.Configer.Info.TypeFullName}", out member3);
+
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault.FirstCharToLower(), Host = System.Uri.TryCreate(host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty, Description = member3?.summary?.text };
         }
 
         const string AttributeSign = "Attribute";
