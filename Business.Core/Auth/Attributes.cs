@@ -1464,6 +1464,7 @@ namespace Business.Attributes //Annotations
 
     /// <summary>
     /// https://github.com/microsoft/referencesource/blob/master/System.ComponentModel.DataAnnotations/DataAnnotations/UrlAttribute.cs
+    /// https://stackoverflow.com/questions/45707293/url-validation-attribute-marks-localhost-as-invalid-url
     /// </summary>
     public class CheckUrlAttribute : ArgumentAttribute
     {

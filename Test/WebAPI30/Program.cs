@@ -87,12 +87,6 @@ public class Startup
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
             });
 
-        services.AddAuthentication("BasicAuthentication")
-                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", c => 
-                {
-                    c.Validate();
-                });
-
         Common.Host.HttpClientFactory = services.AddHttpClient("")
         .ConfigurePrimaryHttpMessageHandler(() =>
         {
@@ -118,8 +112,6 @@ public class Startup
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IHostingEnvironment env)
     {
-        app.UseAuthentication();
-
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
