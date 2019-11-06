@@ -124,6 +124,8 @@ public class Startup
             System.IO.Directory.CreateDirectory(wwwroot);
         }
 
+        Console.WriteLine($"wwwroot: {wwwroot}");
+
         // Set up custom content types -associating file extension to MIME type
         var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
         //provider.Mappings[".yaml"] = "text/yaml";
@@ -387,7 +389,8 @@ public class Startup
 //Internal object do not write logs
 [Logger(canWrite: false)]
 [RequestSizeLimit(long.MaxValue)]
-[RequestFormLimits(ValueCountLimit = int.MaxValue, ValueLengthLimit = int.MaxValue, MultipartHeadersLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+//int.MaxValue bug https://github.com/aspnet/AspNetCore/issues/13719
+[RequestFormLimits(KeyLengthLimit = 1_009_100_000, ValueCountLimit = 1_009_100_000, ValueLengthLimit = 1_009_100_000, MultipartHeadersLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue, MultipartBoundaryLengthLimit = int.MaxValue)]
 public class BusinessController : Controller
 {
     /// <summary>
@@ -453,6 +456,7 @@ public class BusinessController : Controller
             {
                 Key = t,
                 Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
+                Path = this.Request.Path.Value,
                 //Callback = b
             })
             );

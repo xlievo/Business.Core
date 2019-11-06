@@ -516,7 +516,7 @@ namespace Business.Utils
             Xml.member member3 = null;
             xmlMembers?.TryGetValue($"T:{business.Configer.Info.TypeFullName}", out member3);
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault.FirstCharToLower(), Host = System.Uri.TryCreate(host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty, Description = member3?.summary?.text };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault.FirstCharToLower(), Host = System.Uri.TryCreate(host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty, Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>") };
         }
 
         const string AttributeSign = "Attribute";
@@ -713,29 +713,38 @@ namespace Business.Utils
             var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
             group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(pathRoot ?? returnType.Name));
 
-            var nullable = false;
-            var nullType = System.Nullable.GetUnderlyingType(returnType);
-            if (null != nullType)
+            var current = Bind.GetCurrentType(returnType);
+            if (current.hasDictionary)
             {
-                returnType = nullType;
-                nullable = true;
+                current.outType = current.outType.GenericTypeArguments[1];
             }
+            else if (current.hasCollection)
+            {
+                current.outType = current.outType.GenericTypeArguments[0];
+            }
+            //var nullable = false;
+            //var nullType = System.Nullable.GetUnderlyingType(returnType);
+            //if (null != nullType)
+            //{
+            //    returnType = nullType;
+            //    nullable = true;
+            //}
 
             var definition = new TypeDefinition
             {
                 Name = returnType.Name,
                 Type = returnType,
-                LastType = returnType,
+                LastType = current.outType,
                 HasDefinition = hasDefinition,
                 DefaultValue = returnType.IsValueType && typeof(void) != returnType ? System.Activator.CreateInstance(returnType) : null,
 
                 HasNumeric = returnType.IsNumeric(),
-                HasDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(returnType),
-                HasCollection = returnType.IsCollection(),
+                HasDictionary = current.hasDictionary,
+                HasCollection = current.hasCollection,
                 HasEnum = returnType.IsEnum,
                 EnumNames = returnType.IsEnum ? returnType.GetEnumNames() : null,
                 EnumValues = returnType.IsEnum ? returnType.GetEnumValues() : null,
-                Nullable = nullable,
+                Nullable = current.nullable,
 
                 FullName = fullName,
                 Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
@@ -810,29 +819,38 @@ namespace Business.Utils
                 var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
                 group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(path2));
 
-                var nullable = false;
-                var nullType = System.Nullable.GetUnderlyingType(memberType);
-                if (null != nullType)
+                var current = Bind.GetCurrentType(memberType);
+                if (current.hasDictionary)
                 {
-                    memberType = nullType;
-                    nullable = true;
+                    current.outType = current.outType.GenericTypeArguments[1];
                 }
+                else if (current.hasCollection)
+                {
+                    current.outType = current.outType.GenericTypeArguments[0];
+                }
+                //var nullable = false;
+                //var nullType = System.Nullable.GetUnderlyingType(memberType);
+                //if (null != nullType)
+                //{
+                //    memberType = nullType;
+                //    nullable = true;
+                //}
 
                 var definition = new TypeDefinition
                 {
                     Name = item.Name,
                     Type = memberType,
-                    LastType = memberType,
+                    LastType = current.outType,
                     HasDefinition = hasDefinition,
                     DefaultValue = memberType.IsValueType ? System.Activator.CreateInstance(memberType) : null,
 
                     HasNumeric = memberType.IsNumeric(),
-                    HasDictionary = typeof(System.Collections.IDictionary).IsAssignableFrom(memberType),
-                    HasCollection = memberType.IsCollection(),
+                    HasDictionary = current.hasDictionary,
+                    HasCollection = current.hasCollection,
                     HasEnum = memberType.IsEnum,
                     EnumNames = memberType.IsEnum ? memberType.GetEnumNames() : null,
                     EnumValues = memberType.IsEnum ? memberType.GetEnumValues() : null,
-                    Nullable = nullable,
+                    Nullable = current.nullable,
 
                     FullName = fullName,
                     Children = hasDefinition ? GetTypeDefinition(memberType, definitions, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),

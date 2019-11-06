@@ -93,7 +93,10 @@ public struct Host
 /// my token
 /// </summary>
 [TokenCheck]
-public class Token : Business.Auth.Token { }
+public class Token : Business.Auth.Token
+{
+    public string Path { get; set; }
+}
 
 /// <summary>
 /// my session
@@ -121,7 +124,6 @@ public class HttpFile : Arg<Dictionary<string, dynamic>> { }
 [@JsonArg(Group = "j")]
 [Command(Group = "s")]
 [@MessagePackArg(Group = "s")]
-[Logger]
 public abstract class BusinessBase : BusinessBase<ResultObject<string>>
 {
     public readonly Host host;
@@ -137,7 +139,7 @@ public abstract class BusinessBase : BusinessBase<ResultObject<string>>
                 var logs = x.Select(c =>
                 {
                     c.Value = c.Value.ToValue();
-                    Console.WriteLine(c.JsonSerialize());
+                    //Console.WriteLine(c.JsonSerialize());
                     return c;
                 }).ToList();
 
@@ -248,6 +250,6 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         //3
         Configer.UseDoc(docDir);
         //writ url to page
-        DocUI.Write(update: true);
+        DocUI.Write(docDir, update: false);
     }
 }

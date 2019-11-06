@@ -1,13 +1,18 @@
 ﻿namespace Business
 {
     using System.Linq;
+    using System.Threading.Tasks;
 
     public class DocUI
     {
         static readonly bool Unix = false;
         const string Csproj = "Business.DocUI.csproj";
+        /// <summary>
+        /// doc\\index.html
+        /// </summary>
         static readonly string Index = "doc\\index.html";
         static readonly System.Collections.Generic.Dictionary<string, System.IO.Stream> Doc = new System.Collections.Generic.Dictionary<string, System.IO.Stream>();
+        static string AB = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ab.exe");
 
         static DocUI()
         {
@@ -64,11 +69,25 @@
                     System.Console.WriteLine(k);
                 }
             }
+
+            //if (!System.IO.Directory.Exists(AB))
+            //{
+            //    System.IO.Directory.CreateDirectory(AB);
+            //}
         }
 
-        public static void Write(string outDir = "wwwroot", string docRequestPath = null, bool update = false)
+        /// <summary>
+        /// outDir Default value is "System.AppDomain.CurrentDomain.BaseDirectory\wwwroot"
+        /// </summary>
+        /// <param name="outDir"></param>
+        /// <param name="docRequestPath"></param>
+        /// <param name="update"></param>
+        public static void Write(string outDir = null, string docRequestPath = null, bool update = false)
         {
-            outDir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, string.IsNullOrWhiteSpace(outDir) ? "wwwroot" : outDir);
+            if (string.IsNullOrWhiteSpace(outDir))
+            {
+                outDir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
+            }
 
             if (!update)
             {
@@ -137,6 +156,15 @@
                     }
                     else
                     {
+                        if ("ab.exe" == c.Key)
+                        {
+                            if (!Unix)
+                            {
+                                System.IO.File.WriteAllBytes(AB, StreamReadByte(c.Value));
+                            }
+                            return;
+                        }
+
                         var bytes = StreamReadByte(c.Value);
                         System.IO.File.WriteAllBytes(path, bytes);
                     }
@@ -175,6 +203,52 @@
             stream.Read(bytes, 0, bytes.Length);
             stream.Seek(0, System.IO.SeekOrigin.Begin);
             return bytes;
+        }
+
+        //centos yum -y install httpd-tools
+        public static async Task<string> ab(int n, int c, string data, string host)
+        {
+            if (!System.IO.File.Exists(AB))
+            {
+                return $"{AB} not exist!";
+            }
+
+            System.Console.WriteLine($"n:{n} c:{c}");
+
+            //var dir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ab");
+
+            //if (!System.IO.Directory.Exists(dir))
+            //{
+            //    System.IO.Directory.CreateDirectory(dir);
+            //}
+
+            var dataPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, $"ab_{System.Guid.NewGuid().ToString("N")}");
+
+            try
+            {
+                //System.IO.File.WriteAllText(dataPath, System.Net.WebUtility.UrlEncode(data), System.Text.Encoding.UTF8);
+                System.IO.File.WriteAllText(dataPath, data, System.Text.Encoding.UTF8);
+
+                using (var cmd = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(!Unix ? AB : "ab", $"-n {n} -c {c} -p \"{dataPath}\" -T \"application/x-www-form-urlencoded\" \"{host}\"") { RedirectStandardOutput = true }))
+                //using (var cmd = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(!Unix ? AB : "ab", "-n 10 -c 10 http://localhost:5000/API/") { RedirectStandardOutput = true }))
+                {
+                    using (var output = cmd.StandardOutput)
+                    {
+                        return await output.ReadToEndAsync();
+                    }
+                }
+            }
+            finally
+            {
+                try
+                {
+                    System.IO.File.Delete(dataPath);
+                }
+                catch (System.Exception ex)
+                {
+                    System.Console.WriteLine(ex);
+                }
+            }
         }
     }
 }

@@ -1101,9 +1101,9 @@ namespace Business
             return metaData;
         }
 
-        struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type orgType; public bool nullable; }
+        internal struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type orgType; public bool nullable; }
 
-        static CurrentType GetCurrentType(System.Type type)
+        internal static CurrentType GetCurrentType(System.Type type)
         {
             var hasIArg = typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType);
 

@@ -15,8 +15,12 @@ using static Args;
 
 /// <summary>
 /// BusinessMember2。。。
+/// businessDescription
+/// 中文测试！@#￥%……*（）——+
+/// businessDescription3
 /// </summary>
 [Info("API")]
+[Logger]
 public class BusinessMember2 : BusinessBase
 {
     static BusinessMember2()
@@ -37,7 +41,7 @@ public class BusinessMember2 : BusinessBase
 
     public BusinessMember2(Host host) : base(host)
     {
-        
+
     }
 
 
@@ -55,9 +59,11 @@ public class BusinessMember2 : BusinessBase
         public string B { get; set; }
     }
 
-    public virtual async Task<IResult<Test001>> Test00X(Token token2, Arg<Test001> arg)
+    public virtual async Task<IResult<string>> ab(Business.Auth.Token token2, Arg<ab> arg) => this.ResultCreate(await DocUI.ab(arg.Out.n, arg.Out.c, arg.Out.data, arg.Out.host));
+
+    public virtual async Task<IResult<DateTime>> Test00X(Token token2, Arg<Test001> arg)
     {
-        return this.ResultCreate(arg.Out);
+        return this.ResultCreate();
     }
 
     public virtual async Task<IResult<Test001>> Test000(SessionArg session, Arg<Test001> arg)
@@ -75,7 +81,7 @@ public class BusinessMember2 : BusinessBase
     /// <returns></returns>
     [Command("AAA")]
     //Task<IResult<Test001>>
-    public virtual async Task<dynamic> Test001(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, HttpFile context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
+    public virtual async Task<IResult<Test001Result>> Test001(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, HttpFile context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -95,10 +101,20 @@ public class BusinessMember2 : BusinessBase
         //    return this.ResultCreate<Test001Result>(-110, "sss");
         //}
 
+        //foreach (var item in context.Out)
+        //{
+        //    using (var m = item.Value.OpenReadStream())
+        //    {
+        //        var bytes = await Help.StreamReadByteAsync(m);
+
+        //        System.IO.File.WriteAllBytes("testfile", bytes);
+        //    }
+        //}
+
         var files = context.Out.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
 
-        return this.ResultCreate(new { arg = arg.Out, files });
-        //return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
+        //return this.ResultCreate(new { arg = arg.Out, files });
+        return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
     }
 
     static string GetFileName(string path)
@@ -131,7 +147,7 @@ public class BusinessMember2 : BusinessBase
     /// <param name="mm"></param>
     /// <returns>test return!!!</returns>
     [HttpFile]
-    public virtual async Task<dynamic> Test002(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, Arg<Dictionary<string, dynamic>> context = null)
+    public virtual async Task<dynamic> Test002(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [HttpFile]Arg<Dictionary<string, dynamic>> context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -155,7 +171,7 @@ public class BusinessMember2 : BusinessBase
     /// <returns></returns>
     public virtual async Task Test003(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
-        await System.Threading.Tasks.Task.Delay(10000);
+        //await System.Threading.Tasks.Task.Delay(10000);
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
         args.arg = arg.Out;
@@ -436,6 +452,14 @@ public class Test2Attribute : ArgumentAttribute
 
 public class Args
 {
+    public struct ab
+    {
+        public int n;
+        public int c;
+        public string data;
+        public string host;
+    }
+
     /// <summary>
     /// MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
     /// </summary>

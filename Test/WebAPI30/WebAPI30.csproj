@@ -13,7 +13,149 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\doc\ace\ace.js" />
+    <Content Remove="wwwroot\doc\ace\mode-csharp.js" />
+    <Content Remove="wwwroot\doc\ace\mode-java.js" />
+    <Content Remove="wwwroot\doc\ace\mode-javascript.js" />
+    <Content Remove="wwwroot\doc\ace\mode-json.js" />
+    <Content Remove="wwwroot\doc\ace\mode-php.js" />
+    <Content Remove="wwwroot\doc\ace\theme-vibrant_ink.js" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.css" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.css.map" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.min.css" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.min.css.map" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.css" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.css.map" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.min.css" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.min.css.map" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.eot" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff" />
+    <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Remove="wwwroot\doc\doc.js" />
+    <Content Remove="wwwroot\doc\DOMPurify\purify.min.js" />
+    <Content Remove="wwwroot\doc\houdini\css\houdini.css" />
+    <Content Remove="wwwroot\doc\houdini\css\houdini.min.css" />
+    <Content Remove="wwwroot\doc\houdini\js\houdini.js" />
+    <Content Remove="wwwroot\doc\houdini\js\houdini.min.js" />
+    <Content Remove="wwwroot\doc\houdini\js\houdini.polyfills.js" />
+    <Content Remove="wwwroot\doc\houdini\js\houdini.polyfills.min.js" />
+    <Content Remove="wwwroot\doc\index.html" />
+    <Content Remove="wwwroot\doc\jsoneditor\jsoneditor.js" />
+    <Content Remove="wwwroot\doc\jsoneditor\jsoneditor.min.js" />
+    <Content Remove="wwwroot\doc\Juicer\juicer-min.js" />
+    <Content Remove="wwwroot\doc\sdk.js" />
+    <Content Remove="wwwroot\doc\w9.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\BusinessMember.cs" Link="BusinessMember.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\doc\ace\ace.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\ace\mode-csharp.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\ace\mode-java.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\ace\mode-javascript.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\ace\mode-json.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\ace\mode-php.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\ace\theme-vibrant_ink.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.css.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.min.css.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.css.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.min.css.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.eot">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\doc.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\DOMPurify\purify.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\houdini\css\houdini.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\houdini\css\houdini.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\houdini\js\houdini.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\houdini\js\houdini.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\houdini\js\houdini.polyfills.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\houdini\js\houdini.polyfills.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\jsoneditor\jsoneditor.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\jsoneditor\jsoneditor.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\Juicer\juicer-min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\sdk.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\w9.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -24,93 +166,6 @@
     <ProjectReference Include="..\..\Build\Business.DocUI\Business.DocUI.csproj" />
     <ProjectReference Include="..\..\Build\Business.Standard\Business.Standard.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="wwwroot\doc\ace\ace.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\ace\mode-csharp.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\ace\mode-java.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\ace\mode-javascript.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\ace\mode-json.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\ace\mode-php.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\ace\theme-vibrant_ink.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.eot">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\doc.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\DOMPurify\purify.min.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\houdini\css\houdini.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\houdini\css\houdini.min.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\houdini\js\houdini.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\houdini\js\houdini.min.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\houdini\js\houdini.polyfills.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\houdini\js\houdini.polyfills.min.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\index.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\jsoneditor\jsoneditor.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\jsoneditor\jsoneditor.min.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\Juicer\juicer-min.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\sdk.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\doc\w9.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>

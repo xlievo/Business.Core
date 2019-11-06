@@ -7,6 +7,9 @@
         <member name="T:BusinessMember2">
             <summary>
             BusinessMember2。。。
+            businessDescription
+            中文测试！@#￥%……*（）——+
+            businessDescription3
             </summary>
         </member>
         <member name="P:BusinessMember2.Test001Result.A">

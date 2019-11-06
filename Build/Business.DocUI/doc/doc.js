@@ -1,4 +1,5 @@
-﻿
+﻿var fileform = "root[input][f]";
+
 function renderSize(value) {
     if (null == value || value == '') {
         return "0 Bytes";
@@ -600,14 +601,15 @@ JSONEditor.defaults.editors.object = JSONEditor.defaults.editors.object.extend({
         // Position the form directly beneath the button
         // TODO: edge detection
 
-        var holder = this.jsoneditor.editors.root.editors.d.header.parentNode;
+        var input = this.jsoneditor.input;
+        var holder = input.editors.d.header.parentNode;
         var buttonData = holder.querySelector("#data");
 
         this.editjson_holder.style.left = buttonData.offsetLeft + 11 + "px";
         this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
 
         // Start the textarea with the current value
-        this.editjson_textarea.value = getData(this.jsoneditor).d;
+        this.editjson_textarea.value = getData(input).d;
 
         // Disable the rest of the form while editing JSON
         this.disable();
@@ -784,14 +786,15 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         // Position the form directly beneath the button
         // TODO: edge detection
 
-        var holder = this.jsoneditor.editors.root.editors.d.header.parentNode;
+        var input = this.jsoneditor.input;
+        var holder = input.editors.d.header.parentNode;
         var buttonData = holder.querySelector("#data");
 
         this.editjson_holder.style.left = buttonData.offsetLeft + 11 + "px";
         this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
 
         // Start the textarea with the current value
-        this.editjson_textarea.value = getData(this.jsoneditor).d;
+        this.editjson_textarea.value = getData(input).d;
 
         // Disable the rest of the form while editing JSON
         this.disable();
@@ -883,7 +886,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             }
         }
 
-        if ("root[f]" === this.formname) {
+        if (fileform === this.formname) {
             this.add_row_button = document.createElement('a');
             this.add_row_button.type = 'a';
             this.add_row_button.style.display = '';
@@ -980,7 +983,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             this.remove_all_rows_button.style.marginBottom = '3px';
         }
 
-        if ("root[f]" !== this.formname) {
+        if (fileform !== this.formname) {
             this.add_row_button.setAttribute('tag', 'input');
             this.panel.setAttribute('tag', 'input');
             this.remove_all_rows_button.setAttribute('tag', 'array');
@@ -1032,7 +1035,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         self.rows[i] = this.getElementEditor(i);
         self.row_cache[i] = self.rows[i];
 
-        if ("root[f]" === this.formname) {
+        if (fileform === this.formname) {
             self.rows[i].input.removeAttribute("tag");
             self.rows[i].input.style.display = 'none';
 
@@ -1170,12 +1173,10 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                     self.setValue(value);
                     self.refreshValue(true);
                     self.onChange(true);
-
                 });
 
                 controls_holder.appendChild(self.rows[i].copy_button);
             }
-
 
             if (i && !self.hide_move_buttons) {
                 self.rows[i].moveup_button = this.getButton('', 'moveup', this.translate('button_move_up_title'));
@@ -1336,6 +1337,7 @@ var edit = false;
 var businessSelect = document.getElementById('business');
 var groupSelect = document.querySelector("#group");
 var members = document.getElementById('members');
+var businessDescription = document.getElementById('business_description');
 
 function businessOnchang(obj) {
     if (-1 !== obj.selectedIndex) {
@@ -1343,6 +1345,15 @@ function businessOnchang(obj) {
         businessKey = select.value;
         businessName = select.text;
         var business = doc[businessKey];
+
+        businessDescription.innerHTML = null;
+        if (business.description) {
+            businessDescription.innerHTML = business.description;
+            businessDescription.parentNode.style.display = "";
+        }
+        else {
+            businessDescription.parentNode.style.display = "none";
+        }
 
         groupSelect.options.length = 0;
         var def = count = 0;
@@ -1377,6 +1388,7 @@ function destroy(all = false) {
     members.innerHTML = null;
 
     if (all) {
+        businessDescription.innerHTML = null;
         groupSelect.options.length = 0;
         doc = null;
         businessKey = null;
@@ -1486,7 +1498,7 @@ function load(m) {
         member2.member = member;
     });
 
-    disclosure = new Houdini('[data-houdini]');
+    disclosure = new Houdini('[data-houdini]', { btnClass: 'btn btn-primary' });
 
     //console.timeEnd("timer");
 }
@@ -1527,6 +1539,12 @@ function loadMember(member) {
         }
     };
 
+    var out = {
+        title: "Out",
+        type: "object",
+        properties: {}
+    }
+
     var hasToken = false;
     var token = null;
     for (var i in member.properties) {
@@ -1550,6 +1568,13 @@ function loadMember(member) {
         }
     }
 
+    if ("object" == member.returns.type) {
+        out.properties = member.returns.properties;
+    }
+    else {
+        out.properties[member.returns.id] = member.returns;
+    }
+
     if (!hasToken) {
         delete input.properties.t;
     }
@@ -1571,17 +1596,26 @@ function loadMember(member) {
     //    input.type = "null";
     //}
 
-    var inputeditor = new JSONEditor(document.getElementById(inputid), {
+    var inputouteditor = new JSONEditor(document.getElementById(inputid), {
         // The schema for the editor
-        schema: input
+        schema: {
+            title: "Input & Out",
+            type: "object",
+            format: "categories",
+            properties: {
+                input: input,
+                out: out
+            }
+        }
     });
 
-    ready(inputeditor);
+    inputouteditor.input = inputouteditor.editors["root.input"];
+    inputouteditor.out = inputouteditor.editors["root.out"];
+    ready(inputouteditor);
 
     //==================sdk==================//
-    var outid = member.name + '_out';
     var sdkid = member.name + '_sdk';
-    inputeditor.sdkeditor = new JSONEditor(document.getElementById(sdkid), {
+    inputouteditor.sdkeditor = new JSONEditor(document.getElementById(sdkid), {
         // Enable fetching schemas via ajax
         //ajax: true,
         schema: {
@@ -1663,6 +1697,23 @@ function setInput(input) {
             }
         });
     });
+
+    var input_out = input.querySelector("div[id='Input & Out']");
+    input_out.style.border = input_out.style.margin = input_out.style.paddingTop = input_out.style.paddingBottom = "0px";
+    input_out.className = "tab-content";
+
+    input.querySelector('#Input > div > div > h4').style.display = 'none';
+    input.querySelector('#Out > div > div > h4').style.display = 'none';
+
+    var panel = input.querySelector("#Input > div[tag='row']");
+    panel.removeAttribute("style");
+    var panel2 = input.querySelector("#Input > div > div > div[tag='panel']");
+    panel2.removeAttribute("class"); panel2.removeAttribute("style"); panel2.style.margin = "8px";
+
+    var out = input.querySelector("#Out > div[tag='row']");
+    out.removeAttribute("style");
+    var out2 = input.querySelector("#Out > div > div > div[tag='panel']");
+    out2.removeAttribute("class"); out2.removeAttribute("style"); out2.style.margin = "8px";
 }
 
 function setEdit(root, edit) {
@@ -1703,7 +1754,8 @@ function setEdit(root, edit) {
 function ready(editor) {
     editor.on('ready', function () {
         //console.time("timer");
-        if (editor.root.editors.t || editor.root.editors.d) {
+        var input = editor.input;
+        if (input.editors.t || input.root.editors.d) {
             var buttonEdit = editor.root.getButton('', 'edit', 'Edit');
             button_holder = editor.root.theme.getHeaderButtonHolder();
             button_holder.appendChild(buttonEdit);
@@ -1711,29 +1763,28 @@ function ready(editor) {
             buttonEdit.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                var root = editor.getEditor('root');
-                setEdit(root.container, root.schema.edit);
-                root.schema.edit = !root.schema.edit;
+                setEdit(input.container, input.schema.edit);
+                input.schema.edit = !input.schema.edit;
             }, false);
         }
 
-        if (editor.root.editors.d) {
+        if (input.editors.d) {
             var buttonData = editor.root.getButton('', 'data', 'Data');
             buttonData.id = "data";
-            button_holder = editor.root.editors.d.theme.getHeaderButtonHolder();
+            button_holder = input.editors.d.theme.getHeaderButtonHolder();
             button_holder.appendChild(buttonData);
-            editor.root.editors.d.header.parentNode.appendChild(button_holder);
+            input.editors.d.header.parentNode.appendChild(button_holder);
             //this.editjson_controls.appendChild(this.buttonData);
             buttonData.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 //editor.root.editors.d.container.hidden = true; test
-                editor.root.editors.d.toggleEditJSON();
+                input.editors.d.toggleEditJSON();
             }, false);
 
-            if (editor.root.editors.d.editjson_textarea) {
-                editor.root.editors.d.editjson_textarea.removeAttribute('tag');
-                editor.root.editors.d.editjson_textarea.style.display = '';
+            if (input.editors.d.editjson_textarea) {
+                input.editors.d.editjson_textarea.removeAttribute('tag');
+                input.editors.d.editjson_textarea.style.display = '';
                 //editor.root.editors.d.editjson_save.style.display = 'none';
             }
         }
@@ -1763,14 +1814,14 @@ function ready(editor) {
                 $trigger(collapse, 'click');
             }
 
-            if (editor.root.editors.f) {
+            if (input.editors.f) {
                 var form = new FormData();
-                var data = getData(editor, false);
-                form.append("c", editor.schema.name);
+                var data = getData(input, false);
+                form.append("c", input.schema.name);
                 form.append("t", data.t);
                 form.append("d", data.d);
 
-                var files = editor.root.container.querySelectorAll("[tag='file']");
+                var files = input.container.querySelectorAll("[tag='file']");
                 files.forEach(c => {
                     form.append(c.file.name, c.file);
                 });
@@ -1790,9 +1841,9 @@ function ready(editor) {
                     });
             }
             else {
-                var data = getData(editor, false);
+                var data = getData(input, false);
                 ajax.post(doc[businessKey].host + "/" + businessName,
-                    { c: editor.schema.name, t: data.t, d: data.d },
+                    { c: input.schema.name, t: data.t, d: data.d },
                     function (response) {
                         //succcess
                         try {
@@ -1807,13 +1858,60 @@ function ready(editor) {
             }
         }, false);
 
+        var buttonBenchmark = debug.root.getButton('', 'benchmark', 'Benchmark');
+        button_holder.appendChild(buttonBenchmark);
+        buttonBenchmark.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            debugValue.setValue(null);
+            $trigger(tab, 'click');
+            if ("Expand" === collapse.getAttribute("title")) {
+                $trigger(collapse, 'click');
+            }
+
+            //debugValue.setValue("benchmark test!");
+            var data = getData(input, false);
+            //input.schema.name
+            ajax.post(doc[businessKey].host + "/" + businessName,
+                {
+                    c: "ab",
+                    t: null,
+                    d: JSON.stringify({
+                        n: 10000,
+                        c: 1000,
+                        data: "&c=" + input.schema.name + "&t=" + data.t + "&d=" + data.d,
+                        host: doc[businessKey].host + "/" + businessName
+                    })
+                },
+                function (response) {
+                    //succcess
+                    try {
+                        var result = JSON.parse(response);
+                        if (0 < result.S) {
+                            //response = response.replace(/\\r\\n/g, "\\n\\");
+                            debugValue.setValue(JSON.parse(response).D);
+                        }
+                        else {
+                            debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
+                        }
+                    } catch (e) {
+                        debugValue.setValue(response);
+                    }
+                }, function (response) {
+                    //fail
+                    debugValue.setValue(response);
+                });
+        }, false);
+
         //======================================================//
 
         editor.on('change', function () {
-            var data = getData(this, false);
+            var input = this.editors["root.input"];
+            var data = getData(input, false);
             var h = doc[businessKey].host + "/" + businessName;
-            javascriptValue.setValue(GetSdkJavaScript(h, this.schema.name, data.t, JSON.stringify(data.d)));
-            netValue.setValue(GetSdkNet(h, this.schema.name, data.t, JSON.stringify(data.d)));
+            javascriptValue.setValue(GetSdkJavaScript(h, input.schema.name, data.t, JSON.stringify(data.d)));
+            netValue.setValue(GetSdkNet(h, input.schema.name, data.t, JSON.stringify(data.d)));
 
             //console.log(this.sdkeditor.getValue());
         });
@@ -1821,7 +1919,7 @@ function ready(editor) {
     });
 }
 
-function setSdk(sdk) {
+function setSdk(sdk, input) {
     if (null == sdk) { return; }
 
     sdk.querySelector('#JavaScript > div > div > h4').style.display = 'none';
@@ -1904,25 +2002,24 @@ function getSdk(format) {
     };
 }
 
-function getData(editor, format = true) {
+function getData(input, format = true) {
     var d = null;
-    if (editor.editors.root.editors.d) {
-        if (editor.schema.argSingle) {
-            d = JSON.stringify(editor.getEditor("root.d").getValue(), null, format ? 2 : 0);
+    if (input.editors.d) {
+        if (input.schema.argSingle) {
+            d = JSON.stringify(input.editors.d.getValue(), null, format ? 2 : 0);
         }
         else {
             var args = []
-            for (var i in editor.editors.root.editors.d.editors) {
-                args.push("root.d." + i);
+            for (var i in input.editors.d.editors) {
+                args.push(i);
             }
-
             for (var i = args.length - 1; i >= 0; i--) {
-                args[i] = editor.getEditor(args[i]).getValue();
+                args[i] = input.editors.d.editors[args[i]].getValue();
             }
             d = JSON.stringify(args, null, format ? 2 : 0);
         }
     }
-    return { t: editor.editors.root.editors.t ? editor.getEditor("root.t").getValue() : null, d: d };
+    return { t: input.editors.t ? input.editors.t.getValue() : null, d: d };
 }
 
 go();
