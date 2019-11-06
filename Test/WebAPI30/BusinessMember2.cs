@@ -16,7 +16,6 @@ using static Args;
 /// <summary>
 /// BusinessMember2。。。
 /// businessDescription
-/// 中文测试！@#￥%……*（）——+
 /// businessDescription3
 /// </summary>
 [Info("API")]

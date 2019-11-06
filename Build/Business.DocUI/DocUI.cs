@@ -205,10 +205,15 @@
             return bytes;
         }
 
-        //centos yum -y install httpd-tools
+        /*
+        macOS: ~
+        Alpine: apk add apache2-utils
+        CentOS/RHEL: yum -y install httpd-tools
+        Ubuntu: apt-get install apache2-utils
+        */
         public static async Task<string> ab(int n, int c, string data, string host)
         {
-            if (!System.IO.File.Exists(AB))
+            if (!Unix && !System.IO.File.Exists(AB))
             {
                 return $"{AB} not exist!";
             }
