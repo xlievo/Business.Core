@@ -1333,6 +1333,7 @@ var businessKey = null;
 var businessName = null;
 //var business = null;
 var compiled_tpl = juicer(document.getElementById('tpl').innerHTML);
+var compiled_benchmark = juicer(document.getElementById('benchmark').innerHTML);
 var edit = false;
 var businessSelect = document.getElementById('business');
 var groupSelect = document.querySelector("#group");
@@ -1755,7 +1756,7 @@ function ready(editor) {
     editor.on('ready', function () {
         //console.time("timer");
         var input = editor.input;
-        if (input.editors.t || input.root.editors.d) {
+        if (input.editors.t || input.editors.d) {
             var buttonEdit = editor.root.getButton('', 'edit', 'Edit');
             button_holder = editor.root.theme.getHeaderButtonHolder();
             button_holder.appendChild(buttonEdit);
@@ -1858,8 +1859,14 @@ function ready(editor) {
             }
         }, false);
 
-        var buttonBenchmark = debug.root.getButton('', 'benchmark', 'Benchmark');
-        button_holder.appendChild(buttonBenchmark);
+        debug.root.header.parentNode.classList.add("form-inline");
+        button_holder = debug.root.theme.getHeaderButtonHolder();
+        button_holder.classList.add("input-group");
+        button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
+        debug.root.header.parentNode.appendChild(button_holder);
+        var buttonBenchmark = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark');
+        var benchmark_n = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_n');
+        var benchmark_c = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_c');
         buttonBenchmark.addEventListener('click', function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -1870,7 +1877,6 @@ function ready(editor) {
                 $trigger(collapse, 'click');
             }
 
-            //debugValue.setValue("benchmark test!");
             var data = getData(input, false);
             //input.schema.name
             ajax.post(doc[businessKey].host + "/" + businessName,
@@ -1878,8 +1884,8 @@ function ready(editor) {
                     c: "ab",
                     t: null,
                     d: JSON.stringify({
-                        n: 10000,
-                        c: 1000,
+                        n: benchmark_n.value,
+                        c: benchmark_c.value,
                         data: "&c=" + input.schema.name + "&t=" + data.t + "&d=" + data.d,
                         host: doc[businessKey].host + "/" + businessName
                     })
