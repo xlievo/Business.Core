@@ -1,5 +1,11 @@
 ﻿var fileform = "root[input][f]";
 
+function isNumber(val) {
+    var regPos = /^\d+(\.\d+)?$/;
+    var regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/;
+    return regPos.test(val) || regNeg.test(val);
+}
+
 function renderSize(value) {
     if (null == value || value == '') {
         return "0 Bytes";
@@ -1877,12 +1883,27 @@ function ready(editor) {
                 $trigger(collapse, 'click');
             }
 
+            if (!isNumber(benchmark_n.value)) {
+                debugValue.setValue('Request numerical value must be input!');
+                return;
+            }
+
+            if (!isNumber(benchmark_c.value)) {
+                debugValue.setValue('Concurrency numerical value must be input!');
+                return;
+            }
+
+            if (benchmark_c.value > benchmark_n.value) {
+                debugValue.setValue('Concurrency numerical cannot be greater than Request numerical!');
+                return;
+            }
+
             var data = getData(input, false);
             //input.schema.name
             ajax.post(doc[businessKey].host + "/" + businessName,
                 {
                     c: "ab",
-                    t: null,
+                    t: null,//token check
                     d: JSON.stringify({
                         n: benchmark_n.value,
                         c: benchmark_c.value,
