@@ -1915,18 +1915,6 @@ function ready(editor) {
                         },
                         function (response) {
                             //succcess
-                            //try {
-                            //    var result = JSON.parse(response);
-                            //    if (0 < result.S) {
-                            //        //response = response.replace(/\\r\\n/g, "\\n\\");
-                            //        debugValue.setValue(JSON.parse(response).D);
-                            //    }
-                            //    else {
-                            //        debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
-                            //    }
-                            //} catch (e) {
-                            //    debugValue.setValue(response);
-                            //}
                             buttonBenchmark.removeAttribute("disabled");
                             debugValue.setValue(response);
                         }, function (response) {

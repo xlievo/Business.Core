@@ -205,7 +205,7 @@
             return bytes;
         }
 
-        public struct abArg
+        public struct benchmarkArg
         {
             public int n;
             public int c;
@@ -218,16 +218,16 @@
         CentOS/RHEL: yum -y install httpd-tools
         Ubuntu: apt-get install apache2-utils
         */
-        public static async Task<string> ab(abArg ab)
+        public static async Task<string> benchmark(benchmarkArg arg)
         {
-            if (default(abArg).Equals(ab)) { return new System.ArgumentNullException(nameof(ab)).Message; }
+            if (default(benchmarkArg).Equals(arg)) { return new System.ArgumentNullException(nameof(arg)).Message; }
 
             if (!Unix && !System.IO.File.Exists(AB))
             {
                 return $"{AB} not exist!";
             }
 
-            System.Console.WriteLine($"n:{ab.n} c:{ab.c}");
+            System.Console.WriteLine($"n:{arg.n} c:{arg.c}");
 
             //var dir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ab");
 
@@ -241,9 +241,9 @@
             try
             {
                 //System.IO.File.WriteAllText(dataPath, System.Net.WebUtility.UrlEncode(data), System.Text.Encoding.UTF8);
-                System.IO.File.WriteAllText(dataPath, ab.data, System.Text.Encoding.UTF8);
+                System.IO.File.WriteAllText(dataPath, arg.data, System.Text.Encoding.UTF8);
 
-                using (var cmd = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(!Unix ? AB : "ab", $"-n {ab.n} -c {ab.c} -p \"{dataPath}\" -T \"application/x-www-form-urlencoded\" \"{ab.host}\"") { RedirectStandardOutput = true }))
+                using (var cmd = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(!Unix ? AB : "ab", $"-n {arg.n} -c {arg.c} -p \"{dataPath}\" -T \"application/x-www-form-urlencoded\" \"{arg.host}\"") { RedirectStandardOutput = true }))
                 //using (var cmd = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(!Unix ? AB : "ab", "-n 10 -c 10 http://localhost:5000/API/") { RedirectStandardOutput = true }))
                 {
                     using (var output = cmd.StandardOutput)

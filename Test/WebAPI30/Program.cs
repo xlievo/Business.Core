@@ -434,7 +434,17 @@ public class BusinessController : Controller
 
         g = "j";//fixed grouping
 
-        if ("benchmark" == c) { return await DocUI.ab(d.TryJsonDeserialize<DocUI.abArg>()); }
+        #region benchmark
+
+        if ("benchmark" == c)
+        {
+            var arg = d.TryJsonDeserialize<DocUI.benchmarkArg>();
+            if (default(DocUI.benchmarkArg).Equals(arg)) { return new System.ArgumentNullException(nameof(arg)).Message; }
+            arg.host = $"{this.Request.Scheme}://localhost:{this.HttpContext.Connection.LocalPort}/{business.Configer.Info.BusinessName}";
+            return await DocUI.benchmark(arg);
+        }
+
+        #endregion
 
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
 
