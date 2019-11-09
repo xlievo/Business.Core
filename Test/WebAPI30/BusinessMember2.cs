@@ -58,8 +58,6 @@ public class BusinessMember2 : BusinessBase
         public string B { get; set; }
     }
 
-    public virtual async Task<IResult<string>> ab(Business.Auth.Token token2, Arg<ab> arg) => this.ResultCreate(await DocUI.ab(arg.Out.n, arg.Out.c, arg.Out.data, arg.Out.host));
-
     public virtual async Task<IResult<DateTime>> Test00X(Token token2, Arg<Test001> arg)
     {
         return this.ResultCreate();
@@ -451,14 +449,6 @@ public class Test2Attribute : ArgumentAttribute
 
 public class Args
 {
-    public struct ab
-    {
-        public int n;
-        public int c;
-        public string data;
-        public string host;
-    }
-
     /// <summary>
     /// MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
     /// </summary>

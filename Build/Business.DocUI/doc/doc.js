@@ -1,11 +1,5 @@
 ﻿var fileform = "root[input][f]";
 
-function isNumber(val) {
-    var regPos = /^\d+(\.\d+)?$/;
-    var regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/;
-    return regPos.test(val) || regNeg.test(val);
-}
-
 function renderSize(value) {
     if (null == value || value == '') {
         return "0 Bytes";
@@ -1451,8 +1445,8 @@ function go() {
                 for (var i in doc) {
                     businessSelect.options.add(new Option(doc[i].name, i));
 
-                    if (doc[i].host == null || doc[i].host == undefined || doc[i].host === '') {
-                        doc[i].host = document.location.origin;
+                    if (doc[i].config.host == null || doc[i].config.host == undefined || doc[i].config.host === '') {
+                        doc[i].config.host = document.location.origin;
                     }
                 }
                 businessOnchang(businessSelect);
@@ -1833,7 +1827,7 @@ function ready(editor) {
                     form.append(c.file.name, c.file);
                 });
 
-                ajax.postForm(doc[businessKey].host + "/" + businessName,
+                ajax.postForm(doc[businessKey].config.host + "/" + businessName,
                     form,
                     function (response) {
                         //succcess
@@ -1849,7 +1843,7 @@ function ready(editor) {
             }
             else {
                 var data = getData(input, false);
-                ajax.post(doc[businessKey].host + "/" + businessName,
+                ajax.post(doc[businessKey].config.host + "/" + businessName,
                     { c: input.schema.name, t: data.t, d: data.d },
                     function (response) {
                         //succcess
@@ -1865,78 +1859,94 @@ function ready(editor) {
             }
         }, false);
 
-        debug.root.header.parentNode.classList.add("form-inline");
-        button_holder = debug.root.theme.getHeaderButtonHolder();
-        button_holder.classList.add("input-group");
-        button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
-        debug.root.header.parentNode.appendChild(button_holder);
-        var buttonBenchmark = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark');
-        var benchmark_n = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_n');
-        var benchmark_c = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_c');
-        buttonBenchmark.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+        if (doc[businessKey].config.benchmark) {
+            debug.root.header.parentNode.classList.add("form-inline");
+            button_holder = debug.root.theme.getHeaderButtonHolder();
+            button_holder.classList.add("input-group");
+            button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
+            debug.root.header.parentNode.appendChild(button_holder);
+            var buttonBenchmark = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark');
+            var benchmark_n = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_n');
+            var benchmark_c = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_c');
+            buttonBenchmark.addEventListener('click', function (e) {
+                buttonBenchmark.setAttribute("disabled", true);
+                e.preventDefault();
+                e.stopPropagation();
 
-            debugValue.setValue(null);
-            $trigger(tab, 'click');
-            if ("Expand" === collapse.getAttribute("title")) {
-                $trigger(collapse, 'click');
-            }
-
-            if (!isNumber(benchmark_n.value)) {
-                debugValue.setValue('Request numerical value must be input!');
-                return;
-            }
-
-            if (!isNumber(benchmark_c.value)) {
-                debugValue.setValue('Concurrency numerical value must be input!');
-                return;
-            }
-
-            if (benchmark_c.value > benchmark_n.value) {
-                debugValue.setValue('Concurrency numerical cannot be greater than Request numerical!');
-                return;
-            }
-
-            var data = getData(input, false);
-            //input.schema.name
-            ajax.post(doc[businessKey].host + "/" + businessName,
-                {
-                    c: "ab",
-                    t: null,//token check
-                    d: JSON.stringify({
-                        n: benchmark_n.value,
-                        c: benchmark_c.value,
-                        data: "&c=" + input.schema.name + "&t=" + data.t + "&d=" + data.d,
-                        host: doc[businessKey].host + "/" + businessName
-                    })
-                },
-                function (response) {
-                    //succcess
-                    try {
-                        var result = JSON.parse(response);
-                        if (0 < result.S) {
-                            //response = response.replace(/\\r\\n/g, "\\n\\");
-                            debugValue.setValue(JSON.parse(response).D);
-                        }
-                        else {
-                            debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
-                        }
-                    } catch (e) {
-                        debugValue.setValue(response);
+                try {
+                    debugValue.setValue(null);
+                    $trigger(tab, 'click');
+                    if ("Expand" === collapse.getAttribute("title")) {
+                        $trigger(collapse, 'click');
                     }
-                }, function (response) {
-                    //fail
-                    debugValue.setValue(response);
-                });
-        }, false);
+
+                    var n = Number(benchmark_n.value);
+                    if (isNaN(n) || 0 >= n) {
+                        debugValue.setValue('Request numerical must be greater than 0!');
+                        buttonBenchmark.removeAttribute("disabled");
+                        return;
+                    }
+
+                    var c = Number(benchmark_c.value);
+                    if (isNaN(c) || 0 >= c) {
+                        debugValue.setValue('Concurrency numerical must be greater than 0!');
+                        buttonBenchmark.removeAttribute("disabled");
+                        return;
+                    }
+
+                    if (c > n) {
+                        debugValue.setValue('Concurrency numerical cannot be greater than Request numerical!');
+                        buttonBenchmark.removeAttribute("disabled");
+                        return;
+                    }
+
+                    var data = getData(input, false);
+                    //input.schema.name
+                    ajax.post(doc[businessKey].config.host + "/" + businessName,
+                        {
+                            c: "benchmark",
+                            t: null,//token check
+                            d: JSON.stringify({
+                                n: benchmark_n.value,
+                                c: benchmark_c.value,
+                                data: "&c=" + input.schema.name + "&t=" + data.t + "&d=" + data.d,
+                                host: doc[businessKey].config.host + "/" + businessName
+                            })
+                        },
+                        function (response) {
+                            //succcess
+                            //try {
+                            //    var result = JSON.parse(response);
+                            //    if (0 < result.S) {
+                            //        //response = response.replace(/\\r\\n/g, "\\n\\");
+                            //        debugValue.setValue(JSON.parse(response).D);
+                            //    }
+                            //    else {
+                            //        debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
+                            //    }
+                            //} catch (e) {
+                            //    debugValue.setValue(response);
+                            //}
+                            buttonBenchmark.removeAttribute("disabled");
+                            debugValue.setValue(response);
+                        }, function (response) {
+                            //fail
+                            buttonBenchmark.removeAttribute("disabled");
+                            debugValue.setValue(response);
+                        });
+                } catch (e) {
+                    buttonBenchmark.removeAttribute("disabled");
+                    debugValue.setValue(e);
+                }
+            }, false);
+        }
 
         //======================================================//
 
         editor.on('change', function () {
             var input = this.editors["root.input"];
             var data = getData(input, false);
-            var h = doc[businessKey].host + "/" + businessName;
+            var h = doc[businessKey].config.host + "/" + businessName;
             javascriptValue.setValue(GetSdkJavaScript(h, input.schema.name, data.t, JSON.stringify(data.d)));
             netValue.setValue(GetSdkNet(h, input.schema.name, data.t, JSON.stringify(data.d)));
 
@@ -1946,7 +1956,7 @@ function ready(editor) {
     });
 }
 
-function setSdk(sdk, input) {
+function setSdk(sdk) {
     if (null == sdk) { return; }
 
     sdk.querySelector('#JavaScript > div > div > h4').style.display = 'none';
@@ -2016,8 +2026,8 @@ function getSdk(format) {
                         readOnly: true,
                         highlightActiveLine: false,
                         highlightSelectedWord: false,
-                        minLines: 20,
-                        maxLines: 20
+                        minLines: 25,
+                        maxLines: 25
                     }
                 }
             }

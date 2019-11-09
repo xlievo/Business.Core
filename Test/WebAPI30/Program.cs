@@ -434,6 +434,8 @@ public class BusinessController : Controller
 
         g = "j";//fixed grouping
 
+        if ("benchmark" == c) { return await DocUI.ab(d.TryJsonDeserialize<DocUI.abArg>()); }
+
         //this.Request.Headers["X-Real-IP"].FirstOrDefault() 
 
         var cmd = business.Command.GetCommand(

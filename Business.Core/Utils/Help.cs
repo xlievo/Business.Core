@@ -385,9 +385,9 @@ namespace Business.Utils
         /// <typeparam name="Business"></typeparam>
         /// <param name="business"></param>
         /// <param name="outDir"></param>
-        /// <param name="host"></param>
+        /// <param name="config"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(this Business business, string outDir = null, string host = null) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, host);
+        public static Business UseDoc<Business>(this Business business, string outDir = null, Config config = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, config);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -397,9 +397,9 @@ namespace Business.Utils
         /// <param name="business"></param>
         /// <param name="argCallback"></param>
         /// <param name="outDir"></param>
-        /// <param name="host"></param>
+        /// <param name="config"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Meta.Args>, DocArg> argCallback, string outDir = null, string host = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Meta.Args>, DocArg> argCallback, string outDir = null, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -436,7 +436,7 @@ namespace Business.Utils
                 });
             }
 
-            business.Configer.Doc = UseDoc(business, argCallback, Configer.Xmls, host);
+            business.Configer.Doc = UseDoc(business, argCallback, Configer.Xmls, config);
 
             business.Configer.Info.DocFileName = $"{business.Configer.Info.BusinessName}.doc";
 
@@ -475,9 +475,9 @@ namespace Business.Utils
         /// <param name="business"></param>
         /// <param name="argCallback"></param>
         /// <param name="xmlMembers"></param>
-        /// <param name="host"></param>
+        /// <param name="config"></param>
         /// <returns></returns>
-        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Meta.Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string host = null) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Meta.Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
@@ -516,7 +516,9 @@ namespace Business.Utils
             Xml.member member3 = null;
             xmlMembers?.TryGetValue($"T:{business.Configer.Info.TypeFullName}", out member3);
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault.FirstCharToLower(), Host = System.Uri.TryCreate(host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty, Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>") };
+            config.Host = System.Uri.TryCreate(config.Host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty;
+
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault.FirstCharToLower(), Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>"), Config = config };
         }
 
         const string AttributeSign = "Attribute";

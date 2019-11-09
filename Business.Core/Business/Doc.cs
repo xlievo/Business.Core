@@ -180,10 +180,15 @@ namespace Business.Document
         }
     }
 
+    public struct Config
+    {
+        public string Host { get; set; }
+
+        public bool Benchmark { get; set; }
+    }
+
     public interface IDoc
     {
-        string Host { get; set; }
-
         string Name { get; set; }
 
         string Description { get; set; }
@@ -191,6 +196,8 @@ namespace Business.Document
         dynamic Group { get; }
 
         string GroupDefault { get; set; }
+
+        Config Config { get; set; }
     }
 
     public interface IDoc<DocArg> : IDoc where DocArg : IDocArg<DocArg>
@@ -234,8 +241,6 @@ namespace Business.Document
 
     public class Doc<DocArg> : IDoc<DocArg> where DocArg : IDocArg<DocArg>
     {
-        public string Host { get; set; }
-
         public string Name { get; set; }
 
         public Dictionary<string, Dictionary<string, IMember<DocArg>>> Group { get; set; }
@@ -245,6 +250,8 @@ namespace Business.Document
         dynamic IDoc.Group { get => Group; }
 
         public string GroupDefault { get; set; }
+
+        public Config Config { get; set; }
 
         /// <summary>
         /// Json format

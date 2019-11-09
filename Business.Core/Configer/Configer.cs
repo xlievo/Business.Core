@@ -548,16 +548,15 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// Generating Document Model for All Business Classes. business.doc
         /// </summary>
         /// <param name="outDir"></param>
-        /// <param name="host"></param>
-        /// <returns></returns>
-        public static void UseDoc(string outDir = null, string host = null)
+        /// <param name="config"></param>
+        public static void UseDoc(string outDir = null, Config config = default)
         {
             var exists = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
             var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
 
             foreach (var item in BusinessList.OrderBy(c => c.Key))
             {
-                item.Value.UseDoc(null, host);
+                item.Value.UseDoc(null, config);
 
                 if (exists)
                 {
