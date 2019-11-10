@@ -432,8 +432,16 @@ namespace Business.Auth
             {
                 if (returnValue is System.Threading.Tasks.Task task)
                 {
-                    await task;
-                    returnValue = returnValue.Result;
+                    try
+                    {
+                        await task;
+                        returnValue = returnValue.Result;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        logType = LoggerType.Exception;
+                        returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex.ExceptionWrite()));
+                    }
                 }
             }
 

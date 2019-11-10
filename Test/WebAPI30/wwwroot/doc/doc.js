@@ -1357,18 +1357,23 @@ function businessOnchang(obj) {
         }
 
         groupSelect.options.length = 0;
-        var def = count = 0;
+        var index = -1;
+        var count = 0;
         for (var i in business.group) {
-            if (i === business.groupDefault) {
-                def = count;
+            if (i === business.config.group) {
+                index = count;
             }
+            else if (-1 === index && i === business.groupDefault) {
+                index = count;
+            }
+
             count++;
             groupSelect.options.add(new Option(i, i));
         }
 
         if (0 == count) { return; }
 
-        groupSelect.options.selectedIndex = def;
+        groupSelect.options.selectedIndex = index;
         groupOnchang(groupSelect);
     }
 }

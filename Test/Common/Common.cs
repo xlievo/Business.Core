@@ -139,7 +139,11 @@ public abstract class BusinessBase : BusinessBase<ResultObject<string>>
                 var logs = x.Select(c =>
                 {
                     c.Value = c.Value.ToValue();
-                    //Console.WriteLine(c.JsonSerialize());
+
+                    if (c.Type == LoggerType.Exception)
+                    {
+                        Console.WriteLine(c.JsonSerialize());
+                    }
                     return c;
                 }).ToList();
 
@@ -248,7 +252,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
         //==================The third step==================//
         //3
-        Configer.UseDoc(docDir, new Business.Document.Config { Benchmark = true });
+        Configer.UseDoc(docDir, new Business.Document.Config { Benchmark = true, Group = "j" });
         //writ url to page
         DocUI.Write(docDir, update: false);
     }
