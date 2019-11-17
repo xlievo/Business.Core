@@ -243,7 +243,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         */
 
         //InitRedis();
-
+        
         //1
         Configer.LoadBusiness(new object[] { Host });
         //2
@@ -254,6 +254,6 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         //3
         Configer.UseDoc(docDir, new Business.Document.Config { Benchmark = true, Group = "j" });
         //writ url to page
-        DocUI.Write(docDir, update: false);
+        DocUI.Write(docDir, update: true);
     }
 }

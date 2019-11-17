@@ -279,7 +279,7 @@ namespace Business
         /// <param name="type"></param>
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
-        public static object Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments);
+        public static IBusiness Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments) as IBusiness;
 
         /// <summary>
         /// Initialize a Type proxy class

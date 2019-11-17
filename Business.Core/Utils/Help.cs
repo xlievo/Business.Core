@@ -267,7 +267,7 @@ namespace Business.Utils
 
             if (argSource.Args.HasDefaultValue)
             {
-                docArg.DefaultValue = System.Convert.ToString(argSource.Args.DefaultValue);
+                docArg.DefaultValue = argSource.Args.DefaultValue;
             }
 
             if (!docArg.Token && argSource.Args.HasDefinition)
@@ -464,7 +464,7 @@ namespace Business.Utils
                 return input;
             }
 
-            return input.First().ToString().ToLower() + input.Substring(1);
+            return input[0].ToString().ToLower() + input.Substring(1);
         }
 
         /// <summary>
@@ -2205,7 +2205,7 @@ namespace Business.Utils
         public static bool IsDefinition(this System.Type type) => !SysTypes.Contains(type.FullName) && (type.IsClass || (type.IsValueType && !type.IsEnum && !type.IsArray && !type.IsCollection() && !type.IsEnumerable()));
 
         #region Json
-
+        /*
         public static Type TryJsonDeserialize<Type>(this string value, Newtonsoft.Json.JsonSerializerSettings settings)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -2238,7 +2238,6 @@ namespace Business.Utils
                 return default;
             }
         }
-
         public static Type TryJsonDeserialize<Type>(this string value, out string error)
         {
             error = null;
@@ -2311,18 +2310,65 @@ namespace Business.Utils
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(value, settings);
         }
+        */
 
-        public static string TryJsonSerialize<Type>(this Type value, Newtonsoft.Json.JsonSerializerSettings settings = null)
+        public static string[] TryJsonDeserializeObjectArray(this string value, System.Text.Json.JsonSerializerOptions options = null)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return default;
+            }
+
+            try
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement[]>(value, options).Select(c => c.GetRawText()).ToArray();
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public static Type TryJsonDeserialize<Type>(this string value, System.Text.Json.JsonSerializerOptions options = null)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return default;
+            }
+
+            try
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<Type>(value, options);
+            }
+            catch
+            {
+                return default;
+            }
+        }
+        public static string JsonSerialize<Type>(this Type value, System.Text.Json.JsonSerializerOptions options = null) => System.Text.Json.JsonSerializer.Serialize(value, options);
+
+        public static string TryJsonSerialize<Type>(this Type value, System.Text.Json.JsonSerializerOptions options = null)
         {
             try
             {
-                return Newtonsoft.Json.JsonConvert.SerializeObject(value, settings);
+                return System.Text.Json.JsonSerializer.Serialize(value, options);
             }
             catch (System.Exception ex)
             {
-                return Newtonsoft.Json.JsonConvert.SerializeObject(ex);
+                return System.Convert.ToString(ex.ExceptionWrite());
             }
         }
+
+        //public static string TryJsonSerialize<Type>(this Type value, Newtonsoft.Json.JsonSerializerSettings settings = null)
+        //{
+        //    try
+        //    {
+        //        return Newtonsoft.Json.JsonConvert.SerializeObject(value, settings);
+        //    }
+        //    catch (System.Exception ex)
+        //    {
+        //        return Newtonsoft.Json.JsonConvert.SerializeObject(ex);
+        //    }
+        //}
 
         #endregion
 
@@ -2559,6 +2605,31 @@ namespace Business.Utils
             }
 
             return new ConcurrentReadOnlyDictionary<TKey, TElement>(dictionary);
+        }
+
+        public class DateTimeConverter : System.Text.Json.Serialization.JsonConverter<System.DateTime>
+        {
+            public override System.DateTime Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
+            {
+                if (!reader.TryGetDateTime(out System.DateTime value))
+                {
+                    if (reader.ValueSpan.IsEmpty)
+                    {
+                        return value;
+                    }
+                    return System.DateTime.Parse(reader.GetString());
+                }
+
+                return value;
+                //!reader.TryGetDateTime(out System.DateTime value) ? System.DateTime.Parse(reader.GetString()) : value;
+            }
+
+            public override void Write(System.Text.Json.Utf8JsonWriter writer, System.DateTime value, System.Text.Json.JsonSerializerOptions options) => writer.WriteStringValue(value.ToLocalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss"));
+        }
+
+        public class FirstCharToLowerNamingPolicy : System.Text.Json.JsonNamingPolicy
+        {
+            public override string ConvertName(string name) => FirstCharToLower(name);
         }
 
         /*

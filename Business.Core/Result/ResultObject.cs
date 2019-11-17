@@ -71,6 +71,7 @@ namespace Business.Result
         /// </summary>
         //[ProtoBuf.ProtoMember(1, Name = "S")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "S")]
+        [System.Text.Json.Serialization.JsonPropertyName("S")]
         public virtual System.Int32 State { get => state; set => state = value; }
 
         System.String message;
@@ -79,6 +80,7 @@ namespace Business.Result
         /// </summary>
         //[ProtoBuf.ProtoMember(2, Name = "M")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "M")]
+        [System.Text.Json.Serialization.JsonPropertyName("M")]
         public virtual System.String Message { get => message; set => message = value; }
 
         /// <summary>
@@ -92,6 +94,7 @@ namespace Business.Result
         /// </summary>
         //[ProtoBuf.ProtoMember(3, Name = "D")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
+        [System.Text.Json.Serialization.JsonPropertyName("D")]
         public virtual Type Data { get => data; set => data = value; }
 
         System.Boolean hasData;
@@ -100,10 +103,12 @@ namespace Business.Result
         /// </summary>
         //[ProtoBuf.ProtoMember(4, Name = "H")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "H")]
+        [System.Text.Json.Serialization.JsonPropertyName("H")]
         public virtual System.Boolean HasData { get => hasData; set => hasData = value; }
 
         System.Type dataType;
         [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual System.Type DataType { get => dataType; set => dataType = value; }
 
         System.String callback;
@@ -111,12 +116,15 @@ namespace Business.Result
         /// Gets the token of this result, used for callback
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         //[ProtoBuf.ProtoMember(5, Name = "B")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "B")]
+        [System.Text.Json.Serialization.JsonPropertyName("B")]
         public virtual System.String Callback { get => callback; set => callback = value; }
 
         System.Type genericDefinition;
         [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual System.Type GenericDefinition => genericDefinition;
 
         //ICommand command;

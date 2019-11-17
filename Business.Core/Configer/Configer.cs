@@ -394,6 +394,20 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         //internal readonly string ID = System.Guid.NewGuid().ToString("N");
 
+        public static System.Text.Json.JsonSerializerOptions DocJsonSettings = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            AllowTrailingCommas = true,
+            IgnoreNullValues = true,
+            PropertyNamingPolicy = new Help.FirstCharToLowerNamingPolicy()
+        };
+
+        static Configer()
+        {
+            DocJsonSettings.Converters.Add(new Help.DateTimeConverter());
+            DocJsonSettings.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        }
+
         public Configer(Attributes.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Attributes.AttributeBase> attributes)
         /*
 #if !Mobile
@@ -435,7 +449,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         //public bool EnableWatcher { get; }
         public System.Type ResultTypeDefinition { get; private set; }
         public ReadOnlyCollection<string> UseTypes { get; private set; }
-        public Document.IDoc Doc { get; internal set; }
+        public IDoc Doc { get; internal set; }
 
         ///// <summary>
         ///// Logger use threadPool, Default true
@@ -567,17 +581,18 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             if (exists)
             {
                 System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings), Help.UTF8);
+                //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
             }
         }
 
-        public static Newtonsoft.Json.JsonSerializerSettings DocJsonSettings = new Newtonsoft.Json.JsonSerializerSettings
-        {
-            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
-            DateFormatString = "yyyy-MM-dd HH:mm:ss",
-            DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
-            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-        };
+        //public static Newtonsoft.Json.JsonSerializerSettings DocJsonSettings2 = new Newtonsoft.Json.JsonSerializerSettings
+        //{
+        //    ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+        //    ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
+        //    DateFormatString = "yyyy-MM-dd HH:mm:ss",
+        //    DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
+        //    NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+        //};
 
         //public static void UseDoc<Doc>(System.Func<System.Collections.Generic.Dictionary<string, Document.Xml.member>, Doc> operation, string outDir = null) where Doc : Document.Doc
         //{

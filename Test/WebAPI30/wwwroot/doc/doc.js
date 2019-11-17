@@ -1912,8 +1912,8 @@ function ready(editor) {
                             c: "benchmark",
                             t: null,//token check
                             d: JSON.stringify({
-                                n: benchmark_n.value,
-                                c: benchmark_c.value,
+                                n: n,
+                                c: c,
                                 data: "&c=" + input.schema.name + "&t=" + data.t + "&d=" + data.d,
                                 host: doc[businessKey].config.host + "/" + businessName
                             })

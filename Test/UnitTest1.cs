@@ -91,9 +91,9 @@ public struct Arg01
     [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
     //[AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
     [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = CommandGroupDefault.Group)]
-    public Arg<object, dynamic> A;
+    public Arg<object, dynamic> A { get; set; }
 
-    public string B;
+    public string B { get; set; }
 }
 
 [Info(CommandGroupDefault = CommandGroupDefault.Group)]

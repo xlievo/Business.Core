@@ -207,10 +207,10 @@
 
         public struct benchmarkArg
         {
-            public int n;
-            public int c;
-            public string data;
-            public string host;
+            public int n { get; set; }
+            public int c { get; set; }
+            public string data { get; set; }
+            public string host { get; set; }
         }
         /*
         macOS: ~

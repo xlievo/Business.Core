@@ -53,6 +53,7 @@ namespace Business.Auth
         /// </summary>
         //[ProtoBuf.ProtoMember(1, Name = "K")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "K")]
+        [System.Text.Json.Serialization.JsonPropertyName("K")]
         public virtual string Key { get; set; }
 
         /// <summary>
@@ -60,6 +61,7 @@ namespace Business.Auth
         /// </summary>
         //[ProtoBuf.ProtoMember(2, Name = "R")]
         [Newtonsoft.Json.JsonProperty(PropertyName = "R")]
+        [System.Text.Json.Serialization.JsonPropertyName("R")]
         public virtual string Remote { get; set; }
 
         ///// <summary>
@@ -72,6 +74,7 @@ namespace Business.Auth
         /// Gets the token of this result, used for callback
         /// </summary>
         [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual string Callback { get; set; }
     }
 }

@@ -1598,28 +1598,62 @@ namespace Business.Attributes //Annotations
         public ArgumentDefaultAttribute(int state = -11, string message = null) : base(state, message) { }
     }
 
+    //public class JsonArgAttribute : ArgumentAttribute
+    //{
+    //    public static Newtonsoft.Json.JsonSerializerSettings Settings = new Newtonsoft.Json.JsonSerializerSettings
+    //    {
+    //        ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+    //        ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
+    //        DateFormatString = "yyyy-MM-dd HH:mm:ss",
+    //        DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
+    //        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+    //        Converters = new System.Collections.Generic.List<Newtonsoft.Json.JsonConverter> { new Newtonsoft.Json.Converters.StringEnumConverter() }
+    //    };
+
+    //    public JsonArgAttribute(int state = -12, string message = null) : base(state, message) => this.CanNull = false;
+
+    //    public override async ValueTask<IResult> Proces(dynamic value)
+    //    {
+    //        var result = CheckNull(this, value);
+    //        if (!result.HasData) { return result; }
+
+    //        try
+    //        {
+    //            return this.ResultCreate(data: Newtonsoft.Json.JsonConvert.DeserializeObject(value?.ToString(), this.Meta.MemberType, Settings));
+    //        }
+    //        catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
+    //    }
+    //}
+
     public class JsonArgAttribute : ArgumentAttribute
     {
-        public static Newtonsoft.Json.JsonSerializerSettings Settings = new Newtonsoft.Json.JsonSerializerSettings
+        public JsonArgAttribute(int state = -12, string message = null) : base(state, message)
         {
-            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
-            DateFormatString = "yyyy-MM-dd HH:mm:ss",
-            DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
-            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-            Converters = new System.Collections.Generic.List<Newtonsoft.Json.JsonConverter> { new Newtonsoft.Json.Converters.StringEnumConverter() }
-        };
+            this.CanNull = false;
+            this.Description = "Json parsing";
 
-        public JsonArgAttribute(int state = -12, string message = null) : base(state, message) => this.CanNull = false;
+            options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true,
+                IgnoreNullValues = true,
+            };
+            options.Converters.Add(new Help.DateTimeConverter());
+            options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        }
+
+        public readonly System.Text.Json.JsonSerializerOptions options;
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
+            //var value2 = value?.ToString();
+            //var value2 = value?.GetRawText();
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
             try
             {
-                return this.ResultCreate(data: Newtonsoft.Json.JsonConvert.DeserializeObject(value?.ToString(), this.Meta.MemberType, Settings));
+                return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize(value, this.Meta.MemberType, options));
             }
             catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
         }

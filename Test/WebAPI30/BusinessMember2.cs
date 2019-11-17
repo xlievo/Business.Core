@@ -7,14 +7,16 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Net;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static Args;
 
 /// <summary>
-/// BusinessMember2。。。
+/// BusinessMember2
 /// businessDescription
 /// businessDescription3
 /// </summary>
@@ -78,7 +80,7 @@ public class BusinessMember2 : BusinessBase
     /// <returns></returns>
     [Command("AAA")]
     //Task<IResult<Test001>>
-    public virtual async Task<IResult<Test001Result>> Test001(Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, HttpFile context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
+    public virtual async Task<IResult<Test001Result>> Test001(Token token, Arg<Test001> arg, Arg<DateTime> dateTime, HttpFile context = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -111,7 +113,7 @@ public class BusinessMember2 : BusinessBase
         var files = context.Out.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
 
         //return this.ResultCreate(new { arg = arg.Out, files });
-        return this.ResultCreate(new Test001Result { A = "AAA", B = "SSS" });
+        return this.ResultCreate(new Test001Result { A = arg.Out.A, B = "SSS" });
     }
 
     static string GetFileName(string path)
@@ -476,9 +478,9 @@ public class Args
         /// </summary>
         //[Test]
         [Nick("password")]
-        [@CheckNull]
+        //[@CheckNull]
         //[@CheckEmail]
-        [@CheckUrl]
+        //[@CheckUrl]
         [DefaultValue("")]
         public string A { get; set; }
 

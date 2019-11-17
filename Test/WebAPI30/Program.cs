@@ -461,7 +461,7 @@ public class BusinessController : Controller
 
         var result = await cmd.AsyncCall(
             //the data of this request, allow null.
-            cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserialize<object[]>(),
+            cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeObjectArray(),
             //the incoming use object
             new UseEntry(this, "context"), //context
             new UseEntry(new Token //token

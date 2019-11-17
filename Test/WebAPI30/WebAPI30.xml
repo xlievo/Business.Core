@@ -6,7 +6,7 @@
     <members>
         <member name="T:BusinessMember2">
             <summary>
-            BusinessMember2。。。
+            BusinessMember2
             businessDescription
             businessDescription3
             </summary>
@@ -21,7 +21,7 @@
             bbb
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Token,Arg{Args.Test001},Arg{System.DateTime},HttpFile,System.Decimal,System.Int32)">
+        <member name="M:BusinessMember2.Test001(Token,Arg{Args.Test001},Arg{System.DateTime},HttpFile,System.Decimal,System.Int32,System.Boolean)">
             <summary>
             test doc Test001
             and Test001
