@@ -1371,6 +1371,8 @@ function businessOnchang(obj) {
             groupSelect.options.add(new Option(i, i));
         }
 
+        destroy();
+
         if (0 == count) { return; }
 
         groupSelect.options.selectedIndex = index;
@@ -1391,7 +1393,7 @@ function destroy(all = false) {
         disclosure.destroy();
         disclosure = null;
     }
-    members.innerHTML = null;
+    members.innerHTML = '';
 
     if (all) {
         businessDescription.innerHTML = null;
@@ -1487,7 +1489,6 @@ function expand(ev) {
 }
 
 function load(m) {
-    destroy();
 
     var members2 = []
     for (var i in m) {

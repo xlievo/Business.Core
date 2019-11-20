@@ -15,6 +15,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Args;
 
+public class BusinessMember3 : BusinessBase
+{
+    public BusinessMember3(Host host) : base(host)
+    {
+
+    }
+}
+
 /// <summary>
 /// BusinessMember2
 /// businessDescription
@@ -88,6 +96,11 @@ public class BusinessMember2 : BusinessBase
         if (arg.Out.B == "ex")
         {
             throw new System.Exception("Method exception!");
+        }
+
+        if (arg.Out.B == "ex2")
+        {
+            return this.ResultCreate(-911, "dsddsa");
         }
 
         //var exit = await RedisHelper.HExistsAsync("Role", "value2");
@@ -478,9 +491,9 @@ public class Args
         /// </summary>
         //[Test]
         [Nick("password")]
-        //[@CheckNull]
+        [@CheckNull]
         //[@CheckEmail]
-        //[@CheckUrl]
+        [@CheckUrl]
         [DefaultValue("")]
         public string A { get; set; }
 

@@ -2190,12 +2190,12 @@ namespace Business.Utils
             return list2;
         }
 
-        public static string AddeJson(this string json, params object[] item)
-        {
-            var list = string.IsNullOrEmpty(json) ? new System.Collections.ArrayList() : json.TryJsonDeserialize<System.Collections.IList>() ?? new System.Collections.ArrayList { json };
+        //public static string AddeJson(this string json, params object[] item)
+        //{
+        //    var list = string.IsNullOrEmpty(json) ? new System.Collections.ArrayList() : json.TryJsonDeserialize<System.Collections.IList>() ?? new System.Collections.ArrayList { json };
 
-            return list.Adde(item).JsonSerialize();
-        }
+        //    return list.Adde(item).JsonSerialize();
+        //}
 
         //public static bool SpinWait(this int millisecondsTimeout) => System.Threading.SpinWait.SpinUntil(() => false, millisecondsTimeout);
 

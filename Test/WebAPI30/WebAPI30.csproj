@@ -159,10 +159,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\Build\Business.DocUI\Business.DocUI.csproj" />
     <ProjectReference Include="..\..\Build\Business.Standard\Business.Standard.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />

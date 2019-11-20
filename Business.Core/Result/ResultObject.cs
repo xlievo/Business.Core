@@ -70,7 +70,7 @@ namespace Business.Result
         /// The results of the state is greater than or equal to 1: success, equal to 0: system level exceptions, less than 0: business class error.
         /// </summary>
         //[ProtoBuf.ProtoMember(1, Name = "S")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "S")]
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "S")]
         [System.Text.Json.Serialization.JsonPropertyName("S")]
         public virtual System.Int32 State { get => state; set => state = value; }
 
@@ -79,7 +79,7 @@ namespace Business.Result
         /// Success can be null
         /// </summary>
         //[ProtoBuf.ProtoMember(2, Name = "M")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "M")]
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "M")]
         [System.Text.Json.Serialization.JsonPropertyName("M")]
         public virtual System.String Message { get => message; set => message = value; }
 
@@ -93,7 +93,7 @@ namespace Business.Result
         /// Specific Byte/Json data objects
         /// </summary>
         //[ProtoBuf.ProtoMember(3, Name = "D")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "D")]
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "D")]
         [System.Text.Json.Serialization.JsonPropertyName("D")]
         public virtual Type Data { get => data; set => data = value; }
 
@@ -102,12 +102,12 @@ namespace Business.Result
         /// Whether there is value
         /// </summary>
         //[ProtoBuf.ProtoMember(4, Name = "H")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "H")]
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "H")]
         [System.Text.Json.Serialization.JsonPropertyName("H")]
         public virtual System.Boolean HasData { get => hasData; set => hasData = value; }
 
         System.Type dataType;
-        [Newtonsoft.Json.JsonIgnore]
+        //[Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         public virtual System.Type DataType { get => dataType; set => dataType = value; }
 
@@ -115,15 +115,15 @@ namespace Business.Result
         /// <summary>
         /// Gets the token of this result, used for callback
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        //[Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         //[ProtoBuf.ProtoMember(5, Name = "B")]
-        [Newtonsoft.Json.JsonProperty(PropertyName = "B")]
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "B")]
         [System.Text.Json.Serialization.JsonPropertyName("B")]
         public virtual System.String Callback { get => callback; set => callback = value; }
 
         System.Type genericDefinition;
-        [Newtonsoft.Json.JsonIgnore]
+        //[Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         public virtual System.Type GenericDefinition => genericDefinition;
 

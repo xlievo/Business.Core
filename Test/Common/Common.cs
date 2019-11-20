@@ -35,9 +35,11 @@ public class ResultObject<Type> : Business.Result.ResultObject<Type>
     public ResultObject(Type data, int state = 1, string message = null) : base(data, state, message) { }
 
     [MessagePack.IgnoreMember]
+    [System.Text.Json.Serialization.JsonIgnore]
     public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
 
     [MessagePack.IgnoreMember]
+    [System.Text.Json.Serialization.JsonIgnore]
     public override System.Type GenericDefinition => base.GenericDefinition;
 
     public override byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);

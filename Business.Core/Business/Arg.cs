@@ -74,7 +74,7 @@ namespace Business
         /// <summary>
         /// Used for the command group
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        //[Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         public virtual string Group { get; set; }
 

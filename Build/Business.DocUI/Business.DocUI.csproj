@@ -2,12 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.0.3</Version>
+    <Version>1.0.0</Version>
     <Description>https://github.com/xlievo/Business.Core</Description>
     <Copyright>Copyright ©  2014~2019 Business Project - http://www.tmopen.com</Copyright>
     <PackageProjectUrl>https://github.com/xlievo/Business.Core</PackageProjectUrl>
     <PackageIconUrl>https://secure.gravatar.com/userimage/107958241/f5a911b60f47bbf64630f824232c9a24?size=250</PackageIconUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,12 +40,12 @@
     <None Remove="doc\houdini\js\houdini.min.js" />
     <None Remove="doc\houdini\js\houdini.polyfills.js" />
     <None Remove="doc\houdini\js\houdini.polyfills.min.js" />
+    <None Remove="doc\icon.png" />
     <None Remove="doc\index.html" />
     <None Remove="doc\jsoneditor\jsoneditor.js" />
     <None Remove="doc\jsoneditor\jsoneditor.min.js" />
     <None Remove="doc\Juicer\juicer-min.js" />
     <None Remove="doc\sdk.js" />
-    <None Remove="doc\w9.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -79,6 +80,7 @@
     <EmbeddedResource Include="doc\houdini\js\houdini.min.js" />
     <EmbeddedResource Include="doc\houdini\js\houdini.polyfills.js" />
     <EmbeddedResource Include="doc\houdini\js\houdini.polyfills.min.js" />
+    <EmbeddedResource Include="doc\icon.png" />
     <EmbeddedResource Include="doc\index.html">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -88,7 +90,6 @@
     <EmbeddedResource Include="doc\sdk.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="doc\w9.ico" />
   </ItemGroup>
 
   <ItemGroup>

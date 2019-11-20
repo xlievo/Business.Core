@@ -217,7 +217,7 @@ namespace Business.Document
 
         string Description { get; set; }
 
-        [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         Dictionary<string, DocArg> Args { get; set; }
 
@@ -226,7 +226,7 @@ namespace Business.Document
 
     public interface IDocArg<DocArg> where DocArg : IDocArg<DocArg>
     {
-        [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         Dictionary<string, DocArg> Children { get; set; }
 
@@ -284,7 +284,7 @@ namespace Business.Document
 
     public class DocArg : IDocArg<DocArg>
     {
-        [Newtonsoft.Json.JsonProperty(PropertyName = "default")]
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "default")]
         [System.Text.Json.Serialization.JsonPropertyName("default")]
         public object DefaultValue { get; set; }
 
@@ -336,7 +336,7 @@ namespace Business.Document
 
         public string Title { get; set; }
 
-        [Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
+        //[Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         public Dictionary<string, DocArg> Children { get; set; }
 

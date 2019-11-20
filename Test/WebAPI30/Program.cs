@@ -78,34 +78,34 @@ public class Startup
             });
         });
 
-        services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
-            .AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
-                options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
-            });
+        services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+        //.AddNewtonsoftJson(options =>
+        //{
+        //    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+        //    options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+        //    options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+        //    options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
+        //});
 
-        Common.Host.HttpClientFactory = services.AddHttpClient("")
-        .ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            var handler = new HttpClientHandler()
-            {
-                AllowAutoRedirect = false,
-                UseDefaultCredentials = true,
-            };
+        //Common.Host.HttpClientFactory = services.AddHttpClient("")
+        //.ConfigurePrimaryHttpMessageHandler(() =>
+        //{
+        //    var handler = new HttpClientHandler()
+        //    {
+        //        AllowAutoRedirect = false,
+        //        UseDefaultCredentials = true,
+        //    };
 
-            if (Common.Host.ENV.IsDevelopment())
-            {
-                handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            }
+        //    if (Common.Host.ENV.IsDevelopment())
+        //    {
+        //        handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+        //    }
 
-            return handler;
-        })
-        .Services
-        .BuildServiceProvider()
-        .GetService<IHttpClientFactory>();
+        //    return handler;
+        //})
+        //.Services
+        //.BuildServiceProvider()
+        //.GetService<IHttpClientFactory>();
         //AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
     }
 
