@@ -1347,7 +1347,7 @@ function businessOnchang(obj) {
         businessName = select.text;
         var business = doc[businessKey];
 
-        businessDescription.innerHTML = null;
+        businessDescription.innerHTML = '';
         if (business.description) {
             businessDescription.innerHTML = business.description;
             businessDescription.parentNode.style.display = "";
@@ -1371,7 +1371,7 @@ function businessOnchang(obj) {
             groupSelect.options.add(new Option(i, i));
         }
 
-        destroy();
+        members.innerHTML = '';
 
         if (0 == count) { return; }
 
@@ -1396,7 +1396,7 @@ function destroy(all = false) {
     members.innerHTML = '';
 
     if (all) {
-        businessDescription.innerHTML = null;
+        businessDescription.innerHTML = '';
         groupSelect.options.length = 0;
         doc = null;
         businessKey = null;
@@ -1489,6 +1489,8 @@ function expand(ev) {
 }
 
 function load(m) {
+
+    destroy();
 
     var members2 = []
     for (var i in m) {

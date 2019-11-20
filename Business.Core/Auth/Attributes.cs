@@ -1642,7 +1642,7 @@ namespace Business.Attributes //Annotations
             options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
-        public readonly System.Text.Json.JsonSerializerOptions options;
+        public System.Text.Json.JsonSerializerOptions options;
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {

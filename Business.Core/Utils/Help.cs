@@ -518,7 +518,7 @@ namespace Business.Utils
 
             config.Host = System.Uri.TryCreate(config.Host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty;
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault.FirstCharToLower(), Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>"), Config = config };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault, Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>"), Config = config };
         }
 
         const string AttributeSign = "Attribute";
@@ -2175,20 +2175,20 @@ namespace Business.Utils
         //}
 
         public static string GetName(this System.Enum value) => null == value ? null : System.Enum.GetName(value.GetType(), value);
-        public static int? GetValue(this System.Enum value) => null == value ? new int?() : value.GetHashCode();
+        //public static int? GetValue(this System.Enum value) => value?.GetHashCode();
 
-        public static System.Collections.IList Adde(this System.Collections.IList list, params object[] item)
-        {
-            if (null == list) { throw new System.ArgumentNullException(nameof(list)); }
+        //public static System.Collections.IList Adde(this System.Collections.IList list, params object[] item)
+        //{
+        //    if (null == list) { throw new System.ArgumentNullException(nameof(list)); }
 
-            if (null == item || 0 == item.Length) { return list; }
+        //    if (null == item || 0 == item.Length) { return list; }
 
-            var list2 = System.Collections.ArrayList.Adapter(list);
+        //    var list2 = System.Collections.ArrayList.Adapter(list);
 
-            list2.AddRange(item);
+        //    list2.AddRange(item);
 
-            return list2;
-        }
+        //    return list2;
+        //}
 
         //public static string AddeJson(this string json, params object[] item)
         //{
