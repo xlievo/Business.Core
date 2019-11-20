@@ -222,6 +222,8 @@ namespace Business.Document
         Dictionary<string, DocArg> Args { get; set; }
 
         bool ArgSingle { get; set; }
+
+        bool HttpFile { get; set; }
     }
 
     public interface IDocArg<DocArg> where DocArg : IDocArg<DocArg>
