@@ -14,10 +14,10 @@ public class GitHubClient
 
     public GitHubClient(HttpClient httpClient)
     {
-        //httpClient.BaseAddress = new Uri("https://api.github.com/");
-        //httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-        //httpClient.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-Sample");
-        //Client = httpClient;
+        httpClient.BaseAddress = new Uri("https://api.github.com/");
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+        httpClient.DefaultRequestHeaders.Add("User-Agent", "HttpClientFactory-Sample");
+        Client = httpClient;
     }
 
     public async Task<string> GetData()

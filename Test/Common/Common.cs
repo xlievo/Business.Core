@@ -253,7 +253,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
         //==================The third step==================//
         //3
-        Configer.UseDoc(docDir, new Business.Document.Config { Benchmark = true, Group = "jjj" });
+        Configer.UseDoc(docDir, new Business.Document.Config { Benchmark = true, Group = "j", GroupEnable = true });
         //writ url to page
         DocUI.Write(docDir, update: true);
     }

@@ -1356,6 +1356,8 @@ function businessOnchang(obj) {
             businessDescription.parentNode.style.display = "none";
         }
 
+        groupSelect.style.display = business.config.groupEnable ? "" : "none";
+
         groupSelect.options.length = 0;
         var index = -1;
         var count = 0;

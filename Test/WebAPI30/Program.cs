@@ -87,26 +87,26 @@ public class Startup
         //    options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
         //});
 
-        //Common.Host.HttpClientFactory = services.AddHttpClient("")
-        //.ConfigurePrimaryHttpMessageHandler(() =>
-        //{
-        //    var handler = new HttpClientHandler()
-        //    {
-        //        AllowAutoRedirect = false,
-        //        UseDefaultCredentials = true,
-        //    };
+        Common.Host.HttpClientFactory = services.AddHttpClient("")
+        .ConfigurePrimaryHttpMessageHandler(() =>
+        {
+            var handler = new HttpClientHandler()
+            {
+                AllowAutoRedirect = false,
+                UseDefaultCredentials = true,
+            };
 
-        //    if (Common.Host.ENV.IsDevelopment())
-        //    {
-        //        handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-        //    }
+            if (Common.Host.ENV.IsDevelopment())
+            {
+                handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            }
 
-        //    return handler;
-        //})
-        //.Services
-        //.BuildServiceProvider()
-        //.GetService<IHttpClientFactory>();
-        //AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
+            return handler;
+        })
+        .Services
+        .BuildServiceProvider()
+        .GetService<IHttpClientFactory>();
+        AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
