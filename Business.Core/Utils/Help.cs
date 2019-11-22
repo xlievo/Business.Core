@@ -724,13 +724,6 @@ namespace Business.Utils
             {
                 current.outType = current.outType.GenericTypeArguments[0];
             }
-            //var nullable = false;
-            //var nullType = System.Nullable.GetUnderlyingType(returnType);
-            //if (null != nullType)
-            //{
-            //    returnType = nullType;
-            //    nullable = true;
-            //}
 
             var definition = new TypeDefinition
             {
@@ -749,7 +742,7 @@ namespace Business.Utils
                 Nullable = current.nullable,
 
                 FullName = fullName,
-                Children = hasDefinition ? GetTypeDefinition(returnType, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
+                Children = hasDefinition ? GetTypeDefinition(current.outType, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                 Childrens = childrens,
                 MemberDefinition = memberDefinition,
                 Summary = summary,
@@ -830,13 +823,6 @@ namespace Business.Utils
                 {
                     current.outType = current.outType.GenericTypeArguments[0];
                 }
-                //var nullable = false;
-                //var nullType = System.Nullable.GetUnderlyingType(memberType);
-                //if (null != nullType)
-                //{
-                //    memberType = nullType;
-                //    nullable = true;
-                //}
 
                 var definition = new TypeDefinition
                 {
@@ -855,7 +841,7 @@ namespace Business.Utils
                     Nullable = current.nullable,
 
                     FullName = fullName,
-                    Children = hasDefinition ? GetTypeDefinition(memberType, definitions, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
+                    Children = hasDefinition ? GetTypeDefinition(current.outType, definitions, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                     Childrens = childrens2,
                     MemberDefinition = memberDefinition,
                     Summary = summary,

@@ -89,7 +89,7 @@ public class BusinessMember2 : BusinessBase
     [Command("AAA")]
     [Command("jjj", Group = "j")]
     //Task<IResult<Test001>>
-    public virtual async Task<IResult<Test001Result>> Test001(Token token, Arg<Test001> arg, Arg<DateTime> dateTime, HttpFile context = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+    public virtual async Task<IResult<Test001Result?>> Test001(Token token, Arg<Test001> arg, Arg<DateTime> dateTime, HttpFile context = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -127,7 +127,9 @@ public class BusinessMember2 : BusinessBase
         var files = context.Out.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
 
         //return this.ResultCreate(new { arg = arg.Out, files });
-        return this.ResultCreate(new Test001Result { A = arg.Out.A, B = "SSS" });
+        Test001Result? ss = new Test001Result { A = arg.Out.A, B = "SSS" };
+
+        return this.ResultCreate(ss);
     }
 
     static string GetFileName(string path)
