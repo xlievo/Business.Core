@@ -61,7 +61,7 @@ namespace Business
         /// </summary>
         public bool ThreadCall { get; set; } = true;
 
-        internal readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue;
+        public readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue;
 
         /// <summary>
         /// 

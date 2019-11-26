@@ -189,6 +189,8 @@ namespace Business.Document
         public string Group { get; set; }
 
         public bool GroupEnable { get; set; }
+
+        public bool SetToken { get; set; }
     }
 
     public interface IDoc

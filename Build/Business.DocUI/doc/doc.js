@@ -1339,7 +1339,7 @@ var businessSelect = document.getElementById('business');
 var groupSelect = document.querySelector("#group");
 var members = document.getElementById('members');
 var businessDescription = document.getElementById('business_description');
-var d2token = null;
+var tokenvalue = null;
 
 function businessOnchang(obj) {
     if (-1 !== obj.selectedIndex) {
@@ -1397,6 +1397,7 @@ function destroy(all = false) {
         disclosure = null;
     }
     members.innerHTML = '';
+    tokenvalue = null;
 
     if (all) {
         businessDescription.innerHTML = '';
@@ -1594,8 +1595,8 @@ function loadMember(member) {
         input.properties.t = token;
         input.properties.t.id = member.name + '.t';
         input.properties.t.title = "t (String)";
-        if (null != d2token && '' !== d2token) {
-            input.properties.t.default = d2token;
+        if (null != tokenvalue && '' !== tokenvalue) {
+            input.properties.t.default = tokenvalue;
         }
     }
 
@@ -1874,13 +1875,9 @@ function ready(editor) {
         }, false);
 
         button_holder = debug.root.theme.getHeaderButtonHolder();
+        button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
         //button_holder.classList.add("input-group");
         //debug.root.header.parentNode.appendChild(button_holder);
-        button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
-        var token = button_holder.querySelector('#' + editor.schema.properties.input.name + '_token');
-        var settoken = button_holder.querySelector('#' + editor.schema.properties.input.name + '_settoken');
-        debug.root.header.parentNode.appendChild(settoken);
-        debug.root.header.parentNode.appendChild(token);
 
         if (doc[businessKey].config.benchmark) {
             debug.root.header.parentNode.classList.add("form-inline");
@@ -1951,18 +1948,23 @@ function ready(editor) {
             }, false);
         }
 
-        settoken.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
+        if (doc[businessKey].config.setToken) {
+            var token = button_holder.querySelector('#' + editor.schema.properties.input.name + '_token');
+            var settoken = button_holder.querySelector('#' + editor.schema.properties.input.name + '_settoken');
+            debug.root.header.parentNode.appendChild(settoken);
+            debug.root.header.parentNode.appendChild(token);
+            settoken.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-            d2token = token.value;
-            var t = document.getElementsByName("root[input][t]");
-            for (var i = 0; i < t.length; i++) {
-                t[i].value = d2token;
-                $trigger(t[i], 'change');
-            }
-        }, false);
-
+                tokenvalue = token.value;
+                var t = document.getElementsByName("root[input][t]");
+                for (var i = 0; i < t.length; i++) {
+                    t[i].value = tokenvalue;
+                    $trigger(t[i], 'change');
+                }
+            }, false);
+        }
         //======================================================//
 
         editor.on('change', function () {
