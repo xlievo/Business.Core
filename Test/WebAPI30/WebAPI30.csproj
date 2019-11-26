@@ -41,16 +41,20 @@
     <Content Remove="wwwroot\doc\houdini\js\houdini.min.js" />
     <Content Remove="wwwroot\doc\houdini\js\houdini.polyfills.js" />
     <Content Remove="wwwroot\doc\houdini\js\houdini.polyfills.min.js" />
+    <Content Remove="wwwroot\doc\icon.png" />
     <Content Remove="wwwroot\doc\index.html" />
     <Content Remove="wwwroot\doc\jsoneditor\jsoneditor.js" />
     <Content Remove="wwwroot\doc\jsoneditor\jsoneditor.min.js" />
     <Content Remove="wwwroot\doc\Juicer\juicer-min.js" />
     <Content Remove="wwwroot\doc\sdk.js" />
-    <Content Remove="wwwroot\doc\w9.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\BusinessMember.cs" Link="BusinessMember.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\doc\icon.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -151,9 +155,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="wwwroot\doc\sdk.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="wwwroot\doc\w9.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

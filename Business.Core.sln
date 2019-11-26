@@ -63,7 +63,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Test\Common\Commo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI30", "Test\WebAPI30\WebAPI30.csproj", "{E860AEFE-F277-400D-AF1F-CA0E5F4A7D6D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI22", "Test\WebAPI22\WebAPI22.csproj", "{6F6D3759-9DE9-4F65-B485-1B0BF0487AE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI22", "Test\WebAPI22\WebAPI22.csproj", "{6F6D3759-9DE9-4F65-B485-1B0BF0487AE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

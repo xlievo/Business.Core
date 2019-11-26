@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <title>APIs Documents</title>
-    <link rel="shortcut icon" href="/doc/w9.ico" />
+    <link rel="shortcut icon" href="/doc/icon.png" />
 
     <link rel="stylesheet" type="text/css" href="/doc/bootstrap-3.3.7/css/bootstrap.min.css">
 
@@ -90,7 +90,7 @@
     <div class='container'>
         <div style="padding-bottom: 15px;">
             <div class="input-group input-group-lg" style="padding-top:20px;">
-                <input id="url" type="text" class="form-control" value="{URL}">
+                <input id="url" type="text" class="form-control" value="{URL}" readonly="readonly">
                 <div class="input-group-btn">
                     <!--<button class="btn btn-default" type="button" onclick="go()">
                         Go!
@@ -137,13 +137,11 @@
     </script>
 
     <script id="benchmark" type="text/template">
-        <button id="${name}_benchmark" type="button" class="btn btn-default">Benchmark</button>
-        <div class="form-group">
-            <input id="${name}_benchmark_n" type="text" class="form-control" size="4" value="10">
-        </div>
-        <div class="form-group">
-            <input id="${name}_benchmark_c" type="text" class="form-control" size="4" value="10">
-        </div>
+        <button id="${name}_benchmark" style="margin-left: 10px; border-top-right-radius: 0px ;border-bottom-right-radius: 0px;" type="button" class="btn btn-default">Benchmark</button>
+        <input id="${name}_benchmark_n" style="border-radius: 0px;" type="text" class="form-control" size="4" value="10">
+        <input id="${name}_benchmark_c" style="border-radius: 0px;" type="text" class="form-control" size="4" value="10">
+        <input id="${name}_token" style="width: auto; border-radius: 0px; float: right" type="text" class="form-control" size="20">
+        <button id="${name}_settoken" style="margin-right: 10px; border-top-left-radius: 0px ;border-bottom-left-radius: 0px; float: right" type="button" class="btn btn-default">SetAllToken</button>
     </script>
 
     <script type="text/javascript" src="/doc/sdk.js"></script>

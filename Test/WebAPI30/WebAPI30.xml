@@ -21,7 +21,7 @@
             bbb
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Token,Arg{Args.Test001},Arg{System.Nullable{System.DateTime}},HttpFile,System.Nullable{System.Decimal},System.Int32,System.Boolean)">
+        <member name="M:BusinessMember2.Test001(Token,Arg{Args.Test001},Arg{System.DateTime},HttpFile,System.Decimal,System.Int32,System.Boolean)">
             <summary>
             test doc Test001
             and Test001
@@ -132,18 +132,6 @@
             <summary>
             AAA@@@
             </summary>
-        </member>
-        <member name="T:BusinessController">
-            <summary>
-            A class for an MVC controller with view support.
-            </summary>
-        </member>
-        <member name="M:BusinessController.Call(System.String)">
-            <summary>
-            Call
-            </summary>
-            <param name="path"></param>
-            <returns></returns>
         </member>
     </members>
 </doc>

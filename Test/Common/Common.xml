@@ -60,11 +60,23 @@
             parameter name: context
             </summary>
         </member>
-        <member name="M:Common.InitBusiness(System.String)">
+        <member name="M:Common.InitBusiness(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.String)">
             <summary>
             Call this method after environment initialization is complete
             </summary>
             <param name="docDir"></param>
+        </member>
+        <member name="T:BusinessController">
+            <summary>
+            A class for an MVC controller with view support.
+            </summary>
+        </member>
+        <member name="M:BusinessController.Call(System.String)">
+            <summary>
+            Call
+            </summary>
+            <param name="path"></param>
+            <returns></returns>
         </member>
     </members>
 </doc>
