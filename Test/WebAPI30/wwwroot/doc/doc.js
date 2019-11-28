@@ -1816,63 +1816,66 @@ function ready(editor) {
 
         var tab = debug.root.container.querySelector("a[aria-controls='Debug']");
         var collapse = debug.root_container.querySelector("button[tag='collapse']");
-        var buttonDebug = debug.root.getButton('', 'debug', 'Debug');
-        button_holder = debug.root.theme.getHeaderButtonHolder();
-        button_holder.appendChild(buttonDebug);
-        debug.root.header.parentNode.appendChild(button_holder);
-        buttonDebug.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
 
-            debugValue.setValue(null);
-            $trigger(tab, 'click');
-            if ("Expand" === collapse.getAttribute("title")) {
-                $trigger(collapse, 'click');
-            }
+        if (doc[businessKey].config.debug) {
+            var buttonDebug = debug.root.getButton('', 'debug', 'Debug');
+            button_holder = debug.root.theme.getHeaderButtonHolder();
+            button_holder.appendChild(buttonDebug);
+            debug.root.header.parentNode.appendChild(button_holder);
+            buttonDebug.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-            if (input.editors.f) {
-                var form = new FormData();
-                var data = getData(input, false);
-                form.append("c", input.schema.name);
-                form.append("t", data.t);
-                form.append("d", data.d);
+                debugValue.setValue(null);
+                $trigger(tab, 'click');
+                if ("Expand" === collapse.getAttribute("title")) {
+                    $trigger(collapse, 'click');
+                }
 
-                var files = input.container.querySelectorAll("[tag='file']");
-                files.forEach(c => {
-                    form.append(c.file.name, c.file);
-                });
+                if (input.editors.f) {
+                    var form = new FormData();
+                    var data = getData(input, false);
+                    form.append("c", input.schema.name);
+                    form.append("t", data.t);
+                    form.append("d", data.d);
 
-                ajax.postForm(doc[businessKey].config.host + "/" + businessName,
-                    form,
-                    function (response) {
-                        //succcess
-                        try {
-                            debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
-                        } catch (e) {
-                            debugValue.setValue(response);
-                        }
-                    }, function (response) {
-                        //fail
-                        debugValue.setValue(response.responseText);
+                    var files = input.container.querySelectorAll("[tag='file']");
+                    files.forEach(c => {
+                        form.append(c.file.name, c.file);
                     });
-            }
-            else {
-                var data = getData(input, false);
-                ajax.post(doc[businessKey].config.host + "/" + businessName,
-                    { c: input.schema.name, t: data.t, d: data.d },
-                    function (response) {
-                        //succcess
-                        try {
-                            debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
-                        } catch (e) {
+
+                    ajax.postForm(doc[businessKey].config.host + "/" + businessName,
+                        form,
+                        function (response) {
+                            //succcess
+                            try {
+                                debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
+                            } catch (e) {
+                                debugValue.setValue(response);
+                            }
+                        }, function (response) {
+                            //fail
+                            debugValue.setValue(response.responseText);
+                        });
+                }
+                else {
+                    var data = getData(input, false);
+                    ajax.post(doc[businessKey].config.host + "/" + businessName,
+                        { c: input.schema.name, t: data.t, d: data.d },
+                        function (response) {
+                            //succcess
+                            try {
+                                debugValue.setValue(JSON.stringify(JSON.parse(response), null, 4));
+                            } catch (e) {
+                                debugValue.setValue(response);
+                            }
+                        }, function (response) {
+                            //fail
                             debugValue.setValue(response);
-                        }
-                    }, function (response) {
-                        //fail
-                        debugValue.setValue(response);
-                    });
-            }
-        }, false);
+                        });
+                }
+            }, false);
+        }
 
         button_holder = debug.root.theme.getHeaderButtonHolder();
         button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });

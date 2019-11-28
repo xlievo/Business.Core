@@ -184,6 +184,8 @@ namespace Business.Document
     {
         public string Host { get; set; }
 
+        public bool Debug { get; set; }
+
         public bool Benchmark { get; set; }
 
         public string Group { get; set; }
