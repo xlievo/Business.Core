@@ -64,6 +64,7 @@
             <summary>
             Call this method after environment initialization is complete
             </summary>
+            <param name="app"></param>
             <param name="docDir"></param>
         </member>
         <member name="T:BusinessController">

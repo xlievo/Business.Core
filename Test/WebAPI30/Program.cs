@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Net.WebSockets;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -55,27 +54,6 @@ public class Startup
         });
 
         services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-
-        Common.Host.HttpClientFactory = services.AddHttpClient("")
-        .ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            var handler = new HttpClientHandler()
-            {
-                AllowAutoRedirect = false,
-                UseDefaultCredentials = true,
-            };
-
-            if (Common.Host.ENV.IsDevelopment())
-            {
-                handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            }
-
-            return handler;
-        })
-        .Services
-        .BuildServiceProvider()
-        .GetService<IHttpClientFactory>();
-        AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -99,7 +77,7 @@ public class Startup
         var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
         //provider.Mappings[".yaml"] = "text/yaml";
         provider.Mappings[".doc"] = "application/json";
-        app.UseDefaultFiles().UseStaticFiles(new StaticFileOptions
+        app.UseStaticFiles(new StaticFileOptions
         {
             FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwroot),
             ContentTypeProvider = provider,
@@ -118,7 +96,7 @@ public class Startup
 
                 c.Context.Response.Headers[HeaderNames.AccessControlAllowOrigin] = "*";
             }
-        }).UseDirectoryBrowser();
+        });//.UseDirectoryBrowser();
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto }).UseAuthentication().UseCors("any");
 

@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using System.Net.WebSockets;
 using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 
 #region Socket Support
 
@@ -104,6 +105,7 @@ public struct Host
 [TokenCheck]
 public class Token : Business.Auth.Token
 {
+    [System.Text.Json.Serialization.JsonPropertyName("P")]
     public string Path { get; set; }
 }
 
@@ -181,6 +183,15 @@ public static class Common
 
     static Common()
     {
+        Host.HttpClientFactory = new ServiceCollection()
+            .AddHttpClient("any").ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+            {
+                AllowAutoRedirect = false,
+                UseDefaultCredentials = true,
+            }).Services
+            .BuildServiceProvider().GetService<IHttpClientFactory>();
+        AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
+
         //ThreadPool.SetMinThreads(50, 50);
         //ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
         //ThreadPool.GetMaxThreads(out int workerThreads2, out int completionPortThreads2);
@@ -237,6 +248,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
     /// <summary>
     /// Call this method after environment initialization is complete
     /// </summary>
+    /// <param name="app"></param>
     /// <param name="docDir"></param>
     public static void InitBusiness(this IApplicationBuilder app, string docDir = null)
     {
@@ -277,7 +289,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         #region AcceptWebSocket
 
-        var webSocketcfg = Common.Host.AppSettings.GetSection("WebSocket");
+        var webSocketcfg = Host.AppSettings.GetSection("WebSocket");
         var keepAliveInterval = GetValue(webSocketcfg, "KeepAliveInterval", 120);
         ReceiveBufferSize = GetValue(webSocketcfg, "ReceiveBufferSize", 4096);
         MaxDegreeOfParallelism = GetValue(webSocketcfg, "MaxDegreeOfParallelism", -1);
@@ -410,7 +422,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                                 var result2 = result as IResult;
                                 result2.Callback = receiveData.b;
 
-                                var data = Business.Result.ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
+                                var data = ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
                                 /* test
                                 var result3 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
                                 var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
@@ -426,7 +438,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 }
                 catch (Exception ex)
                 {
-                    Help.ExceptionWrite(ex, true, true, Common.LogPath);
+                    Help.ExceptionWrite(ex, true, true, LogPath);
                     var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
                     await SendAsync(result.ToBytes(), id);
                 }
@@ -446,7 +458,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         }
         catch (Exception ex)
         {
-            Help.ExceptionWrite(ex, true, true, Common.LogPath);
+            Help.ExceptionWrite(ex, true, true, LogPath);
             var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
             await SendAsync(result.ToBytes(), id);
         }
