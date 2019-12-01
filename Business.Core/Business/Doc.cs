@@ -188,6 +188,8 @@ namespace Business.Document
 
         public bool Benchmark { get; set; }
 
+        public bool Testing { get; set; }
+
         public string Group { get; set; }
 
         public bool GroupEnable { get; set; }
@@ -230,6 +232,8 @@ namespace Business.Document
         bool ArgSingle { get; set; }
 
         bool HttpFile { get; set; }
+
+        Dictionary<string, Testing> Testing { get; set; }
     }
 
     public interface IDocArg<DocArg> where DocArg : IDocArg<DocArg>
@@ -288,6 +292,31 @@ namespace Business.Document
         public bool ArgSingle { get; set; }
 
         public bool HttpFile { get; set; }
+
+        public Dictionary<string, Testing> Testing { get; set; }
+    }
+
+    public struct Testing
+    {
+        /// <summary>
+        /// test key
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// test args
+        /// </summary>
+        public object Value { get; set; }
+
+        /// <summary>
+        /// test fixed roken
+        /// </summary>
+        public string Token { get; set; }
+
+        /// <summary>
+        /// Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]
+        /// </summary>
+        public string TokenMethod { get; set; }
     }
 
     public class DocArg : IDocArg<DocArg>

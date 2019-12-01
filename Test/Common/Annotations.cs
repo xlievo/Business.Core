@@ -151,6 +151,7 @@ namespace Business.Annotations
         {
             this.CanNull = false;
             this.Description = "Token check";
+            this.Message = "Token is null";
         }
 
         public override async ValueTask<IResult> Proces(dynamic value)
@@ -161,6 +162,11 @@ namespace Business.Annotations
             var key = value.Key as string;
 
             //..1: check token key
+
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                //return this.ResultCreate(this.State, this.Message);
+            }
 
             return this.ResultCreate(); //ok
         }

@@ -137,12 +137,8 @@ public class HttpFile : Arg<Dictionary<string, dynamic>> { }
 [@MessagePackArg(Group = "s")]
 public abstract class BusinessBase : BusinessBase<ResultObject<string>>
 {
-    public readonly Host host;
-
-    public BusinessBase(Host host)
+    public BusinessBase()
     {
-        this.host = host;
-
         this.Logger = new Logger(async x =>
         {
             try
@@ -272,7 +268,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
         //==================The third step==================//
         //3
-        Configer.UseDoc(docDir, new Business.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j" });
+        Configer.UseDoc(docDir, new Business.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true });
         //writ url to page
         DocUI.Write(docDir, update: true);
         //add route

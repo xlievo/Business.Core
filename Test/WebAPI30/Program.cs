@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http;
 using Microsoft.Net.Http.Headers;
 //using Microsoft.AspNetCore.Server.Kestrel.Core;
 

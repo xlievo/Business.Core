@@ -1,24 +1,13 @@
 ﻿using System;
 using System.Linq;
-using System.Net.WebSockets;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http;
 using Microsoft.Net.Http.Headers;
-using Business;
-using Business.Attributes;
-using Business.Utils;
-using Business.Result;
 //using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 public class Program
@@ -70,27 +59,6 @@ public class Startup
                 options.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
                 options.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
             });
-
-        Common.Host.HttpClientFactory = services.AddHttpClient("")
-        .ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            var handler = new HttpClientHandler()
-            {
-                AllowAutoRedirect = false,
-                UseDefaultCredentials = true,
-            };
-
-            if (Common.Host.ENV.IsDevelopment())
-            {
-                handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-            }
-
-            return handler;
-        })
-        .Services
-        .BuildServiceProvider()
-        .GetService<IHttpClientFactory>();
-        //AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

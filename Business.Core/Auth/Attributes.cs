@@ -363,14 +363,52 @@ namespace Business.Attributes //Annotations
 
     #region
 
-    [System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
-    public class DefaultValue : GropuAttribute
+    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public class Testing : GropuAttribute
     {
-        public DefaultValue(object value) => this.Value = value;
+        /// <summary>
+        /// regression testing
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="result"></param>
+        /// <param name="token"></param>
+        /// <param name="tokenMethod">Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]</param>
+        public Testing(string name, object value, object result = null, string token = null, string tokenMethod = null)
+        {
+            this.Name = name;
+            this.Value = value;
+            this.Token = token;
+            this.TokenMethod = tokenMethod;
+            this.Result = result;
+        }
 
-        public object Value { get; private set; }
+        /// <summary>
+        /// test key
+        /// </summary>
+        public string Name { get; private set; }
 
-        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{System.Convert.ToString(this.Value)}";
+        /// <summary>
+        /// test args
+        /// </summary>
+        public object Value { get; set; }
+
+        /// <summary>
+        /// result
+        /// </summary>
+        public object Result { get; set; }
+
+        /// <summary>
+        /// test fixed roken
+        /// </summary>
+        public string Token { get; set; }
+
+        /// <summary>
+        /// Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]
+        /// </summary>
+        public string TokenMethod { get; set; }
+
+        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.Name}";
     }
 
     public enum IgnoreMode

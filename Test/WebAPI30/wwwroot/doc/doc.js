@@ -594,6 +594,20 @@ JSONEditor.defaults.editors.object = JSONEditor.defaults.editors.object.extend({
             this.layoutEditors();
         }
     },
+    //saveJSON: function () {
+    //    if (!this.editjson_holder) return;
+
+    //    try {
+    //        var json = JSON.parse(this.editjson_textarea.value);
+    //        this.setValue(json);
+    //        this.hideEditJSON();
+    //        this.onChange(true);
+    //    }
+    //    catch (e) {
+    //        window.alert('invalid JSON');
+    //        throw e;
+    //    }
+    //},
     showEditJSON: function () {
         //if (!this.editjson_holder) return;
         //this.hideAddProperty();
@@ -1004,20 +1018,20 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
     //    document.execCommand('copy');
     //    document.body.removeChild(ta);
     //},
-    saveJSON: function () {
-        if (!this.editjson_holder) return;
+    //saveJSON: function () {
+    //    if (!this.editjson_holder) return;
 
-        try {
-            var json = JSON.parse(this.editjson_textarea.value);
-            this.setValue(json);
-            this.hideEditJSON();
-            this.onChange(true);
-        }
-        catch (e) {
-            window.alert('invalid JSON');
-            throw e;
-        }
-    },
+    //    try {
+    //        var json = JSON.parse(this.editjson_textarea.value);
+    //        this.setValue(json);
+    //        this.hideEditJSON();
+    //        this.onChange(true);
+    //    }
+    //    catch (e) {
+    //        window.alert('invalid JSON');
+    //        throw e;
+    //    }
+    //},
 
     //hideAddProperty: function () {
     //    if (!this.addproperty_holder) return;
@@ -1527,6 +1541,7 @@ function loadMember(member) {
         edit: !edit,
         argSingle: member.argSingle,
         httpFile: member.httpFile,
+        testing: member.testing,
         name: member.name,
         properties: {
             t: {},
@@ -1817,11 +1832,13 @@ function ready(editor) {
         var tab = debug.root.container.querySelector("a[aria-controls='Debug']");
         var collapse = debug.root_container.querySelector("button[tag='collapse']");
 
+        var header = debug.root.header.parentNode;
+
         if (doc[businessKey].config.debug) {
             var buttonDebug = debug.root.getButton('', 'debug', 'Debug');
             button_holder = debug.root.theme.getHeaderButtonHolder();
             button_holder.appendChild(buttonDebug);
-            debug.root.header.parentNode.appendChild(button_holder);
+            header.appendChild(button_holder);
             buttonDebug.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1880,16 +1897,16 @@ function ready(editor) {
         button_holder = debug.root.theme.getHeaderButtonHolder();
         button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
         //button_holder.classList.add("input-group");
-        //debug.root.header.parentNode.appendChild(button_holder);
+        //header.appendChild(button_holder);
 
         if (doc[businessKey].config.benchmark) {
-            debug.root.header.parentNode.classList.add("form-inline");
+            header.classList.add("form-inline");
             var buttonBenchmark = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark');
             var benchmark_n = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_n');
             var benchmark_c = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_c');
-            debug.root.header.parentNode.appendChild(buttonBenchmark);
-            debug.root.header.parentNode.appendChild(benchmark_n);
-            debug.root.header.parentNode.appendChild(benchmark_c);
+            header.appendChild(buttonBenchmark);
+            header.appendChild(benchmark_n);
+            header.appendChild(benchmark_c);
             buttonBenchmark.addEventListener('click', function (e) {
                 buttonBenchmark.setAttribute("disabled", true);
                 e.preventDefault();
@@ -1954,8 +1971,8 @@ function ready(editor) {
         if (doc[businessKey].config.setToken) {
             var token = button_holder.querySelector('#' + editor.schema.properties.input.name + '_token');
             var settoken = button_holder.querySelector('#' + editor.schema.properties.input.name + '_settoken');
-            debug.root.header.parentNode.appendChild(settoken);
-            debug.root.header.parentNode.appendChild(token);
+            header.appendChild(settoken);
+            header.appendChild(token);
             settoken.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1965,6 +1982,31 @@ function ready(editor) {
                 for (var i = 0; i < t.length; i++) {
                     t[i].value = tokenvalue;
                     $trigger(t[i], 'change');
+                }
+            }, false);
+        }
+
+        if (doc[businessKey].config.testing) {
+            var testing = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing');
+            header.appendChild(testing);
+
+            var tests = []
+            for (var i in input.schema.testing) {
+                tests.push(i);
+            }
+            for (var i = tests.length - 1; i >= 0; i--) {
+                testing.options.add(new Option(tests[i], tests[i]));
+            }
+
+            testing.addEventListener('change', function (el) {
+                if (null == el.currentTarget) {
+                    return;
+                }
+                var obj = el.currentTarget;
+                if (-1 !== obj.selectedIndex) {
+                    var select = obj.options[obj.selectedIndex];
+                    var value = JSON.parse(input.schema.testing[select.value].value);
+                    setData(input, value);
                 }
             }, false);
         }
@@ -2084,6 +2126,26 @@ function getData(input, format = true) {
         }
     }
     return { t: input.editors.t ? input.editors.t.getValue() : null, d: d };
+}
+
+function setData(input, value) {
+    if (input.editors.d) {
+        if (input.schema.argSingle) {
+            return input.editors.d.setValue(value);
+        }
+        else {
+            var args = []
+            for (var i in input.editors.d.editors) {
+                args.push(i);
+            }
+            for (var i = 0; i < args.length; i++) {
+                if (i < value.length) {
+                    input.editors.d.editors[args[i]].setValue(value[i]);
+                }
+            }
+        }
+    }
+    input.editors.d.onChange(true);
 }
 
 go();

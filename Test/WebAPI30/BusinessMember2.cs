@@ -17,10 +17,7 @@ using static Args;
 
 public class BusinessMember3 : BusinessBase
 {
-    public BusinessMember3(Host host) : base(host)
-    {
 
-    }
 }
 
 /// <summary>
@@ -48,12 +45,6 @@ public class BusinessMember2 : BusinessBase
         */
     }
 
-    public BusinessMember2(Host host) : base(host)
-    {
-
-    }
-
-
 
     public struct Test001Result
     {
@@ -78,6 +69,8 @@ public class BusinessMember2 : BusinessBase
         return this.ResultCreate(arg.Out);
     }
 
+    public const string login = "[\"Login\",\"{User:\\\"ddd\\\",Password:\\\"123456\\\"}\",\"D\"]";
+
     /// <summary>
     /// test doc Test001
     /// and Test001
@@ -88,7 +81,17 @@ public class BusinessMember2 : BusinessBase
     /// <returns></returns>
     [Command("AAA")]
     [Command("jjj", Group = "j")]
-    //Task<IResult<Test001>>
+    //[Testing("test1", "[{\"AAA\":[],\"A\":\"\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"\",\"myEnum\":\"C\"}]")]
+    //[Testing("test2",
+    //    "[{\"AAA\":[],\"A\":\"\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"\",\"myEnum\":\"C\"},\"\",99.0234,777,false]",
+    //    "",
+    //    tokenMethod: login)]
+
+    [Testing("test1", "[{\"AAA\":[],\"A\":\"\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"\",\"myEnum\":\"B\"}]")]
+    [Testing("test2",
+        "[{\"AAA\":[],\"A\":\"\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"\",\"myEnum\":\"C\"},\"\",99.0234,777,false]",
+        "",
+        tokenMethod: login)]
     public virtual async Task<IResult<Test001Result?>> Test001(Token token, Arg<Test001> arg, Arg<DateTime> dateTime, HttpFile context = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
@@ -497,7 +500,6 @@ public class Args
         [@CheckNull]
         //[@CheckEmail]
         [@CheckUrl]
-        [DefaultValue("")]
         public string A { get; set; }
 
         /// <summary>
@@ -523,7 +525,6 @@ public class Args
         /// </summary>
         public DateTime? F { get; set; }
 
-        [DefaultValue(MyEnum.B)]
         public MyEnum myEnum { get; set; }
 
         public struct Test0010

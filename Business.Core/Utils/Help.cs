@@ -503,6 +503,7 @@ namespace Business.Utils
                     Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
+                    Testing = meta.Attributes.GetAttrs<Attributes.Testing>().ToDictionary(c3 => c3.Name, c3 => new Testing { Name = c3.Name, Value = c3.Value, Token = c3.Token, TokenMethod = c3.TokenMethod })
                 } as IMember<DocArg>;
 
                 foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))

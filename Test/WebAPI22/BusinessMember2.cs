@@ -43,7 +43,7 @@ public class BusinessMember2 : BusinessBase
 
     System.Net.Http.IHttpClientFactory httpClientFactory;
 
-    public BusinessMember2(Host host) : base(host)
+    public BusinessMember2() : base()
     {
         var s = "[{ \"a\": \"333\",\"b\": \"\", \"c\": { \"c1\": \"\",\"c2\": \"\",\"c3\": { \"c31\": \"\",\"c32\": \"uuu\"} },\"d\": 0, \"e\": true, \"myEnum\": 1}, 0.2345]";
 
@@ -530,7 +530,6 @@ public class Args
         //[Test]
         [Nick("password")]
         [CheckNull2]
-        [DefaultValue("")]
         public string A { get; set; }
 
         /// <summary>
@@ -550,7 +549,6 @@ public class Args
 
         public DateTime F { get; set; }
 
-        [DefaultValue(MyEnum.B)]
         public MyEnum myEnum { get; set; }
 
         public struct Test0010

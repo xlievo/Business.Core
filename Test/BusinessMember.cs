@@ -31,9 +31,9 @@ public class BusinessMember : BusinessBase
 {
     GitHubClient gitHubClient;
 
-    public BusinessMember(Host host) : base(host)
+    public BusinessMember() : base()
     {
-        gitHubClient = new GitHubClient(host.HttpClientFactory?.CreateClient("github"));
+        gitHubClient = new GitHubClient(Common.Host.HttpClientFactory?.CreateClient("github"));
     }
 
     public class A2 : ArgumentAttribute

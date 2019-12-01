@@ -160,8 +160,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Build\Business.DocUI\Business.DocUI.csproj" />
-    <ProjectReference Include="..\..\Build\Business.Standard\Business.Standard.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
