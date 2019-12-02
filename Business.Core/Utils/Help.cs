@@ -696,12 +696,12 @@ namespace Business.Utils
             return arg;
         }
 
-        public static TypeDefinition GetTypeDefinition(this System.Type returnType, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null)
+        public static TypeDefinition GetTypeDefinition(this System.Type type, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null)
         {
-            var hasDefinition = returnType.IsDefinition();
-            var definitions = hasDefinition ? new List<string> { returnType.FullName } : new List<string>();
+            var hasDefinition = type.IsDefinition();
+            var definitions = hasDefinition ? new List<string> { type.FullName } : new List<string>();
             var childrens = new ReadOnlyCollection<TypeDefinition>();
-            var fullName = returnType.FullName.Replace('+', '.');
+            var fullName = type.FullName.Replace('+', '.');
             var memberDefinition = hasDefinition ? Meta.MemberDefinitionCode.Definition : Meta.MemberDefinitionCode.No;
             //..//
 
@@ -714,9 +714,9 @@ namespace Business.Utils
             }
 
             var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
-            group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(pathRoot ?? returnType.Name));
+            group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(pathRoot ?? type.Name));
 
-            var current = Bind.GetCurrentType(returnType);
+            var current = Bind.GetCurrentType(type);
             if (current.hasDictionary)
             {
                 current.outType = current.outType.GenericTypeArguments[1];
@@ -728,18 +728,18 @@ namespace Business.Utils
 
             var definition = new TypeDefinition
             {
-                Name = returnType.Name,
-                Type = returnType,
+                Name = null,//current.outType.Name,
+                Type = type,
                 LastType = current.outType,
                 HasDefinition = hasDefinition,
-                DefaultValue = returnType.IsValueType && typeof(void) != returnType ? System.Activator.CreateInstance(returnType) : null,
+                DefaultValue = type.IsValueType && typeof(void) != type ? System.Activator.CreateInstance(type) : null,
 
-                HasNumeric = returnType.IsNumeric(),
+                HasNumeric = type.IsNumeric(),
                 HasDictionary = current.hasDictionary,
                 HasCollection = current.hasCollection,
-                HasEnum = returnType.IsEnum,
-                EnumNames = returnType.IsEnum ? returnType.GetEnumNames() : null,
-                EnumValues = returnType.IsEnum ? returnType.GetEnumValues() : null,
+                HasEnum = type.IsEnum,
+                EnumNames = type.IsEnum ? type.GetEnumNames() : null,
+                EnumValues = type.IsEnum ? type.GetEnumValues() : null,
                 Nullable = current.nullable,
 
                 FullName = fullName,
@@ -747,7 +747,7 @@ namespace Business.Utils
                 Childrens = childrens,
                 MemberDefinition = memberDefinition,
                 Summary = summary,
-                Path = returnType.Name,
+                Path = type.Name,
                 Group = group
             };
 

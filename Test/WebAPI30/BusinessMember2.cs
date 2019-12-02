@@ -155,21 +155,6 @@ public partial class BusinessMember2 : BusinessBase
         return this.ResultCreate(ss);
     }
 
-    static string GetFileName(string path)
-    {
-        var invalid = System.IO.Path.GetInvalidPathChars();
-
-        foreach (var item in invalid)
-        {
-            if (path.Contains(item))
-            {
-                path = path.Replace(item, new char());
-            }
-        }
-
-        return System.IO.Path.GetFileName(path);
-    }
-
     public enum MyEnum
     {
         A,
