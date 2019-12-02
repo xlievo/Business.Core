@@ -1786,6 +1786,14 @@ function ready(editor) {
     editor.on('ready', function () {
         //console.time("timer");
         var input = editor.input;
+        var data = getData(input, false);
+        if (input.schema.argSingle && "object" !== input.schema.properties.d.type) {
+            input.schema.data = { t: data.t, d: data.d };
+        }
+        else {
+            input.schema.data = { t: data.t, d: JSON.parse(data.d) };
+        }
+
         if (input.editors.t || input.editors.d) {
             var buttonEdit = editor.root.getButton('', 'edit', 'Edit');
             button_holder = editor.root.theme.getHeaderButtonHolder();
@@ -1799,7 +1807,7 @@ function ready(editor) {
             }, false);
         }
 
-        if (input.editors.d) {
+        if (input.editors.d && !(input.schema.argSingle && "object" !== input.schema.properties.d.type)) {
             var buttonData = editor.root.getButton('', 'data', 'Data');
             buttonData.id = "data";
             button_holder = input.editors.d.theme.getHeaderButtonHolder();
@@ -1898,6 +1906,34 @@ function ready(editor) {
         button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
         //button_holder.classList.add("input-group");
         //header.appendChild(button_holder);
+        if (doc[businessKey].config.testing) {
+            var testing = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing');
+            header.appendChild(testing);
+
+            var tests = []
+            for (var i in input.schema.testing) {
+                tests.push(i);
+            }
+            for (var i = tests.length - 1; i >= 0; i--) {
+                testing.options.add(new Option(tests[i], tests[i]));
+            }
+
+            testing.addEventListener('change', function (el) {
+                if (null == el.currentTarget) {
+                    return;
+                }
+                var obj = el.currentTarget;
+                if (-1 !== obj.selectedIndex) {
+                    setData(input, input.schema.data.d, 0 === obj.selectedIndex);
+                    if (0 === obj.selectedIndex) {
+                        return;
+                    }
+                    var select = obj.options[obj.selectedIndex];
+                    var value = JSON.parse(input.schema.testing[select.value].value);
+                    setData(input, value);
+                }
+            }, false);
+        }
 
         if (doc[businessKey].config.benchmark) {
             header.classList.add("form-inline");
@@ -1986,30 +2022,6 @@ function ready(editor) {
             }, false);
         }
 
-        if (doc[businessKey].config.testing) {
-            var testing = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing');
-            header.appendChild(testing);
-
-            var tests = []
-            for (var i in input.schema.testing) {
-                tests.push(i);
-            }
-            for (var i = tests.length - 1; i >= 0; i--) {
-                testing.options.add(new Option(tests[i], tests[i]));
-            }
-
-            testing.addEventListener('change', function (el) {
-                if (null == el.currentTarget) {
-                    return;
-                }
-                var obj = el.currentTarget;
-                if (-1 !== obj.selectedIndex) {
-                    var select = obj.options[obj.selectedIndex];
-                    var value = JSON.parse(input.schema.testing[select.value].value);
-                    setData(input, value);
-                }
-            }, false);
-        }
         //======================================================//
 
         editor.on('change', function () {
@@ -2112,7 +2124,12 @@ function getData(input, format = true) {
     var d = null;
     if (input.editors.d) {
         if (input.schema.argSingle) {
-            d = JSON.stringify(input.editors.d.getValue(), null, format ? 2 : 0);
+            if (input.schema.argSingle && "object" !== input.schema.properties.d.type) {
+                d = input.editors.d.getValue();
+            }
+            else {
+                d = JSON.stringify(input.editors.d.getValue(), null, format ? 2 : 0);
+            }
         }
         else {
             var args = []
@@ -2128,7 +2145,7 @@ function getData(input, format = true) {
     return { t: input.editors.t ? input.editors.t.getValue() : null, d: d };
 }
 
-function setData(input, value) {
+function setData(input, value, refresh = true) {
     if (input.editors.d) {
         if (input.schema.argSingle) {
             return input.editors.d.setValue(value);
@@ -2145,7 +2162,9 @@ function setData(input, value) {
             }
         }
     }
-    input.editors.d.onChange(true);
+    if (refresh) {
+        input.editors.d.onChange(true);
+    }
 }
 
 go();

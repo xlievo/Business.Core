@@ -20,6 +20,17 @@ public class BusinessMember3 : BusinessBase
 
 }
 
+[Testing("test2222", "\"2019-12-02T21:02\"", tokenMethod: login, method: "Test000")]
+[Testing("test2222", "\"2019-12-02T22:02\"", tokenMethod: login, method: "Test000")]
+[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, method: "Test000")]
+[Testing("test2222", "\"2019-12-02T21:02\"", tokenMethod: login, method: "Test000")]
+[Testing("test2222", "\"2019-12-02T22:02\"", tokenMethod: login, method: "Test000")]
+[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, method: "Test000")]
+public partial class BusinessMember2
+{
+    
+}
+
 /// <summary>
 /// BusinessMember2
 /// businessDescription
@@ -27,7 +38,7 @@ public class BusinessMember3 : BusinessBase
 /// </summary>
 [Info("API")]
 [Logger]
-public class BusinessMember2 : BusinessBase
+public partial class BusinessMember2 : BusinessBase
 {
     static BusinessMember2()
     {
@@ -64,9 +75,13 @@ public class BusinessMember2 : BusinessBase
         return this.ResultCreate();
     }
 
-    public virtual async Task<IResult<Test001>> Test000(SessionArg session, Arg<Test001> arg)
+    [Testing("test2", "\"2019-12-02T21:02\"", tokenMethod: login)]
+    [Testing("test3", "\"2019-12-02T22:02\"", tokenMethod: login)]
+    [Testing("test4", "\"2019-12-02T23:02\"", tokenMethod: login)]
+    [Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login)]
+    public virtual async Task<IResult<DateTime?>> Test000(SessionArg session, [Ignore(IgnoreMode.BusinessArg)]DateTime? date)
     {
-        return this.ResultCreate(arg.Out);
+        return this.ResultCreate(date);
     }
 
     public const string login = "[\"Login\",\"{User:\\\"ddd\\\",Password:\\\"123456\\\"}\",\"D\"]";
@@ -81,16 +96,21 @@ public class BusinessMember2 : BusinessBase
     /// <returns></returns>
     [Command("AAA")]
     [Command("jjj", Group = "j")]
-    //[Testing("test1", "[{\"AAA\":[],\"A\":\"\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"\",\"myEnum\":\"C\"}]")]
-    //[Testing("test2",
-    //    "[{\"AAA\":[],\"A\":\"\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"\",\"myEnum\":\"C\"},\"\",99.0234,777,false]",
-    //    "",
-    //    tokenMethod: login)]
-
-    [Testing("test1", "[{\"AAA\":[],\"A\":\"\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"\",\"myEnum\":\"B\"}]")]
+    [Testing("test1", "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T04:24\",\"myEnum\":\"B\"}]")]
     [Testing("test2",
-        "[{\"AAA\":[],\"A\":\"\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"\",\"myEnum\":\"C\"},\"\",99.0234,777,false]",
-        "",
+        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T04:24\",99.0234,777,false]",
+        tokenMethod: login)]
+    [Testing("test3",
+        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T05:24\",99.0234,777,false]",
+        tokenMethod: login)]
+    [Testing("test4",
+        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T06:24\",99.0234,777,false]",
+        tokenMethod: login)]
+    [Testing("test5",
+        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T07:24\",99.0234,777,false]",
+        tokenMethod: login)]
+    [Testing("test, important logic, do not delete!!!",
+        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
         tokenMethod: login)]
     public virtual async Task<IResult<Test001Result?>> Test001(Token token, Arg<Test001> arg, Arg<DateTime> dateTime, HttpFile context = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {

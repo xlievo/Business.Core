@@ -363,8 +363,8 @@ namespace Business.Attributes //Annotations
 
     #region
 
-    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class Testing : GropuAttribute
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    public class TestingAttribute : GropuAttribute
     {
         /// <summary>
         /// regression testing
@@ -373,14 +373,16 @@ namespace Business.Attributes //Annotations
         /// <param name="value"></param>
         /// <param name="result"></param>
         /// <param name="token"></param>
-        /// <param name="tokenMethod">Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]</param>
-        public Testing(string name, object value, object result = null, string token = null, string tokenMethod = null)
+        /// <param name="tokenMethod">Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]<</param>
+        /// <param name="method"></param>
+        public TestingAttribute(string name, object value, object result = null, string token = null, string tokenMethod = null, string method = null)
         {
             this.Name = name;
             this.Value = value;
+            this.Result = result;
             this.Token = token;
             this.TokenMethod = tokenMethod;
-            this.Result = result;
+            this.Method = method;
         }
 
         /// <summary>
@@ -408,7 +410,12 @@ namespace Business.Attributes //Annotations
         /// </summary>
         public string TokenMethod { get; set; }
 
-        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.Name}";
+        /// <summary>
+        /// Target method
+        /// </summary>
+        public string Method { get; set; }
+
+        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.Method}{space}{this.Name}";
     }
 
     public enum IgnoreMode

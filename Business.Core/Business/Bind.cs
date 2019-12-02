@@ -684,6 +684,10 @@ namespace Business
                         {
                             //int/long
                             //defaultObj2[i] = args[i].HasIArg ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].Type);
+                            if (args[i].Nullable && args[i].LastType.GetTypeCode() == System.TypeCode.DateTime && string.IsNullOrEmpty(System.Convert.ToString(argsObj[i])))
+                            {
+                                argsObj[i] = null;
+                            }
                             defaultObj2[i] = args[i].UseType || args[i].HasIArg ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].Type);
                         }
                     }
@@ -959,7 +963,14 @@ namespace Business
                 #endregion
 
                 var space = method.DeclaringType.FullName;
-                var attributes2 = AttributeBase.GetAttributes(method).Distinct(cfg.Attributes);
+
+                var attributes2 = AttributeBase.GetAttributes(method).Distinct(cfg.Attributes, c => c is TestingAttribute test && null != test.Method && !test.Method.Equals(method.Name, System.StringComparison.InvariantCultureIgnoreCase), c =>
+                {
+                    if (c is TestingAttribute test)
+                    {
+                        test.Method = method.Name;
+                    }
+                });
 
                 var argAttrs = attributes2.GetAttrs<ArgumentAttribute>(c => !typeof(HttpFileAttribute).IsAssignableFrom(c.Type));
 
