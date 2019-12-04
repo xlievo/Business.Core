@@ -20,15 +20,15 @@ public class BusinessMember3 : BusinessBase
 
 }
 
-[Testing("test2222", "\"2019-12-02T21:02\"", tokenMethod: login, method: "Test000")]
-[Testing("test2222", "\"2019-12-02T22:02\"", tokenMethod: login, method: "Test000")]
-[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, method: "Test000")]
-[Testing("test2222", "\"2019-12-02T21:02\"", tokenMethod: login, method: "Test000")]
-[Testing("test2222", "\"2019-12-02T22:02\"", tokenMethod: login, method: "Test000")]
-[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, method: "Test000")]
+[Testing("test2222", "\"2019-12-02T21:02\"", tokenMethod: login, Method = "Test000")]
+[Testing("test2222", "\"2019-12-02T22:02\"", tokenMethod: login, Method = "Test000")]
+[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, Method = "Test000")]
+[Testing("test2222", "\"2019-12-02T21:02\"", tokenMethod: login, Method = "Test000")]
+[Testing("test2222", "\"2019-12-02T22:02\"", tokenMethod: login, Method = "Test000")]
+[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, Method = "Test000")]
 public partial class BusinessMember2
 {
-    
+
 }
 
 /// <summary>
@@ -96,9 +96,12 @@ public partial class BusinessMember2 : BusinessBase
     /// <returns></returns>
     [Command("AAA")]
     [Command("jjj", Group = "j")]
-    [Testing("test1", "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T04:24\",\"myEnum\":\"B\"}]")]
+    [Testing("中文测试！重要逻辑，严禁删除，测试金额是否一致！",
+        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
+        tokenMethod: login)]
     [Testing("test2",
         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T04:24\",99.0234,777,false]",
+        "{\"AAA\":\"111\",\"BBB\":\"222\"}",
         tokenMethod: login)]
     [Testing("test3",
         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T05:24\",99.0234,777,false]",

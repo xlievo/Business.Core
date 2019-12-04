@@ -530,15 +530,16 @@ public class BusinessController : Controller
     [EnableCors("any")]
     public async Task<dynamic> Call(string path)
     {
-        if (null != path || !Configer.BusinessList.TryGetValue(this.Request.Path.Value.TrimStart('/').Split('/')[0], out IBusiness business)) { return this.NotFound(); }
+        if (!Configer.BusinessList.TryGetValue(this.Request.Path.Value.TrimStart('/').Split('/')[0], out IBusiness business)) { return this.NotFound(); }
 
-        string c, t, d, g, b = null;
+        var c = path?.Trim('/');
+        string t, d, g, b = null;
 
         switch (this.Request.Method)
         {
             case "GET":
                 //requestData = new RequestData(this.Request.Query);
-                c = this.Request.Query["c"];
+                c = c ?? this.Request.Query["c"];
                 t = this.Request.Query["t"];
                 d = this.Request.Query["d"];
                 //g = this.Request.Query["g"];
@@ -549,7 +550,7 @@ public class BusinessController : Controller
                     //if (this.Request.HasFormContentType)
                     //requestData = new RequestData(await this.Request.ReadFormAsync());
                     var form = await this.Request.ReadFormAsync();
-                    c = form["c"];
+                    c = c ?? form["c"];
                     t = form["t"];
                     d = form["d"];
                     //g = form["g"];

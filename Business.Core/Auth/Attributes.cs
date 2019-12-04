@@ -375,14 +375,14 @@ namespace Business.Attributes //Annotations
         /// <param name="token"></param>
         /// <param name="tokenMethod">Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]<</param>
         /// <param name="method"></param>
-        public TestingAttribute(string name, object value, object result = null, string token = null, string tokenMethod = null, string method = null)
+        public TestingAttribute(string name, object value, string result = null, string token = null, string tokenMethod = null)
         {
             this.Name = name;
             this.Value = value;
             this.Result = result;
             this.Token = token;
             this.TokenMethod = tokenMethod;
-            this.Method = method;
+            //this.Method = method;
         }
 
         /// <summary>
@@ -398,7 +398,7 @@ namespace Business.Attributes //Annotations
         /// <summary>
         /// result
         /// </summary>
-        public object Result { get; set; }
+        public string Result { get; set; }
 
         /// <summary>
         /// test fixed roken

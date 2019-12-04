@@ -309,6 +309,11 @@ namespace Business.Document
         public object Value { get; set; }
 
         /// <summary>
+        /// test result check
+        /// </summary>
+        public string Result { get; set; }
+
+        /// <summary>
         /// test fixed roken
         /// </summary>
         public string Token { get; set; }

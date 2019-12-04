@@ -503,7 +503,7 @@ namespace Business.Utils
                     Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
-                    Testing = meta.Attributes.GetAttrs<Attributes.TestingAttribute>().ToDictionary(c3 => c3.Name, c3 => new Testing { Name = c3.Name, Value = c3.Value, Token = c3.Token, TokenMethod = c3.TokenMethod })
+                    Testing = meta.Attributes.GetAttrs<Attributes.TestingAttribute>().ToDictionary(c3 => c3.Name, c3 => new Testing { Name = c3.Name, Value = c3.Value, Result = c3.Result, Token = c3.Token, TokenMethod = c3.TokenMethod })
                 } as IMember<DocArg>;
 
                 foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))
@@ -696,7 +696,7 @@ namespace Business.Utils
             return arg;
         }
 
-        public static TypeDefinition GetTypeDefinition(this System.Type type, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null)
+        public static TypeDefinition GetTypeDefinition(this System.Type type, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null, string name = null)
         {
             var hasDefinition = type.IsDefinition();
             var definitions = hasDefinition ? new List<string> { type.FullName } : new List<string>();
@@ -728,7 +728,7 @@ namespace Business.Utils
 
             var definition = new TypeDefinition
             {
-                Name = null,//current.outType.Name,
+                Name = name,//current.outType.Name,
                 Type = type,
                 LastType = current.outType,
                 HasDefinition = hasDefinition,

@@ -1906,9 +1906,21 @@ function ready(editor) {
         button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
         //button_holder.classList.add("input-group");
         //header.appendChild(button_holder);
+
+        header.parentNode.removeChild(header.nextSibling);
+        var header2 = document.createElement('div');
+        header2.classList.add("form-inline");
+        header2.style.display = 'none';
+        header2.style.marginTop = '8px';
+        header.parentNode.insertBefore(header2, header.nextSibling);
+
         if (doc[businessKey].config.testing) {
             var testing = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing');
-            header.appendChild(testing);
+            var testing_btn = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing_btn');
+            var testingAll_btn = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testingAll_btn');
+            header2.appendChild(testing);
+            header2.appendChild(testing_btn);
+            header2.appendChild(testingAll_btn);
 
             var tests = []
             for (var i in input.schema.testing) {
@@ -1933,6 +1945,8 @@ function ready(editor) {
                     setData(input, value);
                 }
             }, false);
+
+            header2.style.display = "";
         }
 
         if (doc[businessKey].config.benchmark) {
