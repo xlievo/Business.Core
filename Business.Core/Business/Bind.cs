@@ -411,6 +411,11 @@ namespace Business
 
                 Configer.BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
 
+                if (!Configer.Routes.dictionary.TryAdd(business.Configer.Info.BusinessName, (cfg.Info.BusinessName, null)))
+                {
+                    throw new System.Exception($"Routes name exists \"{cfg.Info.BusinessName}\"");
+                }
+
                 type.LoadAccessors(Configer.Accessors, business.Configer.Info.BusinessName);
 
                 business.BindAfter?.Invoke();
@@ -1102,6 +1107,12 @@ namespace Business
                 if (!metaData.dictionary.TryAdd(method.Name, meta))
                 {
                     throw new System.Exception($"MetaData name exists \"{method.Name}\"");
+                }
+
+                var route = $"{cfg.Info.BusinessName}/{method.Name}";
+                if (!Configer.Routes.dictionary.TryAdd(route, (cfg.Info.BusinessName, method.Name)))
+                {
+                    throw new System.Exception($"Routes name exists \"{route}{System.Environment.NewLine}{Configer.Routes[route].Item1}:{ Configer.Routes[route].Item2}\"");
                 }
 #if DEBUG
             };

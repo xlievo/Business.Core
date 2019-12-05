@@ -390,6 +390,8 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         public static ConcurrentReadOnlyDictionary<string, IBusiness> BusinessList = new ConcurrentReadOnlyDictionary<string, IBusiness>(System.StringComparer.InvariantCultureIgnoreCase);
 
+        public static ConcurrentReadOnlyDictionary<string, (string, string)> Routes = new ConcurrentReadOnlyDictionary<string, (string, string)>(System.StringComparer.InvariantCultureIgnoreCase);
+
         public static ConcurrentReadOnlyDictionary<string, Xml.member> Xmls = null;
 
         //internal readonly string ID = System.Guid.NewGuid().ToString("N");
