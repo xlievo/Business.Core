@@ -523,23 +523,39 @@ public class BusinessController : Controller
     /// <summary>
     /// Call
     /// </summary>
-    /// <param name="path"></param>
     /// <returns></returns>
     [HttpGet]
     [HttpPost]
     [EnableCors("any")]
-    public async Task<dynamic> Call(string path)
+    public async Task<dynamic> Call()
     {
-        if (!Configer.BusinessList.TryGetValue(this.Request.Path.Value.TrimStart('/').Split('/')[0], out IBusiness business)) { return this.NotFound(); }
+        #region route
 
-        var c = path?.Trim('/');
+        var hasc = "POST" == this.Request.Method ? this.Request.Form.ContainsKey("c") : this.Request.Query.ContainsKey("c");
+
+        var paths = this.Request.Path.Value.Trim('/');
+        string prefix = paths;
+        string c = null;
+
+        if (!hasc)
+        {
+            var separate = paths.LastIndexOf('/');
+            prefix = -1 == separate ? paths : paths.Substring(0, separate);
+            c = -1 == separate ? null : paths.Substring(separate + 1);
+        }
+
+        if (!Configer.BusinessList.TryGetValue(prefix, out IBusiness business)) { return this.NotFound(); }
+
+        #endregion
+
         string t, d, g, b = null;
 
         switch (this.Request.Method)
         {
             case "GET":
                 //requestData = new RequestData(this.Request.Query);
-                c = c ?? this.Request.Query["c"];
+                //c = c ?? this.Request.Query["c"];
+                if (hasc) { c = this.Request.Query["c"]; }
                 t = this.Request.Query["t"];
                 d = this.Request.Query["d"];
                 //g = this.Request.Query["g"];
@@ -550,7 +566,8 @@ public class BusinessController : Controller
                     //if (this.Request.HasFormContentType)
                     //requestData = new RequestData(await this.Request.ReadFormAsync());
                     var form = await this.Request.ReadFormAsync();
-                    c = c ?? form["c"];
+                    //c = c ?? form["c"];
+                    if (hasc) { c = form["c"]; }
                     t = form["t"];
                     d = form["d"];
                     //g = form["g"];

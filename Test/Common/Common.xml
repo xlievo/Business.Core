@@ -72,11 +72,10 @@
             A class for an MVC controller with view support.
             </summary>
         </member>
-        <member name="M:BusinessController.Call(System.String)">
+        <member name="M:BusinessController.Call">
             <summary>
             Call
             </summary>
-            <param name="path"></param>
             <returns></returns>
         </member>
     </members>
