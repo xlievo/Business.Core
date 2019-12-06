@@ -81,6 +81,8 @@ namespace Business.Result
         /// System.Type object that represents a generic type definition from which the current generic type can be constructed.
         /// </summary>
         System.Type GenericDefinition { get; }
+
+        double Time { get; set; }
     }
 
     public interface IResult<DataType> : IResult

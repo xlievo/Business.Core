@@ -536,6 +536,7 @@ public class BusinessController : Controller
         #endregion
 
         string c, t, d, g, b = null;
+        g = "j";//fixed grouping
 
         switch (this.Request.Method)
         {
@@ -561,8 +562,6 @@ public class BusinessController : Controller
                 break;
             default: return this.NotFound();
         }
-
-        g = "j";//fixed grouping
 
         #region benchmark
 

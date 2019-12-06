@@ -48,23 +48,6 @@ public partial class BusinessMember2
 [Logger]
 public partial class BusinessMember2 : BusinessBase
 {
-    static BusinessMember2()
-    {
-        /*
-        var con = Startup.appSettings.GetSection("Redis").GetSection("ConnectionString").Value;
-        System.Console.WriteLine($"Redis={con}");
-        var csredis = new CSRedis.CSRedisClient(con);
-        RedisHelper.Initialization(csredis);
-
-        RedisHelper.HSetAsync("Role", "value", "111");
-        RedisHelper.HSetAsync("Role", "value2", "222");
-        RedisHelper.HSetAsync("Role", "value3", "333");
-
-        var values = RedisHelper.HGetAll("Role");
-        */
-    }
-
-
     public struct Test001Result
     {
         /// <summary>
@@ -122,6 +105,7 @@ public partial class BusinessMember2 : BusinessBase
         tokenMethod: login)]
     public virtual async Task<IResult<Test001Result?>> Test001(Token token, Arg<Test001> arg, Arg<DateTime> dateTime, HttpFile context = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
+        await System.Threading.Tasks.Task.Delay(1000);
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
         args.arg = arg.Out;

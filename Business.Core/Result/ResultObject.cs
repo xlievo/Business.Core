@@ -127,6 +127,10 @@ namespace Business.Result
         [System.Text.Json.Serialization.JsonIgnore]
         public virtual System.Type GenericDefinition => genericDefinition;
 
+        [System.Text.Json.Serialization.JsonIgnore]
+        [System.Text.Json.Serialization.JsonPropertyName("T")]
+        public double Time { get; set; }
+
         //ICommand command;
         //[Newtonsoft.Json.JsonIgnore]
         //public ICommand Command { get => command; set => command = value; }

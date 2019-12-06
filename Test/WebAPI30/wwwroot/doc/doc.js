@@ -904,6 +904,8 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             this.add_row_button = document.createElement('a');
             this.add_row_button.type = 'a';
             this.add_row_button.style.display = '';
+            this.add_row_button.style.borderTopRightRadius = '4px';
+            this.add_row_button.style.borderBottomRightRadius = '4px';
             this.setButtonText(this.add_row_button, this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
 
             var file = document.createElement('input');
@@ -922,6 +924,8 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         else {
             this.add_row_button = this.getButton(this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
             this.add_row_button.classList.add('json-editor-btntype-add');
+            this.add_row_button.style.borderTopRightRadius = '4px';
+            this.add_row_button.style.borderBottomRightRadius = '4px';
             this.add_row_button.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1089,6 +1093,8 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             self.rows[i].delete_button.classList.add('delete', 'json-editor-btntype-delete');
             self.rows[i].delete_button.setAttribute('data-i', i);
             self.rows[i].delete_button.setAttribute('tag', 'del');
+            self.rows[i].delete_button.style.borderTopRightRadius = '4px';
+            self.rows[i].delete_button.style.borderBottomRightRadius = '4px';
             self.rows[i].delete_button.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
