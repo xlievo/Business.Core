@@ -445,6 +445,15 @@ namespace Business.Auth
                 }
             }
 
+            if (!object.Equals(null, returnValue) && typeof(IResult).IsAssignableFrom(returnValue.GetType()))
+            {
+                var result = returnValue as IResult;
+                if (0 > result.State)
+                {
+                    logType = LoggerType.Error;
+                }
+            }
+
             //var argsObjLog = meta.Args.Select(c => new ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = c.Group[command.Key].Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg }).ToList();
 
             //var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLog.ToDictionary(c => c.name, c => c.hasIArg), out bool canWrite, out bool canResult);
@@ -460,26 +469,15 @@ namespace Business.Auth
                 argsObjLogHasIArg.Add(c.Name, c.HasIArg);
             }
 
-            watch.Stop();
-            var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
-
-            if (!object.Equals(null, returnValue) && typeof(IResult).IsAssignableFrom(returnValue.GetType()))
-            {
-                var result = returnValue as IResult;
-                result.Time = total;
-                if (0 > result.State)
-                {
-                    logType = LoggerType.Error;
-                }
-            }
-
             var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLogHasIArg, out bool canWrite, out bool canResult);
+
+            watch.Stop();
 
             if (null == Configer.Logger?.Call) { return; }
 
             if (canWrite)
             {
-                var data = new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = total, Member = methodName, Group = command.Group };
+                var data = new LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = Help.Scale(watch.Elapsed.TotalSeconds, 3), Member = methodName, Group = command.Group };
 
                 if (null == Configer.Logger || Configer.Logger.MaxCapacity <= Configer.Logger.LoggerQueue.Count)
                 {

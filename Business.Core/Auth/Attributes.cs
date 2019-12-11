@@ -512,10 +512,11 @@ namespace Business.Attributes //Annotations
         ///// </summary>
         //public string DocRequestPath { get; internal set; }
 
+        string commandGroupDefault = "Default";
         /// <summary>
         /// Default
         /// </summary>
-        public string CommandGroupDefault { get; set; } = "Default";
+        public string CommandGroupDefault { get => commandGroupDefault; set => commandGroupDefault = value?.Trim() ?? string.Empty; }
 
         //public string ConfigFileName { get; internal set; }
     }

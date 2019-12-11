@@ -132,6 +132,7 @@ namespace Business.Annotations
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
+            await System.Threading.Tasks.Task.Delay(1000);
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
@@ -156,6 +157,7 @@ namespace Business.Annotations
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
+            await System.Threading.Tasks.Task.Delay(1000);
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 

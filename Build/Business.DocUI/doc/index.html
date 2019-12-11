@@ -88,7 +88,7 @@
 </head>
 <body>
     <div class='container'>
-        <div style="padding-bottom: 15px;">
+        <div style="padding-bottom:15px;">
             <div class="input-group input-group-lg" style="padding-top:20px;">
                 <input id="url" type="text" class="form-control" value="{URL}" readonly="readonly">
                 <div class="input-group-btn">
@@ -128,21 +128,23 @@
                 <p class="mb-0">$${member.description}</p>
                 {@/if}
             </div>
-            <div data-houdini id="${member.name}_member" style="padding: 10px">
-                <div id="${member.name}_input_out" style="padding-top: 0px;"></div>
-                <div id="${member.name}_sdk" style="padding-top: 10px;"></div>
+            <div data-houdini id="${member.name}_member" style="padding:10px">
+                <div id="${member.name}_input_out" style="padding-top:0px;"></div>
+                <div id="${member.name}_sdk" style="padding-top:10px;"></div>
             </div>
         </div>
         {@/each}
     </script>
 
     <script id="benchmark" type="text/template">
-        <select id="${name}_testing" style="margin-left: 10px; border-radius: 0px;" class="form-control"><option value="defdata">         </option></select>
-        <button id="${name}_benchmark" style="margin-left: 10px; border-top-right-radius: 0px ;border-bottom-right-radius: 0px;" type="button" class="btn btn-default">Benchmark</button>
-        <input id="${name}_benchmark_n" style="border-radius: 0px;" type="text" class="form-control" size="4" value="10">
-        <input id="${name}_benchmark_c" style="border-radius: 0px;" type="text" class="form-control" size="4" value="10">
-        <input id="${name}_token" style="width: auto; border-radius: 0px; float: right" type="text" class="form-control" size="20">
-        <button id="${name}_settoken" style="margin-right: 10px; border-top-left-radius: 0px ;border-bottom-left-radius: 0px; float: right" type="button" class="btn btn-default">SetToken</button>
+        <select id="${name}_testing" style="margin-left:10px; border-top-right-radius:0px ;border-bottom-right-radius:0px;" class="form-control"><option value="defdata">         </option></select>
+        <button id="${name}_testing_btn" style="border-radius:0px;" type="button" class="btn btn-default">Testing</button>
+        <button id="${name}_testingAll_btn" style="border-top-left-radius:0px ;border-bottom-left-radius:0px;" type="button" class="btn btn-default">Testing All</button>
+        <button id="${name}_benchmark" style="margin-left:10px; border-top-right-radius:0px ;border-bottom-right-radius:0px;" type="button" class="btn btn-default">Benchmark</button>
+        <input id="${name}_benchmark_n" style="border-radius:0px;" type="text" class="form-control" size="4" value="10">
+        <input id="${name}_benchmark_c" style="border-top-left-radius:0px ;border-bottom-left-radius:0px;" type="text" class="form-control" size="4" value="10">
+        <input id="${name}_token" style="width:auto; border-top-right-radius:0px ;border-bottom-right-radius:0px; float:right" type="text" class="form-control" size="20">
+        <button id="${name}_settoken" style="margin-right:10px; border-top-left-radius:0px; border-bottom-left-radius:0px; float:right" type="button" class="btn btn-default">SetToken</button>
     </script>
 
     <script type="text/javascript" src="/doc/sdk.js"></script>

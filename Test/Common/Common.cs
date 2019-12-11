@@ -131,8 +131,8 @@ public class SessionArg : Arg<Session, Token> { }
 [HttpFile]
 public class HttpFile : Arg<Dictionary<string, dynamic>> { }
 
-[Command(Group = "j")]
-[@JsonArg(Group = "j")]
+[Command(Group = null)]
+[@JsonArg(Group = null)]
 [Command(Group = "s")]
 [@MessagePackArg(Group = "s")]
 public abstract class BusinessBase : BusinessBase<ResultObject<string>>
@@ -268,7 +268,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
         //==================The third step==================//
         //3
-        Configer.UseDoc(docDir, new Business.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true });
+        Configer.UseDoc(docDir, new Business.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true });
         //writ url to page
         DocUI.Write(docDir, update: true);
         //add route
@@ -531,18 +531,19 @@ public class BusinessController : Controller
     {
         #region route
 
-        if (!Configer.Routes.TryGetValue(this.Request.Path.Value.TrimStart('/'), out (string, string) route) || !Configer.BusinessList.TryGetValue(route.Item1, out IBusiness business)) { return this.NotFound(); }
+        if (!Configer.Routes.TryGetValue(this.Request.Path.Value.TrimStart('/'), out Configer.Route route) || !Configer.BusinessList.TryGetValue(route.Business, out IBusiness business)) { return this.NotFound(); }
 
         #endregion
 
         string c, t, d, g, b = null;
-        g = "j";//fixed grouping
+        //g = "j";//fixed grouping
+        g = route.Group;
 
         switch (this.Request.Method)
         {
             case "GET":
                 //requestData = new RequestData(this.Request.Query);
-                c = route.Item2 ?? this.Request.Query["c"];
+                c = route.Name ?? this.Request.Query["c"];
                 t = this.Request.Query["t"];
                 d = this.Request.Query["d"];
                 //g = this.Request.Query["g"];
@@ -553,7 +554,7 @@ public class BusinessController : Controller
                     //if (this.Request.HasFormContentType)
                     //requestData = new RequestData(await this.Request.ReadFormAsync());
                     var form = await this.Request.ReadFormAsync();
-                    c = route.Item2 ?? form["c"];
+                    c = route.Name ?? form["c"];
                     t = form["t"];
                     d = form["d"];
                     //g = form["g"];

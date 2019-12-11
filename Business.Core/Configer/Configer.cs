@@ -388,9 +388,44 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
     {
         internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 
+        //internal readonly ConcurrentReadOnlyDictionary<string, Accessors> ResultAccessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
+
         public static ConcurrentReadOnlyDictionary<string, IBusiness> BusinessList = new ConcurrentReadOnlyDictionary<string, IBusiness>(System.StringComparer.InvariantCultureIgnoreCase);
 
-        public static ConcurrentReadOnlyDictionary<string, (string, string)> Routes = new ConcurrentReadOnlyDictionary<string, (string, string)>(System.StringComparer.InvariantCultureIgnoreCase);
+        public static ConcurrentReadOnlyDictionary<string, Route> Routes = new ConcurrentReadOnlyDictionary<string, Route>(System.StringComparer.InvariantCultureIgnoreCase);
+
+        public struct Route
+        {
+            public Route(string business, string group = null, string name = null)
+            {
+                Business = business;
+                Group = group;
+                Name = name;
+            }
+
+            public string Business { get; set; }
+
+            public string Group { get; set; }
+
+            public string Name { get; set; }
+
+            public override string ToString()
+            {
+                var key = Business;
+
+                if (!string.IsNullOrWhiteSpace(Group))
+                {
+                    key += $"/{Group}";
+                }
+
+                if (!string.IsNullOrWhiteSpace(Name))
+                {
+                    key += $"/{Name}";
+                }
+
+                return key;
+            }
+        }
 
         public static ConcurrentReadOnlyDictionary<string, Xml.member> Xmls = null;
 

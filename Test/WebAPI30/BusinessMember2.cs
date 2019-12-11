@@ -15,7 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Args;
 
-[Info("API/v2")]
+[Info("API/v2", CommandGroupDefault = null)]
 public class BusinessMember3 : BusinessBase
 {
     [Testing("test2", "\"2019-12-02T21:02\"")]
@@ -44,7 +44,7 @@ public partial class BusinessMember2
 /// businessDescription
 /// businessDescription3
 /// </summary>
-[Info("API")]
+[Info("API", CommandGroupDefault = null)]//, CommandGroupDefault = ""
 [Logger]
 public partial class BusinessMember2 : BusinessBase
 {
@@ -86,7 +86,7 @@ public partial class BusinessMember2 : BusinessBase
     /// <param name="mm">mmmmmmmm!</param>
     /// <returns></returns>
     [Command("AAA")]
-    [Command("jjj", Group = "j")]
+    [Command("jjj", Group = "")]
     [Testing("test2",
         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T04:24\",99.0234,777,false]",
         "{\"AAA\":\"111\",\"BBB\":\"222\"}",
@@ -105,7 +105,6 @@ public partial class BusinessMember2 : BusinessBase
         tokenMethod: login)]
     public virtual async Task<IResult<Test001Result?>> Test001(Token token, Arg<Test001> arg, Arg<DateTime> dateTime, HttpFile context = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
-        await System.Threading.Tasks.Task.Delay(1000);
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
         args.arg = arg.Out;
@@ -217,6 +216,28 @@ public partial class BusinessMember2 : BusinessBase
     }
 
     public virtual async Task<dynamic> Test006(Token token) => this.ResultCreate();
+
+    public virtual async Task<dynamic> Test0061() => this.ResultCreate();
+
+    public virtual IResult<Test001Result?> Test0062([Ignore(IgnoreMode.BusinessArg)]string aaa)
+    {
+        Test001Result? ss = new Test001Result { A = aaa, B = "SSS" };
+
+        return this.ResultCreate(ss);
+    }
+    public virtual IResult<Test001Result?> Test00621([Ignore(IgnoreMode.BusinessArg)]decimal? bbb, [Ignore(IgnoreMode.BusinessArg)]decimal aaa = 111.123m)
+    {
+        Test001Result? ss = new Test001Result { A = aaa.ToString(), B = bbb?.ToString() };
+
+        return this.ResultCreate(ss);
+    }
+
+    public virtual IResult<Test001Result?> Test0063(SessionArg session, [Ignore(IgnoreMode.BusinessArg)]string aaa)
+    {
+        Test001Result? ss = new Test001Result { A = aaa, B = "SSS" };
+
+        return this.ResultCreate(ss);
+    }
 
     public virtual async Task<IResult<Test001>> Test0010(SessionArg session, Arg<Test001> arg)
     {

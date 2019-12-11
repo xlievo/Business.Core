@@ -1,6 +1,15 @@
 ﻿
-function GetSdkJavaScript(h, c, t, d) {
-    return "var ajax = {};\n\
+function GetSdkJavaScript(h, c, data) {
+	var value = "\n\    { c: \"" + c + "\"";
+	if (data.hasOwnProperty("t")) {
+		value += ", t: \"" + data.t + "\"";
+	}
+	if (data.hasOwnProperty("d")) {
+		value += ", d: " + JSON.stringify(data.d);
+	}
+	value += " }";
+
+	return "var ajax = {};\n\
 ajax.x = function () {\n\
 	if (typeof XMLHttpRequest !== 'undefined') {\n\
 		return new XMLHttpRequest();\n\
@@ -73,9 +82,11 @@ ajax.postForm = function (url, data, callback, failed, async) {\n\
 	ajax.send(url, callback, failed, 'POST', data, async, null)\n\
 };\n\
 \n\
-ajax.post(\"" + h + "\",\n\
-    { c: \"" + c + "\", t: \"" + t + "\", d: " + d + " },\n\
-    function (response) {\n\
+ajax.post(\"" + h + "\","
+		+
+		value
+		+
+		"\n\    , function (response) {\n\
         //succcess\n\
         console.log(response);\n\
     }, function (response) {\n\
@@ -84,8 +95,16 @@ ajax.post(\"" + h + "\",\n\
     });";
 }
 
-function GetSdkNet(h, c, t, d) {
-    return "\
+function GetSdkNet(h, c, data) {
+	var value = "\n\            KeyValuePair.Create(\"c\", \"" + c + "\")";
+	if (data.hasOwnProperty("t")) {
+		value += ",\n\            KeyValuePair.Create(\"t\", \"" + data.t + "\")";
+	}
+	if (data.hasOwnProperty("d")) {
+		value += ",\n\            KeyValuePair.Create(\"d\", " + JSON.stringify(data.d) + ")";
+	}
+
+	return "\
 using System;\n\
 using System.Collections.Generic;\n\
 using System.Net.Http;\n\
@@ -104,22 +123,20 @@ class Program\n\
 \n\
         httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
 \n\
-        var result = await Call(\"" + c + "\", \"" + t + "\", " + d + ");\n\
+        var result = await Call("
+		+
+		value
+		+ 
+		");\n\
 \n\
         Console.WriteLine(result);\n\
 \n\
         Console.Read();\n\
     }\n\
 \n\
-    public async static Task<string> Call(string c, string t, string d)\n\
+    public async static Task<string> Call(params KeyValuePair<string, string>[] data)\n\
     {\n\
-        using var content = new FormUrlEncodedContent(new Dictionary<string, string>()\n\
-        {\n\
-            {\"c\", c},\n\
-            {\"t\", t},\n\
-            {\"d\", d}\n\
-        });\n\
-\n\
+		using var content = new FormUrlEncodedContent(data);\n\
         using var request = new HttpRequestMessage(HttpMethod.Post, \"" + h + "\") { Content = content };\n\
         var client = httpClientFactory.CreateClient();\n\
         using var response = await client.SendAsync(request);\n\

@@ -411,9 +411,20 @@ namespace Business
 
                 Configer.BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
 
-                if (!Configer.Routes.dictionary.TryAdd(business.Configer.Info.BusinessName, (cfg.Info.BusinessName, null)))
+                foreach (var item in business.Command)
                 {
-                    throw new System.Exception($"Routes name exists \"{cfg.Info.BusinessName}\"");
+                    if (string.IsNullOrWhiteSpace(item.Key)) { continue; }
+
+                    var route2 = new Configer.Route(cfg.Info.BusinessName, item.Key);
+                    if (!Configer.Routes.dictionary.TryAdd(route2.ToString(), route2))
+                    {
+                        throw new System.Exception($"Routes exists \"{route2}\"");
+                    }
+                }
+                var route = new Configer.Route(cfg.Info.BusinessName);
+                if (!Configer.Routes.dictionary.TryAdd(route.ToString(), route))
+                {
+                    throw new System.Exception($"Routes exists \"{route}\"");
                 }
 
                 type.LoadAccessors(Configer.Accessors, business.Configer.Info.BusinessName);
@@ -998,6 +1009,12 @@ namespace Business
                 foreach (var item in commandGroup)
                 {
                     loggerGroup.dictionary.TryAdd(item.Key, GetMetaLogger(loggers, item.Value.Group));
+
+                    var route = new Configer.Route(cfg.Info.BusinessName, item.Value.Group, item.Value.OnlyName);
+                    if (!Configer.Routes.dictionary.TryAdd(route.ToString(), route))
+                    {
+                        throw new System.Exception($"Routes exists \"{route}\"");
+                    }
                 }
 
                 var childAll = new ReadOnlyCollection<Args>();
@@ -1109,11 +1126,11 @@ namespace Business
                     throw new System.Exception($"MetaData name exists \"{method.Name}\"");
                 }
 
-                var route = $"{cfg.Info.BusinessName}/{method.Name}";
-                if (!Configer.Routes.dictionary.TryAdd(route, (cfg.Info.BusinessName, method.Name)))
-                {
-                    throw new System.Exception($"Routes name exists \"{route}{System.Environment.NewLine}{Configer.Routes[route].Item1}:{ Configer.Routes[route].Item2}\"");
-                }
+                //var route = $"{cfg.Info.BusinessName}/{method.Name}";
+                //if (!Configer.Routes.dictionary.TryAdd(route, (cfg.Info.BusinessName, method.Name)))
+                //{
+                //    throw new System.Exception($"Routes name exists \"{route}{System.Environment.NewLine}{Configer.Routes[route].Item1}:{ Configer.Routes[route].Item2}\"");
+                //}
 #if DEBUG
             };
 #else

@@ -1792,8 +1792,12 @@ function ready(editor) {
     editor.on('ready', function () {
         //console.time("timer");
         var input = editor.input;
+        var hasObject = input.editors.d && ("object" === input.schema.properties.d.type || "array" === input.schema.properties.d.type);
         var data = getData(input, false);
-        if (input.schema.argSingle && "object" !== input.schema.properties.d.type) {
+        if (input.schema.argSingle && !input.editors.d) {
+            input.schema.data = { t: data.t };
+        }
+        else if (input.schema.argSingle && input.editors.d && !hasObject) {
             input.schema.data = { t: data.t, d: data.d };
         }
         else {
@@ -1813,7 +1817,7 @@ function ready(editor) {
             }, false);
         }
 
-        if (input.editors.d && !(input.schema.argSingle && "object" !== input.schema.properties.d.type)) {
+        if (input.editors.d && !(input.schema.argSingle && !hasObject)) {
             var buttonData = editor.root.getButton('', 'data', 'Data');
             buttonData.id = "data";
             button_holder = input.editors.d.theme.getHeaderButtonHolder();
@@ -1867,8 +1871,12 @@ function ready(editor) {
                     var form = new FormData();
                     var data = getData(input, false);
                     form.append("c", input.schema.name);
-                    form.append("t", data.t);
-                    form.append("d", data.d);
+                    if (data.hasOwnProperty("t")) {
+                        form.append("t", data.t);
+                    }
+                    if (data.hasOwnProperty("d")) {
+                        form.append("d", data.d);
+                    }
 
                     var files = input.container.querySelectorAll("[tag='file']");
                     files.forEach(c => {
@@ -1891,8 +1899,14 @@ function ready(editor) {
                 }
                 else {
                     var data = getData(input, false);
-                    ajax.post(doc[businessKey].config.host + "/" + businessName,
-                        { c: input.schema.name, t: data.t, d: data.d },
+                    var d = { c: input.schema.name };
+                    if (data.hasOwnProperty("t")) {
+                        d.t = data.t;
+                    }
+                    if (data.hasOwnProperty("d")) {
+                        d.d = data.d;
+                    }
+                    ajax.post(doc[businessKey].config.host + "/" + businessName, d,
                         function (response) {
                             //succcess
                             try {
@@ -2048,8 +2062,8 @@ function ready(editor) {
             var input = this.editors["root.input"];
             var data = getData(input, false);
             var h = doc[businessKey].config.host + "/" + businessName;
-            javascriptValue.setValue(GetSdkJavaScript(h, input.schema.name, data.t, JSON.stringify(data.d)));
-            netValue.setValue(GetSdkNet(h, input.schema.name, data.t, JSON.stringify(data.d)));
+            javascriptValue.setValue(GetSdkJavaScript(h, input.schema.name, data));
+            netValue.setValue(GetSdkNet(h, input.schema.name, data));
 
             //console.log(this.sdkeditor.getValue());
         });
@@ -2141,10 +2155,11 @@ function getSdk(format) {
 }
 
 function getData(input, format = true) {
-    var d = null;
+    var data = {};
     if (input.editors.d) {
+        var d = null;
         if (input.schema.argSingle) {
-            if (input.schema.argSingle && "object" !== input.schema.properties.d.type) {
+            if (input.schema.argSingle && "object" !== input.schema.properties.d.type && "array" !== input.schema.properties.d.type) {
                 d = input.editors.d.getValue();
             }
             else {
@@ -2161,8 +2176,14 @@ function getData(input, format = true) {
             }
             d = JSON.stringify(args, null, format ? 2 : 0);
         }
+        data.d = d;
     }
-    return { t: input.editors.t ? input.editors.t.getValue() : null, d: d };
+
+    if (input.editors.t) {
+        data.t = input.editors.t.getValue();
+    }
+
+    return data;
 }
 
 function setData(input, value, refresh = true) {
