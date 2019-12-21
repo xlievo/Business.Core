@@ -6,8 +6,6 @@ Support .Net Framework 4.6, Mono 4.x, .Net Standard 2.0
 
 Castle.Core
 
-Newtonsoft.Json
-
 ## Install
 
 [![NuGet Version](https://img.shields.io/nuget/v/Business.Core.svg?style=flat)](https://www.nuget.org/packages/Business.Core/)
