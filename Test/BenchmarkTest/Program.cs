@@ -121,7 +121,7 @@ namespace BenchmarkTest
             //Console.WriteLine($"ResultCount={results.Count} TaskCount={tasks.Count}  Loggers={BusinessMember.Loggers.Count} Time={total}");
             Console.WriteLine($"ResultCount={results.Count} Loggers={BusinessMember.Loggers.Count} Time={total} Avg={Help.Scale(results.Count / total)}");
 
-            Console.WriteLine($"{string.Join(",", BusinessMember.Logs)}");
+            //Console.WriteLine($"{string.Join(",", BusinessMember.Logs)}");
 
             //watch.Restart();
 
@@ -315,14 +315,15 @@ namespace BenchmarkTest
                 }).ToList();
 
                 Logs.Add(logs.Count);
-            }, 30)
-            {
-                Batch = new Logger.BatchOptions
-                {
-                    Interval = System.TimeSpan.FromSeconds(6),
-                    //MaxNumber = 1000
-                }
-            };
+            });
+            //}, 30)
+            //{
+            //    Batch = new Logger.BatchOptions
+            //    {
+            //        Interval = System.TimeSpan.FromSeconds(6),
+            //        //MaxNumber = 1000
+            //    }
+            //};
         }
 
         public virtual dynamic Test000([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);

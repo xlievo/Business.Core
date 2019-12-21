@@ -310,7 +310,117 @@ namespace Business
 
     public partial class Bind : System.IDisposable
     {
-        public object Instance;
+        internal protected Bind() { }
+
+        internal readonly ConcurrentReadOnlyDictionary<string, dynamic> bootstrapConfig = new ConcurrentReadOnlyDictionary<string, dynamic>();
+
+        /// <summary>
+        /// bootstrap all Business class
+        /// </summary>
+        /// <returns></returns>
+        public static Bind CreateAll() => new Bind();
+
+        //Build
+
+        /// <summary>
+        /// Load all business classes in the run directory
+        /// </summary>
+        /// <param name="constructorArguments"></param>
+        /// <param name="assemblyFiles"></param>
+        public virtual void LoadBusiness(object[] constructorArguments = null, params string[] assemblyFiles)
+        {
+            var businessType = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(System.AppContext.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
+            {
+                if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
+                {
+                    Create(type, constructorArguments);
+
+                    return true;
+                }
+
+                return false;
+            });
+
+            foreach (var business in Configer.BusinessList.Values.AsParallel())
+            {
+                foreach (var config in bootstrapConfig.AsParallel())
+                {
+                    switch (config.Key)
+                    {
+                        case "UseTypeType": business.UseType(config.Value as System.Type[]); break;
+                        case "UseTypeName": business.UseType(config.Value as string[]); break;
+
+                        case "LoggerSetType":
+                            {
+                                var logger = config.Value.logger as LoggerAttribute;
+                                var argType = config.Value.argType as System.Type[];
+                                business.LoggerSet(logger, argType);
+                                break;
+                            }
+                        case "LoggerSetName":
+                            {
+                                var logger = config.Value.logger as LoggerAttribute;
+                                var argName = config.Value.argName as string[];
+                                business.LoggerSet(logger, argName);
+                                break;
+                            }
+                        case "IgnoreSetName":
+                            {
+                                var ignore = config.Value.ignore as Ignore;
+                                var argName = config.Value.argName as string[];
+                                business.IgnoreSet(ignore, argName);
+                                break;
+                            }
+                        case "IgnoreSetType":
+                            {
+                                var ignore = config.Value.ignore as Ignore;
+                                var argType = config.Value.argType as System.Type[];
+                                business.IgnoreSet(ignore, argType);
+                                break;
+                            }
+                        case "MemberSet":
+                            {
+                                var memberName = config.Value.memberName as string;
+                                var memberObj = config.Value.memberObj as object;
+                                var skipNull = (bool)config.Value.skipNull;
+                                business.MemberSet(memberName, memberObj, skipNull);
+                                break;
+                            }
+                        default: break;
+                    }
+                }
+            }
+
+            // UseDoc
+            if (bootstrapConfig.TryGetValue("UseDoc", out dynamic args))
+            {
+                var outDir = args.outDir as string;
+                var config = (Document.Config)args.config;
+
+                var exists = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
+                var doc = new System.Collections.Generic.Dictionary<string, Document.IDoc>();
+
+                foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
+                {
+                    item.Value.UseDoc(null, config);
+
+                    if (exists)
+                    {
+                        doc.Add(item.Value.Configer.Doc.Name, item.Value.Configer.Doc);
+                    }
+                }
+
+                if (exists)
+                {
+                    System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.UTF8);
+                    //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
+                }
+            }
+        }
+
+        //======================================//
+
+        object Instance;
 
         public Bind(System.Type type, Auth.IInterceptor interceptor, params object[] constructorArguments)
         {
@@ -391,7 +501,6 @@ namespace Business
             }
             catch (System.Exception ex)
             {
-
                 throw ex;
             }
 
@@ -462,26 +571,31 @@ namespace Business
 
         public void Dispose()
         {
-            var type = Instance.GetType();
+            bootstrapConfig.dictionary.Clear();
 
-            if (typeof(IBusiness).IsAssignableFrom(type))
+            var type = Instance?.GetType();
+
+            if (null != type)
             {
-                var business = (IBusiness)Instance;
-
-                Configer.BusinessList.dictionary.TryRemove(business.Configer.Info.BusinessName, out _);
-                /*
-#if !Mobile
-                if (!Bind.BusinessList.Values.Any(c => c.Configuration.EnableWatcher) && Configer.Configuration.CfgWatcher.EnableRaisingEvents)
+                if (typeof(IBusiness).IsAssignableFrom(type))
                 {
-                    Configer.Configuration.CfgWatcher.EnableRaisingEvents = false;
-                }
-#endif
-                */
-            }
+                    var business = (IBusiness)Instance;
 
-            if (typeof(System.IDisposable).IsAssignableFrom(type))
-            {
-                ((System.IDisposable)Instance).Dispose();
+                    Configer.BusinessList.dictionary.TryRemove(business.Configer.Info.BusinessName, out _);
+                    /*
+    #if !Mobile
+                    if (!Bind.BusinessList.Values.Any(c => c.Configuration.EnableWatcher) && Configer.Configuration.CfgWatcher.EnableRaisingEvents)
+                    {
+                        Configer.Configuration.CfgWatcher.EnableRaisingEvents = false;
+                    }
+    #endif
+                    */
+                }
+
+                if (typeof(System.IDisposable).IsAssignableFrom(type))
+                {
+                    ((System.IDisposable)Instance).Dispose();
+                }
             }
         }
 
@@ -789,7 +903,7 @@ namespace Business
                     {
                         if (!isDef && item2.Group == groupDefault) { isDef = true; }
 
-                        if (item2.Declaring != AttributeBase.DeclaringType.Method)
+                        if (item2.Meta.Declaring != AttributeBase.MetaData.DeclaringType.Method)
                         {
                             notMethods.Add(item2);
 
@@ -988,7 +1102,7 @@ namespace Business
                     }
                 });
 
-                var argAttrs = attributes2.GetAttrs<ArgumentAttribute>(c => !typeof(HttpFileAttribute).IsAssignableFrom(c.Type));
+                var argAttrs = attributes2.GetAttrs<ArgumentAttribute>(c => !typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
 
                 //======LogAttribute======//
                 var loggers = attributes2.GetAttrs<LoggerAttribute>();
@@ -1060,7 +1174,7 @@ namespace Business
 
                     //==================================//
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
-                    var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
+                    var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
 
                     var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
@@ -1185,20 +1299,20 @@ namespace Business
             {
                 //if (string.IsNullOrWhiteSpace(item.Group)) { item.Group = groupDefault; }
 
-                item.Meta.resultType = resultType;
-                item.Meta.resultTypeDefinition = resultTypeDefinition;
-                //item.Meta.Business = business;
-                item.Meta.Member = path;
-                item.Meta.MemberType = memberType;
+                item.ArgumentMeta.resultType = resultType;
+                item.ArgumentMeta.resultTypeDefinition = resultTypeDefinition;
+                //item.ArgumentMeta.Business = business;
+                item.ArgumentMeta.Member = path;
+                item.ArgumentMeta.MemberType = memberType;
 
                 //!procesIArgMethod.DeclaringType.FullName.Equals(argumentAttributeFullName)
-                if (item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(item.Type.FullName))
+                if (item.Meta.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(item.Meta.Type.FullName))
                 {
-                    item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArg;
+                    item.ArgumentMeta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArg;
                 }
-                else if (item.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(item.Type.FullName))
+                else if (item.Meta.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(item.Meta.Type.FullName))
                 {
-                    item.Meta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
+                    item.ArgumentMeta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
                 }
 
                 //if (string.IsNullOrWhiteSpace(item.Nick) && !string.IsNullOrWhiteSpace(nick))
@@ -1239,7 +1353,7 @@ namespace Business
             foreach (var item in members)
             {
                 System.Type memberType = null;
-                Utils.Accessor accessor = default;
+                Accessor accessor = default;
                 var memberDefinition = MemberDefinitionCode.No;
                 switch (item.MemberType)
                 {
@@ -1380,7 +1494,7 @@ namespace Business
 
                 //var argAttrChild = (hasUse || item.Value.IgnoreBusinessArg || ignoreBusinessArg) ?
                 var argAttrChild = (hasUse || ignoreBusinessArg) ?
-                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group) && c.Declaring == AttributeBase.DeclaringType.Parameter).Select(c => c.Clone()).ToList() :
+                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group) && c.Meta.Declaring == AttributeBase.MetaData.DeclaringType.Parameter).Select(c => c.Clone()).ToList() :
                     argAttrs.FindAll(c => GroupEquals(c, item.Value.Group)).Select(c => c.Clone()).ToList();
 
                 var nickValue = string.IsNullOrWhiteSpace(nick?.Nick) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Nick) && GroupEquals(c, item.Value.Group)).GroupBy(c => c.Nick, System.StringComparer.InvariantCultureIgnoreCase).FirstOrDefault()?.Key : nick.Nick;
@@ -1395,18 +1509,20 @@ namespace Business
                 {
                     var attr = string.IsNullOrWhiteSpace(c.Group) ? c.Clone() : c;
 
-                    attr.Meta.Method = item.Value.OnlyName;
-                    attr.Meta.Member = path2;
+                    attr.ArgumentMeta.Method = item.Value.OnlyName;
+                    attr.ArgumentMeta.Member = path2;
 
-                    //attr.Meta.Business = c.Meta.Business;
-                    attr.Meta.resultType = c.Meta.resultType;
-                    attr.Meta.resultTypeDefinition = c.Meta.resultTypeDefinition;
-                    attr.Meta.MemberType = c.Meta.MemberType;
-                    attr.Meta.HasProcesIArg = c.Meta.HasProcesIArg;
+                    //attr.ArgumentMeta.Method = item.Value.OnlyName;
+                    //attr.ArgumentMeta.Member = path2;
+                    ////attr.Meta.Business = c.Meta.Business;
+                    //attr.ArgumentMeta.resultType = c.ArgumentMeta.resultType;
+                    //attr.ArgumentMeta.resultTypeDefinition = c.ArgumentMeta.resultTypeDefinition;
+                    //attr.ArgumentMeta.MemberType = c.ArgumentMeta.MemberType;
+                    //attr.ArgumentMeta.HasProcesIArg = c.ArgumentMeta.HasProcesIArg;
 
                     if (string.IsNullOrWhiteSpace(attr.Nick))
                     {
-                        attr.Nick = !string.IsNullOrWhiteSpace(nickValue) ? nickValue : attr.Meta.Member;
+                        attr.Nick = !string.IsNullOrWhiteSpace(nickValue) ? nickValue : attr.ArgumentMeta.Member;
                     }
 
                     attr.BindAfter?.Invoke();
@@ -1420,7 +1536,7 @@ namespace Business
 
                     if (c.CollectionItem && !hasCollectionAttr) { hasCollectionAttr = true; }//checked hasCollectionAttr 2
 
-                    if (typeof(HttpFileAttribute).IsAssignableFrom(c.Type) && !httpFile)
+                    if (typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type) && !httpFile)
                     {
                         httpFile = true;
                     }
@@ -1431,7 +1547,9 @@ namespace Business
                 if (default == owner && current.hasIArg && null == argAttr.First.Value)
                 {
                     //if (default == owner) ?? Is the first level added or every level added?
-                    argAttr.TryAdd(new ArgumentDefaultAttribute(resultType, resultTypeDefinition) { Declaring = AttributeBase.DeclaringType.Parameter });
+                    var def = new ArgumentDefaultAttribute(resultType, resultTypeDefinition);
+                    def.Meta.Declaring = AttributeBase.MetaData.DeclaringType.Parameter;
+                    argAttr.TryAdd(def);
 
                     if (!hasLower) { hasLower = true; }
                 }
@@ -1534,7 +1652,7 @@ namespace Business
             this.Meta = meta;
             this.Key = key;
             this.HasArgSingle = 1 >= this.Meta.Args.Count(c => !c.HasToken && !c.Group[Key].IgnoreArg);
-            this.HasHttpFile = this.Meta.Args.Any(c => c.Group[Key].HttpFile) || this.Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Type));
+            this.HasHttpFile = this.Meta.Args.Any(c => c.Group[Key].HttpFile) || this.Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
         }
 
         //===============member==================//

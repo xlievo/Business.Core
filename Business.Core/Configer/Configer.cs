@@ -555,74 +555,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         //public static void LoadBusiness(System.Collections.Generic.IEnumerable<string> assemblyFiles = null)
 
-        /// <summary>
-        /// Load all business classes in the run directory
-        /// </summary>
-        /// <param name="constructorArguments"></param>
-        /// <param name="assemblyFiles"></param>
-        public static void LoadBusiness(object[] constructorArguments = null, params string[] assemblyFiles)
-        {
-            var business = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(System.AppContext.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
-            {
-                if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
-                {
-                    Bind.Create(type, constructorArguments);
-
-                    return true;
-                }
-
-                return false;
-            });
-        }
-
-        public static void UseType(params System.Type[] argType)
-        {
-            foreach (var item in BusinessList.Values)
-            {
-                item.UseType(argType);
-            }
-        }
-
-        /// <summary>
-        /// Inject a parameter type, depending on the parameter name
-        /// </summary>
-        /// <param name="argName"></param>
-        public static void UseType(params string[] argName)
-        {
-            foreach (var item in BusinessList.Values)
-            {
-                item.UseType(argName);
-            }
-        }
-
-        /// <summary>
-        /// Generating Document Model for All Business Classes. business.doc
-        /// </summary>
-        /// <param name="outDir"></param>
-        /// <param name="config"></param>
-        public static void UseDoc(string outDir = null, Config config = default)
-        {
-            var exists = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
-            var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
-
-            foreach (var item in BusinessList.OrderBy(c => c.Key))
-            {
-                item.Value.UseDoc(null, config);
-
-                if (exists)
-                {
-                    doc.Add(item.Value.Configer.Doc.Name, item.Value.Configer.Doc);
-                }
-            }
-
-            if (exists)
-            {
-                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings), Help.UTF8);
-                //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
-            }
-        }
-
-        //public static Newtonsoft.Json.JsonSerializerSettings DocJsonSettings2 = new Newtonsoft.Json.JsonSerializerSettings
+//public static Newtonsoft.Json.JsonSerializerSettings DocJsonSettings2 = new Newtonsoft.Json.JsonSerializerSettings
         //{
         //    ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
         //    ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
@@ -653,55 +586,55 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         //    }
         //}
 
-        public static void LoggerSet(Attributes.LoggerAttribute logger, params System.Type[] argType)
-        {
-            foreach (var item in BusinessList.Values)
-            {
-                item.LoggerSet(logger, argType);
-            }
-        }
+        //public static void LoggerSet(Attributes.LoggerAttribute logger, params System.Type[] argType)
+        //{
+        //    foreach (var item in BusinessList.Values)
+        //    {
+        //        item.LoggerSet(logger, argType);
+        //    }
+        //}
 
-        /// <summary>
-        /// Set the log characteristics of a parameter, depending on the parameter name
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="argName"></param>
-        public static void LoggerSet(Attributes.LoggerAttribute logger, params string[] argName)
-        {
-            foreach (var item in BusinessList.Values)
-            {
-                item.LoggerSet(logger, argName);
-            }
-        }
+        ///// <summary>
+        ///// Set the log characteristics of a parameter, depending on the parameter name
+        ///// </summary>
+        ///// <param name="logger"></param>
+        ///// <param name="argName"></param>
+        //public static void LoggerSet(Attributes.LoggerAttribute logger, params string[] argName)
+        //{
+        //    foreach (var item in BusinessList.Values)
+        //    {
+        //        item.LoggerSet(logger, argName);
+        //    }
+        //}
 
-        /// <summary>
-        /// Set a parameter's ignore feature, depending on the parameter name
-        /// </summary>
-        /// <param name="ignore"></param>
-        /// <param name="argName"></param>
-        public static void IgnoreSet(Attributes.Ignore ignore, params string[] argName)
-        {
-            foreach (var item in BusinessList.Values)
-            {
-                item.IgnoreSet(ignore, argName);
-            }
-        }
+        ///// <summary>
+        ///// Set a parameter's ignore feature, depending on the parameter name
+        ///// </summary>
+        ///// <param name="ignore"></param>
+        ///// <param name="argName"></param>
+        //public static void IgnoreSet(Attributes.Ignore ignore, params string[] argName)
+        //{
+        //    foreach (var item in BusinessList.Values)
+        //    {
+        //        item.IgnoreSet(ignore, argName);
+        //    }
+        //}
 
-        public static void IgnoreSet(Attributes.Ignore ignore, params System.Type[] argType)
-        {
-            foreach (var item in BusinessList.Values)
-            {
-                item.IgnoreSet(ignore, argType);
-            }
-        }
+        //public static void IgnoreSet(Attributes.Ignore ignore, params System.Type[] argType)
+        //{
+        //    foreach (var item in BusinessList.Values)
+        //    {
+        //        item.IgnoreSet(ignore, argType);
+        //    }
+        //}
 
-        public static void MemberSet(string memberName, object memberObj, bool skipNull = false)
-        {
-            foreach (var item in BusinessList.Values)
-            {
-                item.MemberSet(memberName, memberObj, skipNull);
-            }
-        }
+        //public static void MemberSet(string memberName, object memberObj, bool skipNull = false)
+        //{
+        //    foreach (var item in BusinessList.Values)
+        //    {
+        //        item.MemberSet(memberName, memberObj, skipNull);
+        //    }
+        //}
 
         //public static System.Collections.Generic.Dictionary<string, Doc> LoadDoc<Business>()
         //{

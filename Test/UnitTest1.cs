@@ -70,6 +70,7 @@ public class AES2 : AESAttribute
 {
     public AES2(string key, int state = -821, string message = null) : base(key, state, message)
     {
+        
     }
 
     public async override ValueTask<IResult> Proces(dynamic value)
@@ -1033,7 +1034,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 
         public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic key)
         {
-            Assert.IsTrue(this.Meta.MemberType.IsCollection());
+            Assert.IsTrue(this.ArgumentMeta.MemberType.IsCollection());
             return this.ResultCreate();
         }
     }
@@ -1231,7 +1232,7 @@ public class TestBusinessMember
     public void TestCfgInfo()
     {
         Assert.AreEqual(Cfg.Info.CommandGroupDefault, CommandGroupDefault.Group);
-        Assert.AreEqual(Cfg.Info.Declaring, AttributeBase.DeclaringType.Class);
+        Assert.AreEqual(Cfg.Info.Meta.Declaring, AttributeBase.MetaData.DeclaringType.Class);
         Assert.AreEqual(Cfg.Info.BusinessName, "Business");
     }
 
@@ -1293,21 +1294,21 @@ public class TestBusinessMember
     {
         Assert.AreEqual(Cfg.Attributes.Count, 5);
 
-        var json = Cfg.Attributes.FirstOrDefault(c => c.Type == typeof(JsonArgAttribute));
+        var json = Cfg.Attributes.FirstOrDefault(c => c.Meta.Type == typeof(JsonArgAttribute));
         Assert.AreNotEqual(json, null);
-        Assert.AreEqual(json.Declaring, AttributeBase.DeclaringType.Assembly);
+        Assert.AreEqual(json.Meta.Declaring, AttributeBase.MetaData.DeclaringType.Assembly);
 
-        var logger = Cfg.Attributes.FirstOrDefault(c => c.Type == typeof(LoggerAttribute));
+        var logger = Cfg.Attributes.FirstOrDefault(c => c.Meta.Type == typeof(LoggerAttribute));
         Assert.AreNotEqual(logger, null);
-        Assert.AreEqual(logger.Declaring, AttributeBase.DeclaringType.Assembly);
+        Assert.AreEqual(logger.Meta.Declaring, AttributeBase.MetaData.DeclaringType.Assembly);
 
-        var command = Cfg.Attributes.FirstOrDefault(c => c.Type == typeof(CommandAttribute));
+        var command = Cfg.Attributes.FirstOrDefault(c => c.Meta.Type == typeof(CommandAttribute));
         Assert.AreNotEqual(command, null);
-        Assert.AreEqual(command.Declaring, AttributeBase.DeclaringType.Assembly);
+        Assert.AreEqual(command.Meta.Declaring, AttributeBase.MetaData.DeclaringType.Assembly);
 
-        var info = Cfg.Attributes.FirstOrDefault(c => c.Type == typeof(Info));
+        var info = Cfg.Attributes.FirstOrDefault(c => c.Meta.Type == typeof(Info));
         Assert.AreNotEqual(info, null);
-        Assert.AreEqual(info.Declaring, AttributeBase.DeclaringType.Class);
+        Assert.AreEqual(info.Meta.Declaring, AttributeBase.MetaData.DeclaringType.Class);
     }
 
     [TestMethod]
@@ -1366,7 +1367,7 @@ public class TestBusinessMember
     {
         var member = Bind.Create<BusinessLoggerAndArg>().UseDoc();
 
-        Configer.LoggerSet(new LoggerAttribute(LoggerType.Record, canWrite: false) { Group = "333" }, typeof(Use02));
+        member.LoggerSet(new LoggerAttribute(LoggerType.Record, canWrite: false) { Group = "333" }, typeof(Use02));
 
         var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry(new Use01 { A = "bbb" }, "use02"), new UseEntry(new Use01 { A = "aaa" }));
         Assert.AreEqual(t2.Message, null);
@@ -1903,5 +1904,20 @@ public class TestBusinessMember
 
         Assert.AreEqual(r.State, 0);
         Assert.AreEqual(r.Message.Contains("Attribute Proces exception! 1"), true);
+    }
+
+    [TestMethod]
+    public void TestAttrs()
+    {
+        var attrs = Member.Configer.MetaData["Test0011"].Attributes;
+
+        foreach (var item in attrs)
+        {
+            var attr = item.Clone();
+        }
+        //Member.Configer.Info.CommandGroupDefault
+
+        //Assert.AreEqual(r.State, 0);
+        //Assert.AreEqual(r.Message.Contains("Attribute Proces exception! 1"), true);
     }
 }

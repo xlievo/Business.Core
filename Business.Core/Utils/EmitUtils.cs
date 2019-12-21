@@ -508,7 +508,7 @@ namespace Business.Utils.Emit
                 return null;
             }
 
-            var setMethod = propertyInfo.GetSetMethod(nonPublic);
+            var setMethod = propertyInfo.GetSetMethod(nonPublic) ?? propertyInfo.DeclaringType.GetProperty(propertyInfo.Name)?.GetSetMethod(nonPublic);
             if (setMethod == null)
             {
                 //if (nonPublic)

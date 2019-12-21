@@ -50,6 +50,96 @@ namespace Business.Utils
 
     public static class Help
     {
+        #region Bootstrap
+
+        //public static Bind Use<T>(this Bind bootstrap, string name, T aegs)
+        //{
+        //    bootstrap.bootstrapConfig.dictionary.TryAdd(name, aegs);
+        //    return bootstrap;
+        //}
+
+        /// <summary>
+        /// Generating Document Model for All Business Classes. business.doc
+        /// </summary>
+        /// <param name="bind"></param>
+        /// <param name="outDir"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public static Bind UseDoc(this Bind bind, string outDir = null, Config config = default)
+        {
+            bind.bootstrapConfig.dictionary.TryAdd("UseDoc", new { outDir, config });
+            return bind;
+        }
+
+        /// <summary>
+        /// Inject a parameter type, depending on the parameter type
+        /// </summary>
+        /// <param name="bind"></param>
+        /// <param name="argType"></param>
+        /// <returns></returns>
+        public static Bind UseType(this Bind bind, params System.Type[] argType)
+        {
+            bind.bootstrapConfig.dictionary.TryAdd("UseTypeType", argType);
+            return bind;
+        }
+
+        /// <summary>
+        /// Inject a parameter type, depending on the parameter name
+        /// </summary>
+        /// <param name="bind"></param>
+        /// <param name="argName"></param>
+        /// <returns></returns>
+        public static Bind UseType(this Bind bind, params string[] argName)
+        {
+            bind.bootstrapConfig.dictionary.TryAdd("UseTypeName", argName);
+            return bind;
+        }
+
+        public static Bind LoggerSet(this Bind bind, Attributes.LoggerAttribute logger, params System.Type[] argType)
+        {
+            bind.bootstrapConfig.dictionary.TryAdd("LoggerSetType", new { logger, argType });
+            return bind;
+        }
+
+        /// <summary>
+        /// Set the log characteristics of a parameter, depending on the parameter name
+        /// </summary>
+        /// <param name="bind"></param>
+        /// <param name="logger"></param>
+        /// <param name="argName"></param>
+        /// <returns></returns>
+        public static Bind LoggerSet(this Bind bind, Attributes.LoggerAttribute logger, params string[] argName)
+        {
+            bind.bootstrapConfig.dictionary.TryAdd("LoggerSetName", new { logger, argName });
+            return bind;
+        }
+
+        /// <summary>
+        /// Set a parameter's ignore feature, depending on the parameter name
+        /// </summary>
+        /// <param name="bind"></param>
+        /// <param name="ignore"></param>
+        /// <param name="argName"></param>
+        /// <returns></returns>
+        public static Bind IgnoreSet(this Bind bind, Attributes.Ignore ignore, params string[] argName)
+        {
+            bind.bootstrapConfig.dictionary.TryAdd("IgnoreSetName", new { ignore, argName });
+            return bind;
+        }
+
+        public static Bind IgnoreSet(this Bind bind, Attributes.Ignore ignore, params System.Type[] argType)
+        {
+            bind.bootstrapConfig.dictionary.TryAdd("IgnoreSetType", new { ignore, argType });
+            return bind;
+        }
+
+        public static Bind MemberSet(this Bind bind, string memberName, object memberObj, bool skipNull = false)
+        {
+            bind.bootstrapConfig.dictionary.TryAdd("MemberSet", new { memberName, memberObj, skipNull });
+            return bind;
+        }
+
+        #endregion
         public static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null)
         {
             var key2 = string.IsNullOrWhiteSpace(key) ? type.FullName : key;
@@ -120,7 +210,7 @@ namespace Business.Utils
                         {
                             var attr = first.Value;
 
-                            if (attr.Declaring != Attributes.AttributeBase.DeclaringType.Parameter)
+                            if (attr.Meta.Declaring != Attributes.AttributeBase.MetaData.DeclaringType.Parameter)
                             {
                                 item2.Value.Attrs.Remove(attr, out _);
                             }
@@ -138,7 +228,8 @@ namespace Business.Utils
                         //add default convert
                         if (arg.HasIArg && NodeState.DAT != first.State)
                         {
-                            var attr = new Attributes.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition) { Declaring = Attributes.AttributeBase.DeclaringType.Parameter };
+                            var attr = new Attributes.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
+                            attr.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
                             item2.Value.Attrs.TryAdd(attr);
                             //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
                         }
@@ -186,7 +277,7 @@ namespace Business.Utils
                         {
                             var attr = first.Value;
 
-                            if (attr.Declaring != Attributes.AttributeBase.DeclaringType.Parameter)
+                            if (attr.Meta.Declaring != Attributes.AttributeBase.MetaData.DeclaringType.Parameter)
                             {
                                 item2.Value.Attrs.Remove(attr, out _);
                             }
@@ -197,7 +288,8 @@ namespace Business.Utils
                         //add default convert
                         if (arg.HasIArg && NodeState.DAT != first.State)
                         {
-                            var attr = new Attributes.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition) { Declaring = Attributes.AttributeBase.DeclaringType.Parameter };
+                            var attr = new Attributes.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
+                            attr.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
                             item2.Value.Attrs.TryAdd(attr);
                         }
                     }
@@ -651,13 +743,13 @@ namespace Business.Utils
             var attr = argGroup.Attrs?.First;
             while (null != attr && NodeState.DAT == attr.State)
             {
-                if ("Business.Attributes.ArgumentDefaultAttribute" == attr.Value.Type.FullName)
+                if ("Business.Attributes.ArgumentDefaultAttribute" == attr.Value.Meta.Type.FullName)
                 {
                     attr = attr.Next;
                     continue;
                 }
 
-                attrs.Add(string.IsNullOrWhiteSpace(attr.Value.Description) ? attr.Value.Type.Name.EndsWith(AttributeSign) ? attr.Value.Type.Name.Substring(0, attr.Value.Type.Name.Length - AttributeSign.Length) : attr.Value.Type.Name : attr.Value.Description);
+                attrs.Add(string.IsNullOrWhiteSpace(attr.Value.Description) ? attr.Value.Meta.Type.Name.EndsWith(AttributeSign) ? attr.Value.Meta.Type.Name.Substring(0, attr.Value.Meta.Type.Name.Length - AttributeSign.Length) : attr.Value.Meta.Type.Name : attr.Value.Description);
                 attr = attr.Next;
             }
 
@@ -934,7 +1026,7 @@ namespace Business.Utils
 
                 if (!groups.Any()) { return; }
 
-                logger.Declaring = Attributes.AttributeBase.DeclaringType.Parameter;
+                logger.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
 
                 System.Threading.Tasks.Parallel.ForEach(argType, type =>
                 {
@@ -975,7 +1067,7 @@ namespace Business.Utils
 
                 if (!groups.Any()) { return; }
 
-                logger.Declaring = Attributes.AttributeBase.DeclaringType.Parameter;
+                logger.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
 
                 System.Threading.Tasks.Parallel.ForEach(argName2, name =>
                 {
@@ -1012,7 +1104,7 @@ namespace Business.Utils
 
                 if (!groups.Any()) { return; }
 
-                ignore.Declaring = Attributes.AttributeBase.DeclaringType.Parameter;
+                ignore.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
 
                 System.Threading.Tasks.Parallel.ForEach(argType, type =>
                 {
@@ -1055,7 +1147,7 @@ namespace Business.Utils
                 //checked group
                 if (!groups.Any()) { return; }
 
-                ignore.Declaring = Attributes.AttributeBase.DeclaringType.Parameter;
+                ignore.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
 
                 System.Threading.Tasks.Parallel.ForEach(argName2, name =>
                 {
@@ -1382,6 +1474,27 @@ namespace Business.Utils
 
             return member.IsDefined(typeof(T));
         }
+
+        //public static IEnumerable<T> SetAttributesMeta<T>(this IEnumerable<T> attrs, Attributes.AttributeBase.DeclaringType declaring, dynamic member, System.Action<T> action = null) where T : Attributes.AttributeBase
+        //{
+        //    var g = attrs.GroupBy(c => c.Meta.Type.FullName);
+
+        //    foreach (var item in g)
+        //    {
+        //        var i = 0;
+        //        foreach (var item2 in item)
+        //        {
+        //            item2.Meta.Declaring = declaring;
+        //            item2.Meta.Member = member;
+        //            item2.Meta.Position = i++;
+        //            action?.Invoke(item2);
+        //        }
+        //    }
+
+        //    return attrs;
+        //}
+
+        //public static List<T> SetAttributesMeta<T>(this List<T> attrs, Attributes.AttributeBase.DeclaringType declaring, dynamic member) where T : Attributes.AttributeBase => SetAttributesMeta(attrs, declaring, member);
 
         #endregion
 

@@ -145,7 +145,7 @@ public abstract class BusinessBase : BusinessBase<ResultObject<string>>
             {
                 var logs = x.Select(c =>
                 {
-                    c.Value = c.Value.ToValue();
+                    c.Value = c.Value?.ToValue();
 
                     if (c.Type == LoggerType.Exception)
                     {
@@ -197,6 +197,7 @@ public static class Common
 
         AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as Exception)?.ExceptionWrite(true, true, LogPath);
 
+        Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
         Console.WriteLine($"LogPath: {LogPath}");
 
         MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
@@ -260,15 +261,23 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         */
 
         //InitRedis();
-        //1
-        Configer.LoadBusiness(new object[] { Host });
-        //2
-        Configer.UseType("context", "socket");
-        Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket");
-        Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket");
+
+        Bind.CreateAll()
+            .UseType("context", "socket", "httpFile")
+            .IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket", "httpFile")
+            .LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket", "httpFile")
+            .UseDoc(docDir, new Business.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true })
+            .LoadBusiness(new object[] { Host });
+
+        ////1
+        //Configer.LoadBusiness(new object[] { Host });
+        ////2
+        //Configer.UseType("context", "socket", "httpFile");
+        //Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket", "httpFile");
+        //Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket", "httpFile");
         //==================The third step==================//
         //3
-        Configer.UseDoc(docDir, new Business.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true });
+        //Configer.UseDoc(docDir, new Business.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true });
         //writ url to page
         DocUI.Write(docDir, update: true);
         //add route
@@ -593,7 +602,7 @@ public class BusinessController : Controller
             //the data of this request, allow null.
             cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeObjectArray(),
             //the incoming use object
-            new UseEntry(this, "context"), //context
+            new UseEntry(this, "context", "httpFile"), //context
             new UseEntry(new Token //token
             {
                 Key = t,

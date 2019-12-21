@@ -29,6 +29,36 @@ namespace Business.Attributes //Annotations
     {
         #region MetaData
 
+        public class MetaData
+        {
+            /// <summary>
+            /// Source types that declare this feature
+            /// </summary>
+            public enum DeclaringType
+            {
+                Assembly,
+                Class,
+                Method,
+                Parameter,
+                Children,
+            }
+
+            /// <summary>
+            /// Gets the fully qualified type name, including the namespace but not the assembly
+            /// </summary>
+            public System.Type Type { get; internal set; }
+
+            /// <summary>
+            /// Declare the source of this feature
+            /// </summary>
+            public DeclaringType Declaring { get; internal set; }
+
+            public void Clone(AttributeBase attribute)
+            {
+                this.Declaring = attribute.Meta.Declaring;
+            }
+        }
+
         static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 
         #region GetAttributes
@@ -45,14 +75,14 @@ namespace Business.Attributes //Annotations
 
             foreach (var item in classAttr)
             {
-                item.Declaring = DeclaringType.Class;
+                item.Meta.Declaring = MetaData.DeclaringType.Class;
             }
 
             var assemblyAttr = classType.Assembly.GetCustomAttributes<AttributeBase>();
 
             foreach (var item in assemblyAttr)
             {
-                item.Declaring = DeclaringType.Assembly;
+                item.Meta.Declaring = MetaData.DeclaringType.Assembly;
             }
 
             var attributes = new System.Collections.Generic.List<AttributeBase>(classAttr).Distinct(assemblyAttr);
@@ -63,7 +93,7 @@ namespace Business.Attributes //Annotations
         internal static System.Collections.Generic.List<AttributeBase> GetAttributes(MemberInfo member, bool inherit = true)
         {
             var attributes = member.GetAttributes<AttributeBase>(inherit).ToList();
-            attributes.ForEach(c => c.Declaring = DeclaringType.Method);
+            attributes.ForEach(c => c.Meta.Declaring = MetaData.DeclaringType.Method);
             return attributes;
         }
 
@@ -72,7 +102,7 @@ namespace Business.Attributes //Annotations
             var attributes = new System.Collections.Generic.List<AttributeBase>(member.GetAttributes<AttributeBase>());
             attributes.AddRange(member.ParameterType.GetAttributes<AttributeBase>());
             attributes.AddRange(type.GetAttributes<AttributeBase>());
-            attributes.ForEach(c => c.Declaring = DeclaringType.Parameter);
+            attributes.ForEach(c => c.Meta.Declaring = MetaData.DeclaringType.Parameter);
             return attributes;
         }
         internal static System.Collections.Generic.List<ArgumentAttribute> GetCollectionAttributes(System.Type type)
@@ -80,7 +110,7 @@ namespace Business.Attributes //Annotations
             var attributes = new System.Collections.Generic.List<ArgumentAttribute>(type.GetAttributes<ArgumentAttribute>());
             attributes.ForEach(c =>
             {
-                c.Declaring = DeclaringType.Parameter;
+                c.Meta.Declaring = MetaData.DeclaringType.Parameter;
                 c.CollectionItem = true;
             });
             return attributes;
@@ -90,7 +120,7 @@ namespace Business.Attributes //Annotations
             var attribute = member.GetAttribute<Attribute>() ?? type.GetAttribute<Attribute>();
             if (null != attribute)
             {
-                attribute.Declaring = DeclaringType.Parameter;
+                attribute.Meta.Declaring = MetaData.DeclaringType.Parameter;
             }
             return attribute;
         }
@@ -99,14 +129,14 @@ namespace Business.Attributes //Annotations
             var attributes = new System.Collections.Generic.List<AttributeBase>();
             attributes.AddRange(member.GetAttributes<AttributeBase>());
             attributes.AddRange(type.GetAttributes<AttributeBase>());
-            attributes.ForEach(c => c.Declaring = DeclaringType.Children);
+            attributes.ForEach(c => c.Meta.Declaring = MetaData.DeclaringType.Children);
             return attributes;
         }
 
-        internal static System.Collections.Generic.List<Attribute> GetAttributes<Attribute>(System.Type type, DeclaringType source, System.Collections.Generic.IEqualityComparer<Attribute> comparer = null) where Attribute : AttributeBase
+        internal static System.Collections.Generic.List<Attribute> GetAttributes<Attribute>(System.Type type, MetaData.DeclaringType source, System.Collections.Generic.IEqualityComparer<Attribute> comparer = null) where Attribute : AttributeBase
         {
             var attributes = type.GetAttributes<Attribute>().Distinct(comparer).ToList();
-            attributes.ForEach(c => c.Declaring = source);
+            attributes.ForEach(c => c.Meta.Declaring = source);
             return attributes;
         }
 
@@ -128,13 +158,13 @@ namespace Business.Attributes //Annotations
         {
             get
             {
-                if (!Accessors.TryGetValue(this.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return null; }
+                if (!Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return null; }
 
                 return accessor.Getter(this);
             }
             set
             {
-                if (!Accessors.TryGetValue(this.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return; }
+                if (!Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return; }
 
                 try
                 {
@@ -147,164 +177,16 @@ namespace Business.Attributes //Annotations
             }
         }
 
-        //public virtual bool MemberSet(System.Type type, string value, out object outValue)
-        //{
-        //    outValue = null;
-
-        //    if (type.IsEnum)
-        //    {
-        //        if (System.String.IsNullOrWhiteSpace(value)) { return false; }
-
-        //        var enums = System.Enum.GetValues(type).Cast<System.Enum>();
-        //        var enumValue = enums.FirstOrDefault(c => value.Equals(c.ToString(), System.StringComparison.CurrentCultureIgnoreCase));
-        //        if (null != enumValue)
-        //        {
-        //            outValue = enumValue;
-        //            return true;
-        //        }
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        switch (type.FullName)
-        //        {
-        //            case "System.String":
-        //                outValue = value;
-        //                return true;
-        //            case "System.Int16":
-        //                if (System.Int16.TryParse(value, out short value2))
-        //                {
-        //                    outValue = value2;
-        //                    return true;
-        //                }
-        //                return false;
-        //            case "System.Int32":
-        //                if (System.Int32.TryParse(value, out int value3))
-        //                {
-        //                    outValue = value3;
-        //                    return true;
-        //                }
-        //                return false;
-        //            case "System.Int64":
-        //                if (System.Int64.TryParse(value, out long value4))
-        //                {
-        //                    outValue = value4;
-        //                    return true;
-        //                }
-        //                return false;
-        //            case "System.Decimal":
-        //                if (System.Decimal.TryParse(value, out decimal value5))
-        //                {
-        //                    outValue = value5;
-        //                    return true;
-        //                }
-        //                return false;
-        //            case "System.Double":
-        //                if (System.Double.TryParse(value, out double value6))
-        //                {
-        //                    outValue = value6;
-        //                    return true;
-        //                }
-        //                return false;
-        //            default:
-        //                value.ChangeType(type);
-        //                System.Convert.ChangeType(value, type);
-        //                return false;
-        //        }
-        //    }
-        //}
-        /*
-        public bool MemberSet(string member, dynamic value)
+        public AttributeBase()
         {
-            if (!MetaData.TryGetValue(this.type.FullName, out System.Collections.Generic.IReadOnlyDictionary<string, Accessor> meta) || !meta.TryGetValue(member, out Accessor accessor)) { return false; }
+            this.Meta = new MetaData { Type = this.TypeId as System.Type };
 
-            try
-            {
-                var value2 = Help.ChangeType(value, accessor.Type);
-                if (System.Object.Equals(value2, accessor.Getter(this)))
-                {
-                    return false;
-                }
-                accessor.Setter(this, value2);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        */
-
-        public AttributeBase()//bool config = false
-        {
-            this.Type = this.GetType();
-            //this.AllowMultiple = this.Type.GetTypeInfo().GetAttribute<System.AttributeUsageAttribute>()?.AllowMultiple ?? false;
-            //this.basePath = this.Type.FullName.Replace('+', '.');
-
-            //var usage = this.Type.GetTypeInfo().GetAttribute<System.AttributeUsageAttribute>();
-            //if (null != usage)
-            //{
-            //    this.AllowMultiple = usage?.AllowMultiple;
-            //    this.Inherited = usage.Inherited;
-            //}
-
-            this.Type.LoadAccessors(Accessors);
-
-            //this.config = config;
+            this.Meta.Type.LoadAccessors(Accessors);
         }
 
         #region
 
-        /// <summary>
-        /// Source types that declare this feature
-        /// </summary>
-        public enum DeclaringType
-        {
-            Assembly,
-            Class,
-            Method,
-            Parameter,
-            Children,
-        }
-
-        /// <summary>
-        /// Gets the fully qualified type name, including the namespace but not the assembly
-        /// </summary>
-        public System.Type Type { get; private set; }
-
-        ///// <summary>
-        ///// Is it possible to specify attributes for multiple instances for a program element
-        ///// </summary>
-        //public bool AllowMultiple { get; private set; }
-
-        /// <summary>
-        /// Declare the source of this feature
-        /// </summary>
-        public DeclaringType Declaring { get; internal set; }
-
-        ///// <summary>
-        ///// Determines whether the attributes indicated by the derived class and the overridden member are inherited
-        ///// </summary>
-        //public bool Inherited { get; private set; }
-
-        //bool enable = true;
-        //public bool Enable { get => enable; set => enable = value; }
-
-        //readonly bool config;
-        //public bool Config { get => config; }
-
-        //readonly string basePath;
-        //public virtual string BasePath { get => basePath; }
-
-        //readonly bool restart;
-        //public bool Restart { get => restart; }
-
-        ///// <summary>
-        ///// Used for the command group
-        ///// </summary>
-        //public virtual string Group { get; set; }
-
-        //public virtual string GetKey(string space = "->") => string.Format("{1}{0}{2}", space, this.Group, this.BasePath);
+        public MetaData Meta { get; }
 
         #endregion
 
@@ -315,30 +197,28 @@ namespace Business.Attributes //Annotations
         /// <returns></returns>
         public virtual T Clone<T>() where T : AttributeBase
         {
-            if (this.Type.IsAbstract) { return default; }
+            if (this.Meta.Type.IsAbstract) { return default; }
 
-            return Force.DeepCloner.DeepClonerExtensions.DeepClone(this as T);
-
-            /*
-            if (!Accessors.TryGetValue(this.Type.FullName, out AttributeAccessor meta))
+            if (!Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta))
             {
                 return default;
             }
 
-            var attr = System.Activator.CreateInstance(this.Type, meta.ConstructorArgs);
+            if (!(System.Activator.CreateInstance(this.Meta.Type, meta.ConstructorArgs) is AttributeBase attr)) { return default; }
 
-            foreach (var item in meta.Accessor.Values)
+            foreach (var item in meta.Accessor)
             {
-                item.Setter(attr, item.Getter(this));
+                item.Value.Setter(attr, item.Value.Getter(this));
             }
 
+            attr.Meta.Clone(this);
+
             return attr as T;
-            */
         }
 
         public virtual string Replace(string value)
         {
-            if (string.IsNullOrWhiteSpace(value) || !Accessors.TryGetValue(this.Type.FullName, out Accessors meta))
+            if (string.IsNullOrWhiteSpace(value) || !Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta))
             {
                 return value;
             }
@@ -461,16 +341,11 @@ namespace Business.Attributes //Annotations
         //public bool Contains(IgnoreMode mode) => 0 != (this.Mode & mode);
     }
 
-    /// <summary>
-    /// Token
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Parameter | System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
-    public sealed class TokenAttribute : System.Attribute { }
+    ///// <summary>
+    ///// Token
+    ///// </summary>
     //[System.AttributeUsage(System.AttributeTargets.Parameter | System.AttributeTargets.Class | System.AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
-    //public sealed class HttpFileAttribute : System.Attribute { }
-    //[System.AttributeUsage(System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-    //public class HttpRequestAttribute : System.Attribute { }
-
+    //public sealed class TokenAttribute : System.Attribute { }
 
     //[System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     //public sealed class EnableWatcherAttribute : System.Attribute { }
@@ -521,234 +396,6 @@ namespace Business.Attributes //Annotations
         //public string ConfigFileName { get; internal set; }
     }
 
-    /*
-    /// <summary>
-    /// Socket
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple = false, Inherited = true)]
-    public class SocketAttribute : AttributeBase
-    {
-        /// <summary>
-        /// Socket server running mode
-        /// </summary>
-        public enum SocketMode
-        {
-            /// <summary>
-            /// Tcp mode
-            /// </summary>
-            Tcp = 0,
-            /// <summary>
-            /// Udp mode
-            /// </summary>
-            Udp = 1,
-        }
-
-        #region Default
-
-        public const string DefaultDescription = "Socket Service";
-
-        /// <summary>
-        /// The default ip
-        /// </summary>
-        public const string DefaultIp = "127.0.0.1";
-
-        /// <summary>
-        /// The default port
-        /// </summary>
-        public const int DefaultPort = 8200;
-
-        /// <summary>
-        /// The default socket mode
-        /// </summary>
-        public const SocketMode DefaultMode = SocketMode.Tcp;
-
-        /// <summary>
-        /// The default socket mode
-        /// </summary>
-        public const string DefaultSecurity = "None";
-
-        /// <summary>
-        /// The default security
-        /// </summary>
-        public const bool DefaultClearIdleSession = true;
-
-        /// <summary>
-        /// Default clear idle session interval
-        /// </summary>
-        public const int DefaultClearIdleSessionInterval = 120;
-        /// <summary>
-        /// Default idle session timeout
-        /// </summary>
-        public const int DefaultIdleSessionTimeOut = 300;
-        /// <summary>
-        /// The default keep alive interval
-        /// </summary>
-        public const int DefaultKeepAliveInterval = 60;
-        /// <summary>
-        /// The default keep alive time
-        /// </summary>
-        public const int DefaultKeepAliveTime = 600;
-        ///// <summary>
-        ///// The default listen backlog
-        ///// </summary>
-        //public const int DefaultListenBacklog = 100;
-        /// <summary>
-        /// Default MaxConnectionNumber
-        /// </summary>
-        public const int DefaultMaxConnectionNumber = 100;
-        /// <summary>
-        /// Default MaxRequestLength
-        /// </summary>
-        public const int DefaultMaxRequestLength = 1024;
-        /// <summary>
-        /// Default ReceiveBufferSize
-        /// </summary>
-        public const int DefaultReceiveBufferSize = 4096;
-        /// <summary>
-        /// The default send buffer size
-        /// </summary>
-        public const int DefaultSendBufferSize = 2048;
-        /// <summary>
-        /// Default sending queue size
-        /// </summary>
-        public const int DefaultSendingQueueSize = 5;
-        /// <summary>
-        /// Default send timeout value, in milliseconds
-        /// </summary>
-        public const int DefaultSendTimeout = 5000;
-        /// <summary>
-        /// The default session snapshot interval
-        /// </summary>
-        public const int DefaultSessionSnapshotInterval = 5;
-
-        #endregion
-
-        /// <summary>
-        /// Initializes a new instance of the socket configuration class
-        /// </summary>
-        /// <param name="ip">Gets the ip of listener</param>
-        /// <param name="port">Gets the port of listener</param>
-        /// <param name="mode">Gets/sets the mode.</param>
-        /// <param name="security">Gets/sets the security option, None/Default/Tls/Ssl/...</param>
-        /// <param name="clearIdleSession"></param>
-        /// <param name="clearIdleSessionInterval">clear idle session interval</param>
-        /// <param name="idleSessionTimeOut">idle session timeout</param>
-        /// <param name="keepAliveInterval">The keep alive interval</param>
-        /// <param name="keepAliveTime">The keep alive time</param>
-        /// <param name="maxConnectionNumber">max connection number</param>
-        /// <param name="maxRequestLength"></param>
-        /// <param name="receiveBufferSize"></param>
-        /// <param name="sendBufferSize">The send buffer size</param>
-        /// <param name="sendingQueueSize">sending queue size</param>
-        /// <param name="sendTimeOut">send timeout value, in milliseconds</param>
-        /// <param name="sessionSnapshotInterval">The default session snapshot interval</param>
-        /// <param name="description"></param>
-        [Newtonsoft.Json.JsonConstructor]
-        public SocketAttribute(string ip = DefaultIp, int port = DefaultPort, SocketMode mode = DefaultMode, string security = DefaultSecurity, bool clearIdleSession = true, int clearIdleSessionInterval = DefaultClearIdleSessionInterval, int idleSessionTimeOut = DefaultIdleSessionTimeOut, int keepAliveInterval = DefaultKeepAliveInterval, int keepAliveTime = DefaultKeepAliveTime, int maxConnectionNumber = DefaultMaxConnectionNumber, int maxRequestLength = DefaultMaxRequestLength, int receiveBufferSize = DefaultReceiveBufferSize, int sendBufferSize = DefaultSendBufferSize, int sendingQueueSize = DefaultSendingQueueSize, int sendTimeOut = DefaultSendTimeout, int sessionSnapshotInterval = DefaultSessionSnapshotInterval, string description = DefaultDescription)
-        {
-            this.Ip = ip;
-            this.Port = port;
-            this.Mode = mode;
-            this.Security = security;
-            this.ClearIdleSession = clearIdleSession;
-            this.ClearIdleSessionInterval = clearIdleSessionInterval;
-            this.IdleSessionTimeOut = idleSessionTimeOut;
-            this.KeepAliveInterval = keepAliveInterval;
-            this.KeepAliveTime = keepAliveTime;
-            this.MaxConnectionNumber = maxConnectionNumber;
-            this.MaxRequestLength = maxRequestLength;
-            this.ReceiveBufferSize = receiveBufferSize;
-            this.SendBufferSize = sendBufferSize;
-            this.SendingQueueSize = sendingQueueSize;
-            this.SendTimeOut = sendTimeOut;
-            this.SessionSnapshotInterval = sessionSnapshotInterval;
-            this.Description = description;
-        }
-
-        /// <summary>
-        /// Gets the ip of listener
-        /// </summary>
-        public string Ip { get; internal set; }
-
-        /// <summary>
-        /// Gets the port of listener
-        /// </summary>
-        public int Port { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the mode.
-        /// </summary>
-        public SocketMode Mode { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the security option, None/Default/Tls/Ssl/...
-        /// </summary>
-        public string Security { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets a value indicating whether clear idle session.
-        /// </summary>
-        public bool ClearIdleSession { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the clear idle session interval, in seconds.
-        /// </summary>
-        public int ClearIdleSessionInterval { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the idle session timeout time length, in seconds.
-        /// </summary>
-        public int IdleSessionTimeOut { get; internal set; }
-
-        /// <summary>
-        /// Gets the max connection number.
-        /// </summary>
-        public int MaxConnectionNumber { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the length of the max request.
-        /// </summary>
-        public int MaxRequestLength { get; internal set; }
-
-        /// <summary>
-        /// Gets the size of the receive buffer.
-        /// </summary>
-        public int ReceiveBufferSize { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the keep alive interval, in seconds.
-        /// </summary>
-        public int KeepAliveInterval { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the start keep alive time, in seconds
-        /// </summary>
-        public int KeepAliveTime { get; internal set; }
-
-        /// <summary>
-        /// Gets the size of the send buffer.
-        /// </summary>
-        public int SendBufferSize { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the size of the sending queue.
-        /// </summary>
-        public int SendingQueueSize { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the send time out.
-        /// </summary>
-        public int SendTimeOut { get; internal set; }
-
-        /// <summary>
-        /// Gets/sets the interval to taking snapshot for all live sessions.
-        /// </summary>
-        public int SessionSnapshotInterval { get; internal set; }
-
-        public string Description { get; internal set; }
-    }
-    */
-
     public struct UseEntry
     {
         public UseEntry(object value, params string[] parameterName)
@@ -760,11 +407,11 @@ namespace Business.Attributes //Annotations
             this.ParameterName = parameterName;
         }
 
-        public System.Type Type { get; private set; }
+        public System.Type Type { get; }
 
-        public object Value { get; private set; }
+        public object Value { get; }
 
-        public string[] ParameterName { get; private set; }
+        public string[] ParameterName { get; }
     }
 
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
@@ -796,7 +443,6 @@ namespace Business.Attributes //Annotations
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public class LoggerAttribute : GropuAttribute
     {
-        //[Newtonsoft.Json.JsonConstructor]
         public LoggerAttribute(LoggerType logType = LoggerType.All, bool canWrite = true)
         {
             this.LogType = logType;
@@ -835,7 +481,7 @@ namespace Business.Attributes //Annotations
         //public override string Key(string space = "->") => string.Format("{1}{0}{2}", space, this.Mode.GetName(), this.Group.Trim());
         public override string GroupKey(string space = "->") => $"{ base.GroupKey(space)}{space}{this.LogType.GetName()}";
 
-        public override string ToString() => $"{this.Type.Name} {this.LogType.ToString()}";
+        public override string ToString() => $"{this.Meta.Type.Name} {this.LogType.ToString()}";
     }
 
     /// <summary>
@@ -868,9 +514,9 @@ namespace Business.Attributes //Annotations
         /// </summary>
         public string Group { get => group; set => group = value?.Trim() ?? string.Empty; }
 
-        public virtual string GroupKey(string space = "->") => $"{this.Type.FullName}{space}{this.Group.Trim()}";
+        public virtual string GroupKey(string space = "->") => $"{this.Meta.Type.FullName}{space}{this.Group.Trim()}";
 
-        public static System.Collections.Generic.IEqualityComparer<GropuAttribute> Comparer = Equality<GropuAttribute>.CreateComparer(c => c.GroupKey(), System.StringComparer.CurrentCultureIgnoreCase);
+        public static System.Collections.Generic.IEqualityComparer<GropuAttribute> Comparer { get => Equality<GropuAttribute>.CreateComparer(c => c.GroupKey(), System.StringComparer.CurrentCultureIgnoreCase); }
     }
 
     /// <summary>
@@ -903,6 +549,23 @@ namespace Business.Attributes //Annotations
 
                 ProcesIArgCollection = 8,
             }
+
+            public void Clone(ArgumentAttribute attribute)
+            {
+                this.resultType = attribute.ArgumentMeta.resultType;
+                this.resultTypeDefinition = attribute.ArgumentMeta.resultTypeDefinition;
+                this.Method = attribute.ArgumentMeta.Method;
+                this.Member = attribute.ArgumentMeta.Member;
+                this.MemberType = attribute.ArgumentMeta.MemberType;
+                this.HasProcesIArg = attribute.ArgumentMeta.HasProcesIArg;
+            }
+        }
+
+        public override T Clone<T>()
+        {
+            var clone = base.Clone<ArgumentAttribute>();
+            clone.ArgumentMeta.Clone(this);
+            return clone as T;
         }
 
         public ArgumentAttribute(int state, string message = null)
@@ -910,7 +573,7 @@ namespace Business.Attributes //Annotations
             this.State = state;
             this.Message = message;
             //this.CanNull = canNull;
-            this.Meta = new MetaData();
+            this.ArgumentMeta = new MetaData();
 
             this.BindAfter += () =>
             {
@@ -930,7 +593,7 @@ namespace Business.Attributes //Annotations
 
         public System.Action BindAfter { get; set; }
 
-        public MetaData Meta { get; }
+        public MetaData ArgumentMeta { get; }
 
         /// <summary>
         /// Whether to apply to each item of a set parameter
@@ -991,7 +654,7 @@ namespace Business.Attributes //Annotations
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state) => ResultFactory.ResultCreate(Meta.resultType, Meta.resultTypeDefinition, state);
+        public IResult ResultCreate(int state) => ResultFactory.ResultCreate(ArgumentMeta.resultType, ArgumentMeta.resultTypeDefinition, state);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -999,7 +662,7 @@ namespace Business.Attributes //Annotations
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.ResultCreate(Meta.resultType, Meta.resultTypeDefinition, state, message);
+        public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.ResultCreate(ArgumentMeta.resultType, ArgumentMeta.resultTypeDefinition, state, message);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -1008,7 +671,7 @@ namespace Business.Attributes //Annotations
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(Meta.resultTypeDefinition, data, message, state);
+        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgumentMeta.resultTypeDefinition, data, message, state);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -1017,7 +680,7 @@ namespace Business.Attributes //Annotations
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(Meta.resultTypeDefinition, data, message, state);
+        public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgumentMeta.resultTypeDefinition, data, message, state);
 
         #endregion
 
@@ -1055,7 +718,7 @@ namespace Business.Attributes //Annotations
 
         public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.OnlyName}";
 
-        public override string ToString() => $"{this.Type.Name} {Group} {OnlyName}";
+        public override string ToString() => $"{this.Meta.Type.Name} {Group} {OnlyName}";
     }
 
     #region
@@ -1066,7 +729,7 @@ namespace Business.Attributes //Annotations
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
-            if (typeof(string).Equals(this.Meta.MemberType))
+            if (typeof(string).Equals(this.ArgumentMeta.MemberType))
             {
                 if (string.IsNullOrEmpty(value))
                 {
@@ -1111,7 +774,7 @@ namespace Business.Attributes //Annotations
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            var type = System.Nullable.GetUnderlyingType(this.Meta.MemberType) ?? this.Meta.MemberType;
+            var type = System.Nullable.GetUnderlyingType(this.ArgumentMeta.MemberType) ?? this.ArgumentMeta.MemberType;
 
             string msg = null;
 
@@ -1235,7 +898,7 @@ namespace Business.Attributes //Annotations
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            switch (this.Meta.MemberType.FullName)
+            switch (this.ArgumentMeta.MemberType.FullName)
             {
                 case "System.Decimal":
                     return this.ResultCreate(Help.Scale((decimal)value, Size));
@@ -1435,7 +1098,7 @@ namespace Business.Attributes //Annotations
 
                 Regex = MatchTimeoutInMilliseconds == -1
                     ? new System.Text.RegularExpressions.Regex(Pattern)
-                    : Regex = new System.Text.RegularExpressions.Regex(Pattern, default(System.Text.RegularExpressions.RegexOptions), System.TimeSpan.FromMilliseconds((double)MatchTimeoutInMilliseconds));
+                    : Regex = new System.Text.RegularExpressions.Regex(Pattern, default(System.Text.RegularExpressions.RegexOptions), System.TimeSpan.FromMilliseconds(MatchTimeoutInMilliseconds));
             }
         }
 
@@ -1637,8 +1300,8 @@ namespace Business.Attributes //Annotations
     {
         internal ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, int state = -11, string message = null) : base(state, message)
         {
-            this.Meta.resultType = resultType;
-            this.Meta.resultTypeDefinition = resultTypeDefinition;
+            this.ArgumentMeta.resultType = resultType;
+            this.ArgumentMeta.resultTypeDefinition = resultTypeDefinition;
         }
 
         public ArgumentDefaultAttribute(int state = -11, string message = null) : base(state, message) { }
@@ -1699,7 +1362,7 @@ namespace Business.Attributes //Annotations
 
             try
             {
-                return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize(value, this.Meta.MemberType, options));
+                return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize(value, this.ArgumentMeta.MemberType, options));
             }
             catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
         }

@@ -14,7 +14,13 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var host = CreateWebHostBuilder(args)
+        var host = WebHost.CreateDefaultBuilder(args)
+            .UseKestrel()
+            .UseStartup<Startup>()
+            //.ConfigureKestrel((context, options) =>
+            //{
+            //    // Set properties and call methods on options
+            //});
             //.UseUrls("http://*:5000")
             .Build();
         Common.Host.Addresses = host.ServerFeatures.Get<Microsoft.AspNetCore.Hosting.Server.Features.IServerAddressesFeature>().Addresses.FirstOrDefault() ?? "http://localhost:5000";
@@ -22,10 +28,10 @@ public class Program
         host.Run();
     }
 
-    public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-        WebHost.CreateDefaultBuilder(args)
-            .UseKestrel()
-            .UseStartup<Startup>();
+    //public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+    //    WebHost.CreateDefaultBuilder(args)
+    //        .UseKestrel()
+    //        .UseStartup<Startup>();
     //.ConfigureKestrel((context, options) =>
     //{
     //    // Set properties and call methods on options
