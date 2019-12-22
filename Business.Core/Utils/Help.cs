@@ -52,11 +52,35 @@ namespace Business.Utils
     {
         #region Bootstrap
 
-        //public static Bind Use<T>(this Bind bootstrap, string name, T aegs)
-        //{
-        //    bootstrap.bootstrapConfig.dictionary.TryAdd(name, aegs);
-        //    return bootstrap;
-        //}
+        public static Bind Use(this Bind bind, System.Func<IBusiness, IBusiness> operation)
+        {
+            bind.bootstrap.config.TryAdd(operation);
+            return bind;
+        }
+
+        static Bind UseDocAll(Bind bind, string outDir = null, Config config = default)
+        {
+            var exists = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
+            var doc = new Dictionary<string, IDoc>();
+
+            foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
+            {
+                item.Value.UseDoc(null, config);
+
+                if (exists)
+                {
+                    doc.Add(item.Value.Configer.Doc.Name, item.Value.Configer.Doc);
+                }
+            }
+
+            if (exists)
+            {
+                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.UTF8);
+                //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
+            }
+
+            return bind;
+        }
 
         /// <summary>
         /// Generating Document Model for All Business Classes. business.doc
@@ -67,7 +91,7 @@ namespace Business.Utils
         /// <returns></returns>
         public static Bind UseDoc(this Bind bind, string outDir = null, Config config = default)
         {
-            bind.bootstrapConfig.dictionary.TryAdd("UseDoc", new { outDir, config });
+            bind.bootstrap.useDoc = () => UseDocAll(bind, outDir, config);
             return bind;
         }
 
@@ -77,11 +101,7 @@ namespace Business.Utils
         /// <param name="bind"></param>
         /// <param name="argType"></param>
         /// <returns></returns>
-        public static Bind UseType(this Bind bind, params System.Type[] argType)
-        {
-            bind.bootstrapConfig.dictionary.TryAdd("UseTypeType", argType);
-            return bind;
-        }
+        public static Bind UseType(this Bind bind, params System.Type[] argType) => Use(bind, c => c.UseType(argType));
 
         /// <summary>
         /// Inject a parameter type, depending on the parameter name
@@ -89,17 +109,16 @@ namespace Business.Utils
         /// <param name="bind"></param>
         /// <param name="argName"></param>
         /// <returns></returns>
-        public static Bind UseType(this Bind bind, params string[] argName)
-        {
-            bind.bootstrapConfig.dictionary.TryAdd("UseTypeName", argName);
-            return bind;
-        }
+        public static Bind UseType(this Bind bind, params string[] argName) => Use(bind, c => c.UseType(argName));
 
-        public static Bind LoggerSet(this Bind bind, Attributes.LoggerAttribute logger, params System.Type[] argType)
-        {
-            bind.bootstrapConfig.dictionary.TryAdd("LoggerSetType", new { logger, argType });
-            return bind;
-        }
+        /// <summary>
+        /// Set the log characteristics of a parameter, depending on the parameter type
+        /// </summary>
+        /// <param name="bind"></param>
+        /// <param name="logger"></param>
+        /// <param name="argType"></param>
+        /// <returns></returns>
+        public static Bind LoggerSet(this Bind bind, Attributes.LoggerAttribute logger, params System.Type[] argType) => Use(bind, c => c.LoggerSet(logger, argType));
 
         /// <summary>
         /// Set the log characteristics of a parameter, depending on the parameter name
@@ -108,11 +127,7 @@ namespace Business.Utils
         /// <param name="logger"></param>
         /// <param name="argName"></param>
         /// <returns></returns>
-        public static Bind LoggerSet(this Bind bind, Attributes.LoggerAttribute logger, params string[] argName)
-        {
-            bind.bootstrapConfig.dictionary.TryAdd("LoggerSetName", new { logger, argName });
-            return bind;
-        }
+        public static Bind LoggerSet(this Bind bind, Attributes.LoggerAttribute logger, params string[] argName) => Use(bind, c => c.LoggerSet(logger, argName));
 
         /// <summary>
         /// Set a parameter's ignore feature, depending on the parameter name
@@ -121,23 +136,11 @@ namespace Business.Utils
         /// <param name="ignore"></param>
         /// <param name="argName"></param>
         /// <returns></returns>
-        public static Bind IgnoreSet(this Bind bind, Attributes.Ignore ignore, params string[] argName)
-        {
-            bind.bootstrapConfig.dictionary.TryAdd("IgnoreSetName", new { ignore, argName });
-            return bind;
-        }
+        public static Bind IgnoreSet(this Bind bind, Attributes.Ignore ignore, params string[] argName) => Use(bind, c => c.IgnoreSet(ignore, argName));
 
-        public static Bind IgnoreSet(this Bind bind, Attributes.Ignore ignore, params System.Type[] argType)
-        {
-            bind.bootstrapConfig.dictionary.TryAdd("IgnoreSetType", new { ignore, argType });
-            return bind;
-        }
+        public static Bind IgnoreSet(this Bind bind, Attributes.Ignore ignore, params System.Type[] argType) => Use(bind, c => c.IgnoreSet(ignore, argType));
 
-        public static Bind MemberSet(this Bind bind, string memberName, object memberObj, bool skipNull = false)
-        {
-            bind.bootstrapConfig.dictionary.TryAdd("MemberSet", new { memberName, memberObj, skipNull });
-            return bind;
-        }
+        public static Bind MemberSet(this Bind bind, string memberName, object memberObj, bool skipNull = false) => Use(bind, c => c.MemberSet(memberName, memberObj, skipNull));
 
         #endregion
         public static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null)
@@ -3062,7 +3065,7 @@ namespace Business.Utils
             var current = _first;
             while (current != null)
             {
-                if (current.Value.Equals(value))
+                if (current.Value == null || current.Value.Equals(value))
                 {
                     var state = current.State;
                     if (state != NodeState.INV)
@@ -3123,7 +3126,7 @@ namespace Business.Utils
                     previous.Next = successor;
                     current = successor;
                 }
-                else if (!current.Value.Equals(value))
+                else if (current.Value != null && !current.Value.Equals(value))
                 {
                     previous = current;
                     current = current.Next;
@@ -3138,7 +3141,6 @@ namespace Business.Utils
                     if (originalValue == NodeState.INS)
                     {
                         result = current.Value;
-                        current.State = NodeState.INV;
                         return true;
                     }
                 }
@@ -3285,7 +3287,7 @@ namespace Business.Utils
         }
     }
 
-    public enum NodeState
+    internal enum NodeState
     {
         INS = 0,
         REM = 1,

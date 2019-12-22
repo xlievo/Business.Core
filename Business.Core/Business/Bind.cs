@@ -312,7 +312,14 @@ namespace Business
     {
         internal protected Bind() { }
 
-        internal readonly ConcurrentReadOnlyDictionary<string, dynamic> bootstrapConfig = new ConcurrentReadOnlyDictionary<string, dynamic>();
+        internal struct Bootstrap
+        {
+            public ConcurrentLinkedList<System.Func<IBusiness, IBusiness>> config;
+
+            public System.Func<Bind> useDoc;
+        }
+
+        internal Bootstrap bootstrap = new Bootstrap { config = new ConcurrentLinkedList<System.Func<IBusiness, IBusiness>>() };
 
         /// <summary>
         /// bootstrap all Business class
@@ -320,8 +327,7 @@ namespace Business
         /// <returns></returns>
         public static Bind CreateAll() => new Bind();
 
-        //Build
-
+        /*
         /// <summary>
         /// Load all business classes in the run directory
         /// </summary>
@@ -341,49 +347,82 @@ namespace Business
                 return false;
             });
 
+            
+
             foreach (var business in Configer.BusinessList.Values.AsParallel())
             {
                 foreach (var config in bootstrapConfig.AsParallel())
                 {
+                    if (null == config.Value) { continue; }
+
                     switch (config.Key)
                     {
-                        case "UseTypeType": business.UseType(config.Value as System.Type[]); break;
-                        case "UseTypeName": business.UseType(config.Value as string[]); break;
+                        case "UseTypeType":
+                            {
+                                foreach (var value in config.Value)
+                                {
+                                    business.UseType(value as System.Type[]);
+                                }
+                            }
+                            break;
+                        case "UseTypeName":
+                            {
+                                foreach (var value in config.Value)
+                                {
+                                    business.UseType(value as string[]);
+                                }
+                            }
+                            break;
 
                         case "LoggerSetType":
                             {
-                                var logger = config.Value.logger as LoggerAttribute;
-                                var argType = config.Value.argType as System.Type[];
-                                business.LoggerSet(logger, argType);
+                                foreach (var value in config.Value)
+                                {
+                                    var logger = value.logger as LoggerAttribute;
+                                    var argType = value.argType as System.Type[];
+                                    business.LoggerSet(logger, argType);
+                                }
                                 break;
                             }
                         case "LoggerSetName":
                             {
-                                var logger = config.Value.logger as LoggerAttribute;
-                                var argName = config.Value.argName as string[];
-                                business.LoggerSet(logger, argName);
+                                foreach (var value in config.Value)
+                                {
+                                    var logger = value.logger as LoggerAttribute;
+                                    var argName = value.argName as string[];
+                                    business.LoggerSet(logger, argName);
+                                }
                                 break;
                             }
                         case "IgnoreSetName":
                             {
-                                var ignore = config.Value.ignore as Ignore;
-                                var argName = config.Value.argName as string[];
-                                business.IgnoreSet(ignore, argName);
+                                foreach (var value in config.Value)
+                                {
+                                    var ignore = value.ignore as Ignore;
+                                    var argName = value.argName as string[];
+                                    business.IgnoreSet(ignore, argName);
+                                }
                                 break;
                             }
                         case "IgnoreSetType":
                             {
-                                var ignore = config.Value.ignore as Ignore;
-                                var argType = config.Value.argType as System.Type[];
-                                business.IgnoreSet(ignore, argType);
+                                foreach (var value in config.Value)
+                                {
+                                    var ignore = value.ignore as Ignore;
+                                    var argType = value.argType as System.Type[];
+                                    business.IgnoreSet(ignore, argType);
+                                }
                                 break;
                             }
                         case "MemberSet":
                             {
-                                var memberName = config.Value.memberName as string;
-                                var memberObj = config.Value.memberObj as object;
-                                var skipNull = (bool)config.Value.skipNull;
-                                business.MemberSet(memberName, memberObj, skipNull);
+                                foreach (var value in config.Value)
+                                {
+                                    var memberName = value.memberName as string;
+                                    var memberObj = value.memberObj as object;
+                                    var skipNull = (bool)value.skipNull;
+                                    business.MemberSet(memberName, memberObj, skipNull);
+                                }
                                 break;
                             }
                         default: break;
@@ -392,8 +431,15 @@ namespace Business
             }
 
             // UseDoc
-            if (bootstrapConfig.TryGetValue("UseDoc", out dynamic args))
+            if (bootstrapConfig.TryGetValue("UseDoc", out System.Collections.Concurrent.ConcurrentBag<dynamic> useDoc))
             {
+                var args = useDoc?.FirstOrDefault();
+
+                if (null == args)
+                {
+                    return;
+                }
+
                 var outDir = args.outDir as string;
                 var config = (Document.Config)args.config;
 
@@ -416,6 +462,42 @@ namespace Business
                     //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
                 }
             }
+        }
+        */
+        /// <summary>
+        /// Load all business classes in the run directory
+        /// </summary>
+        /// <param name="constructorArguments"></param>
+        /// <param name="assemblyFiles"></param>
+        public virtual void LoadBusiness(object[] constructorArguments = null, params string[] assemblyFiles)
+        {
+            var businessType = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(System.AppContext.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
+            {
+                if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
+                {
+                    Create(type, constructorArguments);
+
+                    return true;
+                }
+
+                return false;
+            });
+
+            foreach (var business in Configer.BusinessList.Values.AsParallel())
+            {
+                var first = bootstrap.config.First;
+
+                while (NodeState.DAT == first.State)
+                {
+                    var conf = first.Value;
+
+                    conf.Invoke(business);
+
+                    first = first.Next;
+                }
+            }
+
+            bootstrap.useDoc?.Invoke();
         }
 
         //======================================//
@@ -571,8 +653,6 @@ namespace Business
 
         public void Dispose()
         {
-            bootstrapConfig.dictionary.Clear();
-
             var type = Instance?.GetType();
 
             if (null != type)
