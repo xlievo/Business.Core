@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business.Core", "Business.C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Auth", "Auth", "{942E324B-4266-4C8A-89CC-60E056A5F7D8}"
 	ProjectSection(SolutionItems) = preProject
-		Business.Core\Auth\Attributes.cs = Business.Core\Auth\Attributes.cs
+		Business.Core\Auth\Annotations.cs = Business.Core\Auth\Annotations.cs
 		Business.Core\Auth\Interceptor.cs = Business.Core\Auth\Interceptor.cs
 		Business.Core\Auth\Token.cs = Business.Core\Auth\Token.cs
 	EndProjectSection
@@ -43,7 +43,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Result", "Result", "{BADF3F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{B621B862-0E30-4023-AE06-E8912C596618}"
 	ProjectSection(SolutionItems) = preProject
-		Business.Core\Utils\EmitUtils.cs = Business.Core\Utils\EmitUtils.cs
+		Business.Core\Utils\Emit.cs = Business.Core\Utils\Emit.cs
 		Business.Core\Utils\Help.cs = Business.Core\Utils\Help.cs
 	EndProjectSection
 EndProject

@@ -15,7 +15,7 @@
           ##############
 ==================================*/
 
-namespace Business
+namespace Business.Core
 {
     public interface IBusiness
     {
@@ -34,15 +34,15 @@ namespace Business
         /// </summary>
         Configer Configer { get; set; }
 
-        /// <summary>
-        /// After binding
-        /// </summary>
-        System.Action BindAfter { get; set; }
+        ///// <summary>
+        ///// After binding
+        ///// </summary>
+        //System.Action BindAfter { get; set; }
 
-        /// <summary>
-        /// Before binding
-        /// </summary>
-        System.Action<Configer> BindBefore { get; set; }
+        ///// <summary>
+        ///// Before binding
+        ///// </summary>
+        //System.Action<Configer> BindBefore { get; set; }
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -82,10 +82,10 @@ namespace Business
         */
     }
 
-    public interface IBusiness<Result> : IBusiness where Result : Business.Result.IResult { }
+    public interface IBusiness<Result> : IBusiness where Result : Core.Result.IResult { }
 
     public abstract class BusinessBase<Result> : IBusiness<Result>
-        where Result : Business.Result.IResult
+        where Result : Core.Result.IResult
     {
         /// <summary>
         /// Log subscription queue
@@ -102,15 +102,15 @@ namespace Business
         /// </summary>
         public Configer Configer { get; set; }
 
-        /// <summary>
-        /// After binding
-        /// </summary>
-        public System.Action BindAfter { get; set; }
+        ///// <summary>
+        ///// After binding
+        ///// </summary>
+        //public System.Action BindAfter { get; set; }
 
-        /// <summary>
-        /// Before binding
-        /// </summary>
-        public System.Action<Configer> BindBefore { get; set; }
+        ///// <summary>
+        ///// Before binding
+        ///// </summary>
+        //public System.Action<Configer> BindBefore { get; set; }
 
         #region business
 
@@ -121,7 +121,7 @@ namespace Business
         /// <param name="message"></param>
         /// <param name="method"></param>
         /// <returns></returns>
-        public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => Business.Result.ResultFactory.ResultCreate(this.Configer.MetaData[method], state, message);
+        public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => Core.Result.ResultFactory.ResultCreate(this.Configer.MetaData[method], state, message);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -131,7 +131,7 @@ namespace Business
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public Business.Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => Business.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+        public Core.Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => Core.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -140,7 +140,7 @@ namespace Business
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public Business.Result.IResult ResultCreate(object data, string message = null, int state = 1) => Business.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+        public Core.Result.IResult ResultCreate(object data, string message = null, int state = 1) => Core.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
         #endregion
 

@@ -15,12 +15,11 @@
           ##############
 ==================================*/
 
-namespace Business
+namespace Business.Core
 {
-    using Business.Utils;
-    using Business.Meta;
-    using System.Linq;
-    using Business.Document;
+    using Meta;
+    using Document;
+    using Utils;
 
     /*
 #region ConfigJson
@@ -396,18 +395,18 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         public struct Route
         {
-            public Route(string business, string group = null, string name = null)
+            public Route(string business, string group = null, string command = null)
             {
                 Business = business;
                 Group = group;
-                Name = name;
+                Command = command;
             }
 
             public string Business { get; set; }
 
             public string Group { get; set; }
 
-            public string Name { get; set; }
+            public string Command { get; set; }
 
             public override string ToString()
             {
@@ -418,9 +417,9 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
                     key += $"/{Group}";
                 }
 
-                if (!string.IsNullOrWhiteSpace(Name))
+                if (!string.IsNullOrWhiteSpace(Command))
                 {
-                    key += $"/{Name}";
+                    key += $"/{Command}";
                 }
 
                 return key;
@@ -445,7 +444,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             DocJsonSettings.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
-        public Configer(Attributes.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Attributes.AttributeBase> attributes)
+        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -478,14 +477,27 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         //internal System.Func<string, string, string> GetCommandGroup = (group, name) => string.Format("{0}.{1}", group, name);
 
-        public virtual string GetCommandGroup(string group, string name) => $"{group}.{name}";
+        #region IBusiness
 
-        public ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; set; }
-        public ReadOnlyCollection<Attributes.AttributeBase> Attributes { get; private set; }
-        public Attributes.Info Info { get; private set; }
+        /// <summary>
+        /// After binding
+        /// </summary>
+        public System.Action BindAfter { get; set; }
+
+        /// <summary>
+        /// Before binding
+        /// </summary>
+        public System.Action<Configer> BindBefore { get; set; }
+
+        #endregion
+
+        public ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; internal set; }
+        public ReadOnlyCollection<Annotations.AttributeBase> Attributes { get; private set; }
         //public bool EnableWatcher { get; }
-        public System.Type ResultTypeDefinition { get; private set; }
         public ReadOnlyCollection<string> UseTypes { get; private set; }
+
+        public Annotations.Info Info { get; private set; }
+        public System.Type ResultTypeDefinition { get; private set; }
         public IDoc Doc { get; internal set; }
 
         ///// <summary>
@@ -508,7 +520,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// <summary>
         /// Logger
         /// </summary>
-        public Logger Logger { get; set; }
+        internal Logger Logger { get; set; }
 
         ///// <summary>
         ///// Before the invoked
@@ -518,12 +530,12 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// <summary>
         /// Before the method is successfully invoked
         /// </summary>
-        public System.Func<MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>, System.Threading.Tasks.Task> CallBeforeMethod { get; set; }
+        public System.Func<MetaData, System.Collections.Generic.Dictionary<string, Bind.MethodArgs>, System.Threading.Tasks.Task> CallBeforeMethod { get; set; }
 
         /// <summary>
         /// After the method has been successfully invoked
         /// </summary>
-        public System.Func<MetaData, System.Collections.Generic.Dictionary<string, MethodArgs>, dynamic, System.Threading.Tasks.Task> CallAfterMethod { get; set; }
+        public System.Func<MetaData, System.Collections.Generic.Dictionary<string, Bind.MethodArgs>, dynamic, System.Threading.Tasks.Task> CallAfterMethod { get; set; }
 
         /// <summary>
         /// After the MemberSet has been successfully invoked
@@ -555,7 +567,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         //public static void LoadBusiness(System.Collections.Generic.IEnumerable<string> assemblyFiles = null)
 
-//public static Newtonsoft.Json.JsonSerializerSettings DocJsonSettings2 = new Newtonsoft.Json.JsonSerializerSettings
+        //public static Newtonsoft.Json.JsonSerializerSettings DocJsonSettings2 = new Newtonsoft.Json.JsonSerializerSettings
         //{
         //    ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
         //    ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),

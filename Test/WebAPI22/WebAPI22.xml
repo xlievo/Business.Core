@@ -19,7 +19,7 @@
             bbb
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Business.Auth.Token,Arg{Args.Test001},Arg{System.DateTime},Arg{System.Collections.Generic.Dictionary{System.String,System.Object}},System.Decimal,System.Int32)">
+        <member name="M:BusinessMember2.Test001(Business.Core.Auth.Token,Arg{Args.Test001},Arg{System.DateTime},Arg{System.Collections.Generic.Dictionary{System.String,System.Object}},System.Decimal,System.Int32)">
             <summary>
             test doc Test001
             and Test001
@@ -29,7 +29,7 @@
             <param name="mm">mmmmmmmm!</param>
             <returns></returns>
         </member>
-        <member name="M:BusinessMember2.Test002(Business.Auth.Token,Arg{Args.Test001},System.Decimal,Arg{System.Collections.Generic.Dictionary{System.String,System.Object}})">
+        <member name="M:BusinessMember2.Test002(Business.Core.Auth.Token,Arg{Args.Test001},System.Decimal,Arg{System.Collections.Generic.Dictionary{System.String,System.Object}})">
             <summary>
             222
             </summary>
@@ -38,7 +38,7 @@
             <param name="mm"></param>
             <returns>test return!!!</returns>
         </member>
-        <member name="M:BusinessMember2.Test003(Business.Auth.Token,Arg{Args.Test001},System.Decimal)">
+        <member name="M:BusinessMember2.Test003(Business.Core.Auth.Token,Arg{Args.Test001},System.Decimal)">
             <summary>
             
             </summary>

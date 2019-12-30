@@ -15,13 +15,12 @@
           ##############
 ==================================*/
 
-namespace Business.Result
+namespace Business.Core.Result
 {
     /// <summary>
     /// Serialize result
     /// </summary>
     /// <typeparam name="Type"></typeparam>
-    //[ProtoBuf.ProtoContract(SkipConstructor = true)]
     public class ResultObject<Type> : IResult<Type>
     {
         //public static implicit operator ResultObject<Type>(string value) => Utils.Help.TryJsonDeserialize<ResultObject<Type>>(value);
@@ -43,7 +42,7 @@ namespace Business.Result
             this.data = data;
             this.state = state;
             this.message = message;
-            this.hasData = checkData ? !System.Object.Equals(null, data) : false;
+            this.hasData = checkData ? !object.Equals(null, data) : false;
             this.callback = default;
 
             this.genericDefinition = genericDefinition;
@@ -60,7 +59,7 @@ namespace Business.Result
             this.data = data;
             this.state = state;
             this.message = message;
-            this.hasData = !System.Object.Equals(null, data);
+            this.hasData = !object.Equals(null, data);
         }
 
         //public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }

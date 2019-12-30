@@ -15,7 +15,7 @@
           ##############
 ==================================*/
 
-namespace Business.Auth
+namespace Business.Core.Auth
 {
     public interface IToken
     {
@@ -29,8 +29,7 @@ namespace Business.Auth
     /// <summary>
     /// A token sample
     /// </summary>
-    //[ProtoBuf.ProtoContract(SkipConstructor = true)]
-    [Attributes.Use]
+    [Annotations.Use]
     public class Token : IToken
     {
         public static implicit operator Token(string value) => new Token { Key = value };

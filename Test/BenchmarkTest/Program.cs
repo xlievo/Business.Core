@@ -1,15 +1,15 @@
-﻿using Business;
-using Business.Attributes;
-using Business.Result;
-using Business.Utils;
+﻿using Business.Core.Annotations;
+using Business.Core.Result;
+using Business.Core.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using static BenchmarkTest.BusinessMember;
+using Business.Core;
 
-[assembly: Logger(LoggerType.All)]
+[assembly: Logger(Logger.LoggerType.All)]
 namespace BenchmarkTest
 {
     class Program
@@ -27,7 +27,7 @@ namespace BenchmarkTest
 
         static void Main(string[] args)
         {
-            Member = Bind.Create<BusinessMember>().UseType(typeof(Business.Auth.IToken));
+            Member = Bind.Create<BusinessMember>().UseType(typeof(Business.Core.Auth.IToken));
             Cmd = Member.Command;
             Cfg = Member.Configer;
 
@@ -60,7 +60,7 @@ namespace BenchmarkTest
 
             Parallel.For(0, count, async c =>
             {
-                var result = Cmd.Call("Test000", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" }));
+                var result = Cmd.Call("Test000", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = "b" }));
 
                 results.Add(result.Data);
 
@@ -71,11 +71,11 @@ namespace BenchmarkTest
 
                 //tasks.Add(task);
 
-                var task = await Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" }));
+                var task = await Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = "b" }));
 
                 results.Add(task.Data);
 
-                result = Cmd.CallIResult("Test002", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Auth.Token { Key = "a", Remote = "b" }));
+                result = Cmd.CallIResult("Test002", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = "b" }));
 
                 results.Add(result.Data);
             });
@@ -111,7 +111,7 @@ namespace BenchmarkTest
                 throw new System.Exception("result error!");
             }
 
-            var results4 = Loggers.Select<LoggerData, int>(c => c.Result.Data).OrderBy(c => c);
+            var results4 = Loggers.Select<Logger.LoggerData, int>(c => c.Result.Data).OrderBy(c => c);
 
             if (!Enumerable.SequenceEqual(results2, results4))
             {
@@ -291,7 +291,7 @@ namespace BenchmarkTest
     [Info("Business", CommandGroupDefault = "DEF")]
     public class BusinessMember : BusinessBase
     {
-        public static ConcurrentBag<LoggerData> Loggers = new ConcurrentBag<LoggerData>();
+        public static ConcurrentBag<Logger.LoggerData> Loggers = new ConcurrentBag<Logger.LoggerData>();
 
         public static bool SpinWait(int millisecondsTimeout) => System.Threading.SpinWait.SpinUntil(() => false, millisecondsTimeout);
 
@@ -326,14 +326,14 @@ namespace BenchmarkTest
             //};
         }
 
-        public virtual dynamic Test000([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
+        public virtual dynamic Test000([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
 
-        public virtual async Task<dynamic> Test001([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token)
+        public virtual async Task<dynamic> Test001([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Core.Auth.Token token)
         {
             return this.ResultCreate(data: arg00.Out.A + 1);
         }
 
-        public virtual IResult Test002([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
+        public virtual IResult Test002([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
 
 
         public class TestCollectionAttribute : ArgumentAttribute

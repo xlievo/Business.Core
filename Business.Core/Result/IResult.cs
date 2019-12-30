@@ -14,7 +14,7 @@
           ##############
 ==================================*/
 
-namespace Business.Result
+namespace Business.Core.Result
 {
     public interface IResult
     {
@@ -156,7 +156,7 @@ namespace Business.Result
             //    return null;
             //}
 
-            if (System.Object.Equals(null, result))
+            if (object.Equals(null, result))
             {
                 return null;
             }
@@ -194,7 +194,7 @@ namespace Business.Result
         /// <returns></returns>
         public static IResult ResultCreateToDataString(this IResult result)
         {
-            if (System.Object.Equals(null, result))
+            if (object.Equals(null, result))
             {
                 return null;
             }

@@ -1,8 +1,5 @@
-﻿using Business;
-using Business.Annotations;
-using Business.Attributes;
-using Business.Result;
-using Business.Utils;
+﻿using Business.Core.Annotations;
+using Business.Core.Result;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -44,8 +41,7 @@ public partial class BusinessMember2
 /// businessDescription
 /// businessDescription3
 /// </summary>
-[Info("API", CommandGroupDefault = null)]//, CommandGroupDefault = ""
-[Logger]
+[Info("API", CommandGroupDefault = null)]
 public partial class BusinessMember2 : BusinessBase
 {
     public struct Test001Result
@@ -61,7 +57,7 @@ public partial class BusinessMember2 : BusinessBase
         public string B { get; set; }
     }
 
-    public virtual async Task<IResult<DateTime>> Test00X(Token token2, Arg<Test001> arg)
+    public virtual async Task<IResult<DateTime>> Test00X(Token token2, Test001 arg)
     {
         return this.ResultCreate();
     }
@@ -83,10 +79,14 @@ public partial class BusinessMember2 : BusinessBase
     /// </summary>
     /// <param name="token">A token sample222</param>
     /// <param name="arg"></param>
+    /// <param name="dateTime"></param>
+    /// <param name="httpFile"></param>
     /// <param name="mm">mmmmmmmm!</param>
-    /// <returns></returns>
+    /// <param name="fff"></param>
+    /// <param name="bbb"></param>
+    /// <returns>rrrrrr</returns>
     [Command("AAA")]
-    [Command("jjj", Group = "")]
+    [Command("jjj", Group = "j")]
     [Testing("test2",
         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T04:24\",99.0234,777,false]",
         "{\"AAA\":\"111\",\"BBB\":\"222\"}",
@@ -103,17 +103,17 @@ public partial class BusinessMember2 : BusinessBase
     [Testing("test, important logic, do not delete!!!",
         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
         tokenMethod: login)]
-    public virtual async Task<IResult<Test001Result?>> Test001(Token token, Arg<Test001> arg, Arg<DateTime> dateTime, HttpFile httpFile = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+    public virtual async Task<IResult<Test001Result?>> Test001(Token token, Test001 arg, Arg<DateTime> dateTime, HttpFile httpFile = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
-        args.arg = arg.Out;
-        if (arg.Out.B == "ex")
+        args.arg = arg;
+        if (args.arg.B == "ex")
         {
             throw new System.Exception("Method exception!");
         }
 
-        if (arg.Out.B == "ex2")
+        if (args.arg.B == "ex2")
         {
             return this.ResultCreate(-911, "dsddsa");
         }
@@ -141,7 +141,7 @@ public partial class BusinessMember2 : BusinessBase
         var files = httpFile.Out.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
 
         //return this.ResultCreate(new { arg = arg.Out, files });
-        Test001Result? ss = new Test001Result { A = arg.Out.A, B = "SSS" };
+        Test001Result? ss = new Test001Result { A = args.arg.A, B = "SSS" };
 
         return this.ResultCreate(ss);
     }

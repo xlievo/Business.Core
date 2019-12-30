@@ -15,11 +15,11 @@
           ##############
 ==================================*/
 
-namespace Business.Document
+namespace Business.Core.Document
 {
+    using Utils;
     using System.Collections.Generic;
     using System.Linq;
-    using Business.Utils;
 
     [System.Xml.Serialization.XmlRoot("doc")]
     public class Xml

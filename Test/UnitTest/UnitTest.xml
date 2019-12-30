@@ -20,7 +20,7 @@
             </summary>
         </member>
         <!-- Badly formed XML comment ignored for member "P:Arg01.A" -->
-        <member name="M:BusinessMember.Test001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
+        <member name="M:BusinessMember.Test001(System.Object,Business.Core.Arg{Arg01},System.Decimal,System.Decimal,Business.Core.Auth.Token)">
             <summary>
             This is Test001.
             </summary>
@@ -31,7 +31,7 @@
             <param name="token">This is token.</param>
             <returns></returns>
         </member>
-        <member name="M:BusinessMember.Test0001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
+        <member name="M:BusinessMember.Test0001(System.Object,Business.Core.Arg{Arg01},System.Decimal,System.Decimal,Business.Core.Auth.Token)">
             <summary>
             This is Test001.
             </summary>
@@ -42,7 +42,7 @@
             <param name="token">This is token.</param>
             <returns></returns>
         </member>
-        <member name="M:BusinessMember.Test00001(System.Object,Business.Arg{Arg01},System.Decimal,System.Decimal,Business.Auth.Token)">
+        <member name="M:BusinessMember.Test00001(System.Object,Business.Core.Arg{Arg01},System.Decimal,System.Decimal,Business.Core.Auth.Token)">
             <summary>
             This is Test001.
             </summary>

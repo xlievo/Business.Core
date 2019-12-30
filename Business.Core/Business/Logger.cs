@@ -15,16 +15,84 @@
           ##############
 ==================================*/
 
-namespace Business
+namespace Business.Core
 {
-    using System.Linq;
     using Utils;
+    using System.Linq;
 
     /// <summary>
     /// Log subscription queue
     /// </summary>
     public class Logger
     {
+        /// <summary>
+        /// Needs of the logging categories
+        /// </summary>
+        public enum LoggerType
+        {
+            /// <summary>
+            /// All
+            /// </summary>
+            All = 2,
+
+            /// <summary>
+            /// Record
+            /// </summary>
+            Record = 1,
+
+            /// <summary>
+            /// Error
+            /// </summary>
+            Error = -1,
+
+            /// <summary>
+            /// Exception
+            /// </summary>
+            Exception = 0,
+        }
+
+        /// <summary>
+        /// Logger data object
+        /// </summary>
+        public struct LoggerData
+        {
+            /// <summary>
+            /// Logger type
+            /// </summary>
+            public LoggerType Type { get; set; }
+
+            /// <summary>
+            /// The parameters of the method
+            /// </summary>
+            public LoggerValue Value { get; set; }
+
+            /// <summary>
+            /// The method's Return Value
+            /// </summary>
+            public dynamic Result { get; set; }
+
+            /// <summary>
+            /// Method execution time
+            /// </summary>
+            public double Time { get; set; }
+
+            /// <summary>
+            /// Method full name
+            /// </summary>
+            public string Member { get; set; }
+
+            /// <summary>
+            /// Used for the command group
+            /// </summary>
+            public string Group { get; set; }
+
+            /// <summary>
+            /// Json format
+            /// </summary>
+            /// <returns></returns>
+            public override string ToString() => this.JsonSerialize();
+        }
+
         public struct BatchOptions
         {
             /// <summary>
@@ -40,11 +108,7 @@ namespace Business
 
         public BatchOptions Batch { get; set; } = new BatchOptions();
 
-        /// <summary>
-        /// Logger
-        /// </summary>
-        //public System.Action<System.Collections.Generic.IEnumerable<LoggerData>> Call { get; private set; }
-        public System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> Call { get; private set; }
+        public LoggerValue.LoggerValueType LoggerValueType { get; set; } = LoggerValue.LoggerValueType.In;
 
         /// <summary>
         /// Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately.
@@ -61,7 +125,21 @@ namespace Business
         /// </summary>
         public bool ThreadCall { get; set; } = true;
 
-        public readonly System.Collections.Concurrent.BlockingCollection<LoggerData> LoggerQueue;
+        public readonly System.Collections.Concurrent.BlockingCollection<LoggerData> loggerQueue;
+
+        internal readonly System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> calls;
+
+        internal readonly System.Func<LoggerData, System.Threading.Tasks.Task> call;
+
+        public Logger(System.Func<LoggerData, System.Threading.Tasks.Task> call, LoggerValue.LoggerValueType loggerValueType = LoggerValue.LoggerValueType.In)
+        {
+            this.LoggerValueType = loggerValueType;
+
+            if (null != call)
+            {
+                this.call = call;
+            }
+        }
 
         /// <summary>
         /// 
@@ -69,8 +147,10 @@ namespace Business
         /// <param name="call"></param>
         /// <param name="workThreads">Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately.</param>
         /// <param name="maxCapacity">Gets the max capacity of this logger queue</param>
-        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> call, int? workThreads = null, int? maxCapacity = null)
+        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> call, int? workThreads = null, int? maxCapacity = null, LoggerValue.LoggerValueType loggerValueType = LoggerValue.LoggerValueType.In)
         {
+            this.LoggerValueType = loggerValueType;
+
             if (workThreads.HasValue && 0 < workThreads.Value)
             {
                 this.WorkThreads = workThreads.Value;
@@ -81,14 +161,14 @@ namespace Business
                 this.MaxCapacity = maxCapacity;
             }
 
-            LoggerQueue = MaxCapacity.HasValue && 0 < MaxCapacity.Value ? new System.Collections.Concurrent.BlockingCollection<LoggerData>(MaxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<LoggerData>();
+            loggerQueue = MaxCapacity.HasValue && 0 < MaxCapacity.Value ? new System.Collections.Concurrent.BlockingCollection<LoggerData>(MaxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<LoggerData>();
 
             if (null != call)
             {
-                this.Call = call;
+                this.calls = call;
             }
 
-            if (null != Call)
+            if (null != calls)
             {
                 for (int i = 0; i < WorkThreads; i++)
                 {
@@ -99,7 +179,7 @@ namespace Business
                         var wait = new System.Threading.SpinWait();
                         var watch = new System.Diagnostics.Stopwatch();
 
-                        while (!LoggerQueue.IsCompleted)
+                        while (!loggerQueue.IsCompleted)
                         {
                             var isRunning = 0 != System.TimeSpan.Zero.CompareTo(Batch.Interval);
 
@@ -116,11 +196,11 @@ namespace Business
                             {
                                 if (ThreadCall)
                                 {
-                                    System.Threading.Tasks.Task.Factory.StartNew(async obj => await Call(obj as LoggerData[]), list.ToArray()).ContinueWith(c => c.Exception?.Console());
+                                    System.Threading.Tasks.Task.Factory.StartNew(async obj => await calls(obj as LoggerData[]), list.ToArray()).ContinueWith(c => c.Exception?.Console());
                                 }
                                 else
                                 {
-                                    try { await Call(list.ToArray()); }
+                                    try { await calls(list.ToArray()); }
                                     catch (System.Exception ex) { ex.Console(); }
                                 }
 
@@ -132,7 +212,7 @@ namespace Business
                                 }
                             }
 
-                            if (LoggerQueue.TryTake(out LoggerData logger))
+                            if (loggerQueue.TryTake(out LoggerData logger))
                             {
                                 list.AddLast(logger);
                             }
@@ -153,75 +233,6 @@ namespace Business
     }
 
     /// <summary>
-    /// Needs of the logging categories
-    /// </summary>
-    //[System.Flags]
-    public enum LoggerType
-    {
-        /// <summary>
-        /// All
-        /// </summary>
-        All = 2,
-
-        /// <summary>
-        /// Record
-        /// </summary>
-        Record = 1,
-
-        /// <summary>
-        /// Error
-        /// </summary>
-        Error = -1,
-
-        /// <summary>
-        /// Exception
-        /// </summary>
-        Exception = 0,
-    }
-
-    /// <summary>
-    /// Logger data object
-    /// </summary>
-    public struct LoggerData
-    {
-        /// <summary>
-        /// Logger type
-        /// </summary>
-        public LoggerType Type { get; set; }
-
-        /// <summary>
-        /// The parameters of the method
-        /// </summary>
-        public LoggerValue Value { get; set; }
-
-        /// <summary>
-        /// The method's Return Value
-        /// </summary>
-        public dynamic Result { get; set; }
-
-        /// <summary>
-        /// Method execution time
-        /// </summary>
-        public double Time { get; set; }
-
-        /// <summary>
-        /// Method full name
-        /// </summary>
-        public string Member { get; set; }
-
-        /// <summary>
-        /// Used for the command group
-        /// </summary>
-        public string Group { get; set; }
-
-        /// <summary>
-        /// Json format
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString() => this.JsonSerialize();
-    }
-
-    /// <summary>
     /// The parameters of the method
     /// </summary>
     public class LoggerValue : System.Collections.Generic.Dictionary<string, dynamic>
@@ -234,11 +245,15 @@ namespace Business
             /// <summary>
             /// In
             /// </summary>
-            In = 0,
+            All = 0,
+            /// <summary>
+            /// In
+            /// </summary>
+            In = 1,
             /// <summary>
             /// Out
             /// </summary>
-            Out = 1
+            Out = 2
         }
 
         /// <summary>

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Business.Core</AssemblyName>
     <RootNamespace>Business</RootNamespace>
-    <Version>1.3.6</Version>
+    <Version>1.3.7</Version>
     <Description>https://github.com/xlievo/Business.Core</Description>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/xlievo/Business.Core</PackageProjectUrl>
@@ -12,8 +12,8 @@
     <PackageIconUrl>https://secure.gravatar.com/userimage/107958241/f5a911b60f47bbf64630f824232c9a24?size=250</PackageIconUrl>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>1.3.6</AssemblyVersion>
-    <FileVersion>1.3.6</FileVersion>
+    <AssemblyVersion>1.3.7</AssemblyVersion>
+    <FileVersion>1.3.7</FileVersion>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
@@ -27,7 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\Business.Core\Auth\Attributes.cs" Link="Auth\Attributes.cs" />
+    <Compile Include="..\..\Business.Core\Auth\Annotations.cs" Link="Auth\Annotations.cs" />
     <Compile Include="..\..\Business.Core\Auth\Interceptor.cs" Link="Auth\Interceptor.cs" />
     <Compile Include="..\..\Business.Core\Auth\Token.cs" Link="Auth\Token.cs" />
     <Compile Include="..\..\Business.Core\Business\Arg.cs" Link="Business\Arg.cs" />
@@ -38,7 +38,7 @@
     <Compile Include="..\..\Business.Core\Configer\Configer.cs" Link="Configer\Configer.cs" />
     <Compile Include="..\..\Business.Core\Result\IResult.cs" Link="Result\IResult.cs" />
     <Compile Include="..\..\Business.Core\Result\ResultObject.cs" Link="Result\ResultObject.cs" />
-    <Compile Include="..\..\Business.Core\Utils\EmitUtils.cs" Link="Utils\EmitUtils.cs" />
+    <Compile Include="..\..\Business.Core\Utils\Emit.cs" Link="Utils\Emit.cs" />
     <Compile Include="..\..\Business.Core\Utils\Help.cs" Link="Utils\Help.cs" />
   </ItemGroup>
 

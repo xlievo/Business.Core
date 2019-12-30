@@ -15,12 +15,12 @@
           ##############
 ==================================*/
 
-namespace Business.Utils.Emit
+namespace Business.Core.Utils.Emit
 {
     using System.Reflection;
     using System.Reflection.Emit;
 
-    internal static class EmitUtils
+    internal static class Emit
     {
         public static ILGenerator CallMethod(this ILGenerator il, MethodInfo methodInfo)
         {
@@ -208,7 +208,16 @@ namespace Business.Utils.Emit
 
         private static void UnboxOrCast(System.Type parameterType, ILGenerator il)
         {
-            il.Emit(parameterType.GetTypeInfo().IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, parameterType);
+            //il.Emit(parameterType.GetTypeInfo().IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, parameterType);
+
+            if (parameterType.GetTypeInfo().IsValueType)
+            {
+                il.Emit(OpCodes.Unbox_Any, parameterType);
+            }
+            else
+            {
+                il.Emit(OpCodes.Castclass, typeof(object));
+            }
         }
 
         private static void UpdateOutAndRefArguments(ParameterInfo[] parameters, ILGenerator il)

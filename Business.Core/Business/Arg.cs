@@ -15,7 +15,7 @@
           ##############
 ==================================*/
 
-namespace Business
+namespace Business.Core
 {
     public interface IArg
     {

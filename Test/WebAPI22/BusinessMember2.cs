@@ -1,7 +1,7 @@
-﻿using Business;
-using Business.Attributes;
-using Business.Result;
-using Business.Utils;
+﻿using Business.Core;
+using Business.Core.Annotations;
+using Business.Core.Result;
+using Business.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -62,7 +62,7 @@ public class BusinessMember2 : BusinessBase
                 {
                     var log = item.JsonSerialize();
 
-                    Help.WriteLocal(log, console: true, write: item.Type == LoggerType.Exception);
+                    Help.WriteLocal(log, console: true, write: item.Type == Logger.LoggerType.Exception);
                 }
             }
             catch (Exception exception)
@@ -71,7 +71,7 @@ public class BusinessMember2 : BusinessBase
             }
         });
 
-        this.BindBefore = c =>
+        this.Configer.BindBefore = c =>
         {
             c.CallBeforeMethod = async (meta, args) =>
             {
@@ -110,7 +110,7 @@ public class BusinessMember2 : BusinessBase
         public string B { get; set; }
     }
 
-    public virtual async Task<IResult<Test001>> Test00X(Business.Auth.Token token2, Arg<Test001> arg)
+    public virtual async Task<IResult<Test001>> Test00X(Business.Core.Auth.Token token2, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
     }
@@ -130,7 +130,7 @@ public class BusinessMember2 : BusinessBase
     /// <returns></returns>
     [Command("AAA")]
     //Task<IResult<Test001>>
-    public virtual async Task<dynamic> Test001(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [HttpFile]Arg<Dictionary<string, dynamic>> context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
+    public virtual async Task<dynamic> Test001(Business.Core.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [HttpFile]Arg<Dictionary<string, dynamic>> context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -186,7 +186,7 @@ public class BusinessMember2 : BusinessBase
     /// <param name="mm"></param>
     /// <returns>test return!!!</returns>
     [HttpFile]
-    public virtual async Task<dynamic> Test002(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, Arg<Dictionary<string, dynamic>> context = null)
+    public virtual async Task<dynamic> Test002(Business.Core.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, Arg<Dictionary<string, dynamic>> context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -208,7 +208,7 @@ public class BusinessMember2 : BusinessBase
     /// <param name="arg"></param>
     /// <param name="mm"></param>
     /// <returns></returns>
-    public virtual async Task Test003(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task Test003(Business.Core.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         await System.Threading.Tasks.Task.Delay(10000);
         dynamic args = new System.Dynamic.ExpandoObject();
@@ -220,7 +220,7 @@ public class BusinessMember2 : BusinessBase
         }
     }
 
-    public virtual async Task<dynamic> Test004(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task<dynamic> Test004(Business.Core.Auth.Token token, Arg<List<Test001>> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
@@ -230,7 +230,7 @@ public class BusinessMember2 : BusinessBase
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
-    public virtual async Task<dynamic> Test005(Business.Auth.Token token, Arg<List<Test001>> arg, dynamic context)
+    public virtual async Task<dynamic> Test005(Business.Core.Auth.Token token, Arg<List<Test001>> arg, dynamic context)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
@@ -240,7 +240,7 @@ public class BusinessMember2 : BusinessBase
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
-    public virtual async Task<dynamic> Test006(Business.Auth.Token token) => this.ResultCreate();
+    public virtual async Task<dynamic> Test006(Business.Core.Auth.Token token) => this.ResultCreate();
 
     public virtual async Task<IResult<Test001>> Test0010(SessionArg session, Arg<Test001> arg)
     {
@@ -435,7 +435,7 @@ public class BusinessMember2 : BusinessBase
     /// <returns></returns>
     public virtual async Task<dynamic> Test007(Arg<Test001> arg, Arg<List<string>> arg2) => this.ResultCreate();
 
-    public virtual async void Test0033(Business.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async void Test0033(Business.Core.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -448,7 +448,7 @@ public class BusinessMember2 : BusinessBase
 
     public struct Result
     {
-        public Business.Auth.Token token { get; set; }
+        public Business.Core.Auth.Token token { get; set; }
 
         public List<Test001> arg { get; set; }
     }

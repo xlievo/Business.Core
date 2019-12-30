@@ -1,12 +1,12 @@
-﻿using Business;
-using Business.Attributes;
-using Business.Result;
-using Business.Utils;
+﻿using Business.Core.Annotations;
+using Business.Core.Result;
+using Business.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Net.Http;
+using Business.Core;
 
 public class GitHubClient
 {
@@ -106,7 +106,7 @@ public class BusinessMember : BusinessBase
         }
     }
 
-    public virtual async Task<dynamic> TestAgs001(dynamic context, Arg<Ags2> a, [Ignore(IgnoreMode.BusinessArg)]decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default, Business.Auth.Token token = default)
+    public virtual async Task<dynamic> TestAgs001(dynamic context, Arg<Ags2> a, [Ignore(IgnoreMode.BusinessArg)]decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default, Business.Core.Auth.Token token = default)
     {
         return await gitHubClient.GetData();
 

@@ -4,11 +4,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
-using Business;
-using Business.Utils;
-using Business.Attributes;
-using Business.Annotations;
-using Business.Result;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Builder;
@@ -18,6 +13,12 @@ using Microsoft.AspNetCore.Http;
 using System.Net.WebSockets;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using Business.Core;
+using Business.Core.Utils;
+using Business.Core.Annotations;
+using Business.Core.Result;
+using Business.Utils;
+using Business;
 
 #region Socket Support
 
@@ -33,7 +34,7 @@ public class Arg<OutType> : Arg<OutType, dynamic>
     public override dynamic ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
 }
 
-public class ResultObject<Type> : Business.Result.ResultObject<Type>
+public class ResultObject<Type> : Business.Core.Result.ResultObject<Type>
 {
     public static readonly System.Type ResultTypeDefinition = typeof(ResultObject<>).GetGenericTypeDefinition();
 
@@ -103,7 +104,7 @@ public struct Host
 /// my token
 /// </summary>
 [TokenCheck]
-public class Token : Business.Auth.Token
+public class Token : Business.Core.Auth.Token
 {
     [System.Text.Json.Serialization.JsonPropertyName("P")]
     public string Path { get; set; }
@@ -125,34 +126,30 @@ public class Session
 [SessionCheck]
 public class SessionArg : Arg<Session, Token> { }
 
-/// <summary>
-/// parameter name: context
-/// </summary>
-[HttpFile]
-public class HttpFile : Arg<Dictionary<string, dynamic>> { }
-
-[Command(Group = null)]
-[@JsonArg(Group = null)]
+[Command(Group = "j")]
+[@JsonArg(Group = "j")]
 [Command(Group = "s")]
 [@MessagePackArg(Group = "s")]
+[Logger]
 public abstract class BusinessBase : BusinessBase<ResultObject<string>>
 {
     public BusinessBase()
     {
-        this.Logger = new Logger(async x =>
+        this.Logger = new Logger(async (Logger.LoggerData x) =>
         {
             try
             {
-                var logs = x.Select(c =>
-                {
-                    c.Value = c.Value?.ToValue();
+                //var logs = x.Select(c =>
+                //{
+                //    //if (c.Type == Logger.LoggerType.Exception)
+                //    //{
+                //    //    Console.WriteLine(c.JsonSerialize());
+                //    //}
+                //    Console.WriteLine(c.JsonSerialize());
+                //    return c;
+                //}).ToList();
 
-                    if (c.Type == LoggerType.Exception)
-                    {
-                        Console.WriteLine(c.JsonSerialize());
-                    }
-                    return c;
-                }).ToList();
+                Console.WriteLine(x.JsonSerialize());
 
                 //System.Console.WriteLine(logs.JsonSerialize());
             }
@@ -160,7 +157,7 @@ public abstract class BusinessBase : BusinessBase<ResultObject<string>>
             {
                 Help.ExceptionWrite(ex, true, true);
             }
-        }, maxCapacity: 10000)
+        })
         {
             //Batch = new Logger.BatchOptions
             //{
@@ -266,18 +263,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             .UseType("context", "socket", "httpFile")
             .IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket", "httpFile")
             .LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket", "httpFile")
-            .UseDoc(docDir, new Business.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true })
+            .UseDoc(docDir, new Business.Core.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true })
             .LoadBusiness(new object[] { Host });
 
-        ////1
-        //Configer.LoadBusiness(new object[] { Host });
-        ////2
-        //Configer.UseType("context", "socket", "httpFile");
-        //Configer.IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket", "httpFile");
-        //Configer.LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket", "httpFile");
-        //==================The third step==================//
-        //3
-        //Configer.UseDoc(docDir, new Business.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true });
         //writ url to page
         DocUI.Write(docDir, update: true);
         //add route
@@ -287,7 +275,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             {
                 routes.MapRoute(
                 name: item.Key,
-                template: string.Format("{0}/{{*path}}", item.Key),
+                template: $"{item.Key}/{{*path}}",
                 defaults: new { controller = "Business", action = "Call" });
             }
         });
@@ -545,14 +533,14 @@ public class BusinessController : Controller
         #endregion
 
         string c, t, d, g, b = null;
-        //g = "j";//fixed grouping
-        g = route.Group;
+        g = "j";//fixed grouping
+        //g = route.Group;
 
         switch (this.Request.Method)
         {
             case "GET":
                 //requestData = new RequestData(this.Request.Query);
-                c = route.Name ?? this.Request.Query["c"];
+                c = route.Command ?? this.Request.Query["c"];
                 t = this.Request.Query["t"];
                 d = this.Request.Query["d"];
                 //g = this.Request.Query["g"];
@@ -563,7 +551,7 @@ public class BusinessController : Controller
                     //if (this.Request.HasFormContentType)
                     //requestData = new RequestData(await this.Request.ReadFormAsync());
                     var form = await this.Request.ReadFormAsync();
-                    c = route.Name ?? form["c"];
+                    c = route.Command ?? form["c"];
                     t = form["t"];
                     d = form["d"];
                     //g = form["g"];
@@ -595,7 +583,7 @@ public class BusinessController : Controller
 
         if (null == cmd)
         {
-            return business.ErrorCmd(c);
+            return Help.ErrorCmd(business, c);
         }
 
         var result = await cmd.AsyncCall(

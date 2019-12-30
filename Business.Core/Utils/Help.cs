@@ -15,9 +15,10 @@
           ##############
 ==================================*/
 
-namespace Business.Utils
+namespace Business.Core.Utils
 {
-    using Business.Document;
+    using Document;
+    using Core;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -41,7 +42,7 @@ namespace Business.Utils
         }
     }
 
-    public struct Accessors
+    internal struct Accessors
     {
         public ConcurrentReadOnlyDictionary<string, Accessor> Accessor;
 
@@ -75,7 +76,7 @@ namespace Business.Utils
 
             if (exists)
             {
-                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.UTF8);
+                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), UTF8);
                 //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
             }
 
@@ -118,7 +119,7 @@ namespace Business.Utils
         /// <param name="logger"></param>
         /// <param name="argType"></param>
         /// <returns></returns>
-        public static Bind LoggerSet(this Bind bind, Attributes.LoggerAttribute logger, params System.Type[] argType) => Use(bind, c => c.LoggerSet(logger, argType));
+        public static Bind LoggerSet(this Bind bind, Annotations.LoggerAttribute logger, params System.Type[] argType) => Use(bind, c => c.LoggerSet(logger, argType));
 
         /// <summary>
         /// Set the log characteristics of a parameter, depending on the parameter name
@@ -127,7 +128,7 @@ namespace Business.Utils
         /// <param name="logger"></param>
         /// <param name="argName"></param>
         /// <returns></returns>
-        public static Bind LoggerSet(this Bind bind, Attributes.LoggerAttribute logger, params string[] argName) => Use(bind, c => c.LoggerSet(logger, argName));
+        public static Bind LoggerSet(this Bind bind, Annotations.LoggerAttribute logger, params string[] argName) => Use(bind, c => c.LoggerSet(logger, argName));
 
         /// <summary>
         /// Set a parameter's ignore feature, depending on the parameter name
@@ -136,14 +137,15 @@ namespace Business.Utils
         /// <param name="ignore"></param>
         /// <param name="argName"></param>
         /// <returns></returns>
-        public static Bind IgnoreSet(this Bind bind, Attributes.Ignore ignore, params string[] argName) => Use(bind, c => c.IgnoreSet(ignore, argName));
+        public static Bind IgnoreSet(this Bind bind, Annotations.Ignore ignore, params string[] argName) => Use(bind, c => c.IgnoreSet(ignore, argName));
 
-        public static Bind IgnoreSet(this Bind bind, Attributes.Ignore ignore, params System.Type[] argType) => Use(bind, c => c.IgnoreSet(ignore, argType));
+        public static Bind IgnoreSet(this Bind bind, Annotations.Ignore ignore, params System.Type[] argType) => Use(bind, c => c.IgnoreSet(ignore, argType));
 
         public static Bind MemberSet(this Bind bind, string memberName, object memberObj, bool skipNull = false) => Use(bind, c => c.MemberSet(memberName, memberObj, skipNull));
 
         #endregion
-        public static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null)
+
+        internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null)
         {
             var key2 = string.IsNullOrWhiteSpace(key) ? type.FullName : key;
 
@@ -213,7 +215,7 @@ namespace Business.Utils
                         {
                             var attr = first.Value;
 
-                            if (attr.Meta.Declaring != Attributes.AttributeBase.MetaData.DeclaringType.Parameter)
+                            if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
                             {
                                 item2.Value.Attrs.Remove(attr, out _);
                             }
@@ -231,8 +233,8 @@ namespace Business.Utils
                         //add default convert
                         if (arg.HasIArg && NodeState.DAT != first.State)
                         {
-                            var attr = new Attributes.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
-                            attr.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
+                            var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
+                            attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
                             item2.Value.Attrs.TryAdd(attr);
                             //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
                         }
@@ -268,7 +270,7 @@ namespace Business.Utils
 
                     arg.UseType = true;
 
-                    arg.Use = new Attributes.UseAttribute(true);
+                    arg.Use = new Annotations.UseAttribute(true);
 
                     foreach (var item2 in arg.Group)
                     {
@@ -280,7 +282,7 @@ namespace Business.Utils
                         {
                             var attr = first.Value;
 
-                            if (attr.Meta.Declaring != Attributes.AttributeBase.MetaData.DeclaringType.Parameter)
+                            if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
                             {
                                 item2.Value.Attrs.Remove(attr, out _);
                             }
@@ -291,8 +293,8 @@ namespace Business.Utils
                         //add default convert
                         if (arg.HasIArg && NodeState.DAT != first.State)
                         {
-                            var attr = new Attributes.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
-                            attr.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
+                            var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
+                            attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
                             item2.Value.Attrs.TryAdd(attr);
                         }
                     }
@@ -304,7 +306,7 @@ namespace Business.Utils
             return business;
         }
 
-        public static string GetXmlPath(this Assembly assembly) => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(assembly.Location), $"{System.IO.Path.GetFileNameWithoutExtension(assembly.ManifestModule.Name)}.xml");
+        //public static string GetXmlPath(this Assembly assembly) => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(assembly.Location), $"{System.IO.Path.GetFileNameWithoutExtension(assembly.ManifestModule.Name)}.xml");
 
         /*
         public class SerializaContractResolver : Newtonsoft.Json.Serialization.DefaultContractResolver
@@ -318,8 +320,7 @@ namespace Business.Utils
 
             protected override string ResolvePropertyName(string propertyName) => resolvePropertyName(propertyName);
         }
-        */
-        /*
+
         public static Newtonsoft.Json.JsonSerializerSettings JsonSettings = new Newtonsoft.Json.JsonSerializerSettings
         {
             ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
@@ -598,7 +599,7 @@ namespace Business.Utils
                     Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
-                    Testing = meta.Attributes.GetAttrs<Attributes.TestingAttribute>().ToDictionary(c3 => c3.Name, c3 => new Testing { Name = c3.Name, Value = c3.Value, Result = c3.Result, Token = c3.Token, TokenMethod = c3.TokenMethod })
+                    Testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>().ToDictionary(c3 => c3.Name, c3 => new Testing { Name = c3.Name, Value = c3.Value, Result = c3.Result, Token = c3.Token, TokenMethod = c3.TokenMethod })
                 } as IMember<DocArg>;
 
                 foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))
@@ -618,92 +619,7 @@ namespace Business.Utils
         }
 
         const string AttributeSign = "Attribute";
-        /*
-        static DocArg GetDocArg<DocArg>(string group, Meta.Args args, System.Func<DocArgSource, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null) where DocArg : IDocArg<DocArg>
-        {
-            if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
-            if (string.IsNullOrWhiteSpace(summary))
-            {
-                Xml.member member = null;
-
-                switch (args.MemberDefinition)
-                {
-                    case Meta.MemberDefinitionCode.No:
-                        break;
-                    case Meta.MemberDefinitionCode.Definition:
-                        xmlMembers?.TryGetValue($"T:{args.FullName}", out member);
-                        break;
-                    case Meta.MemberDefinitionCode.Field:
-                        xmlMembers?.TryGetValue($"F:{args.FullName}", out member);
-                        break;
-                    case Meta.MemberDefinitionCode.Property:
-                        xmlMembers?.TryGetValue($"P:{args.FullName}", out member);
-                        break;
-                }
-
-                summary = member?.summary?.text;
-
-                if (string.IsNullOrWhiteSpace(summary) && args.HasDefinition)
-                {
-                    xmlMembers?.TryGetValue($"T:{args.LastType.FullName.Replace('+', '.')}", out member);
-
-                    summary = member?.summary?.text;
-                }
-            }
-
-            var argGroup = args.Group[group];
-
-            var attrs = new List<string>();
-
-            var attr = argGroup.Attrs.First;
-            while (NodeState.DAT == attr.State)
-            {
-                if ("Business.Attributes.ArgumentDefaultAttribute" == attr.Value.Type.FullName)
-                {
-                    attr = attr.Next;
-                    continue;
-                }
-
-                attrs.Add(string.IsNullOrWhiteSpace(attr.Value.Description) ? attr.Value.Type.Name.EndsWith(AttributeSign) ? attr.Value.Type.Name.Substring(0, attr.Value.Type.Name.Length - AttributeSign.Length) : attr.Value.Type.Name : attr.Value.Description);
-                attr = attr.Next;
-            }
-
-            var arg = argCallback(new DocArgSource<TypeDefinition> { Group = group, Args = args, Attributes = attrs, Summary = summary });
-
-            if (!argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild) && !args.LastType.IsEnum)
-            {
-                // && !arg.IsDictionary && !arg.IsCollection
-                var childrens = args.Children.Where(c => !c.Group[group].IgnoreArg);
-
-                if (childrens.Any())
-                {
-                    if ("array" == arg.Type)
-                    {
-                        arg.Items.Children = new Dictionary<string, DocArg>();
-                    }
-                    else
-                    {
-                        arg.Children = new Dictionary<string, DocArg>();
-                    }
-
-                    foreach (var item in childrens)
-                    {
-                        if ("array" == arg.Type)
-                        {
-                            arg.Items.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
-                        }
-                        else
-                        {
-                            arg.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
-                        }
-                    }
-                }
-            }
-
-            return arg;
-        }
-        */
         static DocArg GetDocArg<DocArg, TypeDefinition>(string group, Meta.ITypeDefinition<TypeDefinition> args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null)
             where DocArg : IDocArg<DocArg>
             where TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
@@ -758,7 +674,7 @@ namespace Business.Utils
 
             var arg = argCallback(new DocArgSource<TypeDefinition> { Group = group, Args = args, Attributes = attrs, Summary = summary });
 
-            if ((null == argGroup.Ignore || !argGroup.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.ArgChild)) && !args.LastType.IsEnum)
+            if ((null == argGroup.Ignore || !argGroup.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.ArgChild)) && !args.LastType.IsEnum)
             {
                 // && !arg.IsDictionary && !arg.IsCollection
                 var childrens = args.Children.Where(c => !c.Group[group].IgnoreArg);
@@ -812,14 +728,6 @@ namespace Business.Utils
             group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(pathRoot ?? type.Name));
 
             var current = Bind.GetCurrentType(type);
-            if (current.hasDictionary)
-            {
-                current.outType = current.outType.GenericTypeArguments[1];
-            }
-            else if (current.hasCollection)
-            {
-                current.outType = current.outType.GenericTypeArguments[0];
-            }
 
             var definition = new TypeDefinition
             {
@@ -911,14 +819,6 @@ namespace Business.Utils
                 group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(path2));
 
                 var current = Bind.GetCurrentType(memberType);
-                if (current.hasDictionary)
-                {
-                    current.outType = current.outType.GenericTypeArguments[1];
-                }
-                else if (current.hasCollection)
-                {
-                    current.outType = current.outType.GenericTypeArguments[0];
-                }
 
                 var definition = new TypeDefinition
                 {
@@ -1017,7 +917,7 @@ namespace Business.Utils
         //    return business;
         //}
 
-        public static Business LoggerSet<Business>(this Business business, Attributes.LoggerAttribute logger, params System.Type[] argType) where Business : IBusiness
+        public static Business LoggerSet<Business>(this Business business, Annotations.LoggerAttribute logger, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -1029,7 +929,7 @@ namespace Business.Utils
 
                 if (!groups.Any()) { return; }
 
-                logger.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
+                logger.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
 
                 System.Threading.Tasks.Parallel.ForEach(argType, type =>
                 {
@@ -1054,7 +954,7 @@ namespace Business.Utils
             return business;
         }
 
-        public static Business LoggerSet<Business>(this Business business, Attributes.LoggerAttribute logger, params string[] argName) where Business : IBusiness
+        public static Business LoggerSet<Business>(this Business business, Annotations.LoggerAttribute logger, params string[] argName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -1070,7 +970,7 @@ namespace Business.Utils
 
                 if (!groups.Any()) { return; }
 
-                logger.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
+                logger.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
 
                 System.Threading.Tasks.Parallel.ForEach(argName2, name =>
                 {
@@ -1095,7 +995,7 @@ namespace Business.Utils
             return business;
         }
 
-        public static Business IgnoreSet<Business>(this Business business, Attributes.Ignore ignore, params System.Type[] argType) where Business : IBusiness
+        public static Business IgnoreSet<Business>(this Business business, Annotations.Ignore ignore, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -1107,7 +1007,7 @@ namespace Business.Utils
 
                 if (!groups.Any()) { return; }
 
-                ignore.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
+                ignore.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
 
                 System.Threading.Tasks.Parallel.ForEach(argType, type =>
                 {
@@ -1123,7 +1023,7 @@ namespace Business.Utils
                                     continue;
                                 }
                                 g.Ignore.collection.Add(ignore);
-                                g.IgnoreArg = g.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.Arg);
+                                g.IgnoreArg = g.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.Arg);
                                 business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.Group[group.Key].IgnoreArg);
                             }
                         }
@@ -1134,7 +1034,7 @@ namespace Business.Utils
             return business;
         }
 
-        public static Business IgnoreSet<Business>(this Business business, Attributes.Ignore ignore, params string[] argName) where Business : IBusiness
+        public static Business IgnoreSet<Business>(this Business business, Annotations.Ignore ignore, params string[] argName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -1150,7 +1050,7 @@ namespace Business.Utils
                 //checked group
                 if (!groups.Any()) { return; }
 
-                ignore.Meta.Declaring = Attributes.AttributeBase.MetaData.DeclaringType.Parameter;
+                ignore.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
 
                 System.Threading.Tasks.Parallel.ForEach(argName2, name =>
                 {
@@ -1166,7 +1066,7 @@ namespace Business.Utils
                                     continue;
                                 }
                                 g.Ignore.collection.Add(ignore);
-                                g.IgnoreArg = g.Ignore.Any(c => c.Mode == Attributes.IgnoreMode.Arg);
+                                g.IgnoreArg = g.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.Arg);
                                 business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.Group[group.Key].IgnoreArg);
                             }
                         }
@@ -1183,12 +1083,12 @@ namespace Business.Utils
 
             if (!Configer.Accessors.TryGetValue(business.Configer.Info.BusinessName, out Accessors meta) || !meta.Accessor.TryGetValue(memberName, out Accessor accessor)) { return business; }
 
-            if (skipNull && !object.Equals(null, accessor.Getter(business)))
+            if (skipNull && !Equals(null, accessor.Getter(business)))
             {
                 return business;
             }
 
-            var value = Help.ChangeType(memberObj, accessor.Type);
+            var value = ChangeType(memberObj, accessor.Type);
             accessor.Setter(business, value);
 
             business.Configer.MemberSetAfter?.Invoke(memberName, value);
@@ -1198,27 +1098,27 @@ namespace Business.Utils
 
         public static Result.IResult ErrorBusiness(this System.Type resultTypeDefinition, string businessName) => Bind.ErrorBusiness(resultTypeDefinition, businessName);
 
-        public static Result.IResult ErrorCmd(this IBusiness business, string cmd) => Bind.ErrorCmd(business.Configer.ResultTypeDefinition, cmd);
+        public static Result.IResult ErrorCmd(IBusiness business, string cmd) => Bind.ErrorCmd(business.Configer.ResultTypeDefinition, cmd);
 
-        static Meta.MetaLogger GetMetaLogger(Meta.MetaLogger metaLogger, Attributes.LoggerAttribute logger, string group)
+        static Meta.MetaLogger GetMetaLogger(Meta.MetaLogger metaLogger, Annotations.LoggerAttribute logger, string group)
         {
             var logger2 = logger.Clone();
             logger2.Group = group;
 
             switch (logger2.LogType)
             {
-                case LoggerType.All:
-                    metaLogger.Record = logger2.Clone().SetType(LoggerType.Record);
-                    metaLogger.Error = logger2.Clone().SetType(LoggerType.Error);
-                    metaLogger.Exception = logger2.Clone().SetType(LoggerType.Exception);
+                case Logger.LoggerType.All:
+                    metaLogger.Record = logger2.Clone().SetType(Logger.LoggerType.Record);
+                    metaLogger.Error = logger2.Clone().SetType(Logger.LoggerType.Error);
+                    metaLogger.Exception = logger2.Clone().SetType(Logger.LoggerType.Exception);
                     break;
-                case LoggerType.Record:
+                case Logger.LoggerType.Record:
                     metaLogger.Record = logger2;
                     break;
-                case LoggerType.Error:
+                case Logger.LoggerType.Error:
                     metaLogger.Error = logger2;
                     break;
-                case LoggerType.Exception:
+                case Logger.LoggerType.Exception:
                     metaLogger.Exception = logger2;
                     break;
             }
@@ -1226,19 +1126,7 @@ namespace Business.Utils
             return metaLogger;
         }
 
-        public static string BaseDirectory
-        {
-            get
-            {
-#if NETFX
-                return System.AppDomain.CurrentDomain.BaseDirectory;
-#else
-                return System.AppContext.BaseDirectory;
-#endif
-            }
-        }
-
-        public static string BaseDirectoryCombine(params string[] path) => System.IO.Path.Combine(new string[] { BaseDirectory }.Concat(path).ToArray());
+        //public static string BaseDirectoryCombine(params string[] path) => System.IO.Path.Combine(new string[] { System.AppDomain.CurrentDomain.BaseDirectory }.Concat(path).ToArray());
 
         public static List<System.Type> LoadAssemblys(IEnumerable<string> assemblyFiles, bool parallel = false, System.Func<System.Type, bool> callback = null)
         {
@@ -1308,7 +1196,7 @@ namespace Business.Utils
             }
         }
 
-        public static Accessor GetAccessor(this FieldInfo fieldInfo)
+        internal static Accessor GetAccessor(this FieldInfo fieldInfo)
         {
             if (null == fieldInfo) { throw new System.ArgumentNullException(nameof(fieldInfo)); }
 
@@ -1318,7 +1206,7 @@ namespace Business.Utils
             return new Accessor(fieldInfo.FieldType, getter, setter);
         }
 
-        public static Accessor GetAccessor(this PropertyInfo propertyInfo)
+        internal static Accessor GetAccessor(this PropertyInfo propertyInfo)
         {
             if (null == propertyInfo) { throw new System.ArgumentNullException(nameof(propertyInfo)); }
 
@@ -1330,11 +1218,11 @@ namespace Business.Utils
 
         #region GetAttributes
 
-        public static T Clone<T>(this T attribute) where T : Attributes.AttributeBase => attribute.Clone<T>();
+        public static T Clone<T>(this T attribute) where T : Annotations.AttributeBase => attribute.Clone<T>();
 
-        public static List<Attribute> Distinct<Attribute>(this List<Attribute> attributes, IEnumerable<Attribute> clones = null, System.Func<Attribute, bool> clonesExclude = null, System.Action<Attribute> attributesAction = null) where Attribute : Attributes.AttributeBase
+        internal static List<Attribute> Distinct<Attribute>(this List<Attribute> attributes, IEnumerable<Attribute> clones = null, System.Func<Attribute, bool> clonesExclude = null, System.Action<Attribute> attributesAction = null) where Attribute : Annotations.AttributeBase
         {
-            var gropus = new List<Attributes.GropuAttribute>();
+            var gropus = new List<Annotations.GropuAttribute>();
 
             for (int i = attributes.Count - 1; i >= 0; i--)
             {
@@ -1342,23 +1230,23 @@ namespace Business.Utils
 
                 attributesAction?.Invoke(item);
 
-                if (item is Attributes.GropuAttribute)
+                if (item is Annotations.GropuAttribute)
                 {
-                    gropus.Add(item as Attributes.GropuAttribute);
+                    gropus.Add(item as Annotations.GropuAttribute);
 
                     attributes.RemoveAt(i);
                 }
             }
 
-            var attrs = gropus.Distinct(Attributes.GropuAttribute.Comparer).ToDictionary(c => c.GroupKey(), c => c);
+            var attrs = gropus.Distinct(Annotations.GropuAttribute.Comparer).ToDictionary(c => c.GroupKey(), c => c);
 
             if (null != clones && clones.Any())
             {
                 foreach (var item in clones)
                 {
-                    if (item is Attributes.GropuAttribute)
+                    if (item is Annotations.GropuAttribute)
                     {
-                        var item2 = item as Attributes.GropuAttribute;
+                        var item2 = item as Annotations.GropuAttribute;
 
                         var groupKey = item2.GroupKey();
 
@@ -1381,7 +1269,7 @@ namespace Business.Utils
             return attributes;
         }
 
-        public static List<Attribute> GetAttrs<Attribute>(this IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null, bool clone = false) where Attribute : Attributes.AttributeBase
+        internal static List<Attribute> GetAttrs<Attribute>(this IList<Annotations.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null, bool clone = false) where Attribute : Annotations.AttributeBase
         {
             var list = new List<Attribute>(attributes.Count);
 
@@ -1417,7 +1305,7 @@ namespace Business.Utils
             return list;
         }
 
-        public static Attribute GetAttr<Attribute>(this IList<Attributes.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null) where Attribute : Attributes.AttributeBase
+        internal static Attribute GetAttr<Attribute>(this IList<Annotations.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null) where Attribute : Annotations.AttributeBase
         {
             if (null == predicate)
             {
@@ -1429,13 +1317,13 @@ namespace Business.Utils
             }
         }
 
-        public static T[] GetAttributes<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
+        internal static T[] GetAttributes<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
             return member.GetCustomAttributes<T>(inherit).ToArray();
             //return (T[])System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
         }
-        public static T GetAttribute<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
+        internal static T GetAttribute<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
 
@@ -1446,32 +1334,32 @@ namespace Business.Utils
 
         ////public static System.Collections.Generic.List<Attributes.AttributeBase> GetAttributes(this MemberInfo member, bool inherit = true) => member.GetAttributes<Attributes.AttributeBase>(inherit).ToList();
 
-        public static T[] GetAttributes<T>(this ParameterInfo member, bool inherit = true) where T : System.Attribute
+        internal static T[] GetAttributes<T>(this ParameterInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
             return member.GetCustomAttributes<T>(inherit).ToArray();
             //return (T[])System.Attribute.GetCustomAttributes(member, typeof(T), inherit);
         }
-        public static T GetAttribute<T>(this ParameterInfo member, bool inherit = true) where T : System.Attribute
+        internal static T GetAttribute<T>(this ParameterInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
             return member.GetCustomAttribute<T>(inherit);
         }
 
-        public static bool Exists<T>(this T[] attrs) where T : System.Attribute
+        internal static bool Exists<T>(this T[] attrs) where T : System.Attribute
         {
             if (null == attrs) { throw new System.ArgumentNullException(nameof(attrs)); }
 
             return 0 < attrs.Length;
         }
 
-        public static bool Exists<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
+        internal static bool Exists<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
 
             return member.IsDefined(typeof(T));
         }
-        public static bool Exists<T>(this ParameterInfo member, bool inherit = true) where T : System.Attribute
+        internal static bool Exists<T>(this ParameterInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
 
@@ -1501,7 +1389,7 @@ namespace Business.Utils
 
         #endregion
 
-        public static bool IsAssignableFrom(this System.Type type, System.Type fromType, out System.Type[] genericArguments)
+        internal static bool IsAssignableFrom(this System.Type type, System.Type fromType, out System.Type[] genericArguments)
         {
             if (null != type && null != fromType && type.IsGenericType)
             {
@@ -1811,7 +1699,7 @@ namespace Business.Utils
 
         #endregion
 
-        public static void DeleteFolder(string path)
+        internal static void DeleteFolder(string path)
         {
             if (!System.IO.Directory.Exists(path)) { return; }
 
@@ -1840,10 +1728,10 @@ namespace Business.Utils
             }
         }
 
-        public static bool ContainsAndNotNull(this IDictionary<string, dynamic> dict, string source)
-        {
-            return null != dict && dict.ContainsKey(source) && !object.Equals(null, dict[source]);
-        }
+        //public static bool ContainsAndNotNull(this IDictionary<string, dynamic> dict, string source)
+        //{
+        //    return null != dict && dict.ContainsKey(source) && !object.Equals(null, dict[source]);
+        //}
 
         #region WriteLocal
 
@@ -1898,7 +1786,7 @@ namespace Business.Utils
 
             if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(path)))
             {
-                path = System.IO.Path.Combine(BaseDirectory, System.IO.Path.GetFileName(path));
+                path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, System.IO.Path.GetFileName(path));
             }
 
             if (autoTime)
@@ -2034,7 +1922,7 @@ namespace Business.Utils
         }
 
         #region Guid
-
+        /*
         /// <summary>
         /// 9 - 10 digit number
         /// </summary>
@@ -2056,7 +1944,7 @@ namespace Business.Utils
 
             return string.Format("{0:x}", i - System.DateTime.Now.Ticks);
         }
-
+        */
         /// <summary>
         /// ToString("N")
         /// </summary>
@@ -2064,18 +1952,18 @@ namespace Business.Utils
 
         #endregion
 
-        public static string HumanReadableFilesize(double size)
-        {
-            var units = new string[] { "B", "KB", "MB", "GB", "TB", "PB" };
-            double mod = 1024.0;
-            int i = 0;
-            while (size >= mod)
-            {
-                size /= mod;
-                i++;
-            }
-            return System.Math.Round(size, 2) + units[i];
-        }
+        //public static string HumanReadableFilesize(double size)
+        //{
+        //    var units = new string[] { "B", "KB", "MB", "GB", "TB", "PB" };
+        //    double mod = 1024.0;
+        //    int i = 0;
+        //    while (size >= mod)
+        //    {
+        //        size /= mod;
+        //        i++;
+        //    }
+        //    return System.Math.Round(size, 2) + units[i];
+        //}
 
 #if NETFX
         public static void MailSend(this string subject, string content, string from, string displayName, string host, string credentialsUserName, string credentialsPassword, int port = 25, bool enableSsl = false, System.Text.Encoding contentEncoding = null, string mediaType = "text/html", params string[] to)
@@ -2098,7 +1986,7 @@ namespace Business.Utils
             }
         }
 #endif
-        public static string GetMethodFullName(this MethodInfo methodInfo)
+        internal static string GetMethodFullName(this MethodInfo methodInfo)
         {
             if (null == methodInfo) { throw new System.ArgumentNullException(nameof(methodInfo)); }
 
@@ -2122,7 +2010,7 @@ namespace Business.Utils
             return sp;
         }
 
-        public static bool CompareEquals<T>(this T objectFromCompare, T objectToCompare)
+        public static bool CompareEquals<T>(T objectFromCompare, T objectToCompare)
         {
             if (objectFromCompare == null && objectToCompare == null)
             {
@@ -2171,12 +2059,12 @@ namespace Business.Utils
             return true;
         }
 
-        public static Type ChangeType<Type>(this object value)
+        public static Type ChangeType<Type>(object value)
         {
             return (Type)ChangeType(value, typeof(Type));
         }
 
-        public static object ChangeType(this object value, System.Type type)
+        public static object ChangeType(object value, System.Type type)
         {
             if (null == type) { throw new System.ArgumentNullException(nameof(type)); }
 
@@ -2426,7 +2314,7 @@ namespace Business.Utils
 
             try
             {
-                return System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement[]>(value, options).Select(c => c.GetRawText()).ToArray();
+                return System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement[]>(value, options ?? JsonOptions).Select(c => c.GetRawText()).ToArray();
             }
             catch
             {
@@ -2442,20 +2330,26 @@ namespace Business.Utils
 
             try
             {
-                return System.Text.Json.JsonSerializer.Deserialize<Type>(value, options);
+                return System.Text.Json.JsonSerializer.Deserialize<Type>(value, options ?? JsonOptions);
             }
             catch
             {
                 return default;
             }
         }
-        public static string JsonSerialize<Type>(this Type value, System.Text.Json.JsonSerializerOptions options = null) => System.Text.Json.JsonSerializer.Serialize(value, options);
+
+        public static string JsonSerialize<Type>(this Type value, System.Text.Json.JsonSerializerOptions options = null) => System.Text.Json.JsonSerializer.Serialize(value, options ?? JsonOptions);
+
+        public static System.Text.Json.JsonSerializerOptions JsonOptions = new System.Text.Json.JsonSerializerOptions
+        {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
 
         public static string TryJsonSerialize<Type>(this Type value, System.Text.Json.JsonSerializerOptions options = null)
         {
             try
             {
-                return System.Text.Json.JsonSerializer.Serialize(value, options);
+                return System.Text.Json.JsonSerializer.Serialize(value, options ?? JsonOptions);
             }
             catch (System.Exception ex)
             {
@@ -2958,7 +2852,7 @@ namespace Business.Utils
                 this.comparer = comparer;
             }
             public CommonEqualityComparer(System.Func<T, V> keySelector)
-                : this(keySelector, System.Collections.Generic.EqualityComparer<V>.Default) { }
+                : this(keySelector, EqualityComparer<V>.Default) { }
 
             public bool Equals(T x, T y)
             {
@@ -2993,7 +2887,7 @@ namespace Business.Utils
                 this.comparer = comparer;
             }
             public CommonComparer(System.Func<T, V> keySelector)
-                : this(keySelector, System.Collections.Generic.Comparer<V>.Default)
+                : this(keySelector, Comparer<V>.Default)
             { }
 
             public int Compare(T x, T y)

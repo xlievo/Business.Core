@@ -1,17 +1,17 @@
-using Business;
-using Business.Attributes;
-using Business.Result;
-using Business.Utils;
-using Business.Auth;
+using Business.Core.Annotations;
+using Business.Core.Result;
+using Business.Core.Utils;
+using Business.Core.Auth;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
 using System.Collections.Generic;
 using static BusinessMember;
+using Business.Core;
 
 [assembly: JsonArg(Group = "G01")]
-[assembly: Logger(LoggerType.All)]
+[assembly: Logger(Logger.LoggerType.All)]
 [assembly: Command(Group = "G01")]
 [assembly: Command(Group = CommandGroupDefault.Group)]
 
@@ -20,7 +20,7 @@ public struct CommandGroupDefault
     public const string Group = "333";
 }
 
-public class ResultObject<Type> : Business.Result.ResultObject<Type>
+public class ResultObject<Type> : Business.Core.Result.ResultObject<Type>
 {
     public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericType = null, bool checkData = true)
         : base(dataType, data, state, message, genericType, checkData) { }
@@ -70,7 +70,7 @@ public class AES2 : AESAttribute
 {
     public AES2(string key, int state = -821, string message = null) : base(key, state, message)
     {
-        
+
     }
 
     public async override ValueTask<IResult> Proces(dynamic value)
@@ -131,7 +131,7 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
 
         [ProcesUse02]Arg<Use02, Use01> use06,
 
-        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A);
 }
@@ -141,6 +141,34 @@ public enum TestMode
     OK,
     ERROR,
     Exception,
+}
+
+[Info("Business2")]
+[Logger]
+public class BusinessMember2
+{
+    [Command(Group = "G01", OnlyName = "G01Test001")]
+    [Command(Group = "G01", OnlyName = "G01Test002")]
+    [Command(OnlyName = "DEFTest001")]
+    [Command(OnlyName = "Test001")]
+    public virtual async Task<dynamic> Test001(
+        [Use(true)]dynamic use01,
+
+        Arg<Arg01> arg01,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
+            [Nick("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        =>
+        arg01.Out.A.Out;
 }
 
 [Info("Business", CommandGroupDefault = CommandGroupDefault.Group)]
@@ -186,10 +214,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
     #region realization
 
     public Logger Logger { get; set; }
+
     public CommandGroup Command { get; set; }
+
     public Configer Configer { get; set; }
-    public Action BindAfter { get; set; }
-    public Action<Configer> BindBefore { get; set; }
 
     public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => ResultFactory.ResultCreate(this.Configer.MetaData[method], state, message);
 
@@ -217,17 +245,17 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 
         Arg<Arg01> arg01,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
             [Nick("arg.b")]
             decimal b = 0.0234m,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A.Out);
 
@@ -249,17 +277,17 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 
         Arg<Arg01> arg01,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
             [Nick("arg.b")]
             decimal b = 0.0234m,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A.Out);
 
@@ -281,17 +309,17 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 
         Arg<Arg01> arg01,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
             [Nick("arg.b")]
             decimal b = 0.0234m,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A.Out);
 
@@ -300,17 +328,17 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 
         Arg<Arg01> arg01,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
             [Nick("arg.b")]
             decimal b = 0.0234m,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A.Out);
 
@@ -319,17 +347,17 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 
         Arg<Arg01> arg01,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
             [Nick("arg.b")]
             decimal b = 0.0234m,
 
-        [Business.Attributes.Ignore(IgnoreMode.BusinessArg)]
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
     { }
 
     [Command(Group = "G02", OnlyName = "G02Test002")]
@@ -1039,7 +1067,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
         }
     }
 
-    [TestCollection4]
+    [TestCollection4(CollectionItem = true)]
     public class TestCollectionArg
     {
         [CheckNull(-1103)]
@@ -1070,7 +1098,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
         }
     }
 
-    [TestCollection4]
+    [TestCollection4(CollectionItem = true)]
     public class TestDictArg
     {
         [CheckNull(-1103)]
@@ -1104,7 +1132,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
         [CheckNull(-1100)]
         [ArgumentDefault(-1102)]
         [CheckNull(-1101, CollectionItem = true)]
-        Arg<List<TestCollectionArg>> a)
+        List<TestCollectionArg> a)
     {
         return this.ResultCreate();
     }
@@ -1113,7 +1141,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
         [CheckNull(-1100)]
         [ArgumentDefault(-1102)]
         [CheckNull(-1101, CollectionItem = true)]
-        Arg<Dictionary<string, TestDictArg>> a)
+        Dictionary<string, TestDictArg> a)
     {
         return this.ResultCreate();
     }
@@ -1215,6 +1243,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 [TestClass]
 public class TestBusinessMember
 {
+    static BusinessMember2 Member2 = Bind.Create<BusinessMember2>();
     static BusinessMember Member = Bind.Create<BusinessMember>().UseType(typeof(IToken)).UseDoc();
     static CommandGroup Cmd = Member.Command;
     static Configer Cfg = Member.Configer;
@@ -1367,7 +1396,7 @@ public class TestBusinessMember
     {
         var member = Bind.Create<BusinessLoggerAndArg>().UseDoc();
 
-        member.LoggerSet(new LoggerAttribute(LoggerType.Record, canWrite: false) { Group = "333" }, typeof(Use02));
+        member.LoggerSet(new LoggerAttribute(Logger.LoggerType.Record, canWrite: false) { Group = "333" }, typeof(Use02));
 
         var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry(new Use01 { A = "bbb" }, "use02"), new UseEntry(new Use01 { A = "aaa" }));
         Assert.AreEqual(t2.Message, null);
@@ -1558,6 +1587,12 @@ public class TestBusinessMember
         var t21result = new Token { Key = "a", Remote = "b" };
         var t21 = AsyncCall(business.Command, "TestDynamic", null, new object[] { "abc" }, new UseEntry(t21result, "use01"));
         Assert.AreEqual(t21, t21result);
+
+        var b2 = Member2.Test001(null, new Arg<Arg01> { In = new Arg01 { A = "abc" } });
+        b2.Wait();
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(b2.Result.GetType()), true);
+        Assert.AreEqual(b2.Result.State, -113);
+        Assert.AreEqual(b2.Result.Message, "arg.b minimum range 2");
     }
 
     [TestMethod]
@@ -1704,7 +1739,8 @@ public class TestBusinessMember
 
         var t22 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
 
-        Assert.AreEqual(t22.State, -1105);
+        //TestCollectionArg2 checknull 1003
+        Assert.AreEqual(t22.State, -1103);
 
         list3[0].B = new List<TestCollectionArg.TestCollectionArg2> { new TestCollectionArg.TestCollectionArg2 { C = "sss", D = 888 }, new TestCollectionArg.TestCollectionArg2 { C = "sss2", D = 999 } };
 
@@ -1718,7 +1754,7 @@ public class TestBusinessMember
 
         var t24 = AsyncCall(Member.Command, "TestCollection", null, new object[] { list3 });
 
-        Assert.IsTrue(t24.State == -1106 || t24.State == -1103);
+        Assert.IsTrue(t24.State == -1103);
 
         list3[0] = null;
 
@@ -1734,7 +1770,7 @@ public class TestBusinessMember
 
         var t22 = AsyncCall(Member.Command, "TestDict", null, new object[] { list3 });
 
-        Assert.AreEqual(t22.State, -1105);
+        Assert.AreEqual(t22.State, -1103);
 
         list3["a"].B = new Dictionary<string, TestDictArg.TestDictArg2> { { "b", new TestDictArg.TestDictArg2 { C = "sss", D = 888 } }, { "c", new TestDictArg.TestDictArg2 { C = "sss2", D = 999 } } };
 
@@ -1748,7 +1784,7 @@ public class TestBusinessMember
 
         var t24 = AsyncCall(Member.Command, "TestDict", null, new object[] { list3 });
 
-        Assert.IsTrue(t24.State == -1106 || t24.State == -1103);
+        Assert.IsTrue(t24.State == -1103);
 
         list3["a"] = null;
 

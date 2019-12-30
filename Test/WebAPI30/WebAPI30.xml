@@ -21,15 +21,19 @@
             bbb
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Token,Arg{Args.Test001},Arg{System.DateTime},HttpFile,System.Decimal,System.Int32,System.Boolean)">
+        <member name="M:BusinessMember2.Test001(Token,Args.Test001,Arg{System.DateTime},Business.Core.Annotations.HttpFile,System.Decimal,System.Int32,System.Boolean)">
             <summary>
             test doc Test001
             and Test001
             </summary>
             <param name="token">A token sample222</param>
             <param name="arg"></param>
+            <param name="dateTime"></param>
+            <param name="httpFile"></param>
             <param name="mm">mmmmmmmm!</param>
-            <returns></returns>
+            <param name="fff"></param>
+            <param name="bbb"></param>
+            <returns>rrrrrr</returns>
         </member>
         <member name="M:BusinessMember2.Test002(Token,Arg{Args.Test001},System.Decimal,Arg{System.Collections.Generic.Dictionary{System.String,System.Object}})">
             <summary>

@@ -55,11 +55,6 @@
             Session arg object
             </summary>
         </member>
-        <member name="T:HttpFile">
-            <summary>
-            parameter name: context
-            </summary>
-        </member>
         <member name="M:Common.InitBusiness(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.String)">
             <summary>
             Call this method after environment initialization is complete

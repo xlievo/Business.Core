@@ -1,8 +1,7 @@
-﻿using Business.Attributes;
-using Business.Result;
+﻿using Business.Core.Result;
 using System.Threading.Tasks;
 
-namespace Business.Annotations
+namespace Business.Core.Annotations
 {
     public class MessagePackArg : ArgumentAttribute
     {
@@ -12,7 +11,7 @@ namespace Business.Annotations
             this.Description = "MessagePackArg Binary parsing";
         }
 
-        public override async ValueTask<IResult> Proces(dynamic value, IArg arg)
+        public override async ValueTask<IResult> Proces(dynamic value, Core.IArg arg)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
@@ -114,7 +113,7 @@ namespace Business.Annotations
         }
     }
 
-    public class AES : Attributes.AESAttribute
+    public class AES : AESAttribute
     {
         public AES(string key = null, int state = -821, string message = null) : base(key, state, message)
         {
