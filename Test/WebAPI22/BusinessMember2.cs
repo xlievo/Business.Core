@@ -540,7 +540,7 @@ public class Args
         /// <summary>
         /// CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
         /// </summary>
-        //[Test]
+        [Test]
         public Test0010 C { get; set; }
 
         public decimal D { get; set; }
@@ -556,7 +556,7 @@ public class Args
             /// <summary>
             /// C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
             /// </summary>
-            //[Test]
+            [Test(Group = "j")]
             public string C1 { get; set; }
 
             /// <summary>

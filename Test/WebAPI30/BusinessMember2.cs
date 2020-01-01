@@ -541,7 +541,7 @@ public class Args
         /// <summary>
         /// FF
         /// </summary>
-        public DateTime? F { get; set; }
+        public DateTime F { get; set; }
 
         public MyEnum myEnum { get; set; }
 
@@ -550,7 +550,7 @@ public class Args
             /// <summary>
             /// C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
             /// </summary>
-            //[Test]
+            [Test]
             public string C1 { get; set; }
 
             /// <summary>

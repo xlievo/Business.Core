@@ -516,7 +516,7 @@ namespace Business.Core.Auth
 
         async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, IArg arg, int collectionIndex = -1, dynamic dictKey = null)
         {
-            switch (argAttr.ArgumentMeta.HasProcesIArg)
+            switch (argAttr.ArgMeta.HasProcesIArg)
             {
                 case ArgumentAttribute.MetaData.ProcesMode.Proces:
                     return await argAttr.Proces(value);

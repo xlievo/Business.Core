@@ -1035,7 +1035,7 @@ namespace Business.Core
 
                 #endregion
 
-                var space = method.DeclaringType.FullName;
+                var declaring = method.DeclaringType.FullName;
 
                 var attributes2 = AttributeBase.GetAttributes(method).Distinct(cfg.Attributes, c => c is TestingAttribute test && null != test.Method && !test.Method.Equals(method.Name, System.StringComparison.InvariantCultureIgnoreCase), c =>
                 {
@@ -1110,13 +1110,13 @@ namespace Business.Core
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
                     var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
 
-                    var argGroup = GetArgGroup(argAttrAll, current, path, default, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
+                    var argGroup = GetArgGroup(argAttrAll, current, declaring, method.Name, path, default, argInfo.Name, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
                     var definitions = current.hasDefinition ? new System.Collections.Generic.List<string> { current.outType.FullName } : new System.Collections.Generic.List<string>();
 
                     var hasLower = false;
                     var childrens2 = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? GetArgChild(current.outType, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
+                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? GetArgChild(current.outType, declaring, method.Name, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
 
                     var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
                     if (cast)
@@ -1173,7 +1173,7 @@ namespace Business.Core
                 //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
-                var meta = new MetaData(commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, $"{space}.{method.Name}", method.Name, fullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, method.Name), useTypePosition, GetMethodTypeFullName(fullName, args));
+                var meta = new MetaData(commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, method.GetMethodFullName(), method.Name, fullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, method.Name), useTypePosition, GetMethodTypeFullName(fullName, args));
 
                 if (!metaData.dictionary.TryAdd(method.Name, meta))
                 {
@@ -1229,15 +1229,15 @@ namespace Business.Core
         }
 
         #region GetArgAttr        
-
-        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<AttributeBase> attributes, System.Type memberType, System.Type resultType, System.Type resultTypeDefinition, string path)
+        /*
+        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<AttributeBase> attributes, System.Type memberType, System.Type resultType, System.Type resultTypeDefinition)
         {
             var argAttr = attributes.Where(c => c is ArgumentAttribute).Cast<ArgumentAttribute>().ToList();
             GetArgAttrSort(argAttr);
-            return GetArgAttr(argAttr, resultType, resultTypeDefinition, path, memberType);
+            return GetArgAttr(argAttr, resultType, resultTypeDefinition, memberType);
         }
 
-        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<ArgumentAttribute> argAttr, System.Type resultType, System.Type resultTypeDefinition, string path, System.Type memberType)
+        internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<ArgumentAttribute> argAttr, System.Type resultType, System.Type resultTypeDefinition, System.Type memberType)
         {
             //argAttr = argAttr.FindAll(c => c.Enable);
             //argAttr.Sort(ComparisonHelper<Attributes.ArgumentAttribute>.CreateComparer(c =>c.State.ConvertErrorState()));
@@ -1252,20 +1252,20 @@ namespace Business.Core
             {
                 //if (string.IsNullOrWhiteSpace(item.Group)) { item.Group = groupDefault; }
 
-                item.ArgumentMeta.resultType = resultType;
-                item.ArgumentMeta.resultTypeDefinition = resultTypeDefinition;
+                item.ArgMeta.resultType = resultType;
+                item.ArgMeta.resultTypeDefinition = resultTypeDefinition;
                 //item.ArgumentMeta.Business = business;
-                item.ArgumentMeta.Member = path;
-                item.ArgumentMeta.MemberType = memberType;
+                //item.ArgMeta.MemberPath = path;
+                item.ArgMeta.MemberType = memberType;
 
                 //!procesIArgMethod.DeclaringType.FullName.Equals(argumentAttributeFullName)
                 if (item.Meta.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(item.Meta.Type.FullName))
                 {
-                    item.ArgumentMeta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArg;
+                    item.ArgMeta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArg;
                 }
                 else if (item.Meta.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(item.Meta.Type.FullName))
                 {
-                    item.ArgumentMeta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
+                    item.ArgMeta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
                 }
 
                 //if (string.IsNullOrWhiteSpace(item.Nick) && !string.IsNullOrWhiteSpace(nick))
@@ -1288,10 +1288,10 @@ namespace Business.Core
             argAttr.Sort(ComparisonHelper<ArgumentAttribute>.CreateComparer(c => c.State.ConvertErrorState()));
             //argAttr.Reverse();
         }
-
+        */
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
+        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string method, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
         {
             hasLower = false;
 
@@ -1359,11 +1359,11 @@ namespace Business.Core
 
                 argAttrAll = argAttrAll.Distinct();
 
-                var argGroup = GetArgGroup(argAttrAll, current, path2, path, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
+                var argGroup = GetArgGroup(argAttrAll, current, declaring, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
 
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                var children = current.hasDefinition ? GetArgChild(current.outType, path2, commands, ref definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
+                var children = current.hasDefinition ? GetArgChild(current.outType, declaring, method, path2, commands, ref definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
 
                 if (hasLower2 || hasLower3)
                 {
@@ -1419,12 +1419,17 @@ namespace Business.Core
         /// <returns></returns>
         internal static bool GroupEquals(GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string path, string owner, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string declaring, string method, string path, string owner, string member, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
         {
             hasLower = false;
             hasCollectionAttr = false;
 
-            var argAttrs = GetArgAttr(argAttrAll, current.orgType, resultType, resultTypeDefinition, path);
+            //var argAttrs = GetArgAttr(argAttrAll, current.orgType, resultType, resultTypeDefinition);
+
+            var procesIArgTypes = new System.Type[] { typeof(object), typeof(IArg) };
+            var procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
+            var argAttrs = argAttrAll.Where(c => c is ArgumentAttribute).Cast<ArgumentAttribute>().ToList();
+            argAttrs.Sort(ComparisonHelper<ArgumentAttribute>.CreateComparer(c => c.State.ConvertErrorState()));
 
             var nick = argAttrAll.GetAttr<NickAttribute>();
 
@@ -1446,16 +1451,31 @@ namespace Business.Core
 
                 var argAttr = new ConcurrentLinkedList<ArgumentAttribute>();//argAttrChild.Count
 
-                var path2 = $"{item.Value.OnlyName}.{path}";
-
                 var httpFile = false;
 
                 foreach (var c in argAttrChild)
                 {
                     var attr = string.IsNullOrWhiteSpace(c.Group) ? c.Clone() : c;
 
-                    attr.ArgumentMeta.Method = item.Value.OnlyName;
-                    attr.ArgumentMeta.Member = path2;
+                    attr.ArgMeta.resultType = resultType;
+                    attr.ArgMeta.resultTypeDefinition = resultTypeDefinition;
+
+                    //!procesIArgMethod.DeclaringType.FullName.Equals(argumentAttributeFullName)
+                    if (attr.Meta.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(attr.Meta.Type.FullName))
+                    {
+                        attr.ArgMeta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArg;
+                    }
+                    else if (attr.Meta.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgCollectionTypes, null).DeclaringType.FullName.Equals(attr.Meta.Type.FullName))
+                    {
+                        attr.ArgMeta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
+                    }
+
+                    attr.ArgMeta.Declaring = declaring;
+                    attr.ArgMeta.Method = method;
+                    attr.ArgMeta.OnlyName = item.Value.OnlyName;
+                    attr.ArgMeta.MemberPath = path;
+                    attr.ArgMeta.Member = member;
+                    attr.ArgMeta.MemberType = current.orgType;
 
                     //attr.ArgumentMeta.Method = item.Value.OnlyName;
                     //attr.ArgumentMeta.Member = path2;
@@ -1467,7 +1487,7 @@ namespace Business.Core
 
                     if (string.IsNullOrWhiteSpace(attr.Nick))
                     {
-                        attr.Nick = !string.IsNullOrWhiteSpace(nickValue) ? nickValue : attr.ArgumentMeta.Member;
+                        attr.Nick = !string.IsNullOrWhiteSpace(nickValue) ? nickValue : attr.ArgMeta.MemberPath;
                     }
 
                     attr.BindAfter?.Invoke();
@@ -1500,7 +1520,7 @@ namespace Business.Core
                 }
 
                 //owner ?? Do need only the superior, not the superior path? For doc
-                var group = new ArgGroup(ignores.ToReadOnly(), ignores.Any(c => c.Mode == IgnoreMode.Arg), argAttr, nickValue, path2, default == owner ? item.Value.OnlyName : $"{item.Value.OnlyName}.{owner}", $"{item.Value.OnlyName}.{root}", httpFile);
+                var group = new ArgGroup(ignores.ToReadOnly(), ignores.Any(c => c.Mode == IgnoreMode.Arg), argAttr, nickValue, $"{item.Value.OnlyName}.{path}", default == owner ? item.Value.OnlyName : $"{item.Value.OnlyName}.{owner}", $"{item.Value.OnlyName}.{root}", httpFile);
 
                 if (0 < log?.Count)
                 {

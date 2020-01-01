@@ -1062,7 +1062,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 
         public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic key)
         {
-            Assert.IsTrue(this.ArgumentMeta.MemberType.IsCollection());
+            Assert.IsTrue(this.ArgMeta.MemberType.IsCollection());
             return this.ResultCreate();
         }
     }

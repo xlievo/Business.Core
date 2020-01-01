@@ -19,6 +19,7 @@ using Business.Core.Annotations;
 using Business.Core.Result;
 using Business.Utils;
 using Business;
+using Business.Core.Document;
 
 #region Socket Support
 
@@ -263,7 +264,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             .UseType("context", "socket", "httpFile")
             .IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket", "httpFile")
             .LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket", "httpFile")
-            .UseDoc(docDir, new Business.Core.Document.Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true })
+            .UseDoc(docDir, new Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true })
             .LoadBusiness(new object[] { Host });
 
         //writ url to page

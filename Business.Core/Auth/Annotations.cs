@@ -528,14 +528,19 @@ namespace Business.Core.Annotations
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public abstract class ArgumentAttribute : GropuAttribute
     {
-        public class MetaData
+        public new class MetaData
         {
             internal System.Type resultType;
             internal System.Type resultTypeDefinition;
 
             //public dynamic Business { get; internal set; }
+            public string Declaring { get; internal set; }
 
             public string Method { get; internal set; }
+
+            public string OnlyName { get; internal set; }
+
+            public string MemberPath { get; internal set; }
 
             public string Member { get; internal set; }
 
@@ -555,19 +560,22 @@ namespace Business.Core.Annotations
 
             public void Clone(ArgumentAttribute attribute)
             {
-                this.resultType = attribute.ArgumentMeta.resultType;
-                this.resultTypeDefinition = attribute.ArgumentMeta.resultTypeDefinition;
-                this.Method = attribute.ArgumentMeta.Method;
-                this.Member = attribute.ArgumentMeta.Member;
-                this.MemberType = attribute.ArgumentMeta.MemberType;
-                this.HasProcesIArg = attribute.ArgumentMeta.HasProcesIArg;
+                this.resultType = attribute.ArgMeta.resultType;
+                this.resultTypeDefinition = attribute.ArgMeta.resultTypeDefinition;
+                this.Declaring = attribute.ArgMeta.Declaring;
+                this.Method = attribute.ArgMeta.Method;
+                this.OnlyName = attribute.ArgMeta.OnlyName;
+                this.MemberPath = attribute.ArgMeta.MemberPath;
+                this.Member = attribute.ArgMeta.Member;
+                this.MemberType = attribute.ArgMeta.MemberType;
+                this.HasProcesIArg = attribute.ArgMeta.HasProcesIArg;
             }
         }
 
         public override T Clone<T>()
         {
             var clone = base.Clone<ArgumentAttribute>();
-            clone.ArgumentMeta.Clone(this);
+            clone.ArgMeta.Clone(this);
             return clone as T;
         }
 
@@ -576,7 +584,7 @@ namespace Business.Core.Annotations
             this.State = state;
             this.Message = message;
             //this.CanNull = canNull;
-            this.ArgumentMeta = new MetaData();
+            this.ArgMeta = new MetaData();
 
             this.BindAfter += () =>
             {
@@ -596,7 +604,7 @@ namespace Business.Core.Annotations
 
         public System.Action BindAfter { get; set; }
 
-        public MetaData ArgumentMeta { get; }
+        public MetaData ArgMeta { get; }
 
         /// <summary>
         /// Whether to apply to each item of a set parameter
@@ -657,7 +665,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state) => ResultFactory.ResultCreate(ArgumentMeta.resultType, ArgumentMeta.resultTypeDefinition, state);
+        public IResult ResultCreate(int state) => ResultFactory.ResultCreate(ArgMeta.resultType, ArgMeta.resultTypeDefinition, state);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -665,7 +673,7 @@ namespace Business.Core.Annotations
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.ResultCreate(ArgumentMeta.resultType, ArgumentMeta.resultTypeDefinition, state, message);
+        public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.ResultCreate(ArgMeta.resultType, ArgMeta.resultTypeDefinition, state, message);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -674,7 +682,7 @@ namespace Business.Core.Annotations
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgumentMeta.resultTypeDefinition, data, message, state);
+        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgMeta.resultTypeDefinition, data, message, state);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -683,7 +691,7 @@ namespace Business.Core.Annotations
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgumentMeta.resultTypeDefinition, data, message, state);
+        public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgMeta.resultTypeDefinition, data, message, state);
 
         #endregion
 
@@ -732,7 +740,7 @@ namespace Business.Core.Annotations
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
-            if (typeof(string).Equals(this.ArgumentMeta.MemberType))
+            if (typeof(string).Equals(this.ArgMeta.MemberType))
             {
                 if (string.IsNullOrEmpty(value))
                 {
@@ -777,7 +785,7 @@ namespace Business.Core.Annotations
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            var type = System.Nullable.GetUnderlyingType(this.ArgumentMeta.MemberType) ?? this.ArgumentMeta.MemberType;
+            var type = System.Nullable.GetUnderlyingType(this.ArgMeta.MemberType) ?? this.ArgMeta.MemberType;
 
             string msg = null;
 
@@ -901,7 +909,7 @@ namespace Business.Core.Annotations
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            switch (this.ArgumentMeta.MemberType.FullName)
+            switch (this.ArgMeta.MemberType.FullName)
             {
                 case "System.Decimal":
                     return this.ResultCreate(Help.Scale((decimal)value, Size));
@@ -1301,10 +1309,10 @@ namespace Business.Core.Annotations
 
     public sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
-        internal ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, int state = -11, string message = null) : base(state, message)
+        internal protected ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, int state = -11, string message = null) : base(state, message)
         {
-            this.ArgumentMeta.resultType = resultType;
-            this.ArgumentMeta.resultTypeDefinition = resultTypeDefinition;
+            this.ArgMeta.resultType = resultType;
+            this.ArgMeta.resultTypeDefinition = resultTypeDefinition;
         }
 
         public ArgumentDefaultAttribute(int state = -11, string message = null) : base(state, message) { }
@@ -1369,7 +1377,7 @@ namespace Business.Core.Annotations
 
             try
             {
-                return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize(value, this.ArgumentMeta.MemberType, options));
+                return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize(value, this.ArgMeta.MemberType, options));
             }
             catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
         }
