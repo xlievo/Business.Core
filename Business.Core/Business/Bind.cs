@@ -1110,13 +1110,13 @@ namespace Business.Core
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
                     var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
 
-                    var argGroup = GetArgGroup(argAttrAll, current, declaring, method.Name, path, default, argInfo.Name, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
+                    var argGroup = GetArgGroup(argAttrAll, current, declaring, cfg.Info.BusinessName, method.Name, path, default, argInfo.Name, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
                     var definitions = current.hasDefinition ? new System.Collections.Generic.List<string> { current.outType.FullName } : new System.Collections.Generic.List<string>();
 
                     var hasLower = false;
                     var childrens2 = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? GetArgChild(current.outType, declaring, method.Name, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
+                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? GetArgChild(current.outType, declaring, cfg.Info.BusinessName, method.Name, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
 
                     var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
                     if (cast)
@@ -1291,7 +1291,7 @@ namespace Business.Core
         */
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string method, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
+        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
         {
             hasLower = false;
 
@@ -1359,11 +1359,11 @@ namespace Business.Core
 
                 argAttrAll = argAttrAll.Distinct();
 
-                var argGroup = GetArgGroup(argAttrAll, current, declaring, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
+                var argGroup = GetArgGroup(argAttrAll, current, declaring, businessName, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
 
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                var children = current.hasDefinition ? GetArgChild(current.outType, declaring, method, path2, commands, ref definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
+                var children = current.hasDefinition ? GetArgChild(current.outType, declaring, businessName, method, path2, commands, ref definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
 
                 if (hasLower2 || hasLower3)
                 {
@@ -1419,15 +1419,16 @@ namespace Business.Core
         /// <returns></returns>
         internal static bool GroupEquals(GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string declaring, string method, string path, string owner, string member, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
+        static readonly System.Type[] procesIArgTypes = new System.Type[] { typeof(object), typeof(IArg) };
+        static readonly System.Type[] procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
+
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string declaring, string businessName, string method, string path, string owner, string member, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
         {
             hasLower = false;
             hasCollectionAttr = false;
 
             //var argAttrs = GetArgAttr(argAttrAll, current.orgType, resultType, resultTypeDefinition);
 
-            var procesIArgTypes = new System.Type[] { typeof(object), typeof(IArg) };
-            var procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
             var argAttrs = argAttrAll.Where(c => c is ArgumentAttribute).Cast<ArgumentAttribute>().ToList();
             argAttrs.Sort(ComparisonHelper<ArgumentAttribute>.CreateComparer(c => c.State.ConvertErrorState()));
 
@@ -1470,9 +1471,10 @@ namespace Business.Core
                         attr.ArgMeta.HasProcesIArg = ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection;
                     }
 
-                    attr.ArgMeta.Declaring = declaring;
+                    attr.ArgMeta.Business = declaring;
+                    attr.ArgMeta.BusinessName = businessName;
                     attr.ArgMeta.Method = method;
-                    attr.ArgMeta.OnlyName = item.Value.OnlyName;
+                    attr.ArgMeta.MethodOnlyName = item.Value.OnlyName;
                     attr.ArgMeta.MemberPath = path;
                     attr.ArgMeta.Member = member;
                     attr.ArgMeta.MemberType = current.orgType;

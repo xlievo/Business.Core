@@ -150,6 +150,8 @@ namespace Business.Core.Annotations
 
         #endregion
 
+        public sealed override object TypeId => base.TypeId;
+
         /// <summary>
         /// Accessor
         /// </summary>
@@ -534,11 +536,20 @@ namespace Business.Core.Annotations
             internal System.Type resultTypeDefinition;
 
             //public dynamic Business { get; internal set; }
-            public string Declaring { get; internal set; }
+
+            /// <summary>
+            /// Declaring
+            /// </summary>
+            public string Business { get; internal set; }
+
+            /// <summary>
+            /// Business Friendly Name
+            /// </summary>
+            public string BusinessName { get; internal set; }
 
             public string Method { get; internal set; }
 
-            public string OnlyName { get; internal set; }
+            public string MethodOnlyName { get; internal set; }
 
             public string MemberPath { get; internal set; }
 
@@ -562,9 +573,10 @@ namespace Business.Core.Annotations
             {
                 this.resultType = attribute.ArgMeta.resultType;
                 this.resultTypeDefinition = attribute.ArgMeta.resultTypeDefinition;
-                this.Declaring = attribute.ArgMeta.Declaring;
+                this.Business = attribute.ArgMeta.Business;
+                this.BusinessName = attribute.ArgMeta.BusinessName;
                 this.Method = attribute.ArgMeta.Method;
-                this.OnlyName = attribute.ArgMeta.OnlyName;
+                this.MethodOnlyName = attribute.ArgMeta.MethodOnlyName;
                 this.MemberPath = attribute.ArgMeta.MemberPath;
                 this.Member = attribute.ArgMeta.Member;
                 this.MemberType = attribute.ArgMeta.MemberType;
@@ -909,11 +921,11 @@ namespace Business.Core.Annotations
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            switch (this.ArgMeta.MemberType.FullName)
+            switch (this.ArgMeta.MemberType.GetTypeCode())
             {
-                case "System.Decimal":
+                case System.TypeCode.Decimal:
                     return this.ResultCreate(Help.Scale((decimal)value, Size));
-                case "System.Double":
+                case System.TypeCode.Double:
                     return this.ResultCreate(Help.Scale((double)value, Size));
                 default: return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" type error");
             }

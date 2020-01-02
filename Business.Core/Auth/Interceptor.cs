@@ -21,8 +21,8 @@ namespace Business.Core.Auth
     using Meta;
     using Utils;
     using Result;
-    using System.Linq;
     using Annotations;
+    using System.Linq;
 
     /// <summary>
     /// IInterceptor

@@ -101,7 +101,7 @@ public partial class BusinessMember2 : BusinessBase
         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T07:24\",99.0234,777,false]",
         tokenMethod: login)]
     [Testing("test, important logic, do not delete!!!",
-        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
+        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
         tokenMethod: login)]
     public virtual async Task<IResult<Test001Result?>> Test001(Token token, Test001 arg, Arg<DateTime> dateTime, HttpFile httpFile = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
@@ -529,7 +529,7 @@ public class Args
         /// CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC12
         /// </summary>
         //[Test]
-        public Test0010? C { get; set; }
+        public Test0010 C { get; set; }
 
         /// <summary>
         /// DDD
