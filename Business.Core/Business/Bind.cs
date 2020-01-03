@@ -343,14 +343,14 @@ namespace Business.Core
                         if (businessTypeName.Contains(type.Name))
                         {
                             Create(type, constructorArguments);
+                            return true;
                         }
                     }
                     else
                     {
                         Create(type, constructorArguments);
+                        return true;
                     }
-
-                    return true;
                 }
 
                 return false;
