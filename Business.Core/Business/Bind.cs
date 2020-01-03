@@ -331,13 +331,24 @@ namespace Business.Core
         /// </summary>
         /// <param name="constructorArguments"></param>
         /// <param name="assemblyFiles"></param>
-        public virtual void LoadBusiness(object[] constructorArguments = null, params string[] assemblyFiles)
+        /// <param name="businessTypeName"></param>
+        public virtual void LoadBusiness(object[] constructorArguments = null, string[] assemblyFiles = null, string[] businessTypeName = null)
         {
             var businessType = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(System.AppContext.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {
-                    Create(type, constructorArguments);
+                    if (null != businessTypeName && businessTypeName.Any())
+                    {
+                        if (businessTypeName.Contains(type.Name))
+                        {
+                            Create(type, constructorArguments);
+                        }
+                    }
+                    else
+                    {
+                        Create(type, constructorArguments);
+                    }
 
                     return true;
                 }
@@ -437,7 +448,7 @@ namespace Business.Core
 #endif
             var cfg = new Configer(info, resultType, attributes);
 
-            business?.Configer?.BindBefore?.Invoke(cfg);
+            business?.BindBefore?.Invoke(cfg);
 
             try
             {
@@ -483,7 +494,7 @@ namespace Business.Core
 
                 type.LoadAccessors(Configer.Accessors, business.Configer.Info.BusinessName);
 
-                business?.Configer?.BindAfter?.Invoke();
+                business.BindAfter?.Invoke();
             }
 
             /*
@@ -1489,7 +1500,7 @@ namespace Business.Core
 
                     if (string.IsNullOrWhiteSpace(attr.Nick))
                     {
-                        attr.Nick = !string.IsNullOrWhiteSpace(nickValue) ? nickValue : attr.ArgMeta.MemberPath;
+                        attr.Nick = !string.IsNullOrWhiteSpace(nickValue) ? nickValue : attr.ArgMeta.Member;
                     }
 
                     attr.BindAfter?.Invoke();

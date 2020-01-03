@@ -219,6 +219,10 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 
     public Configer Configer { get; set; }
 
+    public Action BindAfter { get; set; }
+
+    public Action<Configer> BindBefore { get; set; }
+
     public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => ResultFactory.ResultCreate(this.Configer.MetaData[method], state, message);
 
     public IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);

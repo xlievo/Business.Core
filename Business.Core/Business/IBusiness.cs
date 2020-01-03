@@ -34,15 +34,15 @@ namespace Business.Core
         /// </summary>
         Configer Configer { get; set; }
 
-        ///// <summary>
-        ///// After binding
-        ///// </summary>
-        //System.Action BindAfter { get; set; }
+        /// <summary>
+        /// After binding
+        /// </summary>
+        System.Action BindAfter { get; set; }
 
-        ///// <summary>
-        ///// Before binding
-        ///// </summary>
-        //System.Action<Configer> BindBefore { get; set; }
+        /// <summary>
+        /// Before binding
+        /// </summary>
+        System.Action<Configer> BindBefore { get; set; }
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -102,15 +102,15 @@ namespace Business.Core
         /// </summary>
         public Configer Configer { get; set; }
 
-        ///// <summary>
-        ///// After binding
-        ///// </summary>
-        //public System.Action BindAfter { get; set; }
+        /// <summary>
+        /// After binding
+        /// </summary>
+        public System.Action BindAfter { get; set; }
 
-        ///// <summary>
-        ///// Before binding
-        ///// </summary>
-        //public System.Action<Configer> BindBefore { get; set; }
+        /// <summary>
+        /// Before binding
+        /// </summary>
+        public System.Action<Configer> BindBefore { get; set; }
 
         #region business
 

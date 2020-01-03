@@ -477,20 +477,6 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         //internal System.Func<string, string, string> GetCommandGroup = (group, name) => string.Format("{0}.{1}", group, name);
 
-        #region IBusiness
-
-        /// <summary>
-        /// After binding
-        /// </summary>
-        public System.Action BindAfter { get; set; }
-
-        /// <summary>
-        /// Before binding
-        /// </summary>
-        public System.Action<Configer> BindBefore { get; set; }
-
-        #endregion
-
         public ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; internal set; }
         public ReadOnlyCollection<Annotations.AttributeBase> Attributes { get; private set; }
         //public bool EnableWatcher { get; }

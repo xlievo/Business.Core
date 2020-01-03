@@ -71,7 +71,7 @@ public class BusinessMember2 : BusinessBase
             }
         });
 
-        this.Configer.BindBefore = c =>
+        this.BindBefore = c =>
         {
             c.CallBeforeMethod = async (meta, args) =>
             {
