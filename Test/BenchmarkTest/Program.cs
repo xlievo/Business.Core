@@ -8,6 +8,7 @@ using System.Linq;
 using System.Collections.Generic;
 using static BenchmarkTest.BusinessMember;
 using Business.Core;
+using Business.Core.Boot;
 
 [assembly: Logger(Logger.LoggerType.All)]
 namespace BenchmarkTest

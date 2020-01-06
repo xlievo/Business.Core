@@ -15,7 +15,7 @@
           ##############
 ==================================*/
 
-namespace Business.Core
+namespace Business.Core.Boot
 {
     using Utils;
     using Document;
@@ -23,38 +23,38 @@ namespace Business.Core
 
     public interface IBootstrap
     {
-        Bootstrap.BootstrapConfig Config { get; }
+        BootstrapConfig Config { get; }
+    }
+
+    public class BootstrapConfig
+    {
+        internal protected BootstrapConfig()
+        {
+            Use = new ConcurrentLinkedList<System.Func<IBusiness, IBusiness>>();
+            UseDoc = null;
+        }
+
+        public BootstrapConfig(Auth.IInterceptor interceptor, object[] constructorArguments, System.Type type = null) : this()
+        {
+            Interceptor = interceptor;
+            ConstructorArguments = constructorArguments;
+            Type = type;
+        }
+
+        public ConcurrentLinkedList<System.Func<IBusiness, IBusiness>> Use { get; }
+
+        public System.Action UseDoc { get; internal set; }
+
+        public Auth.IInterceptor Interceptor { get; }
+
+        public object[] ConstructorArguments { get; }
+
+        public System.Type Type { get; }
     }
 
     public class Bootstrap : IBootstrap
     {
         public Bootstrap(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
-
-        public class BootstrapConfig
-        {
-            internal protected BootstrapConfig()
-            {
-                Use = new ConcurrentLinkedList<System.Func<IBusiness, IBusiness>>();
-                UseDoc = null;
-            }
-
-            public BootstrapConfig(Auth.IInterceptor interceptor, object[] constructorArguments, System.Type type = null) : this()
-            {
-                Interceptor = interceptor;
-                ConstructorArguments = constructorArguments;
-                Type = type;
-            }
-
-            public ConcurrentLinkedList<System.Func<IBusiness, IBusiness>> Use { get; }
-
-            public System.Func<IBootstrap> UseDoc { get; internal set; }
-
-            public Auth.IInterceptor Interceptor { get; }
-
-            public object[] ConstructorArguments { get; }
-
-            public System.Type Type { get; }
-        }
 
         public BootstrapConfig Config { get; }
 
@@ -106,7 +106,7 @@ namespace Business.Core
 
         #endregion
 
-        internal IBusiness business;
+        IBusiness business;
 
         public virtual object Build()
         {
@@ -141,22 +141,44 @@ namespace Business.Core
         /// <returns></returns>
         public virtual Bootstrap UseDoc(string outDir = null, Config config = default)
         {
-            this.Config.UseDoc = () =>
-            {
-                business?.UseDoc(outDir, config);
-                return this;
-            };
-
+            this.Config.UseDoc = () => business?.UseDoc(outDir, config);
             return this;
         }
     }
 
-    public class Bootstrap<Business> : Bootstrap
+    public class Bootstrap<Business> : IBootstrap
         where Business : class
     {
-        public Bootstrap(BootstrapConfig config = default) : base(config) { }
+        public Bootstrap(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
 
-        public new virtual Business Build() => base.Build() as Business;
+        public BootstrapConfig Config { get; }
+
+        IBusiness business;
+
+        public virtual Business Build()
+        {
+            var bind = new Bind(Config.Type, Config.Interceptor ?? new Auth.Interceptor(), Config.ConstructorArguments);
+
+            business = bind.hasBusiness ? (IBusiness)bind.instance : null;
+
+            if (null != business)
+            {
+                var first = Config.Use.First;
+
+                while (NodeState.DAT == first.State)
+                {
+                    var conf = first.Value;
+
+                    conf.Invoke(business);
+
+                    first = first.Next;
+                }
+
+                Config.UseDoc?.Invoke();
+            }
+
+            return bind.instance as Business;
+        }
 
         /// <summary>
         /// Generating Document Model for All Business Classes. business.doc
@@ -164,12 +186,18 @@ namespace Business.Core
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public new virtual Bootstrap<Business> UseDoc(string outDir = null, Config config = default) => base.UseDoc(outDir, config) as Bootstrap<Business>;
+        public virtual Bootstrap<Business> UseDoc(string outDir = null, Config config = default)
+        {
+            this.Config.UseDoc = () => business?.UseDoc(outDir, config);
+            return this;
+        }
     }
 
-    public class BootstrapAll : Bootstrap
+    public class BootstrapAll : IBootstrap
     {
-        public BootstrapAll(BootstrapConfig config = default) : base(config) { }
+        public BootstrapAll(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
+
+        public BootstrapConfig Config { get; }
 
         /// <summary>
         /// Load all business classes in the run directory
@@ -225,7 +253,7 @@ namespace Business.Core
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public new virtual BootstrapAll UseDoc(string outDir = null, Config config = default)
+        public virtual BootstrapAll UseDoc(string outDir = null, Config config = default)
         {
             this.Config.UseDoc = () =>
             {
@@ -247,8 +275,6 @@ namespace Business.Core
                     System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.utf8);
                     //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
                 }
-
-                return this;
             };
 
             return this;
@@ -258,6 +284,8 @@ namespace Business.Core
 
 namespace Business.Core.Utils
 {
+    using Boot;
+
     public static class BootstrapExtensions
     {
         public static Bootstrap Use<Bootstrap>(this Bootstrap bootstrap, System.Func<IBusiness, IBusiness> operation)
