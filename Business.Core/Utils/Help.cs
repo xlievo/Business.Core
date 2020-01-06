@@ -51,99 +51,7 @@ namespace Business.Core.Utils
 
     public static class Help
     {
-        #region Bootstrap
-
-        public static Bind Use(this Bind bind, System.Func<IBusiness, IBusiness> operation)
-        {
-            bind.bootstrap.config.TryAdd(operation);
-            return bind;
-        }
-
-        static Bind UseDocAll(Bind bind, string outDir = null, Config config = default)
-        {
-            var exists = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
-            var doc = new Dictionary<string, IDoc>();
-
-            foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
-            {
-                item.Value.UseDoc(null, config);
-
-                if (exists)
-                {
-                    doc.Add(item.Value.Configer.Doc.Name, item.Value.Configer.Doc);
-                }
-            }
-
-            if (exists)
-            {
-                System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), UTF8);
-                //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
-            }
-
-            return bind;
-        }
-
-        /// <summary>
-        /// Generating Document Model for All Business Classes. business.doc
-        /// </summary>
-        /// <param name="bind"></param>
-        /// <param name="outDir"></param>
-        /// <param name="config"></param>
-        /// <returns></returns>
-        public static Bind UseDoc(this Bind bind, string outDir = null, Config config = default)
-        {
-            bind.bootstrap.useDoc = () => UseDocAll(bind, outDir, config);
-            return bind;
-        }
-
-        /// <summary>
-        /// Inject a parameter type, depending on the parameter type
-        /// </summary>
-        /// <param name="bind"></param>
-        /// <param name="argType"></param>
-        /// <returns></returns>
-        public static Bind UseType(this Bind bind, params System.Type[] argType) => Use(bind, c => c.UseType(argType));
-
-        /// <summary>
-        /// Inject a parameter type, depending on the parameter name
-        /// </summary>
-        /// <param name="bind"></param>
-        /// <param name="argName"></param>
-        /// <returns></returns>
-        public static Bind UseType(this Bind bind, params string[] argName) => Use(bind, c => c.UseType(argName));
-
-        /// <summary>
-        /// Set the log characteristics of a parameter, depending on the parameter type
-        /// </summary>
-        /// <param name="bind"></param>
-        /// <param name="logger"></param>
-        /// <param name="argType"></param>
-        /// <returns></returns>
-        public static Bind LoggerSet(this Bind bind, Annotations.LoggerAttribute logger, params System.Type[] argType) => Use(bind, c => c.LoggerSet(logger, argType));
-
-        /// <summary>
-        /// Set the log characteristics of a parameter, depending on the parameter name
-        /// </summary>
-        /// <param name="bind"></param>
-        /// <param name="logger"></param>
-        /// <param name="argName"></param>
-        /// <returns></returns>
-        public static Bind LoggerSet(this Bind bind, Annotations.LoggerAttribute logger, params string[] argName) => Use(bind, c => c.LoggerSet(logger, argName));
-
-        /// <summary>
-        /// Set a parameter's ignore feature, depending on the parameter name
-        /// </summary>
-        /// <param name="bind"></param>
-        /// <param name="ignore"></param>
-        /// <param name="argName"></param>
-        /// <returns></returns>
-        public static Bind IgnoreSet(this Bind bind, Annotations.Ignore ignore, params string[] argName) => Use(bind, c => c.IgnoreSet(ignore, argName));
-
-        public static Bind IgnoreSet(this Bind bind, Annotations.Ignore ignore, params System.Type[] argType) => Use(bind, c => c.IgnoreSet(ignore, argType));
-
-        public static Bind MemberSet(this Bind bind, string memberName, object memberObj, bool skipNull = false) => Use(bind, c => c.MemberSet(memberName, memberObj, skipNull));
-
-        #endregion
+        public static readonly string baseDirectory = System.AppDomain.CurrentDomain.BaseDirectory ?? System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null)
         {
@@ -186,9 +94,9 @@ namespace Business.Core.Utils
 
             foreach (var item in argType)
             {
-                if (null == item || business.Configer.UseTypes.Contains(item.FullName)) { continue; }
+                if (null == item || business.Configer.UseTypes.ContainsKey(item.FullName)) { continue; }
 
-                business.Configer.UseTypes.collection.Add(item.FullName);
+                business.Configer.UseTypes.dictionary.TryAdd(item.FullName, item);
             }
 
             //foreach (var item2 in item.Configuration.MetaData.Values)
@@ -198,7 +106,7 @@ namespace Business.Core.Utils
                 {
                     var type2 = arg.HasIArg ? arg.IArgInType : arg.Type;
 
-                    if (!business.Configer.UseTypes.Contains(type2.FullName) || !item.UseTypePosition.dictionary.TryAdd(arg.Position, type2))
+                    if (!business.Configer.UseTypes.ContainsKey(type2.FullName) || !item.UseTypePosition.dictionary.TryAdd(arg.Position, type2))
                     {
                         continue;
                     }
@@ -518,7 +426,7 @@ namespace Business.Core.Utils
             {
                 Configer.Xmls = new ConcurrentReadOnlyDictionary<string, Xml.member>();
 
-                System.IO.Directory.GetFiles(System.AppContext.BaseDirectory, "*.xml").AsParallel().ForAll(path =>
+                System.IO.Directory.GetFiles(baseDirectory, "*.xml").AsParallel().ForAll(path =>
                 {
                     var doc = Xml.DeserializeDoc(FileReadString(path));
 
@@ -534,7 +442,8 @@ namespace Business.Core.Utils
 
             business.Configer.Doc = UseDoc(business, argCallback, Configer.Xmls, config);
 
-            business.Configer.Info.DocFileName = $"{business.Configer.Info.BusinessName}.doc";
+            //business.Configer.Info.DocFileName = $"{business.Configer.Info.BusinessName}.doc";
+            business.Configer.Info.DocFileName = "business.doc";
 
             if (!string.IsNullOrEmpty(outDir))
             {
@@ -546,7 +455,7 @@ namespace Business.Core.Utils
 
                     //business.Configer.Info.DocRequestPath = Uri.TryCreate($"{host ?? string.Empty}/{System.IO.Path.GetFileName(file)}", UriKind.Absolute, out Uri uri) ? uri.AbsoluteUri : $"http://localhost:5000{"/"}{System.IO.Path.GetFileName(file)}";
 
-                    System.IO.File.WriteAllText(file, business.Configer.Doc.ToString(), UTF8);
+                    System.IO.File.WriteAllText(file, business.Configer.Doc.ToString(), utf8);
                 }
             }
 
@@ -1502,14 +1411,14 @@ namespace Business.Core.Utils
 
         public static string StreamReadString(this System.IO.Stream stream, System.Text.Encoding encoding = null)
         {
-            using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8))
+            using (var reader = new System.IO.StreamReader(stream, encoding ?? utf8))
             {
                 return reader.ReadToEnd();
             }
         }
         public static async System.Threading.Tasks.ValueTask<string> StreamReadStringAsync(this System.IO.Stream stream, System.Text.Encoding encoding = null)
         {
-            using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8))
+            using (var reader = new System.IO.StreamReader(stream, encoding ?? utf8))
             {
                 return await reader.ReadToEndAsync();
             }
@@ -1521,7 +1430,7 @@ namespace Business.Core.Utils
 
             using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
             {
-                return fileStream.StreamReadString(encoding ?? UTF8);
+                return fileStream.StreamReadString(encoding ?? utf8);
             }
         }
         public static async System.Threading.Tasks.ValueTask<string> FileReadStringAsync(string path, System.Text.Encoding encoding = null)
@@ -1530,7 +1439,7 @@ namespace Business.Core.Utils
 
             using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
             {
-                return await fileStream.StreamReadStringAsync(encoding ?? UTF8);
+                return await fileStream.StreamReadStringAsync(encoding ?? utf8);
             }
         }
         public static byte[] FileReadByte(string path)
@@ -1554,7 +1463,7 @@ namespace Business.Core.Utils
 
         public static void StreamWrite(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
         {
-            using (var writer = new System.IO.StreamWriter(stream, encoding ?? UTF8))
+            using (var writer = new System.IO.StreamWriter(stream, encoding ?? utf8))
             {
                 writer.AutoFlush = true;
                 writer.Write(value);
@@ -1562,7 +1471,7 @@ namespace Business.Core.Utils
         }
         public static async System.Threading.Tasks.ValueTask StreamWriteAsync(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
         {
-            using (var writer = new System.IO.StreamWriter(stream, encoding ?? UTF8))
+            using (var writer = new System.IO.StreamWriter(stream, encoding ?? utf8))
             {
                 writer.AutoFlush = true;
                 await writer.WriteAsync(value);
@@ -1609,7 +1518,7 @@ namespace Business.Core.Utils
 
             using (var md5 = System.Security.Cryptography.MD5.Create())
             {
-                var result = System.BitConverter.ToString(md5.ComputeHash((encoding ?? UTF8).GetBytes(value))).Replace("-", string.Empty);
+                var result = System.BitConverter.ToString(md5.ComputeHash((encoding ?? utf8).GetBytes(value))).Replace("-", string.Empty);
                 return hasUpper ? result.ToUpperInvariant() : result.ToLowerInvariant();
             }
         }
@@ -1630,7 +1539,7 @@ namespace Business.Core.Utils
 
                 if (string.IsNullOrWhiteSpace(key)) { throw new System.ArgumentNullException(nameof(key)); }
 
-                var encryptKey = (encoding ?? UTF8).GetBytes(key);
+                var encryptKey = (encoding ?? utf8).GetBytes(key);
 
                 using (var aesAlg = System.Security.Cryptography.Aes.Create())
                 {
@@ -1676,7 +1585,7 @@ namespace Business.Core.Utils
                 var cipher = new byte[data.Length];
 
                 System.Buffer.BlockCopy(data, 0, cipher, 0, data.Length);
-                var decryptKey = (encoding ?? UTF8).GetBytes(key);
+                var decryptKey = (encoding ?? utf8).GetBytes(key);
 
                 using (var aesAlg = System.Security.Cryptography.Aes.Create())
                 {
@@ -1786,7 +1695,7 @@ namespace Business.Core.Utils
 
             if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(path)))
             {
-                path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, System.IO.Path.GetFileName(path));
+                path = System.IO.Path.Combine(baseDirectory, System.IO.Path.GetFileName(path));
             }
 
             if (autoTime)
@@ -1808,14 +1717,14 @@ namespace Business.Core.Utils
                     {
                         using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
                         {
-                            using (var stream = new System.IO.StreamReader(fileStream, encoding ?? UTF8))
+                            using (var stream = new System.IO.StreamReader(fileStream, encoding ?? utf8))
                             {
                                 if (-1 != stream.Peek()) { prefix = string.Format("{0}{0}", System.Environment.NewLine); }
                             }
                         }
                     }
 
-                    System.IO.File.AppendAllText(path, $"{prefix}{text}", encoding ?? UTF8);
+                    System.IO.File.AppendAllText(path, $"{prefix}{text}", encoding ?? utf8);
                 }
                 finally { locker.ExitWriteLock(); }
             }
@@ -1826,7 +1735,7 @@ namespace Business.Core.Utils
         /// <summary>
         /// Ignore erroneous characters: Unable to translate Unicode...
         /// </summary>
-        public static readonly System.Text.Encoding UTF8 = System.Text.Encoding.GetEncoding("UTF-8", new System.Text.EncoderReplacementFallback(string.Empty), new System.Text.DecoderExceptionFallback());
+        public static readonly System.Text.Encoding utf8 = System.Text.Encoding.GetEncoding("UTF-8", new System.Text.EncoderReplacementFallback(string.Empty), new System.Text.DecoderExceptionFallback());
 
         #endregion
 
@@ -1835,7 +1744,7 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static string UTF8String(this string value) => UTF8.GetString(UTF8.GetBytes(value ?? string.Empty));
+        public static string UTF8String(this string value) => utf8.GetString(utf8.GetBytes(value ?? string.Empty));
 
         [System.Flags]
         public enum CheckCharMode
@@ -1986,6 +1895,48 @@ namespace Business.Core.Utils
             }
         }
 #endif
+        /// <summary>
+        /// general object creation
+        /// </summary>
+        /// <param name="targetType"></param>
+        /// <returns></returns>
+        internal static dynamic CreateInstance(System.Type targetType)
+        {
+            //string test first - it has no parameterless constructor
+            if (System.Type.GetTypeCode(targetType) == System.TypeCode.String)
+            {
+                return string.Empty;
+            }
+
+            // get the default constructor and instantiate
+            var types = new System.Type[0];
+            var info = targetType.GetConstructor(types);
+            object targetObject;
+
+            if (info == null) //must not have found the constructor
+            {
+                if (targetType.BaseType.UnderlyingSystemType.FullName.Contains("Enum"))
+                {
+                    targetObject = System.Activator.CreateInstance(targetType);
+                }
+                else
+                {
+                    throw new System.ArgumentException("Unable to instantiate type: " + targetType.AssemblyQualifiedName + " - Constructor not found");
+                }
+            }
+            else
+            {
+                targetObject = info.Invoke(null);
+            }
+
+            if (targetObject == null)
+            {
+                throw new System.ArgumentException("Unable to instantiate type: " + targetType.AssemblyQualifiedName + " - Unknown Error");
+            }
+
+            return targetObject;
+        }
+
         internal static string GetMethodFullName(this MethodInfo methodInfo)
         {
             if (null == methodInfo) { throw new System.ArgumentNullException(nameof(methodInfo)); }
@@ -2314,7 +2265,7 @@ namespace Business.Core.Utils
 
             try
             {
-                return System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement[]>(value, options ?? JsonOptions).Select(c => c.GetRawText()).ToArray();
+                return System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement[]>(value, options ?? jsonOptions).Select(c => c.GetRawText()).ToArray();
             }
             catch
             {
@@ -2330,7 +2281,7 @@ namespace Business.Core.Utils
 
             try
             {
-                return System.Text.Json.JsonSerializer.Deserialize<Type>(value, options ?? JsonOptions);
+                return System.Text.Json.JsonSerializer.Deserialize<Type>(value, options ?? jsonOptions);
             }
             catch
             {
@@ -2338,9 +2289,9 @@ namespace Business.Core.Utils
             }
         }
 
-        public static string JsonSerialize<Type>(this Type value, System.Text.Json.JsonSerializerOptions options = null) => System.Text.Json.JsonSerializer.Serialize(value, options ?? JsonOptions);
+        public static string JsonSerialize<Type>(this Type value, System.Text.Json.JsonSerializerOptions options = null) => System.Text.Json.JsonSerializer.Serialize(value, options ?? jsonOptions);
 
-        public static System.Text.Json.JsonSerializerOptions JsonOptions = new System.Text.Json.JsonSerializerOptions
+        public static System.Text.Json.JsonSerializerOptions jsonOptions = new System.Text.Json.JsonSerializerOptions
         {
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
@@ -2349,7 +2300,7 @@ namespace Business.Core.Utils
         {
             try
             {
-                return System.Text.Json.JsonSerializer.Serialize(value, options ?? JsonOptions);
+                return System.Text.Json.JsonSerializer.Serialize(value, options ?? jsonOptions);
             }
             catch (System.Exception ex)
             {

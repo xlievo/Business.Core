@@ -169,6 +169,19 @@ public abstract class BusinessBase : BusinessBase<ResultObject<string>>
     }
 }
 
+[Info("API/v2", CommandGroupDefault = null)]
+public class BusinessMember33 : BusinessBase
+{
+    [Testing("test2", "\"2019-12-02T21:02\"")]
+    [Testing("test3", "\"2019-12-02T22:02\"")]
+    [Testing("test4", "\"2019-12-02T23:02\"")]
+    [Testing("test3333", "\"2019-12-02T23:02\"")]
+    public virtual async Task<IResult<DateTime?>> Test000(SessionArg session, [Ignore(IgnoreMode.BusinessArg)]DateTime? date, dynamic context = null)
+    {
+        return this.ResultCreate(date);
+    }
+}
+
 public static class Common
 {
     public static readonly string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{AppDomain.CurrentDomain.FriendlyName}.log.txt");
@@ -260,12 +273,17 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         //InitRedis();
 
-        Bind.CreateAll()
+        //var b33 = Bootstrap.Create<BusinessMember33>()
+        //    .UseType("context", "socket", "httpFile")
+        //    .UseDoc(docDir, new Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true })
+        //    .Build();
+
+        Bootstrap.Create()
             .UseType("context", "socket", "httpFile")
             .IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket", "httpFile")
             .LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket", "httpFile")
             .UseDoc(docDir, new Config { Debug = true, Benchmark = true, SetToken = true, Group = "j", Testing = true, GroupEnable = true })
-            .LoadBusiness(new object[] { Host });
+            .Build();
 
         //writ url to page
         DocUI.Write(docDir, update: true);

@@ -462,7 +462,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             //this.requestDefault.Configuration = this;
             this.Attributes = attributes.ToReadOnly();
             //this.routes = routes;
-            this.UseTypes = new ReadOnlyCollection<string>();
+            this.UseTypes = new ConcurrentReadOnlyDictionary<string, System.Type>();
 
             //GetCommandGroupDefault = name => GetCommandGroup(CommandGroupDefault, name);
             //this.LoggerUseThreadPool = loggerUseThreadPool;
@@ -480,7 +480,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         public ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; internal set; }
         public ReadOnlyCollection<Annotations.AttributeBase> Attributes { get; private set; }
         //public bool EnableWatcher { get; }
-        public ReadOnlyCollection<string> UseTypes { get; private set; }
+        public ConcurrentReadOnlyDictionary<string, System.Type> UseTypes { get; private set; }
 
         public Annotations.Info Info { get; private set; }
         public System.Type ResultTypeDefinition { get; private set; }

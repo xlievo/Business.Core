@@ -134,7 +134,7 @@ namespace Business.Core
                     }
                     else
                     {
-                        result3 = Create(meta.ReturnType);
+                        result3 = Help.CreateInstance(meta.ReturnType);
                     }
 
                     if (meta.HasAsync)
@@ -161,48 +161,6 @@ namespace Business.Core
             }
 
             return result2;
-        }
-
-        /// <summary>
-        /// general object creation
-        /// </summary>
-        /// <param name="targetType"></param>
-        /// <returns></returns>
-        public static dynamic Create(System.Type targetType)
-        {
-            //string test first - it has no parameterless constructor
-            if (System.Type.GetTypeCode(targetType) == System.TypeCode.String)
-            {
-                return string.Empty;
-            }
-
-            // get the default constructor and instantiate
-            var types = new System.Type[0];
-            var info = targetType.GetConstructor(types);
-            object targetObject = null;
-
-            if (info == null) //must not have found the constructor
-            {
-                if (targetType.BaseType.UnderlyingSystemType.FullName.Contains("Enum"))
-                {
-                    targetObject = System.Activator.CreateInstance(targetType);
-                }
-                else
-                {
-                    throw new System.ArgumentException("Unable to instantiate type: " + targetType.AssemblyQualifiedName + " - Constructor not found");
-                }
-            }
-            else
-            {
-                targetObject = info.Invoke(null);
-            }
-
-            if (targetObject == null)
-            {
-                throw new System.ArgumentException("Unable to instantiate type: " + targetType.AssemblyQualifiedName + " - Unknown Error");
-            }
-
-            return targetObject;
         }
 
         internal static dynamic GetReturnValueIResult<Data>(IResult<Data> result, MetaData meta)
@@ -253,14 +211,17 @@ namespace Business.Core
 
         #region Create
 
+        /*
         /// <summary>
         /// Initialize a Generic proxy class
         /// </summary>
         /// <typeparam name="Business"></typeparam>
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
-        public static Business Create<Business>(params object[] constructorArguments)
-            where Business : class => (Business)Create(typeof(Business), null, constructorArguments);
+        //public static Business Create<Business>(params object[] constructorArguments)
+        //    where Business : class => (Business)Create(typeof(Business), null, constructorArguments);
+
+        public static Bind Create<Business>(params object[] constructorArguments) => Create(typeof(Business), null, constructorArguments);
 
         /// <summary>
         /// Initialize a Generic proxy class
@@ -269,8 +230,10 @@ namespace Business.Core
         /// <param name="interceptor"></param>
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
-        public static Business Create<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments)
-            where Business : class => (Business)Create(typeof(Business), interceptor, constructorArguments);
+        //public static Business Create<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments)
+        //    where Business : class => (Business)Create(typeof(Business), interceptor, constructorArguments);
+
+        public static Bind Create<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments) => Create(typeof(Business), interceptor, constructorArguments);
 
         /// <summary>
         /// Initialize a Type proxy class
@@ -278,7 +241,9 @@ namespace Business.Core
         /// <param name="type"></param>
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
-        public static IBusiness Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments) as IBusiness;
+        //public static IBusiness Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments) as IBusiness;
+
+        public static Bind Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments);
 
         /// <summary>
         /// Initialize a Type proxy class
@@ -287,8 +252,19 @@ namespace Business.Core
         /// <param name="interceptor"></param>
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
-        public static object Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments) => new Bind(type, interceptor ?? new Auth.Interceptor(), constructorArguments).Instance;
+        //public static object Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments) => new Bind(type, interceptor ?? new Auth.Interceptor(), constructorArguments).Instance;
 
+        public static Bind Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments)
+        {
+            var bind = new Bind();
+
+            bind.bootstrapConfig.type = type;
+            bind.bootstrapConfig.interceptor = interceptor;
+            bind.bootstrapConfig.constructorArguments = constructorArguments;
+
+            return bind;
+        }
+        */
         #endregion
     }
 
@@ -309,75 +285,11 @@ namespace Business.Core
 
     public partial class Bind : System.IDisposable
     {
-        internal protected Bind() { }
+        internal readonly object instance;
 
-        internal struct Bootstrap
-        {
-            public ConcurrentLinkedList<System.Func<IBusiness, IBusiness>> config;
+        internal readonly bool hasBusiness;
 
-            public System.Func<Bind> useDoc;
-        }
-
-        internal Bootstrap bootstrap = new Bootstrap { config = new ConcurrentLinkedList<System.Func<IBusiness, IBusiness>>() };
-
-        /// <summary>
-        /// bootstrap all Business class
-        /// </summary>
-        /// <returns></returns>
-        public static Bind CreateAll() => new Bind();
-
-        /// <summary>
-        /// Load all business classes in the run directory
-        /// </summary>
-        /// <param name="constructorArguments"></param>
-        /// <param name="assemblyFiles"></param>
-        /// <param name="businessTypeName"></param>
-        public virtual void LoadBusiness(object[] constructorArguments = null, string[] assemblyFiles = null, string[] businessTypeName = null)
-        {
-            var businessType = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(System.AppContext.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
-            {
-                if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
-                {
-                    if (null != businessTypeName && businessTypeName.Any())
-                    {
-                        if (businessTypeName.Contains(type.Name))
-                        {
-                            Create(type, constructorArguments);
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        Create(type, constructorArguments);
-                        return true;
-                    }
-                }
-
-                return false;
-            });
-
-            foreach (var business in Configer.BusinessList.Values.AsParallel())
-            {
-                var first = bootstrap.config.First;
-
-                while (NodeState.DAT == first.State)
-                {
-                    var conf = first.Value;
-
-                    conf.Invoke(business);
-
-                    first = first.Next;
-                }
-            }
-
-            bootstrap.useDoc?.Invoke();
-        }
-
-        //======================================//
-
-        readonly object Instance;
-
-        public Bind(System.Type type, Auth.IInterceptor interceptor, params object[] constructorArguments)
+        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, params object[] constructorArguments)
         {
             var typeInfo = type.GetTypeInfo();
 
@@ -391,7 +303,7 @@ namespace Business.Core
 
                 var constructor = null == types ? null : type.GetConstructor(types);
 
-                Instance = proxy.CreateClassProxy(type, null == constructor ? type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() : constructorArguments, interceptor);
+                instance = proxy.CreateClassProxy(type, null == constructor ? type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() : constructorArguments, interceptor);
             }
             catch (System.Exception ex)
             {
@@ -440,7 +352,8 @@ namespace Business.Core
                 info.BusinessName = type.Name;
             }
 
-            var business = typeof(IBusiness).IsAssignableFrom(type) ? (IBusiness)Instance : null;
+            hasBusiness = typeof(IBusiness).IsAssignableFrom(type);
+            var business = hasBusiness ? (IBusiness)instance : null;
 #if !Mobile
             //var cfg = new Configer.Configuration(info, resultType, attributes, typeInfo.GetAttributes<Attributes.EnableWatcherAttribute>().Exists());
 #else
@@ -527,13 +440,13 @@ namespace Business.Core
 
         public void Dispose()
         {
-            var type = Instance?.GetType();
+            var type = instance?.GetType();
 
             if (null != type)
             {
                 if (typeof(IBusiness).IsAssignableFrom(type))
                 {
-                    var business = (IBusiness)Instance;
+                    var business = (IBusiness)instance;
 
                     Configer.BusinessList.dictionary.TryRemove(business.Configer.Info.BusinessName, out _);
                     /*
@@ -548,7 +461,7 @@ namespace Business.Core
 
                 if (typeof(System.IDisposable).IsAssignableFrom(type))
                 {
-                    ((System.IDisposable)Instance).Dispose();
+                    ((System.IDisposable)instance).Dispose();
                 }
             }
         }
@@ -1101,7 +1014,7 @@ namespace Business.Core
 
                     var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
 
-                    var hasUse = null != use || (current.hasIArg ? cfg.UseTypes.Contains(current.inType.FullName) : false);
+                    var hasUse = null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
                     //var nick = argAttrAll.GetAttr<NickAttribute>();
 
                     var hasCollectionAttr = false;
@@ -1302,7 +1215,7 @@ namespace Business.Core
         */
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, System.Collections.Generic.IList<string> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
+        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
         {
             hasLower = false;
 
@@ -1355,7 +1268,7 @@ namespace Business.Core
 
                 //var use = argAttrAll.GetAttr<UseAttribute>();
                 var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
-                var hasUse = null != use || (current.hasIArg ? useTypes.Contains(current.inType.FullName) : false);
+                var hasUse = null != use || (current.hasIArg ? useTypes.ContainsKey(current.inType.FullName) : false);
 
                 var hasCollectionAttr = false;
                 if (current.hasCollection)
@@ -1581,6 +1494,12 @@ namespace Business.Core
 
         #region Call
 
+        public virtual Result Call<Result>(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
+
+        public virtual IResult CallIResult(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
+
+        public virtual dynamic Call(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
+
         public virtual Result Call<Result>(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
 
         public virtual IResult CallIResult(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
@@ -1601,6 +1520,12 @@ namespace Business.Core
         #endregion
 
         #region AsyncCallUse
+
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
+
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
+
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
 
         public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
 

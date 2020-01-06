@@ -27,7 +27,7 @@ namespace BenchmarkTest
 
         static void Main(string[] args)
         {
-            Member = Bind.Create<BusinessMember>().UseType(typeof(Business.Core.Auth.IToken));
+            Member = Bootstrap.Create<BusinessMember>().UseType(typeof(Business.Core.Auth.IToken)).Build();
             Cmd = Member.Command;
             Cfg = Member.Configer;
 

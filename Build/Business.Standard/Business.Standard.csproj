@@ -32,6 +32,7 @@
     <Compile Include="..\..\Business.Core\Auth\Token.cs" Link="Auth\Token.cs" />
     <Compile Include="..\..\Business.Core\Business\Arg.cs" Link="Business\Arg.cs" />
     <Compile Include="..\..\Business.Core\Business\Bind.cs" Link="Business\Bind.cs" />
+    <Compile Include="..\..\Business.Core\Business\Bootstrap.cs" Link="Business\Bootstrap.cs" />
     <Compile Include="..\..\Business.Core\Business\Doc.cs" Link="Business\Doc.cs" />
     <Compile Include="..\..\Business.Core\Business\IBusiness.cs" Link="Business\IBusiness.cs" />
     <Compile Include="..\..\Business.Core\Business\Logger.cs" Link="Business\Logger.cs" />

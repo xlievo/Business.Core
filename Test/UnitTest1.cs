@@ -1247,8 +1247,8 @@ public class BusinessMember : IBusiness<ResultObject<object>>
 [TestClass]
 public class TestBusinessMember
 {
-    static BusinessMember2 Member2 = Bind.Create<BusinessMember2>();
-    static BusinessMember Member = Bind.Create<BusinessMember>().UseType(typeof(IToken)).UseDoc();
+    static BusinessMember2 Member2 = Bootstrap.Create<BusinessMember2>().Build();
+    static BusinessMember Member = Bootstrap.Create<BusinessMember>().UseType(typeof(IToken)).UseDoc().Build();
     static CommandGroup Cmd = Member.Command;
     static Configer Cfg = Member.Configer;
 
@@ -1280,7 +1280,7 @@ public class TestBusinessMember
     public void TestCfgUseTypes()
     {
         Assert.AreEqual(Cfg.UseTypes.Count, 1);
-        Assert.AreEqual(Cfg.UseTypes.Contains(typeof(IToken).FullName), true);
+        Assert.AreEqual(Cfg.UseTypes.ContainsKey(typeof(IToken).FullName), true);
 
         var meta = Cmd.GetCommand("Test001").Meta;
         Assert.AreEqual(meta.Args.First(c => c.Type == typeof(Token)).UseType, true);
@@ -1398,7 +1398,7 @@ public class TestBusinessMember
     [TestMethod]
     public void TestLoggerAndArg()
     {
-        var member = Bind.Create<BusinessLoggerAndArg>().UseDoc();
+        var member = Bootstrap.Create<BusinessLoggerAndArg>().UseDoc().Build();
 
         member.LoggerSet(new LoggerAttribute(Logger.LoggerType.Record, canWrite: false) { Group = "333" }, typeof(Use02));
 

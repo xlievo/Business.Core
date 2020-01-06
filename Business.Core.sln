@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Business", "Business", "{EA
 	ProjectSection(SolutionItems) = preProject
 		Business.Core\Business\Arg.cs = Business.Core\Business\Arg.cs
 		Business.Core\Business\Bind.cs = Business.Core\Business\Bind.cs
+		Business.Core\Business\Bootstrap.cs = Business.Core\Business\Bootstrap.cs
 		Business.Core\Business\Doc.cs = Business.Core\Business\Doc.cs
 		Business.Core\Business\IBusiness.cs = Business.Core\Business\IBusiness.cs
 		Business.Core\Business\Logger.cs = Business.Core\Business\Logger.cs
