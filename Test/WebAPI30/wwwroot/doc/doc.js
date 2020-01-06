@@ -1383,7 +1383,7 @@ function businessOnchang(obj) {
         var index = -1;
         var count = 0;
         for (var i in business.group) {
-            if (i === business.config.group) {
+            if (i === business.config.groupSelect) {
                 index = count;
             }
             else if (-1 === index && i === business.groupDefault) {
@@ -1398,7 +1398,7 @@ function businessOnchang(obj) {
 
         if (0 == count) { return; }
 
-        groupSelect.options.selectedIndex = index;
+        groupSelect.options.selectedIndex = -1 === index ? 0 : index;
         groupOnchang(groupSelect);
     }
 }

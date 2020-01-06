@@ -430,6 +430,9 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         //internal readonly string ID = System.Guid.NewGuid().ToString("N");
 
+        /// <summary>
+        /// FirstCharToLowerNamingPolicy
+        /// </summary>
         public static System.Text.Json.JsonSerializerOptions DocJsonSettings = new System.Text.Json.JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,

@@ -959,8 +959,6 @@ namespace Business.Core
 
                 #endregion
 
-                var declaring = method.DeclaringType.FullName;
-
                 var attributes2 = AttributeBase.GetAttributes(method).Distinct(cfg.Attributes, c => c is TestingAttribute test && null != test.Method && !test.Method.Equals(method.Name, System.StringComparison.InvariantCultureIgnoreCase), c =>
                 {
                     if (c is TestingAttribute test)
@@ -1034,13 +1032,13 @@ namespace Business.Core
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
                     var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
 
-                    var argGroup = GetArgGroup(argAttrAll, current, declaring, cfg.Info.BusinessName, method.Name, path, default, argInfo.Name, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
+                    var argGroup = GetArgGroup(argAttrAll, current, cfg.Info.TypeFullName, cfg.Info.BusinessName, method.Name, path, default, argInfo.Name, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
                     var definitions = current.hasDefinition ? new System.Collections.Generic.List<string> { current.outType.FullName } : new System.Collections.Generic.List<string>();
 
                     var hasLower = false;
                     var childrens2 = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? GetArgChild(current.outType, declaring, cfg.Info.BusinessName, method.Name, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
+                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? GetArgChild(current.outType, cfg.Info.TypeFullName, cfg.Info.BusinessName, method.Name, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
 
                     var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
                     if (cast)

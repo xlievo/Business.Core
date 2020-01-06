@@ -192,6 +192,8 @@ namespace Business.Core.Document
 
         public string Group { get; set; }
 
+        public string GroupSelect { get; set; }
+
         public bool GroupEnable { get; set; }
 
         public bool SetToken { get; set; }

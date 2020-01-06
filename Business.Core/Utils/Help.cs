@@ -442,7 +442,7 @@ namespace Business.Core.Utils
 
             business.Configer.Doc = UseDoc(business, argCallback, Configer.Xmls, config);
 
-            //business.Configer.Info.DocFileName = $"{business.Configer.Info.BusinessName}.doc";
+            //business.Configer.Info.DocFileName = $"{business.Configer.Info.TypeFullName}.doc";
             business.Configer.Info.DocFileName = "business.doc";
 
             if (!string.IsNullOrEmpty(outDir))
@@ -488,7 +488,9 @@ namespace Business.Core.Utils
 
             var groupDefault = business.Configer.Info.CommandGroupDefault;
 
-            var group = business.Command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
+            var command = !string.IsNullOrWhiteSpace(config.Group) ? business.Command.Where(c => c.Key.Equals(config.Group, System.StringComparison.InvariantCultureIgnoreCase)) : business.Command;
+
+            var group = command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
             {
                 var key = c2.Value.Key;
                 var meta = c2.Value.Meta;

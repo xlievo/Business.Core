@@ -175,16 +175,16 @@ namespace Business.Core
         /// Load all business classes in the run directory
         /// </summary>
         /// <param name="assemblyFiles"></param>
-        /// <param name="businessTypeName"></param>
-        public virtual void Build(string[] assemblyFiles = null, string[] businessTypeName = null)
+        /// <param name="businessTypeFullName"></param>
+        public virtual void Build(string[] assemblyFiles = null, string[] businessTypeFullName = null)
         {
             Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.baseDirectory, "*.dll") : assemblyFiles, true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {
-                    if (null != businessTypeName && businessTypeName.Any())
+                    if (null != businessTypeFullName && businessTypeFullName.Any())
                     {
-                        if (businessTypeName.Contains(type.Name))
+                        if (businessTypeFullName.Contains(type.FullName))
                         {
                             new Bind(type, Config.Interceptor ?? new Auth.Interceptor(), Config.ConstructorArguments);
                             //Create(type, bootstrap.constructorArguments);

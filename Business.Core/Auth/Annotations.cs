@@ -371,7 +371,7 @@ namespace Business.Core.Annotations
         public string BusinessName { get; internal set; }
 
         /// <summary>
-        /// 
+        /// Type fullName
         /// </summary>
         public string TypeFullName { get; internal set; }
 
