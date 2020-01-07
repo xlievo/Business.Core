@@ -206,7 +206,7 @@ namespace Business.Core.Boot
         /// <param name="businessTypeFullName"></param>
         public virtual void Build(string[] assemblyFiles = null, string[] businessTypeFullName = null)
         {
-            Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.baseDirectory, "*.dll") : assemblyFiles, true, type =>
+            Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {
@@ -272,7 +272,7 @@ namespace Business.Core.Boot
 
                 if (exists)
                 {
-                    System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.utf8);
+                    System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.UTF8);
                     //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
                 }
             };
