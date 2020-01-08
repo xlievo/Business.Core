@@ -55,7 +55,25 @@ namespace Business.Core
             {
                 foreach (var item in iArgs)
                 {
-                    var iArg = (IArg)(argsObj[item.Position] ?? System.Activator.CreateInstance(item.Type));
+                    IArg iArg;
+
+                    var arg = argsObj[item.Position];
+
+                    if (item.HasCast && !item.Type.IsAssignableFrom(arg?.GetType()))
+                    {
+                        iArg = (IArg)System.Activator.CreateInstance(item.Type);
+                        //Not entry for value type
+                        if (!(null == arg && item.IArgInType.IsValueType))
+                        {
+                            iArg.In = arg;
+                        }
+
+                        iArg.Group = defaultCommandKey;
+                    }
+                    else
+                    {
+                        iArg = (IArg)(arg ?? System.Activator.CreateInstance(item.Type));
+                    }
 
                     if (string.IsNullOrWhiteSpace(iArg.Group)) { iArg.Group = defaultCommandKey; }
 
@@ -1032,6 +1050,13 @@ namespace Business.Core
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
                     var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
 
+                    var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
+                    if (cast)
+                    {
+                        current.hasIArg = true;
+                        current.inType = typeof(object);
+                    }
+
                     var argGroup = GetArgGroup(argAttrAll, current, cfg.Info.TypeFullName, cfg.Info.BusinessName, method.Name, path, default, argInfo.Name, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
                     var definitions = current.hasDefinition ? new System.Collections.Generic.List<string> { current.outType.FullName } : new System.Collections.Generic.List<string>();
@@ -1039,13 +1064,6 @@ namespace Business.Core
                     var hasLower = false;
                     var childrens2 = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
                     var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? GetArgChild(current.outType, cfg.Info.TypeFullName, cfg.Info.BusinessName, method.Name, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
-
-                    var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
-                    if (cast)
-                    {
-                        current.hasIArg = true;
-                        current.inType = typeof(object);
-                    }
 
                     var arg = new Args(argInfo.Name,
                     cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,

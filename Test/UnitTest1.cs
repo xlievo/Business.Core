@@ -84,6 +84,23 @@ public class AES2 : AESAttribute
 /// <summary>
 /// This is Arg01.
 /// </summary>
+public class Arg00
+{
+    /// <summary>
+    /// Child Property, Field Agr<> type is only applicable to JSON
+    /// </summary>
+    [CheckNull]
+    [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
+    //[AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
+    [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = CommandGroupDefault.Group)]
+    public Arg<object, dynamic> A { get; set; }
+
+    public string B { get; set; }
+}
+
+/// <summary>
+/// This is Arg01.
+/// </summary>
 public struct Arg01
 {
     /// <summary>
@@ -148,6 +165,25 @@ public enum TestMode
 [Logger]
 public class BusinessMember2
 {
+    public virtual async Task<dynamic> Test000(
+        [Use(true)]dynamic use01,
+
+        Arg00 arg01,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
+            [Nick("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        =>
+        arg01.A.Out;
+
     [Command(Group = "G01", OnlyName = "G01Test001")]
     [Command(Group = "G01", OnlyName = "G01Test002")]
     [Command(OnlyName = "DEFTest001")]
@@ -231,6 +267,25 @@ public class BusinessMember : IBusiness<ResultObject<object>>
     public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
     #endregion
+
+    public virtual async Task<dynamic> Test000(
+        [Use(true)]dynamic use01,
+
+        Arg00 arg01,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
+            [Nick("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        =>
+       this.ResultCreate(arg01.A.Out);
 
     /// <summary>
     /// This is Test001.
@@ -1440,6 +1495,11 @@ public class TestBusinessMember
 
     void TestResult(IBusiness business)
     {
+        //var t0 = AsyncCall(business.Command, "Test000", null, new object[] { new Arg00 { A = "abc" }, 2, 2 });
+        //Assert.AreEqual(t0.State, 1);
+        //Assert.AreEqual(t0.Message, null);
+        //Assert.AreEqual(t0.HasData, true);
+
         var t2 = AsyncCall(business.Command, "Test001", null, new object[] { new Arg01 { A = "abc" }, 2, 2 });
         Assert.AreEqual(t2.State, 1);
         Assert.AreEqual(t2.Message, null);
@@ -1603,6 +1663,17 @@ public class TestBusinessMember
     [TestMethod]
     public void TestResult01()
     {
+        var t000 = AsyncCall(Member.Command, "Test000", null, new object[] { new Arg00 { A = "abc" }, 2, 2 });
+        Assert.AreEqual(t000.State, 1);
+        Assert.AreEqual(t000.Message, null);
+        Assert.AreEqual(t000.HasData, true);
+
+        var t00 = Member.Test000(null, new Arg00 { A = "abc" });
+        t00.Wait();
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t00.Result.GetType()), true);
+        Assert.AreEqual(t00.Result.State, -113);
+        Assert.AreEqual(t00.Result.Message, "arg.b minimum range 2");
+
         var t0 = Member.Test001(null, new Arg01 { A = "abc" });
         t0.Wait();
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(t0.Result.GetType()), true);

@@ -14,6 +14,12 @@
             Attr01
             </summary>
         </member>
+        <member name="T:Arg00">
+            <summary>
+            This is Arg01.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:Arg00.A" -->
         <member name="T:Arg01">
             <summary>
             This is Arg01.
