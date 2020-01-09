@@ -82,10 +82,13 @@ namespace Business.Core
         */
     }
 
-    public interface IBusiness<Result> : IBusiness where Result : Core.Result.IResult { }
+    public interface IBusiness<Result, Arg> : IBusiness where Result : Core.Result.IResult where Arg : IArg, new() { }
 
-    public abstract class BusinessBase<Result> : IBusiness<Result>
+    public interface IBusiness<Result> : IBusiness<Result, Arg<object>> where Result : Core.Result.IResult { }
+
+    public abstract class BusinessBase<Result, Arg> : IBusiness<Result, Arg>
         where Result : Core.Result.IResult
+        where Arg : IArg, new()
     {
         /// <summary>
         /// Log subscription queue
@@ -173,5 +176,7 @@ namespace Business.Core
         */
     }
 
-    public abstract class BusinessBase : BusinessBase<Result.ResultObject<string>> { }
+    public abstract class BusinessBase<Result> : BusinessBase<Result, Arg<object>>, IBusiness<Result> where Result : Core.Result.IResult { }
+
+    public abstract class BusinessBase : BusinessBase<Result.ResultObject<object>> { }
 }

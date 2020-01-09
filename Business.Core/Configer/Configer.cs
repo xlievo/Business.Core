@@ -447,7 +447,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             DocJsonSettings.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
-        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes)
+        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Type argTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -459,6 +459,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         {
             this.Info = info;
             this.ResultTypeDefinition = resultTypeDefinition;
+            this.ArgTypeDefinition = argTypeDefinition;
             //this.token = token;
             //this.requestType = requestType;
             //this.requestDefault = RequestCreate<object>();
@@ -487,6 +488,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         public Annotations.Info Info { get; private set; }
         public System.Type ResultTypeDefinition { get; private set; }
+        public System.Type ArgTypeDefinition { get; private set; }
         public IDoc Doc { get; internal set; }
 
         ///// <summary>

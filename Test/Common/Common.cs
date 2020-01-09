@@ -133,7 +133,7 @@ public class SessionArg : Arg<Session, Token> { }
 [Command(Group = "s")]
 [@MessagePackArg(Group = "s")]
 [Logger]
-public abstract class BusinessBase : BusinessBase<ResultObject<string>>
+public abstract class BusinessBase : BusinessBase<ResultObject<object>, Arg<object>>
 {
     public BusinessBase()
     {

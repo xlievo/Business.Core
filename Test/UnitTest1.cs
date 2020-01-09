@@ -1663,16 +1663,16 @@ public class TestBusinessMember
     [TestMethod]
     public void TestResult01()
     {
-        var t000 = AsyncCall(Member.Command, "Test000", null, new object[] { new Arg00 { A = "abc" }, 2, 2 });
-        Assert.AreEqual(t000.State, 1);
-        Assert.AreEqual(t000.Message, null);
-        Assert.AreEqual(t000.HasData, true);
-
         var t00 = Member.Test000(null, new Arg00 { A = "abc" });
         t00.Wait();
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(t00.Result.GetType()), true);
         Assert.AreEqual(t00.Result.State, -113);
         Assert.AreEqual(t00.Result.Message, "arg.b minimum range 2");
+
+        var t000 = AsyncCall(Member.Command, "Test000", null, new object[] { new Arg00 { A = "abc" }, 2, 2 });
+        Assert.AreEqual(t000.State, 1);
+        Assert.AreEqual(t000.Message, null);
+        Assert.AreEqual(t000.HasData, true);
 
         var t0 = Member.Test001(null, new Arg01 { A = "abc" });
         t0.Wait();

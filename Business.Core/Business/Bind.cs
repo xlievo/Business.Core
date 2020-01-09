@@ -67,8 +67,6 @@ namespace Business.Core
                         {
                             iArg.In = arg;
                         }
-
-                        iArg.Group = defaultCommandKey;
                     }
                     else
                     {
@@ -328,9 +326,10 @@ namespace Business.Core
                 throw ex.ExceptionWrite(true, true);
             }
 
-            var generics = typeof(IBusiness<>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments);
+            var generics = typeof(IBusiness<,>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments);
 
-            var resultType = generics ? businessArguments[0].GetGenericTypeDefinition() : typeof(ResultObject<string>).GetGenericTypeDefinition();
+            var resultType = generics ? businessArguments[0].GetGenericTypeDefinition() : typeof(ResultObject<object>).GetGenericTypeDefinition();
+            var argType = generics ? businessArguments[1].GetGenericTypeDefinition() : typeof(Arg<object>).GetGenericTypeDefinition();
 
             var attributes = AttributeBase.GetTopAttributes(typeInfo);//GetArgAttr(typeInfo);
 
@@ -377,7 +376,7 @@ namespace Business.Core
 #else
             
 #endif
-            var cfg = new Configer(info, resultType, attributes);
+            var cfg = new Configer(info, resultType, argType, attributes);
 
             business?.BindBefore?.Invoke(cfg);
 
@@ -1066,7 +1065,8 @@ namespace Business.Core
                     var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? GetArgChild(current.outType, cfg.Info.TypeFullName, cfg.Info.BusinessName, method.Name, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
 
                     var arg = new Args(argInfo.Name,
-                    cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
+                    //cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
+                    cast ? cfg.ArgTypeDefinition.MakeGenericType(parameterType) : parameterType,
                     current.outType,
                     argInfo.Position,
                     argInfo.HasDefaultValue ? argInfo.DefaultValue : default,
