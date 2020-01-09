@@ -61,7 +61,7 @@ namespace Business.Core.Auth
         /// Intercept
         /// </summary>
         /// <param name="invocation"></param>
-        public virtual async System.Threading.Tasks.Task<dynamic> InterceptAsync(Castle.DynamicProxy.IInvocation invocation)
+        async System.Threading.Tasks.Task<dynamic> InterceptAsync(Castle.DynamicProxy.IInvocation invocation)
         {
             if (null == this.MetaData) { return null; }
 

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using static BusinessMember;
 using Business.Core;
 using Business.Core.Boot;
+using System.Runtime.CompilerServices;
 
 [assembly: JsonArg(Group = "G01")]
 [assembly: Logger(Logger.LoggerType.All)]
@@ -209,7 +210,7 @@ public class BusinessMember2
 }
 
 [Info("Business", CommandGroupDefault = CommandGroupDefault.Group)]
-public class BusinessMember : IBusiness<ResultObject<object>>
+public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 {
     public BusinessMember()
     {
@@ -283,9 +284,7 @@ public class BusinessMember : IBusiness<ResultObject<object>>
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
-        =>
-       this.ResultCreate(arg01.A.Out);
+        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default) => this.ResultCreate(arg01.A.Out);
 
     /// <summary>
     /// This is Test001.
@@ -1308,7 +1307,7 @@ public class TestBusinessMember
     static CommandGroup Cmd = Member.Command;
     static Configer Cfg = Member.Configer;
 
-    static dynamic AsyncCall(CommandGroup businessCommand, string cmd, string group = null, object[] args = null, params UseEntry[] useObj)
+    public static dynamic AsyncCall(CommandGroup businessCommand, string cmd, string group = null, object[] args = null, params UseEntry[] useObj)
     {
         var t = businessCommand.AsyncCall(cmd, args, useObj, group);
         t.Wait();
@@ -1658,6 +1657,12 @@ public class TestBusinessMember
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(b2.Result.GetType()), true);
         Assert.AreEqual(b2.Result.State, -113);
         Assert.AreEqual(b2.Result.Message, "arg.b minimum range 2");
+
+        var t00 = Member2.Test000(null, new Arg00 { A = "abc" });
+        t00.Wait();
+        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t00.Result.GetType()), true);
+        Assert.AreEqual(t00.Result.State, -113);
+        Assert.AreEqual(t00.Result.Message, "arg.b minimum range 2");
     }
 
     [TestMethod]
@@ -2032,4 +2037,16 @@ public class TestBusinessMember
         //Assert.AreEqual(r.State, 0);
         //Assert.AreEqual(r.Message.Contains("Attribute Proces exception! 1"), true);
     }
+}
+
+/// <summary>
+/// This is a parameter package, used to transform parameters
+/// </summary>
+/// <typeparam name="OutType"></typeparam>
+public class Arg<OutType> : Arg<OutType, dynamic>
+{
+    public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
+    public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
+    public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
+    public override dynamic ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
 }
