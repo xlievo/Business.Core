@@ -27,11 +27,13 @@ namespace Business.Core.Auth
     /// <summary>
     /// IInterceptor
     /// </summary>
-    public interface IInterceptor : Castle.DynamicProxy.IInterceptor
+    public interface IInterceptor
     {
-        ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; set; }
-
         Configer Configer { get; set; }
+
+        System.Threading.Tasks.Task<dynamic> Intercept(string method, object[] arguments, System.Func<dynamic> call, string group = null);
+
+        object Create(System.Type type, params object[] constructorArguments);
     }
 
     struct ArgsLog
@@ -46,29 +48,394 @@ namespace Business.Core.Auth
     struct ArgResult
     {
         public bool isUpdate;
-
         public dynamic value;
     }
 
     /// <summary>
     /// Interceptor
     /// </summary>
-    public class Interceptor : IInterceptor
+    public class Interceptor : IInterceptor, Castle.DynamicProxy.IInterceptor
     {
-        public void Intercept(Castle.DynamicProxy.IInvocation invocation) => invocation.ReturnValue = InterceptAsync(invocation).Result;
+        /*
+   class BusinessAllMethodsHook : Castle.DynamicProxy.AllMethodsHook
+   {
+       readonly MethodInfo[] ignoreMethods;
 
+       public BusinessAllMethodsHook(params MethodInfo[] method)
+           : base() { ignoreMethods = method; }
+
+       public override bool ShouldInterceptMethod(System.Type type, MethodInfo methodInfo)
+       {
+           if (System.Array.Exists(ignoreMethods, c => string.Equals(c.GetMethodFullName(), methodInfo.GetMethodFullName()))) { return false; }
+
+           return base.ShouldInterceptMethod(type, methodInfo);
+       }
+   }
+   */
+
+        public void Intercept(Castle.DynamicProxy.IInvocation invocation)
+        {
+            if (null == this.Configer.MetaData)
+            {
+                invocation.ReturnValue = null; return;
+            }
+
+            var proceed = invocation.CaptureProceedInfo();
+
+            invocation.ReturnValue = Intercept(invocation.Method.Name, invocation.Arguments, () =>
+           {
+               proceed.Invoke();
+               return invocation.ReturnValue;
+           }).Result;
+        }
+
+        public object Create(System.Type businessType, params object[] constructorArguments)
+        {
+            var proxy = new Castle.DynamicProxy.ProxyGenerator();
+
+            try
+            {
+                var types = constructorArguments?.Select(c => c.GetType())?.ToArray();
+
+                var constructor = null == types ? null : businessType.GetConstructor(types);
+
+                var instance = proxy.CreateClassProxy(businessType, null == constructor ? businessType.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() : constructorArguments, this);
+
+                return instance;
+            }
+            catch (System.Exception ex)
+            {
+                throw ex.ExceptionWrite(true, true);
+            }
+        }
+
+        public virtual async System.Threading.Tasks.Task<dynamic> Intercept(string method, object[] arguments, System.Func<dynamic> call, string group = null)
+        {
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
+            var meta = this.Configer.MetaData[method];
+            var methodName = meta.FullName;
+            var argsObj = arguments;
+            var logType = Logger.LoggerType.Record;
+            //==================================//
+            var iArgs = Bind.GetIArgs(meta.IArgs, argsObj);
+
+            var group2 = group ?? meta.GroupDefault;
+            if (!meta.CommandGroup.TryGetValue(group2, out CommandAttribute command))
+            {
+                return Bind.GetReturnValue(ResultFactory.ResultCreate(meta, -3, $"Without this Group {group2}"), meta);
+            }
+
+            dynamic returnValue = null;
+
+            try
+            {
+                foreach (var item in meta.Args)
+                {
+                    IResult result = null;
+                    var value = argsObj[item.Position];
+                    var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
+                    var attrs = item.Group[command.Key].Attrs;
+
+                    var first = attrs.First;
+
+                    //while (NodeState.DAT == first.State) // .net fx ConcurrentLinkedList TryAdd error! State = INV 
+                    while (NodeState.DAT == first.State)
+                    {
+                        var argAttr = first.Value;
+
+                        if (argAttr.CollectionItem) { first = first.Next; continue; }
+
+                        result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null);
+
+                        if (1 > result.State)
+                        {
+                            logType = Logger.LoggerType.Error;
+                            returnValue = result;
+                            return meta.HasIResult ? Bind.GetReturnValueIResult((dynamic)result, meta) : Bind.GetReturnValue(result, meta);
+                        }
+
+                        //========================================//
+
+                        first = first.Next;
+
+                        if (result.HasData)
+                        {
+                            if (!item.HasIArg)
+                            {
+                                argsObj[item.Position] = result.Data;
+                            }
+                            else
+                            {
+                                if (NodeState.DAT == first.State)
+                                {
+                                    iArgIn = result.Data;
+                                }
+                                else
+                                {
+                                    iArgs[item.Position].Out = result.Data;
+                                    if (item.HasCast)
+                                    {
+                                        argsObj[item.Position] = result.Data;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    //========================================//
+
+                    object currentValue = item.HasIArg ?
+                        ((null != result && result.HasData) ? result.Data : iArgs[item.Position].Out) :
+                        ((null != result && result.HasData) ? result.Data : value);
+
+                    //========================================//
+                    //item.HasIArg && 
+                    if (null == currentValue)
+                    {
+                        continue;
+                    }
+
+                    //var isUpdate = false;
+
+                    if (item.HasLower || item.HasCollectionAttr)
+                    {
+                        if (item.HasCollection)
+                        {
+                            #region Collection
+
+                            dynamic currentValue2 = currentValue;
+                            int collectioCount = currentValue2.Count;
+
+                            var collectioTasks = new System.Collections.Generic.List<System.Threading.Tasks.Task>(collectioCount);
+
+                            System.Threading.Tasks.Parallel.For(0, collectioCount, (c, o) =>
+                            {
+                                if (item.HasCollectionAttr)
+                                {
+                                    object v2 = null;
+                                    dynamic key = null;
+                                    if (item.HasDictionary)
+                                    {
+                                        var entry = System.Linq.Enumerable.ElementAt(currentValue2, c);
+                                        key = entry.Key;
+                                        v2 = entry.Value;
+                                    }
+                                    else
+                                    {
+                                        v2 = currentValue2[c];
+                                    }
+
+                                    var collectioTask = ArgsResultCollection(meta, item, attrs, v2, command.Key, command.OnlyName, c, (object)key).ContinueWith(c2 =>
+                                    {
+                                        if (null != c2.Exception)
+                                        {
+                                            var ex = c2.Exception.ExceptionWrite();
+                                            logType = Logger.LoggerType.Exception;
+                                            returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
+                                            o.Stop();
+                                            return;
+                                        }
+
+                                        var result2 = c2.Result;
+
+                                        if (1 > result2.State)
+                                        {
+                                            logType = Logger.LoggerType.Error;
+                                            returnValue = result2;
+                                            //invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
+                                            o.Stop();
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            result = result2;
+                                            if (item.HasDictionary)
+                                            {
+                                                currentValue2[key] = result2.Data.value;
+                                            }
+                                            else
+                                            {
+                                                currentValue2[c] = result2.Data.value;
+                                            }
+                                        }
+                                    });
+
+                                    collectioTasks.Add(collectioTask);
+                                }
+                                //==========HasLower==========//
+                                else if (item.HasLower)
+                                {
+                                    object v2 = null;
+                                    dynamic key = null;
+                                    if (item.HasDictionary)
+                                    {
+                                        var entry = System.Linq.Enumerable.ElementAt(currentValue2, c);
+                                        key = entry.Key;
+                                        v2 = entry.Value;
+                                    }
+                                    else
+                                    {
+                                        v2 = currentValue2[c];
+                                    }
+
+                                    var collectioTask2 = ArgsResult(meta, command.Key, item.Children, command.OnlyName, v2, c).ContinueWith(c3 =>
+                                    {
+                                        if (null != c3.Exception)
+                                        {
+                                            var ex = c3.Exception.ExceptionWrite();
+                                            logType = Logger.LoggerType.Exception;
+                                            returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
+                                            o.Stop();
+                                            return;
+                                        }
+
+                                        var result3 = c3.Result;
+
+                                        if (1 > result3.State)
+                                        {
+                                            logType = Logger.LoggerType.Error;
+                                            returnValue = result3;
+                                            //invocation.ReturnValue = Bind.GetReturnValue(result3, meta);
+                                            o.Stop();
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            result = result3;
+                                            if (item.HasDictionary)
+                                            {
+                                                currentValue2[key] = result3.Data.value;
+                                            }
+                                            else
+                                            {
+                                                currentValue2[c] = result3.Data.value;
+                                            }
+                                        }
+                                    });
+
+                                    collectioTasks.Add(collectioTask2);
+                                }
+                            });
+
+                            System.Threading.Tasks.Task.WaitAll(collectioTasks.ToArray());
+
+                            if (null != returnValue)
+                            {
+                                return meta.HasIResult ? Bind.GetReturnValueIResult(returnValue, meta) : Bind.GetReturnValue(returnValue, meta);
+                            }
+
+                            #endregion
+                        }
+                        else
+                        {
+                            result = await ArgsResult(meta, command.Key, item.Children, command.OnlyName, currentValue);
+                            //if (null != result)
+                            if (1 > result.State)
+                            {
+                                logType = Logger.LoggerType.Error;
+                                returnValue = result;
+                                return meta.HasIResult ? Bind.GetReturnValueIResult((dynamic)result, meta) : Bind.GetReturnValue(result, meta);
+                            }
+                        }
+
+                        if (item.HasIArg && !object.Equals(null, result))
+                        {
+                            if (result.Data is ArgResult && result.Data.isUpdate)
+                            {
+                                iArgs[item.Position].Out = currentValue;
+                                if (item.HasCast)
+                                {
+                                    argsObj[item.Position] = currentValue;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //===============================//
+                //watch.Restart();
+                //..CallBeforeMethod..//
+                if (null != this.Configer.CallBeforeMethod)
+                {
+                    await this.Configer.CallBeforeMethod(meta, meta.Args.ToDictionary(c => c.Name, c => new Bind.MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }));
+                }
+
+                var returnValue2 = call();
+
+                if (meta.HasAsync)
+                {
+                    var task = returnValue2 as System.Threading.Tasks.Task;
+                    if (null != task?.Exception)
+                    {
+                        throw task?.Exception;
+                    }
+                }
+
+                //result
+                if (!meta.HasReturn && !meta.HasAsync)
+                {
+                    //log
+                    returnValue2 = Bind.GetReturnValue(ResultFactory.ResultCreate(meta), meta);
+                }
+
+                //..CallAfterMethod..//
+                if (null != this.Configer.CallAfterMethod)
+                {
+                    await this.Configer.CallAfterMethod(meta, meta.Args.ToDictionary(c => c.Name, c => new Bind.MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), returnValue2);
+                }
+
+                if (!meta.HasReturn && meta.HasAsync)
+                {
+                    await (returnValue2 as System.Threading.Tasks.Task);
+
+                    returnValue2 = Bind.GetReturnValue(ResultFactory.ResultCreate(meta), meta);
+                }
+
+                returnValue = returnValue2;
+
+                return returnValue2;
+            }
+            catch (System.Exception ex)
+            {
+                ex = ex.ExceptionWrite();
+                logType = Logger.LoggerType.Exception;
+
+                //log
+                returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
+
+                //result
+                //returnValue2 = meta.HasIResult ? Bind.GetReturnValueIResult(returnValue, meta) : Bind.GetReturnValue(returnValue, meta);
+
+                //if (!meta.HasAsync)
+                //{
+                //    invocation.ReturnValue = result;
+                //}
+                //else
+                //{
+                //    invocation.ReturnValue = System.Threading.Tasks.Task.FromResult(result);
+                //}
+
+                //invocation.ReturnValue = !meta.HasAsync ? Bind.GetReturnValue(0, System.Convert.ToString(ex), meta, ResultType) : System.Threading.Tasks.Task.FromException(ex);
+                return meta.HasIResult ? Bind.GetReturnValueIResult(returnValue, meta) : Bind.GetReturnValue(returnValue, meta);// meta.HasReturn ? invocation.ReturnValue : default;
+            }
+            finally
+            {
+                Finally(this.Configer.Logger, command, meta, returnValue, logType, iArgs, argsObj, methodName, watch);
+            }
+        }
+
+        /*
         /// <summary>
         /// Intercept
         /// </summary>
         /// <param name="invocation"></param>
-        async System.Threading.Tasks.Task<dynamic> InterceptAsync(Castle.DynamicProxy.IInvocation invocation)
+        async static System.Threading.Tasks.Task<dynamic> InterceptAsync(Castle.DynamicProxy.IInvocation invocation, MetaData meta, Configer configer)
         {
-            if (null == this.MetaData) { return null; }
-
             var proceed = invocation.CaptureProceedInfo();
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
-            var meta = this.MetaData[invocation.Method.Name];
+            //var meta = metaData[invocation.Method.Name];
             var methodName = meta.FullName;
             var argsObj = invocation.Arguments;
             var logType = Logger.LoggerType.Record;
@@ -187,40 +554,40 @@ namespace Business.Core.Auth
                                         v2 = currentValue2[c];
                                     }
 
-                                    var collectioTask = ArgsResultCollection(meta, item, attrs, v2, iArgGroup, command.OnlyName, c, (object)key).ContinueWith(c2 =>
-                                    {
-                                        if (null != c2.Exception)
-                                        {
-                                            var ex = c2.Exception.ExceptionWrite();
-                                            logType = Logger.LoggerType.Exception;
-                                            returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
-                                            o.Stop();
-                                            return;
-                                        }
+                                    var collectioTask = ArgsResultCollection(configer, meta, item, attrs, v2, iArgGroup, command.OnlyName, c, (object)key).ContinueWith(c2 =>
+                                     {
+                                         if (null != c2.Exception)
+                                         {
+                                             var ex = c2.Exception.ExceptionWrite();
+                                             logType = Logger.LoggerType.Exception;
+                                             returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
+                                             o.Stop();
+                                             return;
+                                         }
 
-                                        var result2 = c2.Result;
+                                         var result2 = c2.Result;
 
-                                        if (1 > result2.State)
-                                        {
-                                            logType = Logger.LoggerType.Error;
-                                            returnValue = result2;
-                                            //invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
-                                            o.Stop();
-                                            return;
-                                        }
-                                        else
-                                        {
-                                            result = result2;
-                                            if (item.HasDictionary)
-                                            {
-                                                currentValue2[key] = result2.Data.value;
-                                            }
-                                            else
-                                            {
-                                                currentValue2[c] = result2.Data.value;
-                                            }
-                                        }
-                                    });
+                                         if (1 > result2.State)
+                                         {
+                                             logType = Logger.LoggerType.Error;
+                                             returnValue = result2;
+                                             //invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
+                                             o.Stop();
+                                             return;
+                                         }
+                                         else
+                                         {
+                                             result = result2;
+                                             if (item.HasDictionary)
+                                             {
+                                                 currentValue2[key] = result2.Data.value;
+                                             }
+                                             else
+                                             {
+                                                 currentValue2[c] = result2.Data.value;
+                                             }
+                                         }
+                                     });
 
                                     collectioTasks.Add(collectioTask);
                                 }
@@ -240,7 +607,7 @@ namespace Business.Core.Auth
                                         v2 = currentValue2[c];
                                     }
 
-                                    var collectioTask2 = ArgsResult(meta, iArgGroup, item.Children, command.OnlyName, v2, c).ContinueWith(c3 =>
+                                    var collectioTask2 = ArgsResult(configer, meta, iArgGroup, item.Children, command.OnlyName, v2, c).ContinueWith(c3 =>
                                      {
                                          if (null != c3.Exception)
                                          {
@@ -291,7 +658,7 @@ namespace Business.Core.Auth
                         }
                         else
                         {
-                            result = await ArgsResult(meta, iArgGroup, item.Children, command.OnlyName, currentValue);
+                            result = await ArgsResult(configer, meta, iArgGroup, item.Children, command.OnlyName, currentValue);
                             //if (null != result)
                             if (1 > result.State)
                             {
@@ -319,9 +686,9 @@ namespace Business.Core.Auth
                 //===============================//
                 //watch.Restart();
                 //..CallBeforeMethod..//
-                if (null != Configer.CallBeforeMethod)
+                if (null != configer.CallBeforeMethod)
                 {
-                    await Configer.CallBeforeMethod(meta, meta.Args.ToDictionary(c => c.Name, c => new Bind.MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }));
+                    await configer.CallBeforeMethod(meta, meta.Args.ToDictionary(c => c.Name, c => new Bind.MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }));
                 }
 
                 proceed.Invoke();
@@ -343,9 +710,9 @@ namespace Business.Core.Auth
                 }
 
                 //..CallAfterMethod..//
-                if (null != Configer.CallAfterMethod)
+                if (null != configer.CallAfterMethod)
                 {
-                    await Configer.CallAfterMethod(meta, meta.Args.ToDictionary(c => c.Name, c => new Bind.MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), invocation.ReturnValue);
+                    await configer.CallAfterMethod(meta, meta.Args.ToDictionary(c => c.Name, c => new Bind.MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg, Type = c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), invocation.ReturnValue);
                 }
 
                 if (!meta.HasReturn && meta.HasAsync)
@@ -384,11 +751,12 @@ namespace Business.Core.Auth
             }
             finally
             {
-                Finally(command, meta, returnValue, logType, iArgs, argsObj, methodName, watch);
+                Finally(configer, command, meta, returnValue, logType, iArgs, argsObj, methodName, watch);
             }
         }
+        */
 
-        async void Finally(CommandAttribute command, MetaData meta, dynamic returnValue, Logger.LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch)
+        internal async static void Finally(Logger logger, CommandAttribute command, MetaData meta, dynamic returnValue, Logger.LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch)
         {
             if (meta.HasAsync)
             {
@@ -431,42 +799,42 @@ namespace Business.Core.Auth
                 argsObjLogHasIArg.Add(c.Name, c.HasIArg);
             }
 
-            var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLogHasIArg, out bool canWrite, out bool canResult, Configer.Logger?.LoggerValueType);
+            var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLogHasIArg, out bool canWrite, out bool canResult, logger?.LoggerValueType);
 
             watch.Stop();
 
-            if (null == Configer.Logger) { return; }
+            if (null == logger) { return; }
 
             if (canWrite)
             {
                 var data = new Logger.LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = Help.Scale(watch.Elapsed.TotalSeconds, 3), Member = methodName, Group = command.Group };
 
-                if (null == Configer.Logger)
+                if (null == logger)
                 {
                     Help.Console(data.TryJsonSerialize());
                     return;
                 }
 
-                if (null != Configer.Logger.call)
+                if (null != logger.call)
                 {
-                    if (Configer.Logger.ThreadCall)
+                    if (logger.ThreadCall)
                     {
-                        System.Threading.Tasks.Task.Run(() => Configer.Logger.call(data)).ContinueWith(c => c.Exception?.Console());
+                        System.Threading.Tasks.Task.Run(() => logger.call(data)).ContinueWith(c => c.Exception?.Console());
                     }
                     else
                     {
-                        try { await Configer.Logger.call(data); }
+                        try { await logger.call(data); }
                         catch (System.Exception ex) { ex.Console(); }
                     }
                 }
-                else if (null != Configer.Logger.calls)
+                else if (null != logger.calls)
                 {
-                    if (Configer.Logger.MaxCapacity <= Configer.Logger.loggerQueue.Count)
+                    if (logger.MaxCapacity <= logger.loggerQueue.Count)
                     {
                         return;
                     }
 
-                    if (!Configer.Logger.loggerQueue.TryAdd(data))
+                    if (!logger.loggerQueue.TryAdd(data))
                     {
                         Help.Console(data.TryJsonSerialize());
                     }
@@ -514,7 +882,7 @@ namespace Business.Core.Auth
             }
         }
 
-        async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, IArg arg, int collectionIndex = -1, dynamic dictKey = null)
+        internal async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, IArg arg, int collectionIndex = -1, dynamic dictKey = null)
         {
             switch (argAttr.ArgMeta.HasProcesIArg)
             {
@@ -528,7 +896,7 @@ namespace Business.Core.Auth
             }
         }
 
-        async System.Threading.Tasks.Task<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue, int collectionIndex = -1, dynamic dictKey = null)
+        internal async static System.Threading.Tasks.Task<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue, int collectionIndex = -1, dynamic dictKey = null)
         {
             bool isUpdate = false;
 
@@ -627,36 +995,36 @@ namespace Business.Core.Auth
                                 }
 
                                 var collectioTask = ArgsResultCollection(meta, item, attrs, v2, group, methodName, c, (object)key).ContinueWith(c2 =>
-                                {
-                                    if (null != c2.Exception)
-                                    {
-                                        var ex = c2.Exception.ExceptionWrite();
-                                        result3 = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
-                                        o.Stop();
-                                        return;
-                                    }
+                                 {
+                                     if (null != c2.Exception)
+                                     {
+                                         var ex = c2.Exception.ExceptionWrite();
+                                         result3 = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
+                                         o.Stop();
+                                         return;
+                                     }
 
-                                    var result4 = c2.Result;
+                                     var result4 = c2.Result;
 
-                                    if (1 > result4.State)
-                                    {
-                                        result3 = result4;
-                                        o.Stop();
-                                        return;
-                                    }
-                                    else
-                                    {
-                                        result2 = result4;
-                                        if (item.HasDictionary)
-                                        {
-                                            currentValue3[key] = result4.Data.value;
-                                        }
-                                        else
-                                        {
-                                            currentValue3[c] = result4.Data.value;
-                                        }
-                                    }
-                                });
+                                     if (1 > result4.State)
+                                     {
+                                         result3 = result4;
+                                         o.Stop();
+                                         return;
+                                     }
+                                     else
+                                     {
+                                         result2 = result4;
+                                         if (item.HasDictionary)
+                                         {
+                                             currentValue3[key] = result4.Data.value;
+                                         }
+                                         else
+                                         {
+                                             currentValue3[c] = result4.Data.value;
+                                         }
+                                     }
+                                 });
 
                                 collectioTasks.Add(collectioTask);
                             }
@@ -676,36 +1044,36 @@ namespace Business.Core.Auth
                                 }
 
                                 var collectioTask2 = ArgsResult(meta, group, item.Children, methodName, v2, c).ContinueWith(c3 =>
-                                {
-                                    if (null != c3.Exception)
-                                    {
-                                        var ex = c3.Exception.ExceptionWrite();
-                                        result3 = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
-                                        o.Stop();
-                                        return;
-                                    }
+                               {
+                                   if (null != c3.Exception)
+                                   {
+                                       var ex = c3.Exception.ExceptionWrite();
+                                       result3 = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
+                                       o.Stop();
+                                       return;
+                                   }
 
-                                    var result5 = c3.Result;
+                                   var result5 = c3.Result;
 
-                                    if (1 > result5.State)
-                                    {
-                                        result3 = result5;
-                                        o.Stop();
-                                        return;
-                                    }
-                                    else
-                                    {
-                                        result2 = result5;
-                                        if (item.HasDictionary)
-                                        {
-                                            currentValue3[key] = result5.Data.value;
-                                        }
-                                        else
-                                        {
-                                            currentValue3[c] = result5.Data.value;
-                                        }
-                                    }
-                                });
+                                   if (1 > result5.State)
+                                   {
+                                       result3 = result5;
+                                       o.Stop();
+                                       return;
+                                   }
+                                   else
+                                   {
+                                       result2 = result5;
+                                       if (item.HasDictionary)
+                                       {
+                                           currentValue3[key] = result5.Data.value;
+                                       }
+                                       else
+                                       {
+                                           currentValue3[c] = result5.Data.value;
+                                       }
+                                   }
+                               });
 
                                 collectioTasks.Add(collectioTask2);
                             }
@@ -745,10 +1113,10 @@ namespace Business.Core.Auth
                 }
             }
 
-            return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
+            return ResultFactory.ResultCreate(meta.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
-        async System.Threading.Tasks.Task<IResult> ArgsResultCollection(MetaData meta, Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
+        internal async static System.Threading.Tasks.Task<IResult> ArgsResultCollection(MetaData meta, Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
         {
             bool isUpdate = false;
 
@@ -802,10 +1170,10 @@ namespace Business.Core.Auth
                     return result2;
                 }
 
-                return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, data: result2.Data);
+                return ResultFactory.ResultCreate(meta.ResultTypeDefinition, data: result2.Data);
             }
 
-            return ResultFactory.ResultCreate(Configer.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
+            return ResultFactory.ResultCreate(meta.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
         static LoggerValue LoggerSet(Logger.LoggerType logType, MetaLogger logger, System.Collections.Generic.IList<ArgsLog> argsObjLog, System.Collections.Generic.IDictionary<string, bool> argsObjLogHasIArg, out bool canWrite, out bool canResult, LoggerValue.LoggerValueType? loggerValueType)
@@ -940,11 +1308,6 @@ namespace Business.Core.Auth
                 default: break;
             }
         }
-
-        /// <summary>
-        /// MetaData
-        /// </summary>
-        public ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; set; }
 
         /// <summary>
         /// Configer

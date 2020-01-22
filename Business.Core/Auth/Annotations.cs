@@ -54,9 +54,9 @@ namespace Business.Core.Annotations
             /// </summary>
             public DeclaringType Declaring { get; internal set; }
 
-            public void Clone(AttributeBase attribute)
+            public void Clone(MetaData metaData)
             {
-                this.Declaring = attribute.Meta.Declaring;
+                this.Declaring = metaData.Declaring;
             }
         }
 
@@ -214,7 +214,7 @@ namespace Business.Core.Annotations
                 item.Value.Setter(attr, item.Value.Getter(this));
             }
 
-            attr.Meta.Clone(this);
+            attr.Meta.Clone(Meta);
 
             return attr as T;
         }
@@ -392,7 +392,7 @@ namespace Business.Core.Annotations
 
         string commandGroupDefault = string.Empty;// "Default";
         /// <summary>
-        /// Default
+        /// Group default value
         /// </summary>
         public string CommandGroupDefault { get => commandGroupDefault; set => commandGroupDefault = value?.Trim() ?? string.Empty; }
 
@@ -569,25 +569,25 @@ namespace Business.Core.Annotations
                 ProcesIArgCollection = 8,
             }
 
-            public void Clone(ArgumentAttribute attribute)
+            public void Clone(MetaData metaData)
             {
-                this.resultType = attribute.ArgMeta.resultType;
-                this.resultTypeDefinition = attribute.ArgMeta.resultTypeDefinition;
-                this.Business = attribute.ArgMeta.Business;
-                this.BusinessName = attribute.ArgMeta.BusinessName;
-                this.Method = attribute.ArgMeta.Method;
-                this.MethodOnlyName = attribute.ArgMeta.MethodOnlyName;
-                this.MemberPath = attribute.ArgMeta.MemberPath;
-                this.Member = attribute.ArgMeta.Member;
-                this.MemberType = attribute.ArgMeta.MemberType;
-                this.HasProcesIArg = attribute.ArgMeta.HasProcesIArg;
+                this.resultType = metaData.resultType;
+                this.resultTypeDefinition = metaData.resultTypeDefinition;
+                this.Business = metaData.Business;
+                this.BusinessName = metaData.BusinessName;
+                this.Method = metaData.Method;
+                this.MethodOnlyName = metaData.MethodOnlyName;
+                this.MemberPath = metaData.MemberPath;
+                this.Member = metaData.Member;
+                this.MemberType = metaData.MemberType;
+                this.HasProcesIArg = metaData.HasProcesIArg;
             }
         }
 
         public override T Clone<T>()
         {
             var clone = base.Clone<ArgumentAttribute>();
-            clone.ArgMeta.Clone(this);
+            clone.ArgMeta.Clone(ArgMeta);
             return clone as T;
         }
 
@@ -627,6 +627,11 @@ namespace Business.Core.Annotations
         /// By checking the Allow null value, Default to true
         /// </summary>
         public bool CanNull { get; set; } = true;
+
+        /// <summary>
+        /// Apply to custom objects only
+        /// </summary>
+        public bool HasDefinition { get; set; }
 
         int state;
         /// <summary>

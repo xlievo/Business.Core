@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using static BusinessMember;
 using Business.Core;
 using Business.Core.Boot;
-using System.Runtime.CompilerServices;
 
 [assembly: JsonArg(Group = "G01")]
 [assembly: Logger(Logger.LoggerType.All)]
@@ -127,7 +126,7 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
 
             loggers.Select(c =>
             {
-                c.Value = c.Value?.ToValue();
+                //c.Value = c.Value?.ToValue();
                 return c;
             });
 
@@ -192,7 +191,7 @@ public class BusinessMember2
     public virtual async Task<dynamic> Test001(
         [Use(true)]dynamic use01,
 
-        Arg<Arg01> arg01,
+        Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
@@ -206,7 +205,7 @@ public class BusinessMember2
 
         [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
-        arg01.Out.A.Out;
+        arg01.A.Out;
 }
 
 [Info("Business", CommandGroupDefault = CommandGroupDefault.Group)]
@@ -261,7 +260,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
     public Action<Configer> BindBefore { get; set; }
 
-    public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => ResultFactory.ResultCreate(this.Configer.MetaData[method], state, message);
+    public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => this.Configer.MetaData.TryGetValue(method ?? string.Empty, out Business.Core.Meta.MetaData meta) ? ResultFactory.ResultCreate(meta, state, message) : ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, state, message);
 
     public IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
@@ -302,7 +301,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     public virtual async Task<dynamic> Test001(
         [Use(true)]dynamic use01,
 
-        Arg<Arg01> arg01,
+        Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
@@ -316,7 +315,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
         [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
-        this.ResultCreate(arg01.Out.A.Out);
+        this.ResultCreate(arg01.A.Out);
 
     /// <summary>
     /// This is Test001.
@@ -334,7 +333,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     public virtual IResult Test0001(
         [Use(true)]dynamic use01,
 
-        Arg<Arg01> arg01,
+        Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
@@ -348,7 +347,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
         [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
-        this.ResultCreate(arg01.Out.A.Out);
+        this.ResultCreate(arg01.A.Out);
 
     /// <summary>
     /// This is Test001.
@@ -366,7 +365,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     public virtual dynamic Test00001(
         [Use(true)]dynamic use01,
 
-        Arg<Arg01> arg01,
+        Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
@@ -380,12 +379,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
         [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
-        this.ResultCreate(arg01.Out.A.Out);
+        this.ResultCreate(arg01.A.Out);
 
     public virtual async Task Test0011(
         [Use(true)]dynamic use01,
 
-        Arg<Arg01> arg01,
+        Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
@@ -399,12 +398,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
         [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
-        this.ResultCreate(arg01.Out.A.Out);
+        this.ResultCreate(arg01.A.Out);
 
     public virtual async void Test0012(
         [Use(true)]dynamic use01,
 
-        Arg<Arg01> arg01,
+        Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
             [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
@@ -1652,7 +1651,7 @@ public class TestBusinessMember
         var t21 = AsyncCall(business.Command, "TestDynamic", null, new object[] { "abc" }, new UseEntry(t21result, "use01"));
         Assert.AreEqual(t21, t21result);
 
-        var b2 = Member2.Test001(null, new Arg<Arg01> { In = new Arg01 { A = "abc" } });
+        var b2 = Member2.Test001(null, new Arg01 { A = "abc" });
         b2.Wait();
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(b2.Result.GetType()), true);
         Assert.AreEqual(b2.Result.State, -113);
@@ -2043,10 +2042,10 @@ public class TestBusinessMember
 /// This is a parameter package, used to transform parameters
 /// </summary>
 /// <typeparam name="OutType"></typeparam>
-public class Arg<OutType> : Arg<OutType, dynamic>
+public class Arg<OutType> : Business.Core.Arg<OutType>
 {
     public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
     public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
     public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
-    public override dynamic ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
+    public override async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.DeserializeAsync<OutType>(value);
 }

@@ -28,12 +28,12 @@ using Business.Core.Boot;
 /// This is a parameter package, used to transform parameters
 /// </summary>
 /// <typeparam name="OutType"></typeparam>
-public class Arg<OutType> : Arg<OutType, dynamic>
+public class Arg<OutType> : Business.Core.Arg<OutType>
 {
     public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
     public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
     public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
-    public override dynamic ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
+    public override async ValueTask<dynamic> ToOut(dynamic value) => await MessagePack.MessagePackSerializer.DeserializeAsync<OutType>(value);
 }
 
 public class ResultObject<Type> : Business.Core.Result.ResultObject<Type>
@@ -534,30 +534,47 @@ public class BusinessController : Controller
 
         #endregion
 
-        string c, t, d, g, b = null;
+        string c, t, d, g, b = null, value;
         g = "j";//fixed grouping
         //g = route.Group;
+        IDictionary<string, string> args;
 
         switch (this.Request.Method)
         {
             case "GET":
                 //requestData = new RequestData(this.Request.Query);
-                c = route.Command ?? this.Request.Query["c"];
-                t = this.Request.Query["t"];
-                d = this.Request.Query["d"];
+                //c = route.Command ?? this.Request.Query["c"];
+                //t = this.Request.Query["t"];
+                //d = this.Request.Query["d"];
                 //g = this.Request.Query["g"];
                 //b = this.Request.Query["b"];
+                args = this.Request.Query.ToDictionary(k => k.Key, v =>
+                {
+                    var v2 = v.Value.ToString();
+                    return !string.IsNullOrEmpty(v2) ? v2 : null;
+                });
+                c = route.Command ?? (args.TryGetValue("c", out value) ? value : null);
+                t = args.TryGetValue("t", out value) ? value : null;
+                d = args.TryGetValue("d", out value) ? value : null;
                 break;
             case "POST":
                 {
                     //if (this.Request.HasFormContentType)
                     //requestData = new RequestData(await this.Request.ReadFormAsync());
-                    var form = await this.Request.ReadFormAsync();
-                    c = route.Command ?? form["c"];
-                    t = form["t"];
-                    d = form["d"];
+                    //var form = await this.Request.ReadFormAsync();
+                    //c = route.Command ?? form["c"];
+                    //t = form["t"];
+                    //d = form["d"];
                     //g = form["g"];
                     //b = form["b"];
+                    args = (await this.Request.ReadFormAsync()).ToDictionary(k => k.Key, v =>
+                    {
+                        var v2 = v.Value.ToString();
+                        return !string.IsNullOrEmpty(v2) ? v2 : null;
+                    });
+                    c = route.Command ?? (args.TryGetValue("c", out value) ? value : null);
+                    t = args.TryGetValue("t", out value) ? value : null;
+                    d = args.TryGetValue("d", out value) ? value : null;
                 }
                 break;
             default: return this.NotFound();
@@ -588,6 +605,21 @@ public class BusinessController : Controller
             return Help.ErrorCmd(business, c);
         }
 
+        //var args3 = args?.ToDictionary(c => c.Key, c => c.Value);
+
+        //var result = await cmd.AsyncCall(
+        //    //the data of this request, allow null.
+        //    args,
+        //    //the incoming use object
+        //    new UseEntry(this, "context", "httpFile"), //context
+        //    new UseEntry(new Token //token
+        //    {
+        //        Key = t,
+        //        Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
+        //        Path = this.Request.Path.Value,
+        //        //Callback = b
+        //    })
+        //    );
         var result = await cmd.AsyncCall(
             //the data of this request, allow null.
             cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeObjectArray(),

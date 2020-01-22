@@ -99,12 +99,12 @@ namespace Business.Core.Utils
                 business.Configer.UseTypes.dictionary.TryAdd(item.FullName, item);
             }
 
-            //foreach (var item2 in item.Configuration.MetaData.Values)
+            //foreach (var item in business.Configer.MetaData.Values)
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
                 foreach (var arg in item.Args)
                 {
-                    var type2 = arg.HasIArg ? arg.IArgInType : arg.Type;
+                    var type2 = (arg.HasIArg && !arg.HasCast) ? arg.IArgInType : arg.LastType;
 
                     if (!business.Configer.UseTypes.ContainsKey(type2.FullName) || !item.UseTypePosition.dictionary.TryAdd(arg.Position, type2))
                     {
@@ -150,7 +150,8 @@ namespace Business.Core.Utils
                 }
 
                 //item.HasArgSingle = 1 >= item.Args.Count(c => !c.UseType);
-            });
+            }
+            );
 
             return business;
         }
@@ -169,7 +170,7 @@ namespace Business.Core.Utils
             {
                 foreach (var arg in item.Args)
                 {
-                    var type2 = arg.HasIArg ? arg.IArgInType : arg.Type;
+                    var type2 = (arg.HasIArg && !arg.HasCast) ? arg.IArgInType : arg.LastType;
 
                     if (!argName2.Contains(arg.Name) || !item.UseTypePosition.dictionary.TryAdd(arg.Position, type2))
                     {
@@ -2849,7 +2850,7 @@ namespace Business.Core.Utils
 
     #endregion
 
-    #region ConcurrentLinkedList https://github.com/danielkylewood/concurrent-linked-list
+    #region ConcurrentLinkedList https://github.com/danielkylewood/concurrent-linked-list Apache License 2.0
 
     public class ConcurrentLinkedList<T> : IConcurrentLinkedList<T>
     {

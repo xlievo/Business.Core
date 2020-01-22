@@ -29,13 +29,13 @@ namespace Business.Core
         /// </summary>
         dynamic Out { get; set; }
 
-        string Group { get; set; }
+        //string Group { get; set; }
 
         string ToString();
 
         byte[] ToBytes();
 
-        dynamic ToOut(dynamic value);
+        System.Threading.Tasks.ValueTask<dynamic> ToOut(dynamic value);
     }
 
     public interface IArg<OutType, InType> : IArg
@@ -75,9 +75,9 @@ namespace Business.Core
         /// Used for the command group
         /// </summary>
         //[Newtonsoft.Json.JsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
-        public virtual string Group { get; set; }
-
+        //[System.Text.Json.Serialization.JsonIgnore]
+        //public virtual string Group { get; set; }
+         
         /// <summary>
         /// byte format Out
         /// </summary>
@@ -90,7 +90,7 @@ namespace Business.Core
         /// <returns></returns>
         public override string ToString() => Utils.Help.JsonSerialize(Out);
 
-        public virtual dynamic ToOut(dynamic value) => throw new System.NotImplementedException();
+        public virtual System.Threading.Tasks.ValueTask<dynamic> ToOut(dynamic value) => throw new System.NotImplementedException();
     }
 
     /// <summary>

@@ -86,7 +86,7 @@ namespace Business.Core
 
     public interface IBusiness<Result> : IBusiness<Result, Arg<object>> where Result : Core.Result.IResult { }
 
-    public abstract class BusinessBase<Result, Arg> : IBusiness<Result, Arg>
+    public abstract partial class BusinessBase<Result, Arg> : IBusiness<Result, Arg>
         where Result : Core.Result.IResult
         where Arg : IArg, new()
     {
@@ -124,7 +124,7 @@ namespace Business.Core
         /// <param name="message"></param>
         /// <param name="method"></param>
         /// <returns></returns>
-        public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => Core.Result.ResultFactory.ResultCreate(this.Configer.MetaData[method], state, message);
+        public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => this.Configer.MetaData.TryGetValue(method ?? string.Empty, out Meta.MetaData meta) ? Core.Result.ResultFactory.ResultCreate(meta, state, message) : Core.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, state, message);
 
         /// <summary>
         /// Used to create the IResult returns object

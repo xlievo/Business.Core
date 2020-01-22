@@ -447,7 +447,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             DocJsonSettings.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
-        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Type argTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes)
+        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Type argTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -468,6 +468,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             //this.routes = routes;
             this.UseTypes = new ConcurrentReadOnlyDictionary<string, System.Type>();
 
+            this.Interceptor = interceptor;
             //GetCommandGroupDefault = name => GetCommandGroup(CommandGroupDefault, name);
             //this.LoggerUseThreadPool = loggerUseThreadPool;
         }
@@ -490,6 +491,8 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         public System.Type ResultTypeDefinition { get; private set; }
         public System.Type ArgTypeDefinition { get; private set; }
         public IDoc Doc { get; internal set; }
+
+        public Auth.IInterceptor Interceptor { get; internal set; }
 
         ///// <summary>
         ///// Logger use threadPool, Default true
