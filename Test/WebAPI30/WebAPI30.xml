@@ -21,7 +21,7 @@
             bbb
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Token,Arg{Args.Test001},Arg{System.DateTime},Business.Core.Annotations.HttpFile,System.Decimal,System.Int32,System.Boolean)">
+        <member name="M:BusinessMember2.Test001(Token,Args.Test001,Arg{System.Nullable{System.DateTime}},Business.Core.Annotations.HttpFile,System.Decimal,System.Int32,System.Boolean)">
             <summary>
             test doc Test001
             and Test001

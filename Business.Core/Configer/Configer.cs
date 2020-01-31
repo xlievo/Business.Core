@@ -410,20 +410,53 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
             public override string ToString()
             {
-                var key = Business;
+                var key = new System.Text.StringBuilder(Business);
 
                 if (!string.IsNullOrWhiteSpace(Group))
                 {
-                    key += $"/{Group}";
+                    key.AppendFormat("/{0}", Group);
                 }
 
                 if (!string.IsNullOrWhiteSpace(Command))
                 {
-                    key += $"/{Command}";
+                    key.AppendFormat("/{0}", Command);
                 }
 
-                return key;
+                return key.ToString();
             }
+        }
+
+        public class MethodBefore
+        {
+            public MetaData Meta { get; set; }
+
+            public System.Collections.Generic.Dictionary<string, MethodArgs> Args { get; set; }
+
+            public bool Cancel { get; set; }
+        }
+
+        public struct MethodAfter
+        {
+            public MetaData Meta { get; set; }
+
+            public System.Collections.Generic.Dictionary<string, MethodArgs> Args { get; set; }
+
+            public dynamic Result { get; set; }
+        }
+
+        public struct MethodArgs
+        {
+            public string Name;
+
+            public dynamic Value;
+
+            public bool HasIArg;
+
+            public System.Type Type;
+
+            public System.Type OutType;
+
+            public System.Type InType;
         }
 
         public static ConcurrentReadOnlyDictionary<string, Xml.member> Xmls = null;
@@ -524,12 +557,12 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// <summary>
         /// Before the method is successfully invoked
         /// </summary>
-        public System.Func<MetaData, System.Collections.Generic.Dictionary<string, Bind.MethodArgs>, System.Threading.Tasks.Task> CallBeforeMethod { get; set; }
+        public System.Func<MethodBefore, System.Threading.Tasks.Task> CallBeforeMethod { get; set; }
 
         /// <summary>
         /// After the method has been successfully invoked
         /// </summary>
-        public System.Func<MetaData, System.Collections.Generic.Dictionary<string, Bind.MethodArgs>, dynamic, System.Threading.Tasks.Task> CallAfterMethod { get; set; }
+        public System.Func<MethodAfter, System.Threading.Tasks.Task> CallAfterMethod { get; set; }
 
         /// <summary>
         /// After the MemberSet has been successfully invoked

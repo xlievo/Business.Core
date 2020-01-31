@@ -70,29 +70,6 @@ public class BusinessMember2 : BusinessBase
                 Help.ExceptionWrite(exception, true, true);
             }
         });
-
-        this.BindBefore = c =>
-        {
-            c.CallBeforeMethod = async (meta, args) =>
-            {
-
-            };
-
-            c.CallAfterMethod = async (meta, args, result) =>
-            {
-                if (typeof(System.Threading.Tasks.Task).IsAssignableFrom(result?.GetType()))
-                {
-                    //await result;
-
-                    //await System.Threading.Tasks.Task.Run(() =>
-                    //{
-                    //    System.Threading.Thread.Sleep(3000);
-                    //});
-
-                    //result2.State = 111;
-                }
-            };
-        };
     }
 
 

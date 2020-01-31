@@ -113,6 +113,12 @@ namespace Business.Core.Utils
 
                     arg.UseType = true;
 
+                    if (arg.HasCast)
+                    {
+                        arg.HasCast = arg.HasIArg = false;
+                        item.IArgs.collection.Remove(arg);
+                    }
+
                     foreach (var item2 in arg.Group)
                     {
                         //remove not parameter attr
@@ -180,6 +186,12 @@ namespace Business.Core.Utils
                     arg.UseType = true;
 
                     arg.Use = new Annotations.UseAttribute(true);
+
+                    if (arg.HasCast)
+                    {
+                        arg.HasCast = arg.HasIArg = false;
+                        item.IArgs.collection.Remove(arg);
+                    }
 
                     foreach (var item2 in arg.Group)
                     {

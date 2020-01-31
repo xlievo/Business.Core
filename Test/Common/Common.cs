@@ -115,6 +115,7 @@ public class Token : Business.Core.Auth.Token
 /// <summary>
 /// my session
 /// </summary>
+[SessionCheck]
 public class Session
 {
     public string Account { get; set; }
@@ -125,7 +126,6 @@ public class Session
 /// <summary>
 /// Session arg object
 /// </summary>
-[SessionCheck]
 public class SessionArg : Arg<Session, Token> { }
 
 [Command(Group = "j")]
@@ -199,7 +199,8 @@ public static class Common
         Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
         Console.WriteLine($"LogPath: {LogPath}");
 
-        MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
+        MessagePack.Resolvers.CompositeResolver.Create(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
+        //MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
     }
 
     static void InitRedis()
@@ -550,7 +551,7 @@ public class BusinessController : Controller
                 //b = this.Request.Query["b"];
                 args = this.Request.Query.ToDictionary(k => k.Key, v =>
                 {
-                    var v2 = v.Value.ToString();
+                    var v2 = (string)v.Value;
                     return !string.IsNullOrEmpty(v2) ? v2 : null;
                 });
                 c = route.Command ?? (args.TryGetValue("c", out value) ? value : null);
@@ -569,7 +570,7 @@ public class BusinessController : Controller
                     //b = form["b"];
                     args = (await this.Request.ReadFormAsync()).ToDictionary(k => k.Key, v =>
                     {
-                        var v2 = v.Value.ToString();
+                        var v2 = (string)v.Value;
                         return !string.IsNullOrEmpty(v2) ? v2 : null;
                     });
                     c = route.Command ?? (args.TryGetValue("c", out value) ? value : null);
@@ -605,34 +606,31 @@ public class BusinessController : Controller
             return Help.ErrorCmd(business, c);
         }
 
-        //var args3 = args?.ToDictionary(c => c.Key, c => c.Value);
-
-        //var result = await cmd.AsyncCall(
-        //    //the data of this request, allow null.
-        //    args,
-        //    //the incoming use object
-        //    new UseEntry(this, "context", "httpFile"), //context
-        //    new UseEntry(new Token //token
-        //    {
-        //        Key = t,
-        //        Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
-        //        Path = this.Request.Path.Value,
-        //        //Callback = b
-        //    })
-        //    );
-        var result = await cmd.AsyncCall(
-            //the data of this request, allow null.
-            cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeObjectArray(),
-            //the incoming use object
-            new UseEntry(this, "context", "httpFile"), //context
-            new UseEntry(new Token //token
-            {
-                Key = t,
-                Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
-                Path = this.Request.Path.Value,
-                //Callback = b
-            })
-            );
+        var result = null != route.Command ?
+                await cmd.AsyncCall(
+                    //the data of this request, allow null.
+                    args,
+                    //the incoming use object
+                    new UseEntry(this, "context", "httpFile"), //context
+                    new UseEntry(new Token //token
+                    {
+                        Key = t,
+                        Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
+                        Path = this.Request.Path.Value,
+                        //Callback = b
+                    })) :
+                await cmd.AsyncCall(
+                    //the data of this request, allow null.
+                    cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeObjectArray(),
+                    //the incoming use object
+                    new UseEntry(this, "context", "httpFile"), //context
+                    new UseEntry(new Token //token
+                    {
+                        Key = t,
+                        Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
+                        Path = this.Request.Path.Value,
+                        //Callback = b
+                    }));
 
         if (!object.Equals(null, result))
         {

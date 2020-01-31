@@ -208,16 +208,16 @@ namespace Business.Core.Utils.Emit
 
         private static void UnboxOrCast(System.Type parameterType, ILGenerator il)
         {
-            //il.Emit(parameterType.GetTypeInfo().IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, parameterType);
+            il.Emit(parameterType.GetTypeInfo().IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, parameterType);
 
-            if (parameterType.GetTypeInfo().IsValueType)
-            {
-                il.Emit(OpCodes.Unbox_Any, parameterType);
-            }
-            else
-            {
-                il.Emit(OpCodes.Castclass, typeof(object));
-            }
+            //if (parameterType.GetTypeInfo().IsValueType)
+            //{
+            //    il.Emit(OpCodes.Unbox_Any, parameterType);
+            //}
+            //else
+            //{
+            //    il.Emit(OpCodes.Castclass, typeof(object));
+            //}
         }
 
         private static void UpdateOutAndRefArguments(ParameterInfo[] parameters, ILGenerator il)

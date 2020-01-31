@@ -15,11 +15,37 @@ using static Args;
 [Info("API/v2", CommandGroupDefault = null)]
 public class BusinessMember3 : BusinessBase
 {
+    public BusinessMember3()
+    {
+        this.BindBefore = c =>
+        {
+            c.CallBeforeMethod = async method =>
+            {
+                method.Cancel = true;
+            };
+
+            c.CallAfterMethod = async method =>
+            {
+                if (typeof(IAsyncResult).IsAssignableFrom(method.Result?.GetType()))
+                {
+                    //await result;
+
+                    //await System.Threading.Tasks.Task.Run(() =>
+                    //{
+                    //    System.Threading.Thread.Sleep(3000);
+                    //});
+
+                    //result2.State = 111;
+                }
+            };
+        };
+    }
+
     [Testing("test2", "\"2019-12-02T21:02\"")]
     [Testing("test3", "\"2019-12-02T22:02\"")]
     [Testing("test4", "\"2019-12-02T23:02\"")]
     [Testing("test3333", "\"2019-12-02T23:02\"")]
-    public virtual async Task<IResult<DateTime?>> Test000(SessionArg session, [Ignore(IgnoreMode.BusinessArg)]DateTime? date, dynamic context = null)
+    public virtual async Task<IResult<DateTime>> Test000(SessionArg session, [Ignore(IgnoreMode.BusinessArg)]DateTime date, dynamic context = null)
     {
         return this.ResultCreate(date);
     }
@@ -66,7 +92,8 @@ public partial class BusinessMember2 : BusinessBase
     [Testing("test3", "\"2019-12-02T22:02\"", tokenMethod: login)]
     [Testing("test4", "\"2019-12-02T23:02\"", tokenMethod: login)]
     [Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login)]
-    public virtual async Task<IResult<DateTime?>> Test000(SessionArg session, [Ignore(IgnoreMode.BusinessArg)]DateTime? date)
+    [Ignore(IgnoreMode.BusinessArg)]
+    public virtual async Task<IResult<DateTime?>> Test000(SessionArg session, DateTime? date)
     {
         return this.ResultCreate(date);
     }
@@ -103,7 +130,7 @@ public partial class BusinessMember2 : BusinessBase
     [Testing("test, important logic, do not delete!!!",
         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
         tokenMethod: login)]
-    public virtual async Task<IResult<Test001Result?>> Test001(Token token, Test001 arg, Arg<DateTime> dateTime, HttpFile httpFile = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+    public virtual async Task<IResult<Test001Result?>> Test001(Token token, Test001 arg, Arg<DateTime?> dateTime, HttpFile httpFile = null, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;

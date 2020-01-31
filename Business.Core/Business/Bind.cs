@@ -26,21 +26,6 @@ namespace Business.Core
 
     public partial class Bind
     {
-        public struct MethodArgs
-        {
-            public string Name;
-
-            public dynamic Value;
-
-            public bool HasIArg;
-
-            public System.Type Type;
-
-            public System.Type OutType;
-
-            public System.Type InType;
-        }
-
         internal static IResult ErrorBusiness(System.Type resultTypeDefinition, string business) => ResultFactory.ResultCreate(resultTypeDefinition, -1, string.Format("Without this Business{0}", string.IsNullOrEmpty(business) ? null : $" {business}"));
 
         internal static IResult ErrorCmd(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, string.Format("Without this Cmd{0}", string.IsNullOrEmpty(cmd) ? null : $" {cmd}"));
@@ -1518,6 +1503,27 @@ namespace Business.Core
 
         #endregion
 
+        #region Call
+
+        public virtual Result Call<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
+
+        public virtual IResult CallIResult(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
+
+        public virtual dynamic Call(string cmd, System.Collections.Generic.IDictionary<string, string> args, UseEntry[] useObj, string group)
+        {
+            var command = GetCommand(cmd, group);
+
+            return null == command ? Bind.ErrorCmd(resultTypeDefinition, cmd) : command.Call(args, useObj);
+        }
+
+        public virtual Result Call<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
+
+        public virtual IResult CallIResult(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
+
+        public virtual dynamic Call(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
+
+        #endregion
+
         #region AsyncCallUse
 
         public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
@@ -1544,6 +1550,27 @@ namespace Business.Core
         public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
 
         #endregion
+
+        #region AsyncCallUse
+
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, System.Collections.Generic.IDictionary<string, string> args, UseEntry[] useObj, string group)
+        {
+            var command = GetCommand(cmd, group);
+
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(args, useObj);
+        }
+
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
+
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
+
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
+
+        #endregion
     }
 
     public class Command
@@ -1560,14 +1587,13 @@ namespace Business.Core
         //===============member==================//
         readonly System.Func<object[], dynamic> call;
 
-        public virtual object[] GetAgs(object[] args, params UseEntry[] useObj)
+        public virtual object[] GetArgsUse(UseEntry[] useObj, System.Action<object[], int, Args> action)
         {
-            var args2 = new object[Meta.Args.Count];
+            var args = new object[Meta.Args.Count];
 
-            if (0 < args2.Length)
+            if (0 < args.Length)
             {
-                int l = 0;
-                for (int i = 0; i < args2.Length; i++)
+                for (int i = 0; i < args.Length; i++)
                 {
                     var arg = Meta.Args[i];
 
@@ -1581,7 +1607,7 @@ namespace Business.Core
                                 {
                                     if (use.ParameterName?.Contains(arg.Name, System.StringComparer.InvariantCultureIgnoreCase) ?? false)
                                     {
-                                        args2[i] = use.Value;
+                                        args[i] = use.Value;
                                         break;
                                     }
                                 }
@@ -1592,7 +1618,7 @@ namespace Business.Core
                                 {
                                     if (Meta.UseTypePosition[i].IsAssignableFrom(use.Type))
                                     {
-                                        args2[i] = use.Value;
+                                        args[i] = use.Value;
                                         break;
                                     }
                                 }
@@ -1606,109 +1632,90 @@ namespace Business.Core
                         continue;
                     }
 
-                    if (null != args && 0 < args.Length)
-                    {
-                        //if (args.Length < l)
-                        //{
-                        //    break;
-                        //}
-
-                        if (l < args.Length)
-                        {
-                            args2[i] = args[l++];
-                        }
-                    }
+                    action(args, i, arg);
                 }
             }
 
-            return args2;
+            return args;
+        }
+
+        public virtual object[] GetAgs(object[] args, params UseEntry[] useObj)
+        {
+            int l = 0;
+            return GetArgsUse(useObj, (args2, i, arg) =>
+            {
+                if (null != args && 0 < args.Length)
+                {
+                    //if (args.Length < l)
+                    //{
+                    //    break;
+                    //}
+
+                    if (l < args.Length)
+                    {
+                        args2[i] = args[l++];
+                    }
+                }
+            });
         }
 
         public virtual object[] GetAgs(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj)
         {
-            var args2 = new object[Meta.Args.Count];
-
-            if (0 < args2.Length)
+            return GetArgsUse(useObj, (args2, i, arg) =>
             {
-                for (int i = 0; i < args2.Length; i++)
+                if (null != args && 0 < args.Count)
                 {
-                    var arg = Meta.Args[i];
-
-                    if (Meta.UseTypePosition.ContainsKey(i))
+                    if (args.TryGetValue(arg.Name, out string value))
                     {
-                        if (0 < useObj?.Length)
-                        {
-                            if (arg.Use?.ParameterName ?? false)
-                            {
-                                foreach (var use in useObj)
-                                {
-                                    if (use.ParameterName?.Contains(arg.Name, System.StringComparer.InvariantCultureIgnoreCase) ?? false)
-                                    {
-                                        args2[i] = use.Value;
-                                        break;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                foreach (var use in useObj)
-                                {
-                                    if (Meta.UseTypePosition[i].IsAssignableFrom(use.Type))
-                                    {
-                                        args2[i] = use.Value;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        continue;
-                    }
-                    else if (arg.Group[Key].IgnoreArg)
-                    {
-                        continue;
-                    }
-
-                    if (null != args && 0 < args.Count)
-                    {
-                        if (args.TryGetValue(arg.Name, out string value))
-                        {
-                            args2[i] = value;
-                        }
+                        args2[i] = value;
                     }
                 }
-            }
-
-            return args2;
+            });
         }
 
         #region Call
 
-        public virtual dynamic Call(object[] args, params UseEntry[] useObj)
+        public dynamic Call(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => Syn(GetAgs(args, useObj));
+
+        public Result Call<Result>(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => Call(args, useObj);
+
+        public IResult CallIResult(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => Call(args, useObj);
+
+        dynamic Syn(object[] args)
         {
             try
             {
-                return call(GetAgs(args, useObj));
+                return call(args);
             }
             catch (System.Exception ex)
             {
                 return ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(Help.ExceptionWrite(ex)));
             }
         }
-        public virtual Result Call<Result>(object[] args, params UseEntry[] useObj) => Call(args, useObj);
-        public virtual IResult CallIResult(object[] args, params UseEntry[] useObj) => Call(args, useObj);
+
+        public dynamic Call(object[] args, params UseEntry[] useObj) => Syn(GetAgs(args, useObj));
+
+        public Result Call<Result>(object[] args, params UseEntry[] useObj) => Call(args, useObj);
+
+        public IResult CallIResult(object[] args, params UseEntry[] useObj) => Call(args, useObj);
 
         #endregion
 
         #region AsyncCall
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj)
+        public async System.Threading.Tasks.Task<dynamic> AsyncCall(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => await Async(GetAgs(args, useObj));
+
+        public async System.Threading.Tasks.Task<Result> AsyncCall<Result>(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
+
+        public async System.Threading.Tasks.Task<IResult> AsyncIResult(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
+
+        async System.Threading.Tasks.Task<dynamic> Async(object[] args)
         {
             try
             {
                 if (Meta.HasAsync)
                 {
-                    return await call(GetAgs(args, useObj));
+                    return await call(args);
                 }
                 else
                 {
@@ -1717,7 +1724,7 @@ namespace Business.Core
                         var obj2 = (dynamic)obj;
                         return obj2.call(obj2.args);
 
-                    }, new { call, args = GetAgs(args, useObj) }))
+                    }, new { call, args }))
                     {
                         return await task;
                     }
@@ -1729,36 +1736,11 @@ namespace Business.Core
             }
         }
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(object[] args, params UseEntry[] useObj)
-        {
-            try
-            {
-                if (Meta.HasAsync)
-                {
-                    return await call(GetAgs(args, useObj));
-                }
-                else
-                {
-                    using (var task = System.Threading.Tasks.Task.Factory.StartNew(obj =>
-                    {
-                        var obj2 = (dynamic)obj;
-                        return obj2.call(obj2.args);
+        public async System.Threading.Tasks.Task<dynamic> AsyncCall(object[] args, params UseEntry[] useObj) => await Async(GetAgs(args, useObj));
 
-                    }, new { call, args = GetAgs(args, useObj) }))
-                    {
-                        return await task;
-                    }
-                }
-            }
-            catch (System.Exception ex)
-            {
-                return await System.Threading.Tasks.Task.FromResult(ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(ex.ExceptionWrite())));
-            }
-        }
+        public async System.Threading.Tasks.Task<Result> AsyncCall<Result>(object[] args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(object[] args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
-
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(object[] args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
+        public async System.Threading.Tasks.Task<IResult> AsyncIResult(object[] args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
 
         #endregion
 
@@ -1964,7 +1946,7 @@ namespace Business.Core.Meta
         ////==============source===================//
         //public string Source { get; private set; }
         //===============hasIArg==================//
-        public bool HasIArg { get; private set; }
+        public bool HasIArg { get; internal set; }
         //public MetaLogger Logger { get; private set; }
         //public MetaLogger IArgInLogger { get; private set; }
         //==============group===================//
