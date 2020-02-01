@@ -135,7 +135,7 @@ public class BusinessMember : BusinessBase
 
     public virtual async Task<dynamic> MyLogic(Dto arg)
     {
-        return this.ResultCreate(arg.Out.A);
+        return this.ResultCreate(arg.A);
     }
 }
 ```
