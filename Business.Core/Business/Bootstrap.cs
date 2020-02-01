@@ -15,7 +15,7 @@
           ##############
 ==================================*/
 
-namespace Business.Core.Boot
+namespace Business.Core
 {
     using Utils;
     using Document;
@@ -94,6 +94,11 @@ namespace Business.Core.Boot
         /// <returns></returns>
         public static Bootstrap Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments) => new Bootstrap(new BootstrapConfig(interceptor, constructorArguments, type));
 
+        /// <summary>
+        /// bootstrap all Business class
+        /// </summary>
+        /// <param name="constructorArguments"></param>
+        /// <returns></returns>
         public static BootstrapAll Create(params object[] constructorArguments) => Create(null, constructorArguments);
 
         /// <summary>
@@ -284,7 +289,7 @@ namespace Business.Core.Boot
 
 namespace Business.Core.Utils
 {
-    using Boot;
+    //using Boot;
 
     public static class BootstrapExtensions
     {

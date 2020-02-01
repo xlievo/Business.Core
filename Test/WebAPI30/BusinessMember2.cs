@@ -45,9 +45,10 @@ public class BusinessMember3 : BusinessBase
     [Testing("test3", "\"2019-12-02T22:02\"")]
     [Testing("test4", "\"2019-12-02T23:02\"")]
     [Testing("test3333", "\"2019-12-02T23:02\"")]
-    public virtual async Task<IResult<DateTime>> Test000(SessionArg session, [Ignore(IgnoreMode.BusinessArg)]DateTime date, dynamic context = null)
+    public virtual DateTime? Test000(SessionArg session, [Ignore(IgnoreMode.BusinessArg)]DateTime? date, dynamic context = null)
     {
-        return this.ResultCreate(date);
+        return date;// date.ToString();
+        //return this.ResultCreate(date);
     }
 }
 
@@ -59,7 +60,31 @@ public class BusinessMember3 : BusinessBase
 [Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, Method = "Test000")]
 public partial class BusinessMember2
 {
+    public BusinessMember2()
+    {
+        this.BindBefore = c =>
+        {
+            c.CallBeforeMethod = async method =>
+            {
+                method.Cancel = false;
+            };
 
+            c.CallAfterMethod = async method =>
+            {
+                if (typeof(IAsyncResult).IsAssignableFrom(method.Result?.GetType()))
+                {
+                    //await result;
+
+                    //await System.Threading.Tasks.Task.Run(() =>
+                    //{
+                    //    System.Threading.Thread.Sleep(3000);
+                    //});
+
+                    //result2.State = 111;
+                }
+            };
+        };
+    }
 }
 
 /// <summary>
@@ -70,6 +95,7 @@ public partial class BusinessMember2
 [Info("API", CommandGroupDefault = null)]
 public partial class BusinessMember2 : BusinessBase
 {
+
     public struct Test001Result
     {
         /// <summary>

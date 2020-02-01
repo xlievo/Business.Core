@@ -134,7 +134,7 @@ namespace Business.Core.Auth
                 //..CallBeforeMethod..//
                 if (null != this.Configer.CallBeforeMethod)
                 {
-                    var before = new Configer.MethodBefore { Meta = meta, Args = meta.Args.ToDictionary(c => c.Name, c => new Configer.MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position].In : argsObj[c.Position], HasIArg = c.HasIArg && !c.HasCast, Type = c.HasCast ? c.LastType : c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), Cancel = false };
+                    var before = new Configer.MethodBefore { Meta = meta, Args = meta.Args.ToDictionary(c => c.Name, c => c.HasIArg ? iArgs[c.Position].In : argsObj[c.Position]), Cancel = false };
 
                     await this.Configer.CallBeforeMethod(before);
 
@@ -397,7 +397,7 @@ namespace Business.Core.Auth
                 //..CallAfterMethod..//
                 if (null != this.Configer.CallAfterMethod)
                 {
-                    await this.Configer.CallAfterMethod(new Configer.MethodAfter { Meta = meta, Args = meta.Args.ToDictionary(c => c.Name, c => new Configer.MethodArgs { Name = c.Name, Value = c.HasIArg ? iArgs[c.Position].In : argsObj[c.Position], HasIArg = c.HasIArg && !c.HasCast, Type = c.HasCast ? c.LastType : c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), Result = returnValue2 });
+                    await this.Configer.CallAfterMethod(new Configer.MethodAfter { Meta = meta, Args = meta.Args.ToDictionary(c => c.Name, c => new Configer.MethodArgs { Name = c.Name, Value = c.HasCast ? iArgs[c.Position].In : c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg && !c.HasCast, Type = c.HasCast ? c.LastType : c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), Result = returnValue2 });
                 }
 
                 if (!meta.HasReturn && meta.HasAsync)

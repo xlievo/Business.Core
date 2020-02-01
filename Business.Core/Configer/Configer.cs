@@ -430,7 +430,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         {
             public MetaData Meta { get; set; }
 
-            public System.Collections.Generic.Dictionary<string, MethodArgs> Args { get; set; }
+            public System.Collections.Generic.Dictionary<string, dynamic> Args { get; set; }
 
             public bool Cancel { get; set; }
         }

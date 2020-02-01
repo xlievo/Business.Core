@@ -20,7 +20,6 @@ using Business.Core.Result;
 using Business.Utils;
 using Business;
 using Business.Core.Document;
-using Business.Core.Boot;
 
 #region Socket Support
 

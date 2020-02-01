@@ -86,24 +86,25 @@ namespace Business.Core
         internal static dynamic GetReturnValue(IResult result, MetaData meta)
         {
             object result2 = result;
+
             if (meta.HasReturn)
             {
                 if (!meta.HasObject)
                 {
-                    dynamic result3;
+                    dynamic result3 = null;
 
                     if (meta.ReturnType.IsValueType)
                     {
                         result3 = System.Activator.CreateInstance(meta.ReturnType);
                     }
-                    else
-                    {
-                        result3 = Help.CreateInstance(meta.ReturnType);
-                    }
+                    //else
+                    //{
+                    //    result3 = Help.CreateInstance(meta.ReturnType);
+                    //}
 
                     if (meta.HasAsync)
                     {
-                        return System.Threading.Tasks.Task.FromResult(result3);
+                        return System.Threading.Tasks.Task.FromResult<dynamic>(result3);
                     }
 
                     return result3;

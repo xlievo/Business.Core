@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using static BusinessMember;
 using Business.Core;
-using Business.Core.Boot;
 
 [assembly: JsonArg(Group = "G01")]
 [assembly: Logger(Logger.LoggerType.All)]

@@ -1,6 +1,6 @@
 ## Platform
 
-Support .Net Framework 4.6, Mono 4.x, .Net Standard 2.0
+.Net Standard 2.0
 
 ## Depend
 
@@ -68,18 +68,6 @@ public interface IResult
     /// Whether there is value
     /// </summary>
     System.Boolean HasData { get; }
-
-    /// <summary>
-    /// ProtoBuf,MessagePack or Other
-    /// </summary>
-    /// <returns></returns>
-    System.Byte[] ToBytes();
-
-    /// <summary>
-    /// Json
-    /// </summary>
-    /// <returns></returns>
-    System.String ToString();
 }
 
 public interface IArg
@@ -145,7 +133,7 @@ public class BusinessMember : BusinessBase
         public string A { get; set; }
     }
 
-    public virtual async Task<dynamic> MyLogic(Arg<Dto> arg)
+    public virtual async Task<dynamic> MyLogic(Dto arg)
     {
         return this.ResultCreate(arg.Out.A);
     }
@@ -155,7 +143,12 @@ public class BusinessMember : BusinessBase
 3: Register your business class
 
 ```C#
-static BusinessMember Member = Bind.Create<BusinessMember>();
+
+static BusinessMember Member = Bootstrap.Create<BusinessMember>()
+            .Build();
+
+        Bootstrap.Create()
+            .Build();
 ```
 
 4: Calling business methods
