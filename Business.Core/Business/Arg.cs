@@ -45,6 +45,11 @@ namespace Business.Core
         new OutType Out { get; set; }
     }
 
+    public interface IArg<OutType> : IArg
+    {
+        new OutType Out { get; set; }
+    }
+
     /// <summary>
     /// This is a parameter package, used to transform parameters
     /// </summary>
@@ -97,11 +102,37 @@ namespace Business.Core
     /// This is a parameter package, used to transform parameters
     /// </summary>
     /// <typeparam name="OutType"></typeparam>
-    public class Arg<OutType> : Arg<OutType, dynamic>
+    public class Arg<OutType> : IArg<OutType>
     {
         public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
         public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
         //default OutType
         public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
+
+        dynamic IArg.Out { get => this.Out; set => this.Out = value; }
+
+        /// <summary>
+        /// The final output object
+        /// </summary>
+        public virtual OutType Out { get; set; }
+
+        /// <summary>
+        /// The first input object
+        /// </summary>
+        public dynamic In { get; set; }
+
+        /// <summary>
+        /// byte format Out
+        /// </summary>
+        /// <returns></returns>
+        public virtual byte[] ToBytes() => throw new System.NotImplementedException();
+
+        /// <summary>
+        /// JSON format Out
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() => Utils.Help.JsonSerialize(Out);
+
+        public virtual System.Threading.Tasks.ValueTask<dynamic> ToOut(dynamic value) => throw new System.NotImplementedException();
     }
 }

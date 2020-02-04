@@ -24,7 +24,7 @@ namespace Business.Core
     using System.Reflection;
     using System.Linq;
 
-    public partial class Bind
+    internal partial class Bind
     {
         internal static IResult ErrorBusiness(System.Type resultTypeDefinition, string business) => ResultFactory.ResultCreate(resultTypeDefinition, -1, string.Format("Without this Business{0}", string.IsNullOrEmpty(business) ? null : $" {business}"));
 
@@ -83,6 +83,7 @@ namespace Business.Core
             return result2;
         }
         */
+
         internal static dynamic GetReturnValue(IResult result, MetaData meta)
         {
             object result2 = result;
@@ -122,7 +123,7 @@ namespace Business.Core
 
             if (meta.HasAsync)
             {
-                return System.Threading.Tasks.Task.FromResult(result2);
+                return System.Threading.Tasks.Task.FromResult<dynamic>(result2);
             }
 
             return result2;
@@ -233,7 +234,7 @@ namespace Business.Core
         #endregion
     }
 
-    public partial class Bind : System.IDisposable
+    internal partial class Bind : System.IDisposable
     {
         internal readonly object instance;
 
@@ -607,9 +608,9 @@ namespace Business.Core
                     continue;
                 }
 
-                if (arg.Type.GetTypeInfo().IsValueType && null == arg.DefaultValue)
+                if (!arg.Nullable && arg.LastType.IsValueType && null == arg.DefaultValue)
                 {
-                    argsObj[i] = System.Activator.CreateInstance(arg.Type);
+                    argsObj[i] = System.Activator.CreateInstance(arg.LastType);
                 }
                 else if (arg.HasDefaultValue)
                 {
@@ -1012,12 +1013,24 @@ namespace Business.Core
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
                     var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
 
+                    var iArgGenericType = new System.Type[cfg.ArgTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
+                    var parameterType2 = parameterType;
                     var cast = !hasUse && !current.hasIArg;
                     //var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
                     if (cast)
                     {
                         current.hasIArg = true;
                         current.inType = typeof(object);
+
+                        for (int i = 0; i < iArgGenericType.Length; i++)
+                        {
+                            iArgGenericType[i] = typeof(object);
+                        }
+                        if (0 < iArgGenericType.Length)
+                        {
+                            iArgGenericType[0] = parameterType;
+                            parameterType2 = cfg.ArgTypeDefinition.MakeGenericType(iArgGenericType);
+                        }
                     }
 
                     var argGroup = GetArgGroup(argAttrAll, current, cfg.Info.TypeFullName, cfg.Info.BusinessName, method.Name, path, default, argInfo.Name, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
@@ -1030,7 +1043,8 @@ namespace Business.Core
 
                     var arg = new Args(argInfo.Name,
                     //cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
-                    cast ? cfg.ArgTypeDefinition.MakeGenericType(parameterType) : parameterType,
+                    //cast ? cfg.ArgTypeDefinition.MakeGenericType(parameterType2) : parameterType,
+                    parameterType2,
                     current.outType,
                     argInfo.Position,
                     argInfo.HasDefaultValue ? argInfo.DefaultValue : default,
@@ -1038,7 +1052,7 @@ namespace Business.Core
                     current.hasDictionary,
                     current.hasCollection,
                     hasCollectionAttr || hasCollectionAttr2,
-                    current.hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
+                    current.hasCollection ? typeof(IArg).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
                     current.nullable,
                     default,
                     argGroup,
@@ -1052,7 +1066,7 @@ namespace Business.Core
                     //path,
                     use,
                     hasUse,
-                    typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType),
+                    typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || true == use?.Token,
                     //item.Value.CommandAttr.OnlyName,
                     GetMethodTypeFullName(parameterType),
                     current.outType.FullName.Replace('+', '.'),
@@ -1102,9 +1116,9 @@ namespace Business.Core
 
         internal static CurrentType GetCurrentType(System.Type type)
         {
-            var hasIArg = typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType);
+            var hasIArg = typeof(IArg<>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType) || typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out iArgOutType);
 
-            var current = new CurrentType { hasIArg = hasIArg, outType = hasIArg ? iArgOutType[0] : type, inType = hasIArg ? iArgOutType[1] : type };
+            var current = new CurrentType { hasIArg = hasIArg, outType = hasIArg ? iArgOutType[0] : type, inType = (hasIArg && 2 == iArgOutType.Length) ? iArgOutType[1] : type };
             var nullType = System.Nullable.GetUnderlyingType(current.outType);
             if (null != nullType)
             {
@@ -1283,7 +1297,7 @@ namespace Business.Core
                     current.hasDictionary,
                     current.hasCollection,
                     hasCollectionAttr || hasCollectionAttr2,
-                    current.hasCollection ? typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
+                    current.hasCollection ? typeof(IArg).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
                     current.nullable,
                     accessor,
                     argGroup,
@@ -1297,7 +1311,7 @@ namespace Business.Core
                     //path2,
                     use,
                     hasUse,
-                    typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType),
+                    typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || true == use?.Token,
                     GetMethodTypeFullName(memberType),
                     $"{type.FullName.Replace('+', '.')}.{item.Name}",
                     memberDefinition,
@@ -1485,30 +1499,30 @@ namespace Business.Core
 
         public virtual dynamic Call(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
 
-        public virtual Result Call<Result>(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
+        public virtual Result Call<Result>(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
 
-        public virtual IResult CallIResult(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
+        public virtual IResult CallIResult(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
 
-        public virtual dynamic Call(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null)
+        public virtual dynamic Call(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null)
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? Bind.ErrorCmd(resultTypeDefinition, cmd) : command.Call(args, useObj);
+            return null == command ? Bind.ErrorCmd(resultTypeDefinition, cmd) : command.Call(parameters, useObj);
         }
 
-        public virtual Result Call<Result>(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
+        public virtual Result Call<Result>(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
-        public virtual IResult CallIResult(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
+        public virtual IResult CallIResult(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
-        public virtual dynamic Call(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
+        public virtual dynamic Call(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
         #endregion
 
         #region Call
 
-        public virtual Result Call<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
+        public virtual Result Call<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
 
-        public virtual IResult CallIResult(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, UseEntry[] useObj = null, string group = null) => Call(cmd, args, useObj, group);
+        public virtual IResult CallIResult(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
 
         public virtual dynamic Call(string cmd, System.Collections.Generic.IDictionary<string, string> args, UseEntry[] useObj, string group)
         {
@@ -1517,11 +1531,11 @@ namespace Business.Core
             return null == command ? Bind.ErrorCmd(resultTypeDefinition, cmd) : command.Call(args, useObj);
         }
 
-        public virtual Result Call<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
+        public virtual Result Call<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
-        public virtual IResult CallIResult(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
+        public virtual IResult CallIResult(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
-        public virtual dynamic Call(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => Call(cmd, args, useObj, group);
+        public virtual dynamic Call(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
         #endregion
 
@@ -1533,43 +1547,43 @@ namespace Business.Core
 
         public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] args = null, UseEntry[] useObj = null, string group = null)
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null)
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(args, useObj);
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
         }
 
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
         #endregion
 
         #region AsyncCallUse
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, System.Collections.Generic.IDictionary<string, string> args, UseEntry[] useObj, string group)
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, System.Collections.Generic.IDictionary<string, string> parameters, UseEntry[] useObj, string group)
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(args, useObj);
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
         }
 
-        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<Result> AsyncCall<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
-        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, System.Collections.Generic.IDictionary<string, string> args = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, args, useObj, group);
+        public virtual async System.Threading.Tasks.Task<dynamic> AsyncCall(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
         #endregion
     }
@@ -1590,11 +1604,11 @@ namespace Business.Core
 
         public virtual object[] GetArgsUse(UseEntry[] useObj, System.Action<object[], int, Args> action)
         {
-            var args = new object[Meta.Args.Count];
+            var parameters = new object[Meta.Args.Count];
 
-            if (0 < args.Length)
+            if (0 < parameters.Length)
             {
-                for (int i = 0; i < args.Length; i++)
+                for (int i = 0; i < parameters.Length; i++)
                 {
                     var arg = Meta.Args[i];
 
@@ -1608,7 +1622,7 @@ namespace Business.Core
                                 {
                                     if (use.ParameterName?.Contains(arg.Name, System.StringComparer.InvariantCultureIgnoreCase) ?? false)
                                     {
-                                        args[i] = use.Value;
+                                        parameters[i] = use.Value;
                                         break;
                                     }
                                 }
@@ -1619,7 +1633,7 @@ namespace Business.Core
                                 {
                                     if (Meta.UseTypePosition[i].IsAssignableFrom(use.Type))
                                     {
-                                        args[i] = use.Value;
+                                        parameters[i] = use.Value;
                                         break;
                                     }
                                 }
@@ -1633,40 +1647,40 @@ namespace Business.Core
                         continue;
                     }
 
-                    action(args, i, arg);
+                    action(parameters, i, arg);
                 }
             }
 
-            return args;
+            return parameters;
         }
 
-        public virtual object[] GetAgs(object[] args, params UseEntry[] useObj)
+        public virtual object[] GetAgs(object[] parameters, params UseEntry[] useObj)
         {
             int l = 0;
             return GetArgsUse(useObj, (args2, i, arg) =>
             {
-                if (null != args && 0 < args.Length)
+                if (null != parameters && 0 < parameters.Length)
                 {
                     //if (args.Length < l)
                     //{
                     //    break;
                     //}
 
-                    if (l < args.Length)
+                    if (l < parameters.Length)
                     {
-                        args2[i] = args[l++];
+                        args2[i] = parameters[l++];
                     }
                 }
             });
         }
 
-        public virtual object[] GetAgs(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj)
+        public virtual object[] GetAgs(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj)
         {
             return GetArgsUse(useObj, (args2, i, arg) =>
             {
-                if (null != args && 0 < args.Count)
+                if (null != parameters && 0 < parameters.Count)
                 {
-                    if (args.TryGetValue(arg.Name, out string value))
+                    if (parameters.TryGetValue(arg.Name, out string value))
                     {
                         args2[i] = value;
                     }
@@ -1676,17 +1690,17 @@ namespace Business.Core
 
         #region Call
 
-        public dynamic Call(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => Syn(GetAgs(args, useObj));
+        public dynamic Call(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj));
 
-        public Result Call<Result>(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => Call(args, useObj);
+        public Result Call<Result>(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => Call(parameters, useObj);
 
-        public IResult CallIResult(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => Call(args, useObj);
+        public IResult CallIResult(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => Call(parameters, useObj);
 
-        dynamic Syn(object[] args)
+        dynamic Syn(object[] parameters)
         {
             try
             {
-                return call(args);
+                return call(parameters);
             }
             catch (System.Exception ex)
             {
@@ -1694,38 +1708,38 @@ namespace Business.Core
             }
         }
 
-        public dynamic Call(object[] args, params UseEntry[] useObj) => Syn(GetAgs(args, useObj));
+        public dynamic Call(object[] parameters, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj));
 
-        public Result Call<Result>(object[] args, params UseEntry[] useObj) => Call(args, useObj);
+        public Result Call<Result>(object[] parameters, params UseEntry[] useObj) => Call(parameters, useObj);
 
-        public IResult CallIResult(object[] args, params UseEntry[] useObj) => Call(args, useObj);
+        public IResult CallIResult(object[] parameters, params UseEntry[] useObj) => Call(parameters, useObj);
 
         #endregion
 
         #region AsyncCall
 
-        public async System.Threading.Tasks.Task<dynamic> AsyncCall(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => await Async(GetAgs(args, useObj));
+        public async System.Threading.Tasks.Task<dynamic> AsyncCall(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj));
 
-        public async System.Threading.Tasks.Task<Result> AsyncCall<Result>(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
+        public async System.Threading.Tasks.Task<Result> AsyncCall<Result>(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
 
-        public async System.Threading.Tasks.Task<IResult> AsyncIResult(System.Collections.Generic.IDictionary<string, string> args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
+        public async System.Threading.Tasks.Task<IResult> AsyncIResult(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
 
-        async System.Threading.Tasks.Task<dynamic> Async(object[] args)
+        async System.Threading.Tasks.Task<dynamic> Async(object[] parameters)
         {
             try
             {
                 if (Meta.HasAsync)
                 {
-                    return await call(args);
+                    return await call(parameters);
                 }
                 else
                 {
                     using (var task = System.Threading.Tasks.Task.Factory.StartNew(obj =>
                     {
                         var obj2 = (dynamic)obj;
-                        return obj2.call(obj2.args);
+                        return obj2.call(obj2.parameters);
 
-                    }, new { call, args }))
+                    }, new { call, parameters }))
                     {
                         return await task;
                     }
@@ -1737,11 +1751,11 @@ namespace Business.Core
             }
         }
 
-        public async System.Threading.Tasks.Task<dynamic> AsyncCall(object[] args, params UseEntry[] useObj) => await Async(GetAgs(args, useObj));
+        public async System.Threading.Tasks.Task<dynamic> AsyncCall(object[] parameters, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj));
 
-        public async System.Threading.Tasks.Task<Result> AsyncCall<Result>(object[] args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
+        public async System.Threading.Tasks.Task<Result> AsyncCall<Result>(object[] parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
 
-        public async System.Threading.Tasks.Task<IResult> AsyncIResult(object[] args, params UseEntry[] useObj) => await AsyncCall(args, useObj);
+        public async System.Threading.Tasks.Task<IResult> AsyncIResult(object[] parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
 
         #endregion
 

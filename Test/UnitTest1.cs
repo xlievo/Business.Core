@@ -2046,5 +2046,5 @@ public class Arg<OutType> : Business.Core.Arg<OutType>
     public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
     public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
     public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
-    public override async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.DeserializeAsync<OutType>(value);
+    public override async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
 }

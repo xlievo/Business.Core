@@ -20,7 +20,7 @@ namespace Business.Core.Annotations
             {
                 return this.ResultCreate(await arg.ToOut(value));
             }
-            catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} MessagePack deserialize error"); }
+            catch(System.Exception ex) { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} MessagePack deserialize error. {ex.Message}"); }
         }
     }
 
@@ -139,7 +139,7 @@ namespace Business.Core.Annotations
 
             //..1: check 2: convert
 
-            var session = new Session { Account = "test" };
+            var session = new Session { Account = key };
 
             return this.ResultCreate(session);//return out session
         }

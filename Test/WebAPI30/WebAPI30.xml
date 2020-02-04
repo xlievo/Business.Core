@@ -21,7 +21,7 @@
             bbb
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Token,Args.Test001,Arg{System.Nullable{System.DateTime}},Business.Core.Annotations.HttpFile,System.Decimal,System.Int32,System.Boolean)">
+        <member name="M:BusinessMember2.Test001(Token,Args.Test001,System.Nullable{System.DateTime},Business.Core.Annotations.HttpFile,System.Decimal,System.Int32,System.Boolean)">
             <summary>
             test doc Test001
             and Test001
@@ -35,7 +35,7 @@
             <param name="bbb"></param>
             <returns>rrrrrr</returns>
         </member>
-        <member name="M:BusinessMember2.Test002(Token,Arg{Args.Test001},System.Decimal,Arg{System.Collections.Generic.Dictionary{System.String,System.Object}})">
+        <member name="M:BusinessMember2.Test002(Token,Args.Test001,System.Decimal,System.Collections.Generic.Dictionary{System.String,System.Object})">
             <summary>
             222
             </summary>
@@ -44,7 +44,7 @@
             <param name="mm"></param>
             <returns>test return!!!</returns>
         </member>
-        <member name="M:BusinessMember2.Test003(Token,Arg{Args.Test001},System.Decimal)">
+        <member name="M:BusinessMember2.Test003(Token,Args.Test001,System.Decimal)">
             <summary>
             
             </summary>
@@ -53,7 +53,7 @@
             <param name="mm"></param>
             <returns></returns>
         </member>
-        <member name="M:BusinessMember2.Test007(Arg{Args.Test001},Arg{System.Collections.Generic.List{System.String}})">
+        <member name="M:BusinessMember2.Test007(Args.Test001,System.Collections.Generic.List{System.String})">
             <summary>
             
             </summary>

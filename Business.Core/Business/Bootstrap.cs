@@ -304,18 +304,18 @@ namespace Business.Core.Utils
         /// Inject a parameter type, depending on the parameter type
         /// </summary>
         /// <param name="bootstrap"></param>
-        /// <param name="argType"></param>
+        /// <param name="parameterType"></param>
         /// <returns></returns>
-        public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params System.Type[] argType) where Bootstrap : IBootstrap => Use(bootstrap, c => c.UseType(argType));
+        public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params System.Type[] parameterType) where Bootstrap : IBootstrap => Use(bootstrap, c => c.UseType(parameterType));
 
         /// <summary>
         /// Inject a parameter type, depending on the parameter name
         /// </summary>
         /// <typeparam name="Bootstrap"></typeparam>
         /// <param name="bootstrap"></param>
-        /// <param name="argName"></param>
+        /// <param name="parameterName"></param>
         /// <returns></returns>
-        public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params string[] argName) where Bootstrap : IBootstrap => Use(bootstrap, c => c.UseType(argName));
+        public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => c.UseType(parameterName));
 
         /// <summary>
         /// Set the log characteristics of a parameter, depending on the parameter type
@@ -331,18 +331,18 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="bootstrap"></param>
         /// <param name="logger"></param>
-        /// <param name="argName"></param>
+        /// <param name="parameterName"></param>
         /// <returns></returns>
-        public static Bootstrap LoggerSet<Bootstrap>(this Bootstrap bootstrap, Annotations.LoggerAttribute logger, params string[] argName) where Bootstrap : IBootstrap => Use(bootstrap, c => c.LoggerSet(logger, argName));
+        public static Bootstrap LoggerSet<Bootstrap>(this Bootstrap bootstrap, Annotations.LoggerAttribute logger, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => c.LoggerSet(logger, parameterName));
 
         /// <summary>
         /// Set a parameter's ignore feature, depending on the parameter name
         /// </summary>
         /// <param name="bootstrap"></param>
         /// <param name="ignore"></param>
-        /// <param name="argName"></param>
+        /// <param name="parameterName"></param>
         /// <returns></returns>
-        public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params string[] argName) where Bootstrap : IBootstrap => Use(bootstrap, c => c.IgnoreSet(ignore, argName));
+        public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => c.IgnoreSet(ignore, parameterName));
 
         public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params System.Type[] argType) where Bootstrap : IBootstrap => Use(bootstrap, c => c.IgnoreSet(ignore, argType));
 

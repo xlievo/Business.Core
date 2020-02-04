@@ -86,13 +86,13 @@ namespace Business.Core.Utils
             }
         }
 
-        public static Business UseType<Business>(this Business business, params System.Type[] argType) where Business : IBusiness
+        public static Business UseType<Business>(this Business business, params System.Type[] parameterType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
-            if (null == argType) { return business; }
+            if (null == parameterType) { return business; }
 
-            foreach (var item in argType)
+            foreach (var item in parameterType)
             {
                 if (null == item || business.Configer.UseTypes.ContainsKey(item.FullName)) { continue; }
 
@@ -162,23 +162,24 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static Business UseType<Business>(this Business business, params string[] argName) where Business : IBusiness
+        public static Business UseType<Business>(this Business business, params string[] parameterName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
-            if (null == argName) { return business; }
+            if (null == parameterName) { return business; }
 
-            var argName2 = argName.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+            var argName = parameterName.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
 
-            if (0 == argName2.Count) { return business; }
+            if (0 == argName.Count) { return business; }
 
+            //foreach (var item in business.Configer.MetaData.Values)
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
                 foreach (var arg in item.Args)
                 {
                     var type2 = (arg.HasIArg && !arg.HasCast) ? arg.IArgInType : arg.LastType;
 
-                    if (!argName2.Contains(arg.Name) || !item.UseTypePosition.dictionary.TryAdd(arg.Position, type2))
+                    if (!argName.Contains(arg.Name) || !item.UseTypePosition.dictionary.TryAdd(arg.Position, type2))
                     {
                         continue;
                     }
@@ -878,15 +879,15 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static Business LoggerSet<Business>(this Business business, Annotations.LoggerAttribute logger, params string[] argName) where Business : IBusiness
+        public static Business LoggerSet<Business>(this Business business, Annotations.LoggerAttribute logger, params string[] parameterName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
-            if (null == logger || null == argName) { return business; }
+            if (null == logger || null == parameterName) { return business; }
 
-            var argName2 = argName.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+            var argName = parameterName.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
 
-            if (0 == argName2.Count) { return business; }
+            if (0 == argName.Count) { return business; }
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
@@ -896,7 +897,7 @@ namespace Business.Core.Utils
 
                 logger.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
 
-                System.Threading.Tasks.Parallel.ForEach(argName2, name =>
+                System.Threading.Tasks.Parallel.ForEach(argName, name =>
                 {
                     foreach (var group in groups)
                     {
@@ -958,15 +959,15 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static Business IgnoreSet<Business>(this Business business, Annotations.Ignore ignore, params string[] argName) where Business : IBusiness
+        public static Business IgnoreSet<Business>(this Business business, Annotations.Ignore ignore, params string[] parameterName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
-            if (null == ignore || null == argName) { return business; }
+            if (null == ignore || null == parameterName) { return business; }
 
-            var argName2 = argName.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+            var argName = parameterName.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
 
-            if (0 == argName2.Count) { return business; }
+            if (0 == argName.Count) { return business; }
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
@@ -976,7 +977,7 @@ namespace Business.Core.Utils
 
                 ignore.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
 
-                System.Threading.Tasks.Parallel.ForEach(argName2, name =>
+                System.Threading.Tasks.Parallel.ForEach(argName, name =>
                 {
                     foreach (var group in groups)
                     {
@@ -2268,7 +2269,7 @@ namespace Business.Core.Utils
         }
         */
 
-        public static string[] TryJsonDeserializeObjectArray(this string value, System.Text.Json.JsonSerializerOptions options = null)
+        public static string[] TryJsonDeserializeStringArray(this string value, System.Text.Json.JsonSerializerOptions options = null)
         {
             if (string.IsNullOrWhiteSpace(value))
             {

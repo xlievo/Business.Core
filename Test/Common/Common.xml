@@ -4,11 +4,33 @@
         <name>Common</name>
     </assembly>
     <members>
-        <member name="T:Arg`1">
+        <member name="T:Arg2`1">
             <summary>
             This is a parameter package, used to transform parameters
             </summary>
             <typeparam name="OutType"></typeparam>
+        </member>
+        <member name="P:Arg2`1.Out">
+            <summary>
+            The final output object
+            </summary>
+        </member>
+        <member name="P:Arg2`1.In">
+            <summary>
+            The first input object
+            </summary>
+        </member>
+        <member name="M:Arg2`1.ToBytes">
+            <summary>
+            byte format Out
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Arg2`1.ToString">
+            <summary>
+            JSON format Out
+            </summary>
+            <returns></returns>
         </member>
         <member name="P:ReceiveData.a">
             <summary>
@@ -48,11 +70,6 @@
         <member name="T:Session">
             <summary>
             my session
-            </summary>
-        </member>
-        <member name="T:SessionArg">
-            <summary>
-            Session arg object
             </summary>
         </member>
         <member name="M:Common.InitBusiness(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.String)">

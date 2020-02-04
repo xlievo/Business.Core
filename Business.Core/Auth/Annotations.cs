@@ -102,7 +102,10 @@ namespace Business.Core.Annotations
         {
             var attributes = new System.Collections.Generic.List<AttributeBase>(member.GetAttributes<AttributeBase>());
             attributes.AddRange(member.ParameterType.GetAttributes<AttributeBase>());
-            attributes.AddRange(type.GetAttributes<AttributeBase>());
+            if (!member.ParameterType.Equals(type))
+            {
+                attributes.AddRange(type.GetAttributes<AttributeBase>());
+            }
             attributes.ForEach(c => c.Meta.Declaring = MetaData.DeclaringType.Parameter);
             return attributes;
         }
@@ -432,6 +435,8 @@ namespace Business.Core.Annotations
         /// Use parameter names to correspond to injection objects
         /// </summary>
         public bool ParameterName { get; private set; }
+
+        public bool Token { get; set; }
     }
 
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = false, Inherited = true)]

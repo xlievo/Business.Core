@@ -184,18 +184,39 @@ namespace Business.Core.Document
     {
         public string Host { get; set; }
 
+        /// <summary>
+        /// Whether to render the Debug element in the UI
+        /// </summary>
         public bool Debug { get; set; }
 
+        /// <summary>
+        /// Whether to render the Benchmark element in the UI
+        /// </summary>
         public bool Benchmark { get; set; }
 
+        /// <summary>
+        /// Whether to render the Testing element in the UI
+        /// </summary>
         public bool Testing { get; set; }
 
+        /// <summary>
+        /// Generate only documents for the specified group
+        /// </summary>
         public string Group { get; set; }
 
+        /// <summary>
+        /// Currently selected group
+        /// </summary>
         public string GroupSelect { get; set; }
 
+        /// <summary>
+        /// Whether to render the Group element in the UI
+        /// </summary>
         public bool GroupEnable { get; set; }
 
+        /// <summary>
+        /// Whether to render the SetToken element in the UI
+        /// </summary>
         public bool SetToken { get; set; }
     }
 

@@ -17,7 +17,6 @@ using Business.Core;
 using Business.Core.Utils;
 using Business.Core.Annotations;
 using Business.Core.Result;
-using Business.Utils;
 using Business;
 using Business.Core.Document;
 
@@ -27,12 +26,46 @@ using Business.Core.Document;
 /// This is a parameter package, used to transform parameters
 /// </summary>
 /// <typeparam name="OutType"></typeparam>
-public class Arg<OutType> : Business.Core.Arg<OutType>
+//public class Arg<OutType> : Business.Core.Arg<OutType>
+//{
+//    public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
+//    public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
+//    public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
+//    public override async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
+//}
+
+
+/// <summary>
+/// This is a parameter package, used to transform parameters
+/// </summary>
+/// <typeparam name="OutType"></typeparam>
+public struct Arg<OutType> : IArg<OutType>
 {
-    public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
-    public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
-    public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
-    public override async ValueTask<dynamic> ToOut(dynamic value) => await MessagePack.MessagePackSerializer.DeserializeAsync<OutType>(value);
+    dynamic IArg.Out { get => this.Out; set => this.Out = value; }
+
+    /// <summary>
+    /// The final output object
+    /// </summary>
+    public OutType Out { get; set; }
+
+    /// <summary>
+    /// The first input object
+    /// </summary>
+    public dynamic In { get; set; }
+
+    /// <summary>
+    /// byte format Out
+    /// </summary>
+    /// <returns></returns>
+    public byte[] ToBytes() => throw new System.NotImplementedException();
+
+    /// <summary>
+    /// JSON format Out
+    /// </summary>
+    /// <returns></returns>
+    public override string ToString() => Help.JsonSerialize(Out);
+
+    public async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
 }
 
 public class ResultObject<Type> : Business.Core.Result.ResultObject<Type>
@@ -115,17 +148,13 @@ public class Token : Business.Core.Auth.Token
 /// my session
 /// </summary>
 [SessionCheck]
-public class Session
+[Use(true, Token = true)]
+public struct Session
 {
     public string Account { get; set; }
     public int Nick { get; set; }
     public List<string> Roles { get; set; }
 }
-
-/// <summary>
-/// Session arg object
-/// </summary>
-public class SessionArg : Arg<Session, Token> { }
 
 [Command(Group = "j")]
 [@JsonArg(Group = "j")]
@@ -151,8 +180,6 @@ public abstract class BusinessBase : BusinessBase<ResultObject<object>, Arg<obje
                 //}).ToList();
 
                 Console.WriteLine(x.JsonSerialize());
-
-                //System.Console.WriteLine(logs.JsonSerialize());
             }
             catch (Exception ex)
             {
@@ -198,13 +225,14 @@ public static class Common
         Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
         Console.WriteLine($"LogPath: {LogPath}");
 
-        MessagePack.Resolvers.CompositeResolver.Create(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
+        //MessagePack.Resolvers.CompositeResolver.Create(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
         //MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
+        MessagePack.MessagePackSerializer.DefaultOptions = MessagePack.Resolvers.ContractlessStandardResolver.Options;
     }
 
     static void InitRedis()
     {
-        RedisHelper.Initialization(new CSRedis.CSRedisClient("mymaster,password=123456,prefix=", new[] { "192.168.1.121:26379", "192.168.1.122:26379", "192.168.1.123:26379" }));
+        //RedisHelper.Initialization(new CSRedis.CSRedisClient("mymaster,password=123456,prefix=", new[] { "192.168.1.121:26379", "192.168.1.122:26379", "192.168.1.123:26379" }));
 
         /* https://redis.io/topics/sentinel
          * If everything appears to be normal for 30 second, the TILT mode is exited.
@@ -241,6 +269,8 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         */
     }
 
+    internal static readonly string[] ParameterNames = new string[] { "context", "socket", "httpFile" };
+
     /// <summary>
     /// Call this method after environment initialization is complete
     /// </summary>
@@ -262,9 +292,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         //InitRedis();
 
         Bootstrap.Create()
-            .UseType("context", "socket", "httpFile")
-            .IgnoreSet(new Ignore(IgnoreMode.Arg), "context", "socket", "httpFile")
-            .LoggerSet(new LoggerAttribute(canWrite: false), "context", "socket", "httpFile")
+            .UseType(ParameterNames)
+            .IgnoreSet(new Ignore(IgnoreMode.Arg), ParameterNames)
+            .LoggerSet(new LoggerAttribute(canWrite: false), ParameterNames)
             .UseDoc(docDir, new Config { Debug = true, Benchmark = true, SetToken = true, Testing = true, Group = "j", GroupSelect = "s", GroupEnable = true })
             .Build();
 
@@ -373,7 +403,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             {
                 try
                 {
-                    var receiveData = buffer.TryBinaryDeserialize<ReceiveData>();
+                    var receiveData = MessagePack.MessagePackSerializer.Deserialize<ReceiveData>(buffer);
 
                     dynamic result;
 
@@ -407,15 +437,16 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                             Key = receiveData.t,
                             Remote = string.Format("{0}:{1}", context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
                             Callback = receiveData.b
-                        })
+                        }, "session")
                         );
 
+                        // Socket set callback
                         if (null != result)
                         {
                             if (typeof(IResult).IsAssignableFrom(result.GetType()))
                             {
                                 var result2 = result as IResult;
-                                result2.Callback = receiveData.b;
+                                result2.Callback = receiveData.b ?? receiveData.c;
 
                                 var data = ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
                                 /* test
@@ -534,10 +565,10 @@ public class BusinessController : Controller
 
         #endregion
 
-        string c, t, d, g, b = null, value;
+        string c, t, d, g = null, value;
         g = "j";//fixed grouping
         //g = route.Group;
-        IDictionary<string, string> args;
+        IDictionary<string, string> parameters;
 
         switch (this.Request.Method)
         {
@@ -548,14 +579,14 @@ public class BusinessController : Controller
                 //d = this.Request.Query["d"];
                 //g = this.Request.Query["g"];
                 //b = this.Request.Query["b"];
-                args = this.Request.Query.ToDictionary(k => k.Key, v =>
+                parameters = this.Request.Query.ToDictionary(k => k.Key, v =>
                 {
                     var v2 = (string)v.Value;
                     return !string.IsNullOrEmpty(v2) ? v2 : null;
                 });
-                c = route.Command ?? (args.TryGetValue("c", out value) ? value : null);
-                t = args.TryGetValue("t", out value) ? value : null;
-                d = args.TryGetValue("d", out value) ? value : null;
+                c = route.Command ?? (parameters.TryGetValue("c", out value) ? value : null);
+                t = parameters.TryGetValue("t", out value) ? value : null;
+                d = parameters.TryGetValue("d", out value) ? value : null;
                 break;
             case "POST":
                 {
@@ -567,14 +598,14 @@ public class BusinessController : Controller
                     //d = form["d"];
                     //g = form["g"];
                     //b = form["b"];
-                    args = (await this.Request.ReadFormAsync()).ToDictionary(k => k.Key, v =>
+                    parameters = (await this.Request.ReadFormAsync()).ToDictionary(k => k.Key, v =>
                     {
                         var v2 = (string)v.Value;
                         return !string.IsNullOrEmpty(v2) ? v2 : null;
                     });
-                    c = route.Command ?? (args.TryGetValue("c", out value) ? value : null);
-                    t = args.TryGetValue("t", out value) ? value : null;
-                    d = args.TryGetValue("d", out value) ? value : null;
+                    c = route.Command ?? (parameters.TryGetValue("c", out value) ? value : null);
+                    t = parameters.TryGetValue("t", out value) ? value : null;
+                    d = parameters.TryGetValue("d", out value) ? value : null;
                 }
                 break;
             default: return this.NotFound();
@@ -605,41 +636,29 @@ public class BusinessController : Controller
             return Help.ErrorCmd(business, c);
         }
 
-        var result = null != route.Command ?
-                await cmd.AsyncCall(
-                    //the data of this request, allow null.
-                    args,
-                    //the incoming use object
-                    new UseEntry(this, "context", "httpFile"), //context
-                    new UseEntry(new Token //token
-                    {
-                        Key = t,
-                        Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
-                        Path = this.Request.Path.Value,
-                        //Callback = b
-                    })) :
-                await cmd.AsyncCall(
-                    //the data of this request, allow null.
-                    cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeObjectArray(),
-                    //the incoming use object
-                    new UseEntry(this, "context", "httpFile"), //context
-                    new UseEntry(new Token //token
-                    {
-                        Key = t,
-                        Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
-                        Path = this.Request.Path.Value,
-                        //Callback = b
-                    }));
-
-        if (!object.Equals(null, result))
+        var token = new Token //token
         {
-            if (typeof(IResult).IsAssignableFrom(result.GetType()))
-            {
-                var result2 = result as IResult;
-                result2.Callback = b;
-                return result2;
-            }
-        }
+            Key = t,
+            Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
+            Path = this.Request.Path.Value,
+            //Callback = b
+        };
+
+        var result = null != route.Command ?
+                // Normal routing mode
+                await cmd.AsyncCall(
+                    //the data of this request, allow null.
+                    parameters,
+                    //the incoming use object
+                    new UseEntry(this, Common.ParameterNames), //context
+                    new UseEntry(token, "session")) :
+                // Framework routing mode
+                await cmd.AsyncCall(
+                    //the data of this request, allow null.
+                    cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeStringArray(),
+                    //the incoming use object
+                    new UseEntry(this, Common.ParameterNames), //context
+                    new UseEntry(token, "session"));
 
         return result;
     }

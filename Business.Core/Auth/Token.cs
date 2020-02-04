@@ -32,7 +32,7 @@ namespace Business.Core.Auth
     [Annotations.Use]
     public class Token : IToken
     {
-        public static implicit operator Token(string value) => new Token { Key = value };
+        //public static implicit operator Token(string value) => new Token { Key = value };
         //public static implicit operator Token(byte[] value) => Utils.Help.TryProtoBufDeserialize<Token>(value);
 
         /// <summary>
@@ -41,16 +41,15 @@ namespace Business.Core.Auth
         /// <returns></returns>
         public override string ToString() => Utils.Help.JsonSerialize(this);
 
-        /// <summary>
-        /// ProtoBuf format
-        /// </summary>
-        /// <returns></returns>
-        public byte[] ToBytes() => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
+        ///// <summary>
+        ///// ProtoBuf format
+        ///// </summary>
+        ///// <returns></returns>
+        //public byte[] ToBytes() => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
 
         /// <summary>
         /// The user token
         /// </summary>
-        //[ProtoBuf.ProtoMember(1, Name = "K")]
         //[Newtonsoft.Json.JsonProperty(PropertyName = "K")]
         [System.Text.Json.Serialization.JsonPropertyName("K")]
         public virtual string Key { get; set; }
@@ -58,7 +57,6 @@ namespace Business.Core.Auth
         /// <summary>
         /// Remote IP address
         /// </summary>
-        //[ProtoBuf.ProtoMember(2, Name = "R")]
         //[Newtonsoft.Json.JsonProperty(PropertyName = "R")]
         [System.Text.Json.Serialization.JsonPropertyName("R")]
         public virtual string Remote { get; set; }
