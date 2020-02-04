@@ -43,7 +43,7 @@ Welcome Pull out to branch, but if you have a good idea, I hope it will be discu
 
 This library does not support AOT compilation mode, but can run on Xamarin.Android.
 
-### Before you begin, you should be familiar with 2 interface definitions
+### Before you begin, you should be familiar with 1 interface definitions
 
 ```C#
 public interface IResult
@@ -68,19 +68,6 @@ public interface IResult
     /// Whether there is value
     /// </summary>
     System.Boolean HasData { get; }
-}
-
-public interface IArg
-{
-    /// <summary>
-    /// The first input object
-    /// </summary>
-    dynamic In { get; set; }
-
-    /// <summary>
-    /// The final output object
-    /// </summary>
-    dynamic Out { get; set; }
 }
 ```
 
