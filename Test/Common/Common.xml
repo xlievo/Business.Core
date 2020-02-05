@@ -4,55 +4,141 @@
         <name>Common</name>
     </assembly>
     <members>
-        <member name="T:Arg2`1">
+        <member name="T:Arg`1">
             <summary>
             This is a parameter package, used to transform parameters
             </summary>
             <typeparam name="OutType"></typeparam>
         </member>
-        <member name="P:Arg2`1.Out">
+        <member name="P:Arg`1.Out">
             <summary>
             The final output object
             </summary>
         </member>
-        <member name="P:Arg2`1.In">
+        <member name="P:Arg`1.In">
             <summary>
             The first input object
             </summary>
         </member>
-        <member name="M:Arg2`1.ToBytes">
+        <member name="M:Arg`1.ToBytes">
             <summary>
             byte format Out
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Arg2`1.ToString">
+        <member name="M:Arg`1.ToString">
             <summary>
             JSON format Out
             </summary>
             <returns></returns>
         </member>
-        <member name="P:ReceiveData.a">
+        <member name="T:ResultObject`1">
+            <summary>
+            result
+            </summary>
+            <typeparam name="Type"></typeparam>
+        </member>
+        <member name="M:ResultObject`1.#ctor(System.Type,`0,System.Int32,System.String,System.Type,System.Boolean)">
+            <summary>
+            Activator.CreateInstance
+            </summary>
+            <param name="dataType"></param>
+            <param name="data"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <param name="genericDefinition"></param>
+            <param name="checkData"></param>
+        </member>
+        <member name="M:ResultObject`1.#ctor(`0,System.Int32,System.String)">
+            <summary>
+            MessagePack.MessagePackSerializer.Serialize(this)
+            </summary>
+            <param name="data"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+        </member>
+        <member name="P:ResultObject`1.State">
+            <summary>
+            The results of the state is greater than or equal to 1: success, equal to 0: system level exceptions, less than 0: business class error.
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.Message">
+            <summary>
+            Success can be null
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.Business#Core#Result#IResult#Data">
+            <summary>
+            Specific dynamic data objects
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.Data">
+            <summary>
+            Specific Byte/Json data objects
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.HasData">
+            <summary>
+            Whether there is value
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.Callback">
+            <summary>
+            Gets the token of this result, used for callback
+            </summary>
+        </member>
+        <member name="M:ResultObject`1.ToString">
+            <summary>
+            Json format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ResultObject`1.ToDataString">
+            <summary>
+            Json format Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ResultObject`1.ToBytes">
+            <summary>
+            ProtoBuf format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ResultObject`1.ToDataBytes">
+            <summary>
+            ProtoBuf format Data
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ResultObject`1.Get``1">
+            <summary>
+            Get generic data
+            </summary>
+            <typeparam name="DataType">Generic type</typeparam>
+            <returns></returns>
+        </member>
+        <member name="F:ReceiveData.a">
             <summary>
             business
             </summary>
         </member>
-        <member name="P:ReceiveData.c">
+        <member name="F:ReceiveData.c">
             <summary>
             cmd
             </summary>
         </member>
-        <member name="P:ReceiveData.t">
+        <member name="F:ReceiveData.t">
             <summary>
             token
             </summary>
         </member>
-        <member name="P:ReceiveData.d">
+        <member name="F:ReceiveData.d">
             <summary>
             data
             </summary>
         </member>
-        <member name="P:ReceiveData.b">
+        <member name="F:ReceiveData.b">
             <summary>
             callback
             </summary>

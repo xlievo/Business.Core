@@ -22,18 +22,19 @@ using Business.Core.Document;
 
 #region Socket Support
 
+/*
 /// <summary>
 /// This is a parameter package, used to transform parameters
 /// </summary>
 /// <typeparam name="OutType"></typeparam>
-//public class Arg<OutType> : Business.Core.Arg<OutType>
-//{
-//    public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
-//    public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
-//    public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
-//    public override async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
-//}
-
+public class Arg<OutType> : Business.Core.Arg<OutType>
+{
+    public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
+    public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
+    public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
+    public override async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
+}
+*/
 
 /// <summary>
 /// This is a parameter package, used to transform parameters
@@ -57,7 +58,7 @@ public struct Arg<OutType> : IArg<OutType>
     /// byte format Out
     /// </summary>
     /// <returns></returns>
-    public byte[] ToBytes() => throw new System.NotImplementedException();
+    public byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
 
     /// <summary>
     /// JSON format Out
@@ -68,6 +69,7 @@ public struct Arg<OutType> : IArg<OutType>
     public async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
 }
 
+/*
 public class ResultObject<Type> : Business.Core.Result.ResultObject<Type>
 {
     public static readonly System.Type ResultTypeDefinition = typeof(ResultObject<>).GetGenericTypeDefinition();
@@ -89,33 +91,157 @@ public class ResultObject<Type> : Business.Core.Result.ResultObject<Type>
 
     public override byte[] ToDataBytes() => MessagePack.MessagePackSerializer.Serialize(this.Data);
 }
+*/
+
+/// <summary>
+/// result
+/// </summary>
+/// <typeparam name="Type"></typeparam>
+public struct ResultObject<Type> : IResult<Type>
+{
+    public static readonly System.Type ResultTypeDefinition = typeof(ResultObject<>).GetGenericTypeDefinition();
+
+    /// <summary>
+    /// Activator.CreateInstance
+    /// </summary>
+    /// <param name="dataType"></param>
+    /// <param name="data"></param>
+    /// <param name="state"></param>
+    /// <param name="message"></param>
+    /// <param name="genericDefinition"></param>
+    /// <param name="checkData"></param>
+    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericDefinition = null, bool checkData = true)
+    {
+        this.DataType = dataType;
+        this.Data = data;
+        this.State = state;
+        this.Message = message;
+        this.HasData = checkData ? !object.Equals(null, data) : false;
+        this.Callback = default;
+
+        this.GenericDefinition = genericDefinition;
+    }
+
+    /// <summary>
+    /// MessagePack.MessagePackSerializer.Serialize(this)
+    /// </summary>
+    /// <param name="data"></param>
+    /// <param name="state"></param>
+    /// <param name="message"></param>
+    public ResultObject(Type data, int state = 1, string message = null)
+    {
+        this.Data = data;
+        this.State = state;
+        this.Message = message;
+        this.HasData = !object.Equals(null, data);
+
+        this.Callback = null;
+        this.DataType = null;
+        this.GenericDefinition = null;
+    }
+
+    /// <summary>
+    /// The results of the state is greater than or equal to 1: success, equal to 0: system level exceptions, less than 0: business class error.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("S")]
+    public int State { get; set; }
+
+    /// <summary>
+    /// Success can be null
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("M")]
+    public string Message { get; set; }
+
+    /// <summary>
+    /// Specific dynamic data objects
+    /// </summary>
+    dynamic IResult.Data { get => Data; }
+
+    /// <summary>
+    /// Specific Byte/Json data objects
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("D")]
+    public Type Data { get; set; }
+
+    /// <summary>
+    /// Whether there is value
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("H")]
+    public bool HasData { get; set; }
+
+    /// <summary>
+    /// Gets the token of this result, used for callback
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [System.Text.Json.Serialization.JsonPropertyName("B")]
+    public string Callback { get; set; }
+
+    [MessagePack.IgnoreMember]
+    [System.Text.Json.Serialization.JsonIgnore]
+    public System.Type DataType { get; set; }
+
+    [MessagePack.IgnoreMember]
+    [System.Text.Json.Serialization.JsonIgnore]
+    public System.Type GenericDefinition { get; }
+
+    /// <summary>
+    /// Json format
+    /// </summary>
+    /// <returns></returns>
+    public override string ToString() => Help.JsonSerialize(this);
+
+    /// <summary>
+    /// Json format Data
+    /// </summary>
+    /// <returns></returns>
+    public string ToDataString() => Help.JsonSerialize(this.Data);
+
+    /// <summary>
+    /// ProtoBuf format
+    /// </summary>
+    /// <returns></returns>
+    public byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
+
+    /// <summary>
+    /// ProtoBuf format Data
+    /// </summary>
+    /// <returns></returns>
+    public byte[] ToDataBytes() => MessagePack.MessagePackSerializer.Serialize(this.Data);
+
+    /// <summary>
+    /// Get generic data
+    /// </summary>
+    /// <typeparam name="DataType">Generic type</typeparam>
+    /// <returns></returns>
+    public DataType Get<DataType>() => ((IResult)this).Data;
+}
 
 public struct ReceiveData
 {
     /// <summary>
     /// business
     /// </summary>
-    public string a { get; set; }
+    public string a;
 
     /// <summary>
     /// cmd
     /// </summary>
-    public string c { get; set; }
+    public string c;
 
     /// <summary>
     /// token
     /// </summary>
-    public string t { get; set; }
+    public string t;
 
     /// <summary>
     /// data
     /// </summary>
-    public byte[] d { get; set; }
+    public byte[] d;
 
     /// <summary>
     /// callback
     /// </summary>
-    public string b { get; set; }
+    public string b;
 }
 
 #endregion
@@ -138,10 +264,20 @@ public struct Host
 /// my token
 /// </summary>
 [TokenCheck]
-public class Token : Business.Core.Auth.Token
+[Use]
+public struct Token : Business.Core.Auth.IToken
 {
+    [System.Text.Json.Serialization.JsonPropertyName("K")]
+    public string Key { get; set; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("R")]
+    public string Remote { get; set; }
+
     [System.Text.Json.Serialization.JsonPropertyName("P")]
     public string Path { get; set; }
+
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string Callback { get; set; }
 }
 
 /// <summary>
@@ -269,7 +405,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         */
     }
 
-    internal static readonly string[] ParameterNames = new string[] { "context", "socket", "httpFile" };
+    internal static readonly string[] contextParameterNames = new string[] { "context", "socket", "httpFile" };
 
     /// <summary>
     /// Call this method after environment initialization is complete
@@ -292,9 +428,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         //InitRedis();
 
         Bootstrap.Create()
-            .UseType(ParameterNames)
-            .IgnoreSet(new Ignore(IgnoreMode.Arg), ParameterNames)
-            .LoggerSet(new LoggerAttribute(canWrite: false), ParameterNames)
+            .UseType(contextParameterNames)
+            .IgnoreSet(new Ignore(IgnoreMode.Arg), contextParameterNames)
+            .LoggerSet(new LoggerAttribute(canWrite: false), contextParameterNames)
             .UseDoc(docDir, new Config { Debug = true, Benchmark = true, SetToken = true, Testing = true, Group = "j", GroupSelect = "s", GroupEnable = true })
             .Build();
 
@@ -316,14 +452,14 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         var webSocketcfg = Host.AppSettings.GetSection("WebSocket");
         var keepAliveInterval = GetValue(webSocketcfg, "KeepAliveInterval", 120);
-        ReceiveBufferSize = GetValue(webSocketcfg, "ReceiveBufferSize", 4096);
-        MaxDegreeOfParallelism = GetValue(webSocketcfg, "MaxDegreeOfParallelism", -1);
+        receiveBufferSize = GetValue(webSocketcfg, "ReceiveBufferSize", 4096);
+        maxDegreeOfParallelism = GetValue(webSocketcfg, "MaxDegreeOfParallelism", -1);
         //var allowedOrigins = webSocketcfg.GetSection("AllowedOrigins").GetChildren();
 
         var webSocketOptions = new WebSocketOptions()
         {
             KeepAliveInterval = TimeSpan.FromSeconds(keepAliveInterval),
-            ReceiveBufferSize = ReceiveBufferSize
+            ReceiveBufferSize = receiveBufferSize
         };
 
         //foreach (var item in allowedOrigins)
@@ -369,9 +505,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
     #region WebSocket
 
-    public static int ReceiveBufferSize;
+    public static int receiveBufferSize;
 
-    public static int MaxDegreeOfParallelism;
+    public static int maxDegreeOfParallelism;
 
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, WebSocket> Sockets = new System.Collections.Concurrent.ConcurrentDictionary<string, WebSocket>();
 
@@ -397,7 +533,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         try
         {
-            var buffer = new byte[ReceiveBufferSize];
+            var buffer = new byte[receiveBufferSize];
             var socketResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             while (!socketResult.CloseStatus.HasValue)
             {
@@ -500,7 +636,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
     {
         if (null == id || 0 == id.Length)
         {
-            Parallel.ForEach(Sockets, new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism }, async c =>
+            Parallel.ForEach(Sockets, new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism }, async c =>
             {
                 if (c.Value.State != WebSocketState.Open) { return; }
 
@@ -521,7 +657,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         }
         else
         {
-            Parallel.ForEach(id, new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism }, async c =>
+            Parallel.ForEach(id, new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism }, async c =>
             {
                 if (string.IsNullOrWhiteSpace(c)) { return; }
 
@@ -650,14 +786,14 @@ public class BusinessController : Controller
                     //the data of this request, allow null.
                     parameters,
                     //the incoming use object
-                    new UseEntry(this, Common.ParameterNames), //context
+                    new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session")) :
                 // Framework routing mode
                 await cmd.AsyncCall(
                     //the data of this request, allow null.
                     cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeStringArray(),
                     //the incoming use object
-                    new UseEntry(this, Common.ParameterNames), //context
+                    new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session"));
 
         return result;

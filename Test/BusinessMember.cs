@@ -106,7 +106,7 @@ public class BusinessMember : BusinessBase
         }
     }
 
-    public virtual async Task<dynamic> TestAgs001(dynamic context, Arg<Ags2> a, [Ignore(IgnoreMode.BusinessArg)]decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default, Business.Core.Auth.Token token = default)
+    public virtual async Task<dynamic> TestAgs001(dynamic context, Arg<Ags2> a, [Ignore(IgnoreMode.BusinessArg)]decimal mm = 0.0234m, [FileCheck]Arg<List<Files>, BusinessController> ss = default, Token token = default)
     {
         return await gitHubClient.GetData();
 

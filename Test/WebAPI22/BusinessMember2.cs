@@ -107,7 +107,7 @@ public class BusinessMember2 : BusinessBase
     /// <returns></returns>
     [Command("AAA")]
     //Task<IResult<Test001>>
-    public virtual async Task<dynamic> Test001(Business.Core.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [HttpFile]Arg<Dictionary<string, dynamic>> context = null, [Test2]decimal mm = 0.0234m, int fff = 666)
+    public virtual async Task<dynamic> Test001(Business.Core.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Ignore(IgnoreMode.Arg)]Arg<DateTime> dateTime, [HttpFile]Arg<Dictionary<string, dynamic>> context = default, [Test2]decimal mm = 0.0234m, int fff = 666)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -163,7 +163,7 @@ public class BusinessMember2 : BusinessBase
     /// <param name="mm"></param>
     /// <returns>test return!!!</returns>
     [HttpFile]
-    public virtual async Task<dynamic> Test002(Business.Core.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, Arg<Dictionary<string, dynamic>> context = null)
+    public virtual async Task<dynamic> Test002(Business.Core.Auth.Token token, Arg<Test001> arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, Arg<Dictionary<string, dynamic>> context = default)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -203,7 +203,7 @@ public class BusinessMember2 : BusinessBase
 
         //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
         //return this.ResultCreate();
-        return this.ResultCreate(new { token, arg = arg?.Out, State = httpContext.Connection.RemoteIpAddress.ToString() });
+        return this.ResultCreate(new { token, arg = arg.Out, State = httpContext.Connection.RemoteIpAddress.ToString() });
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
@@ -213,7 +213,7 @@ public class BusinessMember2 : BusinessBase
 
         //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
         //return this.ResultCreate();
-        return this.ResultCreate(new { token, arg = arg?.Out, State = httpContext.Connection.RemoteIpAddress.ToString() });
+        return this.ResultCreate(new { token, arg = arg.Out, State = httpContext.Connection.RemoteIpAddress.ToString() });
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 

@@ -18,7 +18,7 @@
 namespace Business.Core.Result
 {
     /// <summary>
-    /// Serialize result
+    /// result
     /// </summary>
     /// <typeparam name="Type"></typeparam>
     public class ResultObject<Type> : IResult<Type>
@@ -28,7 +28,7 @@ namespace Business.Core.Result
         //public static implicit operator ResultObject<Type>(byte[] value) => Utils.Help.TryProtoBufDeserialize<ResultObject<Type>>(value);
 
         /// <summary>
-        /// Activator.CreateInstance
+        /// /Activator.CreateInstance
         /// </summary>
         /// <param name="dataType"></param>
         /// <param name="data"></param>
@@ -51,9 +51,9 @@ namespace Business.Core.Result
         /// <summary>
         /// MessagePack.MessagePackSerializer.Serialize(this)
         /// </summary>
+        /// <param name="data"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        /// <param name="genericType"></param>
         public ResultObject(Type data, int state = 1, string message = null)
         {
             this.data = data;
@@ -64,19 +64,19 @@ namespace Business.Core.Result
 
         //public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }
 
-        System.Int32 state;
+        int state;
         /// <summary>
         /// The results of the state is greater than or equal to 1: success, equal to 0: system level exceptions, less than 0: business class error.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("S")]
-        public virtual System.Int32 State { get => state; set => state = value; }
+        public virtual int State { get => state; set => state = value; }
 
-        System.String message;
+        string message;
         /// <summary>
         /// Success can be null
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("M")]
-        public virtual System.String Message { get => message; set => message = value; }
+        public virtual string Message { get => message; set => message = value; }
 
         /// <summary>
         /// Specific dynamic data objects
@@ -90,20 +90,20 @@ namespace Business.Core.Result
         [System.Text.Json.Serialization.JsonPropertyName("D")]
         public virtual Type Data { get => data; set => data = value; }
 
-        System.Boolean hasData;
+        bool hasData;
         /// <summary>
         /// Whether there is value
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("H")]
-        public virtual System.Boolean HasData { get => hasData; set => hasData = value; }
+        public virtual bool HasData { get => hasData; set => hasData = value; }
 
-        System.String callback;
+        string callback;
         /// <summary>
         /// Gets the token of this result, used for callback
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         [System.Text.Json.Serialization.JsonPropertyName("B")]
-        public virtual System.String Callback { get => callback; set => callback = value; }
+        public virtual string Callback { get => callback; set => callback = value; }
 
         System.Type dataType;
         [System.Text.Json.Serialization.JsonIgnore]
