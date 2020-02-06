@@ -1409,7 +1409,7 @@ namespace Business.Core.Annotations
     /// Simple asp.net HTTP request file
     /// </summary>
     [HttpFile]
-    public class HttpFile : Arg<System.Collections.Generic.Dictionary<string, dynamic>> { }
+    public class HttpFile : System.Collections.Generic.Dictionary<string, dynamic> { }
 
     /// <summary>
     /// Simple asp.net HTTP request file attribute
@@ -1424,7 +1424,7 @@ namespace Business.Core.Annotations
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            var files = new System.Collections.Generic.Dictionary<string, dynamic>();
+            var files = new HttpFile();
 
             if (value.Request.HasFormContentType)
             {

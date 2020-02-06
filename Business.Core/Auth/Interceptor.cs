@@ -155,8 +155,14 @@ namespace Business.Core.Auth
                     var first = attrs.First;
 
                     //while (NodeState.DAT == first.State) // .net fx ConcurrentLinkedList TryAdd error! State = INV 
-                    while (NodeState.DAT == first.State)
+                    while (null != first)
                     {
+                        if (NodeState.DAT != first.State)
+                        {
+                            first = first.Next;
+                            continue;
+                        }
+
                         var argAttr = first.Value;
 
                         if (argAttr.CollectionItem) { first = first.Next; continue; }
@@ -354,7 +360,7 @@ namespace Business.Core.Auth
                             }
                         }
 
-                        if (item.HasIArg && !object.Equals(null, result))
+                        if (item.HasIArg && !Equals(null, result))
                         {
                             if (result.Data is ArgResult && result.Data.isUpdate)
                             {
@@ -597,8 +603,15 @@ namespace Business.Core.Auth
 
                 var first = attrs.First;
 
-                while (NodeState.DAT == first.State)
+                while (null != first)
+                //while (NodeState.DAT == first.State)
                 {
+                    if (NodeState.DAT != first.State)
+                    {
+                        first = first.Next;
+                        continue;
+                    }
+
                     var argAttr = first.Value;
 
                     if (argAttr.CollectionItem) { first = first.Next; continue; }
@@ -809,8 +822,14 @@ namespace Business.Core.Auth
 
             var first = attrs.First;
 
-            while (NodeState.DAT == first.State)
+            while (null != first)
             {
+                if (NodeState.DAT != first.State)
+                {
+                    first = first.Next;
+                    continue;
+                }
+
                 var argAttr = first.Value;
 
                 if (!argAttr.CollectionItem) { first = first.Next; continue; }

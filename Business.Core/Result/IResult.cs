@@ -156,7 +156,7 @@ namespace Business.Core.Result
             //    return null;
             //}
 
-            if (object.Equals(null, result))
+            if (Equals(null, result))
             {
                 return null;
             }
@@ -194,7 +194,7 @@ namespace Business.Core.Result
         /// <returns></returns>
         public static IResult ResultCreateToDataString(this IResult result)
         {
-            if (object.Equals(null, result))
+            if (Equals(null, result))
             {
                 return null;
             }

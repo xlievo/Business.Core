@@ -1045,6 +1045,7 @@ namespace Business.Core
                     //cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
                     //cast ? cfg.ArgTypeDefinition.MakeGenericType(parameterType2) : parameterType,
                     parameterType2,
+                    parameterType,
                     current.outType,
                     argInfo.Position,
                     argInfo.HasDefaultValue ? argInfo.DefaultValue : default,
@@ -1289,6 +1290,7 @@ namespace Business.Core
                 }
 
                 var arg = new Args(item.Name,
+                    memberType,
                     memberType,
                     current.outType,
                     position++,
@@ -1875,10 +1877,11 @@ namespace Business.Core.Meta
         //public override string ToString() => string.Format("{0} {1}", Group2, Name);
 
         //argChild
-        public Args(string name, System.Type type, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Annotations.UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
+        public Args(string name, System.Type type, System.Type origType, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Annotations.UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
         {
             Name = name;
             Type = type;
+            OrigType = origType;
             LastType = lastType;
             Position = position;
             HasDictionary = hasDictionary;
@@ -1920,7 +1923,9 @@ namespace Business.Core.Meta
         //===============name==================//
         public string Name { get; private set; }
         //===============type==================//
-        public System.Type Type { get; private set; }
+        public System.Type Type { get; internal set; }
+        //===============origType==================//
+        public System.Type OrigType { get; private set; }
         //===============lastType==================//
         public System.Type LastType { get; private set; }
         //===============position==================//

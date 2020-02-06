@@ -116,7 +116,7 @@ public struct ResultObject<Type> : IResult<Type>
         this.Data = data;
         this.State = state;
         this.Message = message;
-        this.HasData = checkData ? !object.Equals(null, data) : false;
+        this.HasData = checkData ? !Equals(null, data) : false;
         this.Callback = default;
 
         this.GenericDefinition = genericDefinition;
@@ -133,7 +133,7 @@ public struct ResultObject<Type> : IResult<Type>
         this.Data = data;
         this.State = state;
         this.Message = message;
-        this.HasData = !object.Equals(null, data);
+        this.HasData = !Equals(null, data);
 
         this.Callback = null;
         this.DataType = null;
@@ -361,9 +361,7 @@ public static class Common
         Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
         Console.WriteLine($"LogPath: {LogPath}");
 
-        //MessagePack.Resolvers.CompositeResolver.Create(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
-        //MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(MessagePack.Resolvers.ContractlessStandardResolver.Instance);
-        MessagePack.MessagePackSerializer.DefaultOptions = MessagePack.Resolvers.ContractlessStandardResolver.Options;
+        MessagePack.MessagePackSerializer.DefaultOptions = MessagePack.Resolvers.ContractlessStandardResolver.Options.WithResolver(MessagePack.Resolvers.CompositeResolver.Create(new MessagePack.Formatters.IMessagePackFormatter[] { new MessagePack.Formatters.IgnoreFormatter<Type>(), new MessagePack.Formatters.IgnoreFormatter<System.Reflection.MethodBase>(), new MessagePack.Formatters.IgnoreFormatter<System.Reflection.MethodInfo>(), new MessagePack.Formatters.IgnoreFormatter<System.Reflection.PropertyInfo>(), new MessagePack.Formatters.IgnoreFormatter<System.Reflection.FieldInfo>() }, new MessagePack.IFormatterResolver[] { MessagePack.Resolvers.ContractlessStandardResolver.Instance }));
     }
 
     static void InitRedis()
@@ -405,6 +403,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         */
     }
 
+    /// <summary>
+    /// "context", "socket", "httpFile" 
+    /// </summary>
     internal static readonly string[] contextParameterNames = new string[] { "context", "socket", "httpFile" };
 
     /// <summary>
@@ -451,9 +452,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         #region AcceptWebSocket
 
         var webSocketcfg = Host.AppSettings.GetSection("WebSocket");
-        var keepAliveInterval = GetValue(webSocketcfg, "KeepAliveInterval", 120);
-        receiveBufferSize = GetValue(webSocketcfg, "ReceiveBufferSize", 4096);
-        maxDegreeOfParallelism = GetValue(webSocketcfg, "MaxDegreeOfParallelism", -1);
+        var keepAliveInterval = webSocketcfg.GetValue("KeepAliveInterval", 120);
+        receiveBufferSize = webSocketcfg.GetValue("ReceiveBufferSize", 4096);
+        maxDegreeOfParallelism = webSocketcfg.GetValue("MaxDegreeOfParallelism", -1);
         //var allowedOrigins = webSocketcfg.GetSection("AllowedOrigins").GetChildren();
 
         var webSocketOptions = new WebSocketOptions()
@@ -511,14 +512,14 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, WebSocket> Sockets = new System.Collections.Concurrent.ConcurrentDictionary<string, WebSocket>();
 
-    static T GetValue<T>(IConfiguration configuration, string key, T defaultValue = default)
-    {
-        try
-        {
-            return configuration.GetValue<T>(key);
-        }
-        catch { return defaultValue; }
-    }
+    //static T GetValue<T>(IConfiguration configuration, string key, T defaultValue = default)
+    //{
+    //    try
+    //    {
+    //        return configuration.GetValue(key, defaultValue);
+    //    }
+    //    catch { return defaultValue; }
+    //}
 
     public static async Task Keep(HttpContext context, WebSocket webSocket)
     {
@@ -558,6 +559,8 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                     }
                     else
                     {
+                        var b = receiveData.b ?? receiveData.c;
+
                         result = await business.Command.AsyncCall(
                         //the cmd of this request.
                         receiveData.c,
@@ -572,7 +575,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                         {
                             Key = receiveData.t,
                             Remote = string.Format("{0}:{1}", context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
-                            Callback = receiveData.b
+                            Callback = b
                         }, "session")
                         );
 
@@ -582,7 +585,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                             if (typeof(IResult).IsAssignableFrom(result.GetType()))
                             {
                                 var result2 = result as IResult;
-                                result2.Callback = receiveData.b ?? receiveData.c;
+                                result2.Callback = b;
 
                                 var data = ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
                                 /* test
@@ -777,7 +780,6 @@ public class BusinessController : Controller
             Key = t,
             Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
             Path = this.Request.Path.Value,
-            //Callback = b
         };
 
         var result = null != route.Command ?

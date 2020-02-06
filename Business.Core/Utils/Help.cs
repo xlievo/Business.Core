@@ -116,6 +116,7 @@ namespace Business.Core.Utils
                     if (arg.HasCast)
                     {
                         arg.HasCast = arg.HasIArg = false;
+                        arg.Type = arg.OrigType;
                         item.IArgs.collection.Remove(arg);
                     }
 
@@ -123,29 +124,16 @@ namespace Business.Core.Utils
                     {
                         //remove not parameter attr
 
-                        var first = item2.Value.Attrs.First;
-
-                        while (NodeState.DAT == first.State)
+                        var first = GetLinkedList(item2.Value.Attrs, c =>
                         {
-                            var attr = first.Value;
-
-                            if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
+                            if (c.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
                             {
-                                item2.Value.Attrs.Remove(attr, out _);
+                                item2.Value.Attrs.Remove(c, out _);
                             }
-
-                            first = first.Next;
-                        }
-                        //foreach (var attr in item2.Value.Attrs)
-                        //{
-                        //    if (attr.Source != Attributes.AttributeBase.SourceType.Parameter)
-                        //    {
-                        //        item2.Value.Attrs.Remove(attr);
-                        //    }
-                        //}
+                        });
 
                         //add default convert
-                        if (arg.HasIArg && NodeState.DAT != first.State)
+                        if (arg.HasIArg && null != first)
                         {
                             var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
                             attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
@@ -191,6 +179,7 @@ namespace Business.Core.Utils
                     if (arg.HasCast)
                     {
                         arg.HasCast = arg.HasIArg = false;
+                        arg.Type = arg.OrigType;
                         item.IArgs.collection.Remove(arg);
                     }
 
@@ -198,22 +187,17 @@ namespace Business.Core.Utils
                     {
                         //remove not parameter attr
 
-                        var first = item2.Value.Attrs.First;
-
-                        while (NodeState.DAT == first.State)
+                        var first = GetLinkedList(item2.Value.Attrs, c =>
                         {
-                            var attr = first.Value;
-
-                            if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
+                            if (c.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
                             {
-                                item2.Value.Attrs.Remove(attr, out _);
+                                item2.Value.Attrs.Remove(c, out _);
                             }
-
-                            first = first.Next;
-                        }
+                        });
 
                         //add default convert
-                        if (arg.HasIArg && NodeState.DAT != first.State)
+                        if (arg.HasIArg && null == first)
+                        //if (arg.HasIArg && NodeState.DAT != first.State)
                         {
                             var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
                             attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
@@ -223,7 +207,8 @@ namespace Business.Core.Utils
                 }
 
                 //item.HasArgSingle = 1 >= item.Args.Count(c => !c.UseType);
-            });
+            }
+            );
 
             return business;
         }
@@ -584,18 +569,16 @@ namespace Business.Core.Utils
 
             var attrs = new List<string>();
 
-            var attr = argGroup.Attrs?.First;
-            while (null != attr && NodeState.DAT == attr.State)
+            // while (null != attr && NodeState.DAT == attr.State)
+            GetLinkedList(argGroup.Attrs, c =>
             {
-                if ("Business.Attributes.ArgumentDefaultAttribute" == attr.Value.Meta.Type.FullName)
+                if ("Business.Attributes.ArgumentDefaultAttribute" == c.Meta.Type.FullName)
                 {
-                    attr = attr.Next;
-                    continue;
+                    return;
                 }
 
-                attrs.Add(string.IsNullOrWhiteSpace(attr.Value.Description) ? attr.Value.Meta.Type.Name.EndsWith(AttributeSign) ? attr.Value.Meta.Type.Name.Substring(0, attr.Value.Meta.Type.Name.Length - AttributeSign.Length) : attr.Value.Meta.Type.Name : attr.Value.Description);
-                attr = attr.Next;
-            }
+                attrs.Add(string.IsNullOrWhiteSpace(c.Description) ? c.Meta.Type.Name.EndsWith(AttributeSign) ? c.Meta.Type.Name.Substring(0, c.Meta.Type.Name.Length - AttributeSign.Length) : c.Meta.Type.Name : c.Description);
+            });
 
             var arg = argCallback(new DocArgSource<TypeDefinition> { Group = group, Args = args, Attributes = attrs, Summary = summary });
 
@@ -2727,6 +2710,26 @@ namespace Business.Core.Utils
             }
         }
         */
+
+        public static T GetLinkedList<T>(ConcurrentLinkedList<T> attrs, System.Action<T> action)
+        {
+            var first = attrs?.First;
+
+            while (null != first)
+            {
+                if (NodeState.DAT != first.State)
+                {
+                    first = first.Next;
+                    continue;
+                }
+
+                action(first.Value);
+
+                first = first.Next;
+            }
+
+            return null != first ? first.Value : default;
+        }
     }
     /*
     #region ICloneable

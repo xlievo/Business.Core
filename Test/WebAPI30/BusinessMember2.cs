@@ -208,7 +208,7 @@ public partial class BusinessMember2 : BusinessBase
         //    }
         //}
 
-        var files = httpFile.Out.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
+        var files = httpFile.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
 
         //return this.ResultCreate(new { arg = arg.Out, files });
         Test001Result? ss = new Test001Result { A = args.arg.A, B = "SSS" };

@@ -42,7 +42,7 @@ namespace Business.Core.Result
             this.data = data;
             this.state = state;
             this.message = message;
-            this.hasData = checkData ? !object.Equals(null, data) : false;
+            this.hasData = checkData ? !Equals(null, data) : false;
             this.callback = default;
 
             this.genericDefinition = genericDefinition;
@@ -59,7 +59,7 @@ namespace Business.Core.Result
             this.data = data;
             this.state = state;
             this.message = message;
-            this.hasData = !object.Equals(null, data);
+            this.hasData = !Equals(null, data);
         }
 
         //public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }

@@ -158,6 +158,11 @@
             my session
             </summary>
         </member>
+        <member name="F:Common.contextParameterNames">
+            <summary>
+            "context", "socket", "httpFile" 
+            </summary>
+        </member>
         <member name="M:Common.InitBusiness(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.String)">
             <summary>
             Call this method after environment initialization is complete

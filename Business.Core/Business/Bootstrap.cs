@@ -121,16 +121,7 @@ namespace Business.Core
 
             if (null != business)
             {
-                var first = Config.Use.First;
-
-                while (NodeState.DAT == first.State)
-                {
-                    var conf = first.Value;
-
-                    conf.Invoke(business);
-
-                    first = first.Next;
-                }
+                Help.GetLinkedList(Config.Use, c => c.Invoke(business));
 
                 Config.UseDoc?.Invoke();
             }
@@ -168,16 +159,7 @@ namespace Business.Core
 
             if (null != business)
             {
-                var first = Config.Use.First;
-
-                while (NodeState.DAT == first.State)
-                {
-                    var conf = first.Value;
-
-                    conf.Invoke(business);
-
-                    first = first.Next;
-                }
+                Help.GetLinkedList(Config.Use, c => c.Invoke(business));
 
                 Config.UseDoc?.Invoke();
             }
@@ -237,16 +219,7 @@ namespace Business.Core
 
             foreach (var business in Configer.BusinessList.Values.AsParallel())
             {
-                var first = Config.Use.First;
-
-                while (NodeState.DAT == first.State)
-                {
-                    var conf = first.Value;
-
-                    conf.Invoke(business);
-
-                    first = first.Next;
-                }
+                Help.GetLinkedList(Config.Use, c => c.Invoke(business));
             }
 
             Config.UseDoc?.Invoke();

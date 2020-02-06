@@ -37,7 +37,7 @@ namespace BenchmarkTest
 #else
             var count = 100000;
 #endif
-            System.Console.WriteLine($"RUN Count = {count} X 3 WorkTime = {WorkTime}");
+            Console.WriteLine($"RUN Count = {count} X 3 WorkTime = {WorkTime}");
 
             var results = new ConcurrentBag<int>();
             //var tasks = new ConcurrentBag<Task>();
@@ -54,7 +54,7 @@ namespace BenchmarkTest
 
             System.Threading.ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
             System.Threading.ThreadPool.GetMaxThreads(out int workerThreads2, out int completionPortThreads2);
-            System.Console.WriteLine($"Min {workerThreads}, {completionPortThreads} Max {workerThreads2}, {completionPortThreads2}");
+            Console.WriteLine($"Min {workerThreads}, {completionPortThreads} Max {workerThreads2}, {completionPortThreads2}");
 
             watch.Start();
 
@@ -82,7 +82,7 @@ namespace BenchmarkTest
 
             //Task.WaitAll(tasks.ToArray());
             var total = Help.Scale(watch.Elapsed.TotalSeconds, 3);
-            Console.WriteLine($"ResultCount={results.Count} Loggers={BusinessMember.Loggers.Count} Time={total} Avg={Help.Scale(results.Count / total)}");
+            Console.WriteLine($"ResultCount={results.Count} Loggers={Loggers.Count} Time={total} Avg={Help.Scale(results.Count / total)}");
 
             System.Threading.SpinWait.SpinUntil(() => results.Count == Loggers.Count);
 
@@ -119,7 +119,7 @@ namespace BenchmarkTest
             }
 
             //Console.WriteLine($"ResultCount={results.Count} TaskCount={tasks.Count}  Loggers={BusinessMember.Loggers.Count} Time={total}");
-            Console.WriteLine($"ResultCount={results.Count} Loggers={BusinessMember.Loggers.Count} Time={total} Avg={Help.Scale(results.Count / total)}");
+            Console.WriteLine($"ResultCount={results.Count} Loggers={Loggers.Count} Time={total} Avg={Help.Scale(results.Count / total)}");
 
             //Console.WriteLine($"{string.Join(",", BusinessMember.Logs)}");
 
