@@ -987,7 +987,7 @@ namespace Business.Core
                     //==================================//
                     var current = GetCurrentType(parameterType.GetTypeInfo());
 
-                    var argAttrAll = AttributeBase.GetAttributes(argInfo, current.outType);
+                    var argAttrAll = AttributeBase.GetAttributes(argInfo, current.outType, current.hasCollection ? current.orgType : null);
 
                     //var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() : argAttrAll.GetAttr<UseAttribute>();
 

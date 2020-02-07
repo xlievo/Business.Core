@@ -98,17 +98,22 @@ namespace Business.Core.Annotations
             return attributes;
         }
 
-        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(ParameterInfo member, System.Type type)
+        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(ParameterInfo member, System.Type outType, System.Type orgType = null)
         {
             var attributes = new System.Collections.Generic.List<AttributeBase>(member.GetAttributes<AttributeBase>());
             attributes.AddRange(member.ParameterType.GetAttributes<AttributeBase>());
-            if (!member.ParameterType.Equals(type))
+            if (!member.ParameterType.Equals(outType))
             {
-                attributes.AddRange(type.GetAttributes<AttributeBase>());
+                attributes.AddRange(outType.GetAttributes<AttributeBase>());
+            }
+            if (null != orgType && !outType.Equals(orgType))
+            {
+                attributes.AddRange(orgType.GetAttributes<AttributeBase>());
             }
             attributes.ForEach(c => c.Meta.Declaring = MetaData.DeclaringType.Parameter);
             return attributes;
         }
+
         internal static System.Collections.Generic.List<ArgumentAttribute> GetCollectionAttributes(System.Type type)
         {
             var attributes = new System.Collections.Generic.List<ArgumentAttribute>(type.GetAttributes<ArgumentAttribute>());

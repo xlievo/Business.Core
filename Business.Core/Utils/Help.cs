@@ -99,8 +99,11 @@ namespace Business.Core.Utils
                 business.Configer.UseTypes.dictionary.TryAdd(item.FullName, item);
             }
 
-            //foreach (var item in business.Configer.MetaData.Values)
+#if DEBUG
+            foreach (var item in business.Configer.MetaData.Values)
+#else
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
+#endif
             {
                 foreach (var arg in item.Args)
                 {
@@ -133,7 +136,7 @@ namespace Business.Core.Utils
                         });
 
                         //add default convert
-                        if (arg.HasIArg && null != first)
+                        if (arg.HasIArg && null == first)
                         {
                             var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
                             attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
@@ -144,8 +147,11 @@ namespace Business.Core.Utils
                 }
 
                 //item.HasArgSingle = 1 >= item.Args.Count(c => !c.UseType);
-            }
-            );
+#if DEBUG
+            };
+#else
+            });
+#endif
 
             return business;
         }
@@ -160,8 +166,11 @@ namespace Business.Core.Utils
 
             if (0 == argName.Count) { return business; }
 
-            //foreach (var item in business.Configer.MetaData.Values)
+#if DEBUG
+            foreach (var item in business.Configer.MetaData.Values)
+#else
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
+#endif
             {
                 foreach (var arg in item.Args)
                 {
@@ -207,8 +216,11 @@ namespace Business.Core.Utils
                 }
 
                 //item.HasArgSingle = 1 >= item.Args.Count(c => !c.UseType);
-            }
-            );
+#if DEBUG
+            };
+#else
+            });
+#endif
 
             return business;
         }
@@ -2616,7 +2628,7 @@ namespace Business.Core.Utils
 
                 var args = new object[meta.ArgAttrs[meta.GroupDefault].Args.Count];
 
-    #region Token
+#region Token
 
                 if (0 < meta.TokenPosition.Length)
                 {
@@ -2631,9 +2643,9 @@ namespace Business.Core.Utils
                     }
                 }
 
-    #endregion
+#endregion
 
-    #region HttpRequest
+#region HttpRequest
 
                 if (0 < meta.HttpRequestPosition.Length && null != httpRequest)
                 {
@@ -2658,7 +2670,7 @@ namespace Business.Core.Utils
                     }
                 }
 
-    #endregion
+#endregion
 
                 if (0 < request.Data.Length && 0 < args.Length)
                 {
@@ -2713,6 +2725,8 @@ namespace Business.Core.Utils
 
         public static T GetLinkedList<T>(ConcurrentLinkedList<T> attrs, System.Action<T> action)
         {
+            T value = default;
+
             var first = attrs?.First;
 
             while (null != first)
@@ -2723,16 +2737,17 @@ namespace Business.Core.Utils
                     continue;
                 }
 
-                action(first.Value);
+                value = first.Value;
+                action(value);
 
                 first = first.Next;
             }
 
-            return null != first ? first.Value : default;
+            return value;
         }
     }
     /*
-    #region ICloneable
+#region ICloneable
 
     /// <summary>  
     /// Interface definition for cloneable objects.  
@@ -2748,7 +2763,7 @@ namespace Business.Core.Utils
         T Clone();
     }
 
-    #endregion
+#endregion
     */
 
     public class ConcurrentReadOnlyDictionary<TKey, TValue> : System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue>
