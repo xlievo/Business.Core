@@ -24,217 +24,224 @@ namespace Business.Core
     using System.Reflection;
     using System.Linq;
 
-    internal partial class Bind
-    {
-        internal static IResult ErrorBusiness(System.Type resultTypeDefinition, string business) => ResultFactory.ResultCreate(resultTypeDefinition, -1, string.Format("Without this Business{0}", string.IsNullOrEmpty(business) ? null : $" {business}"));
+    //internal partial class Bind
+    //{
+    //    internal static IResult ErrorBusiness(System.Type resultTypeDefinition, string business) => ResultFactory.ResultCreate(resultTypeDefinition, -1, string.Format("Without this Business{0}", string.IsNullOrEmpty(business) ? null : $" {business}"));
 
-        internal static IResult ErrorCmd(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, string.Format("Without this Cmd{0}", string.IsNullOrEmpty(cmd) ? null : $" {cmd}"));
+    //    internal static IResult ErrorCmd(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, string.Format("Without this Cmd{0}", string.IsNullOrEmpty(cmd) ? null : $" {cmd}"));
 
-        #region Internal
+    //    #region Internal
 
-        //internal static object GetReturnValue(int state, string message, MetaData meta, System.Type resultType) => GetReturnValue(ResultFactory.ResultCreate(resultType, state, message), meta);
-        /*
-        internal static dynamic GetReturnValue(IResult result, MetaData meta)
-        {
-            //var result2 = (meta.HasIResult || meta.HasObject) ? result : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null;
-            object result2 = result;
+    //    //internal static object GetReturnValue(int state, string message, MetaData meta, System.Type resultType) => GetReturnValue(ResultFactory.ResultCreate(resultType, state, message), meta);
+    //    /*
+    //    internal static dynamic GetReturnValue(IResult result, MetaData meta)
+    //    {
+    //        //var result2 = (meta.HasIResult || meta.HasObject) ? result : meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null;
+    //        object result2 = result;
 
-            //if (!meta.HasObject)
-            //{
-            //    if (meta.HasReturn && meta.ReturnType.IsValueType)
-            //    {
-            //        result2 = System.Activator.CreateInstance(meta.ReturnType);
-            //    }
-            //    else
-            //    {
-            //        result2 = null;
-            //    }
-            //}
+    //        //if (!meta.HasObject)
+    //        //{
+    //        //    if (meta.HasReturn && meta.ReturnType.IsValueType)
+    //        //    {
+    //        //        result2 = System.Activator.CreateInstance(meta.ReturnType);
+    //        //    }
+    //        //    else
+    //        //    {
+    //        //        result2 = null;
+    //        //    }
+    //        //}
 
-            if (meta.HasReturn && meta.ReturnType.IsValueType)
-            {
-                result2 = System.Activator.CreateInstance(meta.ReturnType);
-            }
-            //else
-            //{
-            //    result2 = null;
-            //}
+    //        if (meta.HasReturn && meta.ReturnType.IsValueType)
+    //        {
+    //            result2 = System.Activator.CreateInstance(meta.ReturnType);
+    //        }
+    //        //else
+    //        //{
+    //        //    result2 = null;
+    //        //}
 
 
-            if (meta.HasAsync)
-            {
-                //return meta.HasIResult ? System.Threading.Tasks.Task.FromResult((IResult)result2) : meta.HasReturn ? System.Threading.Tasks.Task.FromResult(result2) : System.Threading.Tasks.Task.Run(() => { });
-                //if (meta.HasIResult)
-                //{
-                //    return System.Threading.Tasks.Task.FromResult((IResult)result2);
-                //}
-                //else
-                //{
-                //    return System.Threading.Tasks.Task.FromResult(meta.HasReturn ? result2 : null);
-                //}
-                //if (meta.HasIResult)
-                //{
-                //    return System.Threading.Tasks.Task.FromResult(result2 as IResult<dynamic>);
-                //}
+    //        if (meta.HasAsync)
+    //        {
+    //            //return meta.HasIResult ? System.Threading.Tasks.Task.FromResult((IResult)result2) : meta.HasReturn ? System.Threading.Tasks.Task.FromResult(result2) : System.Threading.Tasks.Task.Run(() => { });
+    //            //if (meta.HasIResult)
+    //            //{
+    //            //    return System.Threading.Tasks.Task.FromResult((IResult)result2);
+    //            //}
+    //            //else
+    //            //{
+    //            //    return System.Threading.Tasks.Task.FromResult(meta.HasReturn ? result2 : null);
+    //            //}
+    //            //if (meta.HasIResult)
+    //            //{
+    //            //    return System.Threading.Tasks.Task.FromResult(result2 as IResult<dynamic>);
+    //            //}
 
-                return System.Threading.Tasks.Task.FromResult(meta.HasIResult ? result2 as IResult : meta.HasReturn ? result2 : null);
-            }
+    //            return System.Threading.Tasks.Task.FromResult(meta.HasIResult ? result2 as IResult : meta.HasReturn ? result2 : null);
+    //        }
 
-            return result2;
-        }
-        */
+    //        return result2;
+    //    }
+    //    */
 
-        internal static dynamic GetReturnValue(IResult result, MetaData meta)
-        {
-            object result2 = result;
+    //    internal static dynamic GetReturnValue(IResult result, MetaData meta)
+    //    {
+    //        object result2 = result;
 
-            if (meta.HasReturn)
-            {
-                if (!meta.HasObject)
-                {
-                    dynamic result3 = null;
+    //        if (meta.HasReturn)
+    //        {
+    //            if (!meta.HasObject)
+    //            {
+    //                dynamic result3 = null;
 
-                    if (meta.ReturnType.IsValueType)
-                    {
-                        result3 = System.Activator.CreateInstance(meta.ReturnType);
-                    }
-                    //else
-                    //{
-                    //    result3 = Help.CreateInstance(meta.ReturnType);
-                    //}
+    //                if (meta.ReturnType.IsValueType)
+    //                {
+    //                    result3 = System.Activator.CreateInstance(meta.ReturnType);
+    //                }
+    //                //else
+    //                //{
+    //                //    result3 = Help.CreateInstance(meta.ReturnType);
+    //                //}
 
-                    if (meta.HasAsync)
-                    {
-                        return System.Threading.Tasks.Task.FromResult<dynamic>(result3);
-                    }
+    //                if (meta.HasAsync)
+    //                {
+    //                    return System.Threading.Tasks.Task.FromResult<dynamic>(result3);
+    //                }
 
-                    return result3;
-                }
-                else if (meta.ReturnType.IsValueType)
-                {
-                    result2 = System.Activator.CreateInstance(meta.ReturnType);
-                }
-            }
-            else
-            {
+    //                return result3;
+    //            }
+    //            else if (meta.ReturnType.IsValueType)
+    //            {
+    //                result2 = System.Activator.CreateInstance(meta.ReturnType);
+    //            }
+    //        }
+    //        else
+    //        {
 
-                result2 = null;
-            }
+    //            result2 = null;
+    //        }
 
-            if (meta.HasAsync)
-            {
-                return System.Threading.Tasks.Task.FromResult<dynamic>(result2);
-            }
+    //        if (meta.HasAsync)
+    //        {
+    //            return System.Threading.Tasks.Task.FromResult<dynamic>(result2);
+    //        }
 
-            return result2;
-        }
+    //        return result2;
+    //    }
 
-        internal static dynamic GetReturnValueIResult<Data>(IResult<Data> result, MetaData meta)
-        {
-            if (meta.HasAsync)
-            {
-                if (meta.HasIResultGeneric)
-                {
-                    return System.Threading.Tasks.Task.FromResult(result);
-                }
+    //    internal static dynamic GetReturnValueIResult<Data>(IResult<Data> result, MetaData meta)
+    //    {
+    //        if (meta.HasAsync)
+    //        {
+    //            if (meta.HasIResultGeneric)
+    //            {
+    //                return System.Threading.Tasks.Task.FromResult(result);
+    //            }
 
-                return System.Threading.Tasks.Task.FromResult(result as IResult);
-            }
+    //            return System.Threading.Tasks.Task.FromResult(result as IResult);
+    //        }
 
-            return result;
-        }
-        //internal static dynamic GetReturnValueIResultGeneric<Data>(IResult<Data> result, MetaData meta)
-        //{
-        //    if (meta.HasIResult || meta.HasObject)
-        //    {
-        //        if (meta.HasAsync)
-        //        {
-        //            return System.Threading.Tasks.Task.FromResult(result);
-        //        }
-        //        else
-        //        {
-        //            return result;
-        //        }
-        //    }
-        //    else if (meta.HasReturn && meta.ReturnType.IsValueType)
-        //    {
-        //        var resultObj = System.Activator.CreateInstance(meta.ReturnType);
+    //        return result;
+    //    }
+    //    //internal static dynamic GetReturnValueIResultGeneric<Data>(IResult<Data> result, MetaData meta)
+    //    //{
+    //    //    if (meta.HasIResult || meta.HasObject)
+    //    //    {
+    //    //        if (meta.HasAsync)
+    //    //        {
+    //    //            return System.Threading.Tasks.Task.FromResult(result);
+    //    //        }
+    //    //        else
+    //    //        {
+    //    //            return result;
+    //    //        }
+    //    //    }
+    //    //    else if (meta.HasReturn && meta.ReturnType.IsValueType)
+    //    //    {
+    //    //        var resultObj = System.Activator.CreateInstance(meta.ReturnType);
 
-        //        if (meta.HasAsync)
-        //        {
-        //            return System.Threading.Tasks.Task.FromResult(resultObj);
-        //        }
-        //        else
-        //        {
-        //            return resultObj;
-        //        }
-        //    }
+    //    //        if (meta.HasAsync)
+    //    //        {
+    //    //            return System.Threading.Tasks.Task.FromResult(resultObj);
+    //    //        }
+    //    //        else
+    //    //        {
+    //    //            return resultObj;
+    //    //        }
+    //    //    }
 
-        //    return null;
-        //}
+    //    //    return null;
+    //    //}
 
-        #endregion
+    //    #endregion
 
-        #region Create
+    //    #region Create
 
-        /*
-        /// <summary>
-        /// Initialize a Generic proxy class
-        /// </summary>
-        /// <typeparam name="Business"></typeparam>
-        /// <param name="constructorArguments"></param>
-        /// <returns></returns>
-        //public static Business Create<Business>(params object[] constructorArguments)
-        //    where Business : class => (Business)Create(typeof(Business), null, constructorArguments);
+    //    /*
+    //    /// <summary>
+    //    /// Initialize a Generic proxy class
+    //    /// </summary>
+    //    /// <typeparam name="Business"></typeparam>
+    //    /// <param name="constructorArguments"></param>
+    //    /// <returns></returns>
+    //    //public static Business Create<Business>(params object[] constructorArguments)
+    //    //    where Business : class => (Business)Create(typeof(Business), null, constructorArguments);
 
-        public static Bind Create<Business>(params object[] constructorArguments) => Create(typeof(Business), null, constructorArguments);
+    //    public static Bind Create<Business>(params object[] constructorArguments) => Create(typeof(Business), null, constructorArguments);
 
-        /// <summary>
-        /// Initialize a Generic proxy class
-        /// </summary>
-        /// <typeparam name="Business"></typeparam>
-        /// <param name="interceptor"></param>
-        /// <param name="constructorArguments"></param>
-        /// <returns></returns>
-        //public static Business Create<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments)
-        //    where Business : class => (Business)Create(typeof(Business), interceptor, constructorArguments);
+    //    /// <summary>
+    //    /// Initialize a Generic proxy class
+    //    /// </summary>
+    //    /// <typeparam name="Business"></typeparam>
+    //    /// <param name="interceptor"></param>
+    //    /// <param name="constructorArguments"></param>
+    //    /// <returns></returns>
+    //    //public static Business Create<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments)
+    //    //    where Business : class => (Business)Create(typeof(Business), interceptor, constructorArguments);
 
-        public static Bind Create<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments) => Create(typeof(Business), interceptor, constructorArguments);
+    //    public static Bind Create<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments) => Create(typeof(Business), interceptor, constructorArguments);
 
-        /// <summary>
-        /// Initialize a Type proxy class
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="constructorArguments"></param>
-        /// <returns></returns>
-        //public static IBusiness Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments) as IBusiness;
+    //    /// <summary>
+    //    /// Initialize a Type proxy class
+    //    /// </summary>
+    //    /// <param name="type"></param>
+    //    /// <param name="constructorArguments"></param>
+    //    /// <returns></returns>
+    //    //public static IBusiness Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments) as IBusiness;
 
-        public static Bind Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments);
+    //    public static Bind Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments);
 
-        /// <summary>
-        /// Initialize a Type proxy class
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="interceptor"></param>
-        /// <param name="constructorArguments"></param>
-        /// <returns></returns>
-        //public static object Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments) => new Bind(type, interceptor ?? new Auth.Interceptor(), constructorArguments).Instance;
+    //    /// <summary>
+    //    /// Initialize a Type proxy class
+    //    /// </summary>
+    //    /// <param name="type"></param>
+    //    /// <param name="interceptor"></param>
+    //    /// <param name="constructorArguments"></param>
+    //    /// <returns></returns>
+    //    //public static object Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments) => new Bind(type, interceptor ?? new Auth.Interceptor(), constructorArguments).Instance;
 
-        public static Bind Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments)
-        {
-            var bind = new Bind();
+    //    public static Bind Create(System.Type type, Auth.IInterceptor interceptor = null, params object[] constructorArguments)
+    //    {
+    //        var bind = new Bind();
 
-            bind.bootstrapConfig.type = type;
-            bind.bootstrapConfig.interceptor = interceptor;
-            bind.bootstrapConfig.constructorArguments = constructorArguments;
+    //        bind.bootstrapConfig.type = type;
+    //        bind.bootstrapConfig.interceptor = interceptor;
+    //        bind.bootstrapConfig.constructorArguments = constructorArguments;
 
-            return bind;
-        }
-        */
-        #endregion
-    }
+    //        return bind;
+    //    }
+    //    */
+    //    #endregion
+    //}
 
-    internal partial class Bind : System.IDisposable
+    //class Bind<Business> : Bind
+    //{
+    //    internal readonly new Business instance;
+
+    //    internal protected Bind(Auth.IInterceptor interceptor, params object[] constructorArguments) : base(interceptor.Create(typeof(Business), constructorArguments), interceptor) => this.instance = (Business)base.instance;
+    //}
+
+    partial class Bind : System.IDisposable
     {
         internal readonly object instance;
 
@@ -499,7 +506,7 @@ namespace Business.Core
             return list.ToDictionary(c => i++, c => c);
         }
 
-        static System.Collections.Generic.List<T> AssemblyAttr<T>(Assembly member, System.Collections.Generic.IEqualityComparer<T> comparer) where T : System.Attribute => member.GetCustomAttributes<T>().Distinct(comparer).ToList();
+        //static System.Collections.Generic.List<T> AssemblyAttr<T>(Assembly member, System.Collections.Generic.IEqualityComparer<T> comparer) where T : System.Attribute => member.GetCustomAttributes<T>().Distinct(comparer).ToList();
 
         static MetaLogger GetMetaLogger(System.Collections.Generic.List<LoggerAttribute> loggers, string group)
         {
@@ -507,7 +514,7 @@ namespace Business.Core
 
             var metaLogger = new MetaLogger();
 
-            var loggers2 = loggers.Where(c => GroupEquals(c, group));
+            var loggers2 = loggers.Where(c => Help.GroupEquals(c, group));
 
             foreach (var item in loggers2)
             {
@@ -688,42 +695,42 @@ namespace Business.Core
             return defaultObj2;
         }
 
-        internal static System.Collections.Generic.Dictionary<int, IArg> GetIArgs(System.Collections.Generic.IReadOnlyList<Args> iArgs, object[] argsObj)
-        {
-            var result = new System.Collections.Generic.Dictionary<int, IArg>();
+        //internal static System.Collections.Generic.Dictionary<int, IArg> GetIArgs(System.Collections.Generic.IReadOnlyList<Args> iArgs, object[] argsObj)
+        //{
+        //    var result = new System.Collections.Generic.Dictionary<int, IArg>();
 
-            if (0 < iArgs?.Count)
-            {
-                foreach (var item in iArgs)
-                {
-                    IArg iArg;
+        //    if (0 < iArgs?.Count)
+        //    {
+        //        foreach (var item in iArgs)
+        //        {
+        //            IArg iArg;
 
-                    var arg = argsObj[item.Position];
+        //            var arg = argsObj[item.Position];
 
-                    if (item.HasCast && !item.Type.IsAssignableFrom(arg?.GetType()))
-                    {
-                        iArg = (IArg)System.Activator.CreateInstance(item.Type);
-                        //Not entry for value type
-                        if (!(null == arg && item.IArgInType.IsValueType))
-                        {
-                            iArg.In = arg;
-                        }
-                    }
-                    else
-                    {
-                        iArg = (IArg)(arg ?? System.Activator.CreateInstance(item.Type));
-                    }
+        //            if (item.HasCast && !item.Type.IsAssignableFrom(arg?.GetType()))
+        //            {
+        //                iArg = (IArg)System.Activator.CreateInstance(item.Type);
+        //                //Not entry for value type
+        //                if (!(null == arg && item.IArgInType.IsValueType))
+        //                {
+        //                    iArg.In = arg;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                iArg = (IArg)(arg ?? System.Activator.CreateInstance(item.Type));
+        //            }
 
-                    //if (string.IsNullOrWhiteSpace(iArg.Group)) { iArg.Group = defaultCommandKey; }
+        //            //if (string.IsNullOrWhiteSpace(iArg.Group)) { iArg.Group = defaultCommandKey; }
 
-                    //iArg.Log = item.IArgLog;
+        //            //iArg.Log = item.IArgLog;
 
-                    result.Add(item.Position, iArg);
-                }
-            }
+        //            result.Add(item.Position, iArg);
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         static ConcurrentReadOnlyDictionary<string, CommandAttribute> CmdAttrGroup(Configer cfg, string methodName, System.Collections.Generic.List<AttributeBase> attributes, string groupDefault, System.Collections.Generic.List<Ignore> ignore)
         {
@@ -830,7 +837,7 @@ namespace Business.Core
             return group;
         }
 
-        public static CommandGroup GetBusinessGroup(IBusiness business, ConcurrentReadOnlyDictionary<string, MetaData> metaData, System.Func<string, MetaData, Command> action)
+        static CommandGroup GetBusinessGroup(IBusiness business, ConcurrentReadOnlyDictionary<string, MetaData> metaData, System.Func<string, MetaData, Command> action)
         {
             var group = new CommandGroup(business.Configer.ResultTypeDefinition, business.Configer.Info.CommandGroupDefault);
 
@@ -889,7 +896,7 @@ namespace Business.Core
             {
                 var args = GetArgsObj(meta.DefaultValue, arguments, meta.IArgs, meta.Args);
 
-                return business.Configer.Interceptor.Intercept(meta.Name, args, () => meta.Accessor(business, args), key).Result;
+                return business.Configer.Interceptor.Intercept(business.Configer, meta.Name, args, () => meta.Accessor(business, args), key).Result;
                 //return call(business, args);
             }, meta, key);
         });
@@ -985,7 +992,7 @@ namespace Business.Core
                     var path = argInfo.Name;
                     var parameterType = argInfo.ParameterType;
                     //==================================//
-                    var current = GetCurrentType(parameterType.GetTypeInfo());
+                    var current = Help.GetCurrentType(parameterType.GetTypeInfo());
 
                     var argAttrAll = AttributeBase.GetAttributes(argInfo, current.outType, current.hasCollection ? current.orgType : null);
 
@@ -1113,40 +1120,6 @@ namespace Business.Core
             return metaData;
         }
 
-        internal struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type orgType; public bool nullable; public bool hasDefinition; }
-
-        internal static CurrentType GetCurrentType(System.Type type)
-        {
-            var hasIArg = typeof(IArg<>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType) || typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out iArgOutType);
-
-            var current = new CurrentType { hasIArg = hasIArg, outType = hasIArg ? iArgOutType[0] : type, inType = (hasIArg && 2 == iArgOutType.Length) ? iArgOutType[1] : type };
-            var nullType = System.Nullable.GetUnderlyingType(current.outType);
-            if (null != nullType)
-            {
-                current.outType = nullType;
-                current.nullable = true;
-            }
-            current.orgType = current.outType;
-
-            current.hasCollection = typeof(System.Collections.Generic.ICollection<>).IsAssignableFrom(current.outType, out System.Type[] coll);// current.outType.IsCollection();
-            current.hasDictionary = typeof(System.Collections.Generic.IDictionary<,>).IsAssignableFrom(current.outType, out System.Type[] dict) || typeof(System.Collections.IDictionary).IsAssignableFrom(current.outType, out dict);
-
-            //================================//
-            if (current.hasDictionary)
-            {
-                current.outType = dict[1];
-                //current.outType = current.outType.GenericTypeArguments[1];
-            }
-            else if (current.hasCollection)
-            {
-                current.outType = coll[0];
-            }
-
-            current.hasDefinition = current.outType.IsDefinition();
-
-            return current;
-        }
-
         #region GetArgAttr        
         /*
         internal static System.Collections.Generic.List<ArgumentAttribute> GetArgAttr(System.Collections.Generic.List<AttributeBase> attributes, System.Type memberType, System.Type resultType, System.Type resultTypeDefinition)
@@ -1250,7 +1223,7 @@ namespace Business.Core
                     default: continue;
                 }
 
-                var current = GetCurrentType(memberType);
+                var current = Help.GetCurrentType(memberType);
 
                 var argAttrAll = AttributeBase.GetAttributes(item, current.outType);
 
@@ -1331,18 +1304,10 @@ namespace Business.Core
             return args;
         }
 
-        /// <summary>
-        /// string.IsNullOrWhiteSpace(x.Group) || x.Group == group
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        internal static bool GroupEquals(GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
-
         static readonly System.Type[] procesIArgTypes = new System.Type[] { typeof(object), typeof(IArg) };
         static readonly System.Type[] procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, CurrentType current, string declaring, string businessName, string method, string path, string owner, string member, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, Help.CurrentType current, string declaring, string businessName, string method, string path, string owner, string member, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
         {
             hasLower = false;
             hasCollectionAttr = false;
@@ -1358,17 +1323,17 @@ namespace Business.Core
 
             foreach (var item in commands)
             {
-                var ignores = argAttrAll.GetAttrs<Ignore>(c => GroupEquals(c, item.Value.Group), clone: true);
+                var ignores = argAttrAll.GetAttrs<Ignore>(c => Help.GroupEquals(c, item.Value.Group), clone: true);
 
                 var ignoreBusinessArg = ignores.Any(c => c.Mode == IgnoreMode.BusinessArg);
                 // || (item.Group == c.Group || string.IsNullOrWhiteSpace(c.Group))
 
                 //var argAttrChild = (hasUse || item.Value.IgnoreBusinessArg || ignoreBusinessArg) ?
                 var argAttrChild = (hasUse || ignoreBusinessArg) ?
-                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group) && c.Meta.Declaring == AttributeBase.MetaData.DeclaringType.Parameter).Select(c => c.Clone()).ToList() :
-                    argAttrs.FindAll(c => GroupEquals(c, item.Value.Group)).Select(c => c.Clone()).ToList();
+                    argAttrs.FindAll(c => Help.GroupEquals(c, item.Value.Group) && c.Meta.Declaring == AttributeBase.MetaData.DeclaringType.Parameter).Select(c => c.Clone()).ToList() :
+                    argAttrs.FindAll(c => Help.GroupEquals(c, item.Value.Group)).Select(c => c.Clone()).ToList();
 
-                var nickValue = string.IsNullOrWhiteSpace(nick?.Nick) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Nick) && GroupEquals(c, item.Value.Group)).GroupBy(c => c.Nick, System.StringComparer.InvariantCultureIgnoreCase).FirstOrDefault()?.Key : nick.Nick;
+                var nickValue = string.IsNullOrWhiteSpace(nick?.Nick) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Nick) && Help.GroupEquals(c, item.Value.Group)).GroupBy(c => c.Nick, System.StringComparer.InvariantCultureIgnoreCase).FirstOrDefault()?.Key : nick.Nick;
 
                 var argAttr = new ConcurrentLinkedList<ArgumentAttribute>();//argAttrChild.Count
 
@@ -1509,7 +1474,7 @@ namespace Business.Core
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? Bind.ErrorCmd(resultTypeDefinition, cmd) : command.Call(parameters, useObj);
+            return null == command ? Help.ErrorCmd(resultTypeDefinition, cmd) : command.Call(parameters, useObj);
         }
 
         public virtual Result Call<Result>(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
@@ -1530,7 +1495,7 @@ namespace Business.Core
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? Bind.ErrorCmd(resultTypeDefinition, cmd) : command.Call(args, useObj);
+            return null == command ? Help.ErrorCmd(resultTypeDefinition, cmd) : command.Call(args, useObj);
         }
 
         public virtual Result Call<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
@@ -1557,7 +1522,7 @@ namespace Business.Core
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
         }
 
         public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
@@ -1578,7 +1543,7 @@ namespace Business.Core
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Bind.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
         }
 
         public virtual async System.Threading.Tasks.Task<IResult> AsyncIResult(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
@@ -1799,7 +1764,7 @@ namespace Business.Core.Meta
 
         public bool IgnoreArg { get; internal set; }
 
-        public ConcurrentLinkedList<Annotations.ArgumentAttribute> Attrs { get; private set; }
+        public ConcurrentLinkedList<Annotations.ArgumentAttribute> Attrs { get; internal set; }
 
         public string Nick { get; private set; }
 

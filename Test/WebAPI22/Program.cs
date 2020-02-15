@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
-//using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 public class Program
 {
@@ -47,7 +46,6 @@ public class Startup
                 builder.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader();
-                //.AllowCredentials();
             });
         });
 

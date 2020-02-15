@@ -11,14 +11,24 @@
             businessDescription3
             </summary>
         </member>
-        <member name="P:BusinessMember2.Test001Result.A">
+        <member name="P:BusinessMember2.Test001Result.a">
             <summary>
             aaa
             </summary>
         </member>
-        <member name="P:BusinessMember2.Test001Result.B">
+        <member name="P:BusinessMember2.Test001Result.b">
             <summary>
             bbb
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test001Result2.a">
+            <summary>
+            aaa2
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test001Result2.b">
+            <summary>
+            bbb2
             </summary>
         </member>
         <member name="M:BusinessMember2.Test001(Token,Arg{Args.Test001},Arg{System.Nullable{System.DateTime}},Business.Core.Annotations.HttpFile,System.Decimal,System.Int32,System.Boolean)">
@@ -33,7 +43,10 @@
             <param name="mm">mmmmmmmm!</param>
             <param name="fff"></param>
             <param name="bbb"></param>
-            <returns>rrrrrr</returns>
+            <returns>
+            rrrrrr
+            rrrrrr2
+            </returns>
         </member>
         <member name="M:BusinessMember2.Test002(Token,Args.Test001,System.Decimal,System.Collections.Generic.Dictionary{System.String,System.Object})">
             <summary>

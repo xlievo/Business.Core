@@ -22,6 +22,8 @@ namespace Business.Core.Utils
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Business.Core.Result;
+    using Business.Core.Meta;
 
     public struct Accessor
     {
@@ -51,6 +53,153 @@ namespace Business.Core.Utils
 
     public static class Help
     {
+        #region Bind
+
+        public static IResult ErrorBusiness(this System.Type resultTypeDefinition, string business) => ResultFactory.ResultCreate(resultTypeDefinition, -1, string.Format("Without this Business{0}", string.IsNullOrEmpty(business) ? null : $" {business}"));
+
+        public static IResult ErrorCmd(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, string.Format("Without this Cmd{0}", string.IsNullOrEmpty(cmd) ? null : $" {cmd}"));
+
+        internal static dynamic GetReturnValue(IResult result, MetaData meta)
+        {
+            object result2 = result;
+
+            if (meta.HasReturn)
+            {
+                if (!meta.HasObject)
+                {
+                    dynamic result3 = null;
+
+                    if (meta.ReturnType.IsValueType)
+                    {
+                        result3 = System.Activator.CreateInstance(meta.ReturnType);
+                    }
+                    //else
+                    //{
+                    //    result3 = Help.CreateInstance(meta.ReturnType);
+                    //}
+
+                    if (meta.HasAsync)
+                    {
+                        return System.Threading.Tasks.Task.FromResult<dynamic>(result3);
+                    }
+
+                    return result3;
+                }
+                else if (meta.ReturnType.IsValueType)
+                {
+                    result2 = System.Activator.CreateInstance(meta.ReturnType);
+                }
+            }
+            else
+            {
+
+                result2 = null;
+            }
+
+            if (meta.HasAsync)
+            {
+                return System.Threading.Tasks.Task.FromResult<dynamic>(result2);
+            }
+
+            return result2;
+        }
+
+        internal static dynamic GetReturnValueIResult<Data>(IResult<Data> result, MetaData meta)
+        {
+            if (meta.HasAsync)
+            {
+                if (meta.HasIResultGeneric)
+                {
+                    return System.Threading.Tasks.Task.FromResult(result);
+                }
+
+                return System.Threading.Tasks.Task.FromResult(result as IResult);
+            }
+
+            return result;
+        }
+
+        internal static Dictionary<int, IArg> GetIArgs(IReadOnlyList<Args> iArgs, object[] argsObj)
+        {
+            var result = new Dictionary<int, IArg>();
+
+            if (0 < iArgs?.Count)
+            {
+                foreach (var item in iArgs)
+                {
+                    IArg iArg;
+
+                    var arg = argsObj[item.Position];
+
+                    if (item.HasCast && !item.Type.IsAssignableFrom(arg?.GetType()))
+                    {
+                        iArg = (IArg)System.Activator.CreateInstance(item.Type);
+                        //Not entry for value type
+                        if (!(null == arg && item.IArgInType.IsValueType))
+                        {
+                            iArg.In = arg;
+                        }
+                    }
+                    else
+                    {
+                        iArg = (IArg)(arg ?? System.Activator.CreateInstance(item.Type));
+                    }
+
+                    //if (string.IsNullOrWhiteSpace(iArg.Group)) { iArg.Group = defaultCommandKey; }
+
+                    //iArg.Log = item.IArgLog;
+
+                    result.Add(item.Position, iArg);
+                }
+            }
+
+            return result;
+        }
+
+        internal struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type orgType; public bool nullable; public bool hasDefinition; }
+
+        internal static CurrentType GetCurrentType(System.Type type)
+        {
+            var hasIArg = typeof(IArg<>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType) || typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out iArgOutType);
+
+            var current = new CurrentType { hasIArg = hasIArg, outType = hasIArg ? iArgOutType[0] : type, inType = (hasIArg && 2 == iArgOutType.Length) ? iArgOutType[1] : type };
+            var nullType = System.Nullable.GetUnderlyingType(current.outType);
+            if (null != nullType)
+            {
+                current.outType = nullType;
+                current.nullable = true;
+            }
+            current.orgType = current.outType;
+
+            current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out System.Type[] coll);// current.outType.IsCollection();
+            current.hasDictionary = typeof(IDictionary<,>).IsAssignableFrom(current.outType, out System.Type[] dict) || typeof(System.Collections.IDictionary).IsAssignableFrom(current.outType, out dict);
+
+            //================================//
+            if (current.hasDictionary)
+            {
+                current.outType = dict[1];
+                //current.outType = current.outType.GenericTypeArguments[1];
+            }
+            else if (current.hasCollection)
+            {
+                current.outType = coll[0];
+            }
+
+            current.hasDefinition = current.outType.IsDefinition();
+
+            return current;
+        }
+
+        /// <summary>
+        /// string.IsNullOrWhiteSpace(x.Group) || x.Group == group
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        internal static bool GroupEquals(Annotations.GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
+
+        #endregion
+
         public static string BaseDirectory = System.AppDomain.CurrentDomain.BaseDirectory ?? System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null)
@@ -127,13 +276,22 @@ namespace Business.Core.Utils
                     {
                         //remove not parameter attr
 
-                        var first = GetLinkedList(item2.Value.Attrs, c =>
+                        var attrs = new ConcurrentLinkedList<Annotations.ArgumentAttribute>();
+
+                        var first = item2.Value.Attrs.ForEach(c =>
                         {
-                            if (c.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
+                            var attr = c.Value;
+
+                            if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
                             {
-                                item2.Value.Attrs.Remove(c, out _);
+                                //item2.Value.Attrs.Remove(attr, out _);
+                                return;
                             }
+
+                            attrs.TryAdd(attr);
                         });
+
+                        item2.Value.Attrs = attrs;
 
                         //add default convert
                         if (arg.HasIArg && null == first)
@@ -196,13 +354,22 @@ namespace Business.Core.Utils
                     {
                         //remove not parameter attr
 
-                        var first = GetLinkedList(item2.Value.Attrs, c =>
+                        var attrs = new ConcurrentLinkedList<Annotations.ArgumentAttribute>();
+
+                        var first = item2.Value.Attrs.ForEach(c =>
                         {
-                            if (c.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
+                            var attr = c.Value;
+
+                            if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
                             {
-                                item2.Value.Attrs.Remove(c, out _);
+                                //item2.Value.Attrs.Remove(attr, out _);
+                                return;
                             }
+
+                            attrs.TryAdd(attr);
                         });
+
+                        item2.Value.Attrs = attrs;
 
                         //add default convert
                         if (arg.HasIArg && null == first)
@@ -250,8 +417,8 @@ namespace Business.Core.Utils
         };
         */
 
-        static DocArg GetDocArg<TypeDefinition>(DocArgSource<TypeDefinition> argSource)
-            where TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
+        static DocArg GetDocArg<TypeDefinition>(DocArgSource<TypeDefinition> argSource, bool hideArray = false, bool hideTitleType = false)
+            where TypeDefinition : ITypeDefinition<TypeDefinition>
         {
             var group = argSource.Args.Group[argSource.Group];
             var nick = group.Nick;
@@ -262,14 +429,14 @@ namespace Business.Core.Utils
 
             var docArg = new DocArg { Id = group.Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection };
 
-            docArg.Title = $"{argSource.Args.Name} ({docArg.LastType}){nick}";
+            docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} {nick}" : $"{argSource.Args.Name} ({docArg.LastType}){nick}";
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary?.Replace(System.Environment.NewLine, "<br/>");
 
             docArg.Token = argSource.Args.HasToken;
 
             //var hasDescription = string.IsNullOrWhiteSpace(docArg.Description);
-            var attrs = System.String.Empty;
+            var attrs = string.Empty;
             for (int i = 0; i < argSource.Attributes.Count; i++)
             {
                 attrs += $"<h5 tag=\"h5\" style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : !docArg.Token && argSource.Args.HasDefinition ? 15 : 2)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
@@ -322,10 +489,11 @@ namespace Business.Core.Utils
                 //    }
                 //};
             }
-            else if (argSource.Args.HasCollection)
+            else if (argSource.Args.HasCollection && !hideArray)
             {
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} (Array){nick}" : $"{argSource.Args.Name} ({docArg.LastType} Array){nick}";
+
                 docArg.Type = "array";
-                docArg.Title = $"{argSource.Args.Name} ({docArg.LastType} Array){nick}";
                 docArg.Items = new Items<DocArg>();
                 docArg.Options = new Dictionary<string, object> { { "disable_array_delete_last_row", true }, { "array_controls_top", true } };
 
@@ -351,6 +519,11 @@ namespace Business.Core.Utils
                     docArg.Type = type.Item1;
                     docArg.Format = type.Item2;
                 }
+            }
+
+            if (argSource.Args.HasCollection)
+            {
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} (Array){nick}" : $"{argSource.Args.Name} ({docArg.LastType} Array){nick}";
             }
 
             return docArg;
@@ -414,7 +587,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Meta.Args>, DocArg> argCallback, string outDir = null, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, string outDir = null, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -493,7 +666,7 @@ namespace Business.Core.Utils
         /// <param name="xmlMembers"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Meta.Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
@@ -517,7 +690,7 @@ namespace Business.Core.Utils
                     Name = onlyName,
                     HasReturn = meta.HasReturn,
                     Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
-                    Returns = GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3), xmlMembers, member?._params?.Find(c4 => c4.name == returnType.Name)?.text),
+                    Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
                     Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
@@ -542,9 +715,9 @@ namespace Business.Core.Utils
 
         const string AttributeSign = "Attribute";
 
-        static DocArg GetDocArg<DocArg, TypeDefinition>(string group, Meta.ITypeDefinition<TypeDefinition> args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null)
+        static DocArg GetDocArg<DocArg, TypeDefinition>(string group, TypeDefinition args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null)
             where DocArg : IDocArg<DocArg>
-            where TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
+            where TypeDefinition : ITypeDefinition<TypeDefinition>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
@@ -554,15 +727,15 @@ namespace Business.Core.Utils
 
                 switch (args.MemberDefinition)
                 {
-                    case Meta.MemberDefinitionCode.No:
+                    case MemberDefinitionCode.No:
                         break;
-                    case Meta.MemberDefinitionCode.Definition:
+                    case MemberDefinitionCode.Definition:
                         xmlMembers?.TryGetValue($"T:{args.FullName}", out member);
                         break;
-                    case Meta.MemberDefinitionCode.Field:
+                    case MemberDefinitionCode.Field:
                         xmlMembers?.TryGetValue($"F:{args.FullName}", out member);
                         break;
-                    case Meta.MemberDefinitionCode.Property:
+                    case MemberDefinitionCode.Property:
                         xmlMembers?.TryGetValue($"P:{args.FullName}", out member);
                         break;
                 }
@@ -582,14 +755,21 @@ namespace Business.Core.Utils
             var attrs = new List<string>();
 
             // while (null != attr && NodeState.DAT == attr.State)
-            GetLinkedList(argGroup.Attrs, c =>
+            argGroup.Attrs.ForEach(c =>
             {
-                if ("Business.Attributes.ArgumentDefaultAttribute" == c.Meta.Type.FullName)
+                //if ("Business.Attributes.ArgumentDefaultAttribute" == c.Meta.Type.FullName)
+                //{
+                //    return;
+                //}
+
+                var attr = c.Value;
+
+                if (typeof(Annotations.ArgumentDefaultAttribute).IsAssignableFrom(attr.Meta.Type))
                 {
                     return;
                 }
 
-                attrs.Add(string.IsNullOrWhiteSpace(c.Description) ? c.Meta.Type.Name.EndsWith(AttributeSign) ? c.Meta.Type.Name.Substring(0, c.Meta.Type.Name.Length - AttributeSign.Length) : c.Meta.Type.Name : c.Description);
+                attrs.Add(string.IsNullOrWhiteSpace(attr.Description) ? attr.Meta.Type.Name.EndsWith(AttributeSign) ? attr.Meta.Type.Name.Substring(0, attr.Meta.Type.Name.Length - AttributeSign.Length) : attr.Meta.Type.Name : attr.Description);
             });
 
             var arg = argCallback(new DocArgSource<TypeDefinition> { Group = group, Args = args, Attributes = attrs, Summary = summary });
@@ -629,32 +809,30 @@ namespace Business.Core.Utils
 
         public static TypeDefinition GetTypeDefinition(this System.Type type, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null, string name = null)
         {
-            var hasDefinition = type.IsDefinition();
-            var definitions = hasDefinition ? new List<string> { type.FullName } : new List<string>();
+            var current = GetCurrentType(type);
+            var definitions = current.hasDefinition ? new List<string> { type.FullName } : new List<string>();
             var childrens = new ReadOnlyCollection<TypeDefinition>();
             var fullName = type.FullName.Replace('+', '.');
-            var memberDefinition = hasDefinition ? Meta.MemberDefinitionCode.Definition : Meta.MemberDefinitionCode.No;
+            var memberDefinition = current.hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No;
             //..//
 
             Xml.member member = null;
-            if (string.IsNullOrWhiteSpace(summary) && memberDefinition == Meta.MemberDefinitionCode.Definition)
+            if (string.IsNullOrWhiteSpace(summary) && memberDefinition == MemberDefinitionCode.Definition)
             {
                 xmlMembers?.TryGetValue($"T:{fullName}", out member);
 
                 summary = member?.summary?.text;
             }
 
-            var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
-            group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(pathRoot ?? type.Name));
-
-            var current = Bind.GetCurrentType(type);
+            var group = new ConcurrentReadOnlyDictionary<string, ArgGroup>();
+            group.dictionary.TryAdd(groupKey, new ArgGroup(pathRoot ?? type.Name));
 
             var definition = new TypeDefinition
             {
                 Name = name,//current.outType.Name,
                 Type = type,
                 LastType = current.outType,
-                HasDefinition = hasDefinition,
+                HasDefinition = current.hasDefinition,
                 DefaultValue = type.IsValueType && typeof(void) != type ? System.Activator.CreateInstance(type) : null,
 
                 HasNumeric = type.IsNumeric(),
@@ -666,7 +844,7 @@ namespace Business.Core.Utils
                 Nullable = current.nullable,
 
                 FullName = fullName,
-                Children = hasDefinition ? GetTypeDefinition(current.outType, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
+                Children = current.hasDefinition ? GetTypeDefinition(current.outType, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                 Childrens = childrens,
                 MemberDefinition = memberDefinition,
                 Summary = summary,
@@ -686,7 +864,7 @@ namespace Business.Core.Utils
             foreach (var item in members)
             {
                 System.Type memberType = null;
-                var memberDefinition = Meta.MemberDefinitionCode.No;
+                var memberDefinition = MemberDefinitionCode.No;
 
                 switch (item.MemberType)
                 {
@@ -694,22 +872,23 @@ namespace Business.Core.Utils
                         {
                             var member = item as FieldInfo;
                             memberType = member.FieldType;
-                            memberDefinition = Meta.MemberDefinitionCode.Field;
+                            memberDefinition = MemberDefinitionCode.Field;
                         }
                         break;
                     case MemberTypes.Property:
                         {
                             var member = item as PropertyInfo;
                             memberType = member.PropertyType;
-                            memberDefinition = Meta.MemberDefinitionCode.Property;
+                            memberDefinition = MemberDefinitionCode.Property;
                         }
                         break;
                     default: continue;
                 }
 
-                var hasDefinition = memberType.IsDefinition();
+                var current = GetCurrentType(memberType);
+                //var hasDefinition = memberType.IsDefinition();
                 if (definitions.Contains(memberType.FullName)) { continue; }
-                else if (hasDefinition) { definitions.Add(memberType.FullName); }
+                else if (current.hasDefinition) { definitions.Add(memberType.FullName); }
                 var childrens2 = new ReadOnlyCollection<TypeDefinition>();
                 var fullName = $"{type.FullName.Replace('+', '.')}.{item.Name}";
 
@@ -717,15 +896,15 @@ namespace Business.Core.Utils
 
                 switch (memberDefinition)
                 {
-                    case Meta.MemberDefinitionCode.No:
+                    case MemberDefinitionCode.No:
                         break;
-                    case Meta.MemberDefinitionCode.Definition:
+                    case MemberDefinitionCode.Definition:
                         xmlMembers?.TryGetValue($"T:{fullName}", out member2);
                         break;
-                    case Meta.MemberDefinitionCode.Field:
+                    case MemberDefinitionCode.Field:
                         xmlMembers?.TryGetValue($"F:{fullName}", out member2);
                         break;
-                    case Meta.MemberDefinitionCode.Property:
+                    case MemberDefinitionCode.Property:
                         xmlMembers?.TryGetValue($"P:{fullName}", out member2);
                         break;
                 }
@@ -735,17 +914,17 @@ namespace Business.Core.Utils
                 // .. //
                 var path2 = !string.IsNullOrWhiteSpace(path) ? $"{path}.{item.Name}" : item.Name;
 
-                var group = new ConcurrentReadOnlyDictionary<string, Meta.ArgGroup>();
-                group.dictionary.TryAdd(groupKey, new Meta.ArgGroup(path2));
+                var group = new ConcurrentReadOnlyDictionary<string, ArgGroup>();
+                group.dictionary.TryAdd(groupKey, new ArgGroup(path2));
 
-                var current = Bind.GetCurrentType(memberType);
+                //var current = GetCurrentType(memberType);
 
                 var definition = new TypeDefinition
                 {
                     Name = item.Name,
                     Type = memberType,
                     LastType = current.outType,
-                    HasDefinition = hasDefinition,
+                    HasDefinition = current.hasDefinition,
                     DefaultValue = memberType.IsValueType ? System.Activator.CreateInstance(memberType) : null,
 
                     HasNumeric = memberType.IsNumeric(),
@@ -757,7 +936,7 @@ namespace Business.Core.Utils
                     Nullable = current.nullable,
 
                     FullName = fullName,
-                    Children = hasDefinition ? GetTypeDefinition(current.outType, definitions, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
+                    Children = current.hasDefinition ? GetTypeDefinition(current.outType, definitions, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                     Childrens = childrens2,
                     MemberDefinition = memberDefinition,
                     Summary = summary,
@@ -777,7 +956,7 @@ namespace Business.Core.Utils
             return types;
         }
 
-        public struct TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
+        public struct TypeDefinition : ITypeDefinition<TypeDefinition>
         {
             public string Name { get; set; }
 
@@ -797,13 +976,13 @@ namespace Business.Core.Utils
 
             public string FullName { get; set; }
 
-            public Meta.MemberDefinitionCode MemberDefinition { get; set; }
+            public MemberDefinitionCode MemberDefinition { get; set; }
 
             public bool HasToken { get; set; }
 
             public bool HasDefaultValue { get; set; }
 
-            public ConcurrentReadOnlyDictionary<string, Meta.ArgGroup> Group { get; set; }
+            public ConcurrentReadOnlyDictionary<string, ArgGroup> Group { get; set; }
 
             public ReadOnlyCollection<TypeDefinition> Children { get; set; }
 
@@ -845,7 +1024,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Values.Where(c => Bind.GroupEquals(logger, c.Group));
+                var groups = item.CommandGroup.Values.Where(c => GroupEquals(logger, c.Group));
 
                 if (!groups.Any()) { return; }
 
@@ -886,7 +1065,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Values.Where(c => Bind.GroupEquals(logger, c.Group));
+                var groups = item.CommandGroup.Values.Where(c => GroupEquals(logger, c.Group));
 
                 if (!groups.Any()) { return; }
 
@@ -923,7 +1102,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Values.Where(c => Bind.GroupEquals(ignore, c.Group));
+                var groups = item.CommandGroup.Values.Where(c => GroupEquals(ignore, c.Group));
 
                 if (!groups.Any()) { return; }
 
@@ -966,7 +1145,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Values.Where(c => Bind.GroupEquals(ignore, c.Group));
+                var groups = item.CommandGroup.Values.Where(c => GroupEquals(ignore, c.Group));
                 //checked group
                 if (!groups.Any()) { return; }
 
@@ -1016,11 +1195,11 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static Result.IResult ErrorBusiness(this System.Type resultTypeDefinition, string businessName) => Bind.ErrorBusiness(resultTypeDefinition, businessName);
+        //public static Result.IResult ErrorBusiness(this System.Type resultTypeDefinition, string businessName) => Bind.ErrorBusiness(resultTypeDefinition, businessName);
 
-        public static Result.IResult ErrorCmd(IBusiness business, string cmd) => Bind.ErrorCmd(business.Configer.ResultTypeDefinition, cmd);
+        public static IResult ErrorCmd(IBusiness business, string cmd) => ErrorCmd(business.Configer.ResultTypeDefinition, cmd);
 
-        static Meta.MetaLogger GetMetaLogger(Meta.MetaLogger metaLogger, Annotations.LoggerAttribute logger, string group)
+        static MetaLogger GetMetaLogger(MetaLogger metaLogger, Annotations.LoggerAttribute logger, string group)
         {
             var logger2 = logger.Clone();
             logger2.Group = group;
@@ -2722,29 +2901,6 @@ namespace Business.Core.Utils
             }
         }
         */
-
-        public static T GetLinkedList<T>(ConcurrentLinkedList<T> attrs, System.Action<T> action)
-        {
-            T value = default;
-
-            var first = attrs?.First;
-
-            while (null != first)
-            {
-                if (NodeState.DAT != first.State)
-                {
-                    first = first.Next;
-                    continue;
-                }
-
-                value = first.Value;
-                action(value);
-
-                first = first.Next;
-            }
-
-            return value;
-        }
     }
     /*
 #region ICloneable
@@ -2765,6 +2921,73 @@ namespace Business.Core.Utils
 
 #endregion
     */
+
+    public static class ConcurrentReadOnlyDictionaryExtensions
+    {
+        public static Node<T> ForEach<T>(this ConcurrentLinkedList<T> linked, System.Action<Node<T>> action)
+        {
+            return ForEach(linked, c =>
+            {
+                action(c);
+                return false;
+            });
+        }
+
+        public static Node<T> ForEach<T>(this ConcurrentLinkedList<T> linked, System.Func<Node<T>, bool> action)
+        {
+            var first = linked?.First;
+
+            while (null != first)
+            {
+                if (NodeState.DAT != first.State)
+                {
+                    first = first.Next;
+                    continue;
+                }
+
+                if (action(first))
+                {
+                    break;
+                }
+
+                first = first.Next;
+            }
+
+            return first;
+        }
+
+        public static async System.Threading.Tasks.Task<Node<T>> ForEach<T>(this ConcurrentLinkedList<T> linked, System.Func<Node<T>, System.Threading.Tasks.Task> action)
+        {
+            return await ForEach(linked, async c =>
+            {
+                await action(c);
+                return false;
+            });
+        }
+
+        public static async System.Threading.Tasks.Task<Node<T>> ForEach<T>(this ConcurrentLinkedList<T> linked, System.Func<Node<T>, System.Threading.Tasks.Task<bool>> action)
+        {
+            var first = linked?.First;
+
+            while (null != first)
+            {
+                if (NodeState.DAT != first.State)
+                {
+                    first = first.Next;
+                    continue;
+                }
+
+                if (await action(first))
+                {
+                    break;
+                }
+
+                first = first.Next;
+            }
+
+            return first;
+        }
+    }
 
     public class ConcurrentReadOnlyDictionary<TKey, TValue> : System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue>
     {

@@ -1506,7 +1506,7 @@ function expand(ev) {
             loadMember(member.member);
 
             setEdit(input, edit);
-            setInput(input);
+            setInput(input, member.member.hasReturn);
             setSdk(parent.querySelector("div[id='SDK & Debug']"));
         }
     }
@@ -1602,11 +1602,14 @@ function loadMember(member) {
         }
     }
 
-    if ("object" == member.returns.type) {
-        out.properties = member.returns.properties;
-    }
-    else {
-        out.properties[member.returns.id] = member.returns;
+    if (null != member.returns) {
+        if ("object" == member.returns.type) {
+            out.properties = member.returns.properties;
+            out.description = member.returns.description;
+        }
+        else {
+            out.properties[member.returns.id] = member.returns;
+        }
     }
 
     if (!hasToken) {
@@ -1673,7 +1676,7 @@ function loadMember(member) {
     //========================================//
 }
 
-function setInput(input) {
+function setInput(input, hasReturn) {
     if (null == input) { return; }
 
     input.querySelectorAll("p[tag='description']").forEach(c => {
@@ -1751,6 +1754,10 @@ function setInput(input) {
     out.removeAttribute("style");
     var out2 = input.querySelector("#Out > div > div > div[tag='panel']");
     out2.removeAttribute("class"); out2.removeAttribute("style"); out2.style.margin = "8px";
+
+    if (!hasReturn) {
+        input.querySelector('#Out > div').style.display = 'none';
+    }
 }
 
 function setEdit(root, edit) {

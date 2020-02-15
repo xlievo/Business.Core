@@ -118,12 +118,25 @@ public partial class BusinessMember2 : BusinessBase
         /// <summary>
         /// aaa
         /// </summary>
-        public string A { get; set; }
+        public string a { get; set; }
 
         /// <summary>
         /// bbb
         /// </summary>
-        public string B { get; set; }
+        public List<Test001Result2> b { get; set; }
+    }
+
+    public struct Test001Result2
+    {
+        /// <summary>
+        /// aaa2
+        /// </summary>
+        public string a { get; set; }
+
+        /// <summary>
+        /// bbb2
+        /// </summary>
+        public string b { get; set; }
     }
 
     public virtual async Task<IResult<DateTime>> Test00X(Token token2, Test001 arg)
@@ -154,7 +167,10 @@ public partial class BusinessMember2 : BusinessBase
     /// <param name="mm">mmmmmmmm!</param>
     /// <param name="fff"></param>
     /// <param name="bbb"></param>
-    /// <returns>rrrrrr</returns>
+    /// <returns>
+    /// rrrrrr
+    /// rrrrrr2
+    /// </returns>
     [Command("AAA")]
     [Command("jjj", Group = "j")]
     [Testing("test2",
@@ -211,7 +227,7 @@ public partial class BusinessMember2 : BusinessBase
         var files = httpFile.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
 
         //return this.ResultCreate(new { arg = arg.Out, files });
-        Test001Result? ss = new Test001Result { A = args.arg.A, B = "SSS" };
+        Test001Result? ss = new Test001Result { a = args.arg.A, b = new List<Test001Result2> { new Test001Result2 { a= args.arg.A, b="sss" } } };
 
         return this.ResultCreate(ss);
         //return ss;
@@ -292,20 +308,20 @@ public partial class BusinessMember2 : BusinessBase
 
     public virtual IResult<Test001Result?> Test0062([Ignore(IgnoreMode.BusinessArg)]string aaa)
     {
-        Test001Result? ss = new Test001Result { A = aaa, B = "SSS" };
+        Test001Result? ss = new Test001Result { a = aaa, b = new List<Test001Result2> { new Test001Result2 { a = aaa, b = "sss" } } };
 
         return this.ResultCreate(ss);
     }
     public virtual IResult<Test001Result?> Test00621([Ignore(IgnoreMode.BusinessArg)]decimal? bbb, [Ignore(IgnoreMode.BusinessArg)]decimal aaa = 111.123m)
     {
-        Test001Result? ss = new Test001Result { A = aaa.ToString(), B = bbb?.ToString() };
+        Test001Result? ss = new Test001Result { a = aaa.ToString(), b = new List<Test001Result2> { new Test001Result2 { a = aaa.ToString(), b = bbb?.ToString()} } };
 
         return this.ResultCreate(ss);
     }
 
     public virtual IResult<Test001Result?> Test0063(Session session, [Ignore(IgnoreMode.BusinessArg)]string aaa)
     {
-        Test001Result? ss = new Test001Result { A = aaa, B = "SSS" };
+        Test001Result? ss = new Test001Result { a = aaa, b = new List<Test001Result2> { new Test001Result2 { a = aaa, b = "sss" } } };
 
         return this.ResultCreate(ss);
     }

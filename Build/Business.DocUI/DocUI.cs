@@ -81,15 +81,15 @@
         /// </summary>
         /// <param name="outDir"></param>
         /// <param name="docRequestPath"></param>
-        /// <param name="update"></param>
-        public static void Write(string outDir = null, string docRequestPath = null, bool update = false)
+        /// <param name="debug"></param>
+        public static void Write(string outDir = null, string docRequestPath = null, bool debug = false)
         {
             if (string.IsNullOrWhiteSpace(outDir))
             {
                 outDir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
             }
 
-            if (!update)
+            if (!debug)
             {
                 var pageOutDir2 = System.IO.Path.Combine(outDir, "doc");
 
@@ -218,7 +218,7 @@
         CentOS/RHEL: yum -y install httpd-tools
         Ubuntu: apt-get install apache2-utils
         */
-        public static async Task<string> benchmark(benchmarkArg arg)
+        public static async Task<string> Benchmark(benchmarkArg arg)
         {
             if (default(benchmarkArg).Equals(arg)) { return new System.ArgumentNullException(nameof(arg)).Message; }
 

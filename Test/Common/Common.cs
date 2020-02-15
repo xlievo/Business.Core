@@ -358,6 +358,7 @@ public static class Common
 
         AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as Exception)?.ExceptionWrite(true, true, LogPath);
 
+        Console.WriteLine($"Date: {DateTimeOffset.Now}");
         Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
         Console.WriteLine($"LogPath: {LogPath}");
 
@@ -436,7 +437,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             .Build();
 
         //writ url to page
-        DocUI.Write(docDir, update: false);
+        DocUI.Write(docDir, debug: true);
         //add route
         app.UseMvc(routes =>
         {
@@ -588,13 +589,6 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                                 result2.Callback = b;
 
                                 var data = ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
-                                /* test
-                                var result3 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
-                                var result4 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Result>(result3.Data);
-                                */
-
-                                //var result4 = MessagePack.MessagePackSerializer.Deserialize<ResultObject<byte[]>>(data);
-                                //var result5 = MessagePack.MessagePackSerializer.Deserialize<BusinessMember2.Test001Result>(result4.Data);
 
                                 await SendAsync(data, id);
                             }
@@ -757,7 +751,7 @@ public class BusinessController : Controller
             var arg = d.TryJsonDeserialize<DocUI.benchmarkArg>();
             if (default(DocUI.benchmarkArg).Equals(arg)) { return new ArgumentNullException(nameof(arg)).Message; }
             arg.host = $"{this.Request.Scheme}://localhost:{this.HttpContext.Connection.LocalPort}/{business.Configer.Info.BusinessName}";
-            return await DocUI.benchmark(arg);
+            return await DocUI.Benchmark(arg);
         }
 
         #endregion

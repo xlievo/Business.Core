@@ -36,7 +36,7 @@ namespace Business.Core
 
         public BootstrapConfig(Auth.IInterceptor interceptor, object[] constructorArguments, System.Type type = null) : this()
         {
-            Interceptor = interceptor;
+            Interceptor = interceptor ?? new Auth.Interceptor();
             ConstructorArguments = constructorArguments;
             Type = type;
         }
@@ -115,13 +115,13 @@ namespace Business.Core
 
         public virtual object Build()
         {
-            var bind = new Bind(Config.Type, Config.Interceptor ?? new Auth.Interceptor(), Config.ConstructorArguments);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
             if (null != business)
             {
-                Help.GetLinkedList(Config.Use, c => c.Invoke(business));
+                Config.Use.ForEach(c => c.Value.Invoke(business));
 
                 Config.UseDoc?.Invoke();
             }
@@ -153,13 +153,13 @@ namespace Business.Core
 
         public virtual Business Build()
         {
-            var bind = new Bind(Config.Type, Config.Interceptor ?? new Auth.Interceptor(), Config.ConstructorArguments);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
             if (null != business)
             {
-                Help.GetLinkedList(Config.Use, c => c.Invoke(business));
+                Config.Use.ForEach(c => c.Value.Invoke(business));
 
                 Config.UseDoc?.Invoke();
             }
@@ -201,7 +201,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            new Bind(type, Config.Interceptor ?? new Auth.Interceptor(), Config.ConstructorArguments);
+                            new Bind(type, Config.Interceptor, Config.ConstructorArguments);
                             //Create(type, bootstrap.constructorArguments);
                             return true;
                         }
@@ -209,7 +209,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        new Bind(type, Config.Interceptor ?? new Auth.Interceptor(), Config.ConstructorArguments);
+                        new Bind(type, Config.Interceptor, Config.ConstructorArguments);
                         return true;
                     }
                 }
@@ -219,7 +219,7 @@ namespace Business.Core
 
             foreach (var business in Configer.BusinessList.Values.AsParallel())
             {
-                Help.GetLinkedList(Config.Use, c => c.Invoke(business));
+                Config.Use.ForEach(c => c.Value.Invoke(business));
             }
 
             Config.UseDoc?.Invoke();
