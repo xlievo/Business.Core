@@ -21,7 +21,7 @@ namespace Business.Core.Result
     /// result
     /// </summary>
     /// <typeparam name="Type"></typeparam>
-    public class ResultObject<Type> : IResult<Type>
+    public struct ResultObject<Type> : IResult<Type>
     {
         //public static implicit operator ResultObject<Type>(string value) => Utils.Help.TryJsonDeserialize<ResultObject<Type>>(value);
 
@@ -38,14 +38,14 @@ namespace Business.Core.Result
         /// <param name="checkData"></param>
         public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericDefinition = null, bool checkData = true)
         {
-            this.dataType = dataType;
-            this.data = data;
-            this.state = state;
+            this.DataType = dataType;
+            this.Data = data;
+            this.State = state;
             this.message = message;
-            this.hasData = checkData ? !Equals(null, data) : false;
-            this.callback = default;
+            this.HasData = checkData ? !Equals(null, data) : false;
+            this.Callback = default;
 
-            this.genericDefinition = genericDefinition;
+            this.GenericDefinition = genericDefinition;
         }
 
         /// <summary>
@@ -56,62 +56,58 @@ namespace Business.Core.Result
         /// <param name="message"></param>
         public ResultObject(Type data, int state = 1, string message = null)
         {
-            this.data = data;
-            this.state = state;
+            this.Data = data;
+            this.State = state;
             this.message = message;
-            this.hasData = !Equals(null, data);
+            this.HasData = !Equals(null, data);
+
+            this.Callback = null;
+            this.DataType = null;
+            this.GenericDefinition = null;
         }
 
-        //public ResultObject(Type data, int state = 1, string message = null) : this(data, null, state, message) { }
-
-        int state;
         /// <summary>
         /// The results of the state is greater than or equal to 1: success, equal to 0: system level exceptions, less than 0: business class error.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("S")]
-        public virtual int State { get => state; set => state = value; }
+        public int State { get; set; }
 
         string message;
         /// <summary>
         /// Success can be null
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("M")]
-        public virtual string Message { get => message; set => message = value; }
+        public string Message { get => message; set => message = value; }
 
         /// <summary>
         /// Specific dynamic data objects
         /// </summary>
-        dynamic IResult.Data { get => data; }
+        dynamic IResult.Data { get => Data; }
 
-        Type data;
         /// <summary>
         /// Specific Byte/Json data objects
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("D")]
-        public virtual Type Data { get => data; set => data = value; }
+        public Type Data { get; set; }
 
-        bool hasData;
         /// <summary>
         /// Whether there is value
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("H")]
-        public virtual bool HasData { get => hasData; set => hasData = value; }
+        public bool HasData { get; set; }
 
-        string callback;
         /// <summary>
         /// Gets the token of this result, used for callback
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         [System.Text.Json.Serialization.JsonPropertyName("B")]
-        public virtual string Callback { get => callback; set => callback = value; }
+        public string Callback { get; set; }
 
-        System.Type dataType;
         [System.Text.Json.Serialization.JsonIgnore]
-        public virtual System.Type DataType { get => dataType; set => dataType = value; }
+        public System.Type DataType { get; set; }
 
-        System.Type genericDefinition;
         [System.Text.Json.Serialization.JsonIgnore]
-        public virtual System.Type GenericDefinition => genericDefinition;
+        public System.Type GenericDefinition { get; }
 
         //ICommand command;
         //[Newtonsoft.Json.JsonIgnore]
@@ -127,26 +123,26 @@ namespace Business.Core.Result
         /// Json format Data
         /// </summary>
         /// <returns></returns>
-        public virtual string ToDataString() => Utils.Help.JsonSerialize(this.Data);
+        public string ToDataString() => Utils.Help.JsonSerialize(this.Data);
 
         /// <summary>
         /// ProtoBuf format
         /// </summary>
         /// <returns></returns>
-        public virtual byte[] ToBytes() => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
+        public byte[] ToBytes() => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
 
         /// <summary>
         /// ProtoBuf format Data
         /// </summary>
         /// <returns></returns>
-        public virtual byte[] ToDataBytes() => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this.Data);
+        public byte[] ToDataBytes() => throw new System.NotImplementedException();
 
-        /// <summary>
-        /// Get generic data
-        /// </summary>
-        /// <typeparam name="DataType">Generic type</typeparam>
-        /// <returns></returns>
-        public virtual DataType Get<DataType>() => ((IResult)this).Data;
+        ///// <summary>
+        ///// Get generic data
+        ///// </summary>
+        ///// <typeparam name="DataType">Generic type</typeparam>
+        ///// <returns></returns>
+        //public DataType Get<DataType>() => ((IResult)this).Data;
     }
 
     /* MessagePack

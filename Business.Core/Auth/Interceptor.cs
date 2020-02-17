@@ -176,7 +176,7 @@ namespace Business.Core.Utils
 
                         if (argAttr.CollectionItem) { return false; }
 
-                        result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value, item.HasIArg ? iArgs[item.Position] : null);
+                        result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value);
 
                         if (1 > result.State)
                         {
@@ -354,7 +354,7 @@ namespace Business.Core.Utils
 
                             System.Threading.Tasks.Task.WaitAll(collectioTasks.ToArray());
 
-                            if (null != returnValue)
+                            if (!Equals(null, returnValue))
                             {
                                 return meta.HasIResult ? Help.GetReturnValueIResult(returnValue, meta) : Help.GetReturnValue(returnValue, meta);
                             }
@@ -545,16 +545,24 @@ namespace Business.Core.Utils
             }
         }
 
-        public async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, IArg arg, int collectionIndex = -1, dynamic dictKey = null)
+        public async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, int collectionIndex = -1, dynamic dictKey = null)
         {
-            switch (argAttr.ArgMeta.HasProcesIArg)
+            switch (argAttr.ArgMeta.Proces.Mode)
             {
-                case ArgumentAttribute.MetaData.ProcesMode.Proces:
+                case Proces.ProcesMode.Proces:
                     return await argAttr.Proces(value);
-                case ArgumentAttribute.MetaData.ProcesMode.ProcesIArg:
-                    return await argAttr.Proces(value, arg);
-                case ArgumentAttribute.MetaData.ProcesMode.ProcesIArgCollection:
-                    return await argAttr.Proces(value, arg, collectionIndex, dictKey);
+                case Proces.ProcesMode.ProcesGeneric:
+                    {
+                        dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { value });
+                        return await result;
+                    }
+                case Proces.ProcesMode.ProcesCollection:
+                    return await argAttr.Proces(value, collectionIndex, dictKey);
+                case Proces.ProcesMode.ProcesCollectionGeneric:
+                    {
+                        dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { value, collectionIndex, dictKey });
+                        return await result;
+                    }
                 default: return null;
             }
         }
@@ -581,7 +589,7 @@ namespace Business.Core.Utils
 
                     if (argAttr.CollectionItem) { return false; }
 
-                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue, (item.HasIArg && null != memberValue) ? (IArg)memberValue : null, collectionIndex, dictKey);
+                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue, collectionIndex, dictKey);
 
                     if (1 > result.State)
                     {
@@ -609,6 +617,7 @@ namespace Business.Core.Utils
                             else if (null != memberValue)
                             {
                                 ((IArg)memberValue).Out = result.Data;
+                                item.Accessor.Setter(currentValue, memberValue);
                             }
                         }
                     }
@@ -749,7 +758,7 @@ namespace Business.Core.Utils
 
                         System.Threading.Tasks.Task.WaitAll(collectioTasks.ToArray());
 
-                        if (null != result3)
+                        if (!Equals(null, result3))
                         {
                             return result3;
                         }
@@ -766,7 +775,7 @@ namespace Business.Core.Utils
                         }
                     }
 
-                    if (!System.Object.Equals(null, result2) && result2.Data is ArgResult && result2.Data.isUpdate)
+                    if (!object.Equals(null, result2) && result2.Data is ArgResult && result2.Data.isUpdate)
                     {
                         if (item.Type.IsValueType || item.HasIArg)
                         {
@@ -798,7 +807,7 @@ namespace Business.Core.Utils
 
                 if (!argAttr.CollectionItem) { return false; }
 
-                var result = await GetProcesResult(argAttr, item.HasCollectionIArg ? iArgIn : currentValue, iArg, collectionIndex, dictKey);
+                var result = await GetProcesResult(argAttr, item.HasCollectionIArg ? iArgIn : currentValue, collectionIndex, dictKey);
 
                 if (1 > result.State)
                 {

@@ -60,7 +60,7 @@ namespace Business.Core.Annotations
             }
         }
 
-        static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
+        internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 
         #region GetAttributes
 
@@ -192,7 +192,7 @@ namespace Business.Core.Annotations
         {
             this.Meta = new MetaData { Type = this.TypeId as System.Type };
 
-            this.Meta.Type.LoadAccessors(Accessors);
+            this.Meta.Type.LoadAccessors(Accessors, methods: true);
         }
 
         #region
@@ -567,17 +567,7 @@ namespace Business.Core.Annotations
 
             public System.Type MemberType { get; internal set; }
 
-            public ProcesMode HasProcesIArg { get; internal set; } = ProcesMode.Proces;
-
-            [System.Flags]
-            public enum ProcesMode
-            {
-                Proces = 2,
-
-                ProcesIArg = 4,
-
-                ProcesIArgCollection = 8,
-            }
+            public Proces Proces { get; internal set; }
 
             public void Clone(MetaData metaData)
             {
@@ -590,7 +580,11 @@ namespace Business.Core.Annotations
                 this.MemberPath = metaData.MemberPath;
                 this.Member = metaData.Member;
                 this.MemberType = metaData.MemberType;
-                this.HasProcesIArg = metaData.HasProcesIArg;
+                this.Proces = new Proces(metaData.Proces.MethodInfo, metaData.Proces.ParameterType)
+                {
+                    Mode = metaData.Proces.Mode,
+                    Call = metaData.Proces.Call
+                };
             }
         }
 
@@ -601,12 +595,38 @@ namespace Business.Core.Annotations
             return clone as T;
         }
 
+        struct ProcesMethod
+        {
+            public System.Type[] proces;
+            public System.Type[] procesCollection;
+        }
+
+        static readonly ProcesMethod procesMethod = new ProcesMethod
+        {
+            proces = Help.GetMethod<ArgumentAttribute>(c => c.Proces(null)).GetParameters().Select(c => c.ParameterType).ToArray(),
+            procesCollection = Help.GetMethod<ArgumentAttribute>(c => c.Proces(null, -1, null)).GetParameters().Select(c => c.ParameterType).ToArray()
+        };
+
         public ArgumentAttribute(int state, string message = null)
         {
             this.State = state;
             this.Message = message;
             //this.CanNull = canNull;
             this.ArgMeta = new MetaData();
+
+            if (Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta) && meta.Methods.TryGetValue("Proces", out Proces method))
+            {
+                this.ArgMeta.Proces = new Proces(method.MethodInfo, method.ParameterType);
+
+                if (Enumerable.SequenceEqual(procesMethod.proces, method.ParameterType))
+                {
+                    this.ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ?  Utils.Proces.ProcesMode.ProcesGeneric : Utils.Proces.ProcesMode.Proces;
+                }
+                else if (Enumerable.SequenceEqual(procesMethod.procesCollection, method.ParameterType))
+                {
+                    this.ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ? Utils.Proces.ProcesMode.ProcesCollectionGeneric : Utils.Proces.ProcesMode.ProcesCollection;
+                }
+            }
 
             this.BindAfter += () =>
             {
@@ -671,19 +691,29 @@ namespace Business.Core.Annotations
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
         /// </summary>
+        /// <typeparam name="Type"></typeparam>
         /// <param name="value"></param>
-        /// <param name="iArg"></param>
         /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces(dynamic value, IArg arg) => this.ResultCreate<dynamic>(value);
+        public virtual async ValueTask<IResult> Proces<Type>(dynamic value) => this.ResultCreate<dynamic>(value);
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
         /// </summary>
         /// <param name="value"></param>
-        /// <param name="arg"></param>
         /// <param name="collectionIndex"></param>
+        /// <param name="dictKey"></param>
         /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic dictKey) => this.ResultCreate<dynamic>(value);
+        public virtual async ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic dictKey) => this.ResultCreate<dynamic>(value);
+
+        /// <summary>
+        /// Start processing the Parameter object, By this.ResultCreate() method returns
+        /// </summary>
+        /// <typeparam name="Type"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="collectionIndex"></param>
+        /// <param name="dictKey"></param>
+        /// <returns></returns>
+        public virtual async ValueTask<IResult> Proces<Type>(dynamic value, int collectionIndex, dynamic dictKey) => this.ResultCreate<dynamic>(value);
 
         #region Result
 
@@ -1395,7 +1425,7 @@ namespace Business.Core.Annotations
 
         public System.Text.Json.JsonSerializerOptions options;
 
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces<Type>(dynamic value)
         {
             //var value2 = value?.ToString();
             //var value2 = value?.GetRawText();
@@ -1404,7 +1434,8 @@ namespace Business.Core.Annotations
 
             try
             {
-                return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize(value, this.ArgMeta.MemberType, options));
+                //return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize(value, this.ArgMeta.MemberType, options));
+                return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize<Type>(value, options));
             }
             catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
         }

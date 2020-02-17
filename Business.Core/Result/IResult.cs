@@ -22,12 +22,12 @@ namespace Business.Core.Result
         /// The results of the state is greater than or equal 
         /// to 1: success, equal to 0: system level exceptions, less than 0: business class error.
         /// </summary>
-        System.Int32 State { get; }
+        int State { get; }
 
         /// <summary>
         /// Success can be null
         /// </summary>
-        System.String Message { get; }
+        string Message { get; }
 
         /// <summary>
         /// Specific Byte/Json data objects
@@ -37,45 +37,38 @@ namespace Business.Core.Result
         /// <summary>
         /// Whether there is value
         /// </summary>
-        System.Boolean HasData { get; }
+        bool HasData { get; }
 
         System.Type DataType { get; }
 
         /// <summary>
         /// Gets the token of this result, used for callback
         /// </summary>
-        System.String Callback { get; set; }
+        string Callback { get; set; }
 
         /// <summary>
         /// Json Data
         /// </summary>
         /// <returns></returns>
-        System.String ToDataString();
+        string ToDataString();
 
         /// <summary>
         /// Byte Data
         /// </summary>
         /// <returns></returns>
-        System.Byte[] ToDataBytes();
+        byte[] ToDataBytes();
 
         /// <summary>
         /// ProtoBuf,MessagePack or Other
         /// </summary>
         /// <returns></returns>
-        System.Byte[] ToBytes();
+        byte[] ToBytes();
 
         /// <summary>
         /// Json
         /// </summary>
         /// <returns></returns>
-        System.String ToString();
-
-        /// <summary>
-        /// Get generic data
-        /// </summary>
-        /// <typeparam name="DataType">Generic type</typeparam>
-        /// <returns></returns>
-        DataType Get<DataType>();
+        string ToString();
 
         /// <summary>
         /// System.Type object that represents a generic type definition from which the current generic type can be constructed.

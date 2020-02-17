@@ -1,4 +1,5 @@
-﻿using Business.Core.Annotations;
+﻿using Business.Core;
+using Business.Core.Annotations;
 using Business.Core.Result;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ using static Args;
 [Info("API/v2", CommandGroupDefault = null)]
 public class BusinessMember3 : BusinessBase
 {
-    public BusinessMember3()
+    public BusinessMember3() : base()
     {
         this.BindBefore = c =>
         {
@@ -227,7 +228,7 @@ public partial class BusinessMember2 : BusinessBase
         var files = httpFile.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
 
         //return this.ResultCreate(new { arg = arg.Out, files });
-        Test001Result? ss = new Test001Result { a = args.arg.A, b = new List<Test001Result2> { new Test001Result2 { a= args.arg.A, b="sss" } } };
+        Test001Result? ss = new Test001Result { a = args.arg.A, b = new List<Test001Result2> { new Test001Result2 { a = args.arg.A, b = "sss" } } };
 
         return this.ResultCreate(ss);
         //return ss;
@@ -314,7 +315,7 @@ public partial class BusinessMember2 : BusinessBase
     }
     public virtual IResult<Test001Result?> Test00621([Ignore(IgnoreMode.BusinessArg)]decimal? bbb, [Ignore(IgnoreMode.BusinessArg)]decimal aaa = 111.123m)
     {
-        Test001Result? ss = new Test001Result { a = aaa.ToString(), b = new List<Test001Result2> { new Test001Result2 { a = aaa.ToString(), b = bbb?.ToString()} } };
+        Test001Result? ss = new Test001Result { a = aaa.ToString(), b = new List<Test001Result2> { new Test001Result2 { a = aaa.ToString(), b = bbb?.ToString() } } };
 
         return this.ResultCreate(ss);
     }

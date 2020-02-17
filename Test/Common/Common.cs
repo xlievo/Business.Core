@@ -22,77 +22,6 @@ using Business.Core.Document;
 
 #region Socket Support
 
-/*
-/// <summary>
-/// This is a parameter package, used to transform parameters
-/// </summary>
-/// <typeparam name="OutType"></typeparam>
-public class Arg<OutType> : Business.Core.Arg<OutType>
-{
-    public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
-    public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
-    public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
-    public override async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
-}
-*/
-
-/// <summary>
-/// This is a parameter package, used to transform parameters
-/// </summary>
-/// <typeparam name="OutType"></typeparam>
-public struct Arg<OutType> : IArg<OutType>
-{
-    dynamic IArg.Out { get => this.Out; set => this.Out = value; }
-
-    /// <summary>
-    /// The final output object
-    /// </summary>
-    public OutType Out { get; set; }
-
-    /// <summary>
-    /// The first input object
-    /// </summary>
-    public dynamic In { get; set; }
-
-    /// <summary>
-    /// byte format Out
-    /// </summary>
-    /// <returns></returns>
-    public byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
-
-    /// <summary>
-    /// JSON format Out
-    /// </summary>
-    /// <returns></returns>
-    public override string ToString() => Help.JsonSerialize(Out);
-
-    public async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
-}
-
-/*
-public class ResultObject<Type> : Business.Core.Result.ResultObject<Type>
-{
-    public static readonly System.Type ResultTypeDefinition = typeof(ResultObject<>).GetGenericTypeDefinition();
-
-    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericDefinition = null, bool checkData = true)
-        : base(dataType, data, state, message, genericDefinition, checkData) { }
-
-    public ResultObject(Type data, int state = 1, string message = null) : base(data, state, message) { }
-
-    [MessagePack.IgnoreMember]
-    [System.Text.Json.Serialization.JsonIgnore]
-    public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
-
-    [MessagePack.IgnoreMember]
-    [System.Text.Json.Serialization.JsonIgnore]
-    public override System.Type GenericDefinition => base.GenericDefinition;
-
-    public override byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
-
-    public override byte[] ToDataBytes() => MessagePack.MessagePackSerializer.Serialize(this.Data);
-}
-*/
-
 /// <summary>
 /// result
 /// </summary>
@@ -207,13 +136,6 @@ public struct ResultObject<Type> : IResult<Type>
     /// </summary>
     /// <returns></returns>
     public byte[] ToDataBytes() => MessagePack.MessagePackSerializer.Serialize(this.Data);
-
-    /// <summary>
-    /// Get generic data
-    /// </summary>
-    /// <typeparam name="DataType">Generic type</typeparam>
-    /// <returns></returns>
-    public DataType Get<DataType>() => ((IResult)this).Data;
 }
 
 public struct ReceiveData
@@ -297,7 +219,7 @@ public struct Session
 [Command(Group = "s")]
 [@MessagePackArg(Group = "s")]
 [Logger]
-public abstract class BusinessBase : BusinessBase<ResultObject<object>, Arg<object>>
+public abstract class BusinessBase : BusinessBase<ResultObject<object>>
 {
     public BusinessBase()
     {

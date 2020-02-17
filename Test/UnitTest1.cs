@@ -20,20 +20,6 @@ public struct CommandGroupDefault
     public const string Group = "333";
 }
 
-public class ResultObject<Type> : Business.Core.Result.ResultObject<Type>
-{
-    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericType = null, bool checkData = true)
-        : base(dataType, data, state, message, genericType, checkData) { }
-
-    [MessagePack.IgnoreMember]
-    public override System.Type DataType { get => base.DataType; set => base.DataType = value; }
-
-    [MessagePack.IgnoreMember]
-    public override System.Type GenericDefinition => base.GenericDefinition;
-
-    public override byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
-}
-
 //[Logger(LoggerType.Record, CanWrite = false)]
 [Use]
 public struct Use01
@@ -1102,7 +1088,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     {
         public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic key)
+        public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic key)
         {
             //if (200000 < value.A)
             //{
@@ -1117,7 +1103,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     {
         public CheckedMemberTypeAttribute(int state = -2000, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic key)
+        public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic key)
         {
             Assert.IsTrue(this.ArgMeta.MemberType.IsCollection());
             return this.ResultCreate();
@@ -1263,7 +1249,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     {
         public TestExceptionAttribute(int state = -1111, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value, IArg arg, int collectionIndex, dynamic key)
+        public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic key)
         {
             if (1 == collectionIndex)
             {
@@ -2035,16 +2021,4 @@ public class TestBusinessMember
         //Assert.AreEqual(r.State, 0);
         //Assert.AreEqual(r.Message.Contains("Attribute Proces exception! 1"), true);
     }
-}
-
-/// <summary>
-/// This is a parameter package, used to transform parameters
-/// </summary>
-/// <typeparam name="OutType"></typeparam>
-public class Arg<OutType> : Business.Core.Arg<OutType>
-{
-    public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
-    public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
-    public static implicit operator Arg<OutType>(OutType value) => new Arg<OutType>() { In = value };
-    public override async ValueTask<dynamic> ToOut(dynamic value) => MessagePack.MessagePackSerializer.Deserialize<OutType>(value);
 }

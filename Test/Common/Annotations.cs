@@ -11,16 +11,16 @@ namespace Business.Core.Annotations
             this.Description = "MessagePackArg Binary parsing";
         }
 
-        public override async ValueTask<IResult> Proces(dynamic value, IArg arg)
+        public override async ValueTask<IResult> Proces<Type>(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
             try
             {
-                return this.ResultCreate(await arg.ToOut(value));
+                return this.ResultCreate(MessagePack.MessagePackSerializer.Deserialize<Type>(value));
             }
-            catch(System.Exception ex) { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} MessagePack deserialize error. {ex.Message}"); }
+            catch (System.Exception ex) { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} MessagePack deserialize error. {ex.Message}"); }
         }
     }
 

@@ -28,14 +28,6 @@ namespace Business.Core
         /// The final output object
         /// </summary>
         dynamic Out { get; set; }
-
-        //string Group { get; set; }
-
-        string ToString();
-
-        byte[] ToBytes();
-
-        System.Threading.Tasks.ValueTask<dynamic> ToOut(dynamic value);
     }
 
     public interface IArg<OutType, InType> : IArg
@@ -55,7 +47,7 @@ namespace Business.Core
     /// </summary>
     /// <typeparam name="OutType"></typeparam>
     /// <typeparam name="InType"></typeparam>
-    public class Arg<OutType, InType> : IArg<OutType, InType>
+    public struct Arg<OutType, InType> : IArg<OutType, InType>
     {
         public static implicit operator Arg<OutType, InType>(InType value) => new Arg<OutType, InType> { In = value };
         //default OutType
@@ -67,42 +59,21 @@ namespace Business.Core
         /// <summary>
         /// The final output object
         /// </summary>
-        public virtual OutType Out { get; set; }
+        public OutType Out { get; set; }
 
         dynamic IArg.In { get => this.In; set => this.In = value; }
 
         /// <summary>
         /// The first input object
         /// </summary>
-        public virtual InType In { get; set; }
-
-        /// <summary>
-        /// Used for the command group
-        /// </summary>
-        //[Newtonsoft.Json.JsonIgnore]
-        //[System.Text.Json.Serialization.JsonIgnore]
-        //public virtual string Group { get; set; }
-         
-        /// <summary>
-        /// byte format Out
-        /// </summary>
-        /// <returns></returns>
-        public virtual byte[] ToBytes() => throw new System.NotImplementedException();
-
-        /// <summary>
-        /// JSON format Out
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString() => Utils.Help.JsonSerialize(Out);
-
-        public virtual System.Threading.Tasks.ValueTask<dynamic> ToOut(dynamic value) => throw new System.NotImplementedException();
+        public InType In { get; set; }
     }
 
     /// <summary>
     /// This is a parameter package, used to transform parameters
     /// </summary>
     /// <typeparam name="OutType"></typeparam>
-    public class Arg<OutType> : IArg<OutType>
+    public struct Arg<OutType> : IArg<OutType>
     {
         public static implicit operator Arg<OutType>(string value) => new Arg<OutType>() { In = value };
         public static implicit operator Arg<OutType>(byte[] value) => new Arg<OutType>() { In = value };
@@ -114,25 +85,11 @@ namespace Business.Core
         /// <summary>
         /// The final output object
         /// </summary>
-        public virtual OutType Out { get; set; }
+        public OutType Out { get; set; }
 
         /// <summary>
         /// The first input object
         /// </summary>
         public dynamic In { get; set; }
-
-        /// <summary>
-        /// byte format Out
-        /// </summary>
-        /// <returns></returns>
-        public virtual byte[] ToBytes() => throw new System.NotImplementedException();
-
-        /// <summary>
-        /// JSON format Out
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString() => Utils.Help.JsonSerialize(Out);
-
-        public virtual System.Threading.Tasks.ValueTask<dynamic> ToOut(dynamic value) => throw new System.NotImplementedException();
     }
 }

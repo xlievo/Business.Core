@@ -64,11 +64,5 @@
             Attr01
             </summary>
         </member>
-        <member name="T:Arg`1">
-            <summary>
-            This is a parameter package, used to transform parameters
-            </summary>
-            <typeparam name="OutType"></typeparam>
-        </member>
     </members>
 </doc>

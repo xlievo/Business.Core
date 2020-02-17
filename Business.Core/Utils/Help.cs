@@ -44,11 +44,42 @@ namespace Business.Core.Utils
         }
     }
 
+    public class Proces
+    {
+        public Proces(MethodInfo method, System.Type[] parameterType)
+        {
+            this.MethodInfo = method;
+            this.ParameterType = parameterType;
+        }
+
+        public MethodInfo MethodInfo { get; }
+
+        public System.Type[] ParameterType { get; }
+
+        public ProcesMode Mode { get; set; }
+
+        public System.Func<object, object[], object> Call { get; set; }
+
+        [System.Flags]
+        public enum ProcesMode
+        {
+            Proces = 2,
+
+            ProcesGeneric = 4,
+
+            ProcesCollection = 8,
+
+            ProcesCollectionGeneric = 16
+        }
+    }
+
     internal struct Accessors
     {
         public ConcurrentReadOnlyDictionary<string, Accessor> Accessor;
 
         public object[] ConstructorArgs;
+
+        public ConcurrentReadOnlyDictionary<string, Proces> Methods;
     }
 
     public static class Help
@@ -202,13 +233,37 @@ namespace Business.Core.Utils
 
         public static string BaseDirectory = System.AppDomain.CurrentDomain.BaseDirectory ?? System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null)
+        internal static readonly Emit.DynamicMethodBuilder dynamicMethodBuilder = new Emit.DynamicMethodBuilder();
+
+        internal static Accessor GetAccessor(this FieldInfo fieldInfo)
+        {
+            if (null == fieldInfo) { throw new System.ArgumentNullException(nameof(fieldInfo)); }
+
+            var getter = Emit.FieldAccessorGenerator.CreateGetter(fieldInfo);
+            var setter = Emit.FieldAccessorGenerator.CreateSetter(fieldInfo);
+
+            return new Accessor(fieldInfo.FieldType, getter, setter);
+        }
+
+        internal static Accessor GetAccessor(this PropertyInfo propertyInfo)
+        {
+            if (null == propertyInfo) { throw new System.ArgumentNullException(nameof(propertyInfo)); }
+
+            var getter = Emit.PropertyAccessorGenerator.CreateGetter(propertyInfo);
+            var setter = Emit.PropertyAccessorGenerator.CreateSetter(propertyInfo);
+
+            return new Accessor(propertyInfo.PropertyType, getter, setter);
+        }
+
+        public static MethodInfo GetMethod<T>(System.Linq.Expressions.Expression<System.Action<T>> methodSelector) => ((System.Linq.Expressions.MethodCallExpression)methodSelector.Body).Method;
+
+        internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null, bool methods = false)
         {
             var key2 = string.IsNullOrWhiteSpace(key) ? type.FullName : key;
 
             if (type.IsAbstract || accessors.ContainsKey(key2)) { return; }
 
-            var member = accessors.dictionary.GetOrAdd(key2, _ => new Accessors { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() });
+            var member = accessors.dictionary.GetOrAdd(key2, _ => new Accessors { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray(), Methods = new ConcurrentReadOnlyDictionary<string, Proces>() });
 
             foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
             {
@@ -232,6 +287,15 @@ namespace Business.Core.Utils
                 var accessor = property.GetAccessor();
                 if (null == accessor.Getter || null == accessor.Setter) { continue; }
                 member.Accessor.dictionary.TryAdd(property.Name, accessor);
+            }
+
+            if (methods)
+            {
+                foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    var accessor = new Proces(method.IsGenericMethod ? method.GetGenericMethodDefinition() : method, method.GetParameters().Select(c => c.ParameterType).ToArray());
+                    member.Methods.dictionary.TryAdd(method.Name, accessor);
+                }
             }
         }
 
@@ -1293,26 +1357,6 @@ namespace Business.Core.Utils
 #endif
                 return null;
             }
-        }
-
-        internal static Accessor GetAccessor(this FieldInfo fieldInfo)
-        {
-            if (null == fieldInfo) { throw new System.ArgumentNullException(nameof(fieldInfo)); }
-
-            var getter = Emit.FieldAccessorGenerator.CreateGetter(fieldInfo);
-            var setter = Emit.FieldAccessorGenerator.CreateSetter(fieldInfo);
-
-            return new Accessor(fieldInfo.FieldType, getter, setter);
-        }
-
-        internal static Accessor GetAccessor(this PropertyInfo propertyInfo)
-        {
-            if (null == propertyInfo) { throw new System.ArgumentNullException(nameof(propertyInfo)); }
-
-            var getter = Emit.PropertyAccessorGenerator.CreateGetter(propertyInfo);
-            var setter = Emit.PropertyAccessorGenerator.CreateSetter(propertyInfo);
-
-            return new Accessor(propertyInfo.PropertyType, getter, setter);
         }
 
         #region GetAttributes

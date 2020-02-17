@@ -4,34 +4,6 @@
         <name>Common</name>
     </assembly>
     <members>
-        <member name="T:Arg`1">
-            <summary>
-            This is a parameter package, used to transform parameters
-            </summary>
-            <typeparam name="OutType"></typeparam>
-        </member>
-        <member name="P:Arg`1.Out">
-            <summary>
-            The final output object
-            </summary>
-        </member>
-        <member name="P:Arg`1.In">
-            <summary>
-            The first input object
-            </summary>
-        </member>
-        <member name="M:Arg`1.ToBytes">
-            <summary>
-            byte format Out
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Arg`1.ToString">
-            <summary>
-            JSON format Out
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:ResultObject`1">
             <summary>
             result
@@ -109,13 +81,6 @@
             <summary>
             ProtoBuf format Data
             </summary>
-            <returns></returns>
-        </member>
-        <member name="M:ResultObject`1.Get``1">
-            <summary>
-            Get generic data
-            </summary>
-            <typeparam name="DataType">Generic type</typeparam>
             <returns></returns>
         </member>
         <member name="F:ReceiveData.a">
