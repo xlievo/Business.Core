@@ -547,7 +547,7 @@ namespace Business.Core.Utils
 
         public async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, int collectionIndex = -1, dynamic dictKey = null)
         {
-            switch (argAttr.ArgMeta.Proces.Mode)
+            switch (argAttr.ArgMeta.Proces?.Mode)
             {
                 case Proces.ProcesMode.Proces:
                     return await argAttr.Proces(value);
@@ -563,7 +563,7 @@ namespace Business.Core.Utils
                         dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { value, collectionIndex, dictKey });
                         return await result;
                     }
-                default: return null;
+                default: return await argAttr.Proces(value);
             }
         }
 

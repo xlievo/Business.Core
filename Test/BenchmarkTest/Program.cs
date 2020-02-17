@@ -275,7 +275,7 @@ namespace BenchmarkTest
     {
         public Proces01(int state = -110, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value) => this.ResultCreate(data: value + 1);
+        public async override ValueTask<IResult> Proces<Type>(dynamic value) => this.ResultCreate(data: value + 1);
     }
 
     public class Arg00
@@ -295,11 +295,11 @@ namespace BenchmarkTest
 
         public static bool SpinWait(int millisecondsTimeout) => System.Threading.SpinWait.SpinUntil(() => false, millisecondsTimeout);
 
-        public static ConcurrentBag<int> Logs = new ConcurrentBag<int>();
+        //public static ConcurrentBag<int> Logs = new ConcurrentBag<int>();
 
         public BusinessMember()
         {
-            this.Logger = new Logger(async loggers =>
+            this.Logger = new Logger(async (Logger.LoggerData x) =>
             {
                 if (-1 != Program.WorkTime)
                 {
@@ -307,14 +307,16 @@ namespace BenchmarkTest
                 }
                 //System.Console.WriteLine(loggers.Count());
 
-                var logs = loggers.Select(c =>
-                {
-                    c.Value = c.Value?.ToValue();
-                    Loggers.Add(c);
-                    return c;
-                }).ToList();
+                //var logs = loggers.Select(c =>
+                //{
+                //    c.Value = c.Value?.ToValue();
+                //    Loggers.Add(c);
+                //    return c;
+                //}).ToList();
 
-                Logs.Add(logs.Count);
+                //Logs.Add(logs.Count);
+                Loggers.Add(x);
+                //Logs.Add(1);
             });
             //}, 30)
             //{
@@ -326,21 +328,21 @@ namespace BenchmarkTest
             //};
         }
 
-        public virtual dynamic Test000([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
+        public virtual dynamic Test000([Use(true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
 
-        public virtual async Task<dynamic> Test001([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Core.Auth.Token token)
+        public virtual async Task<dynamic> Test001([Use(true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token)
         {
-            return this.ResultCreate(data: arg00.Out.A + 1);
+            return this.ResultCreate(data: arg00.A + 1);
         }
 
-        public virtual IResult Test002([Use(true)]dynamic use01, Arg<Arg00> arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.Out.A + 1);
+        public virtual IResult Test002([Use(true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
 
 
         public class TestCollectionAttribute : ArgumentAttribute
         {
             public TestCollectionAttribute(int state = -1106, string message = null) : base(state, message) { }
 
-            public async override ValueTask<IResult> Proces(dynamic value)
+            public async override ValueTask<IResult> Proces<Type>(dynamic value)
             {
                 if (value == "sss")
                 {
@@ -355,7 +357,7 @@ namespace BenchmarkTest
         {
             public TestCollection2Attribute(int state = -1107, string message = null) : base(state, message) { }
 
-            public async override ValueTask<IResult> Proces(dynamic value)
+            public async override ValueTask<IResult> Proces<Type>(dynamic value)
             {
                 return this.ResultCreate(data: value + 1);
             }
@@ -365,7 +367,7 @@ namespace BenchmarkTest
         {
             public TestCollection3Attribute(int state = -1108, string message = null) : base(state, message) { }
 
-            public async override ValueTask<IResult> Proces(dynamic value)
+            public async override ValueTask<IResult> Proces<Type>(dynamic value)
             {
                 return this.ResultCreate(data: value + 1);
             }
@@ -375,7 +377,7 @@ namespace BenchmarkTest
         {
             public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
 
-            public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex = -1, dynamic key = null)
+            public async override ValueTask<IResult> Proces<Type>(dynamic value, int collectionIndex = -1, dynamic key = null)
             {
                 value.A = value.A + 1;
                 return this.ResultCreate(value);

@@ -233,8 +233,6 @@ namespace Business.Core.Utils
 
         public static string BaseDirectory = System.AppDomain.CurrentDomain.BaseDirectory ?? System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        internal static readonly Emit.DynamicMethodBuilder dynamicMethodBuilder = new Emit.DynamicMethodBuilder();
-
         internal static Accessor GetAccessor(this FieldInfo fieldInfo)
         {
             if (null == fieldInfo) { throw new System.ArgumentNullException(nameof(fieldInfo)); }

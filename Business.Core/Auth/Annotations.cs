@@ -580,11 +580,14 @@ namespace Business.Core.Annotations
                 this.MemberPath = metaData.MemberPath;
                 this.Member = metaData.Member;
                 this.MemberType = metaData.MemberType;
-                this.Proces = new Proces(metaData.Proces.MethodInfo, metaData.Proces.ParameterType)
+                if (null != metaData.Proces)
                 {
-                    Mode = metaData.Proces.Mode,
-                    Call = metaData.Proces.Call
-                };
+                    this.Proces = new Proces(metaData.Proces.MethodInfo, metaData.Proces.ParameterType)
+                    {
+                        Mode = metaData.Proces.Mode,
+                        Call = metaData.Proces.Call
+                    };
+                }
             }
         }
 
@@ -614,13 +617,13 @@ namespace Business.Core.Annotations
             //this.CanNull = canNull;
             this.ArgMeta = new MetaData();
 
-            if (Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta) && meta.Methods.TryGetValue("Proces", out Proces method))
+            if (Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta) && meta.Methods.TryGetValue(nameof(ArgumentAttribute.Proces), out Proces method))
             {
                 this.ArgMeta.Proces = new Proces(method.MethodInfo, method.ParameterType);
 
                 if (Enumerable.SequenceEqual(procesMethod.proces, method.ParameterType))
                 {
-                    this.ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ?  Utils.Proces.ProcesMode.ProcesGeneric : Utils.Proces.ProcesMode.Proces;
+                    this.ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ? Utils.Proces.ProcesMode.ProcesGeneric : Utils.Proces.ProcesMode.Proces;
                 }
                 else if (Enumerable.SequenceEqual(procesMethod.procesCollection, method.ParameterType))
                 {
