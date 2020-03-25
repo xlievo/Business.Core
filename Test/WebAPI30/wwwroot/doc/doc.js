@@ -1058,7 +1058,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             self.rows[i].input.style.display = 'none';
 
             var file = self.header.parentNode.querySelector("#file");
-            if (null !== file && 0 < file.files.length) {
+            if ((null !== file && undefined !== file) && 0 < file.files.length) {
                 self.rows[i].label.setAttribute("tag", "file");
                 self.rows[i].label.file = file.files[0];
                 self.rows[i].label.innerText = file.files[0].name + "  " + renderSize(file.files[0].size);
@@ -1114,7 +1114,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                     }
                 });
 
-                if (null !== file) {
+                if (null !== file && undefined !== file) {
                     var files = [];
                     $each(self.rows, function (j, row) {
                         if (j !== i) {
@@ -1126,14 +1126,12 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                 self.empty(true);
                 self.setValue(newval);
 
-                if (null !== file) {
-                    if (null !== file) {
-                        $each(files, function (j, row) {
-                            self.rows[j].label.setAttribute("tag", "file");
-                            self.rows[j].label.file = row;
-                            self.rows[j].label.innerText = row.name + "  " + renderSize(row.size);
-                        });
-                    }
+                if (null !== file && undefined !== file) {
+                    $each(files, function (j, row) {
+                        self.rows[j].label.setAttribute("tag", "file");
+                        self.rows[j].label.file = row;
+                        self.rows[j].label.innerText = row.name + "  " + renderSize(row.size);
+                    });
                 }
 
                 if (self.rows[i]) {
@@ -1172,7 +1170,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             }
         }
 
-        if (null == file) {
+        if (null == file || undefined == file) {
             //Button to copy an array element and add it as last element
             if (self.show_copy_button) {
                 self.rows[i].copy_button = this.getButton(self.getItemTitle(), 'copy', 'Copy ' + self.getItemTitle());
@@ -1349,24 +1347,109 @@ JSONEditor.defaults.iconlibs.bootstrap3 = function () {
 
 var disclosure = null;
 var doc = null;
-var businessKey = null;
+//var businessKey = null;
 var businessName = null;
 //var business = null;
 var compiled_tpl = juicer(document.getElementById('tpl').innerHTML);
+var compiled_menuGroup = juicer(document.getElementById('menuGroup').innerHTML);
 var compiled_benchmark = juicer(document.getElementById('benchmark').innerHTML);
+var menus = document.getElementById('menus');
 var edit = false;
 var businessSelect = document.getElementById('business');
 var groupSelect = document.querySelector("#group");
 var members = document.getElementById('members');
 var businessDescription = document.getElementById('business_description');
 var tokenvalue = null;
+var main = document.getElementById('main');
+var close_sidebar = document.getElementById('close-sidebar');
+var menu_toggle = document.getElementById('menu-toggle');
+var wrapper = document.getElementById('wrapper');
+var page_content = document.getElementById('page-content');
+menu_toggle.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    wrapper.classList.toggle("toggled");
+    e.currentTarget.classList.toggle("is-active");
+}, false);
+document.getElementById('search').addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var value = document.getElementById('searchValue').value.trim();
+    if ("" !== value) {
+        var target = null;
+        var aliass = members.querySelectorAll("#alias");
+        for (var i = 0; i < aliass.length; i++) {
+            if (-1 < aliass[i].textContent.indexOf(value)) {
+                target = aliass[i].getAttribute("tag");
+                document.getElementById(target).scrollIntoView({ behavior: 'smooth' });
+                break;
+            }
+        }
+    }
+}, false);
 
 function businessOnchang(obj) {
     if (-1 !== obj.selectedIndex) {
         var select = obj.options[obj.selectedIndex];
-        businessKey = select.value;
-        businessName = select.text;
-        var business = doc[businessKey];
+        //businessKey = select.value;
+        businessName = select.value;//select.text;
+        var business = doc[businessName];
+
+        var navigationName = document.querySelector(".sidebar-item > .user-info > .user-name strong");
+        navigationName.textContent = business.alias;
+
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            main.style.paddingLeft = main.style.paddingRight = 0;
+        }
+
+        if (business.config.navigtion) {
+            close_sidebar.style.removeProperty("display");
+
+            if (!wrapper.classList.contains("toggled")) {
+                wrapper.classList.toggle("toggled");
+            }
+            if (!menu_toggle.classList.contains("is-active")) {
+                menu_toggle.classList.toggle("is-active");
+            }
+
+            var html = compiled_menuGroup.render(business.docGroup);
+            menus.innerHTML = html;
+
+            document.querySelectorAll(".sidebar-submenu a").forEach(c => {
+                c.addEventListener('click', e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var target = members.querySelector("div[tag='" + e.currentTarget.id + "']");
+                    if (null != target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, false);
+            });
+
+            // Dropdown menu
+            $(".sidebar-dropdown > a").click(function () {
+                //$(".sidebar-submenu").slideUp(200);
+                if ($(this).parent().hasClass("active")) {
+                    //$(".sidebar-dropdown").removeClass("active");
+                    $(this).next(".sidebar-submenu").slideUp(200);
+                    $(this).parent().removeClass("active");
+                } else {
+                    //$(".sidebar-dropdown").removeClass("active");
+                    $(this).next(".sidebar-submenu").slideDown(200);
+                    $(this).parent().addClass("active");
+                }
+            });
+        }
+        else {
+            if (wrapper.classList.contains("toggled")) {
+                wrapper.classList.toggle("toggled");
+            }
+            if (menu_toggle.classList.contains("is-active")) {
+                menu_toggle.classList.toggle("is-active");
+            }
+
+            close_sidebar.style.display = "none";
+        }
 
         businessDescription.innerHTML = '';
         if (business.description) {
@@ -1404,9 +1487,9 @@ function businessOnchang(obj) {
 }
 
 function groupOnchang(obj) {
-    if (null != doc && null != businessKey) {
+    if (null != doc && null != businessName) {
         //console.time("timer");
-        load(doc[businessKey].group[obj.options[obj.selectedIndex].value]);
+        load(doc[businessName].group[obj.options[obj.selectedIndex].value]);
         //console.timeEnd("timer");
     }
 }
@@ -1423,7 +1506,7 @@ function destroy(all = false) {
         businessDescription.innerHTML = '';
         groupSelect.options.length = 0;
         doc = null;
-        businessKey = null;
+        businessName = null;
     }
 }
 
@@ -1472,9 +1555,9 @@ function go() {
         function (response) {
             try {
                 doc = JSON.parse(response);
-                var businessSelect = document.getElementById('business');
+                //var businessSelect = document.getElementById('business');
                 for (var i in doc) {
-                    businessSelect.options.add(new Option(doc[i].name, i));
+                    businessSelect.options.add(new Option(doc[i].alias, i));
 
                     if (doc[i].config.host == null || doc[i].config.host == undefined || doc[i].config.host === '') {
                         doc[i].config.host = document.location.origin;
@@ -1663,6 +1746,7 @@ function loadMember(member) {
             type: "object",
             format: "categories",
             properties: {
+                Curl: getSdk("sh"),
                 JavaScript: getSdk("javascript"),
                 NET: getSdk("csharp"),
                 Java: getSdk("java"),
@@ -1848,6 +1932,7 @@ function ready(editor) {
         //======================================================//
         var debug = editor.sdkeditor;
 
+        var curlValue = debug.editors["root.Curl.value"];
         var javascriptValue = debug.editors["root.JavaScript.value"];
         var netValue = debug.editors["root.NET.value"];
         var javaValue = debug.editors["root.Java.value"];
@@ -1859,7 +1944,7 @@ function ready(editor) {
 
         var header = debug.root.header.parentNode;
 
-        if (doc[businessKey].config.debug) {
+        if (doc[businessName].config.debug) {
             var buttonDebug = debug.root.getButton('', 'debug', 'Debug');
             button_holder = debug.root.theme.getHeaderButtonHolder();
             button_holder.appendChild(buttonDebug);
@@ -1890,7 +1975,7 @@ function ready(editor) {
                         form.append(c.file.name, c.file);
                     });
 
-                    ajax.postForm(doc[businessKey].config.host + "/" + businessName,
+                    ajax.postForm(doc[businessName].config.host + "/" + businessName,
                         form,
                         function (response) {
                             //succcess
@@ -1913,7 +1998,7 @@ function ready(editor) {
                     if (data.hasOwnProperty("d")) {
                         d.d = data.d;
                     }
-                    ajax.post(doc[businessKey].config.host + "/" + businessName, d,
+                    ajax.post(doc[businessName].config.host + "/" + businessName, d,
                         function (response) {
                             //succcess
                             try {
@@ -1941,13 +2026,13 @@ function ready(editor) {
         header2.style.marginTop = '8px';
         header.parentNode.insertBefore(header2, header.nextSibling);
 
-        if (doc[businessKey].config.testing) {
+        if (doc[businessName].config.testing) {
             var testing = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing');
-            var testing_btn = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing_btn');
-            var testingAll_btn = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testingAll_btn');
+            //var testing_btn = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing_btn');
+            //var testingAll_btn = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testingAll_btn');
             header2.appendChild(testing);
-            header2.appendChild(testing_btn);
-            header2.appendChild(testingAll_btn);
+            //header2.appendChild(testing_btn);
+            //header2.appendChild(testingAll_btn);
 
             var tests = []
             for (var i in input.schema.testing) {
@@ -1976,7 +2061,7 @@ function ready(editor) {
             header2.style.display = "";
         }
 
-        if (doc[businessKey].config.benchmark) {
+        if (doc[businessName].config.benchmark) {
             header.classList.add("form-inline");
             var buttonBenchmark = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark');
             var benchmark_n = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_n');
@@ -2018,15 +2103,15 @@ function ready(editor) {
 
                     var data = getData(input, false);
                     //input.schema.name
-                    ajax.post(doc[businessKey].config.host + "/" + businessName,
+                    ajax.post(doc[businessName].config.host + "/" + businessName,
                         {
                             c: "benchmark",
                             t: null,//token check
                             d: JSON.stringify({
                                 n: n,
                                 c: c,
-                                data: "&c=" + input.schema.name + "&t=" + data.t + "&d=" + data.d,
-                                host: doc[businessKey].config.host + "/" + businessName
+                                data: "c=" + input.schema.name + "&t=" + data.t + "&d=" + (doc[businessName].config.benchmarkJSON ? JSON.stringify(data.d) : data.d),
+                                host: doc[businessName].config.host + "/" + businessName
                             })
                         },
                         function (response) {
@@ -2045,7 +2130,7 @@ function ready(editor) {
             }, false);
         }
 
-        if (doc[businessKey].config.setToken) {
+        if (doc[businessName].config.setToken) {
             var token = button_holder.querySelector('#' + editor.schema.properties.input.name + '_token');
             var settoken = button_holder.querySelector('#' + editor.schema.properties.input.name + '_settoken');
             header.appendChild(settoken);
@@ -2068,7 +2153,9 @@ function ready(editor) {
         editor.on('change', function () {
             var input = this.editors["root.input"];
             var data = getData(input, false);
-            var h = doc[businessKey].config.host + "/" + businessName;
+            var h = doc[businessName].config.host + "/" + businessName;
+
+            curlValue.setValue(GetCurl(h, input.schema.name, data, getData2(input, false)));
             javascriptValue.setValue(GetSdkJavaScript(h, input.schema.name, data));
             netValue.setValue(GetSdkNet(h, input.schema.name, data));
 
@@ -2081,12 +2168,14 @@ function ready(editor) {
 function setSdk(sdk) {
     if (null == sdk) { return; }
 
+    sdk.querySelector('#Curl > div > div > h4').style.display = 'none';
     sdk.querySelector('#JavaScript > div > div > h4').style.display = 'none';
     sdk.querySelector('#NET > div > div > h4').style.display = 'none';
     sdk.querySelector('#Java > div > div > h4').style.display = 'none';
     sdk.querySelector('#PHP > div > div > h4').style.display = 'none';
     sdk.querySelector('#Debug > div > div > h4').style.display = 'none';
 
+    sdk.querySelector('#Curl > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
     sdk.querySelector('#JavaScript > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
     sdk.querySelector('#NET > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
     sdk.querySelector('#Java > div > div > div.well.well-sm > div > div > div > div > div.form-group > label').style.display = 'none';
@@ -2095,6 +2184,13 @@ function setSdk(sdk) {
 
     //var sdk = sdkeditor.root.container.querySelector("div[id='SDK & Debug']");
     sdk.style.padding = sdk.style.margin = sdk.style.border = "0px";
+
+    sdk.querySelector('#Curl > div > div').removeAttribute("class");
+    var panel = sdk.querySelector("#Curl > div > div > div[tag='panel']");
+    panel.removeAttribute("class"); panel.removeAttribute("style");
+    var row = sdk.querySelector("#Curl > div > div > div[tag='panel'] > div > div > div[tag='row']");
+    row.removeAttribute("class"); row.removeAttribute("style");
+    sdk.querySelector("#Curl > div > div > div[tag='panel'] > div > div > div[tag='row'] > div").classList.add("emacs-mode");
 
     sdk.querySelector('#JavaScript > div > div').removeAttribute("class");
     var panel = sdk.querySelector("#JavaScript > div > div > div[tag='panel']");
@@ -2184,6 +2280,42 @@ function getData(input, format = true) {
             d = JSON.stringify(args, null, format ? 2 : 0);
         }
         data.d = d;
+    }
+
+    if (input.editors.t) {
+        data.t = input.editors.t.getValue();
+    }
+
+    return data;
+}
+
+function getData2(input, format = true) {
+    var data = {};
+    if (input.editors.d) {
+        if (input.schema.argSingle) {
+            if (input.schema.argSingle && "object" !== input.schema.properties.d.type && "array" !== input.schema.properties.d.type) {
+                d = input.editors.d.schema.name + "=" + encodeURIComponent(input.editors.d.getValue());
+            }
+            else {
+                d = input.editors.d.schema.name + "=" + encodeURIComponent(JSON.stringify(input.editors.d.getValue(), null, format ? 2 : 0));
+            }
+            data.d = d;
+        }
+        else {
+            var args = []
+            for (var i in input.editors.d.editors) {
+                args.push(i);
+            }
+            for (var i = args.length - 1; i >= 0; i--) {
+                if ("object" !== input.editors.d.editors[args[i]].schema.type && "array" !== input.editors.d.editors[args[i]].schema.type) {
+                    args[i] = args[i] + "=" + encodeURIComponent(input.editors.d.editors[args[i]].getValue());
+                }
+                else {
+                    args[i] = args[i] + "=" + encodeURIComponent(JSON.stringify(input.editors.d.editors[args[i]].getValue(), null, format ? 2 : 0));
+                }
+            }
+            data.d = args.join("&");
+        }
     }
 
     if (input.editors.t) {

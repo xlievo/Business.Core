@@ -1,24 +1,24 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Net.Http;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Routing;
+﻿using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
-using System.Net.WebSockets;
-using System.Threading;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Net.WebSockets;
+using Business;
 using Business.Core;
-using Business.Core.Utils;
 using Business.Core.Annotations;
 using Business.Core.Result;
-using Business;
 using Business.Core.Document;
+using Business.Core.Utils;
 
 #region Socket Support
 
@@ -187,6 +187,7 @@ public struct Host
 /// </summary>
 [TokenCheck]
 [Use]
+[Logger(canWrite: false)]
 public struct Token : Business.Core.Auth.IToken
 {
     [System.Text.Json.Serialization.JsonPropertyName("K")]
@@ -214,6 +215,20 @@ public struct Session
     public List<string> Roles { get; set; }
 }
 
+public struct Logs
+{
+    public IEnumerable<string> Data { get; set; }
+
+    public string Index { get; set; }
+}
+
+public struct Log
+{
+    public string Data { get; set; }
+
+    public string Index { get; set; }
+}
+
 [Command(Group = "j")]
 [@JsonArg(Group = "j")]
 [Command(Group = "s")]
@@ -223,34 +238,54 @@ public abstract class BusinessBase : BusinessBase<ResultObject<object>>
 {
     public BusinessBase()
     {
-        this.Logger = new Logger(async (Logger.LoggerData x) =>
-        {
-            try
-            {
-                //var logs = x.Select(c =>
-                //{
-                //    //if (c.Type == Logger.LoggerType.Exception)
-                //    //{
-                //    //    Console.WriteLine(c.JsonSerialize());
-                //    //}
-                //    Console.WriteLine(c.JsonSerialize());
-                //    return c;
-                //}).ToList();
+        //this.Logger = new Logger(async x =>
+        //{
+        //    //try
+        //    //{
+        //    //    Thread.Sleep(3000);
+        //    //    //Common.LogClient.Call("Write", null, new { Index = "log", Data = x.ToString() }.JsonSerialize());
 
-                Console.WriteLine(x.JsonSerialize());
-            }
-            catch (Exception ex)
-            {
-                Help.ExceptionWrite(ex, true, true);
-            }
-        })
+        //    //    switch (x.Type)
+        //    //    {
+        //    //        case Logger.Type.Error:
+        //    //        case Logger.Type.Exception:
+        //    //            x.Value = null;
+        //    //            Help.Console(x.JsonSerialize());
+        //    //            break;
+        //    //        default: break;
+        //    //    }
+        //    //}
+        //    //catch (Exception ex)
+        //    //{
+        //    //    Help.ExceptionWrite(ex, true, true);
+        //    //}
+
+        //    //Common.LogClient.Call("Write", null, new Log { Index = "log", Data = x.ToString() }.JsonSerialize());
+
+        //    switch (x.Type)
+        //    {
+        //        case Logger.Type.Error:
+        //        case Logger.Type.Exception:
+        //            //x.Value = null;
+        //            Help.Console(x.JsonSerialize());
+        //            break;
+        //        default: Help.Console(x.JsonSerialize()); break;
+        //    }
+        //});
+
+        this.Logger = new Logger(async x =>
         {
-            //Batch = new Logger.BatchOptions
-            //{
-            //    Interval = System.TimeSpan.FromSeconds(6),
-            //    MaxNumber = 100
-            //}
-        };
+            foreach (var item in x)
+            {
+                Help.Console(item.JsonSerialize());
+            }
+            //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
+
+        }, new Logger.BatchOptions
+        {
+            Interval = TimeSpan.FromSeconds(6),
+            MaxNumber = 2
+        });
     }
 }
 
@@ -259,6 +294,8 @@ public static class Common
     public static readonly string LogPath = System.IO.Path.Combine(System.IO.Path.DirectorySeparatorChar.ToString(), "data", $"{AppDomain.CurrentDomain.FriendlyName}.log.txt");
 
     public static Host Host = new Host();
+
+    public readonly static HttpClient LogClient;
 
     static Common()
     {
@@ -271,6 +308,8 @@ public static class Common
             .BuildServiceProvider().GetService<IHttpClientFactory>();
         AppContext.SetSwitch("System.Net.Http.UseSocketsHttpHandler", false);
 
+        LogClient = Host.HttpClientFactory.CreateClient("log");
+        LogClient.BaseAddress = new Uri("http://47.115.31.62:8000/Log");
         //ThreadPool.SetMinThreads(50, 50);
         //ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
         //ThreadPool.GetMaxThreads(out int workerThreads2, out int completionPortThreads2);
@@ -286,6 +325,33 @@ public static class Common
 
         MessagePack.MessagePackSerializer.DefaultOptions = MessagePack.Resolvers.ContractlessStandardResolver.Options.WithResolver(MessagePack.Resolvers.CompositeResolver.Create(new MessagePack.Formatters.IMessagePackFormatter[] { new MessagePack.Formatters.IgnoreFormatter<Type>(), new MessagePack.Formatters.IgnoreFormatter<System.Reflection.MethodBase>(), new MessagePack.Formatters.IgnoreFormatter<System.Reflection.MethodInfo>(), new MessagePack.Formatters.IgnoreFormatter<System.Reflection.PropertyInfo>(), new MessagePack.Formatters.IgnoreFormatter<System.Reflection.FieldInfo>() }, new MessagePack.IFormatterResolver[] { MessagePack.Resolvers.ContractlessStandardResolver.Instance }));
     }
+
+    public static async Task<string> Call(this HttpClient httpClient, string c, string t, string d) => await Call(httpClient, new KeyValuePair<string, string>("c", c), new KeyValuePair<string, string>("t", t), new KeyValuePair<string, string>("d", d));
+    public static async Task<string> Call(this HttpClient httpClient, params KeyValuePair<string, string>[] keyValues)
+    {
+        if (null == httpClient) { throw new ArgumentNullException(nameof(httpClient)); }
+        if (null == keyValues) { throw new ArgumentNullException(nameof(keyValues)); }
+
+        using (var content = new FormUrlEncodedContent(keyValues))
+        using (var request = new HttpRequestMessage { Method = HttpMethod.Post, Content = content })
+        using (var response = await httpClient.SendAsync(request))
+        {
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
+    }
+
+    //public static async Task<string> Call(this HttpClient httpClient, string data, string uri, string mediaType = "application/json")
+    //{
+    //    using (var content = new StringContent(data, System.Text.Encoding.UTF8, mediaType))
+    //    using (var request = new HttpRequestMessage(HttpMethod.Post, new Uri(uri)) { Content = content })
+    //    using (var response = await httpClient.SendAsync(request))
+    //    {
+    //        response.EnsureSuccessStatusCode();
+    //        return await response.Content.ReadAsStringAsync();
+    //    }
+    //}
+
 
     static void InitRedis()
     {
@@ -355,11 +421,12 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             .UseType(contextParameterNames)
             .IgnoreSet(new Ignore(IgnoreMode.Arg), contextParameterNames)
             .LoggerSet(new LoggerAttribute(canWrite: false), contextParameterNames)
-            .UseDoc(docDir, new Config { Debug = true, Benchmark = true, SetToken = true, Testing = true, Group = "j", GroupSelect = "j", GroupEnable = true })
+            .UseDoc(docDir, new Config { Debug = true, Benchmark = true, SetToken = false, Testing = true, GroupSelect = "j", GroupEnable = true, Host = Common.Host.Addresses, Navigtion = true })
             .Build();
 
         //writ url to page
-        DocUI.Write(docDir, debug: true);
+        DocUI.Write(docDir);
+
         //add route
         app.UseMvc(routes =>
         {
@@ -395,27 +462,20 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         app.Use(async (context, next) =>
         {
-            if (context.Request.Path == "/ws")
+            if (context.WebSockets.IsWebSocketRequest)
             {
-                if (context.WebSockets.IsWebSocketRequest)
+                using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
                 {
-                    using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
-                    {
-                        Sockets.TryAdd(context.Connection.Id, webSocket);
+                    Sockets.TryAdd(context.Connection.Id, webSocket);
 #if DEBUG
-                        Console.WriteLine($"Add:{context.Connection.Id} Sockets:{Sockets.Count}");
+                    Console.WriteLine($"Add:{context.Connection.Id} Sockets:{Sockets.Count}");
 #endif
-                        await Keep(context, webSocket);
+                    await Keep(context, webSocket);
 
-                        Sockets.TryRemove(context.Connection.Id, out _);
+                    Sockets.TryRemove(context.Connection.Id, out _);
 #if DEBUG
-                        Console.WriteLine($"Remove:{context.Connection.Id} Sockets:{Sockets.Count}");
+                    Console.WriteLine($"Remove:{context.Connection.Id} Sockets:{Sockets.Count}");
 #endif
-                    }
-                }
-                else
-                {
-                    context.Response.StatusCode = 400;
                 }
             }
             else
@@ -429,7 +489,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
     #region WebSocket
 
-    public static int receiveBufferSize;
+    public static int receiveBufferSize = 4096;
 
     public static int maxDegreeOfParallelism;
 
@@ -503,7 +563,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                         );
 
                         // Socket set callback
-                        if (null != result)
+                        if (!Equals(null, result))
                         {
                             if (typeof(IResult).IsAssignableFrom(result.GetType()))
                             {
@@ -614,26 +674,22 @@ public class BusinessController : Controller
     [EnableCors("any")]
     public async Task<dynamic> Call()
     {
-        #region route
+        #region route fixed grouping j
 
-        if (!Configer.Routes.TryGetValue(this.Request.Path.Value.TrimStart('/'), out Configer.Route route) || !Configer.BusinessList.TryGetValue(route.Business, out IBusiness business)) { return this.NotFound(); }
+        var g = "j";//fixed grouping
+        var path = this.Request.Path.Value.TrimStart('/');
+        if (!(Configer.Routes.TryGetValue(path, out Configer.Route route) || Configer.Routes.TryGetValue($"{path}/{g}", out route)) || !Configer.BusinessList.TryGetValue(route.Business, out IBusiness business)) { return this.NotFound(); }
 
-        #endregion
-
-        string c, t, d, g = null, value;
-        g = "j";//fixed grouping
+        string c = null;
+        string t = null;
+        string d = null;
+        string value = null;
         //g = route.Group;
-        IDictionary<string, string> parameters;
+        IDictionary<string, string> parameters = null;
 
         switch (this.Request.Method)
         {
             case "GET":
-                //requestData = new RequestData(this.Request.Query);
-                //c = route.Command ?? this.Request.Query["c"];
-                //t = this.Request.Query["t"];
-                //d = this.Request.Query["d"];
-                //g = this.Request.Query["g"];
-                //b = this.Request.Query["b"];
                 parameters = this.Request.Query.ToDictionary(k => k.Key, v =>
                 {
                     var v2 = (string)v.Value;
@@ -645,34 +701,37 @@ public class BusinessController : Controller
                 break;
             case "POST":
                 {
-                    //if (this.Request.HasFormContentType)
-                    //requestData = new RequestData(await this.Request.ReadFormAsync());
-                    //var form = await this.Request.ReadFormAsync();
-                    //c = route.Command ?? form["c"];
-                    //t = form["t"];
-                    //d = form["d"];
-                    //g = form["g"];
-                    //b = form["b"];
-                    parameters = (await this.Request.ReadFormAsync()).ToDictionary(k => k.Key, v =>
+                    if (this.Request.HasFormContentType)
                     {
-                        var v2 = (string)v.Value;
-                        return !string.IsNullOrEmpty(v2) ? v2 : null;
-                    });
-                    c = route.Command ?? (parameters.TryGetValue("c", out value) ? value : null);
-                    t = parameters.TryGetValue("t", out value) ? value : null;
-                    d = parameters.TryGetValue("d", out value) ? value : null;
+                        parameters = (await this.Request.ReadFormAsync()).ToDictionary(k => k.Key, v =>
+                        {
+                            var v2 = (string)v.Value;
+                            return !string.IsNullOrEmpty(v2) ? v2 : null;
+                        });
+                        c = route.Command ?? (parameters.TryGetValue("c", out value) ? value : null);
+                        t = parameters.TryGetValue("t", out value) ? value : null;
+                        d = parameters.TryGetValue("d", out value) ? value : null;
+                    }
+                    else
+                    {
+                        c = route.Command;
+                        d = System.Web.HttpUtility.UrlDecode(await this.Request.Body.StreamReadStringAsync(), System.Text.Encoding.UTF8);
+                    }
                 }
                 break;
             default: return this.NotFound();
         }
 
+        #endregion
+
         #region benchmark
 
         if ("benchmark" == c)
         {
-            var arg = d.TryJsonDeserialize<DocUI.benchmarkArg>();
-            if (default(DocUI.benchmarkArg).Equals(arg)) { return new ArgumentNullException(nameof(arg)).Message; }
-            arg.host = $"{this.Request.Scheme}://localhost:{this.HttpContext.Connection.LocalPort}/{business.Configer.Info.BusinessName}";
+            var arg = d.TryJsonDeserialize<DocUI.BenchmarkArg>();
+            if (default(DocUI.BenchmarkArg).Equals(arg)) { return new ArgumentNullException(nameof(arg)).Message; }
+            //arg.host = $"{this.Request.Scheme}://localhost:{this.HttpContext.Connection.LocalPort}/{business.Configer.Info.BusinessName}";
+            arg.host = $"{Common.Host.Addresses}/{business.Configer.Info.BusinessName}";
             return await DocUI.Benchmark(arg);
         }
 
@@ -698,7 +757,7 @@ public class BusinessController : Controller
             Path = this.Request.Path.Value,
         };
 
-        var result = null != route.Command ?
+        var result = null != route.Command && null != parameters ?
                 // Normal routing mode
                 await cmd.AsyncCall(
                     //the data of this request, allow null.

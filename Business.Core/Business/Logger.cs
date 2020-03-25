@@ -18,7 +18,9 @@
 namespace Business.Core
 {
     using Utils;
-    using System.Linq;
+    using Annotations;
+    using Meta;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Log subscription queue
@@ -26,9 +28,28 @@ namespace Business.Core
     public class Logger
     {
         /// <summary>
+        /// Logger value type
+        /// </summary>
+        public enum LoggerValueType
+        {
+            /// <summary>
+            /// In
+            /// </summary>
+            All = 0,
+            /// <summary>
+            /// In
+            /// </summary>
+            In = 1,
+            /// <summary>
+            /// Out
+            /// </summary>
+            Out = 2
+        }
+
+        /// <summary>
         /// Needs of the logging categories
         /// </summary>
-        public enum LoggerType
+        public enum Type
         {
             /// <summary>
             /// All
@@ -56,15 +77,22 @@ namespace Business.Core
         /// </summary>
         public struct LoggerData
         {
+            public System.DateTimeOffset Dtt { get; set; }
+
+            /// <summary>
+            /// token
+            /// </summary>
+            public dynamic Token { get; set; }
+
             /// <summary>
             /// Logger type
             /// </summary>
-            public LoggerType Type { get; set; }
+            public Type Type { get; set; }
 
             /// <summary>
             /// The parameters of the method
             /// </summary>
-            public LoggerValue Value { get; set; }
+            public System.Collections.Generic.IDictionary<string, dynamic> Value { get; set; }
 
             /// <summary>
             /// The method's Return Value
@@ -90,13 +118,63 @@ namespace Business.Core
             /// Json format
             /// </summary>
             /// <returns></returns>
-            public override string ToString() => this.JsonSerialize();
+            public override string ToString() => new LoggerDataJson
+            {
+                Dtt = Dtt,
+                Token = Token,
+                Type = Type,
+                Member = Member,
+                Value = Value?.JsonSerialize(),
+                Result = Result?.ToString(),
+                Time = Time,
+                Group = Group,
+            }.JsonSerialize();
+
+            struct LoggerDataJson
+            {
+                public System.DateTimeOffset Dtt { get; set; }
+
+                /// <summary>
+                /// token
+                /// </summary>
+                public dynamic Token { get; set; }
+
+                /// <summary>
+                /// Logger type
+                /// </summary>
+                public Type Type { get; set; }
+
+                /// <summary>
+                /// The parameters of the method
+                /// </summary>
+                public string Value { get; set; }
+
+                /// <summary>
+                /// The method's Return Value
+                /// </summary>
+                public string Result { get; set; }
+
+                /// <summary>
+                /// Method execution time
+                /// </summary>
+                public double Time { get; set; }
+
+                /// <summary>
+                /// Method full name
+                /// </summary>
+                public string Member { get; set; }
+
+                /// <summary>
+                /// Used for the command group
+                /// </summary>
+                public string Group { get; set; }
+            }
         }
 
         public struct BatchOptions
         {
             /// <summary>
-            /// Return log time interval, default System.TimeSpan.Zero equals not enabled,5 seconds is reasonable
+            /// Return log time interval, default System.TimeSpan.Zero equals not enabled, x seconds is reasonable
             /// </summary>
             public System.TimeSpan Interval { get; set; }
 
@@ -106,156 +184,251 @@ namespace Business.Core
             public int MaxNumber { get; set; }
         }
 
-        public BatchOptions Batch { get; set; } = new BatchOptions();
+        public BatchOptions Batch { get; }
 
-        public LoggerValue.LoggerValueType LoggerValueType { get; set; } = LoggerValue.LoggerValueType.In;
+        public LoggerValueType ValueType { get; set; } = LoggerValueType.In;
 
-        /// <summary>
-        /// Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately.
-        /// </summary>
-        public int WorkThreads { get; private set; } = 1;
+        internal readonly System.Func<LoggerData, Task> call;
 
-        /// <summary>
-        /// Gets the max capacity of this logger queue
-        /// </summary>
-        public int? MaxCapacity { get; private set; }
+        public readonly Queue<LoggerData> loggerQueue;
 
-        /// <summary>
-        /// Whether the callback log uses a new thread, default true.
-        /// </summary>
-        public bool ThreadCall { get; set; } = true;
-
-        public readonly System.Collections.Concurrent.BlockingCollection<LoggerData> loggerQueue;
-
-        internal readonly System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> calls;
-
-        internal readonly System.Func<LoggerData, System.Threading.Tasks.Task> call;
-
-        public Logger(System.Func<LoggerData, System.Threading.Tasks.Task> call, LoggerValue.LoggerValueType loggerValueType = LoggerValue.LoggerValueType.In)
+        public Logger(System.Func<LoggerData, Task> call, LoggerValueType loggerValueType = LoggerValueType.In)
         {
-            this.LoggerValueType = loggerValueType;
+            this.ValueType = loggerValueType;
 
-            if (null != call)
-            {
-                this.call = call;
-            }
+            this.call = call;
         }
 
         /// <summary>
-        /// 
+        /// Logger
         /// </summary>
         /// <param name="call"></param>
-        /// <param name="workThreads">Gets the maximum out queue thread for this logger queue, default 1. Please increase the number of concurrent threads appropriately.</param>
-        /// <param name="maxCapacity">Gets the max capacity of this logger queue</param>
-        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, System.Threading.Tasks.Task> call, int? workThreads = null, int? maxCapacity = null, LoggerValue.LoggerValueType loggerValueType = LoggerValue.LoggerValueType.In)
+        /// <param name="batch"></param>
+        /// <param name="maxWorkThreads">Gets the maximum out queue thread for this queue, default 1</param>
+        /// <param name="syn">Whether each outgoing thread has synchronous callback, asynchronous by default</param>
+        /// <param name="maxCapacity">Gets the max capacity of this queue</param>
+        /// <param name="loggerValueType"></param>
+        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, Task> call, BatchOptions batch = default, int maxWorkThreads = 1, bool syn = false, int? maxCapacity = null, LoggerValueType loggerValueType = LoggerValueType.In)
         {
-            this.LoggerValueType = loggerValueType;
+            this.ValueType = loggerValueType;
 
-            if (workThreads.HasValue && 0 < workThreads.Value)
+            loggerQueue = new Queue<LoggerData>(call, new Queue<LoggerData>.BatchOptions { Interval = batch.Interval, MaxNumber = batch.MaxNumber }, maxWorkThreads, syn, maxCapacity);
+        }
+
+        /*
+        public static LoggerData GetLoggerData(IBusiness business, System.Collections.Generic.IDictionary<string, dynamic> value, string group = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null)
+        {
+            if (!business.Configer.MetaData.TryGetValue(method ?? string.Empty, out MetaData meta))
             {
-                this.WorkThreads = workThreads.Value;
+                return default;
             }
 
-            if (maxCapacity.HasValue && -1 < maxCapacity.Value)
+            if (string.IsNullOrWhiteSpace(group))
             {
-                this.MaxCapacity = maxCapacity;
+                group = business.Configer.Info.CommandGroupDefault;
             }
 
-            loggerQueue = MaxCapacity.HasValue && 0 < MaxCapacity.Value ? new System.Collections.Concurrent.BlockingCollection<LoggerData>(MaxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<LoggerData>();
-
-            if (null != call)
+            if (!meta.CommandGroup.Full.TryGetValue(group, out ReadOnlyDictionary<string, CommandAttribute> commands) || 0 == commands?.Count)
             {
-                this.calls = call;
+                return default;
             }
 
-            if (null != calls)
+            var command = commands.First().Value;
+
+            //var argsObjLog = new System.Collections.Generic.List<ArgsLog>(meta.Args.Count);
+
+            //foreach (var c in meta.Args)
+            //{
+            //    if (!c.Group.TryGetValue(command.Key, out ArgGroup argGroup))
+            //    {
+            //        continue;
+            //    }
+
+            //    argsObjLog.Add(new ArgsLog { name = c.Name, value = value[c.Position], logger = argGroup.Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg });
+            //}
+
+            //if (!meta.MetaLogger.TryGetValue(command.Key, out MetaLogger metaLogger))
+            //{
+            //    return default;
+            //}
+
+            //var logType = Type.Record;
+
+            //var logObjs = LoggerSet(logType, metaLogger, argsObjLog, out _, out _, business.Configer.Logger?.ValueType);
+
+            return new LoggerData { Type = Type.Record, Value = value, Member = meta.FullName, Group = command.Group };
+        }
+        */
+
+        internal struct ArgsLog
+        {
+            public string name;
+            public dynamic value;
+            public MetaLogger logger;
+            public MetaLogger iArgInLogger;
+            public bool hasIArg;
+        }
+
+        internal static System.Collections.Generic.IDictionary<string, dynamic> LoggerSet(Type logType, MetaLogger logger, System.Collections.Generic.IList<ArgsLog> argsObjLog, out bool canWrite, out bool canResult, LoggerValueType? loggerValueType)
+        {
+            canWrite = canResult = false;
+
+            switch (logType)
             {
-                for (int i = 0; i < WorkThreads; i++)
-                {
-                    System.Threading.Tasks.Task.Factory.StartNew(async () =>
+                case Type.Record:
+                    if (logger.Record.CanWrite)
                     {
-                        var list = new System.Collections.Generic.LinkedList<LoggerData>();
+                        canWrite = true;
 
-                        var wait = new System.Threading.SpinWait();
-                        var watch = new System.Diagnostics.Stopwatch();
-
-                        while (!loggerQueue.IsCompleted)
+                        if (logger.Record.CanResult)
                         {
-                            var isRunning = 0 != System.TimeSpan.Zero.CompareTo(Batch.Interval);
-
-                            if (!watch.IsRunning && isRunning)
-                            {
-                                watch.Start();
-                            }
-                            else if (!isRunning && watch.IsRunning)
-                            {
-                                watch.Stop();
-                            }
-
-                            if (0 < list.Count && (!isRunning || (isRunning && (0 < watch.Elapsed.CompareTo(Batch.Interval) || (0 < Batch.MaxNumber && Batch.MaxNumber <= list.Count)))))
-                            {
-                                if (ThreadCall)
-                                {
-                                    System.Threading.Tasks.Task.Factory.StartNew(async obj => await calls(obj as LoggerData[]), list.ToArray()).ContinueWith(c => c.Exception?.Console());
-                                }
-                                else
-                                {
-                                    try { await calls(list.ToArray()); }
-                                    catch (System.Exception ex) { ex.Console(); }
-                                }
-
-                                list.Clear();
-
-                                if (watch.IsRunning)
-                                {
-                                    watch.Restart();
-                                }
-                            }
-
-                            if (loggerQueue.TryTake(out LoggerData logger))
-                            {
-                                list.AddLast(logger);
-                            }
-
-                            wait.SpinOnce();
+                            canResult = true;
                         }
 
-                        if (watch.IsRunning)
+                        if (0 < argsObjLog.Count)
                         {
-                            watch.Stop();
+                            var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
+                            foreach (var log in argsObjLog)
+                            {
+                                LoggerSet(logger.Record.CanValue, log.logger.Record, log.iArgInLogger.Record, logObjs, log, loggerValueType);
+                            }
+                            return 0 == logObjs.Count ? null : logObjs;
+                        }
+                    }
+                    return null;
+                case Type.Error:
+                    if (logger.Error.CanWrite)
+                    {
+                        canWrite = true;
+
+                        if (logger.Error.CanResult)
+                        {
+                            canResult = true;
                         }
 
-                        list.Clear();// count > 0 ?
-                    }, System.Threading.Tasks.TaskCreationOptions.DenyChildAttach | System.Threading.Tasks.TaskCreationOptions.LongRunning);
-                }
+                        if (0 < argsObjLog.Count)
+                        {
+                            var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
+                            foreach (var log in argsObjLog)
+                            {
+                                LoggerSet(logger.Error.CanValue, log.logger.Error, log.iArgInLogger.Error, logObjs, log, loggerValueType);
+                            }
+                            return 0 == logObjs.Count ? null : logObjs;
+                        }
+                    }
+                    return null;
+                case Type.Exception:
+                    if (logger.Exception.CanWrite)
+                    {
+                        canWrite = true;
+
+                        if (logger.Exception.CanResult)
+                        {
+                            canResult = true;
+                        }
+
+                        if (0 < argsObjLog.Count)
+                        {
+                            var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
+                            foreach (var log in argsObjLog)
+                            {
+                                LoggerSet(logger.Exception.CanValue, log.logger.Exception, log.iArgInLogger.Exception, logObjs, log, loggerValueType);
+                            }
+                            return 0 == logObjs.Count ? null : logObjs;
+                        }
+                    }
+                    return null;
+                default: return null;
+            }
+
+            //return 0 == logObjs.Count ? null : logObjs;
+        }
+
+        static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, System.Collections.Generic.IDictionary<string, dynamic> logObjs, ArgsLog log, LoggerValueType? loggerValueType)
+        {
+            //meta
+            switch (canValue)
+            {
+                case LoggerValueMode.All:
+                    if ((null != argLogAttr && !argLogAttr.CanWrite))
+                    {
+                        break;
+                    }
+
+                    if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite && log.hasIArg)
+                    {
+                        var iArg = log.value as IArg;
+                        logObjs.Add(log.name, iArg.Out);
+                        //logObjs.HasIArg[log.name] = false;
+                    }
+                    else if (log.hasIArg)
+                    {
+                        var iArg = log.value as IArg;
+                        switch (loggerValueType ?? LoggerValueType.In)
+                        {
+                            case LoggerValueType.All:
+                                logObjs.Add(log.name, iArg ?? log.value);
+                                break;
+                            case LoggerValueType.In:
+                                logObjs.Add(log.name, null == iArg ? log.value : iArg.In);
+                                //logObjs.HasIArg[log.name] = false;
+                                break;
+                            case LoggerValueType.Out:
+                                logObjs.Add(log.name, null == iArg ? log.value : iArg.Out);
+                                //logObjs.HasIArg[log.name] = false;
+                                break;
+                            default: break;
+                        }
+                    }
+                    else
+                    {
+                        logObjs.Add(log.name, log.value);
+                    }
+                    break;
+                case LoggerValueMode.Select:
+                    if (null != argLogAttr && argLogAttr.CanWrite)
+                    {
+                        if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite && log.hasIArg)
+                        {
+                            logObjs.Add(log.name, (log.value as IArg).Out);
+                            //logObjs.HasIArg[log.name] = false;
+                        }
+                        else if (log.hasIArg)
+                        {
+                            var iArg = log.value as IArg;
+                            switch (loggerValueType ?? LoggerValueType.In)
+                            {
+                                case LoggerValueType.All:
+                                    logObjs.Add(log.name, iArg ?? log.value);
+                                    break;
+                                case LoggerValueType.In:
+                                    logObjs.Add(log.name, null == iArg ? log.value : iArg.In);
+                                    //logObjs.HasIArg[log.name] = false;
+                                    break;
+                                case LoggerValueType.Out:
+                                    logObjs.Add(log.name, null == iArg ? log.value : iArg.Out);
+                                    //logObjs.HasIArg[log.name] = false;
+                                    break;
+                                default: break;
+                            }
+                        }
+                        else
+                        {
+                            logObjs.Add(log.name, log.value);
+                        }
+                    }
+                    break;
+                default: break;
             }
         }
     }
 
+    /*
     /// <summary>
     /// The parameters of the method
     /// </summary>
     public class LoggerValue : System.Collections.Generic.Dictionary<string, dynamic>
     {
-        /// <summary>
-        /// Logger value type
-        /// </summary>
-        public enum LoggerValueType
-        {
-            /// <summary>
-            /// In
-            /// </summary>
-            All = 0,
-            /// <summary>
-            /// In
-            /// </summary>
-            In = 1,
-            /// <summary>
-            /// Out
-            /// </summary>
-            Out = 2
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -275,13 +448,13 @@ namespace Business.Core
         /// </summary>
         /// <param name="valueType"></param>
         /// <returns></returns>
-        public LoggerValue ToValue(LoggerValueType valueType = LoggerValueType.In)
+        public LoggerValue ToValue(Logger.LoggerValueType valueType = Logger.LoggerValueType.In)
         {
             var dictionary = new LoggerValue(0 < this.Count ? HasIArg.ToDictionary(c => c.Key, c => false) : HasIArg, this.Count);
 
             foreach (var item in this)
             {
-                dictionary.Add(item.Key, HasIArg[item.Key] ? (valueType == LoggerValueType.Out ? (item.Value as IArg).Out : (item.Value as IArg).In) : item.Value);
+                dictionary.Add(item.Key, HasIArg[item.Key] ? (valueType == Logger.LoggerValueType.Out ? (item.Value as IArg).Out : (item.Value as IArg).In) : item.Value);
             }
 
             return dictionary;
@@ -291,9 +464,7 @@ namespace Business.Core
         /// JSON format, if the total number to 0, then returned null
         /// </summary>
         /// <returns></returns>
-        public override string ToString()
-        {
-            return this.JsonSerialize();
-        }
+        public override string ToString() => this.JsonSerialize();
     }
+    */
 }

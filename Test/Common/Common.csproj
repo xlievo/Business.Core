@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="linq2db.t4models" Version="2.9.0" />
-    <PackageReference Include="MessagePack" Version="2.1.80" />
+    <PackageReference Include="linq2db.t4models" Version="2.9.7" />
+    <PackageReference Include="MessagePack" Version="2.1.90" />
     <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.2.1" />

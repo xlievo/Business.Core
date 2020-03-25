@@ -30,7 +30,7 @@ namespace Business.Core.Auth
     /// A token sample
     /// </summary>
     [Annotations.Use]
-    public class Token : IToken
+    public struct Token : IToken
     {
         //public static implicit operator Token(string value) => new Token { Key = value };
         //public static implicit operator Token(byte[] value) => Utils.Help.TryProtoBufDeserialize<Token>(value);
@@ -52,14 +52,14 @@ namespace Business.Core.Auth
         /// </summary>
         //[Newtonsoft.Json.JsonProperty(PropertyName = "K")]
         [System.Text.Json.Serialization.JsonPropertyName("K")]
-        public virtual string Key { get; set; }
+        public string Key { get; set; }
 
         /// <summary>
         /// Remote IP address
         /// </summary>
         //[Newtonsoft.Json.JsonProperty(PropertyName = "R")]
         [System.Text.Json.Serialization.JsonPropertyName("R")]
-        public virtual string Remote { get; set; }
+        public string Remote { get; set; }
 
         ///// <summary>
         ///// Socket identity
@@ -72,6 +72,6 @@ namespace Business.Core.Auth
         /// </summary>
         //[Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
-        public virtual string Callback { get; set; }
+        public string Callback { get; set; }
     }
 }

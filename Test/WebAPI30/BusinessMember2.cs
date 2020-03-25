@@ -13,7 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Args;
 
-[Info("API/v2", CommandGroupDefault = null)]
+[Info("API/v2", CommandGroupDefault = null, Alias = "TEST0")]
 public class BusinessMember3 : BusinessBase
 {
     public BusinessMember3() : base()
@@ -42,11 +42,12 @@ public class BusinessMember3 : BusinessBase
         };
     }
 
-    [Testing("test2", "\"2019-12-02T21:02\"")]
-    [Testing("test3", "\"2019-12-02T22:02\"")]
-    [Testing("test4", "\"2019-12-02T23:02\"")]
-    [Testing("test3333", "\"2019-12-02T23:02\"")]
-    public virtual async Task<DateTime?> Test000(Session session, [Ignore(IgnoreMode.BusinessArg)]DateTime? date, dynamic context = null)
+    [Testing("test2", "[\"2019-12-02T21:02\", 0.110]")]
+    [Testing("test3", "[\"2019-12-02T22:02\", 0.110]")]
+    [Testing("test4", "[\"2019-12-02T23:02\"")]
+    [Testing("test3333", "[\"2019-12-02T23:02\", 0.110]")]
+    [Ignore(IgnoreMode.BusinessArg)]
+    public virtual async Task<DateTime?> Test000(Session session, DateTime? date, decimal mm = 0.0234m, dynamic context = null)
     {
         return date;
         //return this.ResultCreate(date);
@@ -65,11 +66,15 @@ public class BusinessMember3 : BusinessBase
 
         //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
         //return this.ResultCreate();
-        return this.ResultCreate(new { session, arg = arg, State = httpContext.Connection.RemoteIpAddress.ToString() });
+        return this.ResultCreate(new { session, arg, State = httpContext.Connection.RemoteIpAddress.ToString() });
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 }
 
+[DocGroup("Module 1", Position = 1, Badge = "Beta", Active = true)]
+[DocGroup("Module 2", Position = 2)]
+[DocGroup("Module 3", Position = 3)]
+[Info("API", Alias = "UserCentre", CommandGroupDefault = null)]
 [Testing("test2222", "\"2019-12-02T21:02\"", tokenMethod: login, Method = "Test000")]
 [Testing("test2222", "\"2019-12-02T22:02\"", tokenMethod: login, Method = "Test000")]
 [Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, Method = "Test000")]
@@ -110,7 +115,6 @@ public partial class BusinessMember2
 /// businessDescription
 /// businessDescription3
 /// </summary>
-[Info("API", CommandGroupDefault = null)]
 public partial class BusinessMember2 : BusinessBase
 {
 
@@ -127,6 +131,14 @@ public partial class BusinessMember2 : BusinessBase
         public List<Test001Result2> b { get; set; }
     }
 
+    public struct ObjectList
+    {
+        /// <summary>
+        /// aaa2
+        /// </summary>
+        public List<dynamic> Data { get; set; }
+    }
+
     public struct Test001Result2
     {
         /// <summary>
@@ -140,20 +152,92 @@ public partial class BusinessMember2 : BusinessBase
         public string b { get; set; }
     }
 
-    public virtual async Task<IResult<DateTime>> Test00X(Token token2, Test001 arg)
+    public class Z
+    {
+        /// <summary>
+        /// aaa2
+        /// </summary>
+        public string a { get; set; }
+
+        /// <summary>
+        /// bbb2
+        /// </summary>
+        public DateTime b { get; set; }
+
+        public int c { get; set; }
+
+        public Test001Result2 d { get; set; }
+    }
+
+    //post json
+    public virtual async Task<IResult> TestZ(Z z)
+    {
+        return this.ResultCreate(z);
+    }
+
+    public virtual async Task<IResult<dynamic>> TestObjectList(Token token2, ObjectList arg)
     {
         return this.ResultCreate();
     }
 
-    [Testing("test2", "\"2019-12-02T21:02\"", tokenMethod: login)]
-    [Testing("test3", "\"2019-12-02T22:02\"", tokenMethod: login)]
-    [Testing("test4", "\"2019-12-02T23:02\"", tokenMethod: login)]
-    [Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login)]
-    [Ignore(IgnoreMode.BusinessArg)]
-    public virtual async Task<IResult<DateTime?>> Test000(Session session, [Ignore(IgnoreMode.BusinessArg)]DateTime? date)
+    public virtual async Task<IResult<DateTime>> Test00X(Token token2, Test001<Test0011> arg)
     {
-        return this.ResultCreate(date);
+        return this.ResultCreate();
     }
+
+    public virtual async Task<IResult<DateTime>> Test00X1(Token token2, Test003<Test0011> arg)
+    {
+        return this.ResultCreate();
+    }
+
+    //[Testing("test2", "\"2019-12-02T21:02\"", tokenMethod: login)]
+    //[Testing("test3", "\"2019-12-02T22:02\"", tokenMethod: login)]
+    //[Testing("test4", "\"2019-12-02T23:02\"", tokenMethod: login)]
+    //[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login)]
+    //[Ignore(IgnoreMode.BusinessArg)]
+    //public virtual async Task<IResult<DateTime>> Test000X(Session session, Arg<DateTime?> date)
+    //{
+    //    return this.ResultCreate(date.Out.GetValueOrDefault());
+    //}
+    //[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login)]
+    //public virtual async Task<IResult<DateTime>> Test000X1(Session session, Arg<DateTime?> date)
+    //{
+    //    return this.ResultCreate(date.Out.GetValueOrDefault());
+    //}
+    //[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login)]
+    //[Ignore(IgnoreMode.BusinessArg)]
+    //public virtual async Task<IResult<DateTime>> Test000X2(Session session, DateTime? date)
+    //{
+    //    return this.ResultCreate(date.GetValueOrDefault());
+    //}
+    //[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login)]
+    //public virtual async Task<IResult<DateTime>> Test000X3(Session session, DateTime? date)
+    //{
+    //    return this.ResultCreate(date.GetValueOrDefault());
+    //}
+
+    //[Testing("test3333", "[\"2019-12-02T23:02\", 0.110]")]
+    //[Ignore(IgnoreMode.BusinessArg)]
+    //public virtual async Task<DateTime?> Test000Y(Session session, Arg<DateTime?> date, decimal mm = 0.0234m, dynamic context = null)
+    //{
+    //    return date.Out;
+    //}
+    //[Testing("test3333", "[\"2019-12-02T23:02\", 0.110]")]
+    //public virtual async Task<DateTime?> Test000Y1(Session session, Arg<DateTime?> date, decimal mm = 0.0234m, dynamic context = null)
+    //{
+    //    return date.Out;
+    //}
+    //[Testing("test3333", "[\"2019-12-02T23:02\", 0.110]")]
+    //[Ignore(IgnoreMode.BusinessArg)]
+    //public virtual async Task<DateTime?> Test000Y2(Session session, DateTime? date, decimal mm = 0.0234m, dynamic context = null)
+    //{
+    //    return date;
+    //}
+    //[Testing("test3333", "[\"2019-12-02T23:02\", 0.110]")]
+    //public virtual async Task<DateTime?> Test000Y3(Session session, DateTime? date, decimal mm = 0.0234m, dynamic context = null)
+    //{
+    //    return date;
+    //}
 
     public const string login = "[\"Login\",\"{User:\\\"ddd\\\",Password:\\\"123456\\\"}\",\"D\"]";
 
@@ -172,28 +256,48 @@ public partial class BusinessMember2 : BusinessBase
     /// rrrrrr
     /// rrrrrr2
     /// </returns>
+    [Doc(Group = "Module 1", Position = 1)]
     [Command("AAA")]
-    [Command("jjj", Group = "j")]
+    [Command("jjjTest001jjj", Group = "j")]
+    [Command("wwwwwwwwwwww", Group = "j")]
+    [Command(Group = "zzz")]
     [Testing("test2",
-        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T04:24\",99.0234,777,false]",
-        "{\"AAA\":\"111\",\"BBB\":\"222\"}",
-        tokenMethod: login)]
+         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T04:24\",99.0234,777,false]",
+         "{\"AAA\":\"111\",\"BBB\":\"222\"}",
+         tokenMethod: login)]
     [Testing("test3",
-        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T05:24\",99.0234,777,false]",
-        tokenMethod: login)]
+         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T05:24\",99.0234,777,false]",
+         tokenMethod: login)]
     [Testing("test4",
-        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T06:24\",99.0234,777,false]",
-        tokenMethod: login)]
+         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T06:24\",99.0234,777,false]",
+         tokenMethod: login)]
     [Testing("test5",
-        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T07:24\",99.0234,777,false]",
-        tokenMethod: login)]
+         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T07:24\",99.0234,777,false]",
+         tokenMethod: login)]
     [Testing("test, important logic, do not delete!!!",
-        "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
-        tokenMethod: login)]
-    public virtual async Task<IResult<Test001Result?>> Test001(Token token, Arg<Test001> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
+         tokenMethod: login)]
+    public virtual async Task<dynamic> Test001(Session session, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
+        //Logger.loggerQueue?.queue.TryAdd(new Logger.LoggerData
+        //{
+        //    Type = Logger.Type.Record,
+        //    Value = new Dictionary<string, dynamic>(6)
+        //    {
+        //        { "token", session },
+        //        { "arg", arg },
+        //        { "dateTime", dateTime },
+        //        //{ "httpFile", httpFile },
+        //        { "mm", mm },
+        //        { "fff", fff },
+        //        { "bbb", bbb },
+        //    },
+        //    Member = "BusinessMember2.Test001",
+        //    Group = "j"
+        //});
+
         dynamic args = new System.Dynamic.ExpandoObject();
-        args.token = token;
+        args.token = session;
         args.arg = arg.Out;
         if (args.arg.B == "ex")
         {
@@ -227,10 +331,8 @@ public partial class BusinessMember2 : BusinessBase
 
         var files = httpFile.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
 
-        //return this.ResultCreate(new { arg = arg.Out, files });
-        Test001Result? ss = new Test001Result { a = args.arg.A, b = new List<Test001Result2> { new Test001Result2 { a = args.arg.A, b = "sss" } } };
-
-        return this.ResultCreate(ss);
+        return this.ResultCreate(new { arg = arg.Out, files });
+        //return this.ResultCreate(new List<Test001Result?> { ss });
         //return ss;
     }
 
@@ -249,7 +351,8 @@ public partial class BusinessMember2 : BusinessBase
     /// <param name="mm"></param>
     /// <returns>test return!!!</returns>
     [HttpFile]
-    public virtual async Task<dynamic> Test002(Token token, Test001 arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [HttpFile]Dictionary<string, dynamic> context = null)
+    [Doc("Test002 222", Badge = "      ")]
+    public virtual async Task<dynamic> Test002(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [HttpFile]Dictionary<string, dynamic> context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -271,7 +374,8 @@ public partial class BusinessMember2 : BusinessBase
     /// <param name="arg"></param>
     /// <param name="mm"></param>
     /// <returns></returns>
-    public virtual async Task Test003(Token token, Test001 arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    [Doc("Test003 222", Badge = "New", Group = "Module 3")]
+    public virtual async Task Test003(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         //await System.Threading.Tasks.Task.Delay(10000);
         dynamic args = new System.Dynamic.ExpandoObject();
@@ -283,7 +387,8 @@ public partial class BusinessMember2 : BusinessBase
         }
     }
 
-    public virtual async Task<dynamic> Test004(Token token, List<Test001> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    [Doc]
+    public virtual async Task<dynamic> Test004(Token token, List<Test002> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
@@ -293,7 +398,8 @@ public partial class BusinessMember2 : BusinessBase
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
-    public virtual async Task<dynamic> Test005(Token token, List<Test001> arg, dynamic context)
+    [Doc(Group = "Module 1", Position = 0)]
+    public virtual async Task<dynamic> Test005(Token token, List<Test002> arg, dynamic context)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
@@ -302,7 +408,7 @@ public partial class BusinessMember2 : BusinessBase
         return this.ResultCreate(new { token, arg = arg, State = httpContext.Connection.RemoteIpAddress.ToString() });
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
-
+    [Doc(Group = "Module 2")]
     public virtual async Task<dynamic> Test006(Token token) => this.ResultCreate();
 
     public virtual async Task<dynamic> Test0061() => this.ResultCreate();
@@ -327,187 +433,187 @@ public partial class BusinessMember2 : BusinessBase
         return this.ResultCreate(ss);
     }
 
-    public virtual async Task<IResult<Test001>> Test0010(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0010(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0011(Session session, Test001 arg)
+    public virtual async Task<IResult<Test001<Test0011>>> Test0011(Session session, Test002 arg)
+    {
+        return this.ResultCreate();
+    }
+    public virtual async Task<IResult<Test004>> Test0012(Session session, Test002 arg)
+    {
+        return this.ResultCreate();
+    }
+    public virtual async Task<IResult<Test002>> Test0013(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0012(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0014(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0013(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0015(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0014(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0016(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0015(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0017(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0016(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0018(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0017(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0019(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0018(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0020(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0019(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0021(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0020(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0022(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0021(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0023(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0022(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0024(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0023(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0025(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0024(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0026(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0025(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0027(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0026(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0028(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0027(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0029(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0028(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0030(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0029(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0031(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0030(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0032(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0031(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test00333(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0032(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0034(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test00333(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0035(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0034(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0036(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0035(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0037(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0036(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0038(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0037(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0039(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0038(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0040(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0039(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0041(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0040(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0042(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0041(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0043(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0042(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0044(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0043(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0045(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0044(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0046(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0045(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0047(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0046(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0048(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0047(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0049(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0048(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0050(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0049(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0051(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0050(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0052(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0051(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0053(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0052(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0054(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
-    public virtual async Task<IResult<Test001>> Test0053(Session session, Test001 arg)
-    {
-        return this.ResultCreate(arg);
-    }
-    public virtual async Task<IResult<Test001>> Test0054(Session session, Test001 arg)
-    {
-        return this.ResultCreate(arg);
-    }
-    public virtual async Task<IResult<Test001>> Test0055(Session session, Test001 arg)
+    public virtual async Task<IResult<Test002>> Test0055(Session session, Test002 arg)
     {
         return this.ResultCreate(arg);
     }
@@ -518,9 +624,9 @@ public partial class BusinessMember2 : BusinessBase
     /// <param name="arg"></param>
     /// <param name="arg2">arg2!!!</param>
     /// <returns></returns>
-    public virtual async Task<dynamic> Test007(Test001 arg, List<string> arg2) => this.ResultCreate();
+    public virtual async Task<dynamic> Test007(Test002 arg, List<string> arg2) => this.ResultCreate();
 
-    public virtual async void Test0033(Token token, Test001 arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async void Test0033(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -535,7 +641,7 @@ public partial class BusinessMember2 : BusinessBase
     {
         public Token token { get; set; }
 
-        public List<Test001> arg { get; set; }
+        public List<Test002> arg { get; set; }
     }
 }
 
@@ -543,7 +649,7 @@ public class TestAttribute : ArgumentAttribute
 {
     public TestAttribute(int state = 111, string message = null) : base(state, message) { }
 
-    public override async ValueTask<IResult> Proces(dynamic value)
+    public override async ValueTask<IResult> Proces<Type>(dynamic value)
     {
         //var exit = await RedisHelper.HExistsAsync("Role", "value2");
 
@@ -553,13 +659,18 @@ public class TestAttribute : ArgumentAttribute
                 //return this.ResultCreate(exit ? await RedisHelper.HGetAsync("Role", "value2") : "not!");
                 return this.ResultCreate("OK!!!");
             case "error":
-                return this.ResultCreate(this.State, $"{this.Nick} cannot be empty");
+                return this.ResultCreate(this.State, $"{this.Alias} cannot be empty");
 
             case "data":
                 return this.ResultCreate(value + "1122");
 
-            default: throw new System.Exception("Argument exception!");
+            //default: throw new System.Exception("Argument exception!");
+            default: break;
         }
+
+        System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(new System.Exception("Argument exception!")).Throw();
+
+        return default;
     }
 }
 
@@ -573,7 +684,6 @@ public class Test2Attribute : ArgumentAttribute
     }
 }
 
-
 public class Args
 {
     /// <summary>
@@ -581,16 +691,53 @@ public class Args
     /// </summary>
     public enum MyEnum
     {
+        /// <summary>
+        /// MyEnum A
+        /// </summary>
         A = 0,
+        /// <summary>
+        /// 
+        /// </summary>
         B = 2,
+        /// <summary>
+        /// MyEnum C
+        /// </summary>
         C = 4,
+    }
+
+    public class Test002 : Test001<Test0011>
+    {
+        /// <summary>
+        /// Test002 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+        /// </summary>
+        public string BB { get; set; }
+    }
+
+    public class Test003<T> : Test001<T>
+    {
+        /// <summary>
+        /// Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+        /// </summary>
+        public string BBB { get; set; }
+    }
+
+    /// <summary>
+    /// Test004Test004Test004Test004Test004Test004Test004
+    /// Test004Test004Test004Test004Test004Test004Test004
+    /// </summary>
+    public class Test004 : Test003<Test0011>
+    {
+        /// <summary>
+        /// Test004 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+        /// </summary>
+        public string BBBB { get; set; }
     }
 
     /// <summary>
     /// Test001Test001Tes
     /// t001Test001Test001Test001
     /// </summary>
-    public class Test001
+    public class Test001<T>
     {
         /// <summary>
         /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
@@ -602,7 +749,7 @@ public class Args
         /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
         /// </summary>
         //[Test]
-        [Nick("password")]
+        [Alias("password")]
         [@CheckNull]
         //[@CheckEmail]
         [@CheckUrl]
@@ -613,11 +760,9 @@ public class Args
         /// </summary>
         public string B { get; set; }
 
-        /// <summary>
-        /// CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC12
-        /// </summary>
+
         //[Test]
-        public Test0010 C { get; set; }
+        public Test0010<T> C { get; set; }
 
         /// <summary>
         /// DDD
@@ -631,9 +776,16 @@ public class Args
         /// </summary>
         public DateTime F { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public MyEnum myEnum { get; set; }
 
-        public struct Test0010
+        /// <summary>
+        /// Test0010 Test0010 Test0010 Test0010
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public struct Test0010<T>
         {
             /// <summary>
             /// C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
@@ -649,7 +801,7 @@ public class Args
             /// <summary>
             /// C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
             /// </summary>
-            public List<Test0011> C3 { get; set; }
+            public List<T> C3 { get; set; }
 
             //public string C22 { get; set; }
 
@@ -658,27 +810,27 @@ public class Args
             //public Test0011 C34 { get; set; }
 
             //public string C35 { get; set; }
-
-            /// <summary>
-            /// 
-            /// </summary>
-            public class Test0011
-            {
-                /// <summary>
-                /// 
-                /// </summary>
-                public string C31 { get; set; }
-
-                /// <summary>
-                /// 
-                /// </summary>
-                public string C32 { get; set; }
-
-                /// <summary>
-                /// AAA@@@
-                /// </summary>
-                public List<string> AAA { get; set; }
-            }
         }
+    }
+
+    /// <summary>
+    /// Test0011Test0011Test0011Test0011
+    /// </summary>
+    public class Test0011
+    {
+        /// <summary>
+        /// C31C31C31C31C31C31
+        /// </summary>
+        public string C31 { get; set; }
+
+        /// <summary>
+        /// C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32
+        /// </summary>
+        public string C32 { get; set; }
+
+        /// <summary>
+        /// AAA@@@
+        /// </summary>
+        public List<string> AAA { get; set; }
     }
 }

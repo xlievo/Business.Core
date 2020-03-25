@@ -29,9 +29,9 @@ namespace Business.Core.Utils
     {
         public Accessor(System.Type type, System.Func<object, object> getter, System.Action<object, object> setter)
         {
-            this.Type = type;
-            this.Getter = getter;
-            this.Setter = setter;
+            Type = type;
+            Getter = getter;
+            Setter = setter;
         }
 
         public System.Type Type { get; private set; }
@@ -48,8 +48,8 @@ namespace Business.Core.Utils
     {
         public Proces(MethodInfo method, System.Type[] parameterType)
         {
-            this.MethodInfo = method;
-            this.ParameterType = parameterType;
+            MethodInfo = method;
+            ParameterType = parameterType;
         }
 
         public MethodInfo MethodInfo { get; }
@@ -227,7 +227,7 @@ namespace Business.Core.Utils
         /// <param name="x"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        internal static bool GroupEquals(Annotations.GropuAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
+        internal static bool GroupEquals(Annotations.GroupAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
 
         #endregion
 
@@ -331,36 +331,36 @@ namespace Business.Core.Utils
                     {
                         arg.HasCast = arg.HasIArg = false;
                         arg.Type = arg.OrigType;
-                        item.IArgs.collection.Remove(arg);
+                        item.IArgs.Collection.Remove(arg);
                     }
 
                     foreach (var item2 in arg.Group)
                     {
                         //remove not parameter attr
 
-                        var attrs = new ConcurrentLinkedList<Annotations.ArgumentAttribute>();
+                        //var attrs = new ReadOnlyCollection<Annotations.ArgumentAttribute>();
 
-                        var first = item2.Value.Attrs.ForEach(c =>
-                        {
-                            var attr = c.Value;
+                        //var first = item2.Value.Attrs.ForEach(c =>
+                        //{
+                        //    var attr = c.Value;
 
-                            if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
-                            {
-                                //item2.Value.Attrs.Remove(attr, out _);
-                                return;
-                            }
+                        //    if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
+                        //    {
+                        //        //item2.Value.Attrs.Remove(attr, out _);
+                        //        return;
+                        //    }
 
-                            attrs.TryAdd(attr);
-                        });
+                        //    attrs.TryAdd(attr);
+                        //});
 
-                        item2.Value.Attrs = attrs;
+                        item2.Value.Attrs = item2.Value.Attrs.Where(c => Annotations.AttributeBase.MetaData.DeclaringType.Parameter == c.Meta.Declaring).ToReadOnly();
 
                         //add default convert
-                        if (arg.HasIArg && null == first)
+                        if (arg.HasIArg && 0 == item2.Value.Attrs.Count)
                         {
                             var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
                             attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
-                            item2.Value.Attrs.TryAdd(attr);
+                            item2.Value.Attrs.Collection.Add(attr);
                             //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
                         }
                     }
@@ -409,37 +409,37 @@ namespace Business.Core.Utils
                     {
                         arg.HasCast = arg.HasIArg = false;
                         arg.Type = arg.OrigType;
-                        item.IArgs.collection.Remove(arg);
+                        item.IArgs.Collection.Remove(arg);
                     }
 
                     foreach (var item2 in arg.Group)
                     {
                         //remove not parameter attr
 
-                        var attrs = new ConcurrentLinkedList<Annotations.ArgumentAttribute>();
+                        //var attrs = new ConcurrentLinkedList<Annotations.ArgumentAttribute>();
 
-                        var first = item2.Value.Attrs.ForEach(c =>
-                        {
-                            var attr = c.Value;
+                        //var first = item2.Value.Attrs.ForEach(c =>
+                        //{
+                        //    var attr = c.Value;
 
-                            if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
-                            {
-                                //item2.Value.Attrs.Remove(attr, out _);
-                                return;
-                            }
+                        //    if (attr.Meta.Declaring != Annotations.AttributeBase.MetaData.DeclaringType.Parameter)
+                        //    {
+                        //        //item2.Value.Attrs.Remove(attr, out _);
+                        //        return;
+                        //    }
 
-                            attrs.TryAdd(attr);
-                        });
+                        //    attrs.TryAdd(attr);
+                        //});
 
-                        item2.Value.Attrs = attrs;
+                        item2.Value.Attrs = item2.Value.Attrs.Where(c => Annotations.AttributeBase.MetaData.DeclaringType.Parameter == c.Meta.Declaring).ToReadOnly();
 
                         //add default convert
-                        if (arg.HasIArg && null == first)
+                        if (arg.HasIArg && 0 == item2.Value.Attrs.Count)
                         //if (arg.HasIArg && NodeState.DAT != first.State)
                         {
                             var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
                             attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
-                            item2.Value.Attrs.TryAdd(attr);
+                            item2.Value.Attrs.Collection.Add(attr);
                         }
                     }
                 }
@@ -483,15 +483,15 @@ namespace Business.Core.Utils
             where TypeDefinition : ITypeDefinition<TypeDefinition>
         {
             var group = argSource.Args.Group[argSource.Group];
-            var nick = group.Nick;
-            if (!string.IsNullOrWhiteSpace(nick))
+            var alias = group.Alias;
+            if (!string.IsNullOrWhiteSpace(alias))
             {
-                nick = $" {nick}";
+                alias = $" {alias}";
             }
 
-            var docArg = new DocArg { Id = group.Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection };
+            var docArg = new DocArg { Id = group.Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection, Name = argSource.Args.Name };
 
-            docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} {nick}" : $"{argSource.Args.Name} ({docArg.LastType}){nick}";
+            docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} {alias}" : $"{argSource.Args.Name} ({docArg.LastType}){alias}";
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary?.Replace(System.Environment.NewLine, "<br/>");
 
@@ -532,7 +532,12 @@ namespace Business.Core.Utils
 
             if (argSource.Args.LastType.IsEnum)
             {
-                docArg.Enum = argSource.Args.LastType.GetEnumNames();
+                docArg.Type = "number";
+                docArg.Enum = argSource.Args.LastType.GetEnumValues().Cast<int>();
+                docArg.Options = new Dictionary<string, object>
+                {
+                    { "enum_titles",  docArg.Enum.Select(c => $"{System.Enum.GetName(argSource.Args.LastType, c)} : {c}") },
+                };
             }
 
             if (argSource.Args.HasDictionary)
@@ -553,7 +558,7 @@ namespace Business.Core.Utils
             }
             else if (argSource.Args.HasCollection && !hideArray)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} (Array){nick}" : $"{argSource.Args.Name} ({docArg.LastType} Array){nick}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} (Array){alias}" : $"{argSource.Args.Name} ({docArg.LastType} Array){alias}";
 
                 docArg.Type = "array";
                 docArg.Items = new Items<DocArg>();
@@ -585,7 +590,7 @@ namespace Business.Core.Utils
 
             if (argSource.Args.HasCollection)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} (Array){nick}" : $"{argSource.Args.Name} ({docArg.LastType} Array){nick}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} (Array){alias}" : $"{argSource.Args.Name} ({docArg.LastType} Array){alias}";
             }
 
             return docArg;
@@ -708,15 +713,7 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static string FirstCharToLower(this string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return input;
-            }
-
-            return input[0].ToString().ToLower() + input.Substring(1);
-        }
+        public static string FirstCharToLower(this string input) => string.IsNullOrEmpty(input) ? input : input[0].ToString().ToLower() + input.Substring(1);
 
         /// <summary>
         /// Gets the document object of the specified business class.
@@ -740,7 +737,7 @@ namespace Business.Core.Utils
             {
                 var key = c2.Value.Key;
                 var meta = c2.Value.Meta;
-                var onlyName = meta.CommandGroup[key].OnlyName;
+                var onlyName = meta.CommandGroup.Group[key].OnlyName;
 
                 Xml.member member = null;
                 xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
@@ -749,7 +746,10 @@ namespace Business.Core.Utils
 
                 var member2 = new Member<DocArg>
                 {
+                    Key = meta.Name,
                     Name = onlyName,
+                    Alias = meta.Doc?.Alias,
+                    AliasGroup = meta.Doc?.Group,
                     HasReturn = meta.HasReturn,
                     Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
                     Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
@@ -772,10 +772,23 @@ namespace Business.Core.Utils
 
             config.Host = System.Uri.TryCreate(config.Host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty;
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Group = group, GroupDefault = groupDefault, Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>"), Config = config };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Alias = business.Configer.Info.Alias, Group = group, GroupDefault = groupDefault, Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>"), Config = config, DocGroup = business.Configer.DocGroup.OrderBy(c => c.Key.position).ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.position) as IEnumerable<DocInfo>) };
         }
 
         const string AttributeSign = "Attribute";
+
+        static string GetEnumSummary(this System.Type type, string summary, IDictionary<string, Xml.member> xmlMembers)
+        {
+            var values = type.GetEnumValues().Cast<int>().Select(c =>
+            {
+                var enumName = System.Enum.GetName(type, c);
+                Xml.member enumMember = null;
+                xmlMembers?.TryGetValue($"F:{type.GetTypeName()}.{enumName}", out enumMember);
+                var memberSummary = enumMember?.summary?.text;
+                return string.IsNullOrWhiteSpace(memberSummary) ? $"<strong>{enumName} : {c}</strong>" : $"<strong>{enumName} : {c}</strong>&nbsp;&nbsp;&nbsp;&nbsp;{memberSummary}";
+            });
+            return $"{(!string.IsNullOrWhiteSpace(summary) ? summary + "<br/>" : null)}{string.Join("<br/>", values)}";
+        }
 
         static DocArg GetDocArg<DocArg, TypeDefinition>(string group, TypeDefinition args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null)
             where DocArg : IDocArg<DocArg>
@@ -804,35 +817,48 @@ namespace Business.Core.Utils
 
                 summary = member?.summary?.text;
 
-                if (string.IsNullOrWhiteSpace(summary) && args.HasDefinition)
+                if (string.IsNullOrWhiteSpace(summary) && (args.HasDefinition || args.LastType.IsEnum))
                 {
-                    xmlMembers?.TryGetValue($"T:{args.LastType.FullName.Replace('+', '.')}", out member);
+                    xmlMembers?.TryGetValue($"T:{args.LastType.GetTypeName()}", out member);
 
                     summary = member?.summary?.text;
                 }
+            }
+
+            if (args.LastType.IsEnum)
+            {
+                summary = args.LastType.GetEnumSummary(summary, xmlMembers);
             }
 
             var argGroup = args.Group[group];
 
             var attrs = new List<string>();
 
-            // while (null != attr && NodeState.DAT == attr.State)
-            argGroup.Attrs.ForEach(c =>
+            //// while (null != attr && NodeState.DAT == attr.State)
+            //argGroup.Attrs.ForEach(c =>
+            //{
+            //    var attr = c.Value;
+
+            //    if (typeof(Annotations.ArgumentDefaultAttribute).IsAssignableFrom(attr.Meta.Type))
+            //    {
+            //        return;
+            //    }
+
+            //    attrs.Add(string.IsNullOrWhiteSpace(attr.Description) ? attr.Meta.Type.Name.EndsWith(AttributeSign) ? attr.Meta.Type.Name.Substring(0, attr.Meta.Type.Name.Length - AttributeSign.Length) : attr.Meta.Type.Name : attr.Description);
+            //});
+
+            if (null != argGroup.Attrs)
             {
-                //if ("Business.Attributes.ArgumentDefaultAttribute" == c.Meta.Type.FullName)
-                //{
-                //    return;
-                //}
-
-                var attr = c.Value;
-
-                if (typeof(Annotations.ArgumentDefaultAttribute).IsAssignableFrom(attr.Meta.Type))
+                foreach (var attr in argGroup.Attrs)
                 {
-                    return;
-                }
+                    if (typeof(Annotations.ArgumentDefaultAttribute).IsAssignableFrom(attr.Meta.Type))
+                    {
+                        continue;
+                    }
 
-                attrs.Add(string.IsNullOrWhiteSpace(attr.Description) ? attr.Meta.Type.Name.EndsWith(AttributeSign) ? attr.Meta.Type.Name.Substring(0, attr.Meta.Type.Name.Length - AttributeSign.Length) : attr.Meta.Type.Name : attr.Description);
-            });
+                    attrs.Add(string.IsNullOrWhiteSpace(attr.Description) ? attr.Meta.Type.Name.EndsWith(AttributeSign) ? attr.Meta.Type.Name.Substring(0, attr.Meta.Type.Name.Length - AttributeSign.Length) : attr.Meta.Type.Name : attr.Description);
+                }
+            }
 
             var arg = argCallback(new DocArgSource<TypeDefinition> { Group = group, Args = args, Attributes = attrs, Summary = summary });
 
@@ -856,10 +882,20 @@ namespace Business.Core.Utils
                     {
                         if ("array" == arg.Type)
                         {
+                            if (arg.Items.Children.ContainsKey(item.Name))
+                            {
+                                throw new System.ArgumentException($"{item.Group[group].Path} already exist!");
+                            }
+
                             arg.Items.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
                         }
                         else
                         {
+                            if (arg.Children.ContainsKey(item.Name))
+                            {
+                                throw new System.ArgumentException($"{item.Group[group].Path} already exist!");
+                            }
+
                             arg.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
                         }
                     }
@@ -874,16 +910,21 @@ namespace Business.Core.Utils
             var current = GetCurrentType(type);
             var definitions = current.hasDefinition ? new List<string> { type.FullName } : new List<string>();
             var childrens = new ReadOnlyCollection<TypeDefinition>();
-            var fullName = type.FullName.Replace('+', '.');
+            var fullName = type.GetTypeName();
             var memberDefinition = current.hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No;
             //..//
 
             Xml.member member = null;
-            if (string.IsNullOrWhiteSpace(summary) && memberDefinition == MemberDefinitionCode.Definition)
+            if (string.IsNullOrWhiteSpace(summary) && (memberDefinition == MemberDefinitionCode.Definition || current.outType.IsEnum))
             {
-                xmlMembers?.TryGetValue($"T:{fullName}", out member);
+                xmlMembers?.TryGetValue($"T:{current.outType.GetTypeName()}", out member);
 
                 summary = member?.summary?.text;
+            }
+
+            if (current.outType.IsEnum)
+            {
+                summary = current.outType.GetEnumSummary(summary, xmlMembers);
             }
 
             var group = new ConcurrentReadOnlyDictionary<string, ArgGroup>();
@@ -952,7 +993,7 @@ namespace Business.Core.Utils
                 if (definitions.Contains(memberType.FullName)) { continue; }
                 else if (current.hasDefinition) { definitions.Add(memberType.FullName); }
                 var childrens2 = new ReadOnlyCollection<TypeDefinition>();
-                var fullName = $"{type.FullName.Replace('+', '.')}.{item.Name}";
+                var fullName = $"{type.GetTypeName(item.DeclaringType)}.{item.Name}";
 
                 Xml.member member2 = null;
 
@@ -972,6 +1013,18 @@ namespace Business.Core.Utils
                 }
 
                 var summary = member2?.summary?.text;
+
+                if (string.IsNullOrWhiteSpace(summary) && (memberDefinition == MemberDefinitionCode.Definition || current.outType.IsEnum))
+                {
+                    xmlMembers?.TryGetValue($"T:{current.outType.GetTypeName()}", out member2);
+
+                    summary = member2?.summary?.text;
+                }
+
+                if (current.outType.IsEnum)
+                {
+                    summary = current.outType.GetEnumSummary(summary, xmlMembers);
+                }
 
                 // .. //
                 var path2 = !string.IsNullOrWhiteSpace(path) ? $"{path}.{item.Name}" : item.Name;
@@ -1006,12 +1059,12 @@ namespace Business.Core.Utils
                     Group = group
                 };
 
-                types.collection.Add(definition);
-                childrens.collection.Add(definition);
+                types.Collection.Add(definition);
+                childrens.Collection.Add(definition);
 
                 foreach (var child in childrens2)
                 {
-                    childrens.collection.Add(child);
+                    childrens.Collection.Add(child);
                 }
             }
 
@@ -1086,7 +1139,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Values.Where(c => GroupEquals(logger, c.Group));
+                var groups = item.CommandGroup.Group.Values.Where(c => GroupEquals(logger, c.Group));
 
                 if (!groups.Any()) { return; }
 
@@ -1127,7 +1180,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Values.Where(c => GroupEquals(logger, c.Group));
+                var groups = item.CommandGroup.Group.Values.Where(c => GroupEquals(logger, c.Group));
 
                 if (!groups.Any()) { return; }
 
@@ -1164,7 +1217,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Values.Where(c => GroupEquals(ignore, c.Group));
+                var groups = item.CommandGroup.Group.Values.Where(c => GroupEquals(ignore, c.Group));
 
                 if (!groups.Any()) { return; }
 
@@ -1183,7 +1236,7 @@ namespace Business.Core.Utils
                                 {
                                     continue;
                                 }
-                                g.Ignore.collection.Add(ignore);
+                                g.Ignore.Collection.Add(ignore);
                                 g.IgnoreArg = g.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.Arg);
                                 business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.Group[group.Key].IgnoreArg);
                             }
@@ -1207,7 +1260,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Values.Where(c => GroupEquals(ignore, c.Group));
+                var groups = item.CommandGroup.Group.Values.Where(c => GroupEquals(ignore, c.Group));
                 //checked group
                 if (!groups.Any()) { return; }
 
@@ -1226,7 +1279,7 @@ namespace Business.Core.Utils
                                 {
                                     continue;
                                 }
-                                g.Ignore.collection.Add(ignore);
+                                g.Ignore.Collection.Add(ignore);
                                 g.IgnoreArg = g.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.Arg);
                                 business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.Group[group.Key].IgnoreArg);
                             }
@@ -1268,18 +1321,18 @@ namespace Business.Core.Utils
 
             switch (logger2.LogType)
             {
-                case Logger.LoggerType.All:
-                    metaLogger.Record = logger2.Clone().SetType(Logger.LoggerType.Record);
-                    metaLogger.Error = logger2.Clone().SetType(Logger.LoggerType.Error);
-                    metaLogger.Exception = logger2.Clone().SetType(Logger.LoggerType.Exception);
+                case Logger.Type.All:
+                    metaLogger.Record = logger2.Clone().SetType(Logger.Type.Record);
+                    metaLogger.Error = logger2.Clone().SetType(Logger.Type.Error);
+                    metaLogger.Exception = logger2.Clone().SetType(Logger.Type.Exception);
                     break;
-                case Logger.LoggerType.Record:
+                case Logger.Type.Record:
                     metaLogger.Record = logger2;
                     break;
-                case Logger.LoggerType.Error:
+                case Logger.Type.Error:
                     metaLogger.Error = logger2;
                     break;
-                case Logger.LoggerType.Exception:
+                case Logger.Type.Exception:
                     metaLogger.Exception = logger2;
                     break;
             }
@@ -1363,7 +1416,7 @@ namespace Business.Core.Utils
 
         internal static List<Attribute> Distinct<Attribute>(this List<Attribute> attributes, IEnumerable<Attribute> clones = null, System.Func<Attribute, bool> clonesExclude = null, System.Action<Attribute> attributesAction = null) where Attribute : Annotations.AttributeBase
         {
-            var gropus = new List<Annotations.GropuAttribute>();
+            var gropus = new List<Annotations.GroupAttribute>();
 
             for (int i = attributes.Count - 1; i >= 0; i--)
             {
@@ -1371,23 +1424,23 @@ namespace Business.Core.Utils
 
                 attributesAction?.Invoke(item);
 
-                if (item is Annotations.GropuAttribute)
+                if (item is Annotations.GroupAttribute)
                 {
-                    gropus.Add(item as Annotations.GropuAttribute);
+                    gropus.Add(item as Annotations.GroupAttribute);
 
                     attributes.RemoveAt(i);
                 }
             }
 
-            var attrs = gropus.Distinct(Annotations.GropuAttribute.Comparer).ToDictionary(c => c.GroupKey(), c => c);
+            var attrs = gropus.Distinct(Annotations.GroupAttribute.Comparer).ToDictionary(c => c.GroupKey(), c => c);
 
             if (null != clones && clones.Any())
             {
                 foreach (var item in clones)
                 {
-                    if (item is Annotations.GropuAttribute)
+                    if (item is Annotations.GroupAttribute)
                     {
-                        var item2 = item as Annotations.GropuAttribute;
+                        var item2 = item as Annotations.GroupAttribute;
 
                         var groupKey = item2.GroupKey();
 
@@ -1412,6 +1465,8 @@ namespace Business.Core.Utils
 
         internal static List<Attribute> GetAttrs<Attribute>(this IList<Annotations.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null, bool clone = false) where Attribute : Annotations.AttributeBase
         {
+            if (null == attributes) { throw new System.ArgumentNullException(nameof(attributes)); }
+
             var list = new List<Attribute>(attributes.Count);
 
             foreach (var item in attributes)
@@ -1448,6 +1503,8 @@ namespace Business.Core.Utils
 
         internal static Attribute GetAttr<Attribute>(this IList<Annotations.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null) where Attribute : Annotations.AttributeBase
         {
+            if (null == attributes) { throw new System.ArgumentNullException(nameof(attributes)); }
+
             if (null == predicate)
             {
                 return attributes.FirstOrDefault(c => c is Attribute) as Attribute;
@@ -2003,10 +2060,10 @@ namespace Business.Core.Utils
             Chinese = 32
         }
 
-        static System.Predicate<int> number = delegate (int c) { return !(c >= 48 && c <= 57); };
-        static System.Predicate<int> upper = delegate (int c) { return !(c >= 65 && c <= 90); };
-        static System.Predicate<int> lower = delegate (int c) { return !(c >= 97 && c <= 122); };
-        static System.Predicate<int> chinese = delegate (int c) { return !(c >= 0x4e00 && c <= 0x9fbb); };
+        static readonly System.Predicate<int> number = delegate (int c) { return !(c >= 48 && c <= 57); };
+        static readonly System.Predicate<int> upper = delegate (int c) { return !(c >= 65 && c <= 90); };
+        static readonly System.Predicate<int> lower = delegate (int c) { return !(c >= 97 && c <= 122); };
+        static readonly System.Predicate<int> chinese = delegate (int c) { return !(c >= 0x4e00 && c <= 0x9fbb); };
 
         public static bool CheckChar(string value, CheckCharMode mode = CheckCharMode.All)
         {
@@ -2141,7 +2198,7 @@ namespace Business.Core.Utils
             }
 
             // get the default constructor and instantiate
-            var types = new System.Type[0];
+            var types = System.Array.Empty<System.Type>();
             var info = targetType.GetConstructor(types);
             object targetObject;
 
@@ -2250,7 +2307,7 @@ namespace Business.Core.Utils
 
             var typeInfo = type.GetTypeInfo();
             if (typeInfo.IsGenericType &&
-    type.GetGenericTypeDefinition().Equals(typeof(System.Nullable<>)))
+        type.GetGenericTypeDefinition().Equals(typeof(System.Nullable<>)))
             {
                 if (value == null) { return null; }
 
@@ -2494,7 +2551,7 @@ namespace Business.Core.Utils
 
             try
             {
-                return System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement[]>(value, options ?? JsonOptions).Select(c => c.GetRawText()).ToArray();
+                return System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement[]>(value, options ?? JsonOptions).Select(c => c.ToString()).ToArray();
             }
             catch
             {
@@ -2770,8 +2827,6 @@ namespace Business.Core.Utils
 
         #endregion
 
-        public static ReadOnlyCollection<T> ToReadOnly<T>(this IList<T> list) => new ReadOnlyCollection<T>(list);
-
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> values) => new ReadOnlyCollection<T>(values);
 
         public static ConcurrentReadOnlyDictionary<TKey, TElement> ToReadOnlyDictionary<TKey, TSource, TElement>(this IEnumerable<TSource> source, System.Func<TSource, TKey> keySelector, System.Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer = null)
@@ -2796,6 +2851,7 @@ namespace Business.Core.Utils
                     {
                         return value;
                     }
+
                     return System.DateTime.Parse(reader.GetString());
                 }
 
@@ -2810,6 +2866,27 @@ namespace Business.Core.Utils
         {
             public override string ConvertName(string name) => FirstCharToLower(name);
         }
+
+        internal static string GetTypeName(this System.Type type, System.Type declaringType = null)
+        {
+            if (null == type) { throw new System.ArgumentNullException(nameof(type)); }
+
+            if (null != declaringType)
+            {
+                while (typeof(object) != type.BaseType && type.IsClass && type.IsDefinition())
+                {
+                    if (type.Equals(declaringType))
+                    {
+                        break;
+                    }
+                    type = type.BaseType;
+                }
+            }
+
+            return (type.IsGenericType ? null == type.DeclaringType ? type.Name : $"{type.DeclaringType.GetTypeName()}.{type.Name}" : type.FullName).Replace('+', '.');
+        }
+
+        internal static bool Contains<T>(this T @enum, T value) where T : System.Enum => 0 != (@enum & (dynamic)value);
 
         /*
         public static dynamic Call(this IBusiness business, dynamic data, string remote, string group = null, Http.IHttpRequest httpRequest = null, string commandID = null)
@@ -2963,72 +3040,16 @@ namespace Business.Core.Utils
 
 #endregion
     */
-
-    public static class ConcurrentReadOnlyDictionaryExtensions
+    
+    public class ReadOnlyDictionary<TKey, TValue> : System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue>
     {
-        public static Node<T> ForEach<T>(this ConcurrentLinkedList<T> linked, System.Action<Node<T>> action)
-        {
-            return ForEach(linked, c =>
-            {
-                action(c);
-                return false;
-            });
-        }
+        internal readonly IDictionary<TKey, TValue> dictionary;
 
-        public static Node<T> ForEach<T>(this ConcurrentLinkedList<T> linked, System.Func<Node<T>, bool> action)
-        {
-            var first = linked?.First;
+        public ReadOnlyDictionary(IDictionary<TKey, TValue> dictionary) : base(dictionary) => this.dictionary = dictionary;
 
-            while (null != first)
-            {
-                if (NodeState.DAT != first.State)
-                {
-                    first = first.Next;
-                    continue;
-                }
+        public ReadOnlyDictionary() : this(new Dictionary<TKey, TValue>()) { }
 
-                if (action(first))
-                {
-                    break;
-                }
-
-                first = first.Next;
-            }
-
-            return first;
-        }
-
-        public static async System.Threading.Tasks.Task<Node<T>> ForEach<T>(this ConcurrentLinkedList<T> linked, System.Func<Node<T>, System.Threading.Tasks.Task> action)
-        {
-            return await ForEach(linked, async c =>
-            {
-                await action(c);
-                return false;
-            });
-        }
-
-        public static async System.Threading.Tasks.Task<Node<T>> ForEach<T>(this ConcurrentLinkedList<T> linked, System.Func<Node<T>, System.Threading.Tasks.Task<bool>> action)
-        {
-            var first = linked?.First;
-
-            while (null != first)
-            {
-                if (NodeState.DAT != first.State)
-                {
-                    first = first.Next;
-                    continue;
-                }
-
-                if (await action(first))
-                {
-                    break;
-                }
-
-                first = first.Next;
-            }
-
-            return first;
-        }
+        public ReadOnlyDictionary(IEqualityComparer<TKey> comparer) : this(new Dictionary<TKey, TValue>(comparer)) { }
     }
 
     public class ConcurrentReadOnlyDictionary<TKey, TValue> : System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue>
@@ -3056,7 +3077,9 @@ namespace Business.Core.Utils
 
     public class ReadOnlyCollection<TValue> : System.Collections.ObjectModel.ReadOnlyCollection<TValue>
     {
-        internal IList<TValue> collection { get => this.Items; }
+        public static readonly ReadOnlyCollection<TValue> Empty = new ReadOnlyCollection<TValue>(System.Array.Empty<TValue>());
+
+        internal IList<TValue> Collection { get => Items; }
 
         public ReadOnlyCollection(IList<TValue> collection) : base(collection) { }
 
@@ -3064,15 +3087,7 @@ namespace Business.Core.Utils
 
         public ReadOnlyCollection(int capacity) : this(new List<TValue>(capacity)) { }
 
-        public ReadOnlyCollection(IEnumerable<TValue> values) : this()
-        {
-            if (null == values) { throw new System.ArgumentNullException(nameof(values)); }
-
-            foreach (var item in values)
-            {
-                this.Items.Add(item);
-            }
-        }
+        public ReadOnlyCollection(IEnumerable<TValue> values) : this(new List<TValue>(values)) { }
     }
 
     #region Equals
@@ -3090,8 +3105,8 @@ namespace Business.Core.Utils
 
         class CommonEqualityComparer<V> : IEqualityComparer<T>
         {
-            private System.Func<T, V> keySelector;
-            private IEqualityComparer<V> comparer;
+            private readonly System.Func<T, V> keySelector;
+            private readonly IEqualityComparer<V> comparer;
 
             public CommonEqualityComparer(System.Func<T, V> keySelector, IEqualityComparer<V> comparer)
             {
@@ -3125,8 +3140,8 @@ namespace Business.Core.Utils
 
         class CommonComparer<V> : IComparer<T>
         {
-            private System.Func<T, V> keySelector;
-            private IComparer<V> comparer;
+            private readonly System.Func<T, V> keySelector;
+            private readonly IComparer<V> comparer;
 
             public CommonComparer(System.Func<T, V> keySelector, IComparer<V> comparer)
             {
@@ -3146,307 +3161,126 @@ namespace Business.Core.Utils
 
     #endregion
 
-    #region ConcurrentLinkedList https://github.com/danielkylewood/concurrent-linked-list Apache License 2.0
+    #region Queue<T>
 
-    public class ConcurrentLinkedList<T> : IConcurrentLinkedList<T>
+    public class Queue<T>
     {
-        public Node<T> First => _first;
-
-        private int _counter;
-        private Node<T> _first;
-        private readonly Node<T> _dummy;
-        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, ThreadState<T>> _threads;
-
-        public ConcurrentLinkedList()
+        public struct BatchOptions
         {
-            _counter = 0;
-            _dummy = new Node<T>();
-            _threads = new System.Collections.Concurrent.ConcurrentDictionary<int, ThreadState<T>>();
-            _first = new Node<T>(default(T), NodeState.REM, -1);
+            /// <summary>
+            /// Return log time interval, default System.TimeSpan.Zero equals not enabled,5 seconds is reasonable
+            /// </summary>
+            public System.TimeSpan Interval { get; set; }
+
+            /// <summary>
+            /// Return log number, less than 1 no restrictions
+            /// </summary>
+            public int MaxNumber { get; set; }
         }
+
+        public readonly System.Collections.Concurrent.BlockingCollection<T> queue;
+
+        readonly System.Collections.Concurrent.BlockingCollection<T>[] dequeues;
 
         /// <summary>
-        /// Attempts to add the specified value to the <see cref="ConcurrentLinkedList{T}"/>.
+        /// Queue
         /// </summary>
-        public bool TryAdd(T value)
+        /// <param name="call"></param>
+        /// <param name="batch"></param>
+        /// <param name="maxWorkThreads">Gets the maximum out queue thread for this queue, default 1</param>
+        /// <param name="syn">Whether each outgoing thread has synchronous callback, asynchronous by default</param>
+        /// <param name="maxCapacity">Gets the max capacity of this queue</param>
+        public Queue(System.Func<IEnumerable<T>, System.Threading.Tasks.Task> call, BatchOptions batch = default, int maxWorkThreads = 1, bool syn = false, int? maxCapacity = null)
         {
-            var node = new Node<T>(value, (int)NodeState.INS, System.Threading.Thread.CurrentThread.ManagedThreadId);
+            if (null == call) { throw new System.ArgumentNullException(nameof(call)); }
 
-            Enlist(node);
-            var insertionResult = HelpInsert(node, value);
+            var isBatch = !default(BatchOptions).Equals(batch);
+            var isInterval = 0 != System.TimeSpan.Zero.CompareTo(batch.Interval);
 
-            var originalValue = node.AtomicCompareAndExchangeState(insertionResult ? NodeState.DAT : NodeState.INV, NodeState.INS);
-            if (originalValue != NodeState.INS)
+            if (0 >= maxWorkThreads || !isBatch)
             {
-                HelpRemove(node, value, out _);
-                node.State = NodeState.INV;
+                maxWorkThreads = 1;
             }
 
-            return insertionResult;
-        }
+            queue = maxCapacity.HasValue && 0 < maxCapacity.Value ? new System.Collections.Concurrent.BlockingCollection<T>(maxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<T>();
 
-        /// <summary>
-        /// Attempts to remove the specified value from the <see cref="ConcurrentLinkedList{T}"/>.
-        /// </summary>
-        public bool Remove(T value, out T result)
-        {
-            var node = new Node<T>(value, NodeState.REM, System.Threading.Thread.CurrentThread.ManagedThreadId);
-
-            Enlist(node);
-            var removeResult = HelpRemove(node, value, out result);
-            node.State = NodeState.INV;
-            return removeResult;
-        }
-
-        /// <summary>
-        /// Determines whether the <see cref="ConcurrentLinkedList{T}"/> contains the specified key.
-        /// </summary>
-        public bool Contains(T value)
-        {
-            var current = _first;
-            while (current != null)
+            dequeues = new System.Collections.Concurrent.BlockingCollection<T>[maxWorkThreads];
+            for (int i = 0; i < maxWorkThreads; i++)
             {
-                if (current.Value == null || current.Value.Equals(value))
+                dequeues[i] = 0 < batch.MaxNumber ? new System.Collections.Concurrent.BlockingCollection<T>(batch.MaxNumber) : isBatch ? new System.Collections.Concurrent.BlockingCollection<T>() : new System.Collections.Concurrent.BlockingCollection<T>(1);
+            }
+
+            System.Threading.Tasks.Task.Factory.StartNew(() =>
+            {
+                foreach (var item in queue.GetConsumingEnumerable())
                 {
-                    var state = current.State;
-                    if (state != NodeState.INV)
+                    if (1 == dequeues.Length)
                     {
-                        return state == NodeState.INS || state == NodeState.DAT;
-                    }
-                }
-
-                current = current.Next;
-            }
-
-            return false;
-        }
-
-        private static bool HelpInsert(Node<T> node, T value)
-        {
-            var previous = node;
-            var current = previous.Next;
-            while (current != null)
-            {
-                var state = current.State;
-                if (state == NodeState.INV)
-                {
-                    var successor = current.Next;
-                    previous.Next = successor;
-                    current = successor;
-                }
-                else if (current.Value != null && !current.Value.Equals(value))
-                {
-                    previous = current;
-                    current = current.Next;
-                }
-                else if (state == NodeState.REM)
-                {
-                    return true;
-                }
-                else if (state == NodeState.INS || state == NodeState.DAT)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool HelpRemove(Node<T> node, T value, out T result)
-        {
-            result = default(T);
-            var previous = node;
-            var current = previous.Next;
-
-            while (current != null)
-            {
-                var state = current.State;
-                if (state == NodeState.INV)
-                {
-                    var successor = current.Next;
-                    previous.Next = successor;
-                    current = successor;
-                }
-                else if (current.Value != null && !current.Value.Equals(value))
-                {
-                    previous = current;
-                    current = current.Next;
-                }
-                else if (state == NodeState.REM)
-                {
-                    return false;
-                }
-                else if (state == NodeState.INS)
-                {
-                    var originalValue = current.AtomicCompareAndExchangeState(NodeState.REM, NodeState.INS);
-                    if (originalValue == NodeState.INS)
-                    {
-                        result = current.Value;
-                        return true;
-                    }
-                }
-                else if (state == NodeState.DAT)
-                {
-                    result = current.Value;
-                    current.State = NodeState.INV;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void Enlist(Node<T> node)
-        {
-            var phase = System.Threading.Interlocked.Increment(ref _counter);
-            var threadState = new ThreadState<T>(phase, true, node);
-            var currentThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            _threads.AddOrUpdate(currentThreadId, threadState, (key, value) => threadState);
-
-            foreach (var threadId in _threads.Keys)
-            {
-                HelpEnlist(threadId, phase);
-            }
-
-            HelpFinish();
-        }
-
-        private void HelpEnlist(int threadId, int phase)
-        {
-            while (IsPending(threadId, phase))
-            {
-                var current = _first;
-                var previous = current.Previous;
-                if (current.Equals(_first))
-                {
-                    if (previous == null)
-                    {
-                        if (IsPending(threadId, phase))
-                        {
-                            var node = _threads[threadId].Node;
-                            var original = System.Threading.Interlocked.CompareExchange(ref current.Previous, node, null);
-                            if (original is null)
-                            {
-                                HelpFinish();
-                                return;
-                            }
-                        }
+                        dequeues[0].Add(item);
                     }
                     else
                     {
-                        HelpFinish();
+                        System.Collections.Concurrent.BlockingCollection<T>.AddToAny(dequeues, item);
                     }
                 }
-            }
-        }
+            }, System.Threading.Tasks.TaskCreationOptions.LongRunning);
 
-        private void HelpFinish()
-        {
-            var current = _first;
-            var previous = current.Previous;
-            if (previous != null && !previous.IsDummy())
+            System.Threading.Tasks.Parallel.For(0, maxWorkThreads, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = maxWorkThreads }, async c =>
             {
-                var threadId = previous.ThreadId;
-                var threadState = _threads[threadId];
-                if (current.Equals(_first) && previous.Equals(threadState.Node))
+                var queue = dequeues[c];
+                var capacity = queue.BoundedCapacity;
+
+                var watch = new System.Diagnostics.Stopwatch();
+                var list = new LinkedList<T>();
+
+                if (isInterval)
                 {
-                    var currentState = _threads[threadId];
-                    var updatedState = new ThreadState<T>(threadState.Phase, false, threadState.Node);
-                    _threads.TryUpdate(threadId, updatedState, currentState);
-                    previous.Next = current;
-                    System.Threading.Interlocked.CompareExchange(ref _first, previous, current);
-                    current.Previous = _dummy;
+                    watch.Start();
                 }
-            }
-        }
 
-        private bool IsPending(int threadId, int phase)
-        {
-            var threadState = _threads[threadId];
-            return threadState.Pending && threadState.Phase <= phase;
-        }
-    }
+                while (!this.queue.IsCompleted)
+                {
+                    var count = queue.Count;
 
-    public interface IConcurrentLinkedList<T>
-    {
-        Node<T> First { get; }
+                    if (0 < count && ((0 < capacity && count == capacity) || !isBatch || !isInterval || (isInterval && 0 < watch.Elapsed.CompareTo(batch.Interval))))
+                    {
+                        for (int i2 = 0; i2 < count; i2++)
+                        {
+                            if (queue.TryTake(out T logger))
+                            {
+                                list.AddLast(logger);
+                            }
+                        }
 
-        /// <summary>
-        /// Attempts to add the specified value to the <see cref="ConcurrentLinkedList{T}"/>.
-        /// </summary>
-        bool TryAdd(T value);
+                        var data = new T[list.Count];
+                        list.CopyTo(data, 0);
+                        list.Clear();
 
-        /// <summary>
-        /// Attempts to remove the specified value from the <see cref="ConcurrentLinkedList{T}"/>.
-        /// </summary>
-        bool Remove(T value, out T result);
+                        if (syn)
+                        {
+                            await call(data).ContinueWith(c2 => c2.Exception?.Console());
+                        }
+                        else
+                        {
+                            System.Threading.Tasks.Task.Factory.StartNew(obj => call(obj as T[]).ContinueWith(c2 => c2.Exception?.Console()), data);
+                        }
 
-        /// <summary>
-        /// Determines whether the <see cref="ConcurrentLinkedList{T}"/> contains the specified key.
-        /// </summary>
-        bool Contains(T value);
-    }
+                        if (watch.IsRunning)
+                        {
+                            watch.Restart();
+                        }
+                    }
 
-    public class Node<T>
-    {
-        public T Value;
-        public Node<T> Next;
+                    await System.Threading.Tasks.Task.Delay(1);
+                }
 
-        private int _state;
-        private readonly bool _isDummy;
+                if (watch.IsRunning)
+                {
+                    watch.Stop();
+                }
 
-        internal Node<T> Previous;
-        internal int ThreadId;
-        internal NodeState State
-        {
-            get => (NodeState)_state;
-            set => _state = (int)value;
-        }
-
-        internal Node()
-        {
-            _isDummy = true;
-            Value = default(T);
-        }
-
-        internal Node(T value, NodeState state, int threadId)
-        {
-            Value = value;
-            ThreadId = threadId;
-            _state = (int)state;
-            _isDummy = false;
-        }
-
-        internal NodeState AtomicCompareAndExchangeState(NodeState value, NodeState compare)
-        {
-            return (NodeState)System.Threading.Interlocked.CompareExchange(ref _state, (int)value, (int)compare);
-        }
-
-        internal bool IsDummy()
-        {
-            return _isDummy;
-        }
-    }
-
-    internal enum NodeState
-    {
-        INS = 0,
-        REM = 1,
-        DAT = 2,
-        INV = 3
-    }
-
-    internal class ThreadState<T>
-    {
-        public int Phase;
-        public bool Pending;
-        public Node<T> Node;
-
-        public ThreadState(int phase, bool pending, Node<T> node)
-        {
-            Phase = phase;
-            Pending = pending;
-            Node = node;
+                list.Clear();// count > 0 ?
+            });
         }
     }
 

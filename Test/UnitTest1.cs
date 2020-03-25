@@ -11,7 +11,7 @@ using static BusinessMember;
 using Business.Core;
 
 [assembly: JsonArg(Group = "G01")]
-[assembly: Logger(Logger.LoggerType.All)]
+[assembly: Logger(Logger.Type.All)]
 [assembly: Command(Group = "G01")]
 [assembly: Command(Group = CommandGroupDefault.Group)]
 
@@ -39,7 +39,10 @@ public class ProcesUse02 : ArgumentAttribute
 {
     public ProcesUse02(int state = -100, string message = null) : base(state, message) { }
 
-    public async override ValueTask<IResult> Proces(dynamic value) => this.ResultCreate(new Use02 { B = value.A });
+    public async override ValueTask<IResult> Proces(dynamic value)
+    {
+        return this.ResultCreate(new Use02 { B = value.A });
+    }
 }
 
 /// <summary>
@@ -75,9 +78,9 @@ public class Arg00
     /// Child Property, Field Agr<> type is only applicable to JSON
     /// </summary>
     [CheckNull]
-    [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
+    [AES2("18dc5b9d92a843a8a178069b600fca47", Alias = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
     //[AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
-    [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = CommandGroupDefault.Group)]
+    [Proces01(113, "{Alias} cannot be empty, please enter the correct {Alias}", Alias = "pas2", Group = CommandGroupDefault.Group)]
     public Arg<object, dynamic> A { get; set; }
 
     public string B { get; set; }
@@ -92,9 +95,9 @@ public struct Arg01
     /// Child Property, Field Agr<> type is only applicable to JSON
     /// </summary>
     [CheckNull]
-    [AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
+    [AES2("18dc5b9d92a843a8a178069b600fca47", Alias = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
     //[AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
-    [Proces01(113, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2", Group = CommandGroupDefault.Group)]
+    [Proces01(113, "{Alias} cannot be empty, please enter the correct {Alias}", Alias = "pas2", Group = CommandGroupDefault.Group)]
     public Arg<object, dynamic> A { get; set; }
 
     public string B { get; set; }
@@ -134,7 +137,7 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
 
         [ProcesUse02]Arg<Use02, Use01> use06,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.Out.A);
 }
@@ -156,16 +159,16 @@ public class BusinessMember2
         Arg00 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
-            [Nick("arg.b")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
             decimal b = 0.0234m,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         arg01.A.Out;
 
@@ -179,16 +182,16 @@ public class BusinessMember2
         Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
-            [Nick("arg.b")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
             decimal b = 0.0234m,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         arg01.A.Out;
 }
@@ -259,16 +262,16 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         Arg00 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
-            [Nick("arg.b")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
             decimal b = 0.0234m,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default) => this.ResultCreate(arg01.A.Out);
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default) => this.ResultCreate(arg01.A.Out);
 
     /// <summary>
     /// This is Test001.
@@ -289,16 +292,16 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
-            [Nick("arg.b")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
             decimal b = 0.0234m,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.A.Out);
 
@@ -321,16 +324,16 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
-            [Nick("arg.b")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
             decimal b = 0.0234m,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.A.Out);
 
@@ -353,16 +356,16 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
-            [Nick("arg.b")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
             decimal b = 0.0234m,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.A.Out);
 
@@ -372,16 +375,16 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
-            [Nick("arg.b")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
             decimal b = 0.0234m,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
         =>
         this.ResultCreate(arg01.A.Out);
 
@@ -391,16 +394,16 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         Arg01 arg01,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113)]
-            [Nick("arg.b")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
             decimal b = 0.0234m,
 
         [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 113, Nick = "arg.c", Group = CommandGroupDefault.Group)]
-            [Size(Min = 2, Max = 32, MinMsg = "{Nick} minimum range {Min}", MaxMsg = "{Nick} maximum range {Max}", State = 114, Nick = "G01arg.c", Group = "G01")]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.LoggerType.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
     { }
 
     [Command(Group = "G02", OnlyName = "G02Test002")]
@@ -1407,13 +1410,16 @@ public class TestBusinessMember
     {
         var meta = Cmd.GetCommand("Test001").Meta;
 
-        var attr = meta.Args[1].Children[0].Group[meta.GroupDefault].Attrs.First;
+        var i = 0;
+        var attr = meta.Args[1].Children[0].Group[meta.GroupDefault].Attrs[i];
 
-        Assert.AreEqual(attr.Value.State, -113);
-        attr = attr.Next;
-        Assert.AreEqual(attr.Value.State, -800);
-        attr = attr.Next;
-        Assert.AreEqual(attr.Value.State, -821);
+        Assert.AreEqual(attr.State, -113);
+        i = ++i;
+        attr = meta.Args[1].Children[0].Group[meta.GroupDefault].Attrs[i];
+        Assert.AreEqual(attr.State, -800);
+        i = ++i;
+        attr = meta.Args[1].Children[0].Group[meta.GroupDefault].Attrs[i];
+        Assert.AreEqual(attr.State, -821);
     }
 
     [TestMethod]
@@ -1421,17 +1427,17 @@ public class TestBusinessMember
     {
         var meta = Cmd.GetCommand("Test001").Meta;
 
-        var attr = meta.Args[2].Group[meta.GroupDefault].Attrs.First;
-        Assert.AreEqual(attr.Value.Nick, "arg.b");
+        var attr = meta.Args[2].Group[meta.GroupDefault].Attrs.First();
+        Assert.AreEqual(attr.Alias, "arg.b");
 
-        attr = meta.Args[3].Group[meta.GroupDefault].Attrs.First;
-        Assert.AreEqual(attr.Value.Nick, "arg.c");
+        attr = meta.Args[3].Group[meta.GroupDefault].Attrs.First();
+        Assert.AreEqual(attr.Alias, "arg.c");
 
-        attr = meta.Args[3].Group["G01.G01Test001"].Attrs.First;
-        Assert.AreEqual(attr.Value.Nick, "G01arg.c");
+        attr = meta.Args[3].Group["G01.G01Test001"].Attrs.First();
+        Assert.AreEqual(attr.Alias, "G01arg.c");
 
-        attr = meta.Args[3].Group["G01.G01Test002"].Attrs.First;
-        Assert.AreEqual(attr.Value.Nick, "G01arg.c");
+        attr = meta.Args[3].Group["G01.G01Test002"].Attrs.First();
+        Assert.AreEqual(attr.Alias, "G01arg.c");
     }
 
     [TestMethod]
@@ -1439,7 +1445,7 @@ public class TestBusinessMember
     {
         var member = Bootstrap.Create<BusinessLoggerAndArg>().UseDoc().Build();
 
-        member.LoggerSet(new LoggerAttribute(Logger.LoggerType.Record, canWrite: false) { Group = "333" }, typeof(Use02));
+        member.LoggerSet(new LoggerAttribute(Logger.Type.Record, canWrite: false) { Group = "333" }, typeof(Use02));
 
         var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry(new Use01 { A = "bbb" }, "use02"), new UseEntry(new Use01 { A = "aaa" }));
         Assert.AreEqual(t2.Message, null);

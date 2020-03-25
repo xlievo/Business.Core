@@ -62,7 +62,7 @@ public class BusinessMember2 : BusinessBase
                 {
                     var log = item.JsonSerialize();
 
-                    Help.WriteLocal(log, console: true, write: item.Type == Logger.LoggerType.Exception);
+                    Help.WriteLocal(log, console: true, write: item.Type == Logger.Type.Exception);
                 }
             }
             catch (Exception exception)
@@ -445,7 +445,7 @@ public class TestAttribute : ArgumentAttribute
                 //return this.ResultCreate(exit ? await RedisHelper.HGetAsync("Role", "value2") : "not!");
                 return this.ResultCreate("OK!!!");
             case "error":
-                return this.ResultCreate(this.State, $"{this.Nick} cannot be empty");
+                return this.ResultCreate(this.State, $"{this.Alias} cannot be empty");
 
             case "data":
                 return this.ResultCreate(value + "1122");
@@ -471,7 +471,7 @@ public class CheckNull2Attribute : CheckNullAttribute
     {
         this.BindAfter += () =>
         {
-            this.Description = this.Replace("{Nick} 这个参数必须填写");
+            this.Description = this.Replace("{Alias} 这个参数必须填写");
         };
     }
 }
@@ -505,7 +505,7 @@ public class Args
         /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
         /// </summary>
         //[Test]
-        [Nick("password")]
+        [Alias("password")]
         [CheckNull2]
         public string A { get; set; }
 

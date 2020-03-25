@@ -18,7 +18,6 @@
 namespace Business.Core.Auth
 {
     using Core;
-    using Meta;
     using Utils;
     using System.Linq;
 
@@ -32,15 +31,6 @@ namespace Business.Core.Auth
         object Create(System.Type type, params object[] constructorArguments);
 
         System.Threading.Tasks.Task<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null);
-    }
-
-    struct ArgsLog
-    {
-        public string name;
-        public dynamic value;
-        public MetaLogger logger;
-        public MetaLogger iArgInLogger;
-        public bool hasIArg;
     }
 
     struct ArgResult
@@ -128,19 +118,21 @@ namespace Business.Core.Utils
     {
         public static async System.Threading.Tasks.Task<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null)
         {
+            var dtt = System.DateTimeOffset.Now;
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
             var meta = configer.MetaData[method];
             var methodName = meta.FullName;
             var argsObj = arguments;
-            var logType = Logger.LoggerType.Record;
+            var logType = Logger.Type.Record;
             //==================================//
             var iArgs = Help.GetIArgs(meta.IArgs, argsObj);
+            dynamic token = null;
 
             dynamic returnValue = null;
 
             var group2 = group ?? meta.GroupDefault;
-            if (!meta.CommandGroup.TryGetValue(group2, out CommandAttribute command))
+            if (!meta.CommandGroup.Group.TryGetValue(group2, out CommandAttribute command))
             {
                 returnValue = ResultFactory.ResultCreate(meta, -3, $"Without this Group {group2}");
                 return meta.HasIResult ? Help.GetReturnValueIResult(returnValue, meta) : Help.GetReturnValue(returnValue, meta);
@@ -168,22 +160,29 @@ namespace Business.Core.Utils
                     var value = argsObj[item.Position];
                     var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
                     var attrs = item.Group[command.Key].Attrs;
+                    if (item.HasToken)
+                    {
+                        token = value;
+                    }
 
                     dynamic error = null;
-                    await attrs.ForEach(async c =>
+                    for (int i = 0; i < attrs.Count; i++)
+                    //await attrs.ForEach(async c =>
                     {
-                        var argAttr = c.Value;
+                        //var argAttr = c.Value;
+                        var argAttr = attrs[i];
 
-                        if (argAttr.CollectionItem) { return false; }
+                        if (argAttr.CollectionItem) { continue; }
 
                         result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value);
 
                         if (1 > result.State)
                         {
-                            logType = Logger.LoggerType.Error;
+                            logType = Logger.Type.Error;
                             returnValue = result;
                             error = meta.HasIResult ? Help.GetReturnValueIResult(returnValue, meta) : Help.GetReturnValue(result, meta);
-                            return true; //break
+                            //return true; //break
+                            break;
                         }
 
                         if (result.HasData)
@@ -194,7 +193,8 @@ namespace Business.Core.Utils
                             }
                             else
                             {
-                                if (NodeState.DAT == c.Next?.State)
+                                if (i < attrs.Count - 1)
+                                //if (NodeState.DAT == c.Next?.State)
                                 {
                                     iArgIn = result.Data;
                                 }
@@ -209,8 +209,8 @@ namespace Business.Core.Utils
                             }
                         }
 
-                        return false;
-                    });
+                        //return false;
+                    }
 
                     if (!Equals(null, error))
                     {
@@ -265,7 +265,7 @@ namespace Business.Core.Utils
                                         if (null != c2.Exception)
                                         {
                                             var ex = c2.Exception.ExceptionWrite();
-                                            logType = Logger.LoggerType.Exception;
+                                            logType = Logger.Type.Exception;
                                             returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
                                             o.Stop();
                                             return;
@@ -275,7 +275,7 @@ namespace Business.Core.Utils
 
                                         if (1 > result2.State)
                                         {
-                                            logType = Logger.LoggerType.Error;
+                                            logType = Logger.Type.Error;
                                             returnValue = result2;
                                             //invocation.ReturnValue = Bind.GetReturnValue(result2, meta);
                                             o.Stop();
@@ -318,7 +318,7 @@ namespace Business.Core.Utils
                                         if (null != c3.Exception)
                                         {
                                             var ex = c3.Exception.ExceptionWrite();
-                                            logType = Logger.LoggerType.Exception;
+                                            logType = Logger.Type.Exception;
                                             returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
                                             o.Stop();
                                             return;
@@ -328,7 +328,7 @@ namespace Business.Core.Utils
 
                                         if (1 > result3.State)
                                         {
-                                            logType = Logger.LoggerType.Error;
+                                            logType = Logger.Type.Error;
                                             returnValue = result3;
                                             //invocation.ReturnValue = Bind.GetReturnValue(result3, meta);
                                             o.Stop();
@@ -367,7 +367,7 @@ namespace Business.Core.Utils
                             //if (null != result)
                             if (1 > result.State)
                             {
-                                logType = Logger.LoggerType.Error;
+                                logType = Logger.Type.Error;
                                 returnValue = result;
                                 return meta.HasIResult ? Help.GetReturnValueIResult(returnValue, meta) : Help.GetReturnValue(result, meta);
                             }
@@ -433,7 +433,7 @@ namespace Business.Core.Utils
             catch (System.Exception ex)
             {
                 ex = ex.ExceptionWrite();
-                logType = Logger.LoggerType.Exception;
+                logType = Logger.Type.Exception;
 
                 //log
                 returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex));
@@ -455,11 +455,11 @@ namespace Business.Core.Utils
             }
             finally
             {
-                Finally(configer.Logger, command, meta, returnValue, logType, iArgs, argsObj, methodName, watch);
+                Finally(configer.Logger, command, meta, returnValue, logType, iArgs, argsObj, methodName, watch, token, dtt);
             }
         }
 
-        public async static void Finally(Logger logger, CommandAttribute command, MetaData meta, dynamic returnValue, Logger.LoggerType logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch)
+        public async static void Finally(Logger logger, CommandAttribute command, MetaData meta, dynamic returnValue, Logger.Type logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch, dynamic token, System.DateTimeOffset dtt)
         {
             if (meta.HasAsync)
             {
@@ -472,7 +472,7 @@ namespace Business.Core.Utils
                     }
                     catch (System.Exception ex)
                     {
-                        logType = Logger.LoggerType.Exception;
+                        logType = Logger.Type.Exception;
                         returnValue = ResultFactory.ResultCreate(meta, 0, System.Convert.ToString(ex.ExceptionWrite()));
                     }
                 }
@@ -483,7 +483,7 @@ namespace Business.Core.Utils
                 var result = returnValue as IResult;
                 if (0 > result.State)
                 {
-                    logType = Logger.LoggerType.Error;
+                    logType = Logger.Type.Error;
                 }
             }
 
@@ -491,26 +491,34 @@ namespace Business.Core.Utils
 
             //var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLog.ToDictionary(c => c.name, c => c.hasIArg), out bool canWrite, out bool canResult);
 
-            var argsObjLog = new System.Collections.Generic.List<ArgsLog>(meta.Args.Count);
-            var argsObjLogHasIArg = new System.Collections.Generic.Dictionary<string, bool>(meta.Args.Count);
-
+            var argsObjLog = new System.Collections.Generic.List<Logger.ArgsLog>(meta.Args.Count);
+            //var argsObjLogHasIArg = new System.Collections.Generic.Dictionary<string, bool>(meta.Args.Count);
             foreach (var c in meta.Args)
             {
-                var value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position];
+                if (!c.Group.TryGetValue(command.Key, out ArgGroup argGroup))
+                {
+                    continue;
+                }
 
-                argsObjLog.Add(new ArgsLog { name = c.Name, value = value, logger = c.Group[command.Key].Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg });
-                argsObjLogHasIArg.Add(c.Name, c.HasIArg);
+                argsObjLog.Add(new Logger.ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = argGroup.Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg });
+                //argsObjLogHasIArg.Add(c.Name, c.HasIArg);
             }
 
-            var logObjs = LoggerSet(logType, meta.MetaLogger[command.Key], argsObjLog, argsObjLogHasIArg, out bool canWrite, out bool canResult, logger?.LoggerValueType);
+            if (!meta.MetaLogger.TryGetValue(command.Key, out MetaLogger metaLogger))
+            {
+                watch.Stop();
+                return;
+            }
+
+            var logObjs = Logger.LoggerSet(logType, metaLogger, argsObjLog, out bool canWrite, out bool canResult, logger?.ValueType);
 
             watch.Stop();
 
-            if (null == logger) { return; }
+            //if (null == logger) { return; }
 
             if (canWrite)
             {
-                var data = new Logger.LoggerData { Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = Help.Scale(watch.Elapsed.TotalSeconds, 3), Member = methodName, Group = command.Group };
+                var data = new Logger.LoggerData { Dtt = dtt, Token = token, Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = Help.Scale(watch.Elapsed.TotalSeconds, 3), Member = methodName, Group = command.Group };
 
                 if (null == logger)
                 {
@@ -520,27 +528,24 @@ namespace Business.Core.Utils
 
                 if (null != logger.call)
                 {
-                    if (logger.ThreadCall)
-                    {
-                        System.Threading.Tasks.Task.Run(() => logger.call(data)).ContinueWith(c => c.Exception?.Console());
-                    }
-                    else
-                    {
-                        try { await logger.call(data); }
-                        catch (System.Exception ex) { ex.Console(); }
-                    }
+                    System.Threading.Tasks.Task.Run(() => logger.call(data).ContinueWith(c => c.Exception?.Console()));
                 }
-                else if (null != logger.calls)
+                else if (null != logger.loggerQueue)
                 {
-                    if (logger.MaxCapacity <= logger.loggerQueue.Count)
-                    {
-                        return;
-                    }
+                    //if (logger.MaxCapacity <= logger.loggerQueue.queue.Count)
+                    //{
+                    //    return;
+                    //}
 
-                    if (!logger.loggerQueue.TryAdd(data))
+                    if (!logger.loggerQueue.queue.TryAdd(data))
                     {
                         Help.Console(data.TryJsonSerialize());
                     }
+                }
+                else
+                {
+                    Help.Console(data.TryJsonSerialize());
+                    return;
                 }
             }
         }
@@ -583,18 +588,21 @@ namespace Business.Core.Utils
                 var attrs = item.Group[group].Attrs;
 
                 dynamic error = null;
-                await attrs.ForEach(async c =>
+                for (int i = 0; i < attrs.Count; i++)
+                //await attrs.ForEach(async c =>
                 {
-                    var argAttr = c.Value;
+                    //var argAttr = c.Value;
+                    var argAttr = attrs[i];
 
-                    if (argAttr.CollectionItem) { return false; }
+                    if (argAttr.CollectionItem) { continue; }//return false; }
 
                     result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue, collectionIndex, dictKey);
 
                     if (1 > result.State)
                     {
                         error = result;
-                        return true;
+                        //return true;
+                        break;
                     }
 
                     if (result.HasData)
@@ -610,7 +618,8 @@ namespace Business.Core.Utils
                         }
                         else
                         {
-                            if (NodeState.DAT == c.Next?.State)
+                            //if (NodeState.DAT == c.Next?.State)
+                            if (i < attrs.Count - 1)
                             {
                                 iArgIn = result.Data;
                             }
@@ -622,8 +631,8 @@ namespace Business.Core.Utils
                         }
                     }
 
-                    return false;
-                });
+                    //return false;
+                }
 
                 if (!Equals(null, error))
                 {
@@ -793,7 +802,7 @@ namespace Business.Core.Utils
             return ResultFactory.ResultCreate(meta.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
         }
 
-        public async static System.Threading.Tasks.Task<IResult> ArgsResultCollection(MetaData meta, Args item, ConcurrentLinkedList<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
+        public async static System.Threading.Tasks.Task<IResult> ArgsResultCollection(MetaData meta, Args item, ReadOnlyCollection<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
         {
             bool isUpdate = false;
 
@@ -801,18 +810,20 @@ namespace Business.Core.Utils
             var iArgIn = item.HasCollectionIArg ? iArg?.In : null;
 
             dynamic error = null;
-            await attrs.ForEach(async c =>
+            //await attrs.ForEach(async c =>
+            for (int i = 0; i < attrs.Count; i++)
             {
-                var argAttr = c.Value;
+                //var argAttr = c.Value;
+                var argAttr = attrs[i];
 
-                if (!argAttr.CollectionItem) { return false; }
+                if (!argAttr.CollectionItem) { continue; }
 
                 var result = await GetProcesResult(argAttr, item.HasCollectionIArg ? iArgIn : currentValue, collectionIndex, dictKey);
 
                 if (1 > result.State)
                 {
                     error = result;
-                    return true;
+                    break;
                 }
 
                 if (result.HasData)
@@ -824,7 +835,8 @@ namespace Business.Core.Utils
                     }
                     else
                     {
-                        if (NodeState.DAT == c.Next?.State)
+                        //if (NodeState.DAT == c.Next?.State)
+                        if (i < attrs.Count - 1)
                         {
                             iArgIn = result.Data;
                         }
@@ -835,8 +847,8 @@ namespace Business.Core.Utils
                     }
                 }
 
-                return false;
-            });
+                //return false;
+            }
 
             if (!Equals(null, error))
             {
@@ -857,139 +869,6 @@ namespace Business.Core.Utils
             }
 
             return ResultFactory.ResultCreate(meta.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
-        }
-
-        static LoggerValue LoggerSet(Logger.LoggerType logType, MetaLogger logger, System.Collections.Generic.IList<ArgsLog> argsObjLog, System.Collections.Generic.IDictionary<string, bool> argsObjLogHasIArg, out bool canWrite, out bool canResult, LoggerValue.LoggerValueType? loggerValueType)
-        {
-            canWrite = canResult = false;
-            var logObjs = new LoggerValue(argsObjLogHasIArg, argsObjLog.Count);
-
-            switch (logType)
-            {
-                case Logger.LoggerType.Record:
-                    if (logger.Record.CanWrite)
-                    {
-                        foreach (var log in argsObjLog)
-                        {
-                            LoggerSet(logger.Record.CanValue, log.logger.Record, log.iArgInLogger.Record, logObjs, log, loggerValueType);
-                        }
-                        canWrite = true;
-
-                        if (logger.Record.CanResult)
-                        {
-                            canResult = true;
-                        }
-                    }
-                    break;
-                case Logger.LoggerType.Error:
-                    if (logger.Error.CanWrite)
-                    {
-                        foreach (var log in argsObjLog)
-                        {
-                            LoggerSet(logger.Error.CanValue, log.logger.Error, log.iArgInLogger.Error, logObjs, log, loggerValueType);
-                        }
-                        canWrite = true;
-
-                        if (logger.Error.CanResult)
-                        {
-                            canResult = true;
-                        }
-                    }
-                    break;
-                case Logger.LoggerType.Exception:
-                    if (logger.Exception.CanWrite)
-                    {
-                        foreach (var log in argsObjLog)
-                        {
-                            LoggerSet(logger.Exception.CanValue, log.logger.Exception, log.iArgInLogger.Exception, logObjs, log, loggerValueType);
-                        }
-                        canWrite = true;
-
-                        if (logger.Exception.CanResult)
-                        {
-                            canResult = true;
-                        }
-                    }
-                    break;
-                default: break;
-            }
-
-            return 0 == logObjs.Count ? null : logObjs;
-        }
-
-        static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, LoggerValue logObjs, ArgsLog log, LoggerValue.LoggerValueType? loggerValueType)
-        {
-            //meta
-            switch (canValue)
-            {
-                case LoggerValueMode.All:
-                    if ((null != argLogAttr && !argLogAttr.CanWrite))
-                    {
-                        break;
-                    }
-
-                    if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite && log.hasIArg)
-                    {
-                        logObjs.Add(log.name, (log.value as IArg).Out);
-                        logObjs.HasIArg[log.name] = false;
-                    }
-                    else if (log.hasIArg)
-                    {
-                        switch (loggerValueType ?? LoggerValue.LoggerValueType.In)
-                        {
-                            case LoggerValue.LoggerValueType.All:
-                                logObjs.Add(log.name, log.value as IArg);
-                                break;
-                            case LoggerValue.LoggerValueType.In:
-                                logObjs.Add(log.name, (log.value as IArg).In);
-                                logObjs.HasIArg[log.name] = false;
-                                break;
-                            case LoggerValue.LoggerValueType.Out:
-                                logObjs.Add(log.name, (log.value as IArg).Out);
-                                logObjs.HasIArg[log.name] = false;
-                                break;
-                            default: break;
-                        }
-                    }
-                    else
-                    {
-                        logObjs.Add(log.name, log.value);
-                    }
-                    break;
-                case LoggerValueMode.Select:
-                    if (null != argLogAttr && argLogAttr.CanWrite)
-                    {
-                        if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite && log.hasIArg)
-                        {
-                            logObjs.Add(log.name, (log.value as IArg).Out);
-                            logObjs.HasIArg[log.name] = false;
-                        }
-                        else if (log.hasIArg)
-                        {
-                            switch (loggerValueType ?? LoggerValue.LoggerValueType.In)
-                            {
-                                case LoggerValue.LoggerValueType.All:
-                                    logObjs.Add(log.name, log.value as IArg);
-                                    break;
-                                case LoggerValue.LoggerValueType.In:
-                                    logObjs.Add(log.name, (log.value as IArg).In);
-                                    logObjs.HasIArg[log.name] = false;
-                                    break;
-                                case LoggerValue.LoggerValueType.Out:
-                                    logObjs.Add(log.name, (log.value as IArg).Out);
-                                    logObjs.HasIArg[log.name] = false;
-                                    break;
-                                default: break;
-                            }
-                        }
-                        else
-                        {
-                            logObjs.Add(log.name, log.value);
-                        }
-                    }
-                    break;
-                default: break;
-            }
         }
     }
 }

@@ -23,6 +23,7 @@ namespace Business.Core
     using Annotations;
     using System.Reflection;
     using System.Linq;
+    using Business.Core.Document;
 
     //internal partial class Bind
     //{
@@ -314,6 +315,11 @@ namespace Business.Core
                 info.BusinessName = type.Name;
             }
 
+            if (string.IsNullOrWhiteSpace(info.Alias))
+            {
+                info.Alias = type.Name;
+            }
+
             hasBusiness = typeof(IBusiness).IsAssignableFrom(type);
             var business = hasBusiness ? (IBusiness)instance : null;
 #if !Mobile
@@ -321,13 +327,16 @@ namespace Business.Core
 #else
             
 #endif
-            var cfg = new Configer(info, resultType, argType, attributes, interceptor);
+            var cfg = new Configer(info, resultType, argType, attributes, interceptor)
+            {
+                DocInfo = attributes.GetAttr<DocAttribute>()
+            };
 
             business?.BindBefore?.Invoke(cfg);
 
             try
             {
-                cfg.MetaData = GetInterceptorMetaData(cfg, methods);
+                cfg.MetaData = GetMetaData(cfg, methods);
                 interceptor.Configer = cfg;
             }
             catch
@@ -343,7 +352,7 @@ namespace Business.Core
 
                 business.Configer = cfg;
 
-                business.Command = GetBusinessCommand(business);
+                GetGroup(business);
 
                 Configer.BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
 
@@ -427,63 +436,6 @@ namespace Business.Core
 
         #region
 
-        /*
-        static (MethodInfo[], System.Collections.Generic.Dictionary<int, MethodMeta>) GetMethods2(TypeInfo type)
-        {
-            var ignoreList = new System.Collections.Generic.List<MethodInfo>();
-            var list = new System.Collections.Generic.Dictionary<string, MethodMeta>();
-
-            var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public).Where(c => c.IsVirtual && !c.IsFinal);
-
-            //var methods = type.DeclaredMethods.Where(c => c.IsVirtual && !c.IsFinal && c.IsPublic);
-
-            foreach (var item in methods)
-            {
-                var ignore = item.GetAttribute<Attributes.Ignore>();
-                if (null != ignore && ignore.Contains(Attributes.IgnoreMode.Method) && string.IsNullOrWhiteSpace(ignore.Group))
-                {
-                    ignoreList.Add(item);
-                }
-                else if (item.DeclaringType.Equals(type))
-                {
-                    list.Add(item.Name, new MethodMeta { Ignore = ignore, Method = item });
-                }
-            }
-
-            //Property
-            foreach (var item in type.DeclaredProperties)
-            {
-                var ignore = item.GetAttribute<Attributes.Ignore>();
-                if (null != ignore && ignore.Contains(Attributes.IgnoreMode.Method) && string.IsNullOrWhiteSpace(ignore.Group))
-                {
-                    var set = item.GetSetMethod(true);
-                    if (null != set)
-                    {
-                        ignoreList.Add(set);
-                        if (list.ContainsKey(set.Name))
-                        {
-                            list.Remove(set.Name);
-                        }
-                    }
-
-                    var get = item.GetGetMethod(true);
-                    if (null != get)
-                    {
-                        ignoreList.Add(get);
-                        if (list.ContainsKey(get.Name))
-                        {
-                            list.Remove(get.Name);
-                        }
-                    }
-                }
-            }
-
-            var i = 0;
-            //return (ignoreList.ToArray(), list.ToDictionary(c => i++, c => c));
-            return (ignoreList.ToArray(), list.ToDictionary(c => i++, c => c.Value));
-        }
-        */
-
         static System.Collections.Generic.Dictionary<int, MethodInfo> GetMethods(TypeInfo type)
         {
             var list = new System.Collections.Generic.List<MethodInfo>();
@@ -520,76 +472,29 @@ namespace Business.Core
             {
                 switch (item.LogType)
                 {
-                    case Logger.LoggerType.Record: metaLogger.Record = item; break;
-                    case Logger.LoggerType.Error: metaLogger.Error = item; break;
-                    case Logger.LoggerType.Exception: metaLogger.Exception = item; break;
+                    case Logger.Type.Record: metaLogger.Record = item; break;
+                    case Logger.Type.Error: metaLogger.Error = item; break;
+                    case Logger.Type.Exception: metaLogger.Exception = item; break;
                 }
             }
 
-            var all = loggers2.FirstOrDefault(c => c.LogType == Logger.LoggerType.All);
+            var all = loggers2.FirstOrDefault(c => c.LogType == Logger.Type.All);
 
             if (null == metaLogger.Record)
             {
-                metaLogger.Record = null == all ? new LoggerAttribute(Logger.LoggerType.Record, false) : all.Clone().SetType(Logger.LoggerType.Record);
+                metaLogger.Record = null == all ? new LoggerAttribute(Logger.Type.Record, false) : all.Clone().SetType(Logger.Type.Record);
             }
             if (null == metaLogger.Error)
             {
-                metaLogger.Error = null == all ? new LoggerAttribute(Logger.LoggerType.Error, false) : all.Clone().SetType(Logger.LoggerType.Error);
+                metaLogger.Error = null == all ? new LoggerAttribute(Logger.Type.Error, false) : all.Clone().SetType(Logger.Type.Error);
             }
             if (null == metaLogger.Exception)
             {
-                metaLogger.Exception = null == all ? new LoggerAttribute(Logger.LoggerType.Exception, false) : all.Clone().SetType(Logger.LoggerType.Exception);
+                metaLogger.Exception = null == all ? new LoggerAttribute(Logger.Type.Exception, false) : all.Clone().SetType(Logger.Type.Exception);
             }
 
             return metaLogger;
         }
-
-        /*
-        static System.Collections.Generic.List<Attributes.AttributeBase> GetRoute(string methodName, System.Collections.Generic.List<RouteAttribute> businessRouteAttr, System.Collections.Generic.List<Attributes.AttributeBase> attributes, System.Collections.Generic.List<Attributes.CommandAttribute> commands)
-        {
-            var all = attributes.FindAll(c => c is RouteAttribute).Cast<RouteAttribute>().ToList();
-
-            var notGroup = all.Where(c => !commands.Exists(c2 => System.String.Equals(c2.Group, c.Group, System.StringComparison.CurrentCultureIgnoreCase))).ToList();
-
-            foreach (var item in notGroup)
-            {
-                all.Remove(item);
-                attributes.Remove(item);
-            }
-
-            foreach (var item in businessRouteAttr)
-            {
-                if (!commands.Exists(c => System.String.Equals(c.Group, item.Group, System.StringComparison.CurrentCultureIgnoreCase)))
-                {
-                    continue;
-                }
-
-                if (!all.Any(c => System.String.Equals(c.GetKey(true), item.GetKey(true), System.StringComparison.CurrentCultureIgnoreCase)))
-                {
-                    var route = item.Clone<RouteAttribute>();
-                    all.Add(route);
-                    attributes.Add(route);
-                }
-            }
-
-            foreach (var item in all)
-            {
-                if (System.String.IsNullOrWhiteSpace(item.Path))
-                {
-                    item.Path = methodName;
-                }
-
-                if (System.String.IsNullOrWhiteSpace(item.Group))
-                {
-                    item.Group = Bind.CommandGroupDefault;
-                }
-
-                item.MethodName = methodName;
-            }
-
-            return attributes;
-        }
-        */
 
         //static readonly System.Collections.Generic.List<string> SysTypes = Assembly.GetExecutingAssembly().GetType().Module.Assembly.GetExportedTypes().Select(c => c.FullName).ToList();
         //static bool HasDefinition(System.Type type)
@@ -602,7 +507,7 @@ namespace Business.Core
 
         static object[] GetDefaultValue(System.Collections.Generic.IList<Args> args)
         {
-            if (null == args) { return new object[0]; }
+            if (null == args) { return System.Array.Empty<object>(); }
 
             var argsObj = new object[args.Count];
 
@@ -647,8 +552,27 @@ namespace Business.Core
                             //{
                             //    argsObj[i] = null;
                             //}
+                            //if (args[i].LastType.Equals(typeof(System.DateTime)) || args[i].LastType.Equals(typeof(System.DateTimeOffset)))
+                            //{
+                            //    defaultObj2[i] = Help.ChangeType(argsObj[i], args[i].LastType);
+                            //    continue;
+                            //}
+                            if (args[i].UseType || args[i].HasDefinition)
+                            {
+                                defaultObj2[i] = argsObj[i];
+                            }
+                            else
+                            {
+                                if (args[i].Nullable && string.IsNullOrEmpty(argsObj[i]?.ToString()))
+                                {
+                                    continue;
+                                }
 
-                            defaultObj2[i] = args[i].UseType || (args[i].HasIArg && !args[i].HasCast) ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].LastType);
+                                defaultObj2[i] = Help.ChangeType(argsObj[i], args[i].LastType);
+                            }
+                            //defaultObj2[i] = args[i].UseType || args[i].HasDefinition ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].LastType);
+
+                            //defaultObj2[i] = args[i].UseType || (args[i].HasIArg && !args[i].HasCast) ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].LastType);
 
                             //defaultObj2[i] = args[i].UseType || args[i].HasIArg ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].Type);
                         }
@@ -695,46 +619,10 @@ namespace Business.Core
             return defaultObj2;
         }
 
-        //internal static System.Collections.Generic.Dictionary<int, IArg> GetIArgs(System.Collections.Generic.IReadOnlyList<Args> iArgs, object[] argsObj)
-        //{
-        //    var result = new System.Collections.Generic.Dictionary<int, IArg>();
-
-        //    if (0 < iArgs?.Count)
-        //    {
-        //        foreach (var item in iArgs)
-        //        {
-        //            IArg iArg;
-
-        //            var arg = argsObj[item.Position];
-
-        //            if (item.HasCast && !item.Type.IsAssignableFrom(arg?.GetType()))
-        //            {
-        //                iArg = (IArg)System.Activator.CreateInstance(item.Type);
-        //                //Not entry for value type
-        //                if (!(null == arg && item.IArgInType.IsValueType))
-        //                {
-        //                    iArg.In = arg;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                iArg = (IArg)(arg ?? System.Activator.CreateInstance(item.Type));
-        //            }
-
-        //            //if (string.IsNullOrWhiteSpace(iArg.Group)) { iArg.Group = defaultCommandKey; }
-
-        //            //iArg.Log = item.IArgLog;
-
-        //            result.Add(item.Position, iArg);
-        //        }
-        //    }
-
-        //    return result;
-        //}
-
-        static ConcurrentReadOnlyDictionary<string, CommandAttribute> CmdAttrGroup(Configer cfg, string methodName, System.Collections.Generic.List<AttributeBase> attributes, string groupDefault, System.Collections.Generic.List<Ignore> ignore)
+        static Meta.CommandGroup CmdAttrGroup(Configer cfg, string methodName, System.Collections.Generic.List<AttributeBase> attributes, System.Collections.Generic.List<Ignore> ignore)
         {
-            var group = new ConcurrentReadOnlyDictionary<string, CommandAttribute>();
+            var groupDefault = cfg.Info.CommandGroupDefault;
+            var group = new Meta.CommandGroup(new ReadOnlyDictionary<string, CommandAttribute>(), new ReadOnlyDictionary<string, ReadOnlyDictionary<string, CommandAttribute>>());
 
             //ignore
             var ignores = ignore.Where(c => c.Mode == IgnoreMode.Method).ToList();
@@ -775,26 +663,21 @@ namespace Business.Core
                         if (item2.Meta.Declaring != AttributeBase.MetaData.DeclaringType.Method)
                         {
                             notMethods.Add(item2);
-
-                            //if (!group.Any(c => c.Value.Source == AttributeBase.SourceType.Method && c.Value.Group == clone.Group))
-                            //{
-                            //    group.dictionary.TryAdd(cfg.GetCommandGroup(clone.Group, clone.OnlyName), clone);
-                            //}
-                            //group.dictionary.TryAdd(cfg.GetCommandGroup(clone.Group, clone.OnlyName), clone);
                         }
                         else
                         {
-                            //group.dictionary.AddOrUpdate(cfg.GetCommandGroup(item2.Group, item2.OnlyName), item2, (key, oldValue) => oldValue.Source != AttributeBase.SourceType.Method ? item2 : oldValue);
                             var key = cfg.Info.GetCommandGroup(item2.Group, item2.OnlyName);
                             item2.Key = key;
-                            group.dictionary.TryAdd(key, item2);
+                            group.Group.dictionary.Add(key, item2);
 
-                            //var command = group.FirstOrDefault(c => c.Value.Source != AttributeBase.SourceType.Method && c.Value.Group == item2.Group);
-                            //if (!default(System.Collections.Generic.KeyValuePair<string, CommandAttribute>).Equals(command))
-                            //{
-                            //    attributes.Remove(command.Value);
-                            //    group.dictionary.TryRemove(command.Key, out _);
-                            //}
+                            if (group.Full.TryGetValue(item2.Group, out ReadOnlyDictionary<string, CommandAttribute> commands))
+                            {
+                                commands.dictionary.Add(key, item2);
+                            }
+                            else
+                            {
+                                group.Full.dictionary.Add(item2.Group, new ReadOnlyDictionary<string, CommandAttribute>(new System.Collections.Generic.Dictionary<string, CommandAttribute> { { key, item2 } }));
+                            }
                         }
                     }
                 }
@@ -802,7 +685,7 @@ namespace Business.Core
 
             foreach (var item in notMethods)
             {
-                if (!group.Any(c => c.Value.Group == item.Group))
+                if (!group.Group.Any(c => c.Value.Group == item.Group))
                 {
                     var clone = item.Clone();
                     //clone.Source = AttributeBase.SourceType.Method;
@@ -810,61 +693,78 @@ namespace Business.Core
 
                     var key = cfg.Info.GetCommandGroup(clone.Group, clone.OnlyName);
                     clone.Key = key;
-                    group.dictionary.TryAdd(key, clone);
+                    group.Group.dictionary.Add(key, clone);
+
+                    if (group.Full.TryGetValue(clone.Group, out ReadOnlyDictionary<string, CommandAttribute> commands))
+                    {
+                        commands.dictionary.Add(key, clone);
+                    }
+                    else
+                    {
+                        group.Full.dictionary.Add(clone.Group, new ReadOnlyDictionary<string, CommandAttribute>(new System.Collections.Generic.Dictionary<string, CommandAttribute> { { key, clone } }));
+                    }
                 }
             }
-
-            //foreach (var item in group)
-            //{
-            //    if (item.Value.Source != AttributeBase.SourceType.Method)
-            //    {
-            //        if (group.Any(c => c.Value.Source == AttributeBase.SourceType.Method && c.Value.Group == item.Value.Group))
-            //        {
-            //            attributes.Remove(item.Value);
-            //            group.dictionary.TryRemove(item.Key, out _);
-            //        }
-            //    }
-            //}
 
             //add default group
             /*if (!group.ContainsKey(groupDefault))*/// && methodName == c.OnlyName
             if (!isDef) //(!group.Values.Any(c => groupDefault == c.Group))
             {
                 var key = cfg.Info.GetCommandGroup(groupDefault, methodName);
-                group.dictionary.TryAdd(key, new CommandAttribute(methodName) { Group = groupDefault, Key = key });
+                var command = new CommandAttribute(methodName) { Group = groupDefault, Key = key };
+                group.Group.dictionary.Add(key, command);
+
+                if (group.Full.TryGetValue(groupDefault, out ReadOnlyDictionary<string, CommandAttribute> commands))
+                {
+                    commands.dictionary.Add(key, command);
+                }
+                else
+                {
+                    group.Full.dictionary.Add(groupDefault, new ReadOnlyDictionary<string, CommandAttribute>(new System.Collections.Generic.Dictionary<string, CommandAttribute> { { key, command } }));
+                }
             }
 
             return group;
         }
 
-        static CommandGroup GetBusinessGroup(IBusiness business, ConcurrentReadOnlyDictionary<string, MetaData> metaData, System.Func<string, MetaData, Command> action)
+        static void GetGroup(IBusiness business)
         {
-            var group = new CommandGroup(business.Configer.ResultTypeDefinition, business.Configer.Info.CommandGroupDefault);
+            var commandGroup = new CommandGroup(business.Configer.ResultTypeDefinition, business.Configer.Info.CommandGroupDefault);
+
+            var docGroup = new ConcurrentReadOnlyDictionary<DocGroup, System.Collections.Concurrent.ConcurrentQueue<DocInfo>>(DocGroup.comparer);
+
+            //docGroup add
+            business.Configer.Attributes.GetAttrs<DocGroupAttribute>(c => AttributeBase.MetaData.DeclaringType.Class == c.Meta.Declaring && !string.IsNullOrWhiteSpace(c.Group)).ForEach(c => docGroup.dictionary.TryAdd(new DocGroup(c), new System.Collections.Concurrent.ConcurrentQueue<DocInfo>()));
 
             //========================================//
 
-            //var proxyType = business.GetType();
-
 #if DEBUG
-            foreach (var item in metaData)
+            foreach (var item in business.Configer.MetaData)
 #else
-            System.Threading.Tasks.Parallel.ForEach(metaData, item =>
+            System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData, item =>
 #endif
             {
-
                 var meta = item.Value;
 
-                //var method2 = proxyType.GetMethod(meta.Name);
-
                 //set all
-                foreach (var item2 in meta.CommandGroup)
+                foreach (var item2 in meta.CommandGroup.Group)
                 {
-                    var groups = group.dictionary.GetOrAdd(item2.Value.Group, key => new ConcurrentReadOnlyDictionary<string, Command>());
+                    var groups = commandGroup.dictionary.GetOrAdd(item2.Value.Group, key => new ConcurrentReadOnlyDictionary<string, Command>());
 
-                    if (!groups.dictionary.TryAdd(item2.Value.OnlyName, action(item2.Key, meta)))
+                    if (!groups.dictionary.TryAdd(item2.Value.OnlyName, new Command(arguments =>
+                    {
+                        var args = GetArgsObj(meta.DefaultValue, arguments, meta.IArgs, meta.Args);
+
+                        return business.Configer.Interceptor.Intercept(business.Configer, meta.Name, args, () => meta.Accessor(business, args), item2.Key).Result;
+                    }, meta, item2.Key)))
                     {
                         throw new System.Exception($"Command \"{item2.Key}\" member \"{item2.Value.OnlyName}\" name exists");
                     }
+                }
+
+                if (!string.IsNullOrWhiteSpace(meta.Doc?.Alias) && !string.IsNullOrWhiteSpace(meta.Doc.Group))
+                {
+                    docGroup.dictionary.GetOrAdd(new DocGroup { Group = meta.Doc.Group }, new System.Collections.Concurrent.ConcurrentQueue<DocInfo>()).Enqueue(new DocInfo(meta.Doc, meta.Position, meta.Name));
                 }
 #if DEBUG
             };
@@ -874,34 +774,37 @@ namespace Business.Core
 
             //========================================//
 
-            return group;
+            business.Command = commandGroup;
+            business.Configer.DocGroup = docGroup;
         }
 
-        static CommandGroup GetBusinessCommand(IBusiness business) => GetBusinessGroup(business, business.Configer.MetaData, (key, meta) =>
-        {
-            //var key = business.Configer.GetCommandGroup(item.Group, item.OnlyName);//item.GetKey();//
+        //        static void GetGroup(ConcurrentReadOnlyDictionary<string, CommandAttribute> commandGroup)
+        //        {
+        //            var commandGroup2 = new ConcurrentReadOnlyDictionary<string, System.Collections.Concurrent.ConcurrentQueue<CommandAttribute>>(System.StringComparer.InvariantCultureIgnoreCase);
+        //            //========================================//
 
-            //var call = !meta.HasReturn && !meta.HasAsync ? (p, p1) =>
-            //{
-            //    MethodInvokerGenerator.CreateDelegate2(method, false, key)(p, p1); return null;
-            //}
-            //:
-            //MethodInvokerGenerator.CreateDelegate<dynamic>(method, false, key);
+        //#if DEBUG
+        //            foreach (var item in commandGroup)
+        //#else
+        //            System.Threading.Tasks.Parallel.ForEach(commandGroup, item =>
+        //#endif
+        //            {
+        //                var meta = item.Value;
 
-            //var call = dynamicMethodBuilder.GetDelegate(method);// as System.Func<object, object[], dynamic>;
+        //                var groups2 = commandGroup.dictionary.GetOrAdd(meta.Name, key => new ConcurrentReadOnlyDictionary<string, System.Collections.Concurrent.ConcurrentQueue<CommandAttribute>>(System.StringComparer.InvariantCultureIgnoreCase)).dictionary.GetOrAdd(item2.Value.Group, key => new System.Collections.Concurrent.ConcurrentQueue<CommandAttribute>());
+        //                groups2.Enqueue(item2.Value);
+        //#if DEBUG
+        //            };
+        //#else
+        //            });
+        //#endif
 
-            return new Command(arguments =>
-            {
-                var args = GetArgsObj(meta.DefaultValue, arguments, meta.IArgs, meta.Args);
+        //            //========================================//
 
-                return business.Configer.Interceptor.Intercept(business.Configer, meta.Name, args, () => meta.Accessor(business, args), key).Result;
-                //return call(business, args);
-            }, meta, key);
-        });
-
-        /*
-        static System.Collections.Generic.IEqualityComparer<RouteAttribute> routeComparer = Equality<RouteAttribute>.CreateComparer(c => c.GetKey(true), System.StringComparer.CurrentCultureIgnoreCase);
-        */
+        //            //business.Command = commandGroup;
+        //            //business.Configer.CommandGroup = commandGroup2;
+        //            //business.Configer.AliasGroup = aliasGroup;
+        //        }
 
         static string GetMethodTypeFullName(string fullName, System.Collections.Generic.IList<Args> args) => string.Format("{0}{1}", fullName, (null == args || 0 == args.Count) ? null : string.Format("({0})", null == args ? null : string.Join(",", args.Select(c => c.MethodTypeFullName))));
 
@@ -921,7 +824,7 @@ namespace Business.Core
 
         static readonly Utils.Emit.DynamicMethodBuilder dynamicMethodBuilder = new Utils.Emit.DynamicMethodBuilder();
 
-        static ConcurrentReadOnlyDictionary<string, MetaData> GetInterceptorMetaData(Configer cfg, System.Collections.Generic.Dictionary<int, MethodInfo> methods)
+        static ConcurrentReadOnlyDictionary<string, MetaData> GetMetaData(Configer cfg, System.Collections.Generic.Dictionary<int, MethodInfo> methods)
         {
             var metaData = new ConcurrentReadOnlyDictionary<string, MetaData>();
 
@@ -932,6 +835,7 @@ namespace Business.Core
 #endif
             {
                 var method = methodMeta.Value;
+                var name = method.Name;
 
                 #region method info
 
@@ -947,35 +851,40 @@ namespace Business.Core
 
                 #endregion
 
-                var attributes2 = AttributeBase.GetAttributes(method).Distinct(cfg.Attributes, c => c is TestingAttribute test && null != test.Method && !test.Method.Equals(method.Name, System.StringComparison.InvariantCultureIgnoreCase), c =>
+                var attributes2 = AttributeBase.GetAttributes(method).Distinct(cfg.Attributes, c => (c is TestingAttribute test && null != test.Method && !test.Method.Equals(name, System.StringComparison.InvariantCultureIgnoreCase)) || c is DocAttribute || c is DocGroupAttribute, c =>
                 {
                     if (c is TestingAttribute test)
                     {
-                        test.Method = method.Name;
+                        test.Method = name;
                     }
                 });
 
-                var argAttrs = attributes2.GetAttrs<ArgumentAttribute>(c => !typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
-
-                //======LogAttribute======//
+                //======Log======//
                 var loggers = attributes2.GetAttrs<LoggerAttribute>();
 
                 var ignores = attributes2.GetAttrs<Ignore>();
 
+                var doc = attributes2.GetAttr<DocAttribute>();
+
+                if (null != doc && string.IsNullOrWhiteSpace(doc.Alias))
+                {
+                    doc.Alias = name;
+                }
+
                 //======CmdAttrGroup======//
-                var commandGroup = CmdAttrGroup(cfg, method.Name, attributes2, cfg.Info.CommandGroupDefault, ignores);
+                var commandGroup = CmdAttrGroup(cfg, name, attributes2, ignores);
 
                 var parameters = method.GetParameters();
 
-                var loggerGroup = new ConcurrentReadOnlyDictionary<string, MetaLogger>();
+                var loggerGroup = new ReadOnlyDictionary<string, MetaLogger>();
 
                 var tokenPosition = new System.Collections.Generic.List<int>(parameters.Length);
                 //var httpRequestPosition = new System.Collections.Generic.List<int>(parameters.Length);
                 var useTypePosition = new ConcurrentReadOnlyDictionary<int, System.Type>();
 
-                foreach (var item in commandGroup)
+                foreach (var item in commandGroup.Group)
                 {
-                    loggerGroup.dictionary.TryAdd(item.Key, GetMetaLogger(loggers, item.Value.Group));
+                    loggerGroup.dictionary.Add(item.Key, GetMetaLogger(loggers, item.Value.Group));
 
                     var route = new Configer.Route(cfg.Info.BusinessName, item.Value.Group, item.Value.OnlyName);
                     if (!Configer.Routes.dictionary.TryAdd(route.ToString(), route))
@@ -983,6 +892,10 @@ namespace Business.Core
                         throw new System.Exception($"Routes exists \"{route}\"");
                     }
                 }
+
+                var argAttrs = attributes2.Where(c => !typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type) && c is ArgumentAttribute).Concat(ignores).ToList();
+
+                //var argAttrs = attributes2.GetAttrs<ArgumentAttribute>(c => !typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
 
                 var childAll = new ReadOnlyCollection<Args>();
                 var args = new ReadOnlyCollection<Args>(parameters.Length);
@@ -1014,11 +927,12 @@ namespace Business.Core
                         }
                     }
 
-                    argAttrAll = argAttrAll.Distinct(!hasUse ? argAttrs : null);
+                    //argAttrAll = argAttrAll.Distinct(!hasUse ? argAttrs : null);
+                    argAttrAll = argAttrAll.Distinct(argAttrs);
 
                     //==================================//
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
-                    var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GropuAttribute.Comparer) : null;
+                    var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GroupAttribute.Comparer) : null;
 
                     var iArgGenericType = new System.Type[cfg.ArgTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
                     var parameterType2 = parameterType;
@@ -1040,13 +954,13 @@ namespace Business.Core
                         }
                     }
 
-                    var argGroup = GetArgGroup(argAttrAll, current, cfg.Info.TypeFullName, cfg.Info.BusinessName, method.Name, path, default, argInfo.Name, commandGroup, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
+                    var argGroup = GetArgGroup(argAttrAll, current, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, default, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
                     var definitions = current.hasDefinition ? new System.Collections.Generic.List<string> { current.outType.FullName } : new System.Collections.Generic.List<string>();
-
                     var hasLower = false;
-                    var childrens2 = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                    var children = hasUse && !current.hasIArg ? new ReadOnlyCollection<Args>(0) : current.hasDefinition ? GetArgChild(current.outType, cfg.Info.TypeFullName, cfg.Info.BusinessName, method.Name, path, commandGroup, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : new ReadOnlyCollection<Args>(0);
+                    var childrens2 = hasUse && !current.hasIArg ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
+
+                    var children = hasUse && !current.hasIArg ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(current.outType, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, commandGroup.Group, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : ReadOnlyCollection<Args>.Empty;
 
                     var arg = new Args(argInfo.Name,
                     //cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
@@ -1077,16 +991,16 @@ namespace Business.Core
                     typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || true == use?.Token,
                     //item.Value.CommandAttr.OnlyName,
                     GetMethodTypeFullName(parameterType),
-                    current.outType.FullName.Replace('+', '.'),
+                    current.outType.GetTypeName(),
                     current.hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No,
                     cast);
 
-                    args.collection.Add(arg);
-                    childAll.collection.Add(arg);
+                    args.Collection.Add(arg);
+                    childAll.Collection.Add(arg);
 
                     foreach (var child in childrens2)
                     {
-                        childAll.collection.Add(child);
+                        childAll.Collection.Add(child);
                     }
 
                     if (hasUse)
@@ -1095,19 +1009,19 @@ namespace Business.Core
                     }
                 }
 
-                //var groupDefault = cfg.GetCommandGroup(cfg.Info.CommandGroupDefault, method.Name);
+                //var groupDefault = cfg.GetCommandGroup(cfg.Info.CommandGroupDefault, name);
                 //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
-                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, method.GetMethodFullName(), method.Name, fullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, method.Name), useTypePosition, GetMethodTypeFullName(fullName, args));
+                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, method.GetMethodFullName(), name, fullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), doc);
 
-                if (!metaData.dictionary.TryAdd(method.Name, meta))
+                if (!metaData.dictionary.TryAdd(name, meta))
                 {
-                    throw new System.Exception($"MetaData name exists \"{method.Name}\"");
+                    throw new System.Exception($"MetaData name exists \"{name}\"");
                 }
 
-                //var route = $"{cfg.Info.BusinessName}/{method.Name}";
-                //if (!Configer.Routes.dictionary.TryAdd(route, (cfg.Info.BusinessName, method.Name)))
+                //var route = $"{cfg.Info.BusinessName}/{name}";
+                //if (!Configer.Routes.dictionary.TryAdd(route, (cfg.Info.BusinessName, name)))
                 //{
                 //    throw new System.Exception($"Routes name exists \"{route}{System.Environment.NewLine}{Configer.Routes[route].Item1}:{ Configer.Routes[route].Item2}\"");
                 //}
@@ -1183,7 +1097,7 @@ namespace Business.Core
         */
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
+        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, System.Collections.Generic.IDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)
         {
             hasLower = false;
 
@@ -1254,8 +1168,8 @@ namespace Business.Core
                 var argGroup = GetArgGroup(argAttrAll, current, declaring, businessName, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, out bool hasCollectionAttr2, root);
 
                 var hasLower3 = false;
-                var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : new ReadOnlyCollection<Args>(0);
-                var children = current.hasDefinition ? GetArgChild(current.outType, declaring, businessName, method, path2, commands, ref definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : new ReadOnlyCollection<Args>(0);
+                var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
+                var children = current.hasDefinition ? GetArgChild(current.outType, declaring, businessName, method, path2, commands, ref definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
 
                 if (hasLower2 || hasLower3)
                 {
@@ -1288,16 +1202,16 @@ namespace Business.Core
                     hasUse,
                     typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || true == use?.Token,
                     GetMethodTypeFullName(memberType),
-                    $"{type.FullName.Replace('+', '.')}.{item.Name}",
+                    $"{type.GetTypeName(item.DeclaringType)}.{item.Name}",
                     memberDefinition,
                     false);
 
-                args.collection.Add(arg);
-                childrens.collection.Add(arg);
+                args.Collection.Add(arg);
+                childrens.Collection.Add(arg);
 
                 foreach (var child in childrens2)
                 {
-                    childrens.collection.Add(child);
+                    childrens.Collection.Add(child);
                 }
             }
 
@@ -1307,7 +1221,7 @@ namespace Business.Core
         //static readonly System.Type[] procesTypes = new System.Type[] { typeof(object) };
         //static readonly System.Type[] procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, Help.CurrentType current, string declaring, string businessName, string method, string path, string owner, string member, ConcurrentReadOnlyDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(System.Collections.Generic.List<AttributeBase> argAttrAll, Help.CurrentType current, string declaring, string businessName, string method, string path, string owner, string member, System.Collections.Generic.IDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, out bool hasCollectionAttr, string root, System.Collections.Generic.List<LoggerAttribute> log = null, System.Collections.Generic.List<LoggerAttribute> inLog = null)
         {
             hasLower = false;
             hasCollectionAttr = false;
@@ -1315,9 +1229,9 @@ namespace Business.Core
             //var argAttrs = GetArgAttr(argAttrAll, current.orgType, resultType, resultTypeDefinition);
 
             var argAttrs = argAttrAll.Where(c => c is ArgumentAttribute).Cast<ArgumentAttribute>().ToList();
-            argAttrs.Sort(ComparisonHelper<ArgumentAttribute>.CreateComparer(c => c.State.ConvertErrorState()));
+            argAttrs.Sort(ComparisonHelper<ArgumentAttribute>.CreateComparer(c => System.Math.Abs(c.State.ConvertErrorState())));
 
-            var nick = argAttrAll.GetAttr<NickAttribute>();
+            var aliass = argAttrAll.GetAttrs<AliasAttribute>().Where(c => !string.IsNullOrWhiteSpace(c.Name));
 
             var argGroup = new ConcurrentReadOnlyDictionary<string, ArgGroup>();
 
@@ -1329,22 +1243,31 @@ namespace Business.Core
                 // || (item.Group == c.Group || string.IsNullOrWhiteSpace(c.Group))
 
                 //var argAttrChild = (hasUse || item.Value.IgnoreBusinessArg || ignoreBusinessArg) ?
-                var argAttrChild = (hasUse || ignoreBusinessArg) ?
+                //var argAttrChild = (hasUse || ignoreBusinessArg) ?
+                var argAttrChild = ignoreBusinessArg ?
                     argAttrs.FindAll(c => Help.GroupEquals(c, item.Value.Group) && c.Meta.Declaring == AttributeBase.MetaData.DeclaringType.Parameter).Select(c => c.Clone()).ToList() :
                     argAttrs.FindAll(c => Help.GroupEquals(c, item.Value.Group)).Select(c => c.Clone()).ToList();
 
-                var nickValue = string.IsNullOrWhiteSpace(nick?.Nick) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Nick) && Help.GroupEquals(c, item.Value.Group)).GroupBy(c => c.Nick, System.StringComparer.InvariantCultureIgnoreCase).FirstOrDefault()?.Key : nick.Nick;
+                //var nickValue = string.IsNullOrWhiteSpace(nick?.Name) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Nick) && Help.GroupEquals(c, item.Value.Group)).GroupBy(c => c.Nick, System.StringComparer.InvariantCultureIgnoreCase).FirstOrDefault()?.Key : nick.Name;
+                var alias = aliass.FirstOrDefault(c => Help.GroupEquals(c, item.Value.Group));
+                var aliasValue = string.IsNullOrWhiteSpace(alias?.Name) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Alias) && Help.GroupEquals(c, item.Value.Group)).FirstOrDefault()?.Alias : alias.Name;
 
-                var argAttr = new ConcurrentLinkedList<ArgumentAttribute>();//argAttrChild.Count
+                //var argAttr = new ConcurrentLinkedList<ArgumentAttribute>();//argAttrChild.Count
+                var argAttr = new ReadOnlyCollection<ArgumentAttribute>();
 
                 var httpFile = false;
 
                 foreach (var c in argAttrChild)
                 {
-                    if (c.HasDefinition && !current.hasDefinition)
+                    if (ArgumentAttribute.GetFilter(c.ArgMeta.Filter, hasUse, current.hasDefinition, c.Meta.Declaring))
                     {
                         continue;
                     }
+
+                    //if (!string.IsNullOrWhiteSpace(c.ApplyName) && !c.ApplyName.Equals(member))
+                    //{
+                    //    continue;
+                    //}
 
                     var attr = string.IsNullOrWhiteSpace(c.Group) ? c.Clone() : c;
 
@@ -1372,7 +1295,6 @@ namespace Business.Core
                     attr.ArgMeta.MemberPath = path;
                     attr.ArgMeta.Member = member;
                     attr.ArgMeta.MemberType = current.orgType;
-
                     //attr.ArgumentMeta.Method = item.Value.OnlyName;
                     //attr.ArgumentMeta.Member = path2;
                     ////attr.Meta.Business = c.Meta.Business;
@@ -1381,17 +1303,18 @@ namespace Business.Core
                     //attr.ArgumentMeta.MemberType = c.ArgumentMeta.MemberType;
                     //attr.ArgumentMeta.HasProcesIArg = c.ArgumentMeta.HasProcesIArg;
 
-                    if (string.IsNullOrWhiteSpace(attr.Nick))
+                    if (string.IsNullOrWhiteSpace(attr.Alias))
                     {
-                        attr.Nick = !string.IsNullOrWhiteSpace(nickValue) ? nickValue : attr.ArgMeta.Member;
+                        attr.Alias = !string.IsNullOrWhiteSpace(aliasValue) ? aliasValue : attr.ArgMeta.Member;
                     }
 
                     attr.BindAfter?.Invoke();
 
-                    if (!argAttr.TryAdd(attr))
-                    {
-                        System.Console.WriteLine("ConcurrentLinkedList TryAdd error! State = INV");
-                    }
+                    //if (!argAttr.TryAdd(attr))
+                    //{
+                    //    System.Console.WriteLine("ConcurrentLinkedList TryAdd error! State = INV");
+                    //}
+                    argAttr.Collection.Add(attr);
 
                     if (!hasLower) { hasLower = true; }
 
@@ -1405,18 +1328,20 @@ namespace Business.Core
 
                 //add default convert
                 //if (current.hasIArg && 0 == argAttr.Count)
-                if (default == owner && current.hasIArg && null == argAttr.First.Value)
+                //if (default == owner && current.hasIArg && null == argAttr.First.Value)
+                if (default == owner && current.hasIArg && 0 == argAttr.Count)
                 {
                     //if (default == owner) ?? Is the first level added or every level added?
                     var def = new ArgumentDefaultAttribute(resultType, resultTypeDefinition);
                     def.Meta.Declaring = AttributeBase.MetaData.DeclaringType.Parameter;
-                    argAttr.TryAdd(def);
+                    //argAttr.TryAdd(def);
+                    argAttr.Collection.Add(def);
 
                     if (!hasLower) { hasLower = true; }
                 }
 
                 //owner ?? Do need only the superior, not the superior path? For doc
-                var group = new ArgGroup(ignores.ToReadOnly(), ignores.Any(c => c.Mode == IgnoreMode.Arg), argAttr, nickValue, $"{item.Value.OnlyName}.{path}", default == owner ? item.Value.OnlyName : $"{item.Value.OnlyName}.{owner}", $"{item.Value.OnlyName}.{root}", httpFile);
+                var group = new ArgGroup(ignores.ToReadOnly(), ignores.Any(c => c.Mode == IgnoreMode.Arg), argAttr, aliasValue, $"{item.Value.OnlyName}.{path}", default == owner ? item.Value.OnlyName : $"{item.Value.OnlyName}.{owner}", $"{item.Value.OnlyName}.{root}", httpFile);
 
                 if (0 < log?.Count)
                 {
@@ -1573,7 +1498,7 @@ namespace Business.Core
         //===============member==================//
         readonly System.Func<object[], dynamic> call;
 
-        public virtual object[] GetArgsUse(UseEntry[] useObj, System.Action<object[], int, Args> action)
+        public virtual object[] GetArgsUse(UseEntry[] useObj, System.Action<object[], int, Args, ArgGroup> action)
         {
             var parameters = new object[Meta.Args.Count];
 
@@ -1582,6 +1507,7 @@ namespace Business.Core
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     var arg = Meta.Args[i];
+                    arg.Group.TryGetValue(Key, out ArgGroup group);
 
                     if (Meta.UseTypePosition.ContainsKey(i))
                     {
@@ -1613,12 +1539,12 @@ namespace Business.Core
 
                         continue;
                     }
-                    else if (arg.Group[Key].IgnoreArg)
+                    else if (group.IgnoreArg)
                     {
                         continue;
                     }
 
-                    action(parameters, i, arg);
+                    action(parameters, i, arg, group);
                 }
             }
 
@@ -1628,7 +1554,7 @@ namespace Business.Core
         public virtual object[] GetAgs(object[] parameters, params UseEntry[] useObj)
         {
             int l = 0;
-            return GetArgsUse(useObj, (args2, i, arg) =>
+            return GetArgsUse(useObj, (args2, i, arg, group) =>
             {
                 if (null != parameters && 0 < parameters.Length)
                 {
@@ -1647,7 +1573,7 @@ namespace Business.Core
 
         public virtual object[] GetAgs(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj)
         {
-            return GetArgsUse(useObj, (args2, i, arg) =>
+            return GetArgsUse(useObj, (args2, i, arg, group) =>
             {
                 if (null != parameters && 0 < parameters.Count)
                 {
@@ -1742,6 +1668,7 @@ namespace Business.Core
 
 namespace Business.Core.Meta
 {
+    using Business.Core.Annotations;
     using Business.Core.Utils;
 
     #region Meta
@@ -1750,13 +1677,13 @@ namespace Business.Core.Meta
     {
         public ArgGroup(string path) => Path = path;
 
-        public ArgGroup(ReadOnlyCollection<Annotations.Ignore> ignore, bool ignoreArg, ConcurrentLinkedList<Annotations.ArgumentAttribute> attrs, string nick, string path, string owner, string root, bool httpFile)
+        public ArgGroup(ReadOnlyCollection<Ignore> ignore, bool ignoreArg, ReadOnlyCollection<ArgumentAttribute> attrs, string alias, string path, string owner, string root, bool httpFile)
         {
             Ignore = ignore;
             IgnoreArg = ignoreArg;
             Attrs = attrs;
             Path = path;
-            Nick = nick;
+            Alias = alias;
             Owner = owner;
             Root = root;
             Logger = default;
@@ -1764,13 +1691,14 @@ namespace Business.Core.Meta
             HttpFile = httpFile;
         }
 
-        public ReadOnlyCollection<Annotations.Ignore> Ignore { get; private set; }
+        public ReadOnlyCollection<Ignore> Ignore { get; private set; }
 
         public bool IgnoreArg { get; internal set; }
 
-        public ConcurrentLinkedList<Annotations.ArgumentAttribute> Attrs { get; internal set; }
+        //public ConcurrentLinkedList<ArgumentAttribute> Attrs { get; internal set; }
+        public ReadOnlyCollection<ArgumentAttribute> Attrs { get; internal set; }
 
-        public string Nick { get; private set; }
+        public string Alias { get; private set; }
 
         public string Path { get; private set; }
 
@@ -1846,7 +1774,7 @@ namespace Business.Core.Meta
         //public override string ToString() => string.Format("{0} {1}", Group2, Name);
 
         //argChild
-        public Args(string name, System.Type type, System.Type origType, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, Annotations.UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
+        public Args(string name, System.Type type, System.Type origType, System.Type lastType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionAttr, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
         {
             Name = name;
             Type = type;
@@ -1915,7 +1843,7 @@ namespace Business.Core.Meta
         //===============accessor==================//
         public Accessor Accessor { get; private set; }
         //===============group==================//
-        public ConcurrentReadOnlyDictionary<string, ArgGroup> Group { get; private set; }
+        public ConcurrentReadOnlyDictionary<string, ArgGroup> Group { get; internal set; }
         ////===============argAttr==================//
         //public SafeList<Attributes.ArgumentAttribute> ArgAttr { get; private set; }
         //===============children==================//
@@ -1945,7 +1873,7 @@ namespace Business.Core.Meta
         ////==============ignore===================//
         //public ReadOnlyCollection<Attributes.Ignore> Ignore { get; private set; }
         //==============use===================//
-        public Annotations.UseAttribute Use { get; internal set; }
+        public UseAttribute Use { get; internal set; }
         //==============useType===================//
         public bool UseType { get; internal set; }
         //===============hasToken==================//
@@ -1965,9 +1893,18 @@ namespace Business.Core.Meta
 
     public struct MetaLogger
     {
-        public Annotations.LoggerAttribute Record { get; set; }
-        public Annotations.LoggerAttribute Error { get; set; }
-        public Annotations.LoggerAttribute Exception { get; set; }
+        public LoggerAttribute Record { get; set; }
+        public LoggerAttribute Error { get; set; }
+        public LoggerAttribute Exception { get; set; }
+    }
+
+    public struct CommandGroup
+    {
+        public CommandGroup(ReadOnlyDictionary<string, CommandAttribute> group, ReadOnlyDictionary<string, ReadOnlyDictionary<string, CommandAttribute>> full) { Group = group; Full = full; }
+
+        public ReadOnlyDictionary<string, CommandAttribute> Group { get; }
+
+        public ReadOnlyDictionary<string, ReadOnlyDictionary<string, CommandAttribute>> Full { get; }
     }
 
     public struct MetaData
@@ -1975,7 +1912,7 @@ namespace Business.Core.Meta
         public override string ToString() => Name;
 
         //MetaData
-        public MetaData(System.Func<object, object[], object> accessor, ConcurrentReadOnlyDictionary<string, Annotations.CommandAttribute> commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ConcurrentReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, object[] defaultValue, System.Collections.Generic.List<Annotations.AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName)
+        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
         {
             Accessor = accessor;
             CommandGroup = commandGroup;
@@ -2015,12 +1952,13 @@ namespace Business.Core.Meta
             MethodTypeFullName = methodTypeFullName;
             //Ignore = ignore;
             //HasArgSingle = hasArgSingle;
+            this.Doc = doc;
         }
 
         public System.Func<object, object[], object> Accessor { get; private set; }
 
         //==============commandAttr===================//
-        public ConcurrentReadOnlyDictionary<string, Annotations.CommandAttribute> CommandGroup { get; private set; }
+        public CommandGroup CommandGroup { get; private set; }
         //==============argAttrs===================//
         public ReadOnlyCollection<Args> Args { get; private set; }
         //==============argAll===================//
@@ -2028,7 +1966,7 @@ namespace Business.Core.Meta
         //==============iArgs===================//
         public ReadOnlyCollection<Args> IArgs { get; private set; }
         //==============MetaLogger===================//
-        public ConcurrentReadOnlyDictionary<string, MetaLogger> MetaLogger { get; private set; }
+        public ReadOnlyDictionary<string, MetaLogger> MetaLogger { get; private set; }
         //==============path===================//
         public string Path { get; private set; }
         //==============name===================//
@@ -2056,7 +1994,7 @@ namespace Business.Core.Meta
         //==============defaultValue===================//
         public object[] DefaultValue { get; private set; }
         //==============attributes===================//
-        public System.Collections.Generic.List<Annotations.AttributeBase> Attributes { get; private set; }
+        public System.Collections.Generic.List<AttributeBase> Attributes { get; private set; }
         //===============position==================//
         public int Position { get; private set; }
         //==============groupDefault===================//
@@ -2071,6 +2009,9 @@ namespace Business.Core.Meta
         //public Attributes.Ignore Ignore { get; private set; }
         //==============hasArgSingle===================//
         //public bool HasArgSingle { get; internal set; }
+        //==============doc===================//
+        public DocAttribute Doc { get; private set; }
+
     }
 
     #endregion

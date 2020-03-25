@@ -391,6 +391,11 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         public static ConcurrentReadOnlyDictionary<string, IBusiness> BusinessList = new ConcurrentReadOnlyDictionary<string, IBusiness>(System.StringComparer.InvariantCultureIgnoreCase);
 
+        /// <summary>
+        /// Business
+        /// Business + Group
+        /// Business + Command + Group
+        /// </summary>
         public static ConcurrentReadOnlyDictionary<string, Route> Routes = new ConcurrentReadOnlyDictionary<string, Route>(System.StringComparer.InvariantCultureIgnoreCase);
 
         public struct Route
@@ -412,14 +417,14 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             {
                 var key = new System.Text.StringBuilder(Business);
 
-                if (!string.IsNullOrWhiteSpace(Group))
-                {
-                    key.AppendFormat("/{0}", Group);
-                }
-
                 if (!string.IsNullOrWhiteSpace(Command))
                 {
                     key.AppendFormat("/{0}", Command);
+                }
+
+                if (!string.IsNullOrWhiteSpace(Group))
+                {
+                    key.AppendFormat("/{0}", Group);
                 }
 
                 return key.ToString();
@@ -461,8 +466,6 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         public static ConcurrentReadOnlyDictionary<string, Xml.member> Xmls = null;
 
-        //internal readonly string ID = System.Guid.NewGuid().ToString("N");
-
         /// <summary>
         /// FirstCharToLowerNamingPolicy
         /// </summary>
@@ -471,7 +474,8 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             PropertyNameCaseInsensitive = true,
             AllowTrailingCommas = true,
             IgnoreNullValues = true,
-            PropertyNamingPolicy = new Help.FirstCharToLowerNamingPolicy()
+            PropertyNamingPolicy = new Help.FirstCharToLowerNamingPolicy(),
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
         static Configer()
@@ -526,6 +530,12 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         public IDoc Doc { get; internal set; }
 
         public Auth.IInterceptor Interceptor { get; internal set; }
+
+        public ConcurrentReadOnlyDictionary<DocGroup, System.Collections.Concurrent.ConcurrentQueue<DocInfo>> DocGroup { get; internal set; }
+
+        public Annotations.DocAttribute DocInfo { get; set; }
+
+        //public ConcurrentReadOnlyDictionary<string, ConcurrentReadOnlyDictionary<string, System.Collections.Concurrent.ConcurrentQueue<Annotations.CommandAttribute>>> CommandGroup { get; internal set; }
 
         ///// <summary>
         ///// Logger use threadPool, Default true

@@ -15,8 +15,21 @@ public class Program
     public static void Main(string[] args)
     {
         var host = WebHost.CreateDefaultBuilder(args)
-            .UseKestrel()
+            .UseKestrel(options =>
+            {
+                options.Limits.MinRequestBodyDataRate = null;
+                options.AllowSynchronousIO = true;
+                options.Limits.KeepAliveTimeout =
+                        TimeSpan.FromMinutes(2);
+                options.Limits.RequestHeadersTimeout =
+                    TimeSpan.FromMinutes(1);
+            })
             .UseStartup<Startup>()
+
+#if !DEBUG
+            .UseUrls("http://192.168.1.107:5000")
+#endif
+            //.UseUrls("http://192.168.1.107:5000")
             //.ConfigureKestrel((context, options) =>
             //{
             //    // Set properties and call methods on options
@@ -54,7 +67,6 @@ public class Startup
                 builder.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader();
-                //.AllowCredentials();
             });
         });
 

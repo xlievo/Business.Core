@@ -9,6 +9,7 @@ namespace Business.Core.Annotations
         {
             this.CanNull = false;
             this.Description = "MessagePackArg Binary parsing";
+            this.ArgMeta.Filter |= FilterModel.NotDefinition;
         }
 
         public override async ValueTask<IResult> Proces<Type>(dynamic value)
@@ -20,7 +21,7 @@ namespace Business.Core.Annotations
             {
                 return this.ResultCreate(MessagePack.MessagePackSerializer.Deserialize<Type>(value));
             }
-            catch (System.Exception ex) { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} MessagePack deserialize error. {ex.Message}"); }
+            catch (System.Exception ex) { return this.ResultCreate(State, Message ?? $"Arguments {this.Alias} MessagePack deserialize error. {ex.Message}"); }
         }
     }
 
@@ -46,8 +47,8 @@ namespace Business.Core.Annotations
         public CheckNull(int state = -800, string message = null) : base(state, message)
         {
             this.CanNull = false;
-            this.Description = "{Nick} must be filled in";
-            this.Message = "{Nick} must be filled in";
+            this.Description = "{Alias} must be filled in";
+            this.Message = "{Alias} must be filled in";
         }
     }
 
@@ -55,8 +56,8 @@ namespace Business.Core.Annotations
     {
         public Size(int state = -801, string message = null) : base(state, message)
         {
-            this.Description = "{Nick} Range [{Min} {Max}]";
-            this.Message = "{Nick} Range [{Min} {Max}]";
+            this.Description = "{Alias} Range [{Min} {Max}]";
+            this.Message = "{Alias} Range [{Min} {Max}]";
         }
     }
 
@@ -64,8 +65,8 @@ namespace Business.Core.Annotations
     {
         public Scale(int state = -802, string message = null) : base(state, message)
         {
-            this.Description = "{Nick} Intercept the last {Size} bits";
-            this.Message = "{Nick} Intercept the last {Size} bits";
+            this.Description = "{Alias} Intercept the last {Size} bits";
+            this.Message = "{Alias} Intercept the last {Size} bits";
         }
     }
 
@@ -73,8 +74,8 @@ namespace Business.Core.Annotations
     {
         public CheckEmail(int state = -803, string message = null) : base(state, message)
         {
-            this.Description = "{Nick} Check the validity of email address";
-            this.Message = "{Nick} Illegal mail address";
+            this.Description = "{Alias} Check the validity of email address";
+            this.Message = "{Alias} Illegal mail address";
         }
     }
 
@@ -82,8 +83,8 @@ namespace Business.Core.Annotations
     {
         public CheckChar(int state = -804, string message = null) : base(state, message)
         {
-            this.Description = "{Nick} Check character legitimacy";
-            this.Message = "{Nick} Illegal character";
+            this.Description = "{Alias} Check character legitimacy";
+            this.Message = "{Alias} Illegal character";
         }
     }
 
@@ -91,8 +92,8 @@ namespace Business.Core.Annotations
     {
         public CheckPhone(int state = -806, string message = null) : base(state, message)
         {
-            this.Description = "{Nick} Check the validity of phone number";
-            this.Message = "{Nick} Illegal phone number";
+            this.Description = "{Alias} Check the validity of phone number";
+            this.Message = "{Alias} Illegal phone number";
         }
     }
 
@@ -100,8 +101,8 @@ namespace Business.Core.Annotations
     {
         public CheckUrl(int state = -807, string message = null) : base(state, message)
         {
-            this.Description = "{Nick} Check the validity of url";
-            this.Message = "{Nick} Illegal url";
+            this.Description = "{Alias} Check the validity of url";
+            this.Message = "{Alias} Illegal url";
         }
     }
 

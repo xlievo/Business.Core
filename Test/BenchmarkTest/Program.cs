@@ -8,8 +8,9 @@ using System.Linq;
 using System.Collections.Generic;
 using static BenchmarkTest.BusinessMember;
 using Business.Core;
+using System.Threading;
 
-[assembly: Logger(Logger.LoggerType.All)]
+[assembly: Logger(Logger.Type.All)]
 namespace BenchmarkTest
 {
     class Program
@@ -32,7 +33,7 @@ namespace BenchmarkTest
             Cfg = Member.Configer;
 
 #if DEBUG
-            var count = 1000;
+            var count = 10000;
 
 #else
             var count = 100000;
@@ -202,7 +203,7 @@ namespace BenchmarkTest
 
             Console.WriteLine($"ResultCount={results.Count} TaskCount={tasks.Count}  Loggers={BusinessMember.Loggers.Count} Time={total}");
             */
-#if DEBUG
+#if !DEBUG
             Console.Read();
 #endif
 
@@ -284,7 +285,7 @@ namespace BenchmarkTest
         /// Child Property, Field Agr<> type is only applicable to JSON
         /// </summary>
         [CheckNull]
-        [Proces01(-801, "{Nick} cannot be empty, please enter the correct {Nick}", Nick = "pas2")]
+        [Proces01(-801, "{Alias} cannot be empty, please enter the correct {Alias}", Alias = "pas2")]
         public int A;
     }
 
@@ -299,14 +300,22 @@ namespace BenchmarkTest
 
         public BusinessMember()
         {
-            this.Logger = new Logger(async (Logger.LoggerData x) =>
+            this.Logger = new Logger(async x =>
             {
                 if (-1 != Program.WorkTime)
                 {
                     SpinWait(Program.WorkTime);
                 }
-                //System.Console.WriteLine(loggers.Count());
 
+                //System.Console.WriteLine($"{i}:{x.Count()}");
+                System.Console.WriteLine($"{x.Count()}");
+
+
+                //Console.WriteLine(DateTime.Now);
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                //SpinWait(3000);
+                //Thread.Sleep(TimeSpan.FromSeconds(3));
+                // Console.WriteLine(DateTime.Now);
                 //var logs = loggers.Select(c =>
                 //{
                 //    c.Value = c.Value?.ToValue();
@@ -314,18 +323,21 @@ namespace BenchmarkTest
                 //    return c;
                 //}).ToList();
 
+                foreach (var item in x)
+                {
+                    Loggers.Add(item);
+                }
+
                 //Logs.Add(logs.Count);
-                Loggers.Add(x);
+                //Loggers.Add(x);
                 //Logs.Add(1);
+                //});
+            },
+            new Logger.BatchOptions
+            {
+                Interval = TimeSpan.FromSeconds(3),
+                MaxNumber = 5000
             });
-            //}, 30)
-            //{
-            //    Batch = new Logger.BatchOptions
-            //    {
-            //        Interval = System.TimeSpan.FromSeconds(6),
-            //        //MaxNumber = 1000
-            //    }
-            //};
         }
 
         public virtual dynamic Test000([Use(true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);

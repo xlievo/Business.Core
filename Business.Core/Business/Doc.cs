@@ -180,6 +180,56 @@ namespace Business.Core.Document
         }
     }
 
+    public struct DocGroup
+    {
+        public DocGroup(Annotations.DocGroupAttribute docGroup)
+        {
+            Group = docGroup.Group;
+            this.position = docGroup.Position;
+            Badge = docGroup.Badge;
+            Active = docGroup.Active;
+        }
+
+        internal int position;
+
+        public string Group { get; set; }
+
+        public string Badge { get; set; }
+
+        public bool Active { get; set; }
+
+        public class EqualityComparer : IEqualityComparer<DocGroup>
+        {
+            public bool Equals(DocGroup x, DocGroup y) => string.Equals(x.Group, y.Group, System.StringComparison.InvariantCultureIgnoreCase);
+
+            public int GetHashCode(DocGroup obj) => obj.Group.GetHashCode();
+        }
+
+        public static readonly EqualityComparer comparer = new EqualityComparer();
+    }
+
+    public struct DocInfo
+    {
+        public DocInfo(Annotations.DocAttribute alias, int position, string key)
+        {
+            Key = key;
+            Group = alias.Group;
+            Name = alias.Alias;
+            this.position = 0 <= alias.Position ? alias.Position : position;
+            Badge = alias.Badge;
+        }
+
+        internal int position;
+
+        public string Key { get; set; }
+
+        public string Group { get; set; }
+
+        public string Name { get; set; }
+
+        public string Badge { get; set; }
+    }
+
     public struct Config
     {
         public string Host { get; set; }
@@ -218,11 +268,23 @@ namespace Business.Core.Document
         /// Whether to render the SetToken element in the UI
         /// </summary>
         public bool SetToken { get; set; }
+
+        /// <summary>
+        /// Whether to open the side navigation bar
+        /// </summary>
+        public bool Navigtion { get; set; }
+
+        /// <summary>
+        /// Benchmark tests whether the passed parameters are JSON serialized. By default false, does not need to be serialized
+        /// </summary>
+        public bool BenchmarkJSON { get; set; }
     }
 
     public interface IDoc
     {
         string Name { get; set; }
+
+        string Alias { get; set; }
 
         string Description { get; set; }
 
@@ -231,6 +293,8 @@ namespace Business.Core.Document
         string GroupDefault { get; set; }
 
         Config Config { get; set; }
+
+        IEnumerable<KeyValuePair<DocGroup, IEnumerable<DocInfo>>> DocGroup { get; set; }
     }
 
     public interface IDoc<DocArg> : IDoc where DocArg : IDocArg<DocArg>
@@ -240,7 +304,13 @@ namespace Business.Core.Document
 
     public interface IMember<DocArg> where DocArg : IDocArg<DocArg>
     {
+        string Key { get; set; }
+
         string Name { get; set; }
+
+        string Alias { get; set; }
+
+        string AliasGroup { get; set; }
 
         bool HasReturn { get; set; }
 
@@ -248,7 +318,6 @@ namespace Business.Core.Document
 
         string Description { get; set; }
 
-        //[Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         Dictionary<string, DocArg> Args { get; set; }
 
@@ -261,13 +330,14 @@ namespace Business.Core.Document
 
     public interface IDocArg<DocArg> where DocArg : IDocArg<DocArg>
     {
-        //[Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         Dictionary<string, DocArg> Children { get; set; }
 
         Items<DocArg> Items { get; set; }
 
         string Type { get; set; }
+
+        //string Name { get; set; }
 
         //bool Token { get; set; }
 
@@ -282,6 +352,11 @@ namespace Business.Core.Document
     {
         public string Name { get; set; }
 
+        /// <summary>
+        /// Friendly name
+        /// </summary>
+        public string Alias { get; set; }
+
         public Dictionary<string, Dictionary<string, IMember<DocArg>>> Group { get; set; }
 
         public string Description { get; set; }
@@ -292,6 +367,8 @@ namespace Business.Core.Document
 
         public Config Config { get; set; }
 
+        public IEnumerable<KeyValuePair<DocGroup, IEnumerable<DocInfo>>> DocGroup { get; set; }
+
         /// <summary>
         /// Json format
         /// </summary>
@@ -301,7 +378,19 @@ namespace Business.Core.Document
 
     public class Member<DocArg> : IMember<DocArg> where DocArg : IDocArg<DocArg>
     {
+        public string Key { get; set; }
+
         public string Name { get; set; }
+
+        /// <summary>
+        /// Friendly name
+        /// </summary>
+        public string Alias { get; set; }
+
+        /// <summary>
+        /// Friendly name group
+        /// </summary>
+        public string AliasGroup { get; set; }
 
         public bool HasReturn { get; set; }
 
@@ -349,7 +438,6 @@ namespace Business.Core.Document
 
     public class DocArg : IDocArg<DocArg>
     {
-        //[Newtonsoft.Json.JsonProperty(PropertyName = "default")]
         [System.Text.Json.Serialization.JsonPropertyName("default")]
         public object DefaultValue { get; set; }
 
@@ -368,7 +456,7 @@ namespace Business.Core.Document
 
         public string Title { get; set; }
 
-        public string[] Enum { get; set; }
+        public IEnumerable<int> Enum { get; set; }
 
         public bool Array { get; set; }
 
@@ -379,6 +467,8 @@ namespace Business.Core.Document
         public Dictionary<string, object> Options { get; set; }
 
         public Items<DocArg> Items { get; set; }
+
+        public string Name { get; set; }
 
         #region
         /*
@@ -401,7 +491,6 @@ namespace Business.Core.Document
 
         public string Title { get; set; }
 
-        //[Newtonsoft.Json.JsonProperty(PropertyName = "properties")]
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         public Dictionary<string, DocArg> Children { get; set; }
 

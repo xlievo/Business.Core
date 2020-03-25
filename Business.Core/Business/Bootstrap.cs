@@ -30,7 +30,7 @@ namespace Business.Core
     {
         internal protected BootstrapConfig()
         {
-            Use = new ConcurrentLinkedList<System.Func<IBusiness, IBusiness>>();
+            Use = new System.Collections.Concurrent.ConcurrentQueue<System.Func<IBusiness, IBusiness>>();
             UseDoc = null;
         }
 
@@ -41,7 +41,7 @@ namespace Business.Core
             Type = type;
         }
 
-        public ConcurrentLinkedList<System.Func<IBusiness, IBusiness>> Use { get; }
+        public System.Collections.Concurrent.ConcurrentQueue<System.Func<IBusiness, IBusiness>> Use { get; }
 
         public System.Action UseDoc { get; internal set; }
 
@@ -121,7 +121,12 @@ namespace Business.Core
 
             if (null != business)
             {
-                Config.Use.ForEach(c => c.Value.Invoke(business));
+                foreach (var item in Config.Use)
+                {
+                    item.Invoke(business);
+                }
+
+                //Config.Use.ForEach(c => c.Value.Invoke(business));
 
                 Config.UseDoc?.Invoke();
             }
@@ -159,7 +164,12 @@ namespace Business.Core
 
             if (null != business)
             {
-                Config.Use.ForEach(c => c.Value.Invoke(business));
+                foreach (var item in Config.Use)
+                {
+                    item.Invoke(business);
+                }
+
+                //Config.Use.ForEach(c => c.Value.Invoke(business));
 
                 Config.UseDoc?.Invoke();
             }
@@ -219,7 +229,11 @@ namespace Business.Core
 
             foreach (var business in Configer.BusinessList.Values.AsParallel())
             {
-                Config.Use.ForEach(c => c.Value.Invoke(business));
+                foreach (var item in Config.Use)
+                {
+                    item.Invoke(business);
+                }
+                //Config.Use.ForEach(c => c.Value.Invoke(business));
             }
 
             Config.UseDoc?.Invoke();
@@ -269,7 +283,7 @@ namespace Business.Core.Utils
         public static Bootstrap Use<Bootstrap>(this Bootstrap bootstrap, System.Func<IBusiness, IBusiness> operation)
             where Bootstrap : IBootstrap
         {
-            bootstrap.Config.Use.TryAdd(operation);
+            bootstrap.Config.Use.Enqueue(operation);
             return bootstrap;
         }
 

@@ -100,7 +100,7 @@ public class CheckNull : ArgumentAttribute
     {
         if (object.Equals(null, value))
         {
-            return this.ResultCreate(State, Message ?? $"argument \"{Nick}\" can not null.");
+            return this.ResultCreate(State, Message ?? $"argument \"{Alias}\" can not null.");
         }
 
         return this.ResultCreate();

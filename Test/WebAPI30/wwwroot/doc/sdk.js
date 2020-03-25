@@ -126,7 +126,7 @@ class Program\n\
         var result = await Call("
 		+
 		value
-		+ 
+		+
 		");\n\
 \n\
         Console.WriteLine(result);\n\
@@ -144,4 +144,68 @@ class Program\n\
         return await response.Content.ReadAsStringAsync();\n\
     }\n\
 }";
+}
+
+function GetCurl(h, c, data, data2) {
+	var value = "\n";
+	value += "			#Built-in Route   " + h + "?c=&t=&d=";
+	value += "\n\n\curl -X GET \"" + h + "?c=" + encodeURIComponent(c);
+
+	if (data.hasOwnProperty("t")) {
+		value += "&t=" + encodeURIComponent(data.t);
+	}
+	if (data.hasOwnProperty("d")) {
+		value += "&d=" + encodeURIComponent(data.d);
+	}
+
+	value += "\"";
+	value += "\n";
+	value += "\n\curl -X POST -d \"" + "c=" + encodeURIComponent(c);
+
+	if (data.hasOwnProperty("t")) {
+		value += "&t=" + encodeURIComponent(data.t);
+	}
+	if (data.hasOwnProperty("d")) {
+		value += "&d=" + encodeURIComponent(data.d);
+	}
+	value += "\" " + h;
+
+	value += "\n\n";
+	value += "			#Classical Route   " + h + "/" + encodeURIComponent(c);;
+	value += "\n\n\curl -X GET \"" + h + "/" + encodeURIComponent(c);
+
+	if (data2.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
+		value += "?t=" + encodeURIComponent(data2.t) + "&" + data2.d;
+	}
+	else if (data2.hasOwnProperty("t")) {
+		value += "?t=" + encodeURIComponent(data2.t);
+	} else if (data2.hasOwnProperty("d")) {
+		value += "?" + data2.d;
+	}
+
+	value += "\"";
+	value += "\n";
+	value += "\n\curl -X POST -d \"";
+
+	if (data2.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
+		value += "t=" + encodeURIComponent(data2.t) + "&" + data2.d;
+	}
+	else if (data2.hasOwnProperty("t")) {
+		value += "t=" + encodeURIComponent(data2.t);
+	} else if (data2.hasOwnProperty("d")) {
+		value += data2.d;
+	}
+
+	value += "\" " + h + "/" + encodeURIComponent(c);
+
+	value += "\n";
+	value += "\n\curl -H \"Content-Type:application/json\" -X POST -d \"";
+
+	value += encodeURIComponent(data.d);
+
+	value += "\" " + h + "/" + encodeURIComponent(c);
+
+	value += "\n";
+
+	return value;
 }

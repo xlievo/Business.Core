@@ -12,7 +12,8 @@
         /// </summary>
         static readonly string Index = "doc\\index.html";
         static readonly System.Collections.Generic.Dictionary<string, System.IO.Stream> Doc = new System.Collections.Generic.Dictionary<string, System.IO.Stream>();
-        static string AB = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ab.exe");
+        static readonly string ab = "ab";
+        static readonly string bombardier = "bombardier";
 
         static DocUI()
         {
@@ -27,6 +28,12 @@
                     Unix = true;
                     Index = "doc/index.html";
                     break;
+            }
+
+            if (!Unix)
+            {
+                ab = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ab.exe");
+                bombardier = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "bombardier-windows-386.exe");
             }
 
             var resourceList = System.Xml.Linq.XDocument.Load(ass.GetManifestResourceStream(csproj)).Descendants("EmbeddedResource")
@@ -69,11 +76,6 @@
                     System.Console.WriteLine(k);
                 }
             }
-
-            //if (!System.IO.Directory.Exists(AB))
-            //{
-            //    System.IO.Directory.CreateDirectory(AB);
-            //}
         }
 
         /// <summary>
@@ -160,7 +162,7 @@
                         {
                             if (!Unix)
                             {
-                                System.IO.File.WriteAllBytes(AB, StreamReadByte(c.Value));
+                                System.IO.File.WriteAllBytes(ab, StreamReadByte(c.Value));
                             }
                             return;
                         }
@@ -205,7 +207,7 @@
             return bytes;
         }
 
-        public struct benchmarkArg
+        public struct BenchmarkArg
         {
             public int n { get; set; }
             public int c { get; set; }
@@ -218,33 +220,81 @@
         CentOS/RHEL: yum -y install httpd-tools
         Ubuntu: apt-get install apache2-utils
         */
-        public static async Task<string> Benchmark(benchmarkArg arg)
+        /// <summary>
+        /// ab
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public static async Task<string> Benchmark(BenchmarkArg arg)
         {
-            if (default(benchmarkArg).Equals(arg)) { return new System.ArgumentNullException(nameof(arg)).Message; }
+            if (default(BenchmarkArg).Equals(arg)) { return new System.ArgumentNullException(nameof(arg)).Message; }
 
-            if (!Unix && !System.IO.File.Exists(AB))
+            if (!Unix && !System.IO.File.Exists(ab))
             {
-                return $"{AB} not exist!";
+                return $"{ab} not exist!";
             }
 
-            System.Console.WriteLine($"n:{arg.n} c:{arg.c}");
-
-            //var dir = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "ab");
-
-            //if (!System.IO.Directory.Exists(dir))
-            //{
-            //    System.IO.Directory.CreateDirectory(dir);
-            //}
+            //System.Console.WriteLine($"n:{arg.n} c:{arg.c}");
 
             var dataPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, $"ab_{System.Guid.NewGuid().ToString("N")}");
 
+            System.IO.File.WriteAllText(dataPath, $"&{arg.data}", System.Text.Encoding.UTF8);
+
             try
             {
-                //System.IO.File.WriteAllText(dataPath, System.Net.WebUtility.UrlEncode(data), System.Text.Encoding.UTF8);
-                System.IO.File.WriteAllText(dataPath, arg.data, System.Text.Encoding.UTF8);
+                var args = $"-n {arg.n} -c {arg.c} -p \"{dataPath}\" -T \"application/x-www-form-urlencoded\" \"{arg.host}\"";
 
-                using (var cmd = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(!Unix ? AB : "ab", $"-n {arg.n} -c {arg.c} -p \"{dataPath}\" -T \"application/x-www-form-urlencoded\" \"{arg.host}\"") { RedirectStandardOutput = true }))
-                //using (var cmd = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(!Unix ? AB : "ab", "-n 10 -c 10 http://localhost:5000/API/") { RedirectStandardOutput = true }))
+                using (var cmd = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(ab, args) { RedirectStandardOutput = true }))
+                {
+                    using (var output = cmd.StandardOutput)
+                    {
+                        return await output.ReadToEndAsync();
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                return System.Convert.ToString(ex);
+            }
+            finally
+            {
+                try
+                {
+                    System.IO.File.Delete(dataPath);
+                }
+                catch (System.Exception ex)
+                {
+                    System.Console.WriteLine(ex);
+                }
+            }
+        }
+
+        /*
+        /// <summary>
+        /// bombardier https://github.com/codesenberg/bombardier
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public static async Task<string> Benchmark2(BenchmarkArg arg)
+        {
+            if (default(BenchmarkArg).Equals(arg)) { return new System.ArgumentNullException(nameof(arg)).Message; }
+
+            if (!Unix && !System.IO.File.Exists(ab))
+            {
+                return $"{ab} not exist!";
+            }
+
+            //System.Console.WriteLine($"n:{arg.n} c:{arg.c}");
+
+            try
+            {
+                //https://github.com/codesenberg/bombardier
+                //bombardier -m POST -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" -b "action=get_data&number=1234" http://le-host.fr/other/parts/of/the/url
+                //var data = System.Text.Json.JsonSerializer.Serialize(arg.data,);
+                var args = $"-n {arg.n} -c {arg.c}  -m POST -b \"{arg.data}\" {arg.host}";
+                //System.Console.WriteLine(args);
+
+                using (var cmd = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(bombardier, args) { RedirectStandardOutput = true }))
                 {
                     using (var output = cmd.StandardOutput)
                     {
@@ -257,5 +307,6 @@
                 return System.Convert.ToString(ex);
             }
         }
+        */
     }
 }

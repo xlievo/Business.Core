@@ -26,6 +26,7 @@ public class GitHubClient
     }
 }
 
+[Info(Alias = "TEST2")]
 [Logger]
 public class BusinessMember : BusinessBase
 {

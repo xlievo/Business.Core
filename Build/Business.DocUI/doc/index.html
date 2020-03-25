@@ -2,11 +2,11 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>APIs Documents</title>
+    <meta name="author" content="xlievo" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Business.Core API Documents</title>
     <link rel="shortcut icon" href="/doc/icon.png" />
-
     <link rel="stylesheet" type="text/css" href="/doc/bootstrap-3.3.7/css/bootstrap.min.css">
-
     <!-- JSON Schema Based Editor -->
     <script src="/doc/jsoneditor/jsoneditor.min.js"></script>
     <!-- Collapse -->
@@ -20,134 +20,180 @@
     <script type="text/javascript" src="/doc/Juicer/juicer-min.js"></script>
     <!-- DOMPurify -->
     <script type="text/javascript" src="/doc/DOMPurify/purify.min.js"></script>
+    <!-- hamburgers -->
+    <link rel="stylesheet" type="text/css" href="/doc/hamburgers/hamburgers.min.css">
+    <!-- pro-sidebar -->
+    <link rel="stylesheet" href="/doc/pro-sidebar-template/css/main.css">
+    <link rel="stylesheet" href="/doc/pro-sidebar-template/css/sidebar-themes.css">
+    <link rel="stylesheet" href="/doc/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css">
+    <link rel="stylesheet" href="/doc/fontawesome/css/all.min.css">
 
-    <style type="text/css">
-    </style>
-
-    <style id="emacsMode">
-        .emacs-mode .ace_cursor {
-            border: 1px rgba(50,250,50,0.8) solid !important;
-            box-sizing: border-box !important;
-            background-color: rgba(0,250,0,0.9);
-            opacity: 0.5;
-        }
-
-        .emacs-mode .ace_hidden-cursors .ace_cursor {
-            opacity: 1;
-            background-color: transparent;
-        }
-
-        .emacs-mode .ace_overwrite-cursors .ace_cursor {
-            opacity: 1;
-            background-color: transparent;
-            border-width: 0 0 2px 2px !important;
-        }
-
-        .emacs-mode .ace_text-layer {
-            z-index: 4
-        }
-
-        .emacs-mode .ace_cursor-layer {
-            z-index: 2
-        }
-        /*# sourceURL=ace/css/emacsMode */
-
-        /*a  upload */
-        .a-upload {
-            line-height: 20px;
-            position: relative;
-            cursor: pointer;
-            color: #333;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            overflow: hidden;
-            display: inline-block;
-            *display: inline;
-            *zoom: 1
-        }
-
-            .a-upload input {
-                position: absolute;
-                font-size: 100px;
-                right: 0;
-                top: 0;
-                bottom: 0;
-                opacity: 0;
-                filter: alpha(opacity=0);
-                cursor: pointer
-            }
-
-            .a-upload:hover {
-                color: #333;
-                background: #d4d4d4;
-                border-color: #8c8c8c;
-                text-decoration: none
-            }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/doc/doc.css">
 </head>
 <body>
-    <div class='container'>
-        <div style="padding-bottom:15px;">
-            <div class="input-group input-group-lg" style="padding-top:20px;">
-                <input id="url" type="text" class="form-control" value="{URL}" readonly="readonly">
-                <div class="input-group-btn">
-                    <!--<button class="btn btn-default" type="button" onclick="go()">
-                        Go!
-                    </button>-->
-                    <select id="business" class="btn btn-default" onchange="businessOnchang(this)">
-                        <!--<option value="http://localhost:5000/API.doc" selected="selected">API</option>-->
-                    </select>
-                    <select id="group" style="display:none" class="btn btn-default dropdown-toggle" onchange="groupOnchang(this)">
-                        <!--<option value="j">j</option>-->
-                    </select>
+    <div id="wrapper" class="page-wrapper light-theme"><!--sidebar-bg bg2-->
+        <nav id="sidebar" class="sidebar-wrapper">
+            <div class="sidebar-content">
+                <!-- sidebar-brand  -->
+                <!--<div class="sidebar-item sidebar-brand">
+                <a href="https://github.com/xlievo/Business.Core" target="_blank">Business.Core</a>
+            </div>-->
+                <!-- sidebar-header  -->
+                <div class="sidebar-item sidebar-header flex-nowrap" style="display:flex">
+                    <div class="user-pic">
+                        <a href="https://github.com/xlievo/Business.Core" target="_blank">
+                            <img class="img-responsive img-rounded" src="/doc/icon.png" alt="User picture">
+                        </a>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">
+                            <strong>Business</strong>
+                        </span>
+                        <span class="user-role">Documents</span>
+                        <span>Navigation</span>
+                    </div>
                 </div>
-            </div><!-- /input-group -->
-            <div class="jumbotron" style="display:none; margin-top:8px; margin-bottom:0px; padding:15px;">
-                <p id="business_description" class="text-info" style="margin-bottom:0px; font-size:large;"></p>
+                <!-- sidebar-search  -->
+                <div class="sidebar-item sidebar-search">
+                    <div>
+                        <div class="input-group">
+                            <input id="searchValue" type="text" class="form-control search-menu" placeholder="Search...">
+                            <div class="input-group-btn" style="padding-left:2px;">
+                                <button id="search" class="btn btn-primary">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- sidebar-menu  -->
+                <div class="sidebar-item sidebar-menu">
+                    <ul id="menus" />
+                </div>
+                <!-- sidebar-menu  -->
             </div>
-        </div>
-        <!-- ============================= -->
-        <div class="panel-group" id="members"></div>
-        <!-- ============================= -->
-    </div>
+            <!-- sidebar-footer  -->
+        </nav>
 
-    <script id="tpl" type="text/template">
-        {@each _ as member}
-        <div id="${member.name}" class="panel panel-info">
-            <div class="panel-heading">
-                <h4>
-                    <span class="d-inline-block">${member.name}</span>
-                    <span class="pull-right">
-                        <!--<a data-houdini-toggle="${member.name}_member" onmousedown="expand()">Detailed description</a>-->
-                        <button data-houdini-toggle="${member.name}_member" onmousedown="expand()">Detailed description</button>
-                    </span>
-                </h4>
-                {@if member.description !== null && member.description !== 'null'}
-                <hr>
-                <p class="mb-0">$${member.description}</p>
+        <main id="main" class="page-content pt-2">
+            <div id="overlay" class="overlay"></div>
+            <div id="page-content" class='container-fluid'>
+                <div style="padding-bottom:15px;">
+                    <div class="input-group input-group-lg" style="padding-top:20px;">
+                        <div id="close-sidebar" class="input-group-btn" style="display:none">
+                            <button id="menu-toggle" style="background-color:#337ab7;" class="btn hamburger hamburger--arrow" type="button">
+                                <span class="hamburger-box">
+                                    <span class="hamburger-inner"></span>
+                                </span>
+                            </button>
+                        </div>
+                        <input id="url" type="text" class="form-control" value="{URL}" readonly="readonly">
+                        <div class="input-group-btn">
+                            <!--<button class="btn btn-default" type="button" onclick="go()">
+                            Go!
+                        </button>-->
+                            <select id="business" class="btn btn-default" onchange="businessOnchang(this)">
+                                <!--<option value="http://localhost:5000/API.doc" selected="selected">API</option>-->
+                            </select>
+                            <select id="group" style="display:none" class="btn btn-default dropdown-toggle" onchange="groupOnchang(this)">
+                                <!--<option value="j">j</option>-->
+                            </select>
+                        </div>
+                    </div><!-- /input-group -->
+                    <div class="jumbotron" style="display:none;margin-top:8px;margin-bottom:0px;padding:15px;">
+                        <p id="business_description" class="text-info" style="margin-bottom:0px;font-size:large;"></p>
+                    </div>
+                </div>
+                <!-- ============================= -->
+                <div class="panel-group" id="members"></div>
+                <!-- ============================= -->
+            </div>
+        </main>
+
+        <script id="tpl" type="text/template">
+            {@each _ as member}
+            <div id="${member.name}" tag="${member.key}" class="panel panel-info">
+                <div class="panel-heading">
+                    <h4>
+                        {@if null!=member.alias && ''!=member.alias}
+                        <strong id="alias" class="d-inline-block" tag="${member.name}" style="padding-right:25px">${member.alias}</strong>
+                        <span class="d-inline-block">${member.name}</span>
+                        {@else}
+                        <span id="alias" class="d-inline-block" tag="${member.name}">${member.name}</span>
+                        {@/if}
+                        <span class="pull-right">
+                            <button data-houdini-toggle="${member.name}_member" onmousedown="expand()">Detailed description</button>
+                        </span>
+                    </h4>
+                    {@if member.description !== null && member.description !== 'null'}
+                    <hr>
+                    <p class="mb-0">$${member.description}</p>
+                    {@/if}
+                </div>
+                <div data-houdini id="${member.name}_member" style="padding:10px;">
+                    <div id="${member.name}_input_out" style="padding-top:0px;"></div>
+                    <div id="${member.name}_sdk" style="padding-top:10px;"></div>
+                </div>
+            </div>
+            {@/each}
+        </script>
+
+        <script id="benchmark" type="text/template">
+            <select id="${name}_testing" style="padding-top:0px;padding-bottom:2.3px;margin-left:10px;border-top-right-radius:0px;border-bottom-right-radius:0px;" class="form-control">
+                <option value="defdata">         </option>
+            </select>
+            <button id="${name}_testing_btn" style="border-radius:0px;" type="button" class="btn btn-default">Testing</button>
+            <button id="${name}_testingAll_btn" style="border-top-left-radius:0px;border-bottom-left-radius:0px;" type="button" class="btn btn-default">Testing All</button>
+            <button id="${name}_benchmark" style="margin-left:10px;border-top-right-radius:0px;border-bottom-right-radius:0px;" type="button" class="btn btn-default">Benchmark</button>
+            <input id="${name}_benchmark_n" style="border-radius:0px;" type="text" class="form-control" size="4" value="10">
+            <input id="${name}_benchmark_c" style="border-top-left-radius:0px;border-bottom-left-radius:0px;" type="text" class="form-control" size="4" value="10">
+            <input id="${name}_token" style="width:auto;border-top-right-radius:0px;border-bottom-right-radius:0px;float:right" type="text" class="form-control" size="20">
+            <button id="${name}_settoken" style="margin-right:10px;border-top-left-radius:0px;border-bottom-left-radius:0px;float:right" type="button" class="btn btn-default">SetToken</button>
+        </script>
+
+        <script id="menuGroup" type="text/template">
+            <!--<li class="header-menu">
+            <span>General</span>
+        </li>-->
+            {@each _ as member, index}
+            {@if true === member.Key.active}
+            <li class="sidebar-dropdown active">
+                {@else}
+            <li class="sidebar-dropdown">
                 {@/if}
-            </div>
-            <div data-houdini id="${member.name}_member" style="padding:10px">
-                <div id="${member.name}_input_out" style="padding-top:0px;"></div>
-                <div id="${member.name}_sdk" style="padding-top:10px;"></div>
-            </div>
-        </div>
-        {@/each}
-    </script>
+                <a href="javascript:void(0)">
+                    <i class="fa fa-folder"></i>
+                    <span class="menu-text" style="font-size:115%">${member.Key.group}</span>
+                    {@if null !== member.Key.description}
+                    <span class="badge badge-pill badge-warning">${member.Key.badge}</span>
+                    {@/if}
+                </a>
+                {@if true === member.Key.active}
+                <div class="sidebar-submenu" style="display: block;">
+                    {@else}
+                    <div class="sidebar-submenu">
+                        {@/if}
+                        <ul>
+                            {@each member.Value as item}{@include "#menuItem", item}{@/each}
+                        </ul>
+                    </div>
+            </li>
+            {@/each}
+        </script>
+        <script id="menuItem" type="text/template">
+            <li>
+                <a id="${key}" href="javascript:void(0)" style="font-size:105%">
+                    ${name}{@if null !== description}<span class="badge badge-pill badge-warning">${badge}</span>{@/if}
+                </a>
+            </li>
+        </script>
 
-    <script id="benchmark" type="text/template">
-        <select id="${name}_testing" style="margin-left:10px; border-top-right-radius:0px ;border-bottom-right-radius:0px;" class="form-control"><option value="defdata">         </option></select>
-        <button id="${name}_testing_btn" style="border-radius:0px;" type="button" class="btn btn-default">Testing</button>
-        <button id="${name}_testingAll_btn" style="border-top-left-radius:0px ;border-bottom-left-radius:0px;" type="button" class="btn btn-default">Testing All</button>
-        <button id="${name}_benchmark" style="margin-left:10px; border-top-right-radius:0px ;border-bottom-right-radius:0px;" type="button" class="btn btn-default">Benchmark</button>
-        <input id="${name}_benchmark_n" style="border-radius:0px;" type="text" class="form-control" size="4" value="10">
-        <input id="${name}_benchmark_c" style="border-top-left-radius:0px ;border-bottom-left-radius:0px;" type="text" class="form-control" size="4" value="10">
-        <input id="${name}_token" style="width:auto; border-top-right-radius:0px ;border-bottom-right-radius:0px; float:right" type="text" class="form-control" size="20">
-        <button id="${name}_settoken" style="margin-right:10px; border-top-left-radius:0px; border-bottom-left-radius:0px; float:right" type="button" class="btn btn-default">SetToken</button>
-    </script>
-
-    <script type="text/javascript" src="/doc/sdk.js"></script>
-    <script type="text/javascript" src="/doc/doc.js" async></script>
+        <script type="text/javascript" src="/doc/sdk.js"></script>
+        <script type="text/javascript" src="/doc/doc.js" async></script>
+        <!-- pro-sidebar -->
+        <script src="/doc/jquery/jquery-3.4.1.min.js"></script>
+        <script src="/doc/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.concat.min.js"></script>
+        <script src="/doc/pro-sidebar-template/js/main.js"></script>
+    </div>
 </body>
 </html>

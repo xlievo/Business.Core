@@ -255,7 +255,7 @@ namespace Business.Core.Annotations
     #region
 
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class TestingAttribute : GropuAttribute
+    public class TestingAttribute : GroupAttribute
     {
         /// <summary>
         /// regression testing
@@ -334,7 +334,7 @@ namespace Business.Core.Annotations
     /// The Method and Property needs to be ignored and will not be a proxy
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property | System.AttributeTargets.Parameter | System.AttributeTargets.Field | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
-    public class Ignore : GropuAttribute
+    public class Ignore : GroupAttribute
     {
         public Ignore(IgnoreMode mode = IgnoreMode.Method)
         {
@@ -362,11 +362,15 @@ namespace Business.Core.Annotations
     //public sealed class EnableWatcherAttribute : System.Attribute { }
 
     /// <summary>
-    /// Info
+    /// Business info
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class Info : AttributeBase
     {
+        /// <summary>
+        /// Business Formal Name
+        /// </summary>
+        /// <param name="businessName"></param>
         public Info(string businessName = null)
         {
             this.BusinessName = businessName;
@@ -374,9 +378,14 @@ namespace Business.Core.Annotations
         }
 
         /// <summary>
-        /// Business Friendly Name
+        /// Business formal name
         /// </summary>
         public string BusinessName { get; internal set; }
+
+        /// <summary>
+        /// Business friendly alias
+        /// </summary>
+        public string Alias { get; set; }
 
         /// <summary>
         /// Type fullName
@@ -444,21 +453,92 @@ namespace Business.Core.Annotations
         public bool Token { get; set; }
     }
 
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-    public sealed class NickAttribute : AttributeBase
+    /// <summary>
+    /// Friendly name
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
+    public sealed class AliasAttribute : GroupAttribute
     {
-        public NickAttribute(string nick) => this.Nick = nick;
+        public AliasAttribute(string name = null) => this.Name = name;
 
         /// <summary>
-        /// Amicable name
+        /// Friendly name
         /// </summary>
-        public string Nick { get; private set; }
+        public string Name { get; internal set; }
+    }
+
+    /// <summary>
+    /// Document grouping configuration
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    public class DocGroupAttribute : GroupAttribute
+    {
+        /// <summary>
+        /// Grouping name
+        /// </summary>
+        /// <param name="group"></param>
+        public DocGroupAttribute(string group = null) => this.Group = group;
+
+        /// <summary>
+        /// Grouping name
+        /// </summary>
+        public override string Group { get => base.Group; set => base.Group = value; }
+
+        /// <summary>
+        /// position
+        /// </summary>
+        public int Position { get; set; }
+
+        /// <summary>
+        /// badge
+        /// </summary>
+        public string Badge { get; set; }
+
+        /// <summary>
+        /// Allowed to expand
+        /// </summary>
+        public bool Active { get; set; }
+    }
+
+    /// <summary>
+    /// Document configuration
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public class DocAttribute : GroupAttribute
+    {
+        /// <summary>
+        /// Friendly name
+        /// </summary>
+        /// <param name="alias"></param>
+        public DocAttribute(string alias = null) => this.Alias = alias;
+
+        /// <summary>
+        /// Method alias grouping
+        /// </summary>
+        public override string Group { get => base.Group; set => base.Group = value; }
+
+        /// <summary>
+        /// Friendly name
+        /// </summary>
+        public string Alias { get; internal set; }
+
+        /// <summary>
+        /// position
+        /// </summary>
+        public int Position { get; set; } = -1;
+
+        /// <summary>
+        /// badge
+        /// </summary>
+        public string Badge { get; set; }
+
+        //public string Description { get; set; }
     }
 
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
-    public class LoggerAttribute : GropuAttribute
+    public class LoggerAttribute : GroupAttribute
     {
-        public LoggerAttribute(Logger.LoggerType logType = Logger.LoggerType.All, bool canWrite = true)
+        public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true)
         {
             this.LogType = logType;
             this.CanWrite = canWrite;
@@ -467,7 +547,7 @@ namespace Business.Core.Annotations
         /// <summary>
         /// Record type
         /// </summary>
-        public Logger.LoggerType LogType { get; private set; }
+        public Logger.Type LogType { get; private set; }
         /// <summary>
         /// Allow record
         /// </summary>
@@ -483,7 +563,7 @@ namespace Business.Core.Annotations
         /// </summary>
         public bool CanResult { get; set; } = true;
 
-        public LoggerAttribute SetType(Logger.LoggerType logType)
+        public LoggerAttribute SetType(Logger.Type logType)
         {
             this.LogType = logType;
             return this;
@@ -520,25 +600,25 @@ namespace Business.Core.Annotations
 
     #endregion
 
-    public abstract class GropuAttribute : AttributeBase
+    public abstract class GroupAttribute : AttributeBase
     {
         string group = string.Empty;
 
         /// <summary>
         /// Used for the command group
         /// </summary>
-        public string Group { get => group; set => group = value?.Trim() ?? string.Empty; }
+        public virtual string Group { get => group; set => group = value?.Trim() ?? string.Empty; }
 
         public virtual string GroupKey(string space = "->") => $"{this.Meta.Type.FullName}{space}{this.Group.Trim()}";
 
-        public static System.Collections.Generic.IEqualityComparer<GropuAttribute> Comparer { get => Equality<GropuAttribute>.CreateComparer(c => c.GroupKey(), System.StringComparer.CurrentCultureIgnoreCase); }
+        public static System.Collections.Generic.IEqualityComparer<GroupAttribute> Comparer { get => Equality<GroupAttribute>.CreateComparer(c => c.GroupKey(), System.StringComparer.CurrentCultureIgnoreCase); }
     }
 
     /// <summary>
     /// Base class for all attributes that apply to parameters
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
-    public abstract class ArgumentAttribute : GropuAttribute
+    public abstract class ArgumentAttribute : GroupAttribute
     {
         public new class MetaData
         {
@@ -569,6 +649,11 @@ namespace Business.Core.Annotations
 
             public Proces Proces { get; internal set; }
 
+            /// <summary>
+            /// This value indicates that the annotation is a filter model used to apply parameters. The default value is UseNotParameterLevel, which means that the injection parameters are filtered out and the annotation is non parameter level
+            /// </summary>
+            public FilterModel Filter { get; set; } = FilterModel.UseNotParameterLevel;
+
             public void Clone(MetaData metaData)
             {
                 this.resultType = metaData.resultType;
@@ -580,6 +665,7 @@ namespace Business.Core.Annotations
                 this.MemberPath = metaData.MemberPath;
                 this.Member = metaData.Member;
                 this.MemberType = metaData.MemberType;
+
                 if (null != metaData.Proces)
                 {
                     this.Proces = new Proces(metaData.Proces.MethodInfo, metaData.Proces.ParameterType)
@@ -661,11 +747,6 @@ namespace Business.Core.Annotations
         /// </summary>
         public bool CanNull { get; set; } = true;
 
-        /// <summary>
-        /// Apply to custom objects only
-        /// </summary>
-        public bool HasDefinition { get; set; }
-
         int state;
         /// <summary>
         /// Used to return state
@@ -682,7 +763,71 @@ namespace Business.Core.Annotations
         /// <summary>
         /// Amicable name
         /// </summary>
-        public string Nick { get; set; }
+        public string Alias { get; set; }
+
+        ///// <summary>
+        ///// This value indicates whether it should only be used for a specific name parameter, and the default null applies to all parameters
+        ///// </summary>
+        //public string ApplyName { get; set; }
+
+        internal static bool GetFilter(FilterModel filter, bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring)
+        {
+            switch (filter)
+            {
+                case FilterModel.No: break;
+                case FilterModel.UseParameterLevel:
+                    if (hasUse && AttributeBase.MetaData.DeclaringType.Parameter == declaring) return true;
+                    break;
+                case FilterModel.UseNotParameterLevel:
+                    if (hasUse && AttributeBase.MetaData.DeclaringType.Parameter != declaring) return true;
+                    break;
+                case FilterModel.NotUseParameterLevel:
+                    if (!hasUse && AttributeBase.MetaData.DeclaringType.Parameter == declaring) return true;
+                    break;
+                case FilterModel.NotUseNotParameterLevel:
+                    if (!hasUse && AttributeBase.MetaData.DeclaringType.Parameter != declaring) return true;
+                    break;
+                case FilterModel.Definition:
+                    if (hasDefinition) return true;
+                    break;
+                case FilterModel.NotDefinition:
+                    if (!hasDefinition) return true;
+                    break;
+
+                case FilterModel.UseParameterLevel | FilterModel.Definition:
+                    if ((hasUse && AttributeBase.MetaData.DeclaringType.Parameter == declaring) || hasDefinition) return true;
+                    break;
+                case FilterModel.UseNotParameterLevel | FilterModel.Definition:
+                    if ((hasUse && AttributeBase.MetaData.DeclaringType.Parameter != declaring) || hasDefinition) return true;
+                    break;
+                case FilterModel.UseParameterLevel | FilterModel.NotDefinition:
+                    if ((hasUse && AttributeBase.MetaData.DeclaringType.Parameter == declaring) || !hasDefinition) return true;
+                    break;
+                case FilterModel.UseNotParameterLevel | FilterModel.NotDefinition:
+                    if ((hasUse && AttributeBase.MetaData.DeclaringType.Parameter != declaring) || !hasDefinition) return true;
+                    break;
+
+                //=======================================//
+
+                case FilterModel.NotUseParameterLevel | FilterModel.Definition:
+                    if ((!hasUse && AttributeBase.MetaData.DeclaringType.Parameter == declaring) || hasDefinition) return true;
+                    break;
+                case FilterModel.NotUseNotParameterLevel | FilterModel.Definition:
+                    if ((!hasUse && AttributeBase.MetaData.DeclaringType.Parameter != declaring) || hasDefinition) return true;
+                    break;
+                case FilterModel.NotUseParameterLevel | FilterModel.NotDefinition:
+                    if ((!hasUse && AttributeBase.MetaData.DeclaringType.Parameter == declaring) || !hasDefinition) return true;
+                    break;
+                case FilterModel.NotUseNotParameterLevel | FilterModel.NotDefinition:
+                    if ((!hasUse && AttributeBase.MetaData.DeclaringType.Parameter != declaring) || !hasDefinition) return true;
+                    break;
+                default: break;
+            }
+
+            return false;
+        }
+
+        #region Proces
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -717,6 +862,8 @@ namespace Business.Core.Annotations
         /// <param name="dictKey"></param>
         /// <returns></returns>
         public virtual async ValueTask<IResult> Proces<Type>(dynamic value, int collectionIndex, dynamic dictKey) => this.ResultCreate<dynamic>(value);
+
+        #endregion
 
         #region Result
 
@@ -765,7 +912,7 @@ namespace Business.Core.Annotations
                 }
                 else
                 {
-                    return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Nick}\" can not null.");
+                    return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Alias}\" can not null.");
                 }
             }
 
@@ -773,11 +920,75 @@ namespace Business.Core.Annotations
         }
     }
 
+    [System.Flags]
+    public enum FilterModel
+    {
+        /// <summary>
+        /// Apply all parameters, including injection, without filtering
+        /// </summary>
+        No = 2,
+
+        ///// <summary>
+        ///// Filter out non parameter level annotation
+        ///// </summary>
+        //ParameterLevel = 4,
+
+        ///// <summary>
+        ///// Filter out non parameter level annotation
+        ///// </summary>
+        //NotParameterLevel = 8,
+
+        ///// <summary>
+        ///// Filter out injection parameters
+        ///// </summary>
+        //Use = 16,
+
+        ///// <summary>
+        ///// Filter out non injection parameters
+        ///// </summary>
+        //NotUse = 32,
+
+        /// <summary>
+        /// Filter out injection parameters also parameter level annotation
+        /// </summary>
+        UseParameterLevel = 64,
+
+        /// <summary>
+        /// Filter out injection parameters also non parameter level annotation
+        /// </summary>
+        UseNotParameterLevel = 128,
+
+        /// <summary>
+        /// Filter out non injection parameters also parameter level annotation
+        /// </summary>
+        NotUseParameterLevel = 256,
+
+        /// <summary>
+        /// Filter out non injection parameters also non parameter level annotation
+        /// </summary>
+        NotUseNotParameterLevel = 512,
+
+        /// <summary>
+        /// This value indicates whether it filter out custom parameters
+        /// </summary>
+        Definition = 1024,
+
+        /// <summary>
+        /// This value indicates whether it applies only to non custom parameters
+        /// </summary>
+        NotDefinition = 2048,
+
+        ///// <summary>
+        ///// This value indicates whether it applies only to Parameters parameters
+        ///// </summary>
+        //Parameters = 4096
+    }
+
     /// <summary>
     /// Command attribute on a method, for multiple sources to invoke the method
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class CommandAttribute : GropuAttribute
+    public class CommandAttribute : GroupAttribute
     {
         public CommandAttribute(string onlyName = null) { this.OnlyName = onlyName; }
 
@@ -804,12 +1015,12 @@ namespace Business.Core.Annotations
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" can not null.");
+                    return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" can not null.");
                 }
             }
             else if (object.Equals(null, value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{ this.Nick}\" can not null.");
+                return this.ResultCreate(State, Message ?? $"argument \"{ this.Alias}\" can not null.");
             }
 
             return this.ResultCreate();
@@ -837,8 +1048,8 @@ namespace Business.Core.Annotations
         public object Min { get; set; }
         public object Max { get; set; }
 
-        public string MinMsg { get; set; } = "argument \"{Nick}\" minimum range {Min}.";
-        public string MaxMsg { get; set; } = "argument \"{Nick}\" maximum range {Max}.";
+        public string MinMsg { get; set; } = "argument \"{Alias}\" minimum range {Min}.";
+        public string MaxMsg { get; set; } = "argument \"{Alias}\" maximum range {Max}.";
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
@@ -944,7 +1155,7 @@ namespace Business.Core.Annotations
                     }
                     else
                     {
-                        return this.ResultCreate(State, $"argument \"{this.Nick}\" type error");
+                        return this.ResultCreate(State, $"argument \"{this.Alias}\" type error");
                     }
                     break;
             }
@@ -975,7 +1186,7 @@ namespace Business.Core.Annotations
                     return this.ResultCreate(Help.Scale((decimal)value, Size));
                 case System.TypeCode.Double:
                     return this.ResultCreate(Help.Scale((double)value, Size));
-                default: return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" type error");
+                default: return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" type error");
             }
         }
     }
@@ -995,7 +1206,7 @@ namespace Business.Core.Annotations
             //if (!Utils.Help.CheckEmail(value))
             if (!IsValid(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" email error");
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" email error");
             }
             return this.ResultCreate();
         }
@@ -1055,7 +1266,7 @@ namespace Business.Core.Annotations
 
             if (!Utils.Help.CheckChar(value, Mode))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" char verification failed");
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" char verification failed");
             }
             return this.ResultCreate();
         }
@@ -1093,7 +1304,7 @@ namespace Business.Core.Annotations
             //if (!System.Text.RegularExpressions.Regex.IsMatch(value.Trim(), Pattern, Options))
             if (!IsValid(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" regular expression verification failed");
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" regular expression verification failed");
             }
 
             return this.ResultCreate();
@@ -1196,7 +1407,7 @@ namespace Business.Core.Annotations
 
             if (!IsValid(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" phone error");
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" phone error");
             }
             return this.ResultCreate();
         }
@@ -1257,7 +1468,7 @@ namespace Business.Core.Annotations
 
             if (!IsValid(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Nick}\" url error");
+                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" url error");
             }
             return this.ResultCreate();
         }
@@ -1401,9 +1612,64 @@ namespace Business.Core.Annotations
     //        {
     //            return this.ResultCreate(data: Newtonsoft.Json.JsonConvert.DeserializeObject(value?.ToString(), this.Meta.MemberType, Settings));
     //        }
-    //        catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
+    //        catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Json deserialize error"); }
     //    }
     //}
+
+    /*
+[System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+public class ParametersAttribute : ArgumentAttribute
+{
+    public ParametersAttribute(int state = -11, string message = null) : base(state, message)
+    {
+        this.CanNull = false;
+        this.Description = "Parameters parsing";
+        this.ArgMeta.Filter |= FilterModel.NotDefinition;
+    }
+
+    public override async ValueTask<IResult> Proces<Type>(dynamic value)
+    {
+        var result = CheckNull(this, value);
+        if (!result.HasData) { return result; }
+
+        try
+        {
+            System.Collections.Generic.IDictionary<string, string> dict = value;
+
+            if (0 < dict.Count && 0 < this.ArgMeta.Children?.Count)
+            {
+                var arg = System.Activator.CreateInstance<Type>();
+                //var dict2 = new System.Collections.Generic.Dictionary<string, object>(dict.Count);
+
+                foreach (var item in this.ArgMeta.Children)
+                {
+                    if (dict.TryGetValue(item.Name, out string v))
+                    {
+                        if (!item.HasDefinition)
+                        {
+                            var v2 = Help.ChangeType(v, item.OrigType);
+                            item.Accessor.Setter(arg, v2);
+                        }
+                        else
+                        {
+                            var iarg = System.Activator.CreateInstance(typeof(Arg<>).MakeGenericType(item.OrigType)) as IArg;
+                            iarg.In = v;
+                            item.Accessor.Setter(arg, iarg);
+                        }
+                        //dict2.Add(item.Name, v2);
+                    }
+                }
+
+                //return this.ResultCreate(dict2.JsonSerialize().TryJsonDeserialize<Type>());
+                return this.ResultCreate(arg);
+            }
+
+            return this.ResultCreate<Type>(default);
+        }
+        catch (System.Exception ex) { return this.ResultCreate(State, Message ?? $"Parameters {this.Alias} Proces error. {ex.Message}"); }
+    }
+}
+*/
 
     /// <summary>
     /// System.Text.Json.JsonSerializer.Deserialize
@@ -1414,6 +1680,7 @@ namespace Business.Core.Annotations
         {
             this.CanNull = false;
             this.Description = "Json parsing";
+            this.ArgMeta.Filter |= FilterModel.NotDefinition;
 
             options = new System.Text.Json.JsonSerializerOptions
             {
@@ -1430,17 +1697,14 @@ namespace Business.Core.Annotations
 
         public override async ValueTask<IResult> Proces<Type>(dynamic value)
         {
-            //var value2 = value?.ToString();
-            //var value2 = value?.GetRawText();
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
             try
             {
-                //return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize(value, this.ArgMeta.MemberType, options));
                 return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize<Type>(value, options));
             }
-            catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Nick} Json deserialize error"); }
+            catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Json deserialize error"); }
         }
     }
 

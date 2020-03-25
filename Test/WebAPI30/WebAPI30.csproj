@@ -19,6 +19,7 @@
     <Content Remove="wwwroot\doc\ace\mode-javascript.js" />
     <Content Remove="wwwroot\doc\ace\mode-json.js" />
     <Content Remove="wwwroot\doc\ace\mode-php.js" />
+    <Content Remove="wwwroot\doc\ace\mode-sh.js" />
     <Content Remove="wwwroot\doc\ace\theme-vibrant_ink.js" />
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.css" />
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap-theme.css.map" />
@@ -28,13 +29,25 @@
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.css.map" />
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.min.css" />
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.min.css.map" />
-    <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.eot" />
-    <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg" />
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf" />
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff" />
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Remove="wwwroot\doc\doc.css" />
     <Content Remove="wwwroot\doc\doc.js" />
     <Content Remove="wwwroot\doc\DOMPurify\purify.min.js" />
+    <Content Remove="wwwroot\doc\DOMPurify\purify.min.js.map" />
+    <Content Remove="wwwroot\doc\fontawesome\css\all.min.css" />
+    <Content Remove="wwwroot\doc\fontawesome\webfonts\fa-brands-400.ttf" />
+    <Content Remove="wwwroot\doc\fontawesome\webfonts\fa-brands-400.woff" />
+    <Content Remove="wwwroot\doc\fontawesome\webfonts\fa-brands-400.woff2" />
+    <Content Remove="wwwroot\doc\fontawesome\webfonts\fa-regular-400.ttf" />
+    <Content Remove="wwwroot\doc\fontawesome\webfonts\fa-regular-400.woff" />
+    <Content Remove="wwwroot\doc\fontawesome\webfonts\fa-regular-400.woff2" />
+    <Content Remove="wwwroot\doc\fontawesome\webfonts\fa-solid-900.ttf" />
+    <Content Remove="wwwroot\doc\fontawesome\webfonts\fa-solid-900.woff" />
+    <Content Remove="wwwroot\doc\fontawesome\webfonts\fa-solid-900.woff2" />
+    <Content Remove="wwwroot\doc\hamburgers\hamburgers.css" />
+    <Content Remove="wwwroot\doc\hamburgers\hamburgers.min.css" />
     <Content Remove="wwwroot\doc\houdini\css\houdini.css" />
     <Content Remove="wwwroot\doc\houdini\css\houdini.min.css" />
     <Content Remove="wwwroot\doc\houdini\js\houdini.js" />
@@ -43,10 +56,23 @@
     <Content Remove="wwwroot\doc\houdini\js\houdini.polyfills.min.js" />
     <Content Remove="wwwroot\doc\icon.png" />
     <Content Remove="wwwroot\doc\index.html" />
+    <Content Remove="wwwroot\doc\jquery\jquery-3.4.1.min.js" />
     <Content Remove="wwwroot\doc\jsoneditor\jsoneditor.js" />
     <Content Remove="wwwroot\doc\jsoneditor\jsoneditor.min.js" />
     <Content Remove="wwwroot\doc\Juicer\juicer-min.js" />
+    <Content Remove="wwwroot\doc\malihu-custom-scrollbar-plugin\jquery.mCustomScrollbar.concat.min.js" />
+    <Content Remove="wwwroot\doc\malihu-custom-scrollbar-plugin\jquery.mCustomScrollbar.min.css" />
+    <Content Remove="wwwroot\doc\pro-sidebar-template\css\main.css" />
+    <Content Remove="wwwroot\doc\pro-sidebar-template\css\sidebar-themes.css" />
+    <Content Remove="wwwroot\doc\pro-sidebar-template\img\bg1.jpg" />
+    <Content Remove="wwwroot\doc\pro-sidebar-template\img\bg2.jpg" />
+    <Content Remove="wwwroot\doc\pro-sidebar-template\img\bg3.jpg" />
+    <Content Remove="wwwroot\doc\pro-sidebar-template\img\bg4.jpg" />
+    <Content Remove="wwwroot\doc\pro-sidebar-template\img\favicon.png" />
+    <Content Remove="wwwroot\doc\pro-sidebar-template\img\user.jpg" />
+    <Content Remove="wwwroot\doc\pro-sidebar-template\js\main.js" />
     <Content Remove="wwwroot\doc\sdk.js" />
+    <Content Remove="wwwroot\favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,6 +80,51 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\doc\ace\mode-sh.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\doc.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\DOMPurify\purify.min.js.map">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\css\all.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\webfonts\fa-brands-400.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\webfonts\fa-brands-400.woff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\webfonts\fa-brands-400.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\webfonts\fa-regular-400.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\webfonts\fa-regular-400.woff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\webfonts\fa-regular-400.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\webfonts\fa-solid-900.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\webfonts\fa-solid-900.woff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\fontawesome\webfonts\fa-solid-900.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\hamburgers\hamburgers.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\hamburgers\hamburgers.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="wwwroot\doc\icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -105,12 +176,6 @@
     <None Include="wwwroot\doc\bootstrap-3.3.7\css\bootstrap.min.css.map">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.eot">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -147,6 +212,9 @@
     <None Include="wwwroot\doc\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="wwwroot\doc\jquery\jquery-3.4.1.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="wwwroot\doc\jsoneditor\jsoneditor.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -156,7 +224,43 @@
     <None Include="wwwroot\doc\Juicer\juicer-min.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="wwwroot\doc\malihu-custom-scrollbar-plugin\jquery.mCustomScrollbar.concat.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\malihu-custom-scrollbar-plugin\jquery.mCustomScrollbar.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\pro-sidebar-template\css\main.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\pro-sidebar-template\css\sidebar-themes.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\pro-sidebar-template\img\bg1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\pro-sidebar-template\img\bg2.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\pro-sidebar-template\img\bg3.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\pro-sidebar-template\img\bg4.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\pro-sidebar-template\img\favicon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\pro-sidebar-template\img\user.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\pro-sidebar-template\js\main.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="wwwroot\doc\sdk.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\favicon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

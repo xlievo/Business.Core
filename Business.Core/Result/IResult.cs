@@ -119,7 +119,7 @@ namespace Business.Core.Result
         /// <param name="state"></param>
         /// <param name="checkData"></param>
         /// <returns></returns>
-        public static IResult<Data> ResultCreate<Data>(System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, bool checkData = true)
+        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, bool checkData = true)
         {
             var type = typeof(Data);
             var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, checkData });
@@ -134,7 +134,7 @@ namespace Business.Core.Result
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<string>(resultTypeDefinition, state: state, message: message, checkData: false);
+        public static IResult ResultCreate(this System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<string>(resultTypeDefinition, state: state, message: message, checkData: false);
 
         /// <summary>
         /// Used to create IResult.Data secondary encapsulation

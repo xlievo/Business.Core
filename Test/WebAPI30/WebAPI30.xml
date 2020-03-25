@@ -21,6 +21,11 @@
             bbb
             </summary>
         </member>
+        <member name="P:BusinessMember2.ObjectList.Data">
+            <summary>
+            aaa2
+            </summary>
+        </member>
         <member name="P:BusinessMember2.Test001Result2.a">
             <summary>
             aaa2
@@ -31,7 +36,17 @@
             bbb2
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Token,Business.Core.Arg{Args.Test001},Business.Core.Arg{System.Nullable{System.DateTime}},Business.Core.Annotations.HttpFile,System.Decimal,System.Int32,System.Boolean)">
+        <member name="P:BusinessMember2.Z.a">
+            <summary>
+            aaa2
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Z.b">
+            <summary>
+            bbb2
+            </summary>
+        </member>
+        <member name="M:BusinessMember2.Test001(Session,Business.Core.Arg{Args.Test004},Business.Core.Arg{System.Nullable{System.DateTime}},Business.Core.Annotations.HttpFile,System.Decimal,System.Int32,System.Boolean)">
             <summary>
             test doc Test001
             and Test001
@@ -48,7 +63,7 @@
             rrrrrr2
             </returns>
         </member>
-        <member name="M:BusinessMember2.Test002(Token,Args.Test001,System.Decimal,System.Collections.Generic.Dictionary{System.String,System.Object})">
+        <member name="M:BusinessMember2.Test002(Token,Args.Test002,System.Decimal,System.Collections.Generic.Dictionary{System.String,System.Object})">
             <summary>
             222
             </summary>
@@ -57,7 +72,7 @@
             <param name="mm"></param>
             <returns>test return!!!</returns>
         </member>
-        <member name="M:BusinessMember2.Test003(Token,Args.Test001,System.Decimal)">
+        <member name="M:BusinessMember2.Test003(Token,Args.Test002,System.Decimal)">
             <summary>
             
             </summary>
@@ -66,7 +81,7 @@
             <param name="mm"></param>
             <returns></returns>
         </member>
-        <member name="M:BusinessMember2.Test007(Args.Test001,System.Collections.Generic.List{System.String})">
+        <member name="M:BusinessMember2.Test007(Args.Test002,System.Collections.Generic.List{System.String})">
             <summary>
             
             </summary>
@@ -79,73 +94,115 @@
             MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
             </summary>
         </member>
-        <member name="T:Args.Test001">
+        <member name="F:Args.MyEnum.A">
+            <summary>
+            MyEnum A
+            </summary>
+        </member>
+        <member name="F:Args.MyEnum.B">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Args.MyEnum.C">
+            <summary>
+            MyEnum C
+            </summary>
+        </member>
+        <member name="P:Args.Test002.BB">
+            <summary>
+            Test002 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:Args.Test003`1.BBB">
+            <summary>
+            Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="T:Args.Test004">
+            <summary>
+            Test004Test004Test004Test004Test004Test004Test004
+            Test004Test004Test004Test004Test004Test004Test004
+            </summary>
+        </member>
+        <member name="P:Args.Test004.BBBB">
+            <summary>
+            Test004 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="T:Args.Test001`1">
             <summary>
             Test001Test001Tes
             t001Test001Test001Test001
             </summary>
         </member>
-        <member name="P:Args.Test001.AAA">
+        <member name="P:Args.Test001`1.AAA">
             <summary>
             AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
             </summary>
         </member>
-        <member name="P:Args.Test001.A">
+        <member name="P:Args.Test001`1.A">
             <summary>
             AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
             </summary>
         </member>
-        <member name="P:Args.Test001.B">
+        <member name="P:Args.Test001`1.B">
             <summary>
             BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
             </summary>
         </member>
-        <member name="P:Args.Test001.C">
-            <summary>
-            CccccccccccccccccccccccccccCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC12
-            </summary>
-        </member>
-        <member name="P:Args.Test001.D">
+        <member name="P:Args.Test001`1.D">
             <summary>
             DDD
             </summary>
         </member>
-        <member name="P:Args.Test001.F">
+        <member name="P:Args.Test001`1.F">
             <summary>
             FF
             </summary>
         </member>
-        <member name="P:Args.Test001.Test0010.C1">
+        <member name="P:Args.Test001`1.myEnum">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Args.Test001`1.Test0010`1">
+            <summary>
+            Test0010 Test0010 Test0010 Test0010
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:Args.Test001`1.Test0010`1.C1">
             <summary>
             C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
             </summary>
         </member>
-        <member name="P:Args.Test001.Test0010.C2">
+        <member name="P:Args.Test001`1.Test0010`1.C2">
             <summary>
             C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2
             </summary>
         </member>
-        <member name="P:Args.Test001.Test0010.C3">
+        <member name="P:Args.Test001`1.Test0010`1.C3">
             <summary>
             C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
             </summary>
         </member>
-        <member name="T:Args.Test001.Test0010.Test0011">
+        <member name="T:Args.Test0011">
             <summary>
-            
+            Test0011Test0011Test0011Test0011
             </summary>
         </member>
-        <member name="P:Args.Test001.Test0010.Test0011.C31">
+        <member name="P:Args.Test0011.C31">
             <summary>
-            
+            C31C31C31C31C31C31
             </summary>
         </member>
-        <member name="P:Args.Test001.Test0010.Test0011.C32">
+        <member name="P:Args.Test0011.C32">
             <summary>
-            
+            C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32
             </summary>
         </member>
-        <member name="P:Args.Test001.Test0010.Test0011.AAA">
+        <member name="P:Args.Test0011.AAA">
             <summary>
             AAA@@@
             </summary>

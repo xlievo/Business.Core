@@ -1,0 +1,131 @@
+﻿/*emacsMode*/
+.emacs-mode .ace_cursor {
+    border: 1px rgba(50,250,50,0.8) solid !important;
+    box-sizing: border-box !important;
+    background-color: rgba(0,250,0,0.9);
+    opacity: 0.5;
+}
+
+.emacs-mode .ace_hidden-cursors .ace_cursor {
+    opacity: 1;
+    background-color: transparent;
+}
+
+.emacs-mode .ace_overwrite-cursors .ace_cursor {
+    opacity: 1;
+    background-color: transparent;
+    border-width: 0 0 2px 2px !important;
+}
+
+.emacs-mode .ace_text-layer {
+    z-index: 4
+}
+
+.emacs-mode .ace_cursor-layer {
+    z-index: 2
+}
+/*# sourceURL=ace/css/emacsMode */
+
+/*a  upload */
+.a-upload {
+    line-height: 20px;
+    position: relative;
+    cursor: pointer;
+    color: #333;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+    display: inline-block;
+    *display: inline;
+    *zoom: 1
+}
+
+    .a-upload input {
+        position: absolute;
+        font-size: 100px;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        opacity: 0;
+        filter: alpha(opacity=0);
+        cursor: pointer
+    }
+
+    .a-upload:hover {
+        color: #333;
+        background: #d4d4d4;
+        border-color: #8c8c8c;
+        text-decoration: none
+    }
+
+/*hamburgers*/
+.hamburger-box {
+    width: 25px;
+}
+
+.hamburger-inner {
+    margin-top: -1px;
+    margin-left: -8px;
+    color: white !important;
+    background-color: white !important;
+}
+
+    .hamburger-inner, .hamburger-inner::before, .hamburger-inner::after {
+        background-color: white !important;
+    }
+
+/*pro-sidebar-template*/
+.flex-nowrap {
+    -ms-flex-wrap: nowrap !important;
+    flex-wrap: nowrap !important;
+}
+
+.pt-2,
+.py-2 {
+    padding-top: 0.5rem !important;
+}
+
+/*#page-content {
+            width: 90%;
+        }*/
+
+.page-wrapper .page-content {
+    padding-left: 8%;
+    padding-right: 8%;
+}
+
+@media screen and (min-width: 768px) {
+    .page-wrapper.toggled .page-content {
+        padding-right: 0;
+    }
+}
+
+.sidebar-wrapper .sidebar-brand > a {
+    text-transform: none;
+    padding-left: 25px;
+}
+
+.sidebar-wrapper .sidebar-content {
+    max-height: 100%;
+    height: 100%;
+}
+
+html, body {
+    scroll-behavior: smooth;
+}
+
+/*benchmark benchmark_n benchmark_c*/
+.form-inline .form-control {
+    /*position: relative;
+    float: left;
+    display: block;
+    box-shadow: none;*/
+    width: auto;
+    display: inline-block;
+}
+
+/*tag="panel"*/
+.well {
+    background-color: rgba(0,0,0,.01);
+}

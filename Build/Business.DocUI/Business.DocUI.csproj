@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <Description>https://github.com/xlievo/Business.Core</Description>
     <Copyright>Copyright ©  2014~2020 Business Project - http://www.tmopen.com</Copyright>
     <PackageProjectUrl>https://github.com/xlievo/Business.Core</PackageProjectUrl>
     <PackageIconUrl>https://secure.gravatar.com/userimage/107958241/f5a911b60f47bbf64630f824232c9a24?size=250</PackageIconUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <AssemblyVersion>1.0.5.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +18,7 @@
     <None Remove="doc\ace\mode-javascript.js" />
     <None Remove="doc\ace\mode-json.js" />
     <None Remove="doc\ace\mode-php.js" />
+    <None Remove="doc\ace\mode-sh.js" />
     <None Remove="doc\ace\theme-vibrant_ink.js" />
     <None Remove="doc\bootstrap-3.3.7\css\bootstrap-theme.css" />
     <None Remove="doc\bootstrap-3.3.7\css\bootstrap-theme.css.map" />
@@ -27,13 +28,24 @@
     <None Remove="doc\bootstrap-3.3.7\css\bootstrap.css.map" />
     <None Remove="doc\bootstrap-3.3.7\css\bootstrap.min.css" />
     <None Remove="doc\bootstrap-3.3.7\css\bootstrap.min.css.map" />
-    <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.eot" />
-    <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg" />
     <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf" />
     <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff" />
     <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2" />
+    <None Remove="doc\doc.css" />
     <None Remove="doc\doc.js" />
     <None Remove="doc\DOMPurify\purify.min.js" />
+    <None Remove="doc\DOMPurify\purify.min.js.map" />
+    <None Remove="doc\fontawesome\css\all.min.css" />
+    <None Remove="doc\fontawesome\webfonts\fa-brands-400.ttf" />
+    <None Remove="doc\fontawesome\webfonts\fa-brands-400.woff" />
+    <None Remove="doc\fontawesome\webfonts\fa-brands-400.woff2" />
+    <None Remove="doc\fontawesome\webfonts\fa-regular-400.ttf" />
+    <None Remove="doc\fontawesome\webfonts\fa-regular-400.woff" />
+    <None Remove="doc\fontawesome\webfonts\fa-regular-400.woff2" />
+    <None Remove="doc\fontawesome\webfonts\fa-solid-900.ttf" />
+    <None Remove="doc\fontawesome\webfonts\fa-solid-900.woff" />
+    <None Remove="doc\fontawesome\webfonts\fa-solid-900.woff2" />
+    <None Remove="doc\hamburgers\hamburgers.min.css" />
     <None Remove="doc\houdini\css\houdini.css" />
     <None Remove="doc\houdini\css\houdini.min.css" />
     <None Remove="doc\houdini\js\houdini.js" />
@@ -42,10 +54,22 @@
     <None Remove="doc\houdini\js\houdini.polyfills.min.js" />
     <None Remove="doc\icon.png" />
     <None Remove="doc\index.html" />
-    <None Remove="doc\jsoneditor\jsoneditor.js" />
+    <None Remove="doc\jquery\jquery-3.4.1.min.js" />
     <None Remove="doc\jsoneditor\jsoneditor.min.js" />
     <None Remove="doc\Juicer\juicer-min.js" />
+    <None Remove="doc\malihu-custom-scrollbar-plugin\jquery.mCustomScrollbar.concat.min.js" />
+    <None Remove="doc\malihu-custom-scrollbar-plugin\jquery.mCustomScrollbar.min.css" />
+    <None Remove="doc\pro-sidebar-template\css\main.css" />
+    <None Remove="doc\pro-sidebar-template\css\sidebar-themes.css" />
+    <None Remove="doc\pro-sidebar-template\img\bg1.jpg" />
+    <None Remove="doc\pro-sidebar-template\img\bg2.jpg" />
+    <None Remove="doc\pro-sidebar-template\img\bg3.jpg" />
+    <None Remove="doc\pro-sidebar-template\img\bg4.jpg" />
+    <None Remove="doc\pro-sidebar-template\img\favicon.png" />
+    <None Remove="doc\pro-sidebar-template\img\user.jpg" />
+    <None Remove="doc\pro-sidebar-template\js\main.js" />
     <None Remove="doc\sdk.js" />
+    <None Remove="favicon.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,6 +80,9 @@
     <EmbeddedResource Include="doc\ace\mode-javascript.js" />
     <EmbeddedResource Include="doc\ace\mode-json.js" />
     <EmbeddedResource Include="doc\ace\mode-php.js" />
+    <EmbeddedResource Include="doc\ace\mode-sh.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="doc\ace\theme-vibrant_ink.js" />
     <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap-theme.css" />
     <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap-theme.css.map" />
@@ -65,15 +92,32 @@
     <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap.css.map" />
     <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap.min.css" />
     <EmbeddedResource Include="doc\bootstrap-3.3.7\css\bootstrap.min.css.map" />
-    <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.eot" />
-    <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.svg" />
     <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf" />
     <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff" />
     <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2" />
+    <EmbeddedResource Include="doc\doc.css">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="doc\doc.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="doc\DOMPurify\purify.min.js" />
+    <EmbeddedResource Include="doc\DOMPurify\purify.min.js.map" />
+    <EmbeddedResource Include="doc\fontawesome\css\all.min.css">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\fontawesome\webfonts\fa-brands-400.ttf" />
+    <EmbeddedResource Include="doc\fontawesome\webfonts\fa-brands-400.woff" />
+    <EmbeddedResource Include="doc\fontawesome\webfonts\fa-brands-400.woff2" />
+    <EmbeddedResource Include="doc\fontawesome\webfonts\fa-regular-400.ttf" />
+    <EmbeddedResource Include="doc\fontawesome\webfonts\fa-regular-400.woff" />
+    <EmbeddedResource Include="doc\fontawesome\webfonts\fa-regular-400.woff2" />
+    <EmbeddedResource Include="doc\fontawesome\webfonts\fa-solid-900.ttf" />
+    <EmbeddedResource Include="doc\fontawesome\webfonts\fa-solid-900.woff" />
+    <EmbeddedResource Include="doc\fontawesome\webfonts\fa-solid-900.woff2" />
+    <EmbeddedResource Include="doc\hamburgers\hamburgers.min.css">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="doc\houdini\css\houdini.css" />
     <EmbeddedResource Include="doc\houdini\css\houdini.min.css" />
     <EmbeddedResource Include="doc\houdini\js\houdini.js" />
@@ -84,16 +128,56 @@
     <EmbeddedResource Include="doc\index.html">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="doc\jsoneditor\jsoneditor.js" />
-    <EmbeddedResource Include="doc\jsoneditor\jsoneditor.min.js" />
+    <EmbeddedResource Include="doc\jquery\jquery-3.4.1.min.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\jsoneditor\jsoneditor.min.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="doc\Juicer\juicer-min.js" />
-    <EmbeddedResource Include="doc\sdk.js">
+    <EmbeddedResource Include="doc\malihu-custom-scrollbar-plugin\jquery.mCustomScrollbar.concat.min.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\malihu-custom-scrollbar-plugin\jquery.mCustomScrollbar.min.css">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\pro-sidebar-template\css\main.css">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\pro-sidebar-template\css\sidebar-themes.css">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\pro-sidebar-template\img\bg1.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\pro-sidebar-template\img\bg2.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\pro-sidebar-template\img\bg3.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\pro-sidebar-template\img\bg4.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\pro-sidebar-template\img\favicon.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\pro-sidebar-template\img\user.jpg">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\pro-sidebar-template\js\main.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Business.DocUI.csproj" />
+    <EmbeddedResource Include="doc\sdk.js">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="favicon.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

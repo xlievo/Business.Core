@@ -2311,6 +2311,7 @@
                     'python',
                     'r',
                     'ruby',
+                    'sh',
                     'sass',
                     'scala',
                     'scss',
