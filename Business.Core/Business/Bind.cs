@@ -317,7 +317,7 @@ namespace Business.Core
 
             if (string.IsNullOrWhiteSpace(info.Alias))
             {
-                info.Alias = type.Name;
+                info.Alias = info.BusinessName;
             }
 
             hasBusiness = typeof(IBusiness).IsAssignableFrom(type);

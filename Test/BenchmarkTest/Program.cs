@@ -335,7 +335,7 @@ namespace BenchmarkTest
             },
             new Logger.BatchOptions
             {
-                Interval = TimeSpan.FromSeconds(3),
+                Interval = TimeSpan.FromSeconds(6),
                 MaxNumber = 5000
             });
         }
