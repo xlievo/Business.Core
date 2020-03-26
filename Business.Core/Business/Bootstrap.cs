@@ -31,7 +31,7 @@ namespace Business.Core
         internal protected BootstrapConfig()
         {
             Use = new System.Collections.Concurrent.ConcurrentQueue<System.Func<IBusiness, IBusiness>>();
-            UseDoc = null;
+            //UseDoc = null;
         }
 
         public BootstrapConfig(Auth.IInterceptor interceptor, object[] constructorArguments, System.Type type = null) : this()
@@ -43,13 +43,22 @@ namespace Business.Core
 
         public System.Collections.Concurrent.ConcurrentQueue<System.Func<IBusiness, IBusiness>> Use { get; }
 
-        public System.Action UseDoc { get; internal set; }
+        public UseDocConfig UseDoc { get; set; }
 
         public Auth.IInterceptor Interceptor { get; }
 
         public object[] ConstructorArguments { get; }
 
         public System.Type Type { get; }
+
+        public class UseDocConfig
+        {
+            public string OutDir { get; set; }
+
+            public Config Config { get; internal set; }
+
+            public System.Action<string, Config> Use { get; internal set; }
+        }
     }
 
     public class Bootstrap : IBootstrap
@@ -126,9 +135,7 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                //Config.Use.ForEach(c => c.Value.Invoke(business));
-
-                Config.UseDoc?.Invoke();
+                Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
 
             return bind.instance;
@@ -142,9 +149,16 @@ namespace Business.Core
         /// <returns></returns>
         public virtual Bootstrap UseDoc(string outDir = null, Config config = default)
         {
-            this.Config.UseDoc = () => business?.UseDoc(outDir, config);
+            this.Config.UseDoc = new BootstrapConfig.UseDocConfig
+            {
+                OutDir = outDir,
+                Config = config,
+                Use = (dir, cfg) => business?.UseDoc(dir, cfg)
+            };
             return this;
         }
+
+        public virtual Bootstrap UseDoc(Config config) => UseDoc(null, config);
     }
 
     public class Bootstrap<Business> : IBootstrap
@@ -169,9 +183,7 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                //Config.Use.ForEach(c => c.Value.Invoke(business));
-
-                Config.UseDoc?.Invoke();
+                Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
 
             return bind.instance as Business;
@@ -185,9 +197,16 @@ namespace Business.Core
         /// <returns></returns>
         public virtual Bootstrap<Business> UseDoc(string outDir = null, Config config = default)
         {
-            this.Config.UseDoc = () => business?.UseDoc(outDir, config);
+            this.Config.UseDoc = new BootstrapConfig.UseDocConfig
+            {
+                OutDir = outDir,
+                Config = config,
+                Use = (dir, cfg) => business?.UseDoc(dir, cfg)
+            };
             return this;
         }
+
+        public virtual Bootstrap<Business> UseDoc(Config config) => UseDoc(null, config);
     }
 
     public class BootstrapAll : IBootstrap
@@ -233,10 +252,9 @@ namespace Business.Core
                 {
                     item.Invoke(business);
                 }
-                //Config.Use.ForEach(c => c.Value.Invoke(business));
             }
 
-            Config.UseDoc?.Invoke();
+            Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
         }
 
         /// <summary>
@@ -247,30 +265,37 @@ namespace Business.Core
         /// <returns></returns>
         public virtual BootstrapAll UseDoc(string outDir = null, Config config = default)
         {
-            this.Config.UseDoc = () =>
+            this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
-                var exists = !string.IsNullOrEmpty(outDir) && System.IO.Directory.Exists(outDir);
-                var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
-
-                foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
+                OutDir = outDir,
+                Config = config,
+                Use = (dir, cfg) =>
                 {
-                    item.Value.UseDoc(null, config);
+                    var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
+                    var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
+
+                    foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
+                    {
+                        item.Value.UseDoc(null, cfg);
+
+                        if (exists)
+                        {
+                            doc.Add(item.Value.Configer.Doc.Name, item.Value.Configer.Doc);
+                        }
+                    }
 
                     if (exists)
                     {
-                        doc.Add(item.Value.Configer.Doc.Name, item.Value.Configer.Doc);
+                        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.UTF8);
+                        //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
                     }
-                }
-
-                if (exists)
-                {
-                    System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.UTF8);
-                    //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
                 }
             };
 
             return this;
         }
+
+        public virtual BootstrapAll UseDoc(Config config) => UseDoc(null, config);
     }
 }
 

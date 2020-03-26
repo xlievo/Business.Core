@@ -230,7 +230,7 @@ namespace Business.Core.Document
         public string Badge { get; set; }
     }
 
-    public struct Config
+    public class Config
     {
         public string Host { get; set; }
 

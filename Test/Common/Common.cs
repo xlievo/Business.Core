@@ -417,11 +417,13 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         //InitRedis();
 
+       //Bootstrap.Create().Config.UseDoc.OutDir = "";
+
         Bootstrap.Create()
             .UseType(contextParameterNames)
             .IgnoreSet(new Ignore(IgnoreMode.Arg), contextParameterNames)
             .LoggerSet(new LoggerAttribute(canWrite: false), contextParameterNames)
-            .UseDoc(docDir, new Config { Debug = true, Benchmark = true, SetToken = false, Testing = true, GroupSelect = "j", GroupEnable = true, Host = Common.Host.Addresses, Navigtion = true })
+            .UseDoc(docDir, new Config { Debug = true, Benchmark = true, Testing = true, GroupSelect = "j", SetToken = false, GroupEnable = true, Host = Common.Host.Addresses, Navigtion = true })
             .Build();
 
         //writ url to page

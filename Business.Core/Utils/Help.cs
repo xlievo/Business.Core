@@ -731,6 +731,7 @@ namespace Business.Core.Utils
 
             var groupDefault = business.Configer.Info.CommandGroupDefault;
 
+            config = config ?? new Config();
             var command = null != config.Group ? business.Command.Where(c => c.Key.Equals(config.Group, System.StringComparison.InvariantCultureIgnoreCase)) : business.Command;
 
             var group = command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
@@ -3040,7 +3041,7 @@ namespace Business.Core.Utils
 
 #endregion
     */
-    
+
     public class ReadOnlyDictionary<TKey, TValue> : System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue>
     {
         internal readonly IDictionary<TKey, TValue> dictionary;

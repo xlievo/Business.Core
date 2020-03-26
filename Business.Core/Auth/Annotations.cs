@@ -436,7 +436,7 @@ namespace Business.Core.Annotations
         public string[] ParameterName { get; }
     }
 
-    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    [System.AttributeUsage(System.AttributeTargets.Interface | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public sealed class UseAttribute : AttributeBase
     {
         /// <summary>
@@ -535,7 +535,7 @@ namespace Business.Core.Annotations
         //public string Description { get; set; }
     }
 
-    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
+    [System.AttributeUsage(System.AttributeTargets.Interface | System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public class LoggerAttribute : GroupAttribute
     {
         public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true)
@@ -1173,6 +1173,7 @@ namespace Business.Core.Annotations
     public class ScaleAttribute : ArgumentAttribute
     {
         public ScaleAttribute(int state = -802, string message = null) : base(state, message) { }
+
         public int Size { get; set; } = 2;
 
         public override async ValueTask<IResult> Proces(dynamic value)
