@@ -297,7 +297,7 @@ namespace Business.Core.Utils
             }
         }
 
-        public static Business UseType<Business>(this Business business, params System.Type[] parameterType) where Business : IBusiness
+        public static Business UseType<Business>(Business business, params System.Type[] parameterType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -376,7 +376,7 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static Business UseType<Business>(this Business business, params string[] parameterName) where Business : IBusiness
+        public static Business UseType<Business>(Business business, params string[] parameterName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -642,7 +642,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(this Business business, string outDir = null, Config config = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, config);
+        public static Business UseDoc<Business>(Business business, string outDir = null, Config config = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, config);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -654,7 +654,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, string outDir = null, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, string outDir = null, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -725,7 +725,7 @@ namespace Business.Core.Utils
         /// <param name="xmlMembers"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static Doc<DocArg> UseDoc<Business, DocArg>(this Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Doc<DocArg> UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
@@ -1132,7 +1132,7 @@ namespace Business.Core.Utils
         //    return business;
         //}
 
-        public static Business LoggerSet<Business>(this Business business, Annotations.LoggerAttribute logger, params System.Type[] argType) where Business : IBusiness
+        public static Business LoggerSet<Business>(Business business, Annotations.LoggerAttribute logger, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -1169,7 +1169,7 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static Business LoggerSet<Business>(this Business business, Annotations.LoggerAttribute logger, params string[] parameterName) where Business : IBusiness
+        public static Business LoggerSet<Business>(Business business, Annotations.LoggerAttribute logger, params string[] parameterName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -1210,7 +1210,7 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static Business IgnoreSet<Business>(this Business business, Annotations.Ignore ignore, params System.Type[] argType) where Business : IBusiness
+        public static Business IgnoreSet<Business>(Business business, Annotations.Ignore ignore, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -1249,7 +1249,7 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static Business IgnoreSet<Business>(this Business business, Annotations.Ignore ignore, params string[] parameterName) where Business : IBusiness
+        public static Business IgnoreSet<Business>(Business business, Annotations.Ignore ignore, params string[] parameterName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
@@ -1292,7 +1292,7 @@ namespace Business.Core.Utils
             return business;
         }
 
-        public static Business MemberSet<Business>(this Business business, string memberName, object memberObj, bool skipNull = false) where Business : IBusiness
+        public static Business MemberSet<Business>(Business business, string memberName, object memberObj, bool skipNull = false) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 

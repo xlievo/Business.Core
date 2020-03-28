@@ -31,13 +31,14 @@
     <link rel="stylesheet" type="text/css" href="/doc/doc.css">
 </head>
 <body>
-    <div id="wrapper" class="page-wrapper light-theme"><!--sidebar-bg bg2-->
+    <div id="wrapper" class="page-wrapper light-theme">
+        <!--sidebar-bg bg2-->
         <nav id="sidebar" class="sidebar-wrapper">
             <div class="sidebar-content">
                 <!-- sidebar-brand  -->
                 <!--<div class="sidebar-item sidebar-brand">
-                <a href="https://github.com/xlievo/Business.Core" target="_blank">Business.Core</a>
-            </div>-->
+                    <a href="https://github.com/xlievo/Business.Core" target="_blank">Business.Core</a>
+                </div>-->
                 <!-- sidebar-header  -->
                 <div class="sidebar-item sidebar-header flex-nowrap" style="display:flex">
                     <div class="user-pic">
@@ -90,8 +91,8 @@
                         <input id="url" type="text" class="form-control" value="{URL}" readonly="readonly">
                         <div class="input-group-btn">
                             <!--<button class="btn btn-default" type="button" onclick="go()">
-                            Go!
-                        </button>-->
+                                Go!
+                            </button>-->
                             <select id="business" class="btn btn-default" onchange="businessOnchang(this)">
                                 <!--<option value="http://localhost:5000/API.doc" selected="selected">API</option>-->
                             </select>
@@ -153,8 +154,8 @@
 
         <script id="menuGroup" type="text/template">
             <!--<li class="header-menu">
-            <span>General</span>
-        </li>-->
+                <span>General</span>
+            </li>-->
             {@each _ as member, index}
             {@if true === member.Key.active}
             <li class="sidebar-dropdown active">
@@ -164,7 +165,7 @@
                 <a href="javascript:void(0)">
                     <i class="fa fa-folder"></i>
                     <span class="menu-text" style="font-size:115%">${member.Key.group}</span>
-                    {@if null !== member.Key.description}
+                    {@if undefined !== member.Key.badge}
                     <span class="badge badge-pill badge-warning">${member.Key.badge}</span>
                     {@/if}
                 </a>
@@ -183,7 +184,10 @@
         <script id="menuItem" type="text/template">
             <li>
                 <a id="${key}" href="javascript:void(0)" style="font-size:105%">
-                    ${name}{@if null !== description}<span class="badge badge-pill badge-warning">${badge}</span>{@/if}
+                    {@if undefined !== name}${name}{@else}${key}{@/if}
+                    {@if undefined !== badge}
+                    <span class="badge badge-pill badge-warning">${badge}</span>
+                    {@/if}
                 </a>
             </li>
         </script>

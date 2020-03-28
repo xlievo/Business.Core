@@ -1411,7 +1411,7 @@ function businessOnchang(obj) {
             if (!menu_toggle.classList.contains("is-active")) {
                 menu_toggle.classList.toggle("is-active");
             }
-
+            
             var html = compiled_menuGroup.render(business.docGroup);
             menus.innerHTML = html;
 

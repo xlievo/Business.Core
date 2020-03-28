@@ -153,7 +153,8 @@ namespace Business.Core
             {
                 OutDir = outDir,
                 Config = config,
-                Use = (dir, cfg) => business?.UseDoc(dir, cfg)
+                //Use = (dir, cfg) => business?.UseDoc(dir, cfg)
+                Use = (dir, cfg) => { if (null != business) { Help.UseDoc(business, dir, cfg); } }
             };
             return this;
         }
@@ -201,7 +202,8 @@ namespace Business.Core
             {
                 OutDir = outDir,
                 Config = config,
-                Use = (dir, cfg) => business?.UseDoc(dir, cfg)
+                //Use = (dir, cfg) => business?.UseDoc(dir, cfg)
+                Use = (dir, cfg) => { if (null != business) { Help.UseDoc(business, dir, cfg); } }
             };
             return this;
         }
@@ -276,7 +278,8 @@ namespace Business.Core
 
                     foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
                     {
-                        item.Value.UseDoc(null, cfg);
+                        //item.Value.UseDoc(null, cfg);
+                        Help.UseDoc(item.Value, null, cfg);
 
                         if (exists)
                         {
@@ -318,7 +321,7 @@ namespace Business.Core.Utils
         /// <param name="bootstrap"></param>
         /// <param name="parameterType"></param>
         /// <returns></returns>
-        public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params System.Type[] parameterType) where Bootstrap : IBootstrap => Use(bootstrap, c => c.UseType(parameterType));
+        public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params System.Type[] parameterType) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.UseType(c, parameterType));
 
         /// <summary>
         /// Inject a parameter type, depending on the parameter name
@@ -327,7 +330,7 @@ namespace Business.Core.Utils
         /// <param name="bootstrap"></param>
         /// <param name="parameterName"></param>
         /// <returns></returns>
-        public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => c.UseType(parameterName));
+        public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.UseType(c, parameterName));
 
         /// <summary>
         /// Set the log characteristics of a parameter, depending on the parameter type
@@ -336,7 +339,7 @@ namespace Business.Core.Utils
         /// <param name="logger"></param>
         /// <param name="argType"></param>
         /// <returns></returns>
-        public static Bootstrap LoggerSet<Bootstrap>(this Bootstrap bootstrap, Annotations.LoggerAttribute logger, params System.Type[] argType) where Bootstrap : IBootstrap => Use(bootstrap, c => c.LoggerSet(logger, argType));
+        public static Bootstrap LoggerSet<Bootstrap>(this Bootstrap bootstrap, Annotations.LoggerAttribute logger, params System.Type[] argType) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.LoggerSet(c, logger, argType));
 
         /// <summary>
         /// Set the log characteristics of a parameter, depending on the parameter name
@@ -345,7 +348,7 @@ namespace Business.Core.Utils
         /// <param name="logger"></param>
         /// <param name="parameterName"></param>
         /// <returns></returns>
-        public static Bootstrap LoggerSet<Bootstrap>(this Bootstrap bootstrap, Annotations.LoggerAttribute logger, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => c.LoggerSet(logger, parameterName));
+        public static Bootstrap LoggerSet<Bootstrap>(this Bootstrap bootstrap, Annotations.LoggerAttribute logger, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.LoggerSet(c, logger, parameterName));
 
         /// <summary>
         /// Set a parameter's ignore feature, depending on the parameter name
@@ -354,10 +357,10 @@ namespace Business.Core.Utils
         /// <param name="ignore"></param>
         /// <param name="parameterName"></param>
         /// <returns></returns>
-        public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => c.IgnoreSet(ignore, parameterName));
+        public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.IgnoreSet(c, ignore, parameterName));
 
-        public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params System.Type[] argType) where Bootstrap : IBootstrap => Use(bootstrap, c => c.IgnoreSet(ignore, argType));
+        public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params System.Type[] argType) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.IgnoreSet(c, ignore, argType));
 
-        public static Bootstrap MemberSet<Bootstrap>(this Bootstrap bootstrap, string memberName, object memberObj, bool skipNull = false) where Bootstrap : IBootstrap => Use(bootstrap, c => c.MemberSet(memberName, memberObj, skipNull));
+        public static Bootstrap MemberSet<Bootstrap>(this Bootstrap bootstrap, string memberName, object memberObj, bool skipNull = false) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.MemberSet(c, memberName, memberObj, skipNull));
     }
 }

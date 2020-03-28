@@ -273,8 +273,8 @@ namespace Business.Core
 
             var generics = typeof(IBusiness<,>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments);
 
-            var resultType = generics ? businessArguments[0].GetGenericTypeDefinition() : typeof(ResultObject<object>).GetGenericTypeDefinition();
-            var argType = generics ? businessArguments[1].GetGenericTypeDefinition() : typeof(Arg<object>).GetGenericTypeDefinition();
+            var resultType = (generics ? businessArguments[0] : typeof(ResultObject<object>)).GetGenericTypeDefinition();
+            var argType = (generics ? businessArguments[1] : typeof(Arg<object>)).GetGenericTypeDefinition();
 
             var attributes = AttributeBase.GetTopAttributes(typeInfo);//GetArgAttr(typeInfo);
 
@@ -762,7 +762,8 @@ namespace Business.Core
                     }
                 }
 
-                if (!string.IsNullOrWhiteSpace(meta.Doc?.Alias) && !string.IsNullOrWhiteSpace(meta.Doc.Group))
+                //if (!string.IsNullOrWhiteSpace(meta.Doc?.Alias) && !string.IsNullOrWhiteSpace(meta.Doc.Group))
+                if (!string.IsNullOrWhiteSpace(meta.Doc?.Group))
                 {
                     docGroup.dictionary.GetOrAdd(new DocGroup { Group = meta.Doc.Group }, new System.Collections.Concurrent.ConcurrentQueue<DocInfo>()).Enqueue(new DocInfo(meta.Doc, meta.Position, meta.Name));
                 }
@@ -864,12 +865,12 @@ namespace Business.Core
 
                 var ignores = attributes2.GetAttrs<Ignore>();
 
-                var doc = attributes2.GetAttr<DocAttribute>();
+                //var doc = attributes2.GetAttr<DocAttribute>();
 
-                if (null != doc && string.IsNullOrWhiteSpace(doc.Alias))
-                {
-                    doc.Alias = name;
-                }
+                //if (null != doc && string.IsNullOrWhiteSpace(doc.Alias))
+                //{
+                //    doc.Alias = name;
+                //}
 
                 //======CmdAttrGroup======//
                 var commandGroup = CmdAttrGroup(cfg, name, attributes2, ignores);
@@ -878,7 +879,7 @@ namespace Business.Core
 
                 var loggerGroup = new ReadOnlyDictionary<string, MetaLogger>();
 
-                var tokenPosition = new System.Collections.Generic.List<int>(parameters.Length);
+                //var tokenPosition = new System.Collections.Generic.List<int>(parameters.Length);
                 //var httpRequestPosition = new System.Collections.Generic.List<int>(parameters.Length);
                 var useTypePosition = new ConcurrentReadOnlyDictionary<int, System.Type>();
 
@@ -1013,7 +1014,7 @@ namespace Business.Core
                 //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
-                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, method.GetMethodFullName(), name, fullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), doc);
+                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, method.GetMethodFullName(), name, fullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
 
                 if (!metaData.dictionary.TryAdd(name, meta))
                 {

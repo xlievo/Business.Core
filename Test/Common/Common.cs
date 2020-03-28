@@ -273,6 +273,13 @@ public abstract class BusinessBase : BusinessBase<ResultObject<object>>
         //    }
         //});
 
+        this.GetToken = async (c, token) => new Token 
+        {
+            Key = token.Key,
+            Remote = string.Format("{0}:{1}", c.HttpContext.Connection.RemoteIpAddress.ToString(), c.HttpContext.Connection.RemotePort),
+            Path = c.HttpContext.Request.Path.Value,
+        };
+
         this.Logger = new Logger(async x =>
         {
             foreach (var item in x)
@@ -417,7 +424,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         //InitRedis();
 
-       //Bootstrap.Create().Config.UseDoc.OutDir = "";
+        //Bootstrap.Create().Config.UseDoc.OutDir = "";
 
         Bootstrap.Create()
             .UseType(contextParameterNames)
@@ -752,12 +759,12 @@ public class BusinessController : Controller
             return Help.ErrorCmd(business, c);
         }
 
-        var token = new Token //token
+        var token = await business.GetToken(this.HttpContext, new Token //token
         {
             Key = t,
             Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
             Path = this.Request.Path.Value,
-        };
+        });
 
         var result = null != route.Command && null != parameters ?
                 // Normal routing mode

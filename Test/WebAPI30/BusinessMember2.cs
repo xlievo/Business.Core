@@ -256,7 +256,7 @@ public partial class BusinessMember2 : BusinessBase
     /// rrrrrr
     /// rrrrrr2
     /// </returns>
-    [Doc(Group = "Module 1", Position = 1)]
+    [Doc("Alias", Group = "Module 1", Position = 1)]
     [Command("AAA")]
     [Command("jjjTest001jjj", Group = "j")]
     [Command("wwwwwwwwwwww", Group = "j")]

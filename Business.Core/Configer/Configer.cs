@@ -525,8 +525,10 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         public ConcurrentReadOnlyDictionary<string, System.Type> UseTypes { get; private set; }
 
         public Annotations.Info Info { get; private set; }
+
         public System.Type ResultTypeDefinition { get; private set; }
         public System.Type ArgTypeDefinition { get; private set; }
+
         public IDoc Doc { get; internal set; }
 
         public Auth.IInterceptor Interceptor { get; internal set; }

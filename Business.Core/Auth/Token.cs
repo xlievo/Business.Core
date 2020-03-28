@@ -30,6 +30,7 @@ namespace Business.Core.Auth
     /// A token sample
     /// </summary>
     [Annotations.Use]
+    [Annotations.Logger(canWrite: false)]
     public struct Token : IToken
     {
         //public static implicit operator Token(string value) => new Token { Key = value };
