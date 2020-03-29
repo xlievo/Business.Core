@@ -273,13 +273,6 @@ public abstract class BusinessBase : BusinessBase<ResultObject<object>>
         //    }
         //});
 
-        this.GetToken = async (c, token) => new Token 
-        {
-            Key = token.Key,
-            Remote = string.Format("{0}:{1}", c.HttpContext.Connection.RemoteIpAddress.ToString(), c.HttpContext.Connection.RemotePort),
-            Path = c.HttpContext.Request.Path.Value,
-        };
-
         this.Logger = new Logger(async x =>
         {
             foreach (var item in x)
@@ -426,12 +419,12 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         //Bootstrap.Create().Config.UseDoc.OutDir = "";
 
-        Bootstrap.Create()
+        var bootstrap = Bootstrap.CreateAll<BusinessBase>()
             .UseType(contextParameterNames)
             .IgnoreSet(new Ignore(IgnoreMode.Arg), contextParameterNames)
             .LoggerSet(new LoggerAttribute(canWrite: false), contextParameterNames)
-            .UseDoc(docDir, new Config { Debug = true, Benchmark = true, Testing = true, GroupSelect = "j", SetToken = false, GroupEnable = true, Host = Common.Host.Addresses, Navigtion = true })
-            .Build();
+            .UseDoc(docDir, new Config { Debug = true, Benchmark = true, Testing = true, GroupSelect = "j", SetToken = false, GroupEnable = true, Host = Common.Host.Addresses, Navigtion = true });
+        bootstrap.Build();
 
         //writ url to page
         DocUI.Write(docDir, debug: true);
@@ -759,12 +752,12 @@ public class BusinessController : Controller
             return Help.ErrorCmd(business, c);
         }
 
-        var token = await business.GetToken(this.HttpContext, new Token //token
+        var token = new Token //token
         {
             Key = t,
             Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
             Path = this.Request.Path.Value,
-        });
+        };
 
         var result = null != route.Command && null != parameters ?
                 // Normal routing mode

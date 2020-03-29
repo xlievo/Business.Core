@@ -26,6 +26,19 @@ namespace Business.Core.Auth
         string Callback { get; set; }
     }
 
+    //public enum Origin
+    //{
+    //    Default,
+
+    //    Http,
+
+    //    Socket,
+
+    //    WebSocket,
+
+    //    SOAP,
+    //}
+
     /// <summary>
     /// A token sample
     /// </summary>

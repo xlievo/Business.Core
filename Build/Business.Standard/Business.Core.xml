@@ -940,17 +940,34 @@
             <param name="constructorArguments"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.Create(System.Object[])">
+        <member name="M:Business.Core.Bootstrap.CreateAll(System.Object[])">
             <summary>
             bootstrap all Business class
             </summary>
             <param name="constructorArguments"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.Create(Business.Core.Auth.IInterceptor,System.Object[])">
+        <member name="M:Business.Core.Bootstrap.CreateAll(Business.Core.Auth.IInterceptor,System.Object[])">
             <summary>
             bootstrap all Business class
             </summary>
+            <param name="interceptor"></param>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Bootstrap.CreateAll``1(System.Object[])">
+            <summary>
+            bootstrap all Business class
+            </summary>
+            <typeparam name="Business"></typeparam>
+            <param name="constructorArguments"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Bootstrap.CreateAll``1(Business.Core.Auth.IInterceptor,System.Object[])">
+            <summary>
+            bootstrap all Business class
+            </summary>
+            <typeparam name="Business"></typeparam>
             <param name="interceptor"></param>
             <param name="constructorArguments"></param>
             <returns></returns>
@@ -979,6 +996,21 @@
             <param name="businessTypeFullName"></param>
         </member>
         <member name="M:Business.Core.BootstrapAll.UseDoc(System.String,Business.Core.Document.Config)">
+            <summary>
+            Generating Document Model for All Business Classes. business.doc
+            </summary>
+            <param name="outDir"></param>
+            <param name="config"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.BootstrapAll`1.Build(System.String[],System.String[])">
+            <summary>
+            Load all business classes in the run directory
+            </summary>
+            <param name="assemblyFiles"></param>
+            <param name="businessTypeFullName"></param>
+        </member>
+        <member name="M:Business.Core.BootstrapAll`1.UseDoc(System.String,Business.Core.Document.Config)">
             <summary>
             Generating Document Model for All Business Classes. business.doc
             </summary>

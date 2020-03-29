@@ -108,7 +108,7 @@ namespace Business.Core
         /// </summary>
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
-        public static BootstrapAll Create(params object[] constructorArguments) => Create(null, constructorArguments);
+        public static BootstrapAll CreateAll(params object[] constructorArguments) => CreateAll(null, constructorArguments);
 
         /// <summary>
         /// bootstrap all Business class
@@ -116,7 +116,24 @@ namespace Business.Core
         /// <param name="interceptor"></param>
         /// <param name="constructorArguments"></param>
         /// <returns></returns>
-        public static BootstrapAll Create(Auth.IInterceptor interceptor = null, params object[] constructorArguments) => new BootstrapAll(new BootstrapConfig(interceptor, constructorArguments));
+        public static BootstrapAll CreateAll(Auth.IInterceptor interceptor = null, params object[] constructorArguments) => new BootstrapAll(new BootstrapConfig(interceptor, constructorArguments));
+
+        /// <summary>
+        /// bootstrap all Business class
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="constructorArguments"></param>
+        /// <returns></returns>
+        public static BootstrapAll<Business> CreateAll<Business>(params object[] constructorArguments) where Business : class, IBusiness => CreateAll<Business>(null, constructorArguments);
+
+        /// <summary>
+        /// bootstrap all Business class
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="interceptor"></param>
+        /// <param name="constructorArguments"></param>
+        /// <returns></returns>
+        public static BootstrapAll<Business> CreateAll<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments) where Business : class, IBusiness => new BootstrapAll<Business>(new BootstrapConfig(interceptor, constructorArguments));
 
         #endregion
 
@@ -299,6 +316,105 @@ namespace Business.Core
         }
 
         public virtual BootstrapAll UseDoc(Config config) => UseDoc(null, config);
+    }
+
+    public class BootstrapAll<Business> : IBootstrap
+        where Business : class, IBusiness
+    {
+        public ConcurrentReadOnlyDictionary<string, Business> BusinessList = new ConcurrentReadOnlyDictionary<string, Business>(System.StringComparer.InvariantCultureIgnoreCase);
+
+        public BootstrapAll(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
+
+        public BootstrapConfig Config { get; }
+
+        /// <summary>
+        /// Load all business classes in the run directory
+        /// </summary>
+        /// <param name="assemblyFiles"></param>
+        /// <param name="businessTypeFullName"></param>
+        public virtual void Build(string[] assemblyFiles = null, string[] businessTypeFullName = null)
+        {
+            Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
+            {
+                if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
+                {
+                    if (null != businessTypeFullName && businessTypeFullName.Any())
+                    {
+                        if (businessTypeFullName.Contains(type.FullName))
+                        {
+                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments).instance is Business business)
+                            {
+                                BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
+                            }
+                            //Create(type, bootstrap.constructorArguments);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        //Create(type, bootstrap.constructorArguments);
+                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments).instance is Business business)
+                        {
+                            BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
+                        }
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+
+            foreach (var business in BusinessList.Values.AsParallel())
+            {
+                foreach (var item in Config.Use)
+                {
+                    item.Invoke(business);
+                }
+            }
+
+            Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+        }
+
+        /// <summary>
+        /// Generating Document Model for All Business Classes. business.doc
+        /// </summary>
+        /// <param name="outDir"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public virtual BootstrapAll<Business> UseDoc(string outDir = null, Config config = default)
+        {
+            this.Config.UseDoc = new BootstrapConfig.UseDocConfig
+            {
+                OutDir = outDir,
+                Config = config,
+                Use = (dir, cfg) =>
+                {
+                    var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
+                    var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
+
+                    foreach (var item in BusinessList.OrderBy(c => c.Key))
+                    {
+                        //item.Value.UseDoc(null, cfg);
+                        Help.UseDoc(item.Value, null, cfg);
+
+                        if (exists)
+                        {
+                            doc.Add(item.Value.Configer.Doc.Name, item.Value.Configer.Doc);
+                        }
+                    }
+
+                    if (exists)
+                    {
+                        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.UTF8);
+                        //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
+                    }
+                }
+            };
+
+            return this;
+        }
+
+        public virtual BootstrapAll<Business> UseDoc(Config config) => UseDoc(null, config);
     }
 }
 
