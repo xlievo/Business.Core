@@ -1381,7 +1381,7 @@ document.getElementById('search').addEventListener('click', function (e) {
         for (var i = 0; i < aliass.length; i++) {
             if (-1 < aliass[i].textContent.indexOf(value)) {
                 target = aliass[i].getAttribute("tag");
-                document.getElementById(target).scrollIntoView({ behavior: 'smooth' });
+                members.querySelector("#" + target).scrollIntoView({ behavior: 'smooth' });
                 break;
             }
         }

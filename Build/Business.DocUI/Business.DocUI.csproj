@@ -11,6 +11,14 @@
     <AssemblyVersion>1.0.6.0</AssemblyVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>D:\Source\Repos\Business.Core\Build\Business.DocUI\Business.DocUI.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>D:\Source\Repos\Business.Core\Build\Business.DocUI\Business.DocUI.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="doc\ace\ace.js" />
     <None Remove="doc\ace\mode-csharp.js" />

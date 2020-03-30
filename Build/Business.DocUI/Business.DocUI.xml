@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Business.DocUI</name>
+    </assembly>
+    <members>
+        <member name="F:Business.DocUI.Index">
+            <summary>
+            doc\\index.html
+            </summary>
+        </member>
+        <member name="M:Business.DocUI.Write(System.String,System.String,System.Boolean)">
+            <summary>
+            outDir Default value is "System.AppDomain.CurrentDomain.BaseDirectory\wwwroot"
+            </summary>
+            <param name="outDir"></param>
+            <param name="docRequestPath"></param>
+            <param name="debug"></param>
+        </member>
+        <member name="M:Business.DocUI.Benchmark(Business.DocUI.BenchmarkArg)">
+            <summary>
+            ab
+            </summary>
+            <param name="arg"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
