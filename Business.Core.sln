@@ -6,7 +6,8 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{43142073-0768-410C-94C7-428F93401D7F}"
 	ProjectSection(SolutionItems) = preProject
 		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
-		License = License
+		icon.png = icon.png
+		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject

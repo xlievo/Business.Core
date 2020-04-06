@@ -187,7 +187,7 @@ namespace Business.Core.Utils
             return result;
         }
 
-        internal struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type orgType; public bool nullable; public bool hasDefinition; }
+        internal struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type origType; public bool nullable; public bool hasDefinition; }
 
         internal static CurrentType GetCurrentType(System.Type type)
         {
@@ -200,7 +200,7 @@ namespace Business.Core.Utils
                 current.outType = nullType;
                 current.nullable = true;
             }
-            current.orgType = current.outType;
+            current.origType = current.outType;
 
             current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out System.Type[] coll);// current.outType.IsCollection();
             current.hasDictionary = typeof(IDictionary<,>).IsAssignableFrom(current.outType, out System.Type[] dict) || typeof(System.Collections.IDictionary).IsAssignableFrom(current.outType, out dict);
@@ -358,7 +358,7 @@ namespace Business.Core.Utils
                         //add default convert
                         if (arg.HasIArg && 0 == item2.Value.Attrs.Count)
                         {
-                            var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
+                            var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition, item.ArgTypeDefinition);
                             attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
                             item2.Value.Attrs.Collection.Add(attr);
                             //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
@@ -437,7 +437,7 @@ namespace Business.Core.Utils
                         if (arg.HasIArg && 0 == item2.Value.Attrs.Count)
                         //if (arg.HasIArg && NodeState.DAT != first.State)
                         {
-                            var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
+                            var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition, item.ArgTypeDefinition);
                             attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
                             item2.Value.Attrs.Collection.Add(attr);
                         }
@@ -1556,13 +1556,13 @@ namespace Business.Core.Utils
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
 
-            return member.IsDefined(typeof(T));
+            return member.IsDefined(typeof(T), inherit);
         }
         internal static bool Exists<T>(this ParameterInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
 
-            return member.IsDefined(typeof(T));
+            return member.IsDefined(typeof(T), inherit);
         }
 
         //public static IEnumerable<T> SetAttributesMeta<T>(this IEnumerable<T> attrs, Attributes.AttributeBase.DeclaringType declaring, dynamic member, System.Action<T> action = null) where T : Attributes.AttributeBase

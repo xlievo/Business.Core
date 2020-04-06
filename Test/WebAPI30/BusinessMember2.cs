@@ -1,6 +1,7 @@
 ﻿using Business.Core;
 using Business.Core.Annotations;
 using Business.Core.Result;
+using Business.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -152,6 +153,7 @@ public partial class BusinessMember2 : BusinessBase
         public string b { get; set; }
     }
 
+    [Parameters]
     public class Z
     {
         /// <summary>
@@ -166,11 +168,12 @@ public partial class BusinessMember2 : BusinessBase
 
         public int c { get; set; }
 
-        public Test001Result2 d { get; set; }
+        [@JsonArg]
+        public Arg<Test001Result2> d { get; set; }
     }
 
     //post json
-    public virtual async Task<IResult> TestZ(Z z)
+    public virtual async Task<IResult<Z>> TestZ(Z z)
     {
         return this.ResultCreate(z);
     }
@@ -279,6 +282,7 @@ public partial class BusinessMember2 : BusinessBase
          tokenMethod: login)]
     public virtual async Task<dynamic> Test001(Session session, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
+        DDD = 9;
         //Logger.loggerQueue?.queue.TryAdd(new Logger.LoggerData
         //{
         //    Type = Logger.Type.Record,
@@ -342,6 +346,8 @@ public partial class BusinessMember2 : BusinessBase
         B,
         C
     }
+
+    public virtual int DDD { get; set; }
 
     /// <summary>
     /// 222
@@ -635,90 +641,6 @@ public partial class BusinessMember2 : BusinessBase
         {
             throw new System.Exception("Method exception!");
         }
-    }
-
-    [Doc("测试接口一", Group = "Module 1", Position = 1)]
-    public virtual async Task<dynamic> Test001X(Session session, Test004 arg, DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
-    {
-        dynamic args = new System.Dynamic.ExpandoObject();
-        args.token = session;
-        args.arg = arg;
-        if (args.arg.B == "ex")
-        {
-            throw new System.Exception("Method exception!");
-        }
-
-        if (args.arg.B == "ex2")
-        {
-            return this.ResultCreate(-911, "dsddsa");
-        }
-
-        var files = httpFile.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
-
-        return this.ResultCreate(new { arg, files });
-    }
-
-    [Doc("测试接口二", Group = "Module 1", Position = 1)]
-    public virtual async Task<dynamic> Test002X(Session session, Test004 arg, DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
-    {
-        dynamic args = new System.Dynamic.ExpandoObject();
-        args.token = session;
-        args.arg = arg;
-        if (args.arg.B == "ex")
-        {
-            throw new System.Exception("Method exception!");
-        }
-
-        if (args.arg.B == "ex2")
-        {
-            return this.ResultCreate(-911, "dsddsa");
-        }
-
-        var files = httpFile.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
-
-        return this.ResultCreate(new { arg, files });
-    }
-
-    [Doc("测试接口三", Group = "Module 2", Position = 1)]
-    public virtual async Task<dynamic> Test003X(Session session, Test004 arg, DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
-    {
-        dynamic args = new System.Dynamic.ExpandoObject();
-        args.token = session;
-        args.arg = arg;
-        if (args.arg.B == "ex")
-        {
-            throw new System.Exception("Method exception!");
-        }
-
-        if (args.arg.B == "ex2")
-        {
-            return this.ResultCreate(-911, "dsddsa");
-        }
-
-        var files = httpFile.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
-
-        return this.ResultCreate(new { arg, files });
-    }
-
-    [Doc("测试接口四", Group = "Module 2", Position = 1)]
-    public virtual async Task<dynamic> Test004X(Session session, Test004 arg, DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
-    {
-        dynamic args = new System.Dynamic.ExpandoObject();
-        args.token = session;
-        args.arg = arg;
-        if (args.arg.B == "ex")
-        {
-            throw new System.Exception("Method exception!");
-        }
-
-        if (args.arg.B == "ex2")
-        {
-            return this.ResultCreate(-911, "dsddsa");
-        }
-
-        var files = httpFile.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
-
-        return this.ResultCreate(new { arg, files });
     }
 
     public struct Result

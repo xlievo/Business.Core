@@ -98,7 +98,7 @@ namespace Business.Core.Annotations
             return attributes;
         }
 
-        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(ParameterInfo member, System.Type outType, System.Type orgType = null)
+        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(ParameterInfo member, System.Type outType, System.Type origType = null)
         {
             var attributes = new System.Collections.Generic.List<AttributeBase>(member.GetAttributes<AttributeBase>());
             attributes.AddRange(member.ParameterType.GetAttributes<AttributeBase>());
@@ -106,9 +106,9 @@ namespace Business.Core.Annotations
             {
                 attributes.AddRange(outType.GetAttributes<AttributeBase>());
             }
-            if (null != orgType && !outType.Equals(orgType))
+            if (null != origType && !outType.Equals(origType))
             {
-                attributes.AddRange(orgType.GetAttributes<AttributeBase>());
+                attributes.AddRange(origType.GetAttributes<AttributeBase>());
             }
             attributes.ForEach(c => c.Meta.Declaring = MetaData.DeclaringType.Parameter);
             return attributes;
@@ -312,9 +312,13 @@ namespace Business.Core.Annotations
     public enum IgnoreMode
     {
         /// <summary>
-        /// Ignore business methods
+        /// Ignore business method
         /// </summary>
         Method,
+        /// <summary>
+        /// Ignore business group method
+        /// </summary>
+        Group,
         /// <summary>
         /// Ignore document presentation
         /// </summary>
@@ -329,9 +333,14 @@ namespace Business.Core.Annotations
         BusinessArg,
     }
 
-    /* 1:Ignore method 2,3:Ignore document 4:Ignore Business ArgAttr */
+    /* 1:Ignore business method 2:Ignore business group method 3,4:Ignore document 5:Ignore Business ArgAttr */
     /// <summary>
-    /// The Method and Property needs to be ignored and will not be a proxy
+    /// Ignore
+    /// <para>1: Ignore business method</para>
+    /// <para>2: Ignore business group method</para>
+    /// <para>3: Ignore document presentation</para>
+    /// <para>4: Ignore document child presentation</para>
+    /// <para>5: Ignoring global parameter annotations injection</para>
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property | System.AttributeTargets.Parameter | System.AttributeTargets.Field | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
     public class Ignore : GroupAttribute
@@ -624,6 +633,7 @@ namespace Business.Core.Annotations
         {
             internal System.Type resultType;
             internal System.Type resultTypeDefinition;
+            internal System.Type argTypeDefinition;
 
             //public dynamic Business { get; internal set; }
 
@@ -647,12 +657,20 @@ namespace Business.Core.Annotations
 
             public System.Type MemberType { get; internal set; }
 
+            public Meta.Args Arg { get; internal set; }
+
             public Proces Proces { get; internal set; }
 
             /// <summary>
             /// This value indicates that the annotation is a filter model used to apply parameters. The default value is UseNotParameterLevel, which means that the injection parameters are filtered out and the annotation is non parameter level
+            /// <para>default: FilterModel.UseNotParameterLevel</para>
             /// </summary>
             public FilterModel Filter { get; set; } = FilterModel.UseNotParameterLevel;
+
+            /// <summary>
+            /// Custom filtering, Returns true to indicate that it does not work on this object, default false
+            /// </summary>
+            public System.Func<bool, bool, AttributeBase.MetaData.DeclaringType, System.Collections.Generic.IEnumerable<ArgumentAttribute>, bool> Skip { get; set; }
 
             public void Clone(MetaData metaData)
             {
@@ -665,6 +683,7 @@ namespace Business.Core.Annotations
                 this.MemberPath = metaData.MemberPath;
                 this.Member = metaData.Member;
                 this.MemberType = metaData.MemberType;
+                this.Arg = metaData.Arg;
 
                 if (null != metaData.Proces)
                 {
@@ -800,6 +819,7 @@ namespace Business.Core.Annotations
                 case FilterModel.UseNotParameterLevel | FilterModel.Definition:
                     if ((hasUse && AttributeBase.MetaData.DeclaringType.Parameter != declaring) || hasDefinition) return true;
                     break;
+
                 case FilterModel.UseParameterLevel | FilterModel.NotDefinition:
                     if ((hasUse && AttributeBase.MetaData.DeclaringType.Parameter == declaring) || !hasDefinition) return true;
                     break;
@@ -815,6 +835,7 @@ namespace Business.Core.Annotations
                 case FilterModel.NotUseNotParameterLevel | FilterModel.Definition:
                     if ((!hasUse && AttributeBase.MetaData.DeclaringType.Parameter != declaring) || hasDefinition) return true;
                     break;
+
                 case FilterModel.NotUseParameterLevel | FilterModel.NotDefinition:
                     if ((!hasUse && AttributeBase.MetaData.DeclaringType.Parameter == declaring) || !hasDefinition) return true;
                     break;
@@ -1581,10 +1602,11 @@ namespace Business.Core.Annotations
 
     public sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
-        internal protected ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, int state = -11, string message = null) : base(state, message)
+        internal protected ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, int state = -11, string message = null) : base(state, message)
         {
             this.ArgMeta.resultType = resultType;
             this.ArgMeta.resultTypeDefinition = resultTypeDefinition;
+            this.ArgMeta.argTypeDefinition = argTypeDefinition;
         }
 
         public ArgumentDefaultAttribute(int state = -11, string message = null) : base(state, message) { }
@@ -1617,60 +1639,58 @@ namespace Business.Core.Annotations
     //    }
     //}
 
-    /*
-[System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-public class ParametersAttribute : ArgumentAttribute
-{
-    public ParametersAttribute(int state = -11, string message = null) : base(state, message)
+    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    public class ParametersAttribute : ArgumentAttribute
     {
-        this.CanNull = false;
-        this.Description = "Parameters parsing";
-        this.ArgMeta.Filter |= FilterModel.NotDefinition;
-    }
-
-    public override async ValueTask<IResult> Proces<Type>(dynamic value)
-    {
-        var result = CheckNull(this, value);
-        if (!result.HasData) { return result; }
-
-        try
+        public ParametersAttribute(int state = -11, string message = null) : base(state, message)
         {
-            System.Collections.Generic.IDictionary<string, string> dict = value;
+            this.CanNull = false;
+            this.Description = "Parameters parsing";
+            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments) => !hasDefinition;
+        }
 
-            if (0 < dict.Count && 0 < this.ArgMeta.Children?.Count)
+        public override async ValueTask<IResult> Proces<Type>(dynamic value)
+        {
+            var result = CheckNull(this, value);
+            if (!result.HasData) { return result; }
+
+            try
             {
-                var arg = System.Activator.CreateInstance<Type>();
-                //var dict2 = new System.Collections.Generic.Dictionary<string, object>(dict.Count);
+                System.Collections.Generic.IDictionary<string, string> dict = value;
 
-                foreach (var item in this.ArgMeta.Children)
+                if (0 < dict.Count && 0 < this.ArgMeta.Arg.Children?.Count)
                 {
-                    if (dict.TryGetValue(item.Name, out string v))
+                    var arg = System.Activator.CreateInstance<Type>();
+                    //var dict2 = new System.Collections.Generic.Dictionary<string, object>(dict.Count);
+
+                    foreach (var item in this.ArgMeta.Arg.Children)
                     {
-                        if (!item.HasDefinition)
+                        if (dict.TryGetValue(item.Name, out string v))
                         {
-                            var v2 = Help.ChangeType(v, item.OrigType);
-                            item.Accessor.Setter(arg, v2);
+                            if (!item.HasDefinition)
+                            {
+                                var v2 = Help.ChangeType(v, item.OrigType);
+                                item.Accessor.Setter(arg, v2);
+                            }
+                            else if (typeof(IArg).IsAssignableFrom(item.OrigType))
+                            {
+                                var iarg = System.Activator.CreateInstance(this.ArgMeta.argTypeDefinition.MakeGenericType(item.CurrentOrigType)) as IArg;
+                                iarg.In = v;
+                                item.Accessor.Setter(arg, iarg);
+                            }
+                            //dict2.Add(item.Name, v2);
                         }
-                        else
-                        {
-                            var iarg = System.Activator.CreateInstance(typeof(Arg<>).MakeGenericType(item.OrigType)) as IArg;
-                            iarg.In = v;
-                            item.Accessor.Setter(arg, iarg);
-                        }
-                        //dict2.Add(item.Name, v2);
                     }
+
+                    //return this.ResultCreate(dict2.JsonSerialize().TryJsonDeserialize<Type>());
+                    return this.ResultCreate(arg);
                 }
 
-                //return this.ResultCreate(dict2.JsonSerialize().TryJsonDeserialize<Type>());
-                return this.ResultCreate(arg);
+                return this.ResultCreate<Type>(default);
             }
-
-            return this.ResultCreate<Type>(default);
+            catch (System.Exception ex) { return this.ResultCreate(State, Message ?? $"Parameters {this.Alias} Proces error. {ex.Message}"); }
         }
-        catch (System.Exception ex) { return this.ResultCreate(State, Message ?? $"Parameters {this.Alias} Proces error. {ex.Message}"); }
     }
-}
-*/
 
     /// <summary>
     /// System.Text.Json.JsonSerializer.Deserialize
@@ -1681,7 +1701,8 @@ public class ParametersAttribute : ArgumentAttribute
         {
             this.CanNull = false;
             this.Description = "Json parsing";
-            this.ArgMeta.Filter |= FilterModel.NotDefinition;
+            //this.ArgMeta.Filter |= FilterModel.NotDefinition;
+            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments) => !hasDefinition || this.ArgMeta.Arg.Parameters;
 
             options = new System.Text.Json.JsonSerializerOptions
             {
@@ -1705,7 +1726,7 @@ public class ParametersAttribute : ArgumentAttribute
             {
                 return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize<Type>(value, options));
             }
-            catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Json deserialize error"); }
+            catch (System.Exception ex) { return this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Json deserialize error. {ex.Message}"); }
         }
     }
 

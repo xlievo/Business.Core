@@ -1445,7 +1445,7 @@ public class TestBusinessMember
     {
         var member = Bootstrap.Create<BusinessLoggerAndArg>().UseDoc().Build();
 
-        member.LoggerSet(new LoggerAttribute(Logger.Type.Record, canWrite: false) { Group = "333" }, typeof(Use02));
+        Help.LoggerSet(member, new LoggerAttribute(Logger.Type.Record, canWrite: false) { Group = "333" }, typeof(Use02));
 
         var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry(new Use01 { A = "bbb" }, "use02"), new UseEntry(new Use01 { A = "aaa" }));
         Assert.AreEqual(t2.Message, null);

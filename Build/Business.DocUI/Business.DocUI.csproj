@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.6</Version>
+    <Version>1.0.7</Version>
     <Description>https://github.com/xlievo/Business.Core</Description>
     <Copyright>Copyright ©  2014~2020 Business Project - http://www.tmopen.com</Copyright>
     <PackageProjectUrl>https://github.com/xlievo/Business.Core</PackageProjectUrl>
     <PackageIconUrl>https://secure.gravatar.com/userimage/107958241/f5a911b60f47bbf64630f824232c9a24?size=250</PackageIconUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>1.0.6.0</AssemblyVersion>
+    <AssemblyVersion>1.0.7.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

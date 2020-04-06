@@ -28,7 +28,7 @@ namespace Business.Core.Auth
     {
         Configer Configer { get; set; }
 
-        object Create(System.Type type, params object[] constructorArguments);
+        object Create(System.Type type, object[] constructorArguments = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null);
 
         System.Threading.Tasks.Task<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null);
     }
@@ -44,29 +44,37 @@ namespace Business.Core.Auth
     /// </summary>
     public class Interceptor : IInterceptor, Castle.DynamicProxy.IInterceptor
     {
-        /*
-   class BusinessAllMethodsHook : Castle.DynamicProxy.AllMethodsHook
-   {
-       readonly MethodInfo[] ignoreMethods;
+        class BusinessAllMethodsHook : Castle.DynamicProxy.AllMethodsHook
+        {
+            readonly System.Collections.Generic.IEnumerable<string> ignoreMethods;
 
-       public BusinessAllMethodsHook(params MethodInfo[] method)
-           : base() { ignoreMethods = method; }
+            public BusinessAllMethodsHook(System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> methods = null)
+                : base() => ignoreMethods = methods?.Select(c => c.GetMethodFullName());
 
-       public override bool ShouldInterceptMethod(System.Type type, MethodInfo methodInfo)
-       {
-           if (System.Array.Exists(ignoreMethods, c => string.Equals(c.GetMethodFullName(), methodInfo.GetMethodFullName()))) { return false; }
+            public override bool ShouldInterceptMethod(System.Type type, System.Reflection.MethodInfo methodInfo)
+            {
+                if (null != ignoreMethods)
+                {
+                    if (ignoreMethods.Any(c => string.Equals(c, methodInfo.GetMethodFullName()))) { return false; }
+                }
 
-           return base.ShouldInterceptMethod(type, methodInfo);
-       }
-   }
-   */
+                return base.ShouldInterceptMethod(type, methodInfo);
+            }
+        }
 
         /// <summary>
         /// Configer
         /// </summary>
         public Configer Configer { get; set; }
 
-        public object Create(System.Type businessType, params object[] constructorArguments)
+        /// <summary>
+        /// Create
+        /// </summary>
+        /// <param name="businessType"></param>
+        /// <param name="constructorArguments"></param>
+        /// <param name="ignoreMethods"></param>
+        /// <returns></returns>
+        public object Create(System.Type businessType, object[] constructorArguments = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
         {
             var proxy = new Castle.DynamicProxy.ProxyGenerator();
 
@@ -76,7 +84,7 @@ namespace Business.Core.Auth
 
                 var constructor = null == types ? null : businessType.GetConstructor(types);
 
-                var instance = proxy.CreateClassProxy(businessType, null == constructor ? businessType.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() : constructorArguments, this);
+                var instance = proxy.CreateClassProxy(businessType, new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(ignoreMethods)), null == constructor ? businessType.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() : constructorArguments, this);
 
                 return instance;
             }

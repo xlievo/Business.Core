@@ -4,17 +4,22 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Business.Core</AssemblyName>
     <RootNamespace>Business</RootNamespace>
-    <Version>1.4.5</Version>
+    <Version>1.4.6</Version>
     <Description>https://github.com/xlievo/Business.Core</Description>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/xlievo/Business.Core</PackageProjectUrl>
     <Copyright>Copyright ©  2014~2020 Business Project - http://www.tmopen.com</Copyright>
-    <PackageIconUrl>https://secure.gravatar.com/userimage/107958241/f5a911b60f47bbf64630f824232c9a24?size=250</PackageIconUrl>
+    <PackageIconUrl></PackageIconUrl>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>1.4.5</AssemblyVersion>
-    <FileVersion>1.4.5</FileVersion>
+    <AssemblyVersion>1.4.6</AssemblyVersion>
+    <FileVersion>1.4.6</FileVersion>
     <LangVersion>7.3</LangVersion>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageTags>Business.Core</PackageTags>
+    <RepositoryUrl>https://github.com/xlievo/Business.Core</RepositoryUrl>
+    <PackageReleaseNotes>This is a C # server - side AOP framework, through annotations to the service of your business</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -58,6 +63,17 @@
     <Folder Include="Configer\" />
     <Folder Include="Business\" />
     <Folder Include="Auth\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
