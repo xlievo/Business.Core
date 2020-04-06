@@ -252,9 +252,9 @@ namespace Business.Core
         {
             var typeInfo = type.GetTypeInfo();
 
-            var methods = GetMethods(typeInfo);
+            var (methods, ignores) = GetMethods(typeInfo);
 
-            instance = interceptor.Create(type, constructorArguments, methods.Ignores);
+            instance = interceptor.Create(type, constructorArguments, ignores);
 
             //var proxy = new Castle.DynamicProxy.ProxyGenerator();
 
@@ -336,7 +336,7 @@ namespace Business.Core
 
             try
             {
-                cfg.MetaData = GetMetaData(cfg, methods.Methods);
+                cfg.MetaData = GetMetaData(cfg, methods);
                 interceptor.Configer = cfg;
             }
             catch
@@ -436,7 +436,7 @@ namespace Business.Core
 
         #region
 
-        static (System.Collections.Generic.Dictionary<int, MethodInfo> Methods, System.Collections.Generic.List<MethodInfo> Ignores) GetMethods(TypeInfo type)
+        static (System.Collections.Generic.Dictionary<int, MethodInfo> methods, System.Collections.Generic.List<MethodInfo> ignores) GetMethods(TypeInfo type)
         {
             var list = new System.Collections.Generic.List<MethodInfo>();
 
@@ -448,17 +448,19 @@ namespace Business.Core
 
             foreach (var item in methods)
             {
-                if (item.DeclaringType.Equals(type))
+                //if (item.DeclaringType.Equals(type))
+                //{
+
+                //}
+                //list.Add(new MethodMeta { Ignore = item.GetAttributes<Attributes.Ignore>(), Method = item });
+
+                if (item.GetAttributes<Ignore>().Any(c => IgnoreMode.Method == c.Mode) || Help.BaseObjectMethods.CompareTo(item))
                 {
-                    //list.Add(new MethodMeta { Ignore = item.GetAttributes<Attributes.Ignore>(), Method = item });
-                    if (!item.GetAttributes<Ignore>().Any(c => IgnoreMode.Method == c.Mode))
-                    {
-                        list.Add(item);
-                    }
-                    else
-                    {
-                        ignores.Add(item);
-                    }
+                    ignores.Add(item);
+                }
+                else
+                {
+                    list.Add(item);
                 }
             }
 

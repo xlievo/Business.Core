@@ -1,5 +1,6 @@
 ﻿using Business.Core;
 using Business.Core.Annotations;
+using Business.Core.Auth;
 using Business.Core.Result;
 using Business.Core.Utils;
 using System;

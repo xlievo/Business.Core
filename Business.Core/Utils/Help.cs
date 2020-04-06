@@ -255,6 +255,38 @@ namespace Business.Core.Utils
 
         public static MethodInfo GetMethod<T>(System.Linq.Expressions.Expression<System.Action<T>> methodSelector) => ((System.Linq.Expressions.MethodCallExpression)methodSelector.Body).Method;
 
+        internal struct ObjectMethods
+        {
+            public ObjectMethod GetHashCode { get; set; }
+            public ObjectMethod Equals { get; set; }
+            public ObjectMethod ToString { get; set; }
+
+            public bool CompareTo(MethodInfo method)
+            {
+                var parameters = method.GetParameters().Select(c => c.ParameterType);
+                return (method.Name == BaseObjectMethods.GetHashCode.Method.Name && Enumerable.SequenceEqual(parameters, BaseObjectMethods.GetHashCode.Parameters)) || (method.Name == BaseObjectMethods.Equals.Method.Name && Enumerable.SequenceEqual(parameters, BaseObjectMethods.Equals.Parameters)) || (method.Name == BaseObjectMethods.ToString.Method.Name && Enumerable.SequenceEqual(parameters, BaseObjectMethods.ToString.Parameters));
+            }
+
+            public struct ObjectMethod
+            {
+                public ObjectMethod(MethodInfo method)
+                {
+                    this.Method = method;
+                    this.Parameters = method.GetParameters().Select(c => c.ParameterType);
+                }
+
+                public MethodInfo Method { get; set; }
+                public IEnumerable<System.Type> Parameters { get; set; }
+            }
+        }
+
+        internal static readonly ObjectMethods BaseObjectMethods = new ObjectMethods
+        {
+            GetHashCode = new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.GetHashCode())),
+            Equals = new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.Equals(null))),
+            ToString = new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.ToString()))
+        };
+
         internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null, bool methods = false)
         {
             var key2 = string.IsNullOrWhiteSpace(key) ? type.FullName : key;

@@ -397,6 +397,8 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
     /// </summary>
     internal static readonly string[] contextParameterNames = new string[] { "context", "socket", "httpFile" };
 
+    internal static BootstrapAll<BusinessBase> bootstrap;
+
     /// <summary>
     /// Call this method after environment initialization is complete
     /// </summary>
@@ -419,7 +421,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         //Bootstrap.Create().Config.UseDoc.OutDir = "";
 
-        var bootstrap = Bootstrap.CreateAll<BusinessBase>()
+        bootstrap = Bootstrap.CreateAll<BusinessBase>()
             .UseType(contextParameterNames)
             .IgnoreSet(new Ignore(IgnoreMode.Arg), contextParameterNames)
             .LoggerSet(new LoggerAttribute(canWrite: false), contextParameterNames)
@@ -680,8 +682,8 @@ public class BusinessController : Controller
 
         var g = "j";//fixed grouping
         var path = this.Request.Path.Value.TrimStart('/');
-        if (!(Configer.Routes.TryGetValue(path, out Configer.Route route) || Configer.Routes.TryGetValue($"{path}/{g}", out route)) || !Configer.BusinessList.TryGetValue(route.Business, out IBusiness business)) { return this.NotFound(); }
-
+        if (!(Configer.Routes.TryGetValue(path, out Configer.Route route) || Configer.Routes.TryGetValue($"{path}/{g}", out route)) || !Common.bootstrap.BusinessList.TryGetValue(route.Business, out BusinessBase business)) { return this.NotFound(); }
+        
         string c = null;
         string t = null;
         string d = null;

@@ -20,6 +20,8 @@
     <PackageTags>Business.Core</PackageTags>
     <RepositoryUrl>https://github.com/xlievo/Business.Core</RepositoryUrl>
     <PackageReleaseNotes>This is a C # server - side AOP framework, through annotations to the service of your business</PackageReleaseNotes>
+    <Authors>xlievo</Authors>
+    <Company>www.tmopen.com</Company>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
