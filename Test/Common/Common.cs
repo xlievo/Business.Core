@@ -683,7 +683,7 @@ public class BusinessController : Controller
         var g = "j";//fixed grouping
         var path = this.Request.Path.Value.TrimStart('/');
         if (!(Configer.Routes.TryGetValue(path, out Configer.Route route) || Configer.Routes.TryGetValue($"{path}/{g}", out route)) || !Common.bootstrap.BusinessList.TryGetValue(route.Business, out BusinessBase business)) { return this.NotFound(); }
-        
+
         string c = null;
         string t = null;
         string d = null;

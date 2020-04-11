@@ -1091,29 +1091,29 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     {
         public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic key)
-        {
-            //if (200000 < value.A)
-            //{
-            //    value.A = 369;
-            //}
-            value.A = value.A + 1;
-            return this.ResultCreate(value);
-        }
+        //public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic key)
+        //{
+        //    //if (200000 < value.A)
+        //    //{
+        //    //    value.A = 369;
+        //    //}
+        //    value.A = value.A + 1;
+        //    return this.ResultCreate(value);
+        //}
     }
 
     public class CheckedMemberTypeAttribute : ArgumentAttribute
     {
         public CheckedMemberTypeAttribute(int state = -2000, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic key)
-        {
-            Assert.IsTrue(this.ArgMeta.MemberType.IsCollection());
-            return this.ResultCreate();
-        }
+        //public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic key)
+        //{
+        //    Assert.IsTrue(this.ArgMeta.MemberType.IsCollection());
+        //    return this.ResultCreate();
+        //}
     }
 
-    [TestCollection4(CollectionItem = true)]
+    //[TestCollection4(CollectionItem = true)]
     public class TestCollectionArg
     {
         [CheckNull(-1103)]
@@ -1144,7 +1144,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    [TestCollection4(CollectionItem = true)]
+    //[TestCollection4(CollectionItem = true)]
     public class TestDictArg
     {
         [CheckNull(-1103)]
@@ -1153,12 +1153,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             [TestCollection(-1106)]
             public string C { get; set; }
 
-            [TestCollection2(-1107)]
+            //[TestCollection2(-1107)]
             public int D { get; set; }
         }
 
         [CheckNull(-1104)]
-        [TestCollection3(-1108)]
+        //[TestCollection3(-1108)]
         public int A { get; set; }
 
         [CheckNull(-1105)]
@@ -1177,7 +1177,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     public virtual async Task<dynamic> TestCollection(
         [CheckNull(-1100)]
         [ArgumentDefault(-1102)]
-        [CheckNull(-1101, CollectionItem = true)]
+        //[CheckNull(-1101, CollectionItem = true)]
         List<TestCollectionArg> a)
     {
         return this.ResultCreate();
@@ -1186,7 +1186,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     public virtual async Task<dynamic> TestDict(
         [CheckNull(-1100)]
         [ArgumentDefault(-1102)]
-        [CheckNull(-1101, CollectionItem = true)]
+        //[CheckNull(-1101, CollectionItem = true)]
         Dictionary<string, TestDictArg> a)
     {
         return this.ResultCreate();
@@ -1248,22 +1248,32 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         return this.ResultCreate();
     }
 
+    public class TestCollectionExceptionAttribute : ArgumentAttribute
+    {
+        public TestCollectionExceptionAttribute(int state = -1111, string message = null) : base(state, message) { }
+
+        //public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic key)
+        //{
+        //    if (1 == collectionIndex)
+        //    {
+        //        throw new System.Exception($"Attribute Proces exception! {collectionIndex}");
+        //    }
+
+        //    return this.ResultCreate();
+        //}
+    }
+
     public class TestExceptionAttribute : ArgumentAttribute
     {
         public TestExceptionAttribute(int state = -1111, string message = null) : base(state, message) { }
 
-        public async override ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic key)
+        public async override ValueTask<IResult> Proces(dynamic value)
         {
-            if (1 == collectionIndex)
-            {
-                throw new System.Exception($"Attribute Proces exception! {collectionIndex}");
-            }
-
-            return this.ResultCreate();
+            throw new System.Exception($"Attribute Proces exception!");
         }
     }
 
-    public class TestExceptionArg
+    public class TestCollectionExceptionArg
     {
         public class TestHasLower2
         {
@@ -1283,7 +1293,29 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    public virtual async Task<dynamic> TestException(Arg<List<TestExceptionArg>> a) => this.ResultCreate();
+    public virtual async Task<dynamic> TestCollectionException(Arg<List<TestCollectionExceptionArg>> a) => this.ResultCreate();
+
+    public class TestExceptionArg
+    {
+        public class TestHasLower2
+        {
+            public TestHasLower3 C { get; set; }
+
+            public int D { get; set; }
+        }
+
+        public TestHasLower2 B { get; set; }
+
+        public class TestHasLower3
+        {
+            public string E { get; set; }
+
+            [TestException]
+            public string F { get; set; }
+        }
+    }
+
+    public virtual async Task<dynamic> TestException(Arg<TestExceptionArg> a) => this.ResultCreate();
 }
 
 [TestClass]
@@ -1297,7 +1329,7 @@ public class TestBusinessMember
     public static dynamic AsyncCall(CommandGroup businessCommand, string cmd, string group = null, object[] args = null, params UseEntry[] useObj)
     {
         var t = businessCommand.AsyncCall(cmd, args, useObj, group);
-        t.Wait();
+        t.AsTask().Wait();
         return t.Result;
     }
 
@@ -1682,13 +1714,13 @@ public class TestBusinessMember
 
         //Cmd
         var t2 = Cmd.AsyncCall("Test001", new object[] { new Arg01 { A = "abc" } });
-        t2.Wait();
+        t2.AsTask().Wait();
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(t2.Result.GetType()), true);
         Assert.AreEqual(t2.Result.State, -113);
         Assert.AreEqual(t2.Result.Message, "arg.b minimum range 2");
 
         var t3 = Cmd.AsyncCall("Test001", new object[] { new Arg01 { A = "abc" }, 2, 2 });
-        t3.Wait();
+        t3.AsTask().Wait();
         Assert.AreEqual(t3.Result.State, 1);
         Assert.AreEqual(t3.Result.HasData, true);
 
@@ -1709,13 +1741,13 @@ public class TestBusinessMember
 
         //Cmd
         var t2 = Cmd.AsyncCall("Test0001", new object[] { new Arg01 { A = "abc" } });
-        t2.Wait();
+        t2.AsTask().Wait();
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(t2.Result.GetType()), true);
         Assert.AreEqual(t2.Result.State, -113);
         Assert.AreEqual(t2.Result.Message, "arg.b minimum range 2");
 
         var t3 = Cmd.AsyncCall("Test0001", new object[] { new Arg01 { A = "abc" }, 2, 2 });
-        t3.Wait();
+        t3.AsTask().Wait();
         Assert.AreEqual(t3.Result.State, 1);
         Assert.AreEqual(t3.Result.HasData, true);
 
@@ -1744,13 +1776,13 @@ public class TestBusinessMember
 
         //Cmd
         var t2 = Cmd.AsyncCall("Test00001", new object[] { new Arg01 { A = "abc" } });
-        t2.Wait();
+        t2.AsTask().Wait();
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(t2.Result.GetType()), true);
         Assert.AreEqual(t2.Result.State, -113);
         Assert.AreEqual(t2.Result.Message, "arg.b minimum range 2");
 
         var t3 = Cmd.AsyncCall("Test00001", new object[] { new Arg01 { A = "abc" }, 2, 2 });
-        t3.Wait();
+        t3.AsTask().Wait();
         Assert.AreEqual(t3.Result.State, 1);
         Assert.AreEqual(t3.Result.HasData, true);
 
@@ -1776,11 +1808,11 @@ public class TestBusinessMember
 
         //Cmd
         var t2 = Cmd.AsyncCall("Test0011", new object[] { new Arg01 { A = "abc" } });
-        t2.Wait();
+        t2.AsTask().Wait();
         Assert.IsNull(t2.Result);
 
         var t3 = Cmd.AsyncCall("Test0011", new object[] { new Arg01 { A = "abc" }, 2, 2 });
-        t3.Wait();
+        t3.AsTask().Wait();
         Assert.IsNull(t3.Result);
     }
 
@@ -1795,14 +1827,14 @@ public class TestBusinessMember
 
         //Cmd
         var t2 = Cmd.AsyncCall("Test0012", new object[] { new Arg01 { A = "abc" } });
-        t2.Wait();
+        t2.AsTask().Wait();
         Assert.IsNull(t2.Result);
 
         var t3 = Cmd.AsyncCall("Test0012", new object[] { new Arg01 { A = "abc" }, 2, 2 });
-        t3.Wait();
+        t3.AsTask().Wait();
         Assert.IsNull(t3.Result);
     }
-
+    /*
     [TestMethod]
     public void TestCollection()
     {
@@ -1892,22 +1924,22 @@ public class TestBusinessMember
     {
         var list2 = new Dictionary<string, TestDictArg.TestDictArg2>();
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 50; i++)
         {
             list2.Add($"{i}", new TestDictArg.TestDictArg2 { C = $"{i}", D = i });
         }
 
         var t22 = AsyncCall(Member.Command, "TestDict", null, new object[] {
              new Dictionary<string,TestDictArg> { { "a", new TestDictArg { A = 1, B = list2 } } }
-        });
+            });
 
-        Assert.AreEqual(t22.State, 1);
+        Assert.AreEqual(t22.State, 1);//?? State == 0 ?? Collection was modified; enumeration operation may not execute.
 
-        Assert.AreEqual(list2["0"].D, 1);
-        Assert.AreEqual(list2["1"].D, 2);
-        Assert.AreEqual(list2["2"].D, 3);
-        Assert.AreEqual(list2["3"].D, 4);
-        Assert.AreEqual(list2["4"].D, 5);
+        //Assert.AreEqual(list2["0"].D, 1);
+        //Assert.AreEqual(list2["1"].D, 2);
+        //Assert.AreEqual(list2["2"].D, 3);
+        //Assert.AreEqual(list2["3"].D, 4);
+        //Assert.AreEqual(list2["4"].D, 5);
     }
 
     [TestMethod]
@@ -1958,6 +1990,17 @@ public class TestBusinessMember
         }
     }
 
+        [TestMethod]
+    public void TestCollectionException()
+    {
+        var list2 = new List<TestExceptionArg> { new TestExceptionArg { B = new List<TestExceptionArg.TestHasLower2> { new TestExceptionArg.TestHasLower2 { C = new List<TestExceptionArg.TestHasLower3> { new TestExceptionArg.TestHasLower3 { E = "EEE" }, new TestExceptionArg.TestHasLower3 { E = "EEE", F = "F1" }, new TestExceptionArg.TestHasLower3 { E = "EEE", F = "F2" } }, D = 99 } } } };
+
+        IResult r = AsyncCall(Member.Command, "TestCollectionException", null, new object[] { list2 });
+
+        Assert.AreEqual(r.State, 0);
+        Assert.AreEqual(r.Message.Contains("Attribute Proces exception! 1"), true);
+    }
+    */
     [TestMethod]
     public void TestHasLower()
     {
@@ -1965,7 +2008,7 @@ public class TestBusinessMember
 
         var r = AsyncCall(Member.Command, "TestHasLower", null, new object[] { list2 });
 
-        Assert.AreEqual(r.State, -1100);
+        Assert.AreEqual(r.State, -1200);//checked Collection -1100
 
         list2[0].B[0].C[0].F = "FFF";
         r = AsyncCall(Member.Command, "TestHasLower", null, new object[] { list2 });
@@ -2005,12 +2048,12 @@ public class TestBusinessMember
     [TestMethod]
     public void TestException()
     {
-        var list2 = new List<TestExceptionArg> { new TestExceptionArg { B = new List<TestExceptionArg.TestHasLower2> { new TestExceptionArg.TestHasLower2 { C = new List<TestExceptionArg.TestHasLower3> { new TestExceptionArg.TestHasLower3 { E = "EEE" }, new TestExceptionArg.TestHasLower3 { E = "EEE", F = "F1" }, new TestExceptionArg.TestHasLower3 { E = "EEE", F = "F2" } }, D = 99 } } } };
+        var arg = new TestExceptionArg { B = new TestExceptionArg.TestHasLower2 { C = new TestExceptionArg.TestHasLower3 { E = "EEE" }, D = 99 } };
 
-        IResult r = AsyncCall(Member.Command, "TestException", null, new object[] { list2 });
+        IResult r = AsyncCall(Member.Command, "TestException", null, new object[] { arg });
 
         Assert.AreEqual(r.State, 0);
-        Assert.AreEqual(r.Message.Contains("Attribute Proces exception! 1"), true);
+        Assert.AreEqual(r.Message.Contains("Attribute Proces exception!"), true);
     }
 
     [TestMethod]

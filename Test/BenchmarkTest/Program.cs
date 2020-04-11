@@ -389,11 +389,11 @@ namespace BenchmarkTest
         {
             public TestCollection4Attribute(int state = -1108, string message = null) : base(state, message) { }
 
-            public async override ValueTask<IResult> Proces<Type>(dynamic value, int collectionIndex = -1, dynamic key = null)
-            {
-                value.A = value.A + 1;
-                return this.ResultCreate(value);
-            }
+            //public async override ValueTask<IResult> Proces<Type>(dynamic value, int collectionIndex = -1, dynamic key = null)
+            //{
+            //    value.A = value.A + 1;
+            //    return this.ResultCreate(value);
+            //}
         }
         [TestCollection4]
         public class TestCollectionArg
@@ -428,7 +428,7 @@ namespace BenchmarkTest
         public virtual async Task<dynamic> TestCollection(
         [CheckNull(-1100)]
         [ArgumentDefault(-1102)]
-        [CheckNull(-1101, CollectionItem = true)]
+        //[CheckNull(-1101, CollectionItem = true)]
         Arg<List<TestCollectionArg>> a) => this.ResultCreate();
     }
 }

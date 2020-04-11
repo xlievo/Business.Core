@@ -30,13 +30,19 @@ namespace Business.Core.Auth
 
         object Create(System.Type type, object[] constructorArguments = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null);
 
-        System.Threading.Tasks.Task<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null);
+        System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null);
     }
 
-    struct ArgResult
+    readonly struct ArgResult
     {
-        public bool isUpdate;
-        public dynamic value;
+        public ArgResult(bool isUpdate, dynamic value)
+        {
+            this.isUpdate = isUpdate;
+            this.value = value;
+        }
+
+        public readonly bool isUpdate;
+        public readonly dynamic value;
     }
 
     /// <summary>
@@ -110,7 +116,7 @@ namespace Business.Core.Auth
             }).Result;
         }
 
-        public async System.Threading.Tasks.Task<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null) => await InterceptorExtensions.Intercept(configer, method, arguments, call, group);
+        public async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null) => await InterceptorExtensions.Intercept(configer, method, arguments, call, group);
     }
 }
 
@@ -124,7 +130,7 @@ namespace Business.Core.Utils
 
     public static class InterceptorExtensions
     {
-        public static async System.Threading.Tasks.Task<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null)
+        public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null)
         {
             var dtt = System.DateTimeOffset.Now;
             var watch = new System.Diagnostics.Stopwatch();
@@ -180,7 +186,7 @@ namespace Business.Core.Utils
                         //var argAttr = c.Value;
                         var argAttr = attrs[i];
 
-                        if (argAttr.CollectionItem) { continue; }
+                        //if (argAttr.CollectionItem) { continue; }
 
                         result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value);
 
@@ -240,12 +246,12 @@ namespace Business.Core.Utils
 
                     //var isUpdate = false;
 
-                    if (item.HasLower || item.HasCollectionAttr)
+                    if (item.HasLower)// || item.HasCollectionAttr
                     {
+                        #region Collection
+                        /*
                         if (item.HasCollection)
                         {
-                            #region Collection
-
                             dynamic currentValue2 = currentValue;
                             int collectioCount = currentValue2.Count;
 
@@ -366,19 +372,21 @@ namespace Business.Core.Utils
                             {
                                 return meta.HasIResult ? Help.GetReturnValueIResult(returnValue, meta) : Help.GetReturnValue(returnValue, meta);
                             }
-
-                            #endregion
                         }
                         else
                         {
-                            result = await ArgsResult(meta, command.Key, item.Children, command.OnlyName, currentValue);
-                            //if (null != result)
-                            if (1 > result.State)
-                            {
-                                logType = Logger.Type.Error;
-                                returnValue = result;
-                                return meta.HasIResult ? Help.GetReturnValueIResult(returnValue, meta) : Help.GetReturnValue(result, meta);
-                            }
+                            
+                        }
+                        */
+                        #endregion
+
+                        result = await ArgsResult(meta, command.Key, item.Children, currentValue);
+                        //if (null != result)
+                        if (1 > result.State)
+                        {
+                            logType = Logger.Type.Error;
+                            returnValue = result;
+                            return meta.HasIResult ? Help.GetReturnValueIResult(returnValue, meta) : Help.GetReturnValue(result, meta);
                         }
 
                         if (item.HasIArg && !Equals(null, result))
@@ -508,7 +516,7 @@ namespace Business.Core.Utils
                     continue;
                 }
 
-                argsObjLog.Add(new Logger.ArgsLog { name = c.Name, value = c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], logger = argGroup.Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg });
+                argsObjLog.Add(new Logger.ArgsLog(c.Name, c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], argGroup.Logger, c.Group[command.Key].IArgInLogger, c.HasIArg));
                 //argsObjLogHasIArg.Add(c.Name, c.HasIArg);
             }
 
@@ -518,7 +526,7 @@ namespace Business.Core.Utils
                 return;
             }
 
-            var logObjs = Logger.LoggerSet(logType, metaLogger, argsObjLog, out bool canWrite, out bool canResult, logger?.ValueType);
+            var logObjs = Logger.LoggerSet(logType, metaLogger, argsObjLog, out bool canWrite, out bool canResult);//, logger?.ValueType
 
             watch.Stop();
 
@@ -526,7 +534,7 @@ namespace Business.Core.Utils
 
             if (canWrite)
             {
-                var data = new Logger.LoggerData { Dtt = dtt, Token = token, Type = logType, Value = logObjs, Result = canResult ? returnValue : null, Time = Help.Scale(watch.Elapsed.TotalSeconds, 3), Member = methodName, Group = command.Group };
+                var data = new Logger.LoggerData(dtt, token, logType, logObjs, canResult ? returnValue : null, Help.Scale(watch.Elapsed.TotalSeconds, 3), methodName, command.Group);
 
                 if (null == logger)
                 {
@@ -536,7 +544,7 @@ namespace Business.Core.Utils
 
                 if (null != logger.call)
                 {
-                    System.Threading.Tasks.Task.Run(() => logger.call(data).ContinueWith(c => c.Exception?.Console()));
+                    System.Threading.Tasks.Task.Run(() => logger.call(data).AsTask().ContinueWith(c => c.Exception?.Console()));
                 }
                 else if (null != logger.loggerQueue)
                 {
@@ -558,7 +566,7 @@ namespace Business.Core.Utils
             }
         }
 
-        public async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, int collectionIndex = -1, dynamic dictKey = null)
+        public async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value)//, int collectionIndex = -1, dynamic dictKey = null
         {
             switch (argAttr.ArgMeta.Proces?.Mode)
             {
@@ -569,18 +577,18 @@ namespace Business.Core.Utils
                         dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { value });
                         return await result;
                     }
-                case Proces.ProcesMode.ProcesCollection:
-                    return await argAttr.Proces(value, collectionIndex, dictKey);
-                case Proces.ProcesMode.ProcesCollectionGeneric:
-                    {
-                        dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { value, collectionIndex, dictKey });
-                        return await result;
-                    }
+                //case Proces.ProcesMode.ProcesCollection:
+                //    return await argAttr.Proces(value, collectionIndex, dictKey);
+                //case Proces.ProcesMode.ProcesCollectionGeneric:
+                //    {
+                //        dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { value, collectionIndex, dictKey });
+                //        return await result;
+                //    }
                 default: return await argAttr.Proces(value);
             }
         }
 
-        public async static System.Threading.Tasks.Task<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, string methodName, object currentValue, int collectionIndex = -1, dynamic dictKey = null)
+        public async static System.Threading.Tasks.ValueTask<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, object currentValue)//, int collectionIndex = -1, dynamic dictKey = null
         {
             bool isUpdate = false;
 
@@ -602,9 +610,9 @@ namespace Business.Core.Utils
                     //var argAttr = c.Value;
                     var argAttr = attrs[i];
 
-                    if (argAttr.CollectionItem) { continue; }//return false; }
+                    //if (argAttr.CollectionItem) { continue; }
 
-                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue, collectionIndex, dictKey);
+                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue);//, collectionIndex, dictKey
 
                     if (1 > result.State)
                     {
@@ -657,14 +665,15 @@ namespace Business.Core.Utils
                 }
 
                 //if (0 < item.ArgAttrChild.Count && null != currentValue2)
-                if ((item.HasLower || item.HasCollectionAttr) && null != currentValue2)
+                //if ((item.HasLower || item.HasCollectionAttr) && null != currentValue2)
+                if (item.HasLower && null != currentValue2)
                 {
+                    #region Collection
+                    /*
                     dynamic result2 = null;
 
                     if (item.HasCollection)
                     {
-                        #region Collection
-
                         dynamic result3 = null; //error
                         dynamic currentValue3 = currentValue2;
                         int collectioCount = currentValue3.Count;
@@ -779,17 +788,19 @@ namespace Business.Core.Utils
                         {
                             return result3;
                         }
-
-                        #endregion
                     }
                     else
                     {
-                        result2 = await ArgsResult(meta, group, item.Children, methodName, currentValue2);
+                        
+                    }
+                    */
+                    #endregion
 
-                        if (1 > result2.State)
-                        {
-                            return result2;
-                        }
+                    var result2 = await ArgsResult(meta, group, item.Children, currentValue2);
+
+                    if (1 > result2.State)
+                    {
+                        return result2;
                     }
 
                     if (!object.Equals(null, result2) && result2.Data is ArgResult && result2.Data.isUpdate)
@@ -807,10 +818,11 @@ namespace Business.Core.Utils
                 }
             }
 
-            return ResultFactory.ResultCreate(meta.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
+            return ResultFactory.ResultCreate(meta.ResultTypeDefinition, new ArgResult(isUpdate, currentValue));
         }
 
-        public async static System.Threading.Tasks.Task<IResult> ArgsResultCollection(MetaData meta, Args item, ReadOnlyCollection<ArgumentAttribute> attrs, object currentValue, string group, string methodName, int collectionIndex, dynamic dictKey = null)
+        /*
+        public async static System.Threading.Tasks.Task<IResult> ArgsResultCollection(MetaData meta, Args item, ReadOnlyCollection<ArgumentAttribute> attrs, object currentValue, string group, string methodName)//, int collectionIndex, dynamic dictKey = null
         {
             bool isUpdate = false;
 
@@ -824,9 +836,9 @@ namespace Business.Core.Utils
                 //var argAttr = c.Value;
                 var argAttr = attrs[i];
 
-                if (!argAttr.CollectionItem) { continue; }
+                //if (!argAttr.CollectionItem) { continue; }
 
-                var result = await GetProcesResult(argAttr, item.HasCollectionIArg ? iArgIn : currentValue, collectionIndex, dictKey);
+                var result = await GetProcesResult(argAttr, item.HasCollectionIArg ? iArgIn : currentValue);//, collectionIndex, dictKey
 
                 if (1 > result.State)
                 {
@@ -876,7 +888,8 @@ namespace Business.Core.Utils
                 return ResultFactory.ResultCreate(meta.ResultTypeDefinition, data: result2.Data);
             }
 
-            return ResultFactory.ResultCreate(meta.ResultTypeDefinition, new ArgResult { isUpdate = isUpdate, value = currentValue });
+            return ResultFactory.ResultCreate(meta.ResultTypeDefinition, new ArgResult(isUpdate, currentValue));
         }
+        */
     }
 }

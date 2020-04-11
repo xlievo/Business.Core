@@ -180,7 +180,7 @@ namespace Business.Core.Document
         }
     }
 
-    public struct DocGroup
+    public readonly struct DocGroup
     {
         public DocGroup(Annotations.DocGroupAttribute docGroup)
         {
@@ -190,13 +190,21 @@ namespace Business.Core.Document
             Active = docGroup.Active;
         }
 
-        internal int position;
+        public DocGroup(string group, string badge = default, bool active = default, int position = default)
+        {
+            this.position = position;
+            Group = group;
+            Badge = badge;
+            Active = active;
+        }
 
-        public string Group { get; set; }
+        internal readonly int position;
 
-        public string Badge { get; set; }
+        public string Group { get; }
 
-        public bool Active { get; set; }
+        public string Badge { get; }
+
+        public bool Active { get; }
 
         public class EqualityComparer : IEqualityComparer<DocGroup>
         {
@@ -208,7 +216,7 @@ namespace Business.Core.Document
         public static readonly EqualityComparer comparer = new EqualityComparer();
     }
 
-    public struct DocInfo
+    public readonly struct DocInfo
     {
         public DocInfo(Annotations.DocAttribute alias, int position, string key)
         {
@@ -219,15 +227,15 @@ namespace Business.Core.Document
             Badge = alias.Badge;
         }
 
-        internal int position;
+        internal readonly int position;
 
-        public string Key { get; set; }
+        public string Key { get; }
 
-        public string Group { get; set; }
+        public string Group { get; }
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public string Badge { get; set; }
+        public string Badge { get; }
     }
 
     public class Config
@@ -408,32 +416,41 @@ namespace Business.Core.Document
         public Dictionary<string, Testing> Testing { get; set; }
     }
 
-    public struct Testing
+    public readonly struct Testing
     {
+        public Testing(string name, object value, string result, string token, string tokenMethod)
+        {
+            Name = name;
+            Value = value;
+            Result = result;
+            Token = token;
+            TokenMethod = tokenMethod;
+        }
+
         /// <summary>
         /// test key
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// test args
         /// </summary>
-        public object Value { get; set; }
+        public object Value { get; }
 
         /// <summary>
         /// test result check
         /// </summary>
-        public string Result { get; set; }
+        public string Result { get; }
 
         /// <summary>
         /// test fixed roken
         /// </summary>
-        public string Token { get; set; }
+        public string Token { get; }
 
         /// <summary>
         /// Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]
         /// </summary>
-        public string TokenMethod { get; set; }
+        public string TokenMethod { get; }
     }
 
     public class DocArg : IDocArg<DocArg>
@@ -569,16 +586,24 @@ namespace Business.Core.Document
     }
     */
 
-    public struct DocArgSource<TypeDefinition>
+    public readonly struct DocArgSource<TypeDefinition>
         where TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
     {
-        public string Group { get; set; }
+        public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary)
+        {
+            Group = group;
+            Args = args;
+            Attributes = attributes;
+            Summary = summary;
+        }
 
-        public Meta.ITypeDefinition<TypeDefinition> Args { get; set; }
+        public string Group { get; }
 
-        public IList<string> Attributes { get; set; }
+        public Meta.ITypeDefinition<TypeDefinition> Args { get; }
 
-        public string Summary { get; set; }
+        public IList<string> Attributes { get; }
+
+        public string Summary { get; }
     }
     /*
     //            color

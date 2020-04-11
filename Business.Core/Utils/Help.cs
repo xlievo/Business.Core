@@ -67,9 +67,9 @@ namespace Business.Core.Utils
 
             ProcesGeneric = 4,
 
-            ProcesCollection = 8,
+            //ProcesCollection = 8,
 
-            ProcesCollectionGeneric = 16
+            //ProcesCollectionGeneric = 16
         }
     }
 
@@ -255,11 +255,18 @@ namespace Business.Core.Utils
 
         public static MethodInfo GetMethod<T>(System.Linq.Expressions.Expression<System.Action<T>> methodSelector) => ((System.Linq.Expressions.MethodCallExpression)methodSelector.Body).Method;
 
-        internal struct ObjectMethods
+        internal readonly struct ObjectMethods
         {
-            public ObjectMethod GetHashCode { get; set; }
-            public ObjectMethod Equals { get; set; }
-            public ObjectMethod ToString { get; set; }
+            public ObjectMethods(ObjectMethod getHashCode, ObjectMethod equals, ObjectMethod toString)
+            {
+                GetHashCode = getHashCode;
+                Equals = equals;
+                ToString = toString;
+            }
+
+            public ObjectMethod GetHashCode { get; }
+            public ObjectMethod Equals { get; }
+            public ObjectMethod ToString { get; }
 
             public bool CompareTo(MethodInfo method)
             {
@@ -267,7 +274,7 @@ namespace Business.Core.Utils
                 return (method.Name == BaseObjectMethods.GetHashCode.Method.Name && Enumerable.SequenceEqual(parameters, BaseObjectMethods.GetHashCode.Parameters)) || (method.Name == BaseObjectMethods.Equals.Method.Name && Enumerable.SequenceEqual(parameters, BaseObjectMethods.Equals.Parameters)) || (method.Name == BaseObjectMethods.ToString.Method.Name && Enumerable.SequenceEqual(parameters, BaseObjectMethods.ToString.Parameters));
             }
 
-            public struct ObjectMethod
+            public readonly struct ObjectMethod
             {
                 public ObjectMethod(MethodInfo method)
                 {
@@ -275,17 +282,12 @@ namespace Business.Core.Utils
                     this.Parameters = method.GetParameters().Select(c => c.ParameterType);
                 }
 
-                public MethodInfo Method { get; set; }
-                public IEnumerable<System.Type> Parameters { get; set; }
+                public MethodInfo Method { get; }
+                public IEnumerable<System.Type> Parameters { get; }
             }
         }
 
-        internal static readonly ObjectMethods BaseObjectMethods = new ObjectMethods
-        {
-            GetHashCode = new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.GetHashCode())),
-            Equals = new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.Equals(null))),
-            ToString = new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.ToString()))
-        };
+        internal static readonly ObjectMethods BaseObjectMethods = new ObjectMethods(new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.GetHashCode())), new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.Equals(null))), new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.ToString())));
 
         internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null, bool methods = false)
         {
@@ -293,7 +295,7 @@ namespace Business.Core.Utils
 
             if (type.IsAbstract || accessors.ContainsKey(key2)) { return; }
 
-            var member = accessors.dictionary.GetOrAdd(key2, _ => new Accessors { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray(), Methods = new ConcurrentReadOnlyDictionary<string, Proces>() });
+            var member = accessors.dictionary.GetOrAdd(key2, _ => new Accessors { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : c.ParameterType.IsValueType ? System.Activator.CreateInstance(c.ParameterType) : default).ToArray(), Methods = new ConcurrentReadOnlyDictionary<string, Proces>() });
 
             foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
             {
@@ -789,7 +791,7 @@ namespace Business.Core.Utils
                     Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
-                    Testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>().ToDictionary(c3 => c3.Name, c3 => new Testing { Name = c3.Name, Value = c3.Value, Result = c3.Result, Token = c3.Token, TokenMethod = c3.TokenMethod })
+                    Testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>().ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token, c3.TokenMethod))
                 } as IMember<DocArg>;
 
                 foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))
@@ -893,7 +895,7 @@ namespace Business.Core.Utils
                 }
             }
 
-            var arg = argCallback(new DocArgSource<TypeDefinition> { Group = group, Args = args, Attributes = attrs, Summary = summary });
+            var arg = argCallback(new DocArgSource<TypeDefinition>(group, args, attrs, summary));
 
             if ((null == argGroup.Ignore || !argGroup.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.ArgChild)) && !args.LastType.IsEnum)
             {
@@ -3196,10 +3198,25 @@ namespace Business.Core.Utils
 
     #region Queue<T>
 
+    /// <summary>
+    /// Queue
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class Queue<T>
     {
         public struct BatchOptions
         {
+            /// <summary>
+            /// BatchOptions
+            /// </summary>
+            /// <param name="interval">Return log time interval, default System.TimeSpan.Zero equals not enabled,5 seconds is reasonable</param>
+            /// <param name="maxNumber">Return log number, less than 1 no restrictions</param>
+            public BatchOptions(System.TimeSpan interval, int maxNumber)
+            {
+                Interval = interval;
+                MaxNumber = maxNumber;
+            }
+
             /// <summary>
             /// Return log time interval, default System.TimeSpan.Zero equals not enabled,5 seconds is reasonable
             /// </summary>
@@ -3223,7 +3240,7 @@ namespace Business.Core.Utils
         /// <param name="maxWorkThreads">Gets the maximum out queue thread for this queue, default 1</param>
         /// <param name="syn">Whether each outgoing thread has synchronous callback, asynchronous by default</param>
         /// <param name="maxCapacity">Gets the max capacity of this queue</param>
-        public Queue(System.Func<IEnumerable<T>, System.Threading.Tasks.Task> call, BatchOptions batch = default, int maxWorkThreads = 1, bool syn = false, int? maxCapacity = null)
+        public Queue(System.Func<IEnumerable<T>, System.Threading.Tasks.ValueTask> call, BatchOptions batch = default, int maxWorkThreads = 1, bool syn = false, int? maxCapacity = null)
         {
             if (null == call) { throw new System.ArgumentNullException(nameof(call)); }
 
@@ -3291,11 +3308,11 @@ namespace Business.Core.Utils
 
                         if (syn)
                         {
-                            await call(data).ContinueWith(c2 => c2.Exception?.Console());
+                            await call(data).AsTask().ContinueWith(c2 => c2.Exception?.Console());
                         }
                         else
                         {
-                            System.Threading.Tasks.Task.Factory.StartNew(obj => call(obj as T[]).ContinueWith(c2 => c2.Exception?.Console()), data);
+                            System.Threading.Tasks.Task.Factory.StartNew(obj => call(obj as T[]).AsTask().ContinueWith(c2 => c2.Exception?.Console()), data);
                         }
 
                         if (watch.IsRunning)

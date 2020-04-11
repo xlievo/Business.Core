@@ -152,7 +152,7 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
 
             return bind.instance;
@@ -201,7 +201,7 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
 
             return bind.instance as Business;
@@ -372,7 +372,7 @@ namespace Business.Core
                 }
             }
 
-            Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+            Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
         }
 
         /// <summary>

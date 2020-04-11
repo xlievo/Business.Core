@@ -12,11 +12,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>D:\Source\Repos\Business.Core\Build\Business.DocUI\Business.DocUI.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.0\Business.Core.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>D:\Source\Repos\Business.Core\Build\Business.DocUI\Business.DocUI.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.0\Business.Core.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -179,7 +179,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Business.DocUI.csproj" />
     <EmbeddedResource Include="doc\sdk.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>

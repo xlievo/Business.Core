@@ -54,10 +54,7 @@ namespace Business.Core.Annotations
             /// </summary>
             public DeclaringType Declaring { get; internal set; }
 
-            public void Clone(MetaData metaData)
-            {
-                this.Declaring = metaData.Declaring;
-            }
+            public void Clone(MetaData metaData) => this.Declaring = metaData.Declaring;
         }
 
         internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
@@ -114,16 +111,16 @@ namespace Business.Core.Annotations
             return attributes;
         }
 
-        internal static System.Collections.Generic.List<ArgumentAttribute> GetCollectionAttributes(System.Type type)
-        {
-            var attributes = new System.Collections.Generic.List<ArgumentAttribute>(type.GetAttributes<ArgumentAttribute>());
-            attributes.ForEach(c =>
-            {
-                c.Meta.Declaring = MetaData.DeclaringType.Parameter;
-                c.CollectionItem = true;
-            });
-            return attributes;
-        }
+        //internal static System.Collections.Generic.List<ArgumentAttribute> GetCollectionAttributes(System.Type type)
+        //{
+        //    var attributes = new System.Collections.Generic.List<ArgumentAttribute>(type.GetAttributes<ArgumentAttribute>());
+        //    attributes.ForEach(c =>
+        //    {
+        //        c.Meta.Declaring = MetaData.DeclaringType.Parameter;
+        //        c.CollectionItem = true;
+        //    });
+        //    return attributes;
+        //}
         internal static Attribute GetAttribute<Attribute>(ParameterInfo member, System.Type type) where Attribute : AttributeBase
         {
             var attribute = member.GetAttribute<Attribute>() ?? type.GetAttribute<Attribute>();
@@ -427,14 +424,12 @@ namespace Business.Core.Annotations
         public virtual string GetCommandGroup(string group, string name) => string.IsNullOrWhiteSpace(group) ? name : $"{group}.{name}";
     }
 
-    public struct UseEntry
+    public readonly struct UseEntry
     {
         public UseEntry(object value, params string[] parameterName)
         {
             this.Value = value;
-
             this.Type = this.Value?.GetType();
-
             this.ParameterName = parameterName;
         }
 
@@ -547,10 +542,11 @@ namespace Business.Core.Annotations
     [System.AttributeUsage(System.AttributeTargets.Interface | System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public class LoggerAttribute : GroupAttribute
     {
-        public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true)
+        public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true, Logger.ValueType valueType = Logger.ValueType.In)
         {
             this.LogType = logType;
             this.CanWrite = canWrite;
+            this.ValueType = valueType;
         }
 
         /// <summary>
@@ -571,6 +567,11 @@ namespace Business.Core.Annotations
         /// Allowed to return to results
         /// </summary>
         public bool CanResult { get; set; } = true;
+
+        /// <summary>
+        /// Logger value type
+        /// </summary>
+        public Logger.ValueType ValueType { get; set; } = Logger.ValueType.In;
 
         public LoggerAttribute SetType(Logger.Type logType)
         {
@@ -703,17 +704,20 @@ namespace Business.Core.Annotations
             return clone as T;
         }
 
-        struct ProcesMethod
+        readonly struct ProcesMethod
         {
-            public System.Type[] proces;
-            public System.Type[] procesCollection;
+            public readonly System.Type[] proces;
+            //public readonly System.Type[] procesCollection;
+
+            public ProcesMethod(System.Type[] proces)
+            {
+                this.proces = proces;
+                //this.procesCollection = procesCollection;
+            }
         }
 
-        static readonly ProcesMethod procesMethod = new ProcesMethod
-        {
-            proces = Help.GetMethod<ArgumentAttribute>(c => c.Proces(null)).GetParameters().Select(c => c.ParameterType).ToArray(),
-            procesCollection = Help.GetMethod<ArgumentAttribute>(c => c.Proces(null, -1, null)).GetParameters().Select(c => c.ParameterType).ToArray()
-        };
+        //static readonly ProcesMethod procesMethod = new ProcesMethod(Help.GetMethod<ArgumentAttribute>(c => c.Proces(null)).GetParameters().Select(c => c.ParameterType).ToArray(), Help.GetMethod<ArgumentAttribute>(c => c.Proces(null, -1, null)).GetParameters().Select(c => c.ParameterType).ToArray());
+        static readonly ProcesMethod procesMethod = new ProcesMethod(Help.GetMethod<ArgumentAttribute>(c => c.Proces(null)).GetParameters().Select(c => c.ParameterType).ToArray());
 
         public ArgumentAttribute(int state, string message = null)
         {
@@ -730,10 +734,10 @@ namespace Business.Core.Annotations
                 {
                     this.ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ? Utils.Proces.ProcesMode.ProcesGeneric : Utils.Proces.ProcesMode.Proces;
                 }
-                else if (Enumerable.SequenceEqual(procesMethod.procesCollection, method.ParameterType))
-                {
-                    this.ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ? Utils.Proces.ProcesMode.ProcesCollectionGeneric : Utils.Proces.ProcesMode.ProcesCollection;
-                }
+                //else if (Enumerable.SequenceEqual(procesMethod.procesCollection, method.ParameterType))
+                //{
+                //    this.ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ? Utils.Proces.ProcesMode.ProcesCollectionGeneric : Utils.Proces.ProcesMode.ProcesCollection;
+                //}
             }
 
             this.BindAfter += () =>
@@ -750,7 +754,7 @@ namespace Business.Core.Annotations
             };
         }
 
-        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.CollectionItem}";
+        //public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.CollectionItem}";
 
         public System.Action BindAfter { get; set; }
 
@@ -759,7 +763,7 @@ namespace Business.Core.Annotations
         /// <summary>
         /// Whether to apply to each item of a set parameter
         /// </summary>
-        public bool CollectionItem { get; set; }
+        //public bool CollectionItem { get; set; }
 
         /// <summary>
         /// By checking the Allow null value, Default to true
@@ -865,24 +869,24 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public virtual async ValueTask<IResult> Proces<Type>(dynamic value) => this.ResultCreate<dynamic>(value);
 
-        /// <summary>
-        /// Start processing the Parameter object, By this.ResultCreate() method returns
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="collectionIndex"></param>
-        /// <param name="dictKey"></param>
-        /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic dictKey) => this.ResultCreate<dynamic>(value);
+        ///// <summary>
+        ///// Start processing the Parameter object, By this.ResultCreate() method returns
+        ///// </summary>
+        ///// <param name="value"></param>
+        ///// <param name="collectionIndex"></param>
+        ///// <param name="dictKey"></param>
+        ///// <returns></returns>
+        //public virtual async ValueTask<IResult> Proces(dynamic value, int collectionIndex, dynamic dictKey) => this.ResultCreate<dynamic>(value);
 
-        /// <summary>
-        /// Start processing the Parameter object, By this.ResultCreate() method returns
-        /// </summary>
-        /// <typeparam name="Type"></typeparam>
-        /// <param name="value"></param>
-        /// <param name="collectionIndex"></param>
-        /// <param name="dictKey"></param>
-        /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces<Type>(dynamic value, int collectionIndex, dynamic dictKey) => this.ResultCreate<dynamic>(value);
+        ///// <summary>
+        ///// Start processing the Parameter object, By this.ResultCreate() method returns
+        ///// </summary>
+        ///// <typeparam name="Type"></typeparam>
+        ///// <param name="value"></param>
+        ///// <param name="collectionIndex"></param>
+        ///// <param name="dictKey"></param>
+        ///// <returns></returns>
+        //public virtual async ValueTask<IResult> Proces<Type>(dynamic value, int collectionIndex, dynamic dictKey) => this.ResultCreate<dynamic>(value);
 
         #endregion
 
@@ -1016,6 +1020,8 @@ namespace Business.Core.Annotations
         public string Key { get; internal set; }
 
         public string OnlyName { get; set; }
+
+        public byte OnlyNameByte { get; set; }
 
         //public bool IgnoreBusinessArg { get; set; }
 
