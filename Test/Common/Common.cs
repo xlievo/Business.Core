@@ -233,7 +233,7 @@ public struct Log
 [@JsonArg(Group = "j")]
 [Command(Group = "s")]
 [@MessagePackArg(Group = "s")]
-[Logger]
+[Logger(valueType: Logger.ValueType.In)]
 public abstract class BusinessBase : BusinessBase<ResultObject<object>>
 {
     public BusinessBase()
@@ -277,7 +277,7 @@ public abstract class BusinessBase : BusinessBase<ResultObject<object>>
         {
             foreach (var item in x)
             {
-                Help.Console(item.JsonSerialize());
+                Help.Console(item.ToString());
             }
             //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
 

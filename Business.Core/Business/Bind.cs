@@ -446,7 +446,9 @@ namespace Business.Core
 
             //var methods = type.DeclaredMethods.Where(c => c.IsVirtual && !c.IsFinal && c.IsPublic);
 
-            foreach (var item in methods)
+            var methods2 = methods.Except(ignores);
+
+            foreach (var item in methods2)
             {
                 //if (item.DeclaringType.Equals(type))
                 //{
@@ -1832,6 +1834,37 @@ namespace Business.Core.Meta
         //public override string ToString() => string.Format("{0} {1}", Group2, Name);
 
         //argChild
+        /// <summary>
+        /// Argument
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="type"></param>
+        /// <param name="origType"></param>
+        /// <param name="lastType"></param>
+        /// <param name="currentOrigType"></param>
+        /// <param name="position"></param>
+        /// <param name="defaultValue"></param>
+        /// <param name="hasDefaultValue"></param>
+        /// <param name="hasDictionary"></param>
+        /// <param name="hasCollection"></param>
+        /// <param name="hasCollectionIArg"></param>
+        /// <param name="nullable"></param>
+        /// <param name="accessor"></param>
+        /// <param name="group"></param>
+        /// <param name="children"></param>
+        /// <param name="childrens"></param>
+        /// <param name="hasLower"></param>
+        /// <param name="hasDefinition"></param>
+        /// <param name="hasIArg"></param>
+        /// <param name="iArgOutType"></param>
+        /// <param name="iArgInType"></param>
+        /// <param name="use"></param>
+        /// <param name="useType"></param>
+        /// <param name="hasToken"></param>
+        /// <param name="methodTypeFullName"></param>
+        /// <param name="fullName"></param>
+        /// <param name="memberDefinition"></param>
+        /// <param name="hasCast"></param>
         public Args(string name, System.Type type, System.Type origType, System.Type lastType, System.Type currentOrigType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
         {
             Name = name;

@@ -723,7 +723,7 @@ public class Args
     public class Test003<T> : Test001<T>
     {
         /// <summary>
-        /// Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+        /// Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
         /// </summary>
         public string BBB { get; set; }
     }

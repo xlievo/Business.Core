@@ -2918,7 +2918,7 @@ namespace Business.Core.Utils
                 }
             }
 
-            return (type.IsGenericType ? null == type.DeclaringType ? type.Name : $"{type.DeclaringType.GetTypeName()}.{type.Name}" : type.FullName).Replace('+', '.');
+            return (type.IsGenericType ? null == type.DeclaringType ? $"{type.Namespace}.{type.Name}" : $"{type.DeclaringType.GetTypeName()}.{type.Name}" : type.FullName).Replace('+', '.');
         }
 
         internal static bool Contains<T>(this T @enum, T value) where T : System.Enum => 0 != (@enum & (dynamic)value);
