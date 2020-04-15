@@ -52,7 +52,7 @@ public class Proces01 : ArgumentAttribute
 {
     public Proces01(int state = -110, string message = null) : base(state, message) { }
 
-    public async override ValueTask<IResult> Proces(dynamic value) => this.ResultCreate($"{value}.1234567890");
+    public async override ValueTask<IResult> Proces<Type>(dynamic value) => this.ResultCreate($"{value}.1234567890");
 }
 
 public class AES2 : AESAttribute

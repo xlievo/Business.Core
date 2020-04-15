@@ -141,8 +141,9 @@ namespace Business.Core.Utils
             var logType = Logger.Type.Record;
             //==================================//
             var iArgs = Help.GetIArgs(meta.IArgs, argsObj);
-            dynamic token = null;
 
+            dynamic token = null;
+            dynamic token2 = null;
             dynamic returnValue = null;
 
             var group2 = group ?? meta.GroupDefault;
@@ -168,16 +169,23 @@ namespace Business.Core.Utils
                     }
                 }
 
+                var tokenArg = meta.Args.FirstOrDefault(c => c.HasToken);
+                if (null != tokenArg)
+                {
+                    token = argsObj[tokenArg.Position];
+                    token2 = token;
+                }
+
                 foreach (var item in meta.Args)
                 {
                     IResult result = null;
                     var value = argsObj[item.Position];
                     var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
                     var attrs = item.Group[command.Key].Attrs;
-                    if (item.HasToken)
-                    {
-                        token = value;
-                    }
+                    //if (item.HasToken)
+                    //{
+                    //    token = value;
+                    //}
 
                     dynamic error = null;
                     for (int i = 0; i < attrs.Count; i++)
@@ -188,7 +196,7 @@ namespace Business.Core.Utils
 
                         //if (argAttr.CollectionItem) { continue; }
 
-                        result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value);
+                        result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value, token2);
 
                         if (1 > result.State)
                         {
@@ -380,7 +388,7 @@ namespace Business.Core.Utils
                         */
                         #endregion
 
-                        result = await ArgsResult(meta, command.Key, item.Children, currentValue);
+                        result = await ArgsResult(meta, command.Key, item.Children, currentValue, token2);
                         //if (null != result)
                         if (1 > result.State)
                         {
@@ -400,6 +408,11 @@ namespace Business.Core.Utils
                                 }
                             }
                         }
+                    }
+
+                    if (item.HasToken)
+                    {
+                        token2 = currentValue;
                     }
                 }
 
@@ -566,7 +579,7 @@ namespace Business.Core.Utils
             }
         }
 
-        public async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value)//, int collectionIndex = -1, dynamic dictKey = null
+        public async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, dynamic token)//, int collectionIndex = -1, dynamic dictKey = null
         {
             switch (argAttr.ArgMeta.Proces?.Mode)
             {
@@ -575,6 +588,11 @@ namespace Business.Core.Utils
                 case Proces.ProcesMode.ProcesGeneric:
                     {
                         dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { value });
+                        return await result;
+                    }
+                case Proces.ProcesMode.ProcesGenericToken:
+                    {
+                        dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { token, value });
                         return await result;
                     }
                 //case Proces.ProcesMode.ProcesCollection:
@@ -588,7 +606,7 @@ namespace Business.Core.Utils
             }
         }
 
-        public async static System.Threading.Tasks.ValueTask<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, object currentValue)//, int collectionIndex = -1, dynamic dictKey = null
+        public async static System.Threading.Tasks.ValueTask<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, object currentValue, dynamic token)//, int collectionIndex = -1, dynamic dictKey = null
         {
             bool isUpdate = false;
 
@@ -612,7 +630,7 @@ namespace Business.Core.Utils
 
                     //if (argAttr.CollectionItem) { continue; }
 
-                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue);//, collectionIndex, dictKey
+                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue, token);//, collectionIndex, dictKey
 
                     if (1 > result.State)
                     {
@@ -796,7 +814,7 @@ namespace Business.Core.Utils
                     */
                     #endregion
 
-                    var result2 = await ArgsResult(meta, group, item.Children, currentValue2);
+                    var result2 = await ArgsResult(meta, group, item.Children, currentValue2, token);
 
                     if (1 > result2.State)
                     {

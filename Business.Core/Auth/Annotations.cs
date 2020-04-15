@@ -660,7 +660,7 @@ namespace Business.Core.Annotations
 
             public Meta.Args Arg { get; internal set; }
 
-            public Proces Proces { get; internal set; }
+            internal Proces Proces { get; set; }
 
             /// <summary>
             /// This value indicates that the annotation is a filter model used to apply parameters. The default value is UseNotParameterLevel, which means that the injection parameters are filtered out and the annotation is non parameter level
@@ -707,17 +707,18 @@ namespace Business.Core.Annotations
         readonly struct ProcesMethod
         {
             public readonly System.Type[] proces;
-            //public readonly System.Type[] procesCollection;
+            public readonly System.Type[] procesToken;
 
-            public ProcesMethod(System.Type[] proces)
+            public ProcesMethod(System.Type[] proces, System.Type[] procesToken)
             {
                 this.proces = proces;
-                //this.procesCollection = procesCollection;
+                this.procesToken = procesToken;
             }
         }
 
         //static readonly ProcesMethod procesMethod = new ProcesMethod(Help.GetMethod<ArgumentAttribute>(c => c.Proces(null)).GetParameters().Select(c => c.ParameterType).ToArray(), Help.GetMethod<ArgumentAttribute>(c => c.Proces(null, -1, null)).GetParameters().Select(c => c.ParameterType).ToArray());
-        static readonly ProcesMethod procesMethod = new ProcesMethod(Help.GetMethod<ArgumentAttribute>(c => c.Proces(null)).GetParameters().Select(c => c.ParameterType).ToArray());
+        static readonly ProcesMethod procesMethod = new ProcesMethod(Help.GetMethod<ArgumentAttribute>(c => c.Proces(null)).GetParameters().Select(c => c.ParameterType).ToArray(), Help.GetMethod<ArgumentAttribute>(c => c.Proces<object>(null, null)).GetParameters().Select(c => c.ParameterType).ToArray());
+        //static readonly ProcesMethod procesMethod = new ProcesMethod();
 
         public ArgumentAttribute(int state, string message = null)
         {
@@ -733,6 +734,10 @@ namespace Business.Core.Annotations
                 if (Enumerable.SequenceEqual(procesMethod.proces, method.ParameterType))
                 {
                     this.ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ? Utils.Proces.ProcesMode.ProcesGeneric : Utils.Proces.ProcesMode.Proces;
+                }
+                else if (Enumerable.SequenceEqual(procesMethod.procesToken, method.ParameterType))
+                {
+                    this.ArgMeta.Proces.Mode = Utils.Proces.ProcesMode.ProcesGenericToken;
                 }
                 //else if (Enumerable.SequenceEqual(procesMethod.procesCollection, method.ParameterType))
                 //{
@@ -868,6 +873,15 @@ namespace Business.Core.Annotations
         /// <param name="value"></param>
         /// <returns></returns>
         public virtual async ValueTask<IResult> Proces<Type>(dynamic value) => this.ResultCreate<dynamic>(value);
+
+        /// <summary>
+        /// Start processing the Parameter object, By this.ResultCreate() method returns
+        /// </summary>
+        /// <typeparam name="Type"></typeparam>
+        /// <param name="token"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public virtual async ValueTask<IResult> Proces<Type>(dynamic token, dynamic value) => this.ResultCreate<dynamic>(value);
 
         ///// <summary>
         ///// Start processing the Parameter object, By this.ResultCreate() method returns

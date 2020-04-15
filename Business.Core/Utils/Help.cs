@@ -44,7 +44,7 @@ namespace Business.Core.Utils
         }
     }
 
-    public class Proces
+    internal class Proces
     {
         public Proces(MethodInfo method, System.Type[] parameterType)
         {
@@ -66,6 +66,8 @@ namespace Business.Core.Utils
             Proces = 2,
 
             ProcesGeneric = 4,
+
+            ProcesGenericToken = 8,
 
             //ProcesCollection = 8,
 

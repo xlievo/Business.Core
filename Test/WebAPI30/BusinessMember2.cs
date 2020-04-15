@@ -656,7 +656,7 @@ public class TestAttribute : ArgumentAttribute
 {
     public TestAttribute(int state = 111, string message = null) : base(state, message) { }
 
-    public override async ValueTask<IResult> Proces<Type>(dynamic value)
+    public override async ValueTask<IResult> Proces<Type>(dynamic token, dynamic value)
     {
         //var exit = await RedisHelper.HExistsAsync("Role", "value2");
 

@@ -130,7 +130,7 @@ namespace Business.Core.Annotations
             this.Description = "Session check";
         }
 
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override async ValueTask<IResult> Proces<Type>(dynamic token, dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
