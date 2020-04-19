@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using static Args;
 
 [Info("API/v2", CommandGroupDefault = null, Alias = "TEST0")]
+[@JsonArg2(Group = "j")]
 public class BusinessMember3 : BusinessBase
 {
     public BusinessMember3() : base()

@@ -1469,7 +1469,23 @@ namespace Business.Core.Utils
                 }
             }
 
-            var attrs = gropus.Distinct(Annotations.GroupAttribute.Comparer).ToDictionary(c => c.GroupKey(), c => c);
+            var distinct = gropus.Distinct(Annotations.GroupAttribute.Comparer);
+            var attrs = distinct.ToDictionary(c => c.GroupKey(), c => c);
+
+            //Keep subclasses only
+            var argAttr = distinct.Where(c => c is Annotations.ArgumentAttribute);
+            foreach (var item in attrs)
+            {
+                if (!(item.Value is Annotations.ArgumentAttribute))
+                {
+                    continue;
+                }
+
+                if (argAttr.Any(c => !item.Value.Meta.Type.Equals(c.Meta.Type) && item.Value.Meta.Type.IsAssignableFrom(c.Meta.Type)))
+                {
+                    attrs.Remove(item.Key);
+                }
+            }
 
             if (null != clones && clones.Any())
             {

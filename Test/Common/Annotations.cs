@@ -33,6 +33,14 @@ namespace Business.Core.Annotations
             this.Description = "Json parsing";
         }
     }
+    public class JsonArg2 : JsonArg
+    {
+        public JsonArg2(int state = -112, string message = null) : base(state, message)
+        {
+            this.CanNull = false;
+            this.Description = "Json2 parsing";
+        }
+    }
     /*
     public class HttpFile : HttpFileAttribute
     {
