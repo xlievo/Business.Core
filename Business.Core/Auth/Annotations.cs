@@ -67,15 +67,32 @@ namespace Business.Core.Annotations
         //    argAttr.Distinct(type.Assembly.GetCustomAttributes<AttributeBase>());//.AddRange(type.Assembly.GetCustomAttributes<AttributeBase>());
         //    return argAttr;
         //}
-        internal static System.Collections.Generic.List<AttributeBase> GetTopAttributes(System.Type classType, bool inherit = true)
+        internal static System.Collections.Generic.List<AttributeBase> GetTopAttributes(System.Type classType)
         {
-            var classAttr = classType.GetAttributes<AttributeBase>(inherit);
+            var classAttr = new System.Collections.Generic.List<AttributeBase>();
+
+            //If the subclass annotation is overridden, only the subclass annotation is obtained
+            var classType2 = classType;
+
+            while (null != classType2 && !classType2.Equals(typeof(object)))
+            {
+                var classAttr3 = classType2.GetCustomAttributes<AttributeBase>(false).ToList();
+
+                classAttr.AddRange(classAttr3.Where(c => !(c is GroupAttribute)));
+
+                classAttr.Distinct(classAttr3);
+
+                classType2 = classType2.BaseType;
+            }
+
+            //var classAttr = classType.GetAttributes<AttributeBase>();
 
             foreach (var item in classAttr)
             {
                 item.Meta.Declaring = MetaData.DeclaringType.Class;
             }
 
+            //Still get business class assembly annotations
             var assemblyAttr = classType.Assembly.GetCustomAttributes<AttributeBase>();
 
             foreach (var item in assemblyAttr)
@@ -612,6 +629,26 @@ namespace Business.Core.Annotations
 
     public abstract class GroupAttribute : AttributeBase
     {
+        static System.Type GetType(System.Type type)
+        {
+            while (null != type.BaseType && !type.BaseType.IsAbstract)
+            {
+                type = type.BaseType;
+            }
+
+            return type;
+        }
+
+        /// <summary>
+        /// Get unified type
+        /// </summary>
+        readonly System.Type type;
+
+        /// <summary>
+        /// GroupAttribute
+        /// </summary>
+        public GroupAttribute() => type = GetType(this.Meta.Type);
+
         string group = string.Empty;
 
         /// <summary>
@@ -619,7 +656,13 @@ namespace Business.Core.Annotations
         /// </summary>
         public virtual string Group { get => group; set => group = value?.Trim() ?? string.Empty; }
 
-        public virtual string GroupKey(string space = "->") => $"{this.Meta.Type.FullName}{space}{this.Group.Trim()}";
+        /// <summary>
+        /// GroupKey
+        /// </summary>
+        /// <param name="space"></param>
+        /// <returns></returns>
+        public virtual string GroupKey(string space = "->") => $"{type.FullName}{space}{this.Group.Trim()}";
+        //public virtual string GroupKey(string space = "->") => $"{this.Meta.Type.FullName}{space}{this.Group.Trim()}";
 
         public static System.Collections.Generic.IEqualityComparer<GroupAttribute> Comparer { get => Equality<GroupAttribute>.CreateComparer(c => c.GroupKey(), System.StringComparer.CurrentCultureIgnoreCase); }
     }
