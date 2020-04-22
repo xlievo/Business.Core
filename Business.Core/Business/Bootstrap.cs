@@ -29,11 +29,7 @@ namespace Business.Core
 
         IBootstrap UseResultType(System.Type resultType);
 
-        IBootstrap UseResultType<Result>() where Result : Core.Result.IResult;
-
         IBootstrap UseArgType(System.Type argType);
-
-        IBootstrap UseArgType<Arg>() where Arg : IArg, new();
 
         dynamic Build();
     }
@@ -93,11 +89,7 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
-        IBootstrap IBootstrap.UseResultType<Result>() => UseResultType<Result>();
-
         IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
-
-        IBootstrap IBootstrap.UseArgType<Arg>() => UseArgType<Arg>();
 
         #endregion
 
@@ -234,18 +226,12 @@ namespace Business.Core
         /// <returns></returns>
         public virtual Bootstrap UseResultType(System.Type resultType)
         {
-            Config.ResultType = resultType;
-            return this;
-        }
+            if (!typeof(Result.IResult).IsAssignableFrom(resultType))
+            {
+                throw new System.ArgumentException(nameof(resultType), "Business.Core.Result.IResult interface not implemented");
+            }
 
-        /// <summary>
-        /// use result type
-        /// </summary>
-        /// <typeparam name="Result"></typeparam>
-        /// <returns></returns>
-        public virtual Bootstrap UseResultType<Result>() where Result : Core.Result.IResult
-        {
-            Config.ResultType = typeof(Result);
+            Config.ResultType = resultType;
             return this;
         }
 
@@ -256,18 +242,12 @@ namespace Business.Core
         /// <returns></returns>
         public virtual Bootstrap UseArgType(System.Type argType)
         {
-            Config.ArgType = argType;
-            return this;
-        }
+            if (!typeof(IArg).IsAssignableFrom(argType))
+            {
+                throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
+            }
 
-        /// <summary>
-        /// use arg type
-        /// </summary>
-        /// <typeparam name="Arg"></typeparam>
-        /// <returns></returns>
-        public virtual Bootstrap UseArgType<Arg>() where Arg : IArg, new()
-        {
-            Config.ArgType = typeof(Arg);
+            Config.ArgType = argType;
             return this;
         }
 
@@ -287,11 +267,7 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
-        IBootstrap IBootstrap.UseResultType<Result>() => UseResultType<Result>();
-
         IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
-
-        IBootstrap IBootstrap.UseArgType<Arg>() => UseArgType<Arg>();
 
         dynamic IBootstrap.Build() => Build();
 
@@ -351,18 +327,12 @@ namespace Business.Core
         /// <returns></returns>
         public virtual Bootstrap<Business> UseResultType(System.Type resultType)
         {
-            Config.ResultType = resultType;
-            return this;
-        }
+            if (!typeof(Result.IResult).IsAssignableFrom(resultType))
+            {
+                throw new System.ArgumentException(nameof(resultType), "Business.Core.Result.IResult interface not implemented");
+            }
 
-        /// <summary>
-        /// use result type
-        /// </summary>
-        /// <typeparam name="Result"></typeparam>
-        /// <returns></returns>
-        public virtual Bootstrap<Business> UseResultType<Result>() where Result : Core.Result.IResult
-        {
-            Config.ResultType = typeof(Result);
+            Config.ResultType = resultType;
             return this;
         }
 
@@ -373,18 +343,12 @@ namespace Business.Core
         /// <returns></returns>
         public virtual Bootstrap<Business> UseArgType(System.Type argType)
         {
-            Config.ArgType = argType;
-            return this;
-        }
+            if (!typeof(IArg).IsAssignableFrom(argType))
+            {
+                throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
+            }
 
-        /// <summary>
-        /// use arg type
-        /// </summary>
-        /// <typeparam name="Arg"></typeparam>
-        /// <returns></returns>
-        public virtual Bootstrap<Business> UseArgType<Arg>() where Arg : IArg, new()
-        {
-            Config.ArgType = typeof(Arg);
+            Config.ArgType = argType;
             return this;
         }
 
@@ -403,11 +367,7 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
-        IBootstrap IBootstrap.UseResultType<Result>() => UseResultType<Result>();
-
         IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
-
-        IBootstrap IBootstrap.UseArgType<Arg>() => UseArgType<Arg>();
 
         dynamic IBootstrap.Build()
         {
@@ -513,18 +473,12 @@ namespace Business.Core
         /// <returns></returns>
         public virtual BootstrapAll UseResultType(System.Type resultType)
         {
-            Config.ResultType = resultType;
-            return this;
-        }
+            if (!typeof(Result.IResult).IsAssignableFrom(resultType))
+            {
+                throw new System.ArgumentException(nameof(resultType), "Business.Core.Result.IResult interface not implemented");
+            }
 
-        /// <summary>
-        /// use result type
-        /// </summary>
-        /// <typeparam name="Result"></typeparam>
-        /// <returns></returns>
-        public virtual BootstrapAll UseResultType<Result>() where Result : Core.Result.IResult
-        {
-            Config.ResultType = typeof(Result);
+            Config.ResultType = resultType;
             return this;
         }
 
@@ -535,18 +489,12 @@ namespace Business.Core
         /// <returns></returns>
         public virtual BootstrapAll UseArgType(System.Type argType)
         {
-            Config.ArgType = argType;
-            return this;
-        }
+            if (!typeof(IArg).IsAssignableFrom(argType))
+            {
+                throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
+            }
 
-        /// <summary>
-        /// use arg type
-        /// </summary>
-        /// <typeparam name="Arg"></typeparam>
-        /// <returns></returns>
-        public virtual BootstrapAll UseArgType<Arg>() where Arg : IArg, new()
-        {
-            Config.ArgType = typeof(Arg);
+            Config.ArgType = argType;
             return this;
         }
 
@@ -568,11 +516,7 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
-        IBootstrap IBootstrap.UseResultType<Result>() => UseResultType<Result>();
-
         IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
-
-        IBootstrap IBootstrap.UseArgType<Arg>() => UseArgType<Arg>();
 
         dynamic IBootstrap.Build()
         {
@@ -689,18 +633,12 @@ namespace Business.Core
         /// <returns></returns>
         public virtual BootstrapAll<Business> UseResultType(System.Type resultType)
         {
-            Config.ResultType = resultType;
-            return this;
-        }
+            if (!typeof(Result.IResult).IsAssignableFrom(resultType))
+            {
+                throw new System.ArgumentException(nameof(resultType), "Business.Core.Result.IResult interface not implemented");
+            }
 
-        /// <summary>
-        /// use result type
-        /// </summary>
-        /// <typeparam name="Result"></typeparam>
-        /// <returns></returns>
-        public virtual BootstrapAll<Business> UseResultType<Result>() where Result : Core.Result.IResult
-        {
-            Config.ResultType = typeof(Result);
+            Config.ResultType = resultType;
             return this;
         }
 
@@ -711,18 +649,12 @@ namespace Business.Core
         /// <returns></returns>
         public virtual BootstrapAll<Business> UseArgType(System.Type argType)
         {
-            Config.ArgType = argType;
-            return this;
-        }
+            if (!typeof(IArg).IsAssignableFrom(argType))
+            {
+                throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
+            }
 
-        /// <summary>
-        /// use arg type
-        /// </summary>
-        /// <typeparam name="Arg"></typeparam>
-        /// <returns></returns>
-        public virtual BootstrapAll<Business> UseArgType<Arg>() where Arg : IArg, new()
-        {
-            Config.ArgType = typeof(Arg);
+            Config.ArgType = argType;
             return this;
         }
 
