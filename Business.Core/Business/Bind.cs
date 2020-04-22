@@ -248,7 +248,7 @@ namespace Business.Core
 
         internal readonly bool hasBusiness;
 
-        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, params object[] constructorArguments)
+        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, object[] constructorArguments = null, System.Type resultType = null, System.Type argType = null)
         {
             var typeInfo = type.GetTypeInfo();
 
@@ -271,10 +271,19 @@ namespace Business.Core
             //    throw ex.ExceptionWrite(true, true);
             //}
 
-            var generics = typeof(IBusiness<,>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments);
-
-            var resultType = (generics ? businessArguments[0] : typeof(ResultObject<object>)).GetGenericTypeDefinition();
-            var argType = (generics ? businessArguments[1] : typeof(Arg<object>)).GetGenericTypeDefinition();
+            //var generics = typeof(IBusiness<,>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments);
+            //var resultType = (generics ? businessArguments[0] : typeof(ResultObject<object>)).GetGenericTypeDefinition();
+            //var argType = (generics ? businessArguments[1] : typeof(Arg<object>)).GetGenericTypeDefinition();
+            if (typeof(IBusiness<,>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments))
+            {
+                resultType = businessArguments[0].GetGenericTypeDefinition();
+                argType = businessArguments[1].GetGenericTypeDefinition();
+            }
+            else //if (typeof(IBusiness).IsAssignableFrom(type))
+            {
+                resultType = (resultType ?? typeof(ResultObject<object>)).GetGenericTypeDefinition();
+                argType = (argType ?? typeof(Arg<object>)).GetGenericTypeDefinition();
+            }
 
             var attributes = AttributeBase.GetTopAttributes(typeInfo);//GetArgAttr(typeInfo);
 

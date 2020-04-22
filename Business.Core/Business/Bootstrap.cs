@@ -51,6 +51,12 @@ namespace Business.Core
 
         public System.Type Type { get; }
 
+        public System.Type ResultType { get; set; }
+
+        public System.Type ArgType { get; set; }
+
+        public System.Action Build { get; set; }
+
         public class UseDocConfig
         {
             public string OutDir { get; set; }
@@ -139,9 +145,13 @@ namespace Business.Core
 
         IBusiness business;
 
+        /// <summary>
+        /// Build
+        /// </summary>
+        /// <returns></returns>
         public virtual object Build()
         {
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -154,6 +164,8 @@ namespace Business.Core
 
                 Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
+
+            Config.Build?.Invoke();
 
             return bind.instance;
         }
@@ -176,7 +188,60 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// Generating Document Model for All Business Classes. business.doc
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
         public virtual Bootstrap UseDoc(Config config) => UseDoc(null, config);
+
+        #region UseResultType UseArgType
+
+        /// <summary>
+        /// use result type
+        /// </summary>
+        /// <param name="resultType"></param>
+        /// <returns></returns>
+        public virtual Bootstrap UseResultType(System.Type resultType)
+        {
+            Config.ResultType = resultType;
+            return this;
+        }
+
+        /// <summary>
+        /// use result type
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <returns></returns>
+        public virtual Bootstrap UseResultType<Result>() where Result : Core.Result.IResult
+        {
+            Config.ResultType = typeof(Result);
+            return this;
+        }
+
+        /// <summary>
+        /// use arg type
+        /// </summary>
+        /// <param name="argType"></param>
+        /// <returns></returns>
+        public virtual Bootstrap UseArgType(System.Type argType)
+        {
+            Config.ArgType = argType;
+            return this;
+        }
+
+        /// <summary>
+        /// use arg type
+        /// </summary>
+        /// <typeparam name="Arg"></typeparam>
+        /// <returns></returns>
+        public virtual Bootstrap UseArgType<Arg>() where Arg : IArg, new()
+        {
+            Config.ArgType = typeof(Arg);
+            return this;
+        }
+
+        #endregion
     }
 
     public class Bootstrap<Business> : IBootstrap
@@ -190,7 +255,7 @@ namespace Business.Core
 
         public virtual Business Build()
         {
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -203,6 +268,8 @@ namespace Business.Core
 
                 Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
+
+            Config.Build?.Invoke();
 
             return bind.instance as Business;
         }
@@ -226,6 +293,54 @@ namespace Business.Core
         }
 
         public virtual Bootstrap<Business> UseDoc(Config config) => UseDoc(null, config);
+
+        #region UseResultType UseArgType
+
+        /// <summary>
+        /// use result type
+        /// </summary>
+        /// <param name="resultType"></param>
+        /// <returns></returns>
+        public virtual Bootstrap<Business> UseResultType(System.Type resultType)
+        {
+            Config.ResultType = resultType;
+            return this;
+        }
+
+        /// <summary>
+        /// use result type
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <returns></returns>
+        public virtual Bootstrap<Business> UseResultType<Result>() where Result : Core.Result.IResult
+        {
+            Config.ResultType = typeof(Result);
+            return this;
+        }
+
+        /// <summary>
+        /// use arg type
+        /// </summary>
+        /// <param name="argType"></param>
+        /// <returns></returns>
+        public virtual Bootstrap<Business> UseArgType(System.Type argType)
+        {
+            Config.ArgType = argType;
+            return this;
+        }
+
+        /// <summary>
+        /// use arg type
+        /// </summary>
+        /// <typeparam name="Arg"></typeparam>
+        /// <returns></returns>
+        public virtual Bootstrap<Business> UseArgType<Arg>() where Arg : IArg, new()
+        {
+            Config.ArgType = typeof(Arg);
+            return this;
+        }
+
+        #endregion
     }
 
     public class BootstrapAll : IBootstrap
@@ -249,7 +364,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            new Bind(type, Config.Interceptor, Config.ConstructorArguments);
+                            new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
                             //Create(type, bootstrap.constructorArguments);
                             return true;
                         }
@@ -257,7 +372,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        new Bind(type, Config.Interceptor, Config.ConstructorArguments);
+                        new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
                         return true;
                     }
                 }
@@ -274,6 +389,8 @@ namespace Business.Core
             }
 
             Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+
+            Config.Build?.Invoke();
         }
 
         /// <summary>
@@ -316,6 +433,54 @@ namespace Business.Core
         }
 
         public virtual BootstrapAll UseDoc(Config config) => UseDoc(null, config);
+
+        #region UseResultType UseArgType
+
+        /// <summary>
+        /// use result type
+        /// </summary>
+        /// <param name="resultType"></param>
+        /// <returns></returns>
+        public virtual BootstrapAll UseResultType(System.Type resultType)
+        {
+            Config.ResultType = resultType;
+            return this;
+        }
+
+        /// <summary>
+        /// use result type
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <returns></returns>
+        public virtual BootstrapAll UseResultType<Result>() where Result : Core.Result.IResult
+        {
+            Config.ResultType = typeof(Result);
+            return this;
+        }
+
+        /// <summary>
+        /// use arg type
+        /// </summary>
+        /// <param name="argType"></param>
+        /// <returns></returns>
+        public virtual BootstrapAll UseArgType(System.Type argType)
+        {
+            Config.ArgType = argType;
+            return this;
+        }
+
+        /// <summary>
+        /// use arg type
+        /// </summary>
+        /// <typeparam name="Arg"></typeparam>
+        /// <returns></returns>
+        public virtual BootstrapAll UseArgType<Arg>() where Arg : IArg, new()
+        {
+            Config.ArgType = typeof(Arg);
+            return this;
+        }
+
+        #endregion
     }
 
     public class BootstrapAll<Business> : IBootstrap
@@ -342,7 +507,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments).instance is Business business)
+                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType).instance is Business business)
                             {
                                 BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                             }
@@ -353,7 +518,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments).instance is Business business)
+                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType).instance is Business business)
                         {
                             BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                         }
@@ -373,6 +538,8 @@ namespace Business.Core
             }
 
             Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+
+            Config.Build?.Invoke();
         }
 
         /// <summary>
@@ -414,7 +581,60 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// Generating Document Model for All Business Classes. business.doc
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
         public virtual BootstrapAll<Business> UseDoc(Config config) => UseDoc(null, config);
+
+        #region UseResultType UseArgType
+
+        /// <summary>
+        /// use result type
+        /// </summary>
+        /// <param name="resultType"></param>
+        /// <returns></returns>
+        public virtual BootstrapAll<Business> UseResultType(System.Type resultType)
+        {
+            Config.ResultType = resultType;
+            return this;
+        }
+
+        /// <summary>
+        /// use result type
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <returns></returns>
+        public virtual BootstrapAll<Business> UseResultType<Result>() where Result : Core.Result.IResult
+        {
+            Config.ResultType = typeof(Result);
+            return this;
+        }
+
+        /// <summary>
+        /// use arg type
+        /// </summary>
+        /// <param name="argType"></param>
+        /// <returns></returns>
+        public virtual BootstrapAll<Business> UseArgType(System.Type argType)
+        {
+            Config.ArgType = argType;
+            return this;
+        }
+
+        /// <summary>
+        /// use arg type
+        /// </summary>
+        /// <typeparam name="Arg"></typeparam>
+        /// <returns></returns>
+        public virtual BootstrapAll<Business> UseArgType<Arg>() where Arg : IArg, new()
+        {
+            Config.ArgType = typeof(Arg);
+            return this;
+        }
+
+        #endregion
     }
 }
 

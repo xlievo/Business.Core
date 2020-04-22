@@ -91,9 +91,7 @@ namespace Business.Core
 
     public interface IBusiness<Result> : IBusiness<Result, Arg<object>> where Result : Core.Result.IResult { }
 
-    public abstract partial class BusinessBase<Result, Arg> : IBusiness<Result, Arg>
-        where Result : Core.Result.IResult
-        where Arg : IArg, new()
+    public abstract class BusinessBase : IBusiness
     {
         /// <summary>
         /// Log subscription queue
@@ -120,11 +118,6 @@ namespace Business.Core
         /// </summary>
         public System.Action<Configer> BindBefore { get; set; }
 
-        ///// <summary>
-        ///// Get token
-        ///// </summary>
-        //public virtual System.Func<dynamic, Auth.IToken, System.Threading.Tasks.Task<Auth.IToken>> GetToken { get; set; } = async (c, token) => token;
-
         #region business
 
         /// <summary>
@@ -134,7 +127,7 @@ namespace Business.Core
         /// <param name="message"></param>
         /// <param name="method"></param>
         /// <returns></returns>
-        public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => this.Configer.MetaData.TryGetValue(method ?? string.Empty, out Meta.MetaData meta) ? Core.Result.ResultFactory.ResultCreate(meta, state, message) : Core.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, state, message);
+        public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => this.Configer.MetaData.TryGetValue(method ?? string.Empty, out Meta.MetaData meta) ? Result.ResultFactory.ResultCreate(meta, state, message) : Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, state, message);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -144,7 +137,7 @@ namespace Business.Core
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public Core.Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => Core.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+        public Core.Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -153,10 +146,15 @@ namespace Business.Core
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public Core.Result.IResult ResultCreate(object data, string message = null, int state = 1) => Core.Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+        public Core.Result.IResult ResultCreate(object data, string message = null, int state = 1) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
         #endregion
+    }
 
+    public abstract partial class BusinessBase<Result, Arg> : BusinessBase, IBusiness<Result, Arg>
+        where Result : Core.Result.IResult
+        where Arg : IArg, new()
+    {
         /*
         /// <summary>
         /// Business member accessor
@@ -187,6 +185,4 @@ namespace Business.Core
     }
 
     public abstract class BusinessBase<Result> : BusinessBase<Result, Arg<object>>, IBusiness<Result> where Result : Core.Result.IResult { }
-
-    public abstract class BusinessBase : BusinessBase<Result.ResultObject<object>> { }
 }

@@ -1469,7 +1469,6 @@ namespace Business.Core.Utils
                 }
             }
 
-            //var distinct = gropus.Distinct(Annotations.GroupAttribute.Comparer);
             var attrs = gropus.Distinct(Annotations.GroupAttribute.Comparer).ToDictionary(c => c.GroupKey(), c => c);
 
             if (null != clones && clones.Any())
