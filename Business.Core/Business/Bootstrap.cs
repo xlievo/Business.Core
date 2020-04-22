@@ -24,6 +24,18 @@ namespace Business.Core
     public interface IBootstrap
     {
         BootstrapConfig Config { get; }
+
+        IBootstrap UseDoc(string outDir = null, Config config = default);
+
+        IBootstrap UseResultType(System.Type resultType);
+
+        IBootstrap UseResultType<Result>() where Result : Core.Result.IResult;
+
+        IBootstrap UseArgType(System.Type argType);
+
+        IBootstrap UseArgType<Arg>() where Arg : IArg, new();
+
+        dynamic Build();
     }
 
     public class BootstrapConfig
@@ -55,7 +67,9 @@ namespace Business.Core
 
         public System.Type ArgType { get; set; }
 
-        public System.Action Build { get; set; }
+        public System.Action<IBootstrap> BuildBefore { get; set; }
+
+        public System.Action<IBootstrap> BuildAfter { get; set; }
 
         public class UseDocConfig
         {
@@ -71,7 +85,21 @@ namespace Business.Core
     {
         public Bootstrap(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
 
+        #region IBootstrap
+
         public BootstrapConfig Config { get; }
+
+        IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
+
+        IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
+
+        IBootstrap IBootstrap.UseResultType<Result>() => UseResultType<Result>();
+
+        IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+
+        IBootstrap IBootstrap.UseArgType<Arg>() => UseArgType<Arg>();
+
+        #endregion
 
         #region Create
 
@@ -151,6 +179,8 @@ namespace Business.Core
         /// <returns></returns>
         public virtual object Build()
         {
+            Config.BuildBefore?.Invoke(this);
+
             var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
@@ -165,7 +195,7 @@ namespace Business.Core
                 Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
 
-            Config.Build?.Invoke();
+            Config.BuildAfter?.Invoke(this);
 
             return bind.instance;
         }
@@ -249,12 +279,30 @@ namespace Business.Core
     {
         public Bootstrap(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
 
+        #region IBootstrap
+
         public BootstrapConfig Config { get; }
+
+        IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
+
+        IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
+
+        IBootstrap IBootstrap.UseResultType<Result>() => UseResultType<Result>();
+
+        IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+
+        IBootstrap IBootstrap.UseArgType<Arg>() => UseArgType<Arg>();
+
+        dynamic IBootstrap.Build() => Build();
+
+        #endregion
 
         IBusiness business;
 
         public virtual Business Build()
         {
+            Config.BuildBefore?.Invoke(this);
+
             var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
@@ -269,7 +317,7 @@ namespace Business.Core
                 Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
 
-            Config.Build?.Invoke();
+            Config.BuildAfter?.Invoke(this);
 
             return bind.instance as Business;
         }
@@ -347,7 +395,27 @@ namespace Business.Core
     {
         public BootstrapAll(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
 
+        #region IBootstrap
+
         public BootstrapConfig Config { get; }
+
+        IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
+
+        IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
+
+        IBootstrap IBootstrap.UseResultType<Result>() => UseResultType<Result>();
+
+        IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+
+        IBootstrap IBootstrap.UseArgType<Arg>() => UseArgType<Arg>();
+
+        dynamic IBootstrap.Build()
+        {
+            Build();
+            return null;
+        }
+
+        #endregion
 
         /// <summary>
         /// Load all business classes in the run directory
@@ -356,6 +424,8 @@ namespace Business.Core
         /// <param name="businessTypeFullName"></param>
         public virtual void Build(string[] assemblyFiles = null, string[] businessTypeFullName = null)
         {
+            Config.BuildBefore?.Invoke(this);
+
             Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
@@ -390,7 +460,7 @@ namespace Business.Core
 
             Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
 
-            Config.Build?.Invoke();
+            Config.BuildAfter?.Invoke(this);
         }
 
         /// <summary>
@@ -490,7 +560,27 @@ namespace Business.Core
 
         public BootstrapAll(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
 
+        #region IBootstrap
+
         public BootstrapConfig Config { get; }
+
+        IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
+
+        IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
+
+        IBootstrap IBootstrap.UseResultType<Result>() => UseResultType<Result>();
+
+        IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+
+        IBootstrap IBootstrap.UseArgType<Arg>() => UseArgType<Arg>();
+
+        dynamic IBootstrap.Build()
+        {
+            Build();
+            return null;
+        }
+
+        #endregion
 
         /// <summary>
         /// Load all business classes in the run directory
@@ -499,6 +589,8 @@ namespace Business.Core
         /// <param name="businessTypeFullName"></param>
         public virtual void Build(string[] assemblyFiles = null, string[] businessTypeFullName = null)
         {
+            Config.BuildBefore?.Invoke(this);
+
             Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
@@ -539,7 +631,7 @@ namespace Business.Core
 
             Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
 
-            Config.Build?.Invoke();
+            Config.BuildAfter?.Invoke(this);
         }
 
         /// <summary>
