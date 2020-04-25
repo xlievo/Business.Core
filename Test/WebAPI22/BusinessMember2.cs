@@ -2,6 +2,7 @@
 using Business.Core.Annotations;
 using Business.Core.Result;
 using Business.Core.Utils;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -95,6 +96,45 @@ public class BusinessMember2 : BusinessBase
     public virtual async Task<IResult<Test001>> Test000(Session session, Arg<Test001> arg)
     {
         return this.ResultCreate(arg.Out);
+    }
+
+    /// <summary>
+    /// Simple asp.net HTTP request file
+    /// </summary>
+    [Use(typeof(BusinessController))]
+    [HttpFile]
+    public class HttpFile : ReadOnlyCollection<IFormFile>
+    {
+        public HttpFile() { }
+
+        public HttpFile(IEnumerable<IFormFile> values) : base(values) { }
+    }
+
+    /// <summary>
+    /// Simple asp.net HTTP request file attribute
+    /// </summary>
+    public class HttpFileAttribute : Business.Core.Annotations.HttpFileAttribute
+    {
+        readonly IEqualityComparer<IFormFile> comparer = Equality<IFormFile>.CreateComparer(c => c.Name);
+
+        /// <summary>
+        /// Simple asp.net HTTP request file attribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        public HttpFileAttribute(int state = 830, string message = null) : base(state, message) { comparer = null; }
+
+        public override async ValueTask<IResult> Proces<Type>(dynamic value)
+        {
+            BusinessController context = value;
+
+            if (!context.Request.HasFormContentType || Equals(null, context))
+            {
+                return this.ResultCreate<Type>(default);
+            }
+
+            return this.ResultCreate(new HttpFile(context.Request.Form.Files.Distinct(comparer)));
+        }
     }
 
     /// <summary>

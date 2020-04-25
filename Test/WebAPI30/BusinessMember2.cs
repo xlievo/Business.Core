@@ -3,6 +3,7 @@ using Business.Core.Annotations;
 using Business.Core.Auth;
 using Business.Core.Result;
 using Business.Core.Utils;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -244,6 +245,45 @@ public partial class BusinessMember2 : BusinessBase
     //    return date;
     //}
 
+    /// <summary>
+    /// Simple asp.net HTTP request file
+    /// </summary>
+    [Use(typeof(BusinessController))]
+    [HttpFile]
+    public class HttpFile : ReadOnlyCollection<IFormFile>
+    {
+        public HttpFile() { }
+
+        public HttpFile(IEnumerable<IFormFile> values) : base(values) { }
+    }
+
+    /// <summary>
+    /// Simple asp.net HTTP request file attribute
+    /// </summary>
+    public class HttpFileAttribute : Business.Core.Annotations.HttpFileAttribute
+    {
+        readonly IEqualityComparer<IFormFile> comparer = Equality<IFormFile>.CreateComparer(c => c.Name);
+
+        /// <summary>
+        /// Simple asp.net HTTP request file attribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        public HttpFileAttribute(int state = 830, string message = null) : base(state, message) { comparer = null; }
+
+        public override async ValueTask<IResult> Proces<Type>(dynamic value)
+        {
+            BusinessController context = value;
+
+            if (!context.Request.HasFormContentType || Equals(null, context))
+            {
+                return this.ResultCreate<Type>(default);
+            }
+
+            return this.ResultCreate(new HttpFile(context.Request.Form.Files.Distinct(comparer)));
+        }
+    }
+
     public const string login = "[\"Login\",\"{User:\\\"ddd\\\",Password:\\\"123456\\\"}\",\"D\"]";
 
     /// <summary>
@@ -282,7 +322,7 @@ public partial class BusinessMember2 : BusinessBase
     [Testing("test, important logic, do not delete!!!",
          "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
          tokenMethod: login)]
-    public virtual async Task<dynamic> Test001(Session session, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+    public virtual async Task<dynamic> Test001(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
     {
         DDD = 9;
         //Logger.loggerQueue?.queue.TryAdd(new Logger.LoggerData
@@ -303,7 +343,7 @@ public partial class BusinessMember2 : BusinessBase
         //});
 
         dynamic args = new System.Dynamic.ExpandoObject();
-        args.token = session;
+        args.token = session222;
         args.arg = arg.Out;
         if (args.arg.B == "ex")
         {
@@ -335,7 +375,7 @@ public partial class BusinessMember2 : BusinessBase
         //    }
         //}
 
-        var files = httpFile.Select(c => new { key = c.Key, length = c.Value.Length }).ToList();
+        var files = httpFile.Select(c => new { key = c.Name, length = c.Length }).ToList();
 
         return this.ResultCreate(new { arg = arg.Out, files });
         //return this.ResultCreate(new List<Test001Result?> { ss });

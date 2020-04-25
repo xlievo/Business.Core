@@ -340,14 +340,14 @@ namespace BenchmarkTest
             });
         }
 
-        public virtual dynamic Test000([Use(true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
+        public virtual dynamic Test000([Use(ParameterName = true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
 
-        public virtual async Task<dynamic> Test001([Use(true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token)
+        public virtual async Task<dynamic> Test001([Use(ParameterName = true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token)
         {
             return this.ResultCreate(data: arg00.A + 1);
         }
 
-        public virtual IResult Test002([Use(true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
+        public virtual IResult Test002([Use(ParameterName = true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
 
 
         public class TestCollectionAttribute : ArgumentAttribute

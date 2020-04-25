@@ -457,21 +457,27 @@ namespace Business.Core.Annotations
         public string[] ParameterName { get; }
     }
 
+    /// <summary>
+    /// Injecting Objects Corresponding to Parameters
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Interface | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public sealed class UseAttribute : AttributeBase
     {
         /// <summary>
-        /// Injecting Objects Corresponding to Parameters
+        /// Injecting Objects Corresponding to Parameter type
         /// </summary>
-        /// <param name="parameterName">Use parameter names to correspond to injection objects</param>
-        public UseAttribute(bool parameterName = false) => this.ParameterName = parameterName;
+        /// <param name="parameterType"></param>
+        public UseAttribute(System.Type parameterType = null) => this.ParameterType = parameterType;
 
         /// <summary>
         /// Use parameter names to correspond to injection objects
         /// </summary>
-        public bool ParameterName { get; private set; }
+        public bool ParameterName { get; set; }
 
-        public bool Token { get; set; }
+        /// <summary>
+        /// Injecting Objects Corresponding to Parameter type
+        /// </summary>
+        public System.Type ParameterType { get; set; }
     }
 
     /// <summary>
@@ -915,7 +921,7 @@ namespace Business.Core.Annotations
         /// <typeparam name="Type"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces<Type>(dynamic value) => this.ResultCreate<dynamic>(value);
+        public virtual async ValueTask<IResult> Proces<Type>(dynamic value) => this.ResultCreate<Type>(value);
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -924,7 +930,7 @@ namespace Business.Core.Annotations
         /// <param name="token"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces<Type>(dynamic token, dynamic value) => this.ResultCreate<dynamic>(value);
+        public virtual async ValueTask<IResult> Proces<Type>(dynamic token, dynamic value) => this.ResultCreate<Type>(value);
 
         ///// <summary>
         ///// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -1663,6 +1669,7 @@ namespace Business.Core.Annotations
 
     #region Deserialize
 
+    [System.AttributeUsage(System.AttributeTargets.All, AllowMultiple = false)]
     public sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
         internal protected ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, int state = -11, string message = null) : base(state, message)
@@ -1674,33 +1681,6 @@ namespace Business.Core.Annotations
 
         public ArgumentDefaultAttribute(int state = -11, string message = null) : base(state, message) { }
     }
-
-    //public class JsonArgAttribute : ArgumentAttribute
-    //{
-    //    public static Newtonsoft.Json.JsonSerializerSettings Settings = new Newtonsoft.Json.JsonSerializerSettings
-    //    {
-    //        ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-    //        ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver(),
-    //        DateFormatString = "yyyy-MM-dd HH:mm:ss",
-    //        DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local,
-    //        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-    //        Converters = new System.Collections.Generic.List<Newtonsoft.Json.JsonConverter> { new Newtonsoft.Json.Converters.StringEnumConverter() }
-    //    };
-
-    //    public JsonArgAttribute(int state = -12, string message = null) : base(state, message) => this.CanNull = false;
-
-    //    public override async ValueTask<IResult> Proces(dynamic value)
-    //    {
-    //        var result = CheckNull(this, value);
-    //        if (!result.HasData) { return result; }
-
-    //        try
-    //        {
-    //            return this.ResultCreate(data: Newtonsoft.Json.JsonConvert.DeserializeObject(value?.ToString(), this.Meta.MemberType, Settings));
-    //        }
-    //        catch { return this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Json deserialize error"); }
-    //    }
-    //}
 
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class ParametersAttribute : ArgumentAttribute
@@ -1758,6 +1738,7 @@ namespace Business.Core.Annotations
     /// <summary>
     /// System.Text.Json.JsonSerializer.Deserialize
     /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public class JsonArgAttribute : ArgumentAttribute
     {
         public JsonArgAttribute(int state = -12, string message = null) : base(state, message)
@@ -1794,39 +1775,12 @@ namespace Business.Core.Annotations
     }
 
     /// <summary>
-    /// Simple asp.net HTTP request file
-    /// </summary>
-    [HttpFile]
-    public class HttpFile : System.Collections.Generic.Dictionary<string, dynamic> { }
-
-    /// <summary>
     /// Simple asp.net HTTP request file attribute
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
-    public class HttpFileAttribute : ArgumentAttribute
+    [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    public abstract class HttpFileAttribute : ArgumentAttribute
     {
         public HttpFileAttribute(int state = 830, string message = null) : base(state, message) { }
-
-        public override async ValueTask<IResult> Proces(dynamic value)
-        {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
-
-            var files = new HttpFile();
-
-            if (value.Request.HasFormContentType)
-            {
-                foreach (var item in value.HttpContext.Request.Form.Files)
-                {
-                    if (!files.ContainsKey(item.Name))
-                    {
-                        files.Add(item.Name, item);
-                    }
-                }
-            }
-
-            return this.ResultCreate(files);
-        }
     }
     /*
     public class ProtoBufArgAttribute : ArgumentAttribute

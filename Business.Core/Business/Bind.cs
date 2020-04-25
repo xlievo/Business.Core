@@ -936,7 +936,9 @@ namespace Business.Core
 
                     var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
 
-                    var hasUse = null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
+                    var hasToken = typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || typeof(Auth.IToken).IsAssignableFrom(use?.ParameterType);//true == use?.Token;
+
+                    var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
                     //var nick = argAttrAll.GetAttr<NickAttribute>();
 
                     //var hasCollectionAttr = false;
@@ -1012,7 +1014,7 @@ namespace Business.Core
                     //path,
                     use,
                     hasUse,
-                    typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || true == use?.Token,
+                    hasToken,
                     //item.Value.CommandAttr.OnlyName,
                     GetMethodTypeFullName(parameterType),
                     current.outType.GetTypeName(),
@@ -1178,7 +1180,10 @@ namespace Business.Core
 
                 //var use = argAttrAll.GetAttr<UseAttribute>();
                 var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
-                var hasUse = null != use || (current.hasIArg ? useTypes.ContainsKey(current.inType.FullName) : false);
+
+                var hasToken = typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || typeof(Auth.IToken).IsAssignableFrom(use?.ParameterType);// true == use?.Token;
+
+                var hasUse = hasToken || null != use || (current.hasIArg ? useTypes.ContainsKey(current.inType.FullName) : false);
 
                 //var hasCollectionAttr = false;
                 //if (current.hasCollection)
@@ -1241,7 +1246,7 @@ namespace Business.Core
                     //path2,
                     use,
                     hasUse,
-                    typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || true == use?.Token,
+                    hasToken,
                     GetMethodTypeFullName(memberType),
                     $"{type.GetTypeName(item.DeclaringType)}.{item.Name}",
                     memberDefinition,
@@ -1591,12 +1596,25 @@ namespace Business.Core
                             }
                             else
                             {
+                                var hasParameterType = null != arg.Use?.ParameterType;
+
                                 foreach (var use in useObj)
                                 {
-                                    if (Meta.UseTypePosition[i].IsAssignableFrom(use.Type))
+                                    if (hasParameterType)
                                     {
-                                        parameters[i] = use.Value;
-                                        break;
+                                        if (arg.Use.ParameterType.IsAssignableFrom(use.Type))
+                                        {
+                                            parameters[i] = use.Value;
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (Meta.UseTypePosition[i].IsAssignableFrom(use.Type))
+                                        {
+                                            parameters[i] = use.Value;
+                                            break;
+                                        }
                                     }
                                 }
                             }

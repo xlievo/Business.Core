@@ -439,7 +439,7 @@ namespace Business.Core.Utils
 
                     arg.UseType = true;
 
-                    arg.Use = new Annotations.UseAttribute(true);
+                    arg.Use = new Annotations.UseAttribute { ParameterName = true };
 
                     if (arg.HasCast)
                     {

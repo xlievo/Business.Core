@@ -39,7 +39,8 @@ public struct ResultObject<Type> : IResult<Type>
     /// <param name="message"></param>
     /// <param name="genericDefinition"></param>
     /// <param name="checkData"></param>
-    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericDefinition = null, bool checkData = true)
+    /// <param name="hasDataResult"></param>
+    public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, System.Type genericDefinition = null, bool checkData = true, bool hasDataResult = false)
     {
         this.DataType = dataType;
         this.Data = data;
@@ -49,6 +50,7 @@ public struct ResultObject<Type> : IResult<Type>
         this.Callback = default;
 
         this.GenericDefinition = genericDefinition;
+        this.HasDataResult = hasDataResult;
     }
 
     /// <summary>
@@ -67,6 +69,7 @@ public struct ResultObject<Type> : IResult<Type>
         this.Callback = null;
         this.DataType = null;
         this.GenericDefinition = null;
+        this.HasDataResult = false;
     }
 
     /// <summary>
@@ -112,6 +115,13 @@ public struct ResultObject<Type> : IResult<Type>
     [MessagePack.IgnoreMember]
     [System.Text.Json.Serialization.JsonIgnore]
     public System.Type GenericDefinition { get; }
+
+    /// <summary>
+    /// Return data or not
+    /// </summary>
+    [MessagePack.IgnoreMember]
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool HasDataResult { get; }
 
     /// <summary>
     /// Json format
@@ -207,7 +217,7 @@ public struct Token : Business.Core.Auth.IToken
 /// my session
 /// </summary>
 [SessionCheck]
-[Use(true, Token = true)]
+[Use(typeof(Token))]
 public struct Session
 {
     public string Account { get; set; }

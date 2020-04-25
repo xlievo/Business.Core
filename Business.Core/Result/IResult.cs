@@ -74,6 +74,11 @@ namespace Business.Core.Result
         /// System.Type object that represents a generic type definition from which the current generic type can be constructed.
         /// </summary>
         System.Type GenericDefinition { get; }
+
+        /// <summary>
+        /// Return data or not
+        /// </summary>
+        bool HasDataResult { get; }
     }
 
     public interface IResult<DataType> : IResult
@@ -97,7 +102,7 @@ namespace Business.Core.Result
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null) => (IResult)System.Activator.CreateInstance(resultType, new object[] { resultType.GenericTypeArguments[0], default, state, message, resultTypeDefinition, false });
+        public static IResult ResultCreate(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null) => (IResult)System.Activator.CreateInstance(resultType, new object[] { resultType.GenericTypeArguments[0], default, state, message, resultTypeDefinition, false, false });
 
         // Interceptor use
         /// <summary>
@@ -119,10 +124,10 @@ namespace Business.Core.Result
         /// <param name="state"></param>
         /// <param name="checkData"></param>
         /// <returns></returns>
-        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, bool checkData = true)
+        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, bool checkData = true, bool hasDataResult = true)
         {
             var type = typeof(Data);
-            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, checkData });
+            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, checkData, hasDataResult });
             //0 > state ? System.Math.Abs(state) : state
             return result;
         }
@@ -134,7 +139,7 @@ namespace Business.Core.Result
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<string>(resultTypeDefinition, state: state, message: message, checkData: false);
+        public static IResult ResultCreate(this System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<string>(resultTypeDefinition, state: state, message: message, checkData: false, hasDataResult: false);
 
         /// <summary>
         /// Used to create IResult.Data secondary encapsulation
@@ -144,33 +149,10 @@ namespace Business.Core.Result
         /// <returns></returns>
         public static IResult ResultCreateToDataBytes(this IResult result)
         {
-            //if (null == resultType)
-            //{
-            //    return null;
-            //}
-
             if (Equals(null, result))
             {
                 return null;
             }
-
-            //IResult result2 = null;
-
-            //if (0 < result.State)
-            //{
-            //    if (result.HasData)
-            //    {
-            //        result2 = ResultCreate(resultType, result.ToDataBytes(), result.State);
-            //    }
-            //    else
-            //    {
-            //        result2 = ResultCreate(resultType, result.State);
-            //    }
-            //}
-            //else
-            //{
-            //    result2 = ResultCreate(resultType, result.State, result.Message);
-            //}
 
             var result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataBytes() : null, result.Message, result.State);
             //====================================//
@@ -192,24 +174,6 @@ namespace Business.Core.Result
                 return null;
             }
 
-            //IResult result2 = null;
-
-            //if (0 < result.State)
-            //{
-            //    if (result.HasData)
-            //    {
-            //        result2 = ResultCreate(resultType, result.ToDataString(), result.State);
-            //    }
-            //    else
-            //    {
-            //        result2 = ResultCreate(resultType, result.State);
-            //    }
-            //}
-            //else
-            //{
-            //    result2 = ResultCreate(resultType, result.State, result.Message);
-            //}
-            //var r = result.GetType().GetGenericTypeDefinition();
             var result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataString() : null, result.Message, result.State);
             //====================================//
             result2.Callback = result.Callback;

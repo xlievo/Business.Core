@@ -207,7 +207,7 @@ namespace Business.Core.Utils
                             break;
                         }
 
-                        if (result.HasData)
+                        if (result.HasDataResult)
                         {
                             if (!item.HasIArg)
                             {
@@ -639,7 +639,7 @@ namespace Business.Core.Utils
                         break;
                     }
 
-                    if (result.HasData)
+                    if (result.HasDataResult)
                     {
                         if (!item.HasIArg)
                         {
