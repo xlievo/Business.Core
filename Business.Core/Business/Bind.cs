@@ -1441,12 +1441,23 @@ namespace Business.Core
 
         readonly string groupDefault;
 
+        /// <summary>
+        /// CommandGroup
+        /// </summary>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="groupDefault"></param>
         public CommandGroup(System.Type resultTypeDefinition, string groupDefault)
         {
             this.resultTypeDefinition = resultTypeDefinition;
             this.groupDefault = groupDefault;
         }
 
+        /// <summary>
+        /// GetCommand
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual Command GetCommand(string cmd, string group = null)
         {
             if (string.IsNullOrEmpty(cmd))
@@ -1459,16 +1470,60 @@ namespace Business.Core
 
         #region Call
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual Result Call<Result>(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
 
+        /// <summary>
+        /// CallIResult
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual IResult CallIResult(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual dynamic Call(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual Result Call<Result>(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// CallIResult
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual IResult CallIResult(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual dynamic Call(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null)
         {
             var command = GetCommand(cmd, group);
@@ -1476,20 +1531,70 @@ namespace Business.Core
             return null == command ? Help.ErrorCmd(resultTypeDefinition, cmd) : command.Call(parameters, useObj);
         }
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual Result Call<Result>(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual IResult CallIResult(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual dynamic Call(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
         #endregion
 
         #region Call
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual Result Call<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// CallIResult
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual IResult CallIResult(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="args"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual dynamic Call(string cmd, System.Collections.Generic.IDictionary<string, string> args, UseEntry[] useObj, string group)
         {
             var command = GetCommand(cmd, group);
@@ -1497,26 +1602,95 @@ namespace Business.Core
             return null == command ? Help.ErrorCmd(resultTypeDefinition, cmd) : command.Call(args, useObj);
         }
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual Result Call<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// CallIResult
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual IResult CallIResult(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual dynamic Call(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
 
         #endregion
 
         #region AsyncCallUse
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
 
+        /// <summary>
+        /// AsyncIResult
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// AsyncIResult
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null)
         {
             var command = GetCommand(cmd, group);
@@ -1524,20 +1698,70 @@ namespace Business.Core
             return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
         }
 
+        /// <summary>
+        /// AsyncIResult
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
         #endregion
 
         #region AsyncCallUse
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// AsyncIResult
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, System.Collections.Generic.IDictionary<string, string> parameters, UseEntry[] useObj, string group)
         {
             var command = GetCommand(cmd, group);
@@ -1545,17 +1769,51 @@ namespace Business.Core
             return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
         }
 
+        /// <summary>
+        /// AsyncIResult
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="group"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, System.Collections.Generic.IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
         #endregion
     }
 
+    /// <summary>
+    /// Command
+    /// </summary>
     public class Command
     {
+        /// <summary>
+        /// Command
+        /// </summary>
+        /// <param name="call"></param>
+        /// <param name="meta"></param>
+        /// <param name="key"></param>
         public Command(System.Func<object[], dynamic> call, MetaData meta, string key)
         {
             this.call = call;
@@ -1568,6 +1826,12 @@ namespace Business.Core
         //===============member==================//
         readonly System.Func<object[], dynamic> call;
 
+        /// <summary>
+        /// GetArgsUse
+        /// </summary>
+        /// <param name="useObj"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
         public virtual object[] GetArgsUse(UseEntry[] useObj, System.Action<object[], int, Args, ArgGroup> action)
         {
             var parameters = new object[Meta.Args.Count];
@@ -1634,6 +1898,12 @@ namespace Business.Core
             return parameters;
         }
 
+        /// <summary>
+        /// GetAgs
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual object[] GetAgs(object[] parameters, params UseEntry[] useObj)
         {
             int l = 0;
@@ -1654,6 +1924,12 @@ namespace Business.Core
             });
         }
 
+        /// <summary>
+        /// GetAgs
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public virtual object[] GetAgs(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj)
         {
             return GetArgsUse(useObj, (args2, i, arg, group) =>
@@ -1674,10 +1950,29 @@ namespace Business.Core
 
         #region Call
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public dynamic Call(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj));
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public Result Call<Result>(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => Call(parameters, useObj);
 
+        /// <summary>
+        /// CallIResult
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public IResult CallIResult(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => Call(parameters, useObj);
 
         dynamic Syn(object[] parameters)
@@ -1692,20 +1987,58 @@ namespace Business.Core
             }
         }
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public dynamic Call(object[] parameters, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj));
 
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public Result Call<Result>(object[] parameters, params UseEntry[] useObj) => Call(parameters, useObj);
 
+        /// <summary>
+        /// CallIResult
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public IResult CallIResult(object[] parameters, params UseEntry[] useObj) => Call(parameters, useObj);
 
         #endregion
 
         #region AsyncCall
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj));
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
 
+        /// <summary>
+        /// AsyncIResult
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
 
         async System.Threading.Tasks.ValueTask<dynamic> Async(object[] parameters)
@@ -1735,20 +2068,51 @@ namespace Business.Core
             }
         }
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(object[] parameters, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj));
 
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(object[] parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
 
+        /// <summary>
+        /// AsyncIResult
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(object[] parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
 
         #endregion
 
+        /// <summary>
+        /// Key
+        /// </summary>
         public readonly string Key;
 
+        /// <summary>
+        /// Meta
+        /// </summary>
         public MetaData Meta { get; private set; }
 
+        /// <summary>
+        /// HasArgSingle
+        /// </summary>
         public bool HasArgSingle { get; internal set; }
 
+        /// <summary>
+        /// HasHttpFile
+        /// </summary>
         public bool HasHttpFile { get; internal set; }
     }
 }
@@ -1760,10 +2124,28 @@ namespace Business.Core.Meta
 
     #region Meta
 
+    /// <summary>
+    /// ArgGroup
+    /// </summary>
     public class ArgGroup
     {
+        /// <summary>
+        /// ArgGroup
+        /// </summary>
+        /// <param name="path"></param>
         public ArgGroup(string path) => Path = path;
 
+        /// <summary>
+        /// ArgGroup
+        /// </summary>
+        /// <param name="ignore"></param>
+        /// <param name="ignoreArg"></param>
+        /// <param name="attrs"></param>
+        /// <param name="alias"></param>
+        /// <param name="path"></param>
+        /// <param name="owner"></param>
+        /// <param name="root"></param>
+        /// <param name="httpFile"></param>
         public ArgGroup(ReadOnlyCollection<Ignore> ignore, bool ignoreArg, ReadOnlyCollection<ArgumentAttribute> attrs, string alias, string path, string owner, string root, bool httpFile)
         {
             Ignore = ignore;
@@ -1778,48 +2160,118 @@ namespace Business.Core.Meta
             HttpFile = httpFile;
         }
 
+        /// <summary>
+        /// Ignore
+        /// </summary>
         public ReadOnlyCollection<Ignore> Ignore { get; private set; }
 
+        /// <summary>
+        /// IgnoreArg
+        /// </summary>
         public bool IgnoreArg { get; internal set; }
 
         //public ConcurrentLinkedList<ArgumentAttribute> Attrs { get; internal set; }
+        /// <summary>
+        /// Attrs
+        /// </summary>
         public ReadOnlyCollection<ArgumentAttribute> Attrs { get; internal set; }
 
+        /// <summary>
+        /// Alias
+        /// </summary>
         public string Alias { get; private set; }
 
+        /// <summary>
+        /// Path
+        /// </summary>
         public string Path { get; private set; }
 
+        /// <summary>
+        /// Owner
+        /// </summary>
         public string Owner { get; private set; }
 
+        /// <summary>
+        /// Root
+        /// </summary>
         public string Root { get; private set; }
 
+        /// <summary>
+        /// Logger
+        /// </summary>
         public MetaLogger Logger { get; internal set; }
 
+        /// <summary>
+        /// IArgInLogger
+        /// </summary>
         public MetaLogger IArgInLogger { get; internal set; }
 
+        /// <summary>
+        /// HttpFile
+        /// </summary>
         public bool HttpFile { get; private set; }
     }
 
+    /// <summary>
+    /// MemberDefinitionCode
+    /// </summary>
     public enum MemberDefinitionCode
     {
+        /// <summary>
+        /// No
+        /// </summary>
         No,
+
+        /// <summary>
+        /// Definition
+        /// </summary>
         Definition,
+
+        /// <summary>
+        /// Field
+        /// </summary>
         Field,
+
+        /// <summary>
+        /// Property
+        /// </summary>
         Property,
     }
 
+    /// <summary>
+    /// ITypeDefinition
+    /// </summary>
+    /// <typeparam name="TypeDefinition"></typeparam>
     public interface ITypeDefinition<TypeDefinition> where TypeDefinition : ITypeDefinition<TypeDefinition>
     {
+        /// <summary>
+        /// Name
+        /// </summary>
         string Name { get; }
 
+        /// <summary>
+        /// Type
+        /// </summary>
         System.Type Type { get; }
 
+        /// <summary>
+        /// LastType
+        /// </summary>
         System.Type LastType { get; }
 
+        /// <summary>
+        /// HasDefinition
+        /// </summary>
         bool HasDefinition { get; }
 
+        /// <summary>
+        /// HasCollection
+        /// </summary>
         bool HasCollection { get; }
 
+        /// <summary>
+        /// HasDictionary
+        /// </summary>
         bool HasDictionary { get; }
 
         //bool IsEnum { get; set; }
@@ -1834,22 +2286,49 @@ namespace Business.Core.Meta
 
         //string Summary { get; set; }
 
+        /// <summary>
+        /// DefaultValue
+        /// </summary>
         object DefaultValue { get; }
 
+        /// <summary>
+        /// Nullable
+        /// </summary>
         bool Nullable { get; }
 
+        /// <summary>
+        /// FullName
+        /// </summary>
         string FullName { get; }
 
+        /// <summary>
+        /// MemberDefinition
+        /// </summary>
         MemberDefinitionCode MemberDefinition { get; }
 
+        /// <summary>
+        /// HasToken
+        /// </summary>
         bool HasToken { get; }
 
+        /// <summary>
+        /// HasDefaultValue
+        /// </summary>
         bool HasDefaultValue { get; }
 
+        /// <summary>
+        /// Group
+        /// </summary>
         ConcurrentReadOnlyDictionary<string, ArgGroup> Group { get; }
 
+        /// <summary>
+        /// Children
+        /// </summary>
         ReadOnlyCollection<TypeDefinition> Children { get; }
 
+        /// <summary>
+        /// Childrens
+        /// </summary>
         ReadOnlyCollection<TypeDefinition> Childrens { get; }
     }
 
@@ -1936,57 +2415,117 @@ namespace Business.Core.Meta
             HasCast = hasCast;
         }
 
-        //===============name==================//
+        /// <summary>
+        /// Name
+        /// </summary>
         public string Name { get; private set; }
-        //===============type==================//
+
+        /// <summary>
+        /// Type
+        /// </summary>
         public System.Type Type { get; internal set; }
-        //===============origType==================//
+
+        /// <summary>
+        /// OrigType
+        /// </summary>
         public System.Type OrigType { get; private set; }
-        //===============lastType==================//
+
+        /// <summary>
+        /// LastType
+        /// </summary>
         public System.Type LastType { get; private set; }
-        //===============currentOrigType==================//
+
+        /// <summary>
+        /// CurrentOrigType
+        /// </summary>
         public System.Type CurrentOrigType { get; private set; }
-        //===============position==================//
+
+        /// <summary>
+        /// Position
+        /// </summary>
         public int Position { get; private set; }
-        //===============defaultValue==================//
+
+        /// <summary>
+        /// DefaultValue
+        /// </summary>
         public object DefaultValue { get; private set; }
-        //===============hasDefaultValue==================//
+
+        /// <summary>
+        /// HasDefaultValue
+        /// </summary>
         public bool HasDefaultValue { get; private set; }
+
+        /// <summary>
+        /// HasDictionary
+        /// </summary>
         public bool HasDictionary { get; private set; }
-        //===============hasCollection==================//
+
+        /// <summary>
+        /// HasCollection
+        /// </summary>
         public bool HasCollection { get; private set; }
         //===============hasCollectionAttr==================//
         //public bool HasCollectionAttr { get; internal set; }
-        //===============hasCollectionIArg==================//
+
+        /// <summary>
+        /// HasCollectionIArg
+        /// </summary>
         public bool HasCollectionIArg { get; internal set; }
-        //===============nullable==================//
+
+        /// <summary>
+        /// Nullable
+        /// </summary>
         public bool Nullable { get; private set; }
-        //===============accessor==================//
+
+        /// <summary>
+        /// Accessor
+        /// </summary>
         public Accessor Accessor { get; private set; }
-        //===============group==================//
+
+        /// <summary>
+        /// Group
+        /// </summary>
         public ConcurrentReadOnlyDictionary<string, ArgGroup> Group { get; internal set; }
         ////===============argAttr==================//
         //public SafeList<Attributes.ArgumentAttribute> ArgAttr { get; private set; }
-        //===============children==================//
+
+        /// <summary>
+        /// Children
+        /// </summary>
         public ReadOnlyCollection<Args> Children { get; private set; }
-        //===============childrens==================//
+
+        /// <summary>
+        /// Childrens
+        /// </summary>
         public ReadOnlyCollection<Args> Childrens { get; private set; }
-        //===============hasLower==================//
+
         /// <summary>
         /// Whether there are children
         /// </summary>
         public bool HasLower { get; internal set; }
-        //===============hasDefinition==================//
+
+        /// <summary>
+        /// HasDefinition
+        /// </summary>
         public bool HasDefinition { get; private set; }
-        //===============iArgOutType==================//
+
+        /// <summary>
+        /// IArgOutType
+        /// </summary>
         public System.Type IArgOutType { get; private set; }
-        //===============iArgInType==================//
+
+        /// <summary>
+        /// IArgInType
+        /// </summary>
         public System.Type IArgInType { get; private set; }
         ////==============path===================//
         //public string Path { get; private set; }
         ////==============source===================//
         //public string Source { get; private set; }
-        //===============hasIArg==================//
+
+        /// <summary>
+        /// HasIArg
+        /// </summary>
         public bool HasIArg { get; internal set; }
         //public MetaLogger Logger { get; private set; }
         //public MetaLogger IArgInLogger { get; private set; }
@@ -1996,48 +2535,130 @@ namespace Business.Core.Meta
         //public string Owner { get; private set; }
         ////==============ignore===================//
         //public ReadOnlyCollection<Attributes.Ignore> Ignore { get; private set; }
-        //==============use===================//
+
+        /// <summary>
+        /// Use
+        /// </summary>
         public UseAttribute Use { get; internal set; }
-        //==============useType===================//
+
+        /// <summary>
+        /// UseType
+        /// </summary>
         public bool UseType { get; internal set; }
-        //===============hasToken==================//
+
+        /// <summary>
+        /// HasToken
+        /// </summary>
         public bool HasToken { get; private set; }
-        //==============methodTypeFullName===================//
+
+        /// <summary>
+        /// MethodTypeFullName
+        /// </summary>
         public string MethodTypeFullName { get; private set; }
-        //==============argTypeFullName===================//
+
+        /// <summary>
+        /// FullName
+        /// </summary>
         public string FullName { get; private set; }
-        //==============memberDefinition===================//
+
         /// <summary>
         /// xml using
         /// </summary>
         public MemberDefinitionCode MemberDefinition { get; private set; }
-        //==============hasCast===================//
+
+        /// <summary>
+        /// HasCast
+        /// </summary>
         public bool HasCast { get; internal set; }
-        //==============parameters===================//
+
+        /// <summary>
+        /// Parameters
+        /// </summary>
         public bool Parameters { get; internal set; }
     }
 
+    /// <summary>
+    /// MetaLogger
+    /// </summary>
     public struct MetaLogger
     {
+        /// <summary>
+        /// Record
+        /// </summary>
         public LoggerAttribute Record { get; set; }
+
+        /// <summary>
+        /// Error
+        /// </summary>
         public LoggerAttribute Error { get; set; }
+
+        /// <summary>
+        /// Exception
+        /// </summary>
         public LoggerAttribute Exception { get; set; }
     }
 
+    /// <summary>
+    /// CommandGroup
+    /// </summary>
     public readonly struct CommandGroup
     {
+        /// <summary>
+        /// CommandGroup
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="full"></param>
         public CommandGroup(ReadOnlyDictionary<string, CommandAttribute> group, ReadOnlyDictionary<string, ReadOnlyDictionary<string, CommandAttribute>> full) { Group = group; Full = full; }
 
+        /// <summary>
+        /// Group
+        /// </summary>
         public ReadOnlyDictionary<string, CommandAttribute> Group { get; }
 
+        /// <summary>
+        /// Full
+        /// </summary>
         public ReadOnlyDictionary<string, ReadOnlyDictionary<string, CommandAttribute>> Full { get; }
     }
 
+    /// <summary>
+    /// MetaData
+    /// </summary>
     public readonly struct MetaData
     {
+        /// <summary>
+        /// Name
+        /// </summary>
+        /// <returns></returns>
         public override string ToString() => Name;
 
-        //MetaData
+        /// <summary>
+        /// MetaData
+        /// </summary>
+        /// <param name="accessor"></param>
+        /// <param name="commandGroup"></param>
+        /// <param name="args"></param>
+        /// <param name="argAll"></param>
+        /// <param name="iArgs"></param>
+        /// <param name="metaLogger"></param>
+        /// <param name="path"></param>
+        /// <param name="name"></param>
+        /// <param name="fullName"></param>
+        /// <param name="hasAsync"></param>
+        /// <param name="hasReturn"></param>
+        /// <param name="hasIResult"></param>
+        /// <param name="hasIResultGeneric"></param>
+        /// <param name="returnType"></param>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="resultType"></param>
+        /// <param name="argTypeDefinition"></param>
+        /// <param name="defaultValue"></param>
+        /// <param name="attributes"></param>
+        /// <param name="position"></param>
+        /// <param name="groupDefault"></param>
+        /// <param name="useTypePosition"></param>
+        /// <param name="methodTypeFullName"></param>
+        /// <param name="doc"></param>
         public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, System.Type argTypeDefinition, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
         {
             Accessor = accessor;
@@ -2083,63 +2704,140 @@ namespace Business.Core.Meta
             this.Doc = doc;
         }
 
+        /// <summary>
+        /// Accessor
+        /// </summary>
         public System.Func<object, object[], object> Accessor { get; }
 
-        //==============commandAttr===================//
+        /// <summary>
+        /// CommandGroup
+        /// </summary>
         public CommandGroup CommandGroup { get; }
-        //==============argAttrs===================//
+
+        /// <summary>
+        /// Args
+        /// </summary>
         public ReadOnlyCollection<Args> Args { get; }
-        //==============argAll===================//
+
+        /// <summary>
+        /// ArgAll
+        /// </summary>
         public ReadOnlyCollection<Args> ArgAll { get; }
-        //==============iArgs===================//
+
+        /// <summary>
+        /// IArgs
+        /// </summary>
         public ReadOnlyCollection<Args> IArgs { get; }
-        //==============MetaLogger===================//
+
+        /// <summary>
+        /// MetaLogger
+        /// </summary>
         public ReadOnlyDictionary<string, MetaLogger> MetaLogger { get; }
-        //==============path===================//
+
+        /// <summary>
+        /// Path
+        /// </summary>
         public string Path { get; }
-        //==============name===================//
+
+        /// <summary>
+        /// Name
+        /// </summary>
         public string Name { get; }
-        //==============fullName===================//
+
+        /// <summary>
+        /// FullName
+        /// </summary>
         public string FullName { get; }
-        //==============hasReturn===================//
+
+        /// <summary>
+        /// HasReturn
+        /// </summary>
         public bool HasReturn { get; }
-        //==============hasIResult===================//
+
+        /// <summary>
+        /// HasIResult
+        /// </summary>
         public bool HasIResult { get; }
-        //==============hasIResultGeneric===================//
+
+        /// <summary>
+        /// HasIResultGeneric
+        /// </summary>
         public bool HasIResultGeneric { get; }
-        //==============hasObject===================//
+
+        /// <summary>
+        /// HasObject
+        /// </summary>
         public bool HasObject { get; }
-        //==============returnType===================//
+
+        /// <summary>
+        /// ReturnType
+        /// </summary>
         public System.Type ReturnType { get; }
-        //==============resultTypeDefinition===================//
+
+        /// <summary>
+        /// ResultTypeDefinition
+        /// </summary>
         public System.Type ResultTypeDefinition { get; }
-        //==============resultType===================//
+
+        /// <summary>
+        /// ResultType
+        /// </summary>
         public System.Type ResultType { get; }
-        //==============resultGeneric===================//
+
+        /// <summary>
+        /// ResultGeneric
+        /// </summary>
         public System.Type ResultGeneric { get; }
-        //==============argTypeDefinition===================//
+
+        /// <summary>
+        /// ArgTypeDefinition
+        /// </summary>
         public System.Type ArgTypeDefinition { get; }
-        //==============hasAsync===================//
+
+        /// <summary>
+        /// HasAsync
+        /// </summary>
         public bool HasAsync { get; }
-        //==============defaultValue===================//
+
+        /// <summary>
+        /// DefaultValue
+        /// </summary>
         public object[] DefaultValue { get; }
-        //==============attributes===================//
+
+        /// <summary>
+        /// Attributes
+        /// </summary>
         public System.Collections.Generic.List<AttributeBase> Attributes { get; }
-        //===============position==================//
+
+        /// <summary>
+        /// Position
+        /// </summary>
         public int Position { get; }
-        //==============groupDefault===================//
+
+        /// <summary>
+        /// GroupDefault
+        /// </summary>
         public string GroupDefault { get; }
         ////==============argsFirst===================//
         //public ReadOnlyCollection<Args> ArgsFirst { get; private set; }
-        //==============useTypesPosition===================//
+
+        /// <summary>
+        /// UseTypePosition
+        /// </summary>
         public ConcurrentReadOnlyDictionary<int, System.Type> UseTypePosition { get; }
-        //==============methodTypeFullName===================//
+
+        /// <summary>
+        /// MethodTypeFullName
+        /// </summary>
         public string MethodTypeFullName { get; }
         ////==============ignore===================//
         //public Attributes.Ignore Ignore { get; private set; }
         //==============hasArgSingle===================//
         //public bool HasArgSingle { get; internal set; }
-        //==============doc===================//
+
+        /// <summary>
+        /// Doc
+        /// </summary>
         public DocAttribute Doc { get; }
 
     }

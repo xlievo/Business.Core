@@ -88,7 +88,7 @@ namespace Business.Core.Result
     }
 
     /// <summary>
-    /// IResult<DataType>
+    /// IResult
     /// </summary>
     /// <typeparam name="DataType"></typeparam>
     public interface IResult<DataType> : IResult
@@ -136,6 +136,7 @@ namespace Business.Core.Result
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <param name="checkData"></param>
+        /// <param name="hasDataResult"></param>
         /// <returns></returns>
         public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, bool checkData = true, bool hasDataResult = true)
         {

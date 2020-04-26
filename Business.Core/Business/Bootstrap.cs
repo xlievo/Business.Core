@@ -21,27 +21,57 @@ namespace Business.Core
     using Document;
     using System.Linq;
 
+    /// <summary>
+    /// IBootstrap
+    /// </summary>
     public interface IBootstrap
     {
+        /// <summary>
+        /// Config
+        /// </summary>
         BootstrapConfig Config { get; }
 
+        /// <summary>
+        /// UseDoc
+        /// </summary>
         IBootstrap UseDoc(string outDir = null, Config config = default);
 
+        /// <summary>
+        /// UseResultType
+        /// </summary>
         IBootstrap UseResultType(System.Type resultType);
 
+        /// <summary>
+        /// UseArgType
+        /// </summary>
         IBootstrap UseArgType(System.Type argType);
 
+        /// <summary>
+        /// Build
+        /// </summary>
         dynamic Build();
     }
 
+    /// <summary>
+    /// BootstrapConfig
+    /// </summary>
     public class BootstrapConfig
     {
+        /// <summary>
+        /// BootstrapConfig
+        /// </summary>
         internal protected BootstrapConfig()
         {
             Use = new System.Collections.Concurrent.ConcurrentQueue<System.Func<IBusiness, IBusiness>>();
             //UseDoc = null;
         }
 
+        /// <summary>
+        /// BootstrapConfig
+        /// </summary>
+        /// <param name="interceptor"></param>
+        /// <param name="constructorArguments"></param>
+        /// <param name="type"></param>
         public BootstrapConfig(Auth.IInterceptor interceptor, object[] constructorArguments, System.Type type = null) : this()
         {
             Interceptor = interceptor ?? new Auth.Interceptor();
@@ -49,40 +79,90 @@ namespace Business.Core
             Type = type;
         }
 
+        /// <summary>
+        /// Use
+        /// </summary>
         public System.Collections.Concurrent.ConcurrentQueue<System.Func<IBusiness, IBusiness>> Use { get; }
 
+        /// <summary>
+        /// UseDoc
+        /// </summary>
         public UseDocConfig UseDoc { get; set; }
 
+        /// <summary>
+        /// Interceptor
+        /// </summary>
         public Auth.IInterceptor Interceptor { get; }
 
+        /// <summary>
+        /// ConstructorArguments
+        /// </summary>
         public object[] ConstructorArguments { get; }
 
+        /// <summary>
+        /// Type
+        /// </summary>
         public System.Type Type { get; }
 
+        /// <summary>
+        /// ResultType
+        /// </summary>
         public System.Type ResultType { get; set; }
 
+        /// <summary>
+        /// ArgType
+        /// </summary>
         public System.Type ArgType { get; set; }
 
+        /// <summary>
+        /// BuildBefore
+        /// </summary>
         public System.Action<IBootstrap> BuildBefore { get; set; }
 
+        /// <summary>
+        /// BuildAfter
+        /// </summary>
         public System.Action<IBootstrap> BuildAfter { get; set; }
 
+        /// <summary>
+        /// UseDocConfig
+        /// </summary>
         public class UseDocConfig
         {
+
+            /// <summary>
+            /// OutDir
+            /// </summary>
             public string OutDir { get; set; }
 
+            /// <summary>
+            /// Config
+            /// </summary>
             public Config Config { get; internal set; }
 
+            /// <summary>
+            /// Use
+            /// </summary>
             public System.Action<string, Config> Use { get; internal set; }
         }
     }
 
+    /// <summary>
+    /// Bootstrap
+    /// </summary>
     public class Bootstrap : IBootstrap
     {
+        /// <summary>
+        /// Bootstrap
+        /// </summary>
+        /// <param name="config"></param>
         public Bootstrap(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
 
         #region IBootstrap
 
+        /// <summary>
+        /// Config
+        /// </summary>
         public BootstrapConfig Config { get; }
 
         IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
@@ -112,12 +192,12 @@ namespace Business.Core
         /// <returns></returns>
         public static Bootstrap<Business> Create<Business>(Auth.IInterceptor interceptor = null, params object[] constructorArguments) where Business : class => new Bootstrap<Business>(new BootstrapConfig(interceptor, constructorArguments, typeof(Business)));
 
-        /// <summary>
-        /// Initialize a Type proxy class
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="constructorArguments"></param>
-        /// <returns></returns>
+        ///// <summary>
+        ///// Initialize a Type proxy class
+        ///// </summary>
+        ///// <param name="type"></param>
+        ///// <param name="constructorArguments"></param>
+        ///// <returns></returns>
         //public static Bootstrap Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments);
 
         /// <summary>
@@ -254,13 +334,24 @@ namespace Business.Core
         #endregion
     }
 
+    /// <summary>
+    /// Bootstrap
+    /// </summary>
+    /// <typeparam name="Business"></typeparam>
     public class Bootstrap<Business> : IBootstrap
         where Business : class
     {
+        /// <summary>
+        /// Bootstrap
+        /// </summary>
+        /// <param name="config"></param>
         public Bootstrap(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
 
         #region IBootstrap
 
+        /// <summary>
+        /// Config
+        /// </summary>
         public BootstrapConfig Config { get; }
 
         IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
@@ -275,6 +366,10 @@ namespace Business.Core
 
         IBusiness business;
 
+        /// <summary>
+        /// Build
+        /// </summary>
+        /// <returns></returns>
         public virtual Business Build()
         {
             Config.BuildBefore?.Invoke(this);
@@ -316,6 +411,11 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// UseDoc
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
         public virtual Bootstrap<Business> UseDoc(Config config) => UseDoc(null, config);
 
         #region UseResultType UseArgType
@@ -355,12 +455,22 @@ namespace Business.Core
         #endregion
     }
 
+    /// <summary>
+    /// BootstrapAll
+    /// </summary>
     public class BootstrapAll : IBootstrap
     {
+        /// <summary>
+        /// BootstrapAll
+        /// </summary>
+        /// <param name="config"></param>
         public BootstrapAll(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
 
         #region IBootstrap
 
+        /// <summary>
+        /// Config
+        /// </summary>
         public BootstrapConfig Config { get; }
 
         IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
@@ -462,6 +572,11 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// UseDoc
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
         public virtual BootstrapAll UseDoc(Config config) => UseDoc(null, config);
 
         #region UseResultType UseArgType
@@ -501,15 +616,29 @@ namespace Business.Core
         #endregion
     }
 
+    /// <summary>
+    /// BootstrapAll
+    /// </summary>
+    /// <typeparam name="Business"></typeparam>
     public class BootstrapAll<Business> : IBootstrap
         where Business : class, IBusiness
     {
+        /// <summary>
+        /// BusinessList
+        /// </summary>
         public ConcurrentReadOnlyDictionary<string, Business> BusinessList = new ConcurrentReadOnlyDictionary<string, Business>(System.StringComparer.InvariantCultureIgnoreCase);
 
+        /// <summary>
+        /// BootstrapAll
+        /// </summary>
+        /// <param name="config"></param>
         public BootstrapAll(BootstrapConfig config = default) => Config = config ?? new BootstrapConfig();
 
         #region IBootstrap
 
+        /// <summary>
+        /// Config
+        /// </summary>
         public BootstrapConfig Config { get; }
 
         IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
@@ -666,8 +795,18 @@ namespace Business.Core.Utils
 {
     //using Boot;
 
+    /// <summary>
+    /// BootstrapExtensions
+    /// </summary>
     public static class BootstrapExtensions
     {
+        /// <summary>
+        /// Use
+        /// </summary>
+        /// <typeparam name="Bootstrap"></typeparam>
+        /// <param name="bootstrap"></param>
+        /// <param name="operation"></param>
+        /// <returns></returns>
         public static Bootstrap Use<Bootstrap>(this Bootstrap bootstrap, System.Func<IBusiness, IBusiness> operation)
             where Bootstrap : IBootstrap
         {
@@ -719,8 +858,25 @@ namespace Business.Core.Utils
         /// <returns></returns>
         public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.IgnoreSet(c, ignore, parameterName));
 
+        /// <summary>
+        /// IgnoreSet
+        /// </summary>
+        /// <typeparam name="Bootstrap"></typeparam>
+        /// <param name="bootstrap"></param>
+        /// <param name="ignore"></param>
+        /// <param name="argType"></param>
+        /// <returns></returns>
         public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params System.Type[] argType) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.IgnoreSet(c, ignore, argType));
 
+        /// <summary>
+        /// MemberSet
+        /// </summary>
+        /// <typeparam name="Bootstrap"></typeparam>
+        /// <param name="bootstrap"></param>
+        /// <param name="memberName"></param>
+        /// <param name="memberObj"></param>
+        /// <param name="skipNull"></param>
+        /// <returns></returns>
         public static Bootstrap MemberSet<Bootstrap>(this Bootstrap bootstrap, string memberName, object memberObj, bool skipNull = false) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.MemberSet(c, memberName, memberObj, skipNull));
     }
 }

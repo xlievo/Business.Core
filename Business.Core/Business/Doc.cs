@@ -21,9 +21,17 @@ namespace Business.Core.Document
     using System.Collections.Generic;
     using System.Linq;
 
+    /// <summary>
+    /// doc .xml
+    /// </summary>
     [System.Xml.Serialization.XmlRoot("doc")]
     public class Xml
     {
+        /// <summary>
+        /// doc .xml
+        /// </summary>
+        /// <param name="xml"></param>
+        /// <returns></returns>
         public static Xml DeserializeDoc(string xml)
         {
             if (null == xml) { throw new System.ArgumentNullException(nameof(xml)); }
@@ -101,6 +109,11 @@ namespace Business.Core.Document
             }
         }
 
+        /// <summary>
+        /// WhitespaceTrim
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static string WhitespaceTrim(string value)
         {
             if (null == value)
@@ -113,75 +126,162 @@ namespace Business.Core.Document
             return string.Join(System.Environment.NewLine, lin).Trim();
         }
 
+        /// <summary>
+        /// _assembly
+        /// </summary>
         [System.Xml.Serialization.XmlElement("assembly")]
         public assembly _assembly;
 
+        /// <summary>
+        /// members
+        /// </summary>
         public List<member> members;
 
+        /// <summary>
+        /// assembly
+        /// </summary>
         public class assembly
         {
+            /// <summary>
+            /// name
+            /// </summary>
             public string name;
 
+            /// <summary>
+            /// name
+            /// </summary>
+            /// <returns></returns>
             public override string ToString() => name;
         }
 
+        /// <summary>
+        /// member
+        /// </summary>
         public class member
         {
+            /// <summary>
+            /// name
+            /// </summary>
             [System.Xml.Serialization.XmlAttribute("name")]
             public string name;
 
+            /// <summary>
+            /// summary
+            /// </summary>
             [System.Xml.Serialization.XmlElement("summary")]
             public values summary;
 
+            /// <summary>
+            /// _params
+            /// </summary>
             [System.Xml.Serialization.XmlElement("param")]
             public List<param> _params;
 
+            /// <summary>
+            /// returns
+            /// </summary>
             [System.Xml.Serialization.XmlElement("returns")]
             public values returns;
 
+            /// <summary>
+            /// name
+            /// </summary>
+            /// <returns></returns>
             public override string ToString() => name;
 
+            /// <summary>
+            /// param
+            /// </summary>
             public class param
             {
+                /// <summary>
+                /// name
+                /// </summary>
                 [System.Xml.Serialization.XmlAttribute("name")]
                 public string name;
 
+                /// <summary>
+                /// text
+                /// </summary>
                 [System.Xml.Serialization.XmlText]
                 public string text;
 
+                /// <summary>
+                /// para
+                /// </summary>
                 [System.Xml.Serialization.XmlElement("para")]
                 public List<para> para;
 
+                /// <summary>
+                /// sub
+                /// </summary>
                 public string sub;
 
+                /// <summary>
+                /// $"{name} {text}"
+                /// </summary>
+                /// <returns></returns>
                 public override string ToString() => $"{name} {text}";
             }
 
+            /// <summary>
+            /// values
+            /// </summary>
             public class values
             {
+                /// <summary>
+                /// text
+                /// </summary>
                 [System.Xml.Serialization.XmlText]
                 public string text;
 
+                /// <summary>
+                /// para
+                /// </summary>
                 [System.Xml.Serialization.XmlElement("para")]
                 public List<para> para;
 
+                /// <summary>
+                /// sub
+                /// </summary>
                 public string sub;
 
+                /// <summary>
+                /// text
+                /// </summary>
+                /// <returns></returns>
                 public override string ToString() => text;
             }
 
+            /// <summary>
+            /// para
+            /// </summary>
             public class para
             {
+                /// <summary>
+                /// text
+                /// </summary>
                 [System.Xml.Serialization.XmlText]
                 public string text;
 
+                /// <summary>
+                /// text
+                /// </summary>
+                /// <returns></returns>
                 public override string ToString() => text;
             }
         }
     }
 
+    /// <summary>
+    /// DocGroup
+    /// </summary>
     public readonly struct DocGroup
     {
+        /// <summary>
+        /// DocGroup
+        /// </summary>
+        /// <param name="docGroup"></param>
         public DocGroup(Annotations.DocGroupAttribute docGroup)
         {
             Group = docGroup.Group;
@@ -190,6 +290,13 @@ namespace Business.Core.Document
             Active = docGroup.Active;
         }
 
+        /// <summary>
+        /// DocGroup
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="badge"></param>
+        /// <param name="active"></param>
+        /// <param name="position"></param>
         public DocGroup(string group, string badge = default, bool active = default, int position = default)
         {
             this.position = position;
@@ -200,24 +307,59 @@ namespace Business.Core.Document
 
         internal readonly int position;
 
+        /// <summary>
+        /// Group
+        /// </summary>
         public string Group { get; }
 
+        /// <summary>
+        /// Badge
+        /// </summary>
         public string Badge { get; }
 
+        /// <summary>
+        /// Active
+        /// </summary>
         public bool Active { get; }
 
+        /// <summary>
+        /// EqualityComparer
+        /// </summary>
         public class EqualityComparer : IEqualityComparer<DocGroup>
         {
+            /// <summary>
+            /// Equals
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="y"></param>
+            /// <returns></returns>
             public bool Equals(DocGroup x, DocGroup y) => string.Equals(x.Group, y.Group, System.StringComparison.InvariantCultureIgnoreCase);
 
+            /// <summary>
+            /// GetHashCode
+            /// </summary>
+            /// <param name="obj"></param>
+            /// <returns></returns>
             public int GetHashCode(DocGroup obj) => obj.Group.GetHashCode();
         }
 
+        /// <summary>
+        /// comparer
+        /// </summary>
         public static readonly EqualityComparer comparer = new EqualityComparer();
     }
 
+    /// <summary>
+    /// DocInfo
+    /// </summary>
     public readonly struct DocInfo
     {
+        /// <summary>
+        /// DocInfo
+        /// </summary>
+        /// <param name="alias"></param>
+        /// <param name="position"></param>
+        /// <param name="key"></param>
         public DocInfo(Annotations.DocAttribute alias, int position, string key)
         {
             Key = key;
@@ -229,17 +371,35 @@ namespace Business.Core.Document
 
         internal readonly int position;
 
+        /// <summary>
+        /// Key
+        /// </summary>
         public string Key { get; }
 
+        /// <summary>
+        /// Group
+        /// </summary>
         public string Group { get; }
 
+        /// <summary>
+        /// Name
+        /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        /// Badge
+        /// </summary>
         public string Badge { get; }
     }
 
+    /// <summary>
+    /// Config
+    /// </summary>
     public class Config
     {
+        /// <summary>
+        /// Host
+        /// </summary>
         public string Host { get; set; }
 
         /// <summary>
@@ -288,61 +448,142 @@ namespace Business.Core.Document
         public bool BenchmarkJSON { get; set; }
     }
 
+    /// <summary>
+    /// IDoc
+    /// </summary>
     public interface IDoc
     {
+        /// <summary>
+        /// Name
+        /// </summary>
         string Name { get; set; }
 
+        /// <summary>
+        /// Alias
+        /// </summary>
         string Alias { get; set; }
 
+        /// <summary>
+        /// Description
+        /// </summary>
         string Description { get; set; }
 
+        /// <summary>
+        /// Group
+        /// </summary>
         dynamic Group { get; }
 
+        /// <summary>
+        /// GroupDefault
+        /// </summary>
         string GroupDefault { get; set; }
 
+        /// <summary>
+        /// Config
+        /// </summary>
         Config Config { get; set; }
 
+        /// <summary>
+        /// DocGroup
+        /// </summary>
         IEnumerable<KeyValuePair<DocGroup, IEnumerable<DocInfo>>> DocGroup { get; set; }
     }
 
+    /// <summary>
+    /// IDoc
+    /// </summary>
+    /// <typeparam name="DocArg"></typeparam>
     public interface IDoc<DocArg> : IDoc where DocArg : IDocArg<DocArg>
     {
+        /// <summary>
+        /// Group
+        /// </summary>
         new Dictionary<string, Dictionary<string, IMember<DocArg>>> Group { get; set; }
     }
 
+    /// <summary>
+    /// IMember
+    /// </summary>
+    /// <typeparam name="DocArg"></typeparam>
     public interface IMember<DocArg> where DocArg : IDocArg<DocArg>
     {
+        /// <summary>
+        /// Key
+        /// </summary>
         string Key { get; set; }
 
+        /// <summary>
+        /// Name
+        /// </summary>
         string Name { get; set; }
 
+        /// <summary>
+        /// Alias
+        /// </summary>
         string Alias { get; set; }
 
+        /// <summary>
+        /// AliasGroup
+        /// </summary>
         string AliasGroup { get; set; }
 
+        /// <summary>
+        /// HasReturn
+        /// </summary>
         bool HasReturn { get; set; }
 
+        /// <summary>
+        /// Returns
+        /// </summary>
         Document.DocArg Returns { get; set; }
 
+        /// <summary>
+        /// Description
+        /// </summary>
         string Description { get; set; }
 
+        /// <summary>
+        /// Args
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         Dictionary<string, DocArg> Args { get; set; }
 
+        /// <summary>
+        /// ArgSingle
+        /// </summary>
         bool ArgSingle { get; set; }
 
+        /// <summary>
+        /// HttpFile
+        /// </summary>
         bool HttpFile { get; set; }
 
+        /// <summary>
+        /// Testing
+        /// </summary>
         Dictionary<string, Testing> Testing { get; set; }
     }
 
+    /// <summary>
+    /// IDocArg
+    /// </summary>
+    /// <typeparam name="DocArg"></typeparam>
     public interface IDocArg<DocArg> where DocArg : IDocArg<DocArg>
     {
+        /// <summary>
+        /// Children
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         Dictionary<string, DocArg> Children { get; set; }
 
+        /// <summary>
+        /// Items
+        /// </summary>
         Items<DocArg> Items { get; set; }
 
+        /// <summary>
+        /// Type
+        /// </summary>
         string Type { get; set; }
 
         //string Name { get; set; }
@@ -356,8 +597,15 @@ namespace Business.Core.Document
         //string[] Enum { get; set; }
     }
 
+    /// <summary>
+    /// Doc
+    /// </summary>
+    /// <typeparam name="DocArg"></typeparam>
     public class Doc<DocArg> : IDoc<DocArg> where DocArg : IDocArg<DocArg>
     {
+        /// <summary>
+        /// Name
+        /// </summary>
         public string Name { get; set; }
 
         /// <summary>
@@ -365,16 +613,34 @@ namespace Business.Core.Document
         /// </summary>
         public string Alias { get; set; }
 
+        /// <summary>
+        /// Group
+        /// </summary>
         public Dictionary<string, Dictionary<string, IMember<DocArg>>> Group { get; set; }
 
+        /// <summary>
+        /// Description
+        /// </summary>
         public string Description { get; set; }
 
+        /// <summary>
+        /// Group
+        /// </summary>
         dynamic IDoc.Group { get => Group; }
 
+        /// <summary>
+        /// GroupDefault
+        /// </summary>
         public string GroupDefault { get; set; }
 
+        /// <summary>
+        /// Config
+        /// </summary>
         public Config Config { get; set; }
 
+        /// <summary>
+        /// DocGroup
+        /// </summary>
         public IEnumerable<KeyValuePair<DocGroup, IEnumerable<DocInfo>>> DocGroup { get; set; }
 
         /// <summary>
@@ -384,10 +650,20 @@ namespace Business.Core.Document
         public override string ToString() => new Dictionary<string, Doc<DocArg>> { { this.Name, this } }.JsonSerialize(Configer.DocJsonSettings);
     }
 
+    /// <summary>
+    /// Member
+    /// </summary>
+    /// <typeparam name="DocArg"></typeparam>
     public class Member<DocArg> : IMember<DocArg> where DocArg : IDocArg<DocArg>
     {
+        /// <summary>
+        /// Key
+        /// </summary>
         public string Key { get; set; }
 
+        /// <summary>
+        /// Name
+        /// </summary>
         public string Name { get; set; }
 
         /// <summary>
@@ -400,24 +676,56 @@ namespace Business.Core.Document
         /// </summary>
         public string AliasGroup { get; set; }
 
+        /// <summary>
+        /// HasReturn
+        /// </summary>
         public bool HasReturn { get; set; }
 
+        /// <summary>
+        /// Returns
+        /// </summary>
         public Document.DocArg Returns { get; set; }
 
+        /// <summary>
+        /// Description
+        /// </summary>
         public string Description { get; set; }
 
+        /// <summary>
+        /// Args
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         public Dictionary<string, DocArg> Args { get; set; }
 
+        /// <summary>
+        /// ArgSingle
+        /// </summary>
         public bool ArgSingle { get; set; }
 
+        /// <summary>
+        /// HttpFile
+        /// </summary>
         public bool HttpFile { get; set; }
 
+        /// <summary>
+        /// Testing
+        /// </summary>
         public Dictionary<string, Testing> Testing { get; set; }
     }
 
+    /// <summary>
+    /// Testing
+    /// </summary>
     public readonly struct Testing
     {
+        /// <summary>
+        /// Testing
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="result"></param>
+        /// <param name="token"></param>
+        /// <param name="tokenMethod"></param>
         public Testing(string name, object value, string result, string token, string tokenMethod)
         {
             Name = name;
@@ -453,38 +761,86 @@ namespace Business.Core.Document
         public string TokenMethod { get; }
     }
 
+    /// <summary>
+    /// DocArg
+    /// </summary>
     public class DocArg : IDocArg<DocArg>
     {
+        /// <summary>
+        /// DefaultValue
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("default")]
         public object DefaultValue { get; set; }
 
+        /// <summary>
+        /// Children
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         public Dictionary<string, DocArg> Children { get; set; }
 
+        /// <summary>
+        /// Id
+        /// </summary>
         public string Id { get; set; }
 
+        /// <summary>
+        /// Type
+        /// </summary>
         public string Type { get; set; }
 
+        /// <summary>
+        /// LastType
+        /// </summary>
         public string LastType { get; set; }
 
+        /// <summary>
+        /// Token
+        /// </summary>
         public bool Token { get; set; }
 
+        /// <summary>
+        /// Format
+        /// </summary>
         public string Format { get; set; }
 
+        /// <summary>
+        /// Title
+        /// </summary>
         public string Title { get; set; }
 
+        /// <summary>
+        /// Enum
+        /// </summary>
         public IEnumerable<int> Enum { get; set; }
 
+        /// <summary>
+        /// Array
+        /// </summary>
         public bool Array { get; set; }
 
+        /// <summary>
+        /// Description
+        /// </summary>
         public string Description { get; set; }
 
+        /// <summary>
+        /// UniqueItems
+        /// </summary>
         public bool UniqueItems { get; set; }
 
+        /// <summary>
+        /// Options
+        /// </summary>
         public Dictionary<string, object> Options { get; set; }
 
+        /// <summary>
+        /// Items
+        /// </summary>
         public Items<DocArg> Items { get; set; }
 
+        /// <summary>
+        /// Name
+        /// </summary>
         public string Name { get; set; }
 
         #region
@@ -500,14 +856,30 @@ namespace Business.Core.Document
         #endregion
     }
 
+    /// <summary>
+    /// Items
+    /// </summary>
+    /// <typeparam name="DocArg"></typeparam>
     public class Items<DocArg> where DocArg : IDocArg<DocArg>
     {
+        /// <summary>
+        /// Type
+        /// </summary>
         public string Type { get; set; }
 
+        /// <summary>
+        /// Format
+        /// </summary>
         public string Format { get; set; }
 
+        /// <summary>
+        /// Title
+        /// </summary>
         public string Title { get; set; }
 
+        /// <summary>
+        /// Children
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         public Dictionary<string, DocArg> Children { get; set; }
 
@@ -586,9 +958,20 @@ namespace Business.Core.Document
     }
     */
 
+    /// <summary>
+    /// TypeDefinition
+    /// </summary>
+    /// <typeparam name="TypeDefinition"></typeparam>
     public readonly struct DocArgSource<TypeDefinition>
         where TypeDefinition : Meta.ITypeDefinition<TypeDefinition>
     {
+        /// <summary>
+        /// DocArgSource
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="args"></param>
+        /// <param name="attributes"></param>
+        /// <param name="summary"></param>
         public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary)
         {
             Group = group;
@@ -597,12 +980,24 @@ namespace Business.Core.Document
             Summary = summary;
         }
 
+        /// <summary>
+        /// Group
+        /// </summary>
         public string Group { get; }
 
+        /// <summary>
+        /// Args
+        /// </summary>
         public Meta.ITypeDefinition<TypeDefinition> Args { get; }
 
+        /// <summary>
+        /// Attributes
+        /// </summary>
         public IList<string> Attributes { get; }
 
+        /// <summary>
+        /// Summary
+        /// </summary>
         public string Summary { get; }
     }
     /*

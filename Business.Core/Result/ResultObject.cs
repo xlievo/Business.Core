@@ -105,9 +105,15 @@ namespace Business.Core.Result
         [System.Text.Json.Serialization.JsonPropertyName("B")]
         public string Callback { get; set; }
 
+        /// <summary>
+        /// Data type
+        /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Type DataType { get; set; }
 
+        /// <summary>
+        /// GenericDefinition
+        /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Type GenericDefinition { get; }
 

@@ -3,6 +3,9 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// DocUI
+    /// </summary>
     public class DocUI
     {
         static readonly bool Unix = false;
@@ -207,11 +210,30 @@
             return bytes;
         }
 
+        /// <summary>
+        /// BenchmarkArg
+        /// </summary>
         public struct BenchmarkArg
         {
+
+            /// <summary>
+            /// n
+            /// </summary>
             public int n { get; set; }
+
+            /// <summary>
+            /// c
+            /// </summary>
             public int c { get; set; }
+
+            /// <summary>
+            /// data
+            /// </summary>
             public string data { get; set; }
+
+            /// <summary>
+            /// host
+            /// </summary>
             public string host { get; set; }
         }
         /*

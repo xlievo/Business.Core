@@ -17,12 +17,24 @@
 
 namespace Business.Core.Auth
 {
+    /// <summary>
+    /// IToken
+    /// </summary>
     public interface IToken
     {
+        /// <summary>
+        /// Key
+        /// </summary>
         string Key { get; set; }
 
+        /// <summary>
+        /// Remote
+        /// </summary>
         string Remote { get; set; }
 
+        /// <summary>
+        /// Callback
+        /// </summary>
         string Callback { get; set; }
     }
 

@@ -100,6 +100,9 @@ namespace Business.Core
                 Group = group;
             }
 
+            /// <summary>
+            /// Dtt
+            /// </summary>
             public System.DateTimeOffset Dtt { get; }
 
             /// <summary>
@@ -223,12 +226,18 @@ namespace Business.Core
             public int MaxNumber { get; set; }
         }
 
+        /// <summary>
+        /// Batch
+        /// </summary>
         public BatchOptions Batch { get; }
 
         //public LoggerValueType ValueType { get; set; } = LoggerValueType.In;
 
         internal readonly System.Func<LoggerData, ValueTask> call;
 
+        /// <summary>
+        /// loggerQueue
+        /// </summary>
         public readonly Queue<LoggerData> loggerQueue;
 
         /// <summary>

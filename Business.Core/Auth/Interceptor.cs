@@ -26,10 +26,29 @@ namespace Business.Core.Auth
     /// </summary>
     public interface IInterceptor
     {
+        /// <summary>
+        /// Configer
+        /// </summary>
         Configer Configer { get; set; }
 
+        /// <summary>
+        /// Create
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="constructorArguments"></param>
+        /// <param name="ignoreMethods"></param>
+        /// <returns></returns>
         object Create(System.Type type, object[] constructorArguments = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null);
 
+        /// <summary>
+        /// Intercept
+        /// </summary>
+        /// <param name="configer"></param>
+        /// <param name="method"></param>
+        /// <param name="arguments"></param>
+        /// <param name="call"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null);
     }
 
@@ -100,6 +119,10 @@ namespace Business.Core.Auth
             }
         }
 
+        /// <summary>
+        /// Intercept
+        /// </summary>
+        /// <param name="invocation"></param>
         public void Intercept(Castle.DynamicProxy.IInvocation invocation)
         {
             if (null == this.Configer.MetaData)
@@ -116,6 +139,15 @@ namespace Business.Core.Auth
             }).Result;
         }
 
+        /// <summary>
+        /// Intercept
+        /// </summary>
+        /// <param name="configer"></param>
+        /// <param name="method"></param>
+        /// <param name="arguments"></param>
+        /// <param name="call"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null) => await InterceptorExtensions.Intercept(configer, method, arguments, call, group);
     }
 }
@@ -128,8 +160,20 @@ namespace Business.Core.Utils
     using Auth;
     using System.Linq;
 
+    /// <summary>
+    /// InterceptorExtensions
+    /// </summary>
     public static class InterceptorExtensions
     {
+        /// <summary>
+        /// Intercept
+        /// </summary>
+        /// <param name="configer"></param>
+        /// <param name="method"></param>
+        /// <param name="arguments"></param>
+        /// <param name="call"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null)
         {
             var dtt = System.DateTimeOffset.Now;
@@ -488,6 +532,20 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// Finally
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="command"></param>
+        /// <param name="meta"></param>
+        /// <param name="returnValue"></param>
+        /// <param name="logType"></param>
+        /// <param name="iArgs"></param>
+        /// <param name="argsObj"></param>
+        /// <param name="methodName"></param>
+        /// <param name="watch"></param>
+        /// <param name="token"></param>
+        /// <param name="dtt"></param>
         public async static void Finally(Logger logger, CommandAttribute command, MetaData meta, dynamic returnValue, Logger.Type logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch, dynamic token, System.DateTimeOffset dtt)
         {
             if (meta.HasAsync)
@@ -579,6 +637,13 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// GetProcesResult
+        /// </summary>
+        /// <param name="argAttr"></param>
+        /// <param name="value"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, dynamic token)//, int collectionIndex = -1, dynamic dictKey = null
         {
             switch (argAttr.ArgMeta.Proces?.Mode)
@@ -606,6 +671,15 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// ArgsResult
+        /// </summary>
+        /// <param name="meta"></param>
+        /// <param name="group"></param>
+        /// <param name="args"></param>
+        /// <param name="currentValue"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public async static System.Threading.Tasks.ValueTask<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, object currentValue, dynamic token)//, int collectionIndex = -1, dynamic dictKey = null
         {
             bool isUpdate = false;

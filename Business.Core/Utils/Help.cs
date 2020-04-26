@@ -25,8 +25,17 @@ namespace Business.Core.Utils
     using Business.Core.Result;
     using Business.Core.Meta;
 
+    /// <summary>
+    /// Accessor
+    /// </summary>
     public struct Accessor
     {
+        /// <summary>
+        /// Accessor
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="getter"></param>
+        /// <param name="setter"></param>
         public Accessor(System.Type type, System.Func<object, object> getter, System.Action<object, object> setter)
         {
             Type = type;
@@ -34,10 +43,26 @@ namespace Business.Core.Utils
             Setter = setter;
         }
 
+        /// <summary>
+        /// Type
+        /// </summary>
         public System.Type Type { get; private set; }
+
+        /// <summary>
+        /// Getter
+        /// </summary>
         public System.Func<object, object> Getter { get; private set; }
+
+        /// <summary>
+        /// Setter
+        /// </summary>
         public System.Action<object, object> Setter { get; private set; }
 
+        /// <summary>
+        /// TryGetter
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public object TryGetter(object obj)
         {
             try { return Getter(obj); } catch { return Type.IsValueType ? System.Activator.CreateInstance(Type) : null; }
@@ -84,12 +109,27 @@ namespace Business.Core.Utils
         public ConcurrentReadOnlyDictionary<string, Proces> Methods;
     }
 
+    /// <summary>
+    /// Help
+    /// </summary>
     public static class Help
     {
         #region Bind
 
+        /// <summary>
+        /// ErrorBusiness
+        /// </summary>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="business"></param>
+        /// <returns></returns>
         public static IResult ErrorBusiness(this System.Type resultTypeDefinition, string business) => ResultFactory.ResultCreate(resultTypeDefinition, -1, string.Format("Without this Business{0}", string.IsNullOrEmpty(business) ? null : $" {business}"));
 
+        /// <summary>
+        /// ErrorCmd
+        /// </summary>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
         public static IResult ErrorCmd(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, string.Format("Without this Cmd{0}", string.IsNullOrEmpty(cmd) ? null : $" {cmd}"));
 
         internal static dynamic GetReturnValue(IResult result, MetaData meta)
@@ -233,6 +273,9 @@ namespace Business.Core.Utils
 
         #endregion
 
+        /// <summary>
+        /// BaseDirectory
+        /// </summary>
         public static string BaseDirectory = System.AppDomain.CurrentDomain.BaseDirectory ?? System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         internal static Accessor GetAccessor(this FieldInfo fieldInfo)
@@ -255,6 +298,12 @@ namespace Business.Core.Utils
             return new Accessor(propertyInfo.PropertyType, getter, setter);
         }
 
+        /// <summary>
+        /// GetMethod
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="methodSelector"></param>
+        /// <returns></returns>
         public static MethodInfo GetMethod<T>(System.Linq.Expressions.Expression<System.Action<T>> methodSelector) => ((System.Linq.Expressions.MethodCallExpression)methodSelector.Body).Method;
 
         internal readonly struct ObjectMethods
@@ -333,6 +382,13 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// UseType
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="parameterType"></param>
+        /// <returns></returns>
         public static Business UseType<Business>(Business business, params System.Type[] parameterType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -412,6 +468,13 @@ namespace Business.Core.Utils
             return business;
         }
 
+        /// <summary>
+        /// UseType
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="parameterName"></param>
+        /// <returns></returns>
         public static Business UseType<Business>(Business business, params string[] parameterName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -749,6 +812,11 @@ namespace Business.Core.Utils
             return business;
         }
 
+        /// <summary>
+        /// FirstCharToLower
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public static string FirstCharToLower(this string input) => string.IsNullOrEmpty(input) ? input : input[0].ToString().ToLower() + input.Substring(1);
 
         /// <summary>
@@ -942,6 +1010,16 @@ namespace Business.Core.Utils
             return arg;
         }
 
+        /// <summary>
+        /// GetTypeDefinition
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="xmlMembers"></param>
+        /// <param name="summary"></param>
+        /// <param name="groupKey"></param>
+        /// <param name="pathRoot"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static TypeDefinition GetTypeDefinition(this System.Type type, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null, string name = null)
         {
             var current = GetCurrentType(type);
@@ -1108,50 +1186,116 @@ namespace Business.Core.Utils
             return types;
         }
 
+        /// <summary>
+        /// TypeDefinition
+        /// </summary>
         public struct TypeDefinition : ITypeDefinition<TypeDefinition>
         {
+            /// <summary>
+            /// Name
+            /// </summary>
             public string Name { get; set; }
 
+            /// <summary>
+            /// Type
+            /// </summary>
             public System.Type Type { get; set; }
 
+            /// <summary>
+            /// LastType
+            /// </summary>
             public System.Type LastType { get; set; }
 
+            /// <summary>
+            /// HasDefinition
+            /// </summary>
             public bool HasDefinition { get; set; }
 
+            /// <summary>
+            /// HasCollection
+            /// </summary>
             public bool HasCollection { get; set; }
 
+            /// <summary>
+            /// HasDictionary
+            /// </summary>
             public bool HasDictionary { get; set; }
 
+            /// <summary>
+            /// DefaultValue
+            /// </summary>
             public object DefaultValue { get; set; }
 
+            /// <summary>
+            /// Nullable
+            /// </summary>
             public bool Nullable { get; set; }
 
+            /// <summary>
+            /// FullName
+            /// </summary>
             public string FullName { get; set; }
 
+            /// <summary>
+            /// MemberDefinition
+            /// </summary>
             public MemberDefinitionCode MemberDefinition { get; set; }
 
+            /// <summary>
+            /// HasToken
+            /// </summary>
             public bool HasToken { get; set; }
 
+            /// <summary>
+            /// HasDefaultValue
+            /// </summary>
             public bool HasDefaultValue { get; set; }
 
+            /// <summary>
+            /// Group
+            /// </summary>
             public ConcurrentReadOnlyDictionary<string, ArgGroup> Group { get; set; }
 
+            /// <summary>
+            /// Children
+            /// </summary>
             public ReadOnlyCollection<TypeDefinition> Children { get; set; }
 
+            /// <summary>
+            /// Childrens
+            /// </summary>
             public ReadOnlyCollection<TypeDefinition> Childrens { get; set; }
 
             //==========================================================//
 
+            /// <summary>
+            /// HasEnum
+            /// </summary>
             public bool HasEnum { get; set; }
 
+            /// <summary>
+            /// HasNumeric
+            /// </summary>
             public bool HasNumeric { get; set; }
 
+            /// <summary>
+            /// EnumNames
+            /// </summary>
             public string[] EnumNames { get; set; }
 
+            /// <summary>
+            /// EnumValues
+            /// </summary>
             public System.Array EnumValues { get; set; }
 
+            /// <summary>
+            /// Path
+            /// </summary>
             public string Path { get; set; }
 
+            /// <summary>
+            /// Summary
+            /// </summary>
             public string Summary { get; set; }
         }
 
@@ -1168,6 +1312,14 @@ namespace Business.Core.Utils
         //    return business;
         //}
 
+        /// <summary>
+        /// LoggerSet
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="logger"></param>
+        /// <param name="argType"></param>
+        /// <returns></returns>
         public static Business LoggerSet<Business>(Business business, Annotations.LoggerAttribute logger, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -1205,6 +1357,14 @@ namespace Business.Core.Utils
             return business;
         }
 
+        /// <summary>
+        /// LoggerSet
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="logger"></param>
+        /// <param name="parameterName"></param>
+        /// <returns></returns>
         public static Business LoggerSet<Business>(Business business, Annotations.LoggerAttribute logger, params string[] parameterName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -1246,6 +1406,14 @@ namespace Business.Core.Utils
             return business;
         }
 
+        /// <summary>
+        /// IgnoreSet
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="ignore"></param>
+        /// <param name="argType"></param>
+        /// <returns></returns>
         public static Business IgnoreSet<Business>(Business business, Annotations.Ignore ignore, params System.Type[] argType) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -1285,6 +1453,14 @@ namespace Business.Core.Utils
             return business;
         }
 
+        /// <summary>
+        /// IgnoreSet
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="ignore"></param>
+        /// <param name="parameterName"></param>
+        /// <returns></returns>
         public static Business IgnoreSet<Business>(Business business, Annotations.Ignore ignore, params string[] parameterName) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -1328,6 +1504,15 @@ namespace Business.Core.Utils
             return business;
         }
 
+        /// <summary>
+        /// MemberSet
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="business"></param>
+        /// <param name="memberName"></param>
+        /// <param name="memberObj"></param>
+        /// <param name="skipNull"></param>
+        /// <returns></returns>
         public static Business MemberSet<Business>(Business business, string memberName, object memberObj, bool skipNull = false) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
@@ -1349,6 +1534,12 @@ namespace Business.Core.Utils
 
         //public static Result.IResult ErrorBusiness(this System.Type resultTypeDefinition, string businessName) => Bind.ErrorBusiness(resultTypeDefinition, businessName);
 
+        /// <summary>
+        /// ErrorCmd
+        /// </summary>
+        /// <param name="business"></param>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
         public static IResult ErrorCmd(IBusiness business, string cmd) => ErrorCmd(business.Configer.ResultTypeDefinition, cmd);
 
         static MetaLogger GetMetaLogger(MetaLogger metaLogger, Annotations.LoggerAttribute logger, string group)
@@ -1379,6 +1570,13 @@ namespace Business.Core.Utils
 
         //public static string BaseDirectoryCombine(params string[] path) => System.IO.Path.Combine(new string[] { System.AppDomain.CurrentDomain.BaseDirectory }.Concat(path).ToArray());
 
+        /// <summary>
+        /// LoadAssemblys
+        /// </summary>
+        /// <param name="assemblyFiles"></param>
+        /// <param name="parallel"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
         public static List<System.Type> LoadAssemblys(IEnumerable<string> assemblyFiles, bool parallel = false, System.Func<System.Type, bool> callback = null)
         {
             var ass = new List<System.Type>();
@@ -1429,6 +1627,11 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// LoadAssembly
+        /// </summary>
+        /// <param name="assemblyFile"></param>
+        /// <returns></returns>
         public static Assembly LoadAssembly(string assemblyFile)
         {
             try
@@ -1449,6 +1652,12 @@ namespace Business.Core.Utils
 
         #region GetAttributes
 
+        /// <summary>
+        /// Clone
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
         public static T Clone<T>(this T attribute) where T : Annotations.AttributeBase => attribute.Clone<T>();
 
         internal static List<Attribute> Distinct<Attribute>(this List<Attribute> attributes, IEnumerable<Attribute> clones = null, System.Func<Attribute, bool> clonesExclude = null, System.Action<Attribute> attributesAction = null) where Attribute : Annotations.AttributeBase
@@ -1693,6 +1902,12 @@ namespace Business.Core.Utils
             return outStream;
         }
         */
+
+        /// <summary>
+        /// StreamReadByte
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
         public static byte[] StreamReadByte(this System.IO.Stream stream)
         {
             if (null == stream) { throw new System.ArgumentNullException(nameof(stream)); }
@@ -1702,6 +1917,11 @@ namespace Business.Core.Utils
             stream.Seek(0, System.IO.SeekOrigin.Begin);
             return bytes;
         }
+        /// <summary>
+        /// StreamReadByteAsync
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
         public static async System.Threading.Tasks.ValueTask<byte[]> StreamReadByteAsync(this System.IO.Stream stream)
         {
             if (null == stream) { throw new System.ArgumentNullException(nameof(stream)); }
@@ -1712,6 +1932,11 @@ namespace Business.Core.Utils
             return bytes;
         }
 
+        /// <summary>
+        /// StreamCopyByte
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
         public static byte[] StreamCopyByte(this System.IO.Stream stream)
         {
             if (null == stream) { throw new System.ArgumentNullException(nameof(stream)); }
@@ -1723,6 +1948,11 @@ namespace Business.Core.Utils
                 return m.ToArray();
             }
         }
+        /// <summary>
+        /// StreamCopyByteAsync
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
         public static async System.Threading.Tasks.ValueTask<byte[]> StreamCopyByteAsync(this System.IO.Stream stream)
         {
             if (null == stream) { throw new System.ArgumentNullException(nameof(stream)); }
@@ -1735,6 +1965,12 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// StreamReadString
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
         public static string StreamReadString(this System.IO.Stream stream, System.Text.Encoding encoding = null)
         {
             using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8))
@@ -1742,6 +1978,12 @@ namespace Business.Core.Utils
                 return reader.ReadToEnd();
             }
         }
+        /// <summary>
+        /// StreamReadStringAsync
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
         public static async System.Threading.Tasks.ValueTask<string> StreamReadStringAsync(this System.IO.Stream stream, System.Text.Encoding encoding = null)
         {
             using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8))
@@ -1750,6 +1992,12 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// FileReadString
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
         public static string FileReadString(string path, System.Text.Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
@@ -1759,6 +2007,12 @@ namespace Business.Core.Utils
                 return fileStream.StreamReadString(encoding ?? UTF8);
             }
         }
+        /// <summary>
+        /// FileReadStringAsync
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
         public static async System.Threading.Tasks.ValueTask<string> FileReadStringAsync(string path, System.Text.Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
@@ -1768,6 +2022,11 @@ namespace Business.Core.Utils
                 return await fileStream.StreamReadStringAsync(encoding ?? UTF8);
             }
         }
+        /// <summary>
+        /// FileReadByte
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static byte[] FileReadByte(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
@@ -1777,6 +2036,11 @@ namespace Business.Core.Utils
                 return fileStream.StreamCopyByte();
             }
         }
+        /// <summary>
+        /// FileReadByteAsync
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static async System.Threading.Tasks.ValueTask<byte[]> FileReadByteAsync(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
@@ -1787,6 +2051,12 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// StreamWrite
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="value"></param>
+        /// <param name="encoding"></param>
         public static void StreamWrite(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
         {
             using (var writer = new System.IO.StreamWriter(stream, encoding ?? UTF8))
@@ -1795,6 +2065,13 @@ namespace Business.Core.Utils
                 writer.Write(value);
             }
         }
+        /// <summary>
+        /// StreamWriteAsync
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="value"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
         public static async System.Threading.Tasks.ValueTask StreamWriteAsync(this System.IO.Stream stream, string value, System.Text.Encoding encoding = null)
         {
             using (var writer = new System.IO.StreamWriter(stream, encoding ?? UTF8))
@@ -1838,6 +2115,13 @@ namespace Business.Core.Utils
 
         #region Crypto
 
+        /// <summary>
+        /// MD5
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="hasUpper"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
         public static string MD5(this string value, bool hasUpper = false, System.Text.Encoding encoding = null)
         {
             if (null == value) { throw new System.ArgumentNullException(nameof(value)); }
@@ -1849,6 +2133,9 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// AES
+        /// </summary>
         public static class AES
         {
             /// <summary>
@@ -1896,6 +2183,14 @@ namespace Business.Core.Utils
                 }
             }
 
+            /// <summary>
+            /// Decrypt
+            /// </summary>
+            /// <param name="input"></param>
+            /// <param name="key"></param>
+            /// <param name="iv"></param>
+            /// <param name="encoding"></param>
+            /// <returns></returns>
             public static string Decrypt(string input, string key, string iv, System.Text.Encoding encoding = null)
             {
                 if (null == input) { throw new System.ArgumentNullException(nameof(input)); }
@@ -1978,6 +2273,7 @@ namespace Business.Core.Utils
         /// <param name="console"></param>
         /// <param name="path"></param>
         /// <param name="dateFormat"></param>
+        /// <param name="encoding"></param>
         /// <returns></returns>
         public static System.Exception ExceptionWrite(this System.Exception ex, bool write = false, bool console = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null)
         {
@@ -2000,6 +2296,11 @@ namespace Business.Core.Utils
             return inner;
         }
 
+        /// <summary>
+        /// Console
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="dateFormat"></param>
         public static void Console(this System.Exception ex, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff") => ex.ExceptionWrite(console: true, dateFormat: dateFormat);
 
         static readonly System.Threading.ReaderWriterLockSlim locker = new System.Threading.ReaderWriterLockSlim();
@@ -2013,6 +2314,7 @@ namespace Business.Core.Utils
         /// <param name="write"></param>
         /// <param name="console"></param>
         /// <param name="dateFormat"></param>
+        /// <param name="encoding"></param>
         public static void WriteLocal(string text, string path = "business.log.txt", bool autoTime = true, bool write = true, bool console = false, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
@@ -2056,6 +2358,16 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// Console
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="autoTime"></param>
+        /// <param name="console"></param>
+        /// <param name="write"></param>
+        /// <param name="path"></param>
+        /// <param name="dateFormat"></param>
+        /// <param name="encoding"></param>
         public static void Console(string text, bool autoTime = true, bool console = true, bool write = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null) => WriteLocal(text, path, autoTime, write, console, dateFormat, encoding);
 
         /// <summary>
@@ -2072,6 +2384,9 @@ namespace Business.Core.Utils
         /// <returns></returns>
         public static string UTF8String(this string value) => UTF8.GetString(UTF8.GetBytes(value ?? string.Empty));
 
+        /// <summary>
+        /// CheckCharMode
+        /// </summary>
         [System.Flags]
         public enum CheckCharMode
         {
@@ -2102,6 +2417,12 @@ namespace Business.Core.Utils
         static readonly System.Predicate<int> lower = delegate (int c) { return !(c >= 97 && c <= 122); };
         static readonly System.Predicate<int> chinese = delegate (int c) { return !(c >= 0x4e00 && c <= 0x9fbb); };
 
+        /// <summary>
+        /// CheckChar
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
         public static bool CheckChar(string value, CheckCharMode mode = CheckCharMode.All)
         {
             if (string.IsNullOrWhiteSpace(value)) { return false; }
@@ -2180,6 +2501,7 @@ namespace Business.Core.Utils
             return string.Format("{0:x}", i - System.DateTime.Now.Ticks);
         }
         */
+
         /// <summary>
         /// ToString("N")
         /// </summary>
@@ -2270,6 +2592,13 @@ namespace Business.Core.Utils
             return $"{ methodInfo.DeclaringType.FullName}.{ methodInfo.Name}";
         }
 
+        /// <summary>
+        /// Split
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public static IEnumerable<T[]> Split<T>(this IEnumerable<T> source, int length)
         {
             if (null == source) { throw new System.ArgumentNullException(nameof(source)); }
@@ -2287,6 +2616,13 @@ namespace Business.Core.Utils
             return sp;
         }
 
+        /// <summary>
+        /// CompareEquals
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectFromCompare"></param>
+        /// <param name="objectToCompare"></param>
+        /// <returns></returns>
         public static bool CompareEquals<T>(T objectFromCompare, T objectToCompare)
         {
             if (objectFromCompare == null && objectToCompare == null)
@@ -2336,8 +2672,20 @@ namespace Business.Core.Utils
             return true;
         }
 
+        /// <summary>
+        /// ChangeType
+        /// </summary>
+        /// <typeparam name="Type"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static Type ChangeType<Type>(object value) => (Type)ChangeType(value, typeof(Type));
 
+        /// <summary>
+        /// ChangeType
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static object ChangeType(object value, System.Type type)
         {
             if (null == type) { throw new System.ArgumentNullException(nameof(type)); }
@@ -2374,6 +2722,12 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// Random
+        /// </summary>
+        /// <param name="minValue"></param>
+        /// <param name="maxValue"></param>
+        /// <returns></returns>
         public static int Random(int minValue, int maxValue)
         {
             using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
@@ -2383,6 +2737,11 @@ namespace Business.Core.Utils
                 return new System.Random(System.BitConverter.ToInt32(bytes, 0)).Next(minValue, maxValue);
             }
         }
+        /// <summary>
+        /// Random
+        /// </summary>
+        /// <param name="maxValue"></param>
+        /// <returns></returns>
         public static int Random(this int maxValue)
         {
             using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
@@ -2392,6 +2751,10 @@ namespace Business.Core.Utils
                 return new System.Random(System.BitConverter.ToInt32(bytes, 0)).Next(maxValue);
             }
         }
+        /// <summary>
+        /// Random
+        /// </summary>
+        /// <returns></returns>
         public static double Random()
         {
             using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
@@ -2412,11 +2775,23 @@ namespace Business.Core.Utils
         //    return System.Text.RegularExpressions.Regex.IsMatch(email.Trim(), @"^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})$");
         //}
 
+        /// <summary>
+        /// Scale
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
         public static double Scale(this double value, int size = 2)
         {
             var p = System.Math.Pow(10, size);
             return (int)(value * (int)p) / p;
         }
+        /// <summary>
+        /// Scale
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
         public static decimal Scale(this decimal value, int size = 2)
         {
             //var sp = System.Convert.ToDecimal(System.Math.Pow(10, size));
@@ -2441,6 +2816,11 @@ namespace Business.Core.Utils
         //    return System.DateTime.ParseExact(time, "yyyyMMddHHmmssfffffff", null);
         //}
 
+        /// <summary>
+        /// GetName
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static string GetName(this System.Enum value) => null == value ? null : System.Enum.GetName(value.GetType(), value);
         //public static int? GetValue(this System.Enum value) => value?.GetHashCode();
 
@@ -2469,6 +2849,12 @@ namespace Business.Core.Utils
         //public static bool SpinWait(this System.TimeSpan timeout) => System.Threading.SpinWait.SpinUntil(() => false, timeout);
 
         static readonly List<string> SysTypes = Assembly.GetExecutingAssembly().GetType().Module.Assembly.GetExportedTypes().Select(c => c.FullName).ToList();
+
+        /// <summary>
+        /// IsDefinition
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static bool IsDefinition(this System.Type type) => !SysTypes.Contains(type.FullName) && (type.IsClass || (type.IsValueType && !type.IsEnum && !type.IsArray && !type.IsCollection() && !type.IsEnumerable()));
 
         #region Json
@@ -2579,6 +2965,12 @@ namespace Business.Core.Utils
         }
         */
 
+        /// <summary>
+        /// TryJsonDeserializeStringArray
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public static string[] TryJsonDeserializeStringArray(this string value, System.Text.Json.JsonSerializerOptions options = null)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -2595,6 +2987,14 @@ namespace Business.Core.Utils
                 return default;
             }
         }
+
+        /// <summary>
+        /// TryJsonDeserialize
+        /// </summary>
+        /// <typeparam name="Type"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public static Type TryJsonDeserialize<Type>(this string value, System.Text.Json.JsonSerializerOptions options = null)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -2612,13 +3012,30 @@ namespace Business.Core.Utils
             }
         }
 
+        /// <summary>
+        /// JsonSerialize
+        /// </summary>
+        /// <typeparam name="Type"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public static string JsonSerialize<Type>(this Type value, System.Text.Json.JsonSerializerOptions options = null) => System.Text.Json.JsonSerializer.Serialize(value, options ?? JsonOptions);
 
+        /// <summary>
+        /// JsonOptions
+        /// </summary>
         public static System.Text.Json.JsonSerializerOptions JsonOptions = new System.Text.Json.JsonSerializerOptions
         {
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
+        /// <summary>
+        /// TryJsonSerialize
+        /// </summary>
+        /// <typeparam name="Type"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         public static string TryJsonSerialize<Type>(this Type value, System.Text.Json.JsonSerializerOptions options = null)
         {
             try
@@ -2721,6 +3138,11 @@ namespace Business.Core.Utils
 
         #region Nancy Copy
 
+        /// <summary>
+        /// GetTypeCode
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static System.TypeCode GetTypeCode(this System.Type type)
         {
             switch (type.FullName)
@@ -2864,8 +3286,25 @@ namespace Business.Core.Utils
 
         #endregion
 
+        /// <summary>
+        /// ToReadOnly
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <returns></returns>
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> values) => new ReadOnlyCollection<T>(values);
 
+        /// <summary>
+        /// ToReadOnlyDictionary
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TElement"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="keySelector"></param>
+        /// <param name="elementSelector"></param>
+        /// <param name="comparer"></param>
+        /// <returns></returns>
         public static ConcurrentReadOnlyDictionary<TKey, TElement> ToReadOnlyDictionary<TKey, TSource, TElement>(this IEnumerable<TSource> source, System.Func<TSource, TKey> keySelector, System.Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer = null)
         {
             var dictionary = new System.Collections.Concurrent.ConcurrentDictionary<TKey, TElement>(comparer);
@@ -2878,8 +3317,18 @@ namespace Business.Core.Utils
             return new ConcurrentReadOnlyDictionary<TKey, TElement>(dictionary);
         }
 
+        /// <summary>
+        /// DateTimeConverter
+        /// </summary>
         public class DateTimeConverter : System.Text.Json.Serialization.JsonConverter<System.DateTime>
         {
+            /// <summary>
+            /// Reads and converts the JSON to type DateTime.
+            /// </summary>
+            /// <param name="reader"></param>
+            /// <param name="typeToConvert"></param>
+            /// <param name="options"></param>
+            /// <returns></returns>
             public override System.DateTime Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
             {
                 if (!reader.TryGetDateTime(out System.DateTime value))
@@ -2896,11 +3345,25 @@ namespace Business.Core.Utils
                 //!reader.TryGetDateTime(out System.DateTime value) ? System.DateTime.Parse(reader.GetString()) : value;
             }
 
+            /// <summary>
+            /// Writes a specified value as JSON.
+            /// </summary>
+            /// <param name="writer"></param>
+            /// <param name="value"></param>
+            /// <param name="options"></param>
             public override void Write(System.Text.Json.Utf8JsonWriter writer, System.DateTime value, System.Text.Json.JsonSerializerOptions options) => writer.WriteStringValue(value.ToLocalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss"));
         }
 
+        /// <summary>
+        /// FirstCharToLowerNamingPolicy
+        /// </summary>
         public class FirstCharToLowerNamingPolicy : System.Text.Json.JsonNamingPolicy
         {
+            /// <summary>
+            /// ConvertName
+            /// </summary>
+            /// <param name="name"></param>
+            /// <returns></returns>
             public override string ConvertName(string name) => FirstCharToLower(name);
         }
 
@@ -3078,25 +3541,57 @@ namespace Business.Core.Utils
 #endregion
     */
 
+    /// <summary>
+    /// ReadOnlyDictionary
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
     public class ReadOnlyDictionary<TKey, TValue> : System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue>
     {
         internal readonly IDictionary<TKey, TValue> dictionary;
 
+        /// <summary>
+        /// ReadOnlyDictionary
+        /// </summary>
+        /// <param name="dictionary"></param>
         public ReadOnlyDictionary(IDictionary<TKey, TValue> dictionary) : base(dictionary) => this.dictionary = dictionary;
 
+        /// <summary>
+        /// ReadOnlyDictionary
+        /// </summary>
         public ReadOnlyDictionary() : this(new Dictionary<TKey, TValue>()) { }
 
+        /// <summary>
+        /// ReadOnlyDictionary
+        /// </summary>
+        /// <param name="comparer"></param>
         public ReadOnlyDictionary(IEqualityComparer<TKey> comparer) : this(new Dictionary<TKey, TValue>(comparer)) { }
     }
 
+    /// <summary>
+    /// ConcurrentReadOnlyDictionary
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
     public class ConcurrentReadOnlyDictionary<TKey, TValue> : System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TValue>
     {
         internal readonly System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue> dictionary;
 
+        /// <summary>
+        /// ConcurrentReadOnlyDictionary
+        /// </summary>
+        /// <param name="dictionary"></param>
         public ConcurrentReadOnlyDictionary(System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue> dictionary) : base(dictionary) => this.dictionary = dictionary;
 
+        /// <summary>
+        /// ConcurrentReadOnlyDictionary
+        /// </summary>
         public ConcurrentReadOnlyDictionary() : this(new System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>()) { }
 
+        /// <summary>
+        /// ConcurrentReadOnlyDictionary
+        /// </summary>
+        /// <param name="comparer"></param>
         public ConcurrentReadOnlyDictionary(IEqualityComparer<TKey> comparer) : this(new System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>(comparer)) { }
 
         //public virtual TValue TryGetValue(TKey key)
@@ -3112,29 +3607,68 @@ namespace Business.Core.Utils
         //}
     }
 
+    /// <summary>
+    /// ReadOnlyCollection
+    /// </summary>
+    /// <typeparam name="TValue"></typeparam>
     public class ReadOnlyCollection<TValue> : System.Collections.ObjectModel.ReadOnlyCollection<TValue>
     {
+        /// <summary>
+        /// Empty
+        /// </summary>
         public static readonly ReadOnlyCollection<TValue> Empty = new ReadOnlyCollection<TValue>(System.Array.Empty<TValue>());
 
         internal IList<TValue> Collection { get => Items; }
 
+        /// <summary>
+        /// ReadOnlyCollection
+        /// </summary>
+        /// <param name="collection"></param>
         public ReadOnlyCollection(IList<TValue> collection) : base(collection) { }
 
+        /// <summary>
+        /// ReadOnlyCollection
+        /// </summary>
         public ReadOnlyCollection() : this(new List<TValue>()) { }
 
+        /// <summary>
+        /// ReadOnlyCollection
+        /// </summary>
+        /// <param name="capacity"></param>
         public ReadOnlyCollection(int capacity) : this(new List<TValue>(capacity)) { }
 
+        /// <summary>
+        /// ReadOnlyCollection
+        /// </summary>
+        /// <param name="values"></param>
         public ReadOnlyCollection(IEnumerable<TValue> values) : this(new List<TValue>(values)) { }
     }
 
     #region Equals
 
+    /// <summary>
+    /// Equality
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public static class Equality<T>
     {
+        /// <summary>
+        /// CreateComparer
+        /// </summary>
+        /// <typeparam name="V"></typeparam>
+        /// <param name="keySelector"></param>
+        /// <returns></returns>
         public static IEqualityComparer<T> CreateComparer<V>(System.Func<T, V> keySelector)
         {
             return new CommonEqualityComparer<V>(keySelector);
         }
+        /// <summary>
+        /// CreateComparer
+        /// </summary>
+        /// <typeparam name="V"></typeparam>
+        /// <param name="keySelector"></param>
+        /// <param name="comparer"></param>
+        /// <returns></returns>
         public static IEqualityComparer<T> CreateComparer<V>(System.Func<T, V> keySelector, IEqualityComparer<V> comparer)
         {
             return new CommonEqualityComparer<V>(keySelector, comparer);
@@ -3164,12 +3698,29 @@ namespace Business.Core.Utils
         }
     }
 
+    /// <summary>
+    /// ComparisonHelper
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public static class ComparisonHelper<T>
     {
+        /// <summary>
+        /// CreateComparer
+        /// </summary>
+        /// <typeparam name="V"></typeparam>
+        /// <param name="keySelector"></param>
+        /// <returns></returns>
         public static IComparer<T> CreateComparer<V>(System.Func<T, V> keySelector)
         {
             return new CommonComparer<V>(keySelector);
         }
+        /// <summary>
+        /// CreateComparer
+        /// </summary>
+        /// <typeparam name="V"></typeparam>
+        /// <param name="keySelector"></param>
+        /// <param name="comparer"></param>
+        /// <returns></returns>
         public static IComparer<T> CreateComparer<V>(System.Func<T, V> keySelector, IComparer<V> comparer)
         {
             return new CommonComparer<V>(keySelector, comparer);
@@ -3206,6 +3757,9 @@ namespace Business.Core.Utils
     /// <typeparam name="T"></typeparam>
     public class Queue<T>
     {
+        /// <summary>
+        /// BatchOptions
+        /// </summary>
         public struct BatchOptions
         {
             /// <summary>
@@ -3230,6 +3784,9 @@ namespace Business.Core.Utils
             public int MaxNumber { get; set; }
         }
 
+        /// <summary>
+        /// queue
+        /// </summary>
         public readonly System.Collections.Concurrent.BlockingCollection<T> queue;
 
         readonly System.Collections.Concurrent.BlockingCollection<T>[] dequeues;

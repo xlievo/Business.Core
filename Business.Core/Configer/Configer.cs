@@ -383,12 +383,18 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 #endif
 */
 
+    /// <summary>
+    /// Configer
+    /// </summary>
     public partial class Configer
     {
         internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 
         //internal readonly ConcurrentReadOnlyDictionary<string, Accessors> ResultAccessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 
+        /// <summary>
+        /// BusinessList
+        /// </summary>
         public static ConcurrentReadOnlyDictionary<string, IBusiness> BusinessList = new ConcurrentReadOnlyDictionary<string, IBusiness>(System.StringComparer.InvariantCultureIgnoreCase);
 
         /// <summary>
@@ -398,8 +404,17 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// </summary>
         public static ConcurrentReadOnlyDictionary<string, Route> Routes = new ConcurrentReadOnlyDictionary<string, Route>(System.StringComparer.InvariantCultureIgnoreCase);
 
+        /// <summary>
+        /// Route
+        /// </summary>
         public struct Route
         {
+            /// <summary>
+            /// Route
+            /// </summary>
+            /// <param name="business"></param>
+            /// <param name="group"></param>
+            /// <param name="command"></param>
             public Route(string business, string group = null, string command = null)
             {
                 Business = business;
@@ -407,12 +422,25 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
                 Command = command;
             }
 
+            /// <summary>
+            /// Business
+            /// </summary>
             public string Business { get; set; }
 
+            /// <summary>
+            /// Group
+            /// </summary>
             public string Group { get; set; }
 
+            /// <summary>
+            /// Command
+            /// </summary>
             public string Command { get; set; }
 
+            /// <summary>
+            /// ToString
+            /// </summary>
+            /// <returns></returns>
             public override string ToString()
             {
                 var key = new System.Text.StringBuilder(Business);
@@ -431,39 +459,87 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             }
         }
 
+        /// <summary>
+        /// MethodBefore
+        /// </summary>
         public class MethodBefore
         {
+            /// <summary>
+            /// Meta
+            /// </summary>
             public MetaData Meta { get; set; }
 
+            /// <summary>
+            /// Args
+            /// </summary>
             public System.Collections.Generic.Dictionary<string, dynamic> Args { get; set; }
 
+            /// <summary>
+            /// Cancel
+            /// </summary>
             public bool Cancel { get; set; }
         }
 
+        /// <summary>
+        /// MethodAfter
+        /// </summary>
         public struct MethodAfter
         {
+            /// <summary>
+            /// Meta
+            /// </summary>
             public MetaData Meta { get; set; }
 
+            /// <summary>
+            /// Args
+            /// </summary>
             public System.Collections.Generic.Dictionary<string, MethodArgs> Args { get; set; }
 
+            /// <summary>
+            /// Result
+            /// </summary>
             public dynamic Result { get; set; }
         }
 
+        /// <summary>
+        /// MethodArgs
+        /// </summary>
         public struct MethodArgs
         {
+            /// <summary>
+            /// Name
+            /// </summary>
             public string Name;
 
+            /// <summary>
+            /// Value
+            /// </summary>
             public dynamic Value;
 
+            /// <summary>
+            /// HasIArg
+            /// </summary>
             public bool HasIArg;
 
+            /// <summary>
+            /// Type
+            /// </summary>
             public System.Type Type;
 
+            /// <summary>
+            /// OutType
+            /// </summary>
             public System.Type OutType;
 
+            /// <summary>
+            /// InType
+            /// </summary>
             public System.Type InType;
         }
 
+        /// <summary>
+        /// Xmls
+        /// </summary>
         public static ConcurrentReadOnlyDictionary<string, Xml.member> Xmls = null;
 
         /// <summary>
@@ -484,6 +560,14 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             DocJsonSettings.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
+        /// <summary>
+        /// Configer
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="argTypeDefinition"></param>
+        /// <param name="attributes"></param>
+        /// <param name="interceptor"></param>
         public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Type argTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor)
         /*
 #if !Mobile
@@ -519,22 +603,55 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
 
         //internal System.Func<string, string, string> GetCommandGroup = (group, name) => string.Format("{0}.{1}", group, name);
 
+        /// <summary>
+        /// MetaData
+        /// </summary>
         public ConcurrentReadOnlyDictionary<string, MetaData> MetaData { get; internal set; }
+
+        /// <summary>
+        /// Attributes
+        /// </summary>
         public ReadOnlyCollection<Annotations.AttributeBase> Attributes { get; private set; }
         //public bool EnableWatcher { get; }
+
+        /// <summary>
+        /// UseTypes
+        /// </summary>
         public ConcurrentReadOnlyDictionary<string, System.Type> UseTypes { get; private set; }
 
+        /// <summary>
+        /// Info
+        /// </summary>
         public Annotations.Info Info { get; private set; }
 
+        /// <summary>
+        /// ResultTypeDefinition
+        /// </summary>
         public System.Type ResultTypeDefinition { get; private set; }
+
+        /// <summary>
+        /// ArgTypeDefinition
+        /// </summary>
         public System.Type ArgTypeDefinition { get; private set; }
 
+        /// <summary>
+        /// Doc
+        /// </summary>
         public IDoc Doc { get; internal set; }
 
+        /// <summary>
+        /// Interceptor
+        /// </summary>
         public Auth.IInterceptor Interceptor { get; internal set; }
 
+        /// <summary>
+        /// DocGroup
+        /// </summary>
         public ConcurrentReadOnlyDictionary<DocGroup, System.Collections.Concurrent.ConcurrentQueue<DocInfo>> DocGroup { get; internal set; }
 
+        /// <summary>
+        /// DocInfo
+        /// </summary>
         public Annotations.DocAttribute DocInfo { get; set; }
 
         //public ConcurrentReadOnlyDictionary<string, ConcurrentReadOnlyDictionary<string, System.Collections.Concurrent.ConcurrentQueue<Annotations.CommandAttribute>>> CommandGroup { get; internal set; }

@@ -26,10 +26,16 @@ namespace Business.Core.Annotations
 
     #region abstract
 
+    /// <summary>
+    /// AttributeBase
+    /// </summary>
     public abstract class AttributeBase : System.Attribute
     {
         #region MetaData
 
+        /// <summary>
+        /// MetaData
+        /// </summary>
         public class MetaData
         {
             /// <summary>
@@ -37,10 +43,29 @@ namespace Business.Core.Annotations
             /// </summary>
             public enum DeclaringType
             {
+                /// <summary>
+                /// Assembly
+                /// </summary>
                 Assembly,
+
+                /// <summary>
+                /// Class
+                /// </summary>
                 Class,
+
+                /// <summary>
+                /// Method
+                /// </summary>
                 Method,
+
+                /// <summary>
+                /// Parameter
+                /// </summary>
                 Parameter,
+
+                /// <summary>
+                /// Children
+                /// </summary>
                 Children,
             }
 
@@ -54,6 +79,10 @@ namespace Business.Core.Annotations
             /// </summary>
             public DeclaringType Declaring { get; internal set; }
 
+            /// <summary>
+            /// Clone
+            /// </summary>
+            /// <param name="metaData"></param>
             public void Clone(MetaData metaData) => this.Declaring = metaData.Declaring;
         }
 
@@ -172,6 +201,9 @@ namespace Business.Core.Annotations
 
         #endregion
 
+        /// <summary>
+        /// When implemented in a derived class, gets a unique identifier for this System.Attribute.
+        /// </summary>
         public sealed override object TypeId => base.TypeId;
 
         /// <summary>
@@ -202,6 +234,9 @@ namespace Business.Core.Annotations
             }
         }
 
+        /// <summary>
+        /// AttributeBase
+        /// </summary>
         public AttributeBase()
         {
             this.Meta = new MetaData { Type = this.TypeId as System.Type };
@@ -211,6 +246,9 @@ namespace Business.Core.Annotations
 
         #region
 
+        /// <summary>
+        /// Meta
+        /// </summary>
         public MetaData Meta { get; }
 
         #endregion
@@ -241,6 +279,11 @@ namespace Business.Core.Annotations
             return attr as T;
         }
 
+        /// <summary>
+        /// Replace
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public virtual string Replace(string value)
         {
             if (string.IsNullOrWhiteSpace(value) || !Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta))
@@ -268,6 +311,9 @@ namespace Business.Core.Annotations
 
     #region
 
+    /// <summary>
+    /// TestingAttribute
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class TestingAttribute : GroupAttribute
     {
@@ -278,8 +324,7 @@ namespace Business.Core.Annotations
         /// <param name="value"></param>
         /// <param name="result"></param>
         /// <param name="token"></param>
-        /// <param name="tokenMethod">Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]<</param>
-        /// <param name="method"></param>
+        /// <param name="tokenMethod">Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]</param>
         public TestingAttribute(string name, object value, string result = null, string token = null, string tokenMethod = null)
         {
             this.Name = name;
@@ -320,9 +365,17 @@ namespace Business.Core.Annotations
         /// </summary>
         public string Method { get; set; }
 
+        /// <summary>
+        /// GroupKey
+        /// </summary>
+        /// <param name="space"></param>
+        /// <returns></returns>
         public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.Method}{space}{this.Name}";
     }
 
+    /// <summary>
+    /// IgnoreMode
+    /// </summary>
     public enum IgnoreMode
     {
         /// <summary>
@@ -359,17 +412,29 @@ namespace Business.Core.Annotations
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Property | System.AttributeTargets.Parameter | System.AttributeTargets.Field | System.AttributeTargets.Struct, AllowMultiple = true, Inherited = true)]
     public class Ignore : GroupAttribute
     {
+        /// <summary>
+        /// Ignore
+        /// </summary>
+        /// <param name="mode"></param>
         public Ignore(IgnoreMode mode = IgnoreMode.Method)
         {
             this.Mode = mode;
         }
 
+        /// <summary>
+        /// Mode
+        /// </summary>
         public IgnoreMode Mode { get; private set; }
 
         //public string Group { get; set; }
 
         //public bool Contains(IgnoreMode mode) => 0 != (this.Mode & mode);
 
+        /// <summary>
+        /// GroupKey
+        /// </summary>
+        /// <param name="space"></param>
+        /// <returns></returns>
         public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.Mode.GetName()}";
 
         //public bool Contains(IgnoreMode mode) => 0 != (this.Mode & mode);
@@ -438,11 +503,25 @@ namespace Business.Core.Annotations
 
         //public string ConfigFileName { get; internal set; }
 
+        /// <summary>
+        /// GetCommandGroup
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public virtual string GetCommandGroup(string group, string name) => string.IsNullOrWhiteSpace(group) ? name : $"{group}.{name}";
     }
 
+    /// <summary>
+    /// UseEntry
+    /// </summary>
     public readonly struct UseEntry
     {
+        /// <summary>
+        /// UseEntry
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="parameterName"></param>
         public UseEntry(object value, params string[] parameterName)
         {
             this.Value = value;
@@ -450,10 +529,19 @@ namespace Business.Core.Annotations
             this.ParameterName = parameterName;
         }
 
+        /// <summary>
+        /// Type
+        /// </summary>
         public System.Type Type { get; }
 
+        /// <summary>
+        /// Value
+        /// </summary>
         public object Value { get; }
 
+        /// <summary>
+        /// ParameterName
+        /// </summary>
         public string[] ParameterName { get; }
     }
 
@@ -486,6 +574,10 @@ namespace Business.Core.Annotations
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
     public sealed class AliasAttribute : GroupAttribute
     {
+        /// <summary>
+        /// AliasAttribute
+        /// </summary>
+        /// <param name="name"></param>
         public AliasAttribute(string name = null) => this.Name = name;
 
         /// <summary>
@@ -562,9 +654,18 @@ namespace Business.Core.Annotations
         //public string Description { get; set; }
     }
 
+    /// <summary>
+    /// LoggerAttribute
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Interface | System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public class LoggerAttribute : GroupAttribute
     {
+        /// <summary>
+        /// LoggerAttribute
+        /// </summary>
+        /// <param name="logType"></param>
+        /// <param name="canWrite"></param>
+        /// <param name="valueType"></param>
         public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true, Logger.ValueType valueType = Logger.ValueType.In)
         {
             this.LogType = logType;
@@ -596,6 +697,11 @@ namespace Business.Core.Annotations
         /// </summary>
         public Logger.ValueType ValueType { get; set; } = Logger.ValueType.In;
 
+        /// <summary>
+        /// SetType
+        /// </summary>
+        /// <param name="logType"></param>
+        /// <returns></returns>
         public LoggerAttribute SetType(Logger.Type logType)
         {
             this.LogType = logType;
@@ -607,8 +713,18 @@ namespace Business.Core.Annotations
         //public override T Clone<T>() => new LoggerAttribute(this.LogType) { Group = this.Group, CanResult = this.CanResult, CanValue = this.CanValue, CanWrite = this.CanWrite } as T;
 
         //public override string Key(string space = "->") => string.Format("{1}{0}{2}", space, this.Mode.GetName(), this.Group.Trim());
+
+        /// <summary>
+        /// GroupKey
+        /// </summary>
+        /// <param name="space"></param>
+        /// <returns></returns>
         public override string GroupKey(string space = "->") => $"{ base.GroupKey(space)}{space}{this.LogType.GetName()}";
 
+        /// <summary>
+        /// ToString
+        /// </summary>
+        /// <returns></returns>
         public override string ToString() => $"{this.Meta.Type.Name} {this.LogType.ToString()}";
     }
 
@@ -633,6 +749,9 @@ namespace Business.Core.Annotations
 
     #endregion
 
+    /// <summary>
+    /// GroupAttribute
+    /// </summary>
     public abstract class GroupAttribute : AttributeBase
     {
         static System.Type GetType(System.Type type)
@@ -670,6 +789,9 @@ namespace Business.Core.Annotations
         public virtual string GroupKey(string space = "->") => $"{type.FullName}{space}{this.Group.Trim()}";
         //public virtual string GroupKey(string space = "->") => $"{this.Meta.Type.FullName}{space}{this.Group.Trim()}";
 
+        /// <summary>
+        /// Comparer
+        /// </summary>
         public static System.Collections.Generic.IEqualityComparer<GroupAttribute> Comparer { get => Equality<GroupAttribute>.CreateComparer(c => c.GroupKey(), System.StringComparer.CurrentCultureIgnoreCase); }
     }
 
@@ -679,6 +801,9 @@ namespace Business.Core.Annotations
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public abstract class ArgumentAttribute : GroupAttribute
     {
+        /// <summary>
+        /// MetaData
+        /// </summary>
         public new class MetaData
         {
             internal System.Type resultType;
@@ -697,16 +822,34 @@ namespace Business.Core.Annotations
             /// </summary>
             public string BusinessName { get; internal set; }
 
+            /// <summary>
+            /// Method
+            /// </summary>
             public string Method { get; internal set; }
 
+            /// <summary>
+            /// MethodOnlyName
+            /// </summary>
             public string MethodOnlyName { get; internal set; }
 
+            /// <summary>
+            /// MemberPath
+            /// </summary>
             public string MemberPath { get; internal set; }
 
+            /// <summary>
+            /// Member
+            /// </summary>
             public string Member { get; internal set; }
 
+            /// <summary>
+            /// MemberType
+            /// </summary>
             public System.Type MemberType { get; internal set; }
 
+            /// <summary>
+            /// Arg
+            /// </summary>
             public Meta.Args Arg { get; internal set; }
 
             internal Proces Proces { get; set; }
@@ -722,6 +865,10 @@ namespace Business.Core.Annotations
             /// </summary>
             public System.Func<bool, bool, AttributeBase.MetaData.DeclaringType, System.Collections.Generic.IEnumerable<ArgumentAttribute>, bool> Skip { get; set; }
 
+            /// <summary>
+            /// Clone
+            /// </summary>
+            /// <param name="metaData"></param>
             public void Clone(MetaData metaData)
             {
                 this.resultType = metaData.resultType;
@@ -746,6 +893,11 @@ namespace Business.Core.Annotations
             }
         }
 
+        /// <summary>
+        /// Clone
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public override T Clone<T>()
         {
             var clone = base.Clone<ArgumentAttribute>();
@@ -769,6 +921,11 @@ namespace Business.Core.Annotations
         static readonly ProcesMethod procesMethod = new ProcesMethod(Help.GetMethod<ArgumentAttribute>(c => c.Proces(null)).GetParameters().Select(c => c.ParameterType).ToArray(), Help.GetMethod<ArgumentAttribute>(c => c.Proces<object>(null, null)).GetParameters().Select(c => c.ParameterType).ToArray());
         //static readonly ProcesMethod procesMethod = new ProcesMethod();
 
+        /// <summary>
+        /// Argument base attribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public ArgumentAttribute(int state, string message = null)
         {
             this.State = state;
@@ -810,13 +967,19 @@ namespace Business.Core.Annotations
 
         //public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.CollectionItem}";
 
+        /// <summary>
+        /// BindAfter
+        /// </summary>
         public System.Action BindAfter { get; set; }
 
+        /// <summary>
+        /// ArgMeta
+        /// </summary>
         public MetaData ArgMeta { get; }
 
-        /// <summary>
-        /// Whether to apply to each item of a set parameter
-        /// </summary>
+        ///// <summary>
+        ///// Whether to apply to each item of a set parameter
+        ///// </summary>
         //public bool CollectionItem { get; set; }
 
         /// <summary>
@@ -835,6 +998,9 @@ namespace Business.Core.Annotations
         /// </summary>
         public string Message { get; set; }
 
+        /// <summary>
+        /// Description
+        /// </summary>
         public string Description { get; set; }
 
         /// <summary>
@@ -975,6 +1141,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <typeparam name="Data"></typeparam>
         /// <param name="data"></param>
+        /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
         public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgMeta.resultTypeDefinition, data, message, state);
@@ -982,14 +1149,20 @@ namespace Business.Core.Annotations
         /// <summary>
         /// Used to create the Proces() method returns object
         /// </summary>
-        /// <typeparam name="Data"></typeparam>
         /// <param name="data"></param>
+        /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
         public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgMeta.resultTypeDefinition, data, message, state);
 
         #endregion
 
+        /// <summary>
+        /// CheckNull
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static IResult CheckNull(ArgumentAttribute attribute, dynamic value)
         {
             if (object.Equals(null, value))
@@ -1008,6 +1181,9 @@ namespace Business.Core.Annotations
         }
     }
 
+    /// <summary>
+    /// FilterModel
+    /// </summary>
     [System.Flags]
     public enum FilterModel
     {
@@ -1078,27 +1254,62 @@ namespace Business.Core.Annotations
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class CommandAttribute : GroupAttribute
     {
+        /// <summary>
+        /// Command attribute on a method, for multiple sources to invoke the method
+        /// </summary>
+        /// <param name="onlyName"></param>
         public CommandAttribute(string onlyName = null) { this.OnlyName = onlyName; }
 
+        /// <summary>
+        /// Key
+        /// </summary>
         public string Key { get; internal set; }
 
+        /// <summary>
+        /// OnlyName
+        /// </summary>
         public string OnlyName { get; set; }
 
+        /// <summary>
+        /// OnlyNameByte
+        /// </summary>
         public byte OnlyNameByte { get; set; }
 
         //public bool IgnoreBusinessArg { get; set; }
 
+        /// <summary>
+        /// GroupKey
+        /// </summary>
+        /// <param name="space"></param>
+        /// <returns></returns>
         public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.OnlyName}";
 
+        /// <summary>
+        /// ToString
+        /// </summary>
+        /// <returns></returns>
         public override string ToString() => $"{this.Meta.Type.Name} {Group} {OnlyName}";
     }
 
     #region
 
+    /// <summary>
+    /// CheckNullAttribute
+    /// </summary>
     public class CheckNullAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// CheckNullAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public CheckNullAttribute(int state = -800, string message = null) : base(state, message) => this.CanNull = false;
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             if (typeof(string).Equals(this.ArgMeta.MemberType))
@@ -1117,8 +1328,16 @@ namespace Business.Core.Annotations
         }
     }
 
+    /// <summary>
+    /// SizeAttribute
+    /// </summary>
     public class SizeAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// SizeAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public SizeAttribute(int state = -801, string message = null) : base(state, message)
         {
             this.BindAfter += () =>
@@ -1135,12 +1354,29 @@ namespace Business.Core.Annotations
             };
         }
 
+        /// <summary>
+        /// Min
+        /// </summary>
         public object Min { get; set; }
+        /// <summary>
+        /// Max
+        /// </summary>
         public object Max { get; set; }
 
+        /// <summary>
+        /// MinMsg
+        /// </summary>
         public string MinMsg { get; set; } = "argument \"{Alias}\" minimum range {Min}.";
+        /// <summary>
+        /// MaxMsg
+        /// </summary>
         public string MaxMsg { get; set; } = "argument \"{Alias}\" maximum range {Max}.";
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1260,12 +1496,28 @@ namespace Business.Core.Annotations
         }
     }
 
+    /// <summary>
+    /// ScaleAttribute
+    /// </summary>
     public class ScaleAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// ScaleAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public ScaleAttribute(int state = -802, string message = null) : base(state, message) { }
 
+        /// <summary>
+        /// Size
+        /// </summary>
         public int Size { get; set; } = 2;
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1287,8 +1539,18 @@ namespace Business.Core.Annotations
     /// </summary>
     public class CheckEmailAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// CheckEmailAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public CheckEmailAttribute(int state = -803, string message = null) : base(state, message) { }
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1345,11 +1607,28 @@ namespace Business.Core.Annotations
         }
     }
 
+    /// <summary>
+    /// CheckCharAttribute
+    /// </summary>
     public class CheckCharAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// CheckCharAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public CheckCharAttribute(int state = -804, string message = null) : base(state, message) { }
+
+        /// <summary>
+        /// Mode
+        /// </summary>
         public Help.CheckCharMode Mode { get; set; } = Help.CheckCharMode.All;
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1373,7 +1652,6 @@ namespace Business.Core.Annotations
         /// Indicates whether the specified regular expression finds a match in the specified input string, using the specified matching options.
         /// </summary>
         /// <param name="pattern">The regular expression pattern to match.</param>
-        /// <param name="options">A bitwise combination of the enumeration values that provide options for matching.</param>
         /// <param name="state"></param>
         /// <param name="message"></param>
         public RegexAttribute(string pattern, int state = -805, string message = null) : base(state, message)
@@ -1489,8 +1767,18 @@ namespace Business.Core.Annotations
     /// </summary>
     public class CheckPhoneAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// CheckPhoneAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public CheckPhoneAttribute(int state = -806, string message = null) : base(state, message) { }
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1550,8 +1838,18 @@ namespace Business.Core.Annotations
     /// </summary>
     public class CheckUrlAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// CheckUrlAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public CheckUrlAttribute(int state = -807, string message = null) : base(state, message) { }
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1608,14 +1906,33 @@ namespace Business.Core.Annotations
         }
     }
 
+    /// <summary>
+    /// MD5Attribute
+    /// </summary>
     public class MD5Attribute : ArgumentAttribute
     {
+        /// <summary>
+        /// MD5Attribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public MD5Attribute(int state = -820, string message = null) : base(state, message) { }
 
+        /// <summary>
+        /// Encoding
+        /// </summary>
         public System.Text.Encoding Encoding { get; set; }
 
+        /// <summary>
+        /// HasUpper
+        /// </summary>
         public bool HasUpper { get; set; }
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1640,10 +1957,24 @@ namespace Business.Core.Annotations
         /// </summary>
         public string Salt { get; set; }
 
+        /// <summary>
+        /// Encoding
+        /// </summary>
         public System.Text.Encoding Encoding { get; set; }
 
+        /// <summary>
+        /// AES return to item1=Data and item2=Salt
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public AESAttribute(string key = null, int state = -821, string message = null) : base(state, message) => this.Key = key;
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1652,6 +1983,13 @@ namespace Business.Core.Annotations
             return this.ResultCreate(Help.AES.Encrypt(value, Key, Salt, Encoding));
         }
 
+        /// <summary>
+        /// Equals
+        /// </summary>
+        /// <param name="password"></param>
+        /// <param name="encryptData"></param>
+        /// <param name="salt"></param>
+        /// <returns></returns>
         public bool Equals(string password, string encryptData, string salt)
         {
             try
@@ -1669,22 +2007,46 @@ namespace Business.Core.Annotations
 
     #region Deserialize
 
+    /// <summary>
+    /// ArgumentDefaultAttribute
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.All, AllowMultiple = false)]
     public sealed class ArgumentDefaultAttribute : ArgumentAttribute
     {
-        internal protected ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, int state = -11, string message = null) : base(state, message)
+        /// <summary>
+        /// ArgumentDefaultAttribute
+        /// </summary>
+        /// <param name="resultType"></param>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="argTypeDefinition"></param>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        internal ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, int state = -11, string message = null) : base(state, message)
         {
             this.ArgMeta.resultType = resultType;
             this.ArgMeta.resultTypeDefinition = resultTypeDefinition;
             this.ArgMeta.argTypeDefinition = argTypeDefinition;
         }
 
+        /// <summary>
+        /// ArgumentDefaultAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public ArgumentDefaultAttribute(int state = -11, string message = null) : base(state, message) { }
     }
 
+    /// <summary>
+    /// ParametersAttribute
+    /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
     public class ParametersAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// ParametersAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public ParametersAttribute(int state = -11, string message = null) : base(state, message)
         {
             this.CanNull = false;
@@ -1692,6 +2054,12 @@ namespace Business.Core.Annotations
             this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments) => !hasDefinition;
         }
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <typeparam name="Type"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces<Type>(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1741,6 +2109,11 @@ namespace Business.Core.Annotations
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public class JsonArgAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// JsonArgAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public JsonArgAttribute(int state = -12, string message = null) : base(state, message)
         {
             this.CanNull = false;
@@ -1759,8 +2132,17 @@ namespace Business.Core.Annotations
             options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
+        /// <summary>
+        /// options
+        /// </summary>
         public System.Text.Json.JsonSerializerOptions options;
 
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <typeparam name="Type"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override async ValueTask<IResult> Proces<Type>(dynamic value)
         {
             var result = CheckNull(this, value);
@@ -1780,6 +2162,11 @@ namespace Business.Core.Annotations
     [System.AttributeUsage(System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public abstract class HttpFileAttribute : ArgumentAttribute
     {
+        /// <summary>
+        /// Simple asp.net HTTP request file attribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
         public HttpFileAttribute(int state = 830, string message = null) : base(state, message) { }
     }
     /*

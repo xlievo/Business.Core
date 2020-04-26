@@ -246,12 +246,28 @@ namespace Business.Core.Utils.Emit
             }
         }
 
+        /// <summary>
+        /// DynamicMethodSkeleton
+        /// </summary>
         public class DynamicMethodSkeleton : IDynamicMethodSkeleton
         {
+            /// <summary>
+            /// dynamicMethod
+            /// </summary>
             public readonly DynamicMethod dynamicMethod;
 
+            /// <summary>
+            /// DynamicMethodSkeleton
+            /// </summary>
             public DynamicMethodSkeleton() => dynamicMethod = new DynamicMethod("DynamicMethod", typeof(object), new[] { typeof(object), typeof(object[]) }, typeof(DynamicMethodSkeleton).GetTypeInfo().Module, true);
 
+            /// <summary>
+            /// DynamicMethodSkeleton
+            /// </summary>
+            /// <param name="returnType"></param>
+            /// <param name="parameterTypes"></param>
+            /// <param name="owner"></param>
+            /// <param name="skipVisibility"></param>
             public DynamicMethodSkeleton(System.Type returnType, System.Type[] parameterTypes, System.Type owner, bool skipVisibility = true)
             {
                 var ownerTypeInfo = owner.GetTypeInfo();
@@ -270,17 +286,37 @@ namespace Business.Core.Utils.Emit
             /// <returns>A function delegate.</returns>
             public System.Func<object, object[], object> CreateDelegate() => (System.Func<object, object[], object>)dynamicMethod.CreateDelegate(typeof(System.Func<object, object[], object>));
 
+            /// <summary>
+            /// CreateDelegate
+            /// </summary>
+            /// <param name="delegateType"></param>
+            /// <returns></returns>
             public System.Delegate CreateDelegate(System.Type delegateType) => dynamicMethod.CreateDelegate(delegateType);
         }
     }
 
+    /// <summary>
+    /// FieldAccessorGenerator
+    /// </summary>
     public static class FieldAccessorGenerator
     {
+        /// <summary>
+        /// CreateGetter
+        /// </summary>
+        /// <param name="fieldInfo"></param>
+        /// <returns></returns>
         public static System.Func<object, object> CreateGetter(FieldInfo fieldInfo)
         {
             return CreateGetter<object, object>(fieldInfo);
         }
 
+        /// <summary>
+        /// CreateGetter
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TRet"></typeparam>
+        /// <param name="fieldInfo"></param>
+        /// <returns></returns>
         public static System.Func<TSource, TRet> CreateGetter<TSource, TRet>(FieldInfo fieldInfo)
         {
             if (fieldInfo == null)
@@ -306,11 +342,23 @@ namespace Business.Core.Utils.Emit
             return EmitFieldGetter<TSource, TRet>(fieldInfo);
         }
 
+        /// <summary>
+        /// CreateSetter
+        /// </summary>
+        /// <param name="fieldInfo"></param>
+        /// <returns></returns>
         public static System.Action<object, object> CreateSetter(FieldInfo fieldInfo)
         {
             return CreateSetter<object, object>(fieldInfo);
         }
 
+        /// <summary>
+        /// CreateSetter
+        /// </summary>
+        /// <typeparam name="TTarget"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="fieldInfo"></param>
+        /// <returns></returns>
         public static System.Action<TTarget, TValue> CreateSetter<TTarget, TValue>(FieldInfo fieldInfo)
         {
             if (fieldInfo == null)
@@ -421,13 +469,30 @@ namespace Business.Core.Utils.Emit
         }
     }
 
+    /// <summary>
+    /// PropertyAccessorGenerator
+    /// </summary>
     public static class PropertyAccessorGenerator
     {
+        /// <summary>
+        /// CreateGetter
+        /// </summary>
+        /// <param name="propertyInfo"></param>
+        /// <param name="nonPublic"></param>
+        /// <returns></returns>
         public static System.Func<object, object> CreateGetter(PropertyInfo propertyInfo, bool nonPublic = true)
         {
             return CreateGetter<object, object>(propertyInfo, nonPublic);
         }
 
+        /// <summary>
+        /// CreateGetter
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TRet"></typeparam>
+        /// <param name="propertyInfo"></param>
+        /// <param name="nonPublic"></param>
+        /// <returns></returns>
         public static System.Func<TSource, TRet> CreateGetter<TSource, TRet>(PropertyInfo propertyInfo, bool nonPublic)
         {
             if (propertyInfo == null)
@@ -479,11 +544,25 @@ namespace Business.Core.Utils.Emit
             return EmitPropertyGetter<TSource, TRet>(propertyInfo, getMethod);
         }
 
+        /// <summary>
+        /// CreateSetter
+        /// </summary>
+        /// <param name="propertyInfo"></param>
+        /// <param name="nonPublic"></param>
+        /// <returns></returns>
         public static System.Action<object, object> CreateSetter(PropertyInfo propertyInfo, bool nonPublic = true)
         {
             return CreateSetter<object, object>(propertyInfo, nonPublic);
         }
 
+        /// <summary>
+        /// CreateSetter
+        /// </summary>
+        /// <typeparam name="TTarget"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="propertyInfo"></param>
+        /// <param name="nonPublic"></param>
+        /// <returns></returns>
         public static System.Action<TTarget, TValue> CreateSetter<TTarget, TValue>(PropertyInfo propertyInfo, bool nonPublic)
         {
             if (propertyInfo == null)
