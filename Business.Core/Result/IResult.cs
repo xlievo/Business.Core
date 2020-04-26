@@ -16,6 +16,9 @@
 
 namespace Business.Core.Result
 {
+    /// <summary>
+    /// IResult
+    /// </summary>
     public interface IResult
     {
         /// <summary>
@@ -39,6 +42,9 @@ namespace Business.Core.Result
         /// </summary>
         bool HasData { get; }
 
+        /// <summary>
+        /// Data type
+        /// </summary>
         System.Type DataType { get; }
 
         /// <summary>
@@ -47,13 +53,13 @@ namespace Business.Core.Result
         string Callback { get; set; }
 
         /// <summary>
-        /// Json Data
+        /// Json data
         /// </summary>
         /// <returns></returns>
         string ToDataString();
 
         /// <summary>
-        /// Byte Data
+        /// Byte data
         /// </summary>
         /// <returns></returns>
         byte[] ToDataBytes();
@@ -81,6 +87,10 @@ namespace Business.Core.Result
         bool HasDataResult { get; }
     }
 
+    /// <summary>
+    /// IResult<DataType>
+    /// </summary>
+    /// <typeparam name="DataType"></typeparam>
     public interface IResult<DataType> : IResult
     {
         /// <summary>
@@ -89,6 +99,9 @@ namespace Business.Core.Result
         new DataType Data { get; }
     }
 
+    /// <summary>
+    /// Result factory
+    /// </summary>
     public static class ResultFactory
     {
         internal static int ConvertErrorState(this int state) => 0 < state ? 0 - System.Math.Abs(state) : state;
@@ -144,7 +157,6 @@ namespace Business.Core.Result
         /// <summary>
         /// Used to create IResult.Data secondary encapsulation
         /// </summary>
-        /// <param name="resultType"></param>
         /// <param name="result"></param>
         /// <returns></returns>
         public static IResult ResultCreateToDataBytes(this IResult result)
@@ -154,7 +166,16 @@ namespace Business.Core.Result
                 return null;
             }
 
-            var result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataBytes() : null, result.Message, result.State);
+            IResult result2;
+
+            if (result.HasDataResult)
+            {
+                result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataBytes() : null, result.Message, result.State);
+            }
+            else
+            {
+                result2 = ResultCreate(result.GenericDefinition, result.State, result.Message);
+            }
             //====================================//
             result2.Callback = result.Callback;
 
@@ -164,7 +185,6 @@ namespace Business.Core.Result
         /// <summary>
         /// Used to create IResult.Data secondary encapsulation
         /// </summary>
-        /// <param name="resultType"></param>
         /// <param name="result"></param>
         /// <returns></returns>
         public static IResult ResultCreateToDataString(this IResult result)
@@ -174,7 +194,16 @@ namespace Business.Core.Result
                 return null;
             }
 
-            var result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataString() : null, result.Message, result.State);
+            IResult result2;
+
+            if (result.HasDataResult)
+            {
+                result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataString() : null, result.Message, result.State);
+            }
+            else
+            {
+                result2 = ResultCreate(result.GenericDefinition, result.State, result.Message);
+            }
             //====================================//
             result2.Callback = result.Callback;
 
