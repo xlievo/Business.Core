@@ -272,7 +272,7 @@ namespace Business.Core
             //}
 
             //var generics = typeof(IBusiness<,>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments);
-            //var resultType = (generics ? businessArguments[0] : typeof(ResultObject<object>)).GetGenericTypeDefinition();
+            //var resultType = (generics ? businessArguments[0] : typeof(ResultObject<>)).GetGenericTypeDefinition();
             //var argType = (generics ? businessArguments[1] : typeof(Arg<object>)).GetGenericTypeDefinition();
             if (typeof(IBusiness<,>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments))
             {
@@ -281,8 +281,8 @@ namespace Business.Core
             }
             else //if (typeof(IBusiness).IsAssignableFrom(type))
             {
-                resultType = (resultType ?? typeof(ResultObject<object>)).GetGenericTypeDefinition();
-                argType = (argType ?? typeof(Arg<object>)).GetGenericTypeDefinition();
+                resultType = (resultType ?? typeof(ResultObject<>)).GetGenericTypeDefinition();
+                argType = (argType ?? typeof(Arg<>)).GetGenericTypeDefinition();
             }
 
             var attributes = AttributeBase.GetTopAttributes(typeInfo);//GetArgAttr(typeInfo);

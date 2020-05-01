@@ -34,7 +34,7 @@ namespace Business.Core
         /// <summary>
         /// UseDoc
         /// </summary>
-        IBootstrap UseDoc(string outDir = null, Config config = default);
+        IBootstrap UseDoc(string outDir = null, System.Action<Config> config = default);
 
         /// <summary>
         /// UseResultType
@@ -138,7 +138,7 @@ namespace Business.Core
             /// <summary>
             /// Config
             /// </summary>
-            public Config Config { get; internal set; }
+            public System.Action<Config> Config { get; internal set; }
 
             /// <summary>
             /// Use
@@ -165,7 +165,7 @@ namespace Business.Core
         /// </summary>
         public BootstrapConfig Config { get; }
 
-        IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
+        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Config> config) => UseDoc(outDir, config);
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
@@ -264,7 +264,13 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+                Config config = null;
+                if (null != Config.UseDoc?.Config)
+                {
+                    config = new Config();
+                    Config.UseDoc?.Config(config);
+                }
+                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, config);
             }
 
             Config.BuildAfter?.Invoke(this);
@@ -278,7 +284,7 @@ namespace Business.Core
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public virtual Bootstrap UseDoc(string outDir = null, Config config = default)
+        public virtual Bootstrap UseDoc(string outDir = null, System.Action<Config> config = default)
         {
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
@@ -295,7 +301,7 @@ namespace Business.Core
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public virtual Bootstrap UseDoc(Config config) => UseDoc(null, config);
+        public virtual Bootstrap UseDoc(System.Action<Config> config) => UseDoc(null, config);
 
         #region UseResultType UseArgType
 
@@ -354,7 +360,7 @@ namespace Business.Core
         /// </summary>
         public BootstrapConfig Config { get; }
 
-        IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
+        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Config> config) => UseDoc(outDir, config);
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
@@ -385,7 +391,13 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+                Config config = null;
+                if (null != Config.UseDoc?.Config)
+                {
+                    config = new Config();
+                    Config.UseDoc?.Config(config);
+                }
+                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, config);
             }
 
             Config.BuildAfter?.Invoke(this);
@@ -399,7 +411,7 @@ namespace Business.Core
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public virtual Bootstrap<Business> UseDoc(string outDir = null, Config config = default)
+        public virtual Bootstrap<Business> UseDoc(string outDir = null, System.Action<Config> config = default)
         {
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
@@ -416,7 +428,7 @@ namespace Business.Core
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public virtual Bootstrap<Business> UseDoc(Config config) => UseDoc(null, config);
+        public virtual Bootstrap<Business> UseDoc(System.Action<Config> config) => UseDoc(null, config);
 
         #region UseResultType UseArgType
 
@@ -473,7 +485,7 @@ namespace Business.Core
         /// </summary>
         public BootstrapConfig Config { get; }
 
-        IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
+        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Config> config) => UseDoc(outDir, config);
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
@@ -528,7 +540,13 @@ namespace Business.Core
                 }
             }
 
-            Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+            Config config = null;
+            if (null != Config.UseDoc?.Config)
+            {
+                config = new Config();
+                Config.UseDoc?.Config(config);
+            }
+            Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, config);
 
             Config.BuildAfter?.Invoke(this);
         }
@@ -539,7 +557,7 @@ namespace Business.Core
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public virtual BootstrapAll UseDoc(string outDir = null, Config config = default)
+        public virtual BootstrapAll UseDoc(string outDir = null, System.Action<Config> config = default)
         {
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
@@ -577,7 +595,7 @@ namespace Business.Core
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public virtual BootstrapAll UseDoc(Config config) => UseDoc(null, config);
+        public virtual BootstrapAll UseDoc(System.Action<Config> config) => UseDoc(null, config);
 
         #region UseResultType UseArgType
 
@@ -641,7 +659,7 @@ namespace Business.Core
         /// </summary>
         public BootstrapConfig Config { get; }
 
-        IBootstrap IBootstrap.UseDoc(string outDir, Config config) => UseDoc(outDir, config);
+        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Config> config) => UseDoc(outDir, config);
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
@@ -702,7 +720,13 @@ namespace Business.Core
                 }
             }
 
-            Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+            Config config = null;
+            if (null != Config.UseDoc?.Config)
+            {
+                config = new Config();
+                Config.UseDoc?.Config(config);
+            }
+            Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, config);
 
             Config.BuildAfter?.Invoke(this);
         }
@@ -713,7 +737,7 @@ namespace Business.Core
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public virtual BootstrapAll<Business> UseDoc(string outDir = null, Config config = default)
+        public virtual BootstrapAll<Business> UseDoc(string outDir = null, System.Action<Config> config = default)
         {
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
@@ -751,7 +775,7 @@ namespace Business.Core
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public virtual BootstrapAll<Business> UseDoc(Config config) => UseDoc(null, config);
+        public virtual BootstrapAll<Business> UseDoc(System.Action<Config> config) => UseDoc(null, config);
 
         #region UseResultType UseArgType
 
@@ -807,7 +831,7 @@ namespace Business.Core.Utils
         /// <param name="bootstrap"></param>
         /// <param name="operation"></param>
         /// <returns></returns>
-        public static Bootstrap Use<Bootstrap>(this Bootstrap bootstrap, System.Func<IBusiness, IBusiness> operation)
+        static Bootstrap Use<Bootstrap>(this Bootstrap bootstrap, System.Func<IBusiness, IBusiness> operation)
             where Bootstrap : IBootstrap
         {
             bootstrap.Config.Use.Enqueue(operation);
