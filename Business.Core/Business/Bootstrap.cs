@@ -138,7 +138,7 @@ namespace Business.Core
             /// <summary>
             /// Config
             /// </summary>
-            public System.Action<Config> Config { get; internal set; }
+            public Config Config { get; internal set; }
 
             /// <summary>
             /// Use
@@ -264,13 +264,7 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                Config config = null;
-                if (null != Config.UseDoc?.Config)
-                {
-                    config = new Config();
-                    Config.UseDoc?.Config(config);
-                }
-                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, config);
+                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
 
             Config.BuildAfter?.Invoke(this);
@@ -286,10 +280,13 @@ namespace Business.Core
         /// <returns></returns>
         public virtual Bootstrap UseDoc(string outDir = null, System.Action<Config> config = default)
         {
+            var _config = null == config ? null : new Config();
+            config?.Invoke(_config);
+
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
                 OutDir = outDir,
-                Config = config,
+                Config = _config,
                 //Use = (dir, cfg) => business?.UseDoc(dir, cfg)
                 Use = (dir, cfg) => { if (null != business) { Help.UseDoc(business, dir, cfg); } }
             };
@@ -391,13 +388,7 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                Config config = null;
-                if (null != Config.UseDoc?.Config)
-                {
-                    config = new Config();
-                    Config.UseDoc?.Config(config);
-                }
-                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, config);
+                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
             }
 
             Config.BuildAfter?.Invoke(this);
@@ -413,10 +404,13 @@ namespace Business.Core
         /// <returns></returns>
         public virtual Bootstrap<Business> UseDoc(string outDir = null, System.Action<Config> config = default)
         {
+            var _config = null == config ? null : new Config();
+            config?.Invoke(_config);
+
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
                 OutDir = outDir,
-                Config = config,
+                Config = _config,
                 //Use = (dir, cfg) => business?.UseDoc(dir, cfg)
                 Use = (dir, cfg) => { if (null != business) { Help.UseDoc(business, dir, cfg); } }
             };
@@ -540,13 +534,7 @@ namespace Business.Core
                 }
             }
 
-            Config config = null;
-            if (null != Config.UseDoc?.Config)
-            {
-                config = new Config();
-                Config.UseDoc?.Config(config);
-            }
-            Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, config);
+            Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
 
             Config.BuildAfter?.Invoke(this);
         }
@@ -559,10 +547,13 @@ namespace Business.Core
         /// <returns></returns>
         public virtual BootstrapAll UseDoc(string outDir = null, System.Action<Config> config = default)
         {
+            var _config = null == config ? null : new Config();
+            config?.Invoke(_config);
+
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
                 OutDir = outDir,
-                Config = config,
+                Config = _config,
                 Use = (dir, cfg) =>
                 {
                     var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
@@ -720,13 +711,7 @@ namespace Business.Core
                 }
             }
 
-            Config config = null;
-            if (null != Config.UseDoc?.Config)
-            {
-                config = new Config();
-                Config.UseDoc?.Config(config);
-            }
-            Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, config);
+            Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
 
             Config.BuildAfter?.Invoke(this);
         }
@@ -739,10 +724,13 @@ namespace Business.Core
         /// <returns></returns>
         public virtual BootstrapAll<Business> UseDoc(string outDir = null, System.Action<Config> config = default)
         {
+            var _config = null == config ? null : new Config();
+            config?.Invoke(_config);
+
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
                 OutDir = outDir,
-                Config = config,
+                Config = _config,
                 Use = (dir, cfg) =>
                 {
                     var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
