@@ -138,7 +138,7 @@ namespace Business.Core
             /// <summary>
             /// Config
             /// </summary>
-            public Options Options { get; internal set; }
+            public Options Options { get; set; }
 
             /// <summary>
             /// Use
