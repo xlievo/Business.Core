@@ -149,11 +149,21 @@ namespace Business.Core.Result
         /// <summary>
         /// Used to create the IResult returns object
         /// </summary>
+        /// <typeparam name="Data"></typeparam>
         /// <param name="resultTypeDefinition"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(this System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<string>(resultTypeDefinition, state: state, message: message, checkData: false, hasDataResult: false);
+        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<Data>(resultTypeDefinition, state: state, message: message, checkData: false, hasDataResult: false);
+
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static IResult ResultCreate(this System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<string>(resultTypeDefinition, state, message);
 
         /// <summary>
         /// Used to create IResult.Data secondary encapsulation

@@ -152,7 +152,7 @@ namespace Business.Core
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public Core.Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+        public Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -161,7 +161,7 @@ namespace Business.Core
         /// <param name="message"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        public Core.Result.IResult ResultCreate(object data, string message = null, int state = 1) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+        public Result.IResult ResultCreate(object data, string message = null, int state = 1) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
         #endregion
     }
