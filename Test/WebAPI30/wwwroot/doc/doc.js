@@ -1402,7 +1402,7 @@ function businessOnchang(obj) {
             main.style.paddingLeft = main.style.paddingRight = 0;
         }
 
-        if (business.config.navigtion) {
+        if (business.options.navigtion) {
             close_sidebar.style.removeProperty("display");
 
             if (!wrapper.classList.contains("toggled")) {
@@ -1460,13 +1460,13 @@ function businessOnchang(obj) {
             businessDescription.parentNode.style.display = "none";
         }
 
-        groupSelect.style.display = business.config.groupEnable ? "" : "none";
+        groupSelect.style.display = business.options.groupEnable ? "" : "none";
 
         groupSelect.options.length = 0;
         var index = -1;
         var count = 0;
         for (var i in business.group) {
-            if (i === business.config.groupSelect) {
+            if (i === business.options.groupSelect) {
                 index = count;
             }
             else if (-1 === index && i === business.groupDefault) {
@@ -1559,8 +1559,8 @@ function go() {
                 for (var i in doc) {
                     businessSelect.options.add(new Option(doc[i].alias, i));
 
-                    if (doc[i].config.host == null || doc[i].config.host == undefined || doc[i].config.host === '') {
-                        doc[i].config.host = document.location.origin;
+                    if (doc[i].options.host == null || doc[i].options.host == undefined || doc[i].options.host === '') {
+                        doc[i].options.host = document.location.origin;
                     }
                 }
                 businessOnchang(businessSelect);
@@ -1944,7 +1944,7 @@ function ready(editor) {
 
         var header = debug.root.header.parentNode;
 
-        if (doc[businessName].config.debug) {
+        if (doc[businessName].options.debug) {
             var buttonDebug = debug.root.getButton('', 'debug', 'Debug');
             button_holder = debug.root.theme.getHeaderButtonHolder();
             button_holder.appendChild(buttonDebug);
@@ -1975,7 +1975,7 @@ function ready(editor) {
                         form.append(c.file.name, c.file);
                     });
 
-                    ajax.postForm(doc[businessName].config.host + "/" + businessName,
+                    ajax.postForm(doc[businessName].options.host + "/" + businessName,
                         form,
                         function (response) {
                             //succcess
@@ -1998,7 +1998,7 @@ function ready(editor) {
                     if (data.hasOwnProperty("d")) {
                         d.d = data.d;
                     }
-                    ajax.post(doc[businessName].config.host + "/" + businessName, d,
+                    ajax.post(doc[businessName].options.host + "/" + businessName, d,
                         function (response) {
                             //succcess
                             try {
@@ -2026,7 +2026,7 @@ function ready(editor) {
         header2.style.marginTop = '8px';
         header.parentNode.insertBefore(header2, header.nextSibling);
 
-        if (doc[businessName].config.testing) {
+        if (doc[businessName].options.testing) {
             var testing = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing');
             //var testing_btn = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testing_btn');
             //var testingAll_btn = button_holder.querySelector('#' + editor.schema.properties.input.name + '_testingAll_btn');
@@ -2061,7 +2061,7 @@ function ready(editor) {
             header2.style.display = "";
         }
 
-        if (doc[businessName].config.benchmark) {
+        if (doc[businessName].options.benchmark) {
             header.classList.add("form-inline");
             var buttonBenchmark = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark');
             var benchmark_n = button_holder.querySelector('#' + editor.schema.properties.input.name + '_benchmark_n');
@@ -2103,15 +2103,15 @@ function ready(editor) {
 
                     var data = getData(input, false);
                     //input.schema.name
-                    ajax.post(doc[businessName].config.host + "/" + businessName,
+                    ajax.post(doc[businessName].options.host + "/" + businessName,
                         {
                             c: "benchmark",
                             t: null,//token check
                             d: JSON.stringify({
                                 n: n,
                                 c: c,
-                                data: "c=" + input.schema.name + "&t=" + data.t + "&d=" + (doc[businessName].config.benchmarkJSON ? JSON.stringify(data.d) : data.d),
-                                host: doc[businessName].config.host + "/" + businessName
+                                data: "c=" + input.schema.name + "&t=" + data.t + "&d=" + (doc[businessName].options.benchmarkJSON ? JSON.stringify(data.d) : data.d),
+                                host: doc[businessName].options.host + "/" + businessName
                             })
                         },
                         function (response) {
@@ -2130,7 +2130,7 @@ function ready(editor) {
             }, false);
         }
 
-        if (doc[businessName].config.setToken) {
+        if (doc[businessName].options.setToken) {
             var token = button_holder.querySelector('#' + editor.schema.properties.input.name + '_token');
             var settoken = button_holder.querySelector('#' + editor.schema.properties.input.name + '_settoken');
             header.appendChild(settoken);
@@ -2153,7 +2153,7 @@ function ready(editor) {
         editor.on('change', function () {
             var input = this.editors["root.input"];
             var data = getData(input, false);
-            var h = doc[businessName].config.host + "/" + businessName;
+            var h = doc[businessName].options.host + "/" + businessName;
 
             curlValue.setValue(GetCurl(h, input.schema.name, data, getData2(input, false)));
             javascriptValue.setValue(GetSdkJavaScript(h, input.schema.name, data));

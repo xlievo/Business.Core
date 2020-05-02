@@ -739,9 +739,9 @@ namespace Business.Core.Utils
         /// <typeparam name="Business"></typeparam>
         /// <param name="business"></param>
         /// <param name="outDir"></param>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(Business business, string outDir = null, Options config = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, config);
+        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, options);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -751,9 +751,9 @@ namespace Business.Core.Utils
         /// <param name="business"></param>
         /// <param name="argCallback"></param>
         /// <param name="outDir"></param>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, string outDir = null, Options config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, string outDir = null, Options options = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -790,7 +790,7 @@ namespace Business.Core.Utils
                 });
             }
 
-            business.Configer.Doc = UseDoc(business, argCallback, Configer.Xmls, config);
+            business.Configer.Doc = UseDoc(business, argCallback, Configer.Xmls, options);
 
             //business.Configer.Info.DocFileName = $"{business.Configer.Info.TypeFullName}.doc";
             business.Configer.Info.DocFileName = "business.doc";
@@ -827,16 +827,16 @@ namespace Business.Core.Utils
         /// <param name="business"></param>
         /// <param name="argCallback"></param>
         /// <param name="xmlMembers"></param>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public static Doc<DocArg> UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Options config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Doc<DocArg> UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Options options = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
             var groupDefault = business.Configer.Info.CommandGroupDefault;
 
-            config = config ?? new Options();
-            var command = null != config.Group ? business.Command.Where(c => c.Key.Equals(config.Group, System.StringComparison.InvariantCultureIgnoreCase)) : business.Command;
+            options = options ?? new Options();
+            var command = null != options.Group ? business.Command.Where(c => c.Key.Equals(options.Group, System.StringComparison.InvariantCultureIgnoreCase)) : business.Command;
 
             var group = command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
             {
@@ -875,9 +875,9 @@ namespace Business.Core.Utils
             Xml.member member3 = null;
             xmlMembers?.TryGetValue($"T:{business.Configer.Info.TypeFullName}", out member3);
 
-            config.Host = System.Uri.TryCreate(config.Host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty;
+            options.Host = System.Uri.TryCreate(options.Host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty;
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Alias = business.Configer.Info.Alias, Group = group, GroupDefault = groupDefault, Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>"), Config = config, DocGroup = business.Configer.DocGroup.OrderBy(c => c.Key.position).ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.position) as IEnumerable<DocInfo>) };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Alias = business.Configer.Info.Alias, Group = group, GroupDefault = groupDefault, Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>"), Options = options, DocGroup = business.Configer.DocGroup.OrderBy(c => c.Key.position).ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.position) as IEnumerable<DocInfo>) };
         }
 
         const string AttributeSign = "Attribute";

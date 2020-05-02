@@ -479,9 +479,9 @@ namespace Business.Core.Document
         string GroupDefault { get; set; }
 
         /// <summary>
-        /// Config
+        /// Options
         /// </summary>
-        Options Config { get; set; }
+        Options Options { get; set; }
 
         /// <summary>
         /// DocGroup
@@ -634,9 +634,9 @@ namespace Business.Core.Document
         public string GroupDefault { get; set; }
 
         /// <summary>
-        /// Config
+        /// Options
         /// </summary>
-        public Options Config { get; set; }
+        public Options Options { get; set; }
 
         /// <summary>
         /// DocGroup

@@ -136,7 +136,7 @@ namespace Business.Core
             public string OutDir { get; set; }
 
             /// <summary>
-            /// Config
+            /// Options
             /// </summary>
             public Options Options { get; set; }
 
@@ -288,7 +288,7 @@ namespace Business.Core
                 OutDir = outDir,
                 Options = _options,
                 //Use = (dir, cfg) => business?.UseDoc(dir, cfg)
-                Use = (dir, cfg) => { if (null != business) { Help.UseDoc(business, dir, cfg); } }
+                Use = (dir, opt) => { if (null != business) { Help.UseDoc(business, dir, opt); } }
             };
             return this;
         }
@@ -412,7 +412,7 @@ namespace Business.Core
                 OutDir = outDir,
                 Options = _options,
                 //Use = (dir, cfg) => business?.UseDoc(dir, cfg)
-                Use = (dir, cfg) => { if (null != business) { Help.UseDoc(business, dir, cfg); } }
+                Use = (dir, opt) => { if (null != business) { Help.UseDoc(business, dir, opt); } }
             };
             return this;
         }
@@ -554,7 +554,7 @@ namespace Business.Core
             {
                 OutDir = outDir,
                 Options = _options,
-                Use = (dir, cfg) =>
+                Use = (dir, opt) =>
                 {
                     var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
                     var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
@@ -562,7 +562,7 @@ namespace Business.Core
                     foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
                     {
                         //item.Value.UseDoc(null, cfg);
-                        Help.UseDoc(item.Value, null, cfg);
+                        Help.UseDoc(item.Value, null, opt);
 
                         if (exists)
                         {
@@ -731,7 +731,7 @@ namespace Business.Core
             {
                 OutDir = outDir,
                 Options = _options,
-                Use = (dir, cfg) =>
+                Use = (dir, opt) =>
                 {
                     var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
                     var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
@@ -739,7 +739,7 @@ namespace Business.Core
                     foreach (var item in BusinessList.OrderBy(c => c.Key))
                     {
                         //item.Value.UseDoc(null, cfg);
-                        Help.UseDoc(item.Value, null, cfg);
+                        Help.UseDoc(item.Value, null, opt);
 
                         if (exists)
                         {
