@@ -154,7 +154,7 @@ namespace Business.Core.Result
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<Data>(resultTypeDefinition, state: state, message: message, checkData: false, hasDataResult: false);
+        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, int state, string message) => ResultCreate<Data>(resultTypeDefinition, state: state, message: message, checkData: false, hasDataResult: false);
 
         /// <summary>
         /// Used to create the IResult returns object
