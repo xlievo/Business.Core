@@ -34,7 +34,7 @@ namespace Business.Core
         /// <summary>
         /// UseDoc
         /// </summary>
-        IBootstrap UseDoc(string outDir = null, System.Action<Config> config = default);
+        IBootstrap UseDoc(string outDir = null, System.Action<Options> options = default);
 
         /// <summary>
         /// UseResultType
@@ -138,12 +138,12 @@ namespace Business.Core
             /// <summary>
             /// Config
             /// </summary>
-            public Config Config { get; internal set; }
+            public Options Options { get; internal set; }
 
             /// <summary>
             /// Use
             /// </summary>
-            public System.Action<string, Config> Use { get; internal set; }
+            public System.Action<string, Options> Use { get; internal set; }
         }
     }
 
@@ -165,7 +165,7 @@ namespace Business.Core
         /// </summary>
         public BootstrapConfig Config { get; }
 
-        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Config> config) => UseDoc(outDir, config);
+        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Options> options) => UseDoc(outDir, options);
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
@@ -264,7 +264,7 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Options);
             }
 
             Config.BuildAfter?.Invoke(this);
@@ -276,17 +276,17 @@ namespace Business.Core
         /// Generating Document Model for All Business Classes. business.doc
         /// </summary>
         /// <param name="outDir"></param>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public virtual Bootstrap UseDoc(string outDir = null, System.Action<Config> config = default)
+        public virtual Bootstrap UseDoc(string outDir = null, System.Action<Options> options = default)
         {
-            var _config = null == config ? null : new Config();
-            config?.Invoke(_config);
+            var _options = null == options ? null : new Options();
+            options?.Invoke(_options);
 
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
                 OutDir = outDir,
-                Config = _config,
+                Options = _options,
                 //Use = (dir, cfg) => business?.UseDoc(dir, cfg)
                 Use = (dir, cfg) => { if (null != business) { Help.UseDoc(business, dir, cfg); } }
             };
@@ -296,9 +296,9 @@ namespace Business.Core
         /// <summary>
         /// Generating Document Model for All Business Classes. business.doc
         /// </summary>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public virtual Bootstrap UseDoc(System.Action<Config> config) => UseDoc(null, config);
+        public virtual Bootstrap UseDoc(System.Action<Options> options) => UseDoc(null, options);
 
         #region UseResultType UseArgType
 
@@ -357,7 +357,7 @@ namespace Business.Core
         /// </summary>
         public BootstrapConfig Config { get; }
 
-        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Config> config) => UseDoc(outDir, config);
+        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Options> options) => UseDoc(outDir, options);
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
@@ -388,7 +388,7 @@ namespace Business.Core
                     item.Invoke(business);
                 }
 
-                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+                Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Options);
             }
 
             Config.BuildAfter?.Invoke(this);
@@ -400,17 +400,17 @@ namespace Business.Core
         /// Generating Document Model for All Business Classes. business.doc
         /// </summary>
         /// <param name="outDir"></param>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public virtual Bootstrap<Business> UseDoc(string outDir = null, System.Action<Config> config = default)
+        public virtual Bootstrap<Business> UseDoc(string outDir = null, System.Action<Options> options = default)
         {
-            var _config = null == config ? null : new Config();
-            config?.Invoke(_config);
+            var _options = null == options ? null : new Options();
+            options?.Invoke(_options);
 
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
                 OutDir = outDir,
-                Config = _config,
+                Options = _options,
                 //Use = (dir, cfg) => business?.UseDoc(dir, cfg)
                 Use = (dir, cfg) => { if (null != business) { Help.UseDoc(business, dir, cfg); } }
             };
@@ -420,9 +420,9 @@ namespace Business.Core
         /// <summary>
         /// UseDoc
         /// </summary>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public virtual Bootstrap<Business> UseDoc(System.Action<Config> config) => UseDoc(null, config);
+        public virtual Bootstrap<Business> UseDoc(System.Action<Options> options) => UseDoc(null, options);
 
         #region UseResultType UseArgType
 
@@ -479,7 +479,7 @@ namespace Business.Core
         /// </summary>
         public BootstrapConfig Config { get; }
 
-        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Config> config) => UseDoc(outDir, config);
+        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Options> options) => UseDoc(outDir, options);
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
@@ -534,7 +534,7 @@ namespace Business.Core
                 }
             }
 
-            Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+            Config.UseDoc.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Options);
 
             Config.BuildAfter?.Invoke(this);
         }
@@ -543,17 +543,17 @@ namespace Business.Core
         /// Generating Document Model for All Business Classes. business.doc
         /// </summary>
         /// <param name="outDir"></param>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public virtual BootstrapAll UseDoc(string outDir = null, System.Action<Config> config = default)
+        public virtual BootstrapAll UseDoc(string outDir = null, System.Action<Options> options = default)
         {
-            var _config = null == config ? null : new Config();
-            config?.Invoke(_config);
+            var _options = null == options ? null : new Options();
+            options?.Invoke(_options);
 
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
                 OutDir = outDir,
-                Config = _config,
+                Options = _options,
                 Use = (dir, cfg) =>
                 {
                     var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
@@ -584,9 +584,9 @@ namespace Business.Core
         /// <summary>
         /// UseDoc
         /// </summary>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public virtual BootstrapAll UseDoc(System.Action<Config> config) => UseDoc(null, config);
+        public virtual BootstrapAll UseDoc(System.Action<Options> options) => UseDoc(null, options);
 
         #region UseResultType UseArgType
 
@@ -650,7 +650,7 @@ namespace Business.Core
         /// </summary>
         public BootstrapConfig Config { get; }
 
-        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Config> config) => UseDoc(outDir, config);
+        IBootstrap IBootstrap.UseDoc(string outDir, System.Action<Options> options) => UseDoc(outDir, options);
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
@@ -711,7 +711,7 @@ namespace Business.Core
                 }
             }
 
-            Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Config);
+            Config.UseDoc?.Use?.Invoke(Config.UseDoc.OutDir, Config.UseDoc.Options);
 
             Config.BuildAfter?.Invoke(this);
         }
@@ -720,17 +720,17 @@ namespace Business.Core
         /// Generating Document Model for All Business Classes. business.doc
         /// </summary>
         /// <param name="outDir"></param>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public virtual BootstrapAll<Business> UseDoc(string outDir = null, System.Action<Config> config = default)
+        public virtual BootstrapAll<Business> UseDoc(string outDir = null, System.Action<Options> options = default)
         {
-            var _config = null == config ? null : new Config();
-            config?.Invoke(_config);
+            var _options = null == options ? null : new Options();
+            options?.Invoke(_options);
 
             this.Config.UseDoc = new BootstrapConfig.UseDocConfig
             {
                 OutDir = outDir,
-                Config = _config,
+                Options = _options,
                 Use = (dir, cfg) =>
                 {
                     var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
@@ -761,9 +761,9 @@ namespace Business.Core
         /// <summary>
         /// Generating Document Model for All Business Classes. business.doc
         /// </summary>
-        /// <param name="config"></param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        public virtual BootstrapAll<Business> UseDoc(System.Action<Config> config) => UseDoc(null, config);
+        public virtual BootstrapAll<Business> UseDoc(System.Action<Options> options) => UseDoc(null, options);
 
         #region UseResultType UseArgType
 

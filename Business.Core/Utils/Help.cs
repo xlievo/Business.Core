@@ -741,7 +741,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(Business business, string outDir = null, Config config = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, config);
+        public static Business UseDoc<Business>(Business business, string outDir = null, Options config = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, config);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -753,7 +753,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, string outDir = null, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, string outDir = null, Options config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -829,13 +829,13 @@ namespace Business.Core.Utils
         /// <param name="xmlMembers"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static Doc<DocArg> UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Config config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Doc<DocArg> UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Options config = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
             var groupDefault = business.Configer.Info.CommandGroupDefault;
 
-            config = config ?? new Config();
+            config = config ?? new Options();
             var command = null != config.Group ? business.Command.Where(c => c.Key.Equals(config.Group, System.StringComparison.InvariantCultureIgnoreCase)) : business.Command;
 
             var group = command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>

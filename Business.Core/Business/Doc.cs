@@ -393,9 +393,9 @@ namespace Business.Core.Document
     }
 
     /// <summary>
-    /// Config
+    /// Options
     /// </summary>
-    public class Config
+    public class Options
     {
         /// <summary>
         /// Host
@@ -481,7 +481,7 @@ namespace Business.Core.Document
         /// <summary>
         /// Config
         /// </summary>
-        Config Config { get; set; }
+        Options Config { get; set; }
 
         /// <summary>
         /// DocGroup
@@ -636,7 +636,7 @@ namespace Business.Core.Document
         /// <summary>
         /// Config
         /// </summary>
-        public Config Config { get; set; }
+        public Options Config { get; set; }
 
         /// <summary>
         /// DocGroup
