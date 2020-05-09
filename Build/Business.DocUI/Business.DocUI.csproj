@@ -12,11 +12,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard2.0\Business.Core.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\netstandard2.0\Business.DocUI.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Business.Core.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.0\Business.DocUI.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
