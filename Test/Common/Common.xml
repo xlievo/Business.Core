@@ -114,6 +114,22 @@
             callback
             </summary>
         </member>
+        <member name="T:JsonCommandAttribute">
+            <summary>
+            Json command
+            </summary>
+        </member>
+        <member name="M:JsonCommandAttribute.#ctor(System.String)">
+            <summary>
+            Command attribute on a method, for multiple sources to invoke the method
+            </summary>
+            <param name="onlyName"></param>
+        </member>
+        <member name="P:JsonCommandAttribute.Group">
+            <summary>
+            Used for the command group
+            </summary>
+        </member>
         <member name="T:Host">
             <summary>
             Business constructor would match given arguments

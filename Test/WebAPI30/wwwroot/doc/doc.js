@@ -2110,7 +2110,7 @@ function ready(editor) {
                             d: JSON.stringify({
                                 n: n,
                                 c: c,
-                                data: "c=" + input.schema.name + "&t=" + data.t + "&d=" + (doc[businessName].options.benchmarkJSON ? JSON.stringify(data.d) : data.d),
+                                data: "&c=" + encodeURIComponent(input.schema.name) + "&t=" + encodeURIComponent(data.t) + "&d=" + encodeURIComponent((doc[businessName].options.benchmarkJSON ? JSON.stringify(data.d) : data.d)),
                                 host: doc[businessName].options.host + "/" + businessName
                             })
                         },

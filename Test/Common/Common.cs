@@ -179,6 +179,23 @@ public struct ReceiveData
 #endregion
 
 /// <summary>
+/// Json command
+/// </summary>
+public class JsonCommandAttribute : CommandAttribute
+{
+    /// <summary>
+    /// Command attribute on a method, for multiple sources to invoke the method
+    /// </summary>
+    /// <param name="onlyName"></param>
+    public JsonCommandAttribute(string onlyName = null) : base(onlyName) => base.Group = "j";
+
+    /// <summary>
+    /// Used for the command group
+    /// </summary>
+    public new string Group { get => base.Group; }
+}
+
+/// <summary>
 /// Business constructor would match given arguments
 /// </summary>
 public struct Host
@@ -435,8 +452,17 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             .UseType(contextParameterNames)
             .IgnoreSet(new Ignore(IgnoreMode.Arg), contextParameterNames)
             .LoggerSet(new LoggerAttribute(canWrite: false), contextParameterNames)
-            .UseDoc(docDir);
-        //.UseDoc(docDir, new Config { Debug = true, Benchmark = true, Testing = true, GroupSelect = "j", SetToken = false, GroupEnable = true, Host = Common.Host.Addresses, Navigtion = true });
+            .UseDoc(docDir, o =>
+            {
+                o.Debug = true;
+                o.Benchmark = true;
+                o.Testing = true;
+                o.GroupSelect = "j";
+                o.SetToken = false;
+                o.GroupEnable = true;
+                o.Host = Common.Host.Addresses;
+                o.Navigtion = true;
+            });
         bootstrap.Build();
 
         //writ url to page

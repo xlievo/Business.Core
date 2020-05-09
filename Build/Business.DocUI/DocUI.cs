@@ -258,9 +258,9 @@
 
             //System.Console.WriteLine($"n:{arg.n} c:{arg.c}");
 
-            var dataPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, $"ab_{System.Guid.NewGuid().ToString("N")}");
+            var dataPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, $"ab_{System.Guid.NewGuid():N}");
 
-            System.IO.File.WriteAllText(dataPath, $"&{arg.data}", System.Text.Encoding.UTF8);
+            System.IO.File.WriteAllText(dataPath, arg.data, System.Text.Encoding.UTF8);
 
             try
             {

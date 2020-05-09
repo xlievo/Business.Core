@@ -191,6 +191,7 @@ public partial class BusinessMember2 : BusinessBase
         return this.ResultCreate();
     }
 
+    [JsonCommand("Test00X122222222222")]
     public virtual async Task<IResult<DateTime>> Test00X1(Token token2, Test003<Test0011> arg)
     {
         return this.ResultCreate();
@@ -303,8 +304,9 @@ public partial class BusinessMember2 : BusinessBase
     /// </returns>
     [Doc("Alias", Group = "Module 1", Position = 1)]
     [Command("AAA")]
-    [Command("jjjTest001jjj", Group = "j")]
-    [Command("wwwwwwwwwwww", Group = "j")]
+    //[Command("jjjTest001jjj", Group = "j")]
+    //[Command("wwwwwwwwwwww", Group = "j")]
+    [JsonCommand("jjjTest001jjj22222222222")]
     [Command(Group = "zzz")]
     [Testing("test2",
          "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T04:24\",99.0234,777,false]",
