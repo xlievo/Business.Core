@@ -1935,8 +1935,8 @@ function ready(editor) {
         var curlValue = debug.editors["root.Curl.value"];
         var javascriptValue = debug.editors["root.JavaScript.value"];
         var netValue = debug.editors["root.NET.value"];
-        var javaValue = debug.editors["root.Java.value"];
-        var phpValue = debug.editors["root.PHP.value"];
+        //var javaValue = debug.editors["root.Java.value"];
+        //var phpValue = debug.editors["root.PHP.value"];
         var debugValue = debug.editors["root.Debug.value"];
 
         var tab = debug.root.container.querySelector("a[aria-controls='Debug']");
