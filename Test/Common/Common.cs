@@ -48,6 +48,8 @@ public struct ResultObject<Type> : IResult<Type>
         this.Message = message;
         this.HasData = checkData ? !Equals(null, data) : false;
         this.Callback = default;
+        this.Business = null;
+        this.Command = null;
 
         this.GenericDefinition = genericDefinition;
         this.HasDataResult = hasDataResult;
@@ -67,6 +69,8 @@ public struct ResultObject<Type> : IResult<Type>
         this.HasData = !Equals(null, data);
 
         this.Callback = null;
+        this.Business = null;
+        this.Command = null;
         this.DataType = null;
         this.GenericDefinition = null;
         this.HasDataResult = false;
@@ -105,8 +109,20 @@ public struct ResultObject<Type> : IResult<Type>
     /// Gets the token of this result, used for callback
     /// </summary>
     [System.Text.Json.Serialization.JsonIgnore]
-    [System.Text.Json.Serialization.JsonPropertyName("B")]
+    //[System.Text.Json.Serialization.JsonPropertyName("B")]
     public string Callback { get; set; }
+
+    /// <summary>
+    /// Business to call
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string Business { get; set; }
+
+    /// <summary>
+    /// Command to call
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string Command { get; set; }
 
     [MessagePack.IgnoreMember]
     [System.Text.Json.Serialization.JsonIgnore]

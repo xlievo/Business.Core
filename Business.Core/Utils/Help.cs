@@ -588,7 +588,7 @@ namespace Business.Core.Utils
                 alias = $" {alias}";
             }
 
-            var docArg = new DocArg { Id = group.Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection, Name = argSource.Args.Name };
+            var docArg = new DocArg { Id = group.Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection, Name = argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
 
             docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} {alias}" : $"{argSource.Args.Name} ({docArg.LastType}){alias}";
             //{argSource.Args.Group[argSource.Group].Nick}
@@ -856,6 +856,7 @@ namespace Business.Core.Utils
                     Alias = meta.Doc?.Alias,
                     AliasGroup = meta.Doc?.Group,
                     HasReturn = meta.HasReturn,
+                    HasIResult = meta.HasIResult,
                     Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
                     Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
                     Args = new Dictionary<string, DocArg>(),
@@ -1037,10 +1038,10 @@ namespace Business.Core.Utils
                 summary = member?.summary?.text;
             }
 
-            if (current.outType.IsEnum)
-            {
-                summary = current.outType.GetEnumSummary(summary, xmlMembers);
-            }
+            //if (current.outType.IsEnum)
+            //{
+            //    summary = current.outType.GetEnumSummary(summary, xmlMembers);
+            //}
 
             var group = new ConcurrentReadOnlyDictionary<string, ArgGroup>();
             group.dictionary.TryAdd(groupKey, new ArgGroup(pathRoot ?? type.Name));

@@ -384,11 +384,30 @@ public partial class BusinessMember2 : BusinessBase
         //return ss;
     }
 
+    public virtual async Task<MyEnum> TestMyEnum(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+    {
+        return MyEnum.B;
+    }
+
+    public virtual async Task<Test0011> TestTest0011(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+    {
+        return new Test0011 { AAA = new List<string> { "aaa" } };
+    }
+
+    /// <summary>
+    /// MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
+    /// </summary>
     public enum MyEnum
     {
-        A,
-        B,
-        C
+        /// <summary>
+        /// MyEnum A
+        /// </summary>
+        A = 0,
+        B = 2,
+        /// <summary>
+        /// MyEnum C
+        /// </summary>
+        C = 4
     }
 
     public virtual int DDD { get; set; }

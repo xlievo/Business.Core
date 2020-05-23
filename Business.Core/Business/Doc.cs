@@ -20,6 +20,7 @@ namespace Business.Core.Document
     using Utils;
     using System.Collections.Generic;
     using System.Linq;
+    using Business.Core.Result;
 
     /// <summary>
     /// doc .xml
@@ -533,6 +534,11 @@ namespace Business.Core.Document
         bool HasReturn { get; set; }
 
         /// <summary>
+        /// HasIResult
+        /// </summary>
+        bool HasIResult { get; set; }
+
+        /// <summary>
         /// Returns
         /// </summary>
         Document.DocArg Returns { get; set; }
@@ -585,6 +591,11 @@ namespace Business.Core.Document
         /// Type
         /// </summary>
         string Type { get; set; }
+
+        /// <summary>
+        /// ValueType
+        /// </summary>
+        bool ValueType { get; set; }
 
         //string Name { get; set; }
 
@@ -680,6 +691,11 @@ namespace Business.Core.Document
         /// HasReturn
         /// </summary>
         public bool HasReturn { get; set; }
+
+        /// <summary>
+        /// HasIResult
+        /// </summary>
+        public bool HasIResult { get; set; }
 
         /// <summary>
         /// Returns
@@ -842,6 +858,11 @@ namespace Business.Core.Document
         /// Name
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// ValueType
+        /// </summary>
+        public bool ValueType { get; set; }
 
         #region
         /*

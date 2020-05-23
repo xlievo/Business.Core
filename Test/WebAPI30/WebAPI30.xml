@@ -80,6 +80,21 @@
             rrrrrr2
             </returns>
         </member>
+        <member name="T:BusinessMember2.MyEnum">
+            <summary>
+            MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
+            </summary>
+        </member>
+        <member name="F:BusinessMember2.MyEnum.A">
+            <summary>
+            MyEnum A
+            </summary>
+        </member>
+        <member name="F:BusinessMember2.MyEnum.C">
+            <summary>
+            MyEnum C
+            </summary>
+        </member>
         <member name="M:BusinessMember2.Test002(Token,Args.Test002,System.Decimal,System.Collections.Generic.Dictionary{System.String,System.Object})">
             <summary>
             222
