@@ -817,7 +817,7 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string FirstCharToLower(this string input) => string.IsNullOrEmpty(input) ? input : input[0].ToString().ToLower() + input.Substring(1);
+        public static string FirstCharToLower(this string input) => string.IsNullOrEmpty(input) ? input : $"{input[0].ToString().ToLower()}{input.Substring(1)}";
 
         /// <summary>
         /// Gets the document object of the specified business class.
@@ -857,6 +857,7 @@ namespace Business.Core.Utils
                     AliasGroup = meta.Doc?.Group,
                     HasReturn = meta.HasReturn,
                     HasIResult = meta.HasIResult,
+                    HasToken = meta.HasToken,
                     Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
                     Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
                     Args = new Dictionary<string, DocArg>(),

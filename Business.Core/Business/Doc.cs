@@ -549,6 +549,11 @@ namespace Business.Core.Document
         string Description { get; set; }
 
         /// <summary>
+        /// HasToken
+        /// </summary>
+        bool HasToken { get; set; }
+
+        /// <summary>
         /// Args
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
@@ -706,6 +711,11 @@ namespace Business.Core.Document
         /// Description
         /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// HasToken
+        /// </summary>
+        public bool HasToken { get; set; }
 
         /// <summary>
         /// Args

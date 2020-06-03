@@ -53,16 +53,6 @@ namespace Business.Core.Result
         string Callback { get; set; }
 
         /// <summary>
-        /// Business to call
-        /// </summary>
-        string Business { get; set; }
-
-        /// <summary>
-        /// Command to call
-        /// </summary>
-        string Command { get; set; }
-
-        /// <summary>
         /// Json data
         /// </summary>
         /// <returns></returns>

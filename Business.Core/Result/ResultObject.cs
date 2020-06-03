@@ -46,8 +46,6 @@ namespace Business.Core.Result
             this.HasData = checkData ? !Equals(null, data) : false;
 
             this.Callback = null;
-            this.Business = null;
-            this.Command = null;
             this.GenericDefinition = genericDefinition;
             this.HasDataResult = hasDataResult;
         }
@@ -66,8 +64,6 @@ namespace Business.Core.Result
             this.HasData = !Equals(null, data);
 
             this.Callback = null;
-            this.Business = null;
-            this.Command = null;
             this.DataType = null;
             this.GenericDefinition = null;
             this.HasDataResult = false;
@@ -106,20 +102,7 @@ namespace Business.Core.Result
         /// Gets the token of this result, used for callback
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
-        //[System.Text.Json.Serialization.JsonPropertyName("B")]
         public string Callback { get; set; }
-
-        /// <summary>
-        /// Business to call
-        /// </summary>
-        [System.Text.Json.Serialization.JsonIgnore]
-        public string Business { get; set; }
-
-        /// <summary>
-        /// Command to call
-        /// </summary>
-        [System.Text.Json.Serialization.JsonIgnore]
-        public string Command { get; set; }
 
         /// <summary>
         /// Data type
@@ -138,10 +121,6 @@ namespace Business.Core.Result
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public bool HasDataResult { get; }
-
-        //ICommand command;
-        //[Newtonsoft.Json.JsonIgnore]
-        //public ICommand Command { get => command; set => command = value; }
 
         /// <summary>
         /// Json format
