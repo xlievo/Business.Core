@@ -594,20 +594,6 @@ JSONEditor.defaults.editors.object = JSONEditor.defaults.editors.object.extend({
             this.layoutEditors();
         }
     },
-    //saveJSON: function () {
-    //    if (!this.editjson_holder) return;
-
-    //    try {
-    //        var json = JSON.parse(this.editjson_textarea.value);
-    //        this.setValue(json);
-    //        this.hideEditJSON();
-    //        this.onChange(true);
-    //    }
-    //    catch (e) {
-    //        window.alert('invalid JSON');
-    //        throw e;
-    //    }
-    //},
     showEditJSON: function () {
         //if (!this.editjson_holder) return;
         //this.hideAddProperty();
@@ -767,15 +753,6 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         this.editjson_controls = this.theme.getHeaderButtonHolder();
         this.title.appendChild(this.editjson_controls);
 
-        // Edit JSON Button
-        //this.editjson_button = this.getButton('JSON', 'edit', 'Edit JSON');
-        //this.editjson_button.classList.add('json-editor-btntype-editjson');
-        //this.editjson_button.addEventListener('click', function (e) {
-        //    e.preventDefault();
-        //    e.stopPropagation();
-        //    self.toggleEditJSON();
-        //});
-        //this.editjson_controls.appendChild(this.editjson_button);
         this.editjson_controls.appendChild(this.editjson_holder);
 
         // Add controls
@@ -821,51 +798,6 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         var self = this;
         this.panel = self.container.querySelector("div[tag='panel']");
         this.panel.removeAttribute('class');
-
-        //this.collapsed = false;
-        //this.toggle_button = this.getButton('', 'collapse', this.translate('button_collapse'));
-        //this.toggle_button.setAttribute('tag', 'toggle');
-        //this.toggle_button.setAttribute('collapsed', this.collapsed);
-        //this.toggle_button.classList.add('json-editor-btntype-toggle');
-        //this.title_controls.appendChild(this.toggle_button);
-        //var row_holder_display = self.row_holder.style.display;
-        //var controls_display = self.controls.style.display;
-        //this.toggle_button.addEventListener('click', function (e) {
-        //    e.preventDefault();
-        //    e.stopPropagation();
-        //    if (self.collapsed) {
-        //        self.collapsed = false;
-        //        if (self.panel) self.panel.style.display = '';
-        //        self.row_holder.style.display = row_holder_display;
-        //        if (self.tabs_holder) self.tabs_holder.style.display = '';
-        //        self.controls.style.display = controls_display;
-        //        self.setButtonText(this, '', 'collapse', self.translate('button_collapse'));
-        //    }
-        //    else {
-        //        self.collapsed = true;
-        //        self.row_holder.style.display = 'none';
-        //        if (self.tabs_holder) self.tabs_holder.style.display = 'none';
-        //        self.controls.style.display = 'none';
-        //        if (self.panel) self.panel.style.display = 'none';
-        //        self.setButtonText(this, '', 'expand', self.translate('button_expand'));
-        //    }
-        //    self.toggle_button.setAttribute('collapsed', self.collapsed);
-        //});
-
-        //// If it should start collapsed
-        //if (this.options.collapsed) {
-        //    $trigger(this.toggle_button, 'click');
-        //}
-
-        //// Collapse button disabled
-        //if (this.schema.options && typeof this.schema.options.disable_collapse !== "undefined") {
-        //    if (this.schema.options.disable_collapse) this.toggle_button.style.display = 'none';
-        //}
-        //else if (this.jsoneditor.options.disable_collapse) {
-        //    this.toggle_button.style.display = 'none';
-        //}
-
-        // Add "new row" and "delete last" buttons below editor
 
         function click() {
             var i = self.rows.length;
@@ -1411,7 +1343,7 @@ function businessOnchang(obj) {
             if (!menu_toggle.classList.contains("is-active")) {
                 menu_toggle.classList.toggle("is-active");
             }
-            
+
             var html = compiled_menuGroup.render(business.docGroup);
             menus.innerHTML = html;
 
@@ -1453,7 +1385,7 @@ function businessOnchang(obj) {
 
         businessDescription.innerHTML = '';
         if (business.description) {
-            businessDescription.innerHTML = business.description;
+            businessDescription.innerHTML = business.description.replace_r_n();
             businessDescription.parentNode.style.display = "";
         }
         else {
@@ -1528,29 +1460,6 @@ function go() {
     }
     document.getElementById('url').setAttribute("value", url);
 
-    //atomic(document.querySelector("#url").value)
-    //    .then(function (response) {
-    //        //console.log(response.data); // xhr.responseText
-    //        //console.log(response.xhr);  // full response
-    //        doc = response.data;
-    //        var def = count = 0;
-    //        var groupElement = document.querySelector("#group");
-    //        for (var i in doc.group) {
-    //            if (i === doc.groupDefault) {
-    //                def = count;
-    //            }
-    //            count++;
-    //            groupElement.options.add(new Option(i, i));
-    //        }
-
-    //        if (0 == count) { return; }
-
-    //        groupElement.options.selectedIndex = def;
-    //        groupOnchang(document.querySelector("#group"));
-    //    })
-    //    .catch(function (error) {
-    //        console.log(error);
-    //    });
     ajax.get(url, null,
         function (response) {
             try {
@@ -1602,6 +1511,10 @@ function load(m) {
     var members2 = []
     for (var i in m) {
         members2.push(m[i]);
+
+        if (m[i].description) {
+            m[i].description = m[i].description.replace_r_n();
+        }
     }
 
     var html = compiled_tpl.render(members2);
@@ -1619,7 +1532,68 @@ function load(m) {
     //console.timeEnd("timer");
 }
 
+String.prototype.replace_r_n = function (newValue = "<br/>") {
+    if (this === undefined) {
+        return null;
+    }
+    return this.replace(/(?:\\[rn]|[\r\n])+/g, newValue);
+}
+
+function propertyHandle(property) {
+    if (property === undefined) {
+        return;
+    }
+    //handle enumDescription
+    if (property.enumDescription && 0 < property.enumDescription.length) {
+
+        var description = [];
+        for (var i2 = 0; i2 < property.enumDescription.length; i2++) {
+            var item = property.enumDescription[i2];
+            var summary = "<strong>" + item.name + " : " + item.value + "</strong>";
+            if (item.summary) {
+                summary += "&nbsp;&nbsp;&nbsp;&nbsp;" + item.summary;
+            }
+            description.push(summary);
+        }
+
+        property.description += "<br/>" + description.join("<br/>");
+    }
+
+    //handle description
+    if (property.descriptionTip && 0 < property.descriptionTip.length) {
+
+        var description = "";
+        for (var i2 = 0; i2 < property.descriptionTip.length; i2++) {
+            description += "<h5 tag=\"h5\" style=\"margin:0px;margin-bottom:";
+            description += property.descriptionTip.length - 1 > i2 ? 2 : !property.token && property.properties ? 15 : 2;
+            description += "px;margin-top:2px;\"><code>";
+            description += property.descriptionTip[i2];
+            description += "</code></h5>";
+        }
+
+        property.description += "<br/>" + description;
+    }
+
+    if (property.description) {
+        property.description = property.description.replace_r_n();
+    }
+
+    if (property.properties) {
+        for (c in property.properties) {
+            propertyHandle(property.properties[c]);
+        }
+    } else if (property.items && property.items.properties) {
+        for (c in property.items.properties) {
+            propertyHandle(property.items.properties[c]);
+        }
+    }
+}
+
 function loadMember(member) {
+
+    propertyHandle(member);
+
+    propertyHandle(member.returns);
 
     //==================input==================//
     var inputid = member.name + '_input_out';

@@ -592,21 +592,25 @@ namespace Business.Core.Utils
 
             docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} {alias}" : $"{argSource.Args.Name} ({docArg.LastType}){alias}";
             //{argSource.Args.Group[argSource.Group].Nick}
-            docArg.Description = argSource.Summary?.Replace(System.Environment.NewLine, "<br/>");
+            docArg.Description = argSource.Summary;
+
+            docArg.DescriptionTip = argSource.Attributes;// string.Join(System.Environment.NewLine, argSource.Attributes);
+
+            docArg.EnumDescription = argSource.EnumSummary;
 
             docArg.Token = argSource.Args.HasToken;
 
-            //var hasDescription = string.IsNullOrWhiteSpace(docArg.Description);
-            var attrs = string.Empty;
-            for (int i = 0; i < argSource.Attributes.Count; i++)
-            {
-                attrs += $"<h5 tag=\"h5\" style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : !docArg.Token && argSource.Args.HasDefinition ? 15 : 2)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
-            }
+            ////var hasDescription = string.IsNullOrWhiteSpace(docArg.Description);
+            //var attrs = string.Empty;
+            //for (int i = 0; i < argSource.Attributes.Count; i++)
+            //{
+            //    attrs += $"<h5 tag=\"h5\" style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : !docArg.Token && argSource.Args.HasDefinition ? 15 : 2)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
+            //}
 
-            if (!string.IsNullOrWhiteSpace(attrs))
-            {
-                docArg.Description += System.Environment.NewLine + attrs;
-            }
+            //if (!string.IsNullOrWhiteSpace(attrs))
+            //{
+            //    docArg.Description += System.Environment.NewLine + attrs;
+            //}
 
             if (argSource.Args.HasDefaultValue)
             {
@@ -858,7 +862,7 @@ namespace Business.Core.Utils
                     HasReturn = meta.HasReturn,
                     HasIResult = meta.HasIResult,
                     HasToken = meta.HasToken,
-                    Description = member?.summary?.sub?.Replace(System.Environment.NewLine, "<br/>"),
+                    Description = member?.summary?.sub,
                     Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
                     Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
@@ -879,22 +883,34 @@ namespace Business.Core.Utils
 
             options.Host = System.Uri.TryCreate(options.Host, System.UriKind.Absolute, out System.Uri uri) ? $"{uri.Scheme}://{uri.Authority}" : string.Empty;
 
-            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Alias = business.Configer.Info.Alias, Group = group, GroupDefault = groupDefault, Description = member3?.summary?.text?.Replace(System.Environment.NewLine, "<br/>"), Options = options, DocGroup = business.Configer.DocGroup.OrderBy(c => c.Key.position).ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.position) as IEnumerable<DocInfo>) };
+            return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Alias = business.Configer.Info.Alias, Group = group, GroupDefault = groupDefault, Description = member3?.summary?.text, Options = options, DocGroup = business.Configer.DocGroup.OrderBy(c => c.Key.position).ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.position) as IEnumerable<DocInfo>) };
         }
 
         const string AttributeSign = "Attribute";
 
-        static string GetEnumSummary(this System.Type type, string summary, IDictionary<string, Xml.member> xmlMembers)
+        //static string GetEnumSummary(this System.Type type, string summary, IDictionary<string, Xml.member> xmlMembers)
+        //{
+        //    var values = type.GetEnumValues().Cast<int>().Select(c =>
+        //    {
+        //        var enumName = System.Enum.GetName(type, c);
+        //        Xml.member enumMember = null;
+        //        xmlMembers?.TryGetValue($"F:{type.GetTypeName()}.{enumName}", out enumMember);
+        //        var memberSummary = enumMember?.summary?.text;
+        //        return string.IsNullOrWhiteSpace(memberSummary) ? $"<strong>{enumName} : {c}</strong>" : $"<strong>{enumName} : {c}</strong>&nbsp;&nbsp;&nbsp;&nbsp;{memberSummary}";
+        //    });
+        //    return $"{(!string.IsNullOrWhiteSpace(summary) ? summary + "<br/>" : null)}{string.Join("<br/>", values)}";
+        //}
+
+        static IEnumerable<EnumSummary> GetEnumSummary(this System.Type type, string summary, IDictionary<string, Xml.member> xmlMembers)
         {
-            var values = type.GetEnumValues().Cast<int>().Select(c =>
+            return type.GetEnumValues().Cast<int>().Select(c =>
             {
                 var enumName = System.Enum.GetName(type, c);
                 Xml.member enumMember = null;
                 xmlMembers?.TryGetValue($"F:{type.GetTypeName()}.{enumName}", out enumMember);
                 var memberSummary = enumMember?.summary?.text;
-                return string.IsNullOrWhiteSpace(memberSummary) ? $"<strong>{enumName} : {c}</strong>" : $"<strong>{enumName} : {c}</strong>&nbsp;&nbsp;&nbsp;&nbsp;{memberSummary}";
+                return new EnumSummary(enumName, c, memberSummary);
             });
-            return $"{(!string.IsNullOrWhiteSpace(summary) ? summary + "<br/>" : null)}{string.Join("<br/>", values)}";
         }
 
         static DocArg GetDocArg<DocArg, TypeDefinition>(string group, TypeDefinition args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null)
@@ -932,10 +948,10 @@ namespace Business.Core.Utils
                 }
             }
 
-            if (args.LastType.IsEnum)
-            {
-                summary = args.LastType.GetEnumSummary(summary, xmlMembers);
-            }
+            //if (args.LastType.IsEnum)
+            //{
+            //    summary = args.LastType.GetEnumSummary(summary, xmlMembers);
+            //}
 
             var argGroup = args.Group[group];
 
@@ -967,7 +983,7 @@ namespace Business.Core.Utils
                 }
             }
 
-            var arg = argCallback(new DocArgSource<TypeDefinition>(group, args, attrs, summary));
+            var arg = argCallback(new DocArgSource<TypeDefinition>(group, args, attrs, summary, args.LastType.IsEnum ? args.LastType.GetEnumSummary(summary, xmlMembers) : null));
 
             if ((null == argGroup.Ignore || !argGroup.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.ArgChild)) && !args.LastType.IsEnum)
             {
@@ -1138,10 +1154,10 @@ namespace Business.Core.Utils
                     summary = member2?.summary?.text;
                 }
 
-                if (current.outType.IsEnum)
-                {
-                    summary = current.outType.GetEnumSummary(summary, xmlMembers);
-                }
+                //if (current.outType.IsEnum)
+                //{
+                //    summary = current.outType.GetEnumSummary(summary, xmlMembers);
+                //}
 
                 // .. //
                 var path2 = !string.IsNullOrWhiteSpace(path) ? $"{path}.{item.Name}" : item.Name;

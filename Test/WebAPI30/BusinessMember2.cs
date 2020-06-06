@@ -848,6 +848,7 @@ public class Args
         /// <summary>
         /// 
         /// </summary>
+        [@CheckUrl]
         public MyEnum myEnum { get; set; }
 
         /// <summary>

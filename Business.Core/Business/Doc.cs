@@ -850,6 +850,16 @@ namespace Business.Core.Document
         public string Description { get; set; }
 
         /// <summary>
+        /// DescriptionTip
+        /// </summary>
+        public IEnumerable<string> DescriptionTip { get; set; }
+
+        /// <summary>
+        /// EnumDescription
+        /// </summary>
+        public IEnumerable<EnumSummary> EnumDescription { get; set; }
+
+        /// <summary>
         /// UniqueItems
         /// </summary>
         public bool UniqueItems { get; set; }
@@ -885,6 +895,22 @@ namespace Business.Core.Document
         public string Maximum { get; set; }
         */
         #endregion
+    }
+
+    public readonly struct EnumSummary
+    {
+        public EnumSummary(string name, int value, string summary)
+        {
+            Name = name;
+            Value = value;
+            Summary = summary;
+        }
+
+        public string Name { get; }
+
+        public int Value { get; }
+
+        public string Summary { get; }
     }
 
     /// <summary>
@@ -1003,12 +1029,14 @@ namespace Business.Core.Document
         /// <param name="args"></param>
         /// <param name="attributes"></param>
         /// <param name="summary"></param>
-        public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary)
+        /// <param name="enumSummary"></param>
+        public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary, IEnumerable<EnumSummary> enumSummary)
         {
             Group = group;
             Args = args;
             Attributes = attributes;
             Summary = summary;
+            EnumSummary = enumSummary;
         }
 
         /// <summary>
@@ -1030,6 +1058,11 @@ namespace Business.Core.Document
         /// Summary
         /// </summary>
         public string Summary { get; }
+
+        /// <summary>
+        /// EnumSummary
+        /// </summary>
+        public IEnumerable<EnumSummary> EnumSummary { get; }
     }
     /*
     //            color
