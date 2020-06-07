@@ -596,7 +596,7 @@ namespace Business.Core.Utils
 
             docArg.DescriptionTip = 0 < argSource.Attributes?.Count ? argSource.Attributes : null;
 
-            docArg.DescriptionEnum = argSource.EnumSummary;
+            docArg.Enums = argSource.Enums;
 
             docArg.Token = argSource.Args.HasToken;
 
@@ -633,13 +633,12 @@ namespace Business.Core.Utils
                 }
             }
 
-            if (argSource.Args.LastType.IsEnum)
+            if (null != docArg.Enums)
             {
                 docArg.Type = "number";
-                docArg.Enum = argSource.Args.LastType.GetEnumValues().Cast<int>();
                 docArg.Options = new Dictionary<string, object>
                 {
-                    { "enum_titles",  docArg.Enum.Select(c => $"{System.Enum.GetName(argSource.Args.LastType, c)} : {c}") },
+                    { "enum_titles",  docArg.Enums.Select(c => $"{c.Name} : {c.Value}") },
                 };
             }
 
@@ -891,7 +890,7 @@ namespace Business.Core.Utils
 
         const string AttributeSign = "Attribute";
 
-        static IEnumerable<EnumSummary> GetEnumSummary(this System.Type type, string summary, IDictionary<string, Xml.member> xmlMembers)
+        static IEnumerable<EnumItems> GetEnums(this System.Type type, IDictionary<string, Xml.member> xmlMembers)
         {
             return type.GetEnumValues().Cast<int>().Select(c =>
             {
@@ -899,7 +898,7 @@ namespace Business.Core.Utils
                 Xml.member enumMember = null;
                 xmlMembers?.TryGetValue($"F:{type.GetTypeName()}.{enumName}", out enumMember);
                 var memberSummary = enumMember?.summary?.text;
-                return new EnumSummary(enumName, c, memberSummary);
+                return new EnumItems(enumName, c, memberSummary);
             });
         }
 
@@ -973,7 +972,7 @@ namespace Business.Core.Utils
                 }
             }
 
-            var arg = argCallback(new DocArgSource<TypeDefinition>(group, args, attrs, summary, args.LastType.IsEnum ? args.LastType.GetEnumSummary(summary, xmlMembers) : null));
+            var arg = argCallback(new DocArgSource<TypeDefinition>(group, args, attrs, summary, args.LastType.IsEnum ? args.LastType.GetEnums(xmlMembers) : null));
 
             if ((null == argGroup.Ignore || !argGroup.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.ArgChild)) && !args.LastType.IsEnum)
             {

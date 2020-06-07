@@ -1543,17 +1543,19 @@ function propertyHandle(property) {
     if (property === undefined) {
         return;
     }
-    //handle descriptionEnum
-    if (property.descriptionEnum && 0 < property.descriptionEnum.length) {
+    //handle enums
+    if (property.enums && 0 < property.enums.length) {
 
+        property.enum = [];
         var description = [];
-        for (var i2 = 0; i2 < property.descriptionEnum.length; i2++) {
-            var item = property.descriptionEnum[i2];
-            var summary = "<strong>" + item.name + " : " + item.value + "</strong>";
-            if (item.summary) {
-                summary += "&nbsp;&nbsp;&nbsp;&nbsp;" + item.summary;
+        for (var i2 = 0; i2 < property.enums.length; i2++) {
+            var item = property.enums[i2];
+            var itemDescription = "<strong>" + item.name + " : " + item.value + "</strong>";
+            if (item.description) {
+                itemDescription += "&nbsp;&nbsp;&nbsp;&nbsp;" + item.description;
             }
-            description.push(summary);
+            description.push(itemDescription);
+            property.enum.push(item.value);
         }
 
         property.description += "<br/>" + description.join("<br/>");

@@ -853,14 +853,14 @@ namespace Business.Core.Document
         public string Title { get; set; }
 
         /// <summary>
-        /// Enum
-        /// </summary>
-        public IEnumerable<int> Enum { get; set; }
-
-        /// <summary>
         /// Array
         /// </summary>
         public bool Array { get; set; }
+
+        /// <summary>
+        /// Enums
+        /// </summary>
+        public IEnumerable<EnumItems> Enums { get; set; }
 
         /// <summary>
         /// Description
@@ -871,11 +871,6 @@ namespace Business.Core.Document
         /// DescriptionTip
         /// </summary>
         public IEnumerable<string> DescriptionTip { get; set; }
-
-        /// <summary>
-        /// DescriptionEnum
-        /// </summary>
-        public IEnumerable<EnumSummary> DescriptionEnum { get; set; }
 
         /// <summary>
         /// UniqueItems
@@ -915,20 +910,20 @@ namespace Business.Core.Document
         #endregion
     }
 
-    public readonly struct EnumSummary
+    public readonly struct EnumItems
     {
-        public EnumSummary(string name, int value, string summary)
+        public EnumItems(string name, int value, string description)
         {
             Name = name;
             Value = value;
-            Summary = summary;
+            Description = description;
         }
 
         public string Name { get; }
 
         public int Value { get; }
 
-        public string Summary { get; }
+        public string Description { get; }
     }
 
     /// <summary>
@@ -1047,14 +1042,14 @@ namespace Business.Core.Document
         /// <param name="args"></param>
         /// <param name="attributes"></param>
         /// <param name="summary"></param>
-        /// <param name="enumSummary"></param>
-        public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary, IEnumerable<EnumSummary> enumSummary)
+        /// <param name="enums"></param>
+        public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary, IEnumerable<EnumItems> enums)
         {
             Group = group;
             Args = args;
             Attributes = attributes;
             Summary = summary;
-            EnumSummary = enumSummary;
+            Enums = enums;
         }
 
         /// <summary>
@@ -1078,9 +1073,9 @@ namespace Business.Core.Document
         public string Summary { get; }
 
         /// <summary>
-        /// EnumSummary
+        /// Enums
         /// </summary>
-        public IEnumerable<EnumSummary> EnumSummary { get; }
+        public IEnumerable<EnumItems> Enums { get; }
     }
     /*
     //            color
