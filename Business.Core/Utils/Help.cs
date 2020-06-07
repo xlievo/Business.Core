@@ -596,7 +596,7 @@ namespace Business.Core.Utils
 
             docArg.DescriptionTip = argSource.Attributes;// string.Join(System.Environment.NewLine, argSource.Attributes);
 
-            docArg.EnumDescription = argSource.EnumSummary;
+            docArg.DescriptionEnum = argSource.EnumSummary;
 
             docArg.Token = argSource.Args.HasToken;
 
@@ -863,6 +863,8 @@ namespace Business.Core.Utils
                     HasIResult = meta.HasIResult,
                     HasToken = meta.HasToken,
                     Description = member?.summary?.sub,
+                    DescriptionParam = member?._params?.ToDictionary(c3 => c3.name, c3 => c3.sub),
+                    DescriptionResult = member?.returns?.sub,
                     Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
                     Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
@@ -887,19 +889,6 @@ namespace Business.Core.Utils
         }
 
         const string AttributeSign = "Attribute";
-
-        //static string GetEnumSummary(this System.Type type, string summary, IDictionary<string, Xml.member> xmlMembers)
-        //{
-        //    var values = type.GetEnumValues().Cast<int>().Select(c =>
-        //    {
-        //        var enumName = System.Enum.GetName(type, c);
-        //        Xml.member enumMember = null;
-        //        xmlMembers?.TryGetValue($"F:{type.GetTypeName()}.{enumName}", out enumMember);
-        //        var memberSummary = enumMember?.summary?.text;
-        //        return string.IsNullOrWhiteSpace(memberSummary) ? $"<strong>{enumName} : {c}</strong>" : $"<strong>{enumName} : {c}</strong>&nbsp;&nbsp;&nbsp;&nbsp;{memberSummary}";
-        //    });
-        //    return $"{(!string.IsNullOrWhiteSpace(summary) ? summary + "<br/>" : null)}{string.Join("<br/>", values)}";
-        //}
 
         static IEnumerable<EnumSummary> GetEnumSummary(this System.Type type, string summary, IDictionary<string, Xml.member> xmlMembers)
         {

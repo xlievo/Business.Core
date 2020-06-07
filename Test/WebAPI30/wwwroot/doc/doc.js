@@ -1543,12 +1543,12 @@ function propertyHandle(property) {
     if (property === undefined) {
         return;
     }
-    //handle enumDescription
-    if (property.enumDescription && 0 < property.enumDescription.length) {
+    //handle descriptionEnum
+    if (property.descriptionEnum && 0 < property.descriptionEnum.length) {
 
         var description = [];
-        for (var i2 = 0; i2 < property.enumDescription.length; i2++) {
-            var item = property.enumDescription[i2];
+        for (var i2 = 0; i2 < property.descriptionEnum.length; i2++) {
+            var item = property.descriptionEnum[i2];
             var summary = "<strong>" + item.name + " : " + item.value + "</strong>";
             if (item.summary) {
                 summary += "&nbsp;&nbsp;&nbsp;&nbsp;" + item.summary;

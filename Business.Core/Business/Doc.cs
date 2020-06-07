@@ -20,7 +20,6 @@ namespace Business.Core.Document
     using Utils;
     using System.Collections.Generic;
     using System.Linq;
-    using Business.Core.Result;
 
     /// <summary>
     /// doc .xml
@@ -55,7 +54,7 @@ namespace Business.Core.Document
                                 item.text = WhitespaceTrim(item.text);
                             }
 
-                            var subList = new List<string>(member.summary.para.Select(c => c.text));
+                            var subList = new List<string>(member.summary.para.Select(c => WhitespaceTrim(c.text)));
                             if (!string.IsNullOrEmpty(member.summary.text))
                             {
                                 subList.Insert(0, member.summary.text);
@@ -74,7 +73,7 @@ namespace Business.Core.Document
                                 item.text = WhitespaceTrim(item.text);
                             }
 
-                            var subList = new List<string>(member.returns.para.Select(c => c.text));
+                            var subList = new List<string>(member.returns.para.Select(c => WhitespaceTrim(c.text)));
                             if (!string.IsNullOrEmpty(member.returns.text))
                             {
                                 subList.Insert(0, member.returns.text);
@@ -89,7 +88,7 @@ namespace Business.Core.Document
                         {
                             item.text = WhitespaceTrim(item.text);
 
-                            var subList = new List<string>(item.para.Select(c => c.text));
+                            var subList = new List<string>(item.para.Select(c => WhitespaceTrim(c.text)));
                             if (!string.IsNullOrEmpty(item.text))
                             {
                                 subList.Insert(0, item.text);
@@ -549,6 +548,16 @@ namespace Business.Core.Document
         string Description { get; set; }
 
         /// <summary>
+        /// DescriptionParam
+        /// </summary>
+        Dictionary<string, string> DescriptionParam { get; set; }
+
+        /// <summary>
+        /// DescriptionResult
+        /// </summary>
+        string DescriptionResult { get; set; }
+
+        /// <summary>
         /// HasToken
         /// </summary>
         bool HasToken { get; set; }
@@ -713,6 +722,16 @@ namespace Business.Core.Document
         public string Description { get; set; }
 
         /// <summary>
+        /// DescriptionParam
+        /// </summary>
+        public Dictionary<string, string> DescriptionParam { get; set; }
+
+        /// <summary>
+        /// DescriptionResult
+        /// </summary>
+        public string DescriptionResult { get; set; }
+
+        /// <summary>
         /// HasToken
         /// </summary>
         public bool HasToken { get; set; }
@@ -855,9 +874,9 @@ namespace Business.Core.Document
         public IEnumerable<string> DescriptionTip { get; set; }
 
         /// <summary>
-        /// EnumDescription
+        /// DescriptionEnum
         /// </summary>
-        public IEnumerable<EnumSummary> EnumDescription { get; set; }
+        public IEnumerable<EnumSummary> DescriptionEnum { get; set; }
 
         /// <summary>
         /// UniqueItems

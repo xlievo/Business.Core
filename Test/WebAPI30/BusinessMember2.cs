@@ -291,7 +291,8 @@ public partial class BusinessMember2 : BusinessBase
     /// test doc Test001
     /// and Test001
     /// </summary>
-    /// <param name="token">A token sample222</param>
+    /// <param name="session222">A token 
+    /// sample222</param>
     /// <param name="arg"></param>
     /// <param name="dateTime"></param>
     /// <param name="httpFile"></param>
