@@ -600,18 +600,6 @@ namespace Business.Core.Utils
 
             docArg.Token = argSource.Args.HasToken;
 
-            ////var hasDescription = string.IsNullOrWhiteSpace(docArg.Description);
-            //var attrs = string.Empty;
-            //for (int i = 0; i < argSource.Attributes.Count; i++)
-            //{
-            //    attrs += $"<h5 tag=\"h5\" style=\"margin:0px;margin-bottom:{(argSource.Attributes.Count - 1 > i ? 2 : !docArg.Token && argSource.Args.HasDefinition ? 15 : 2)}px;margin-top:2px;\"><code>{argSource.Attributes[i]}</code></h5>";
-            //}
-
-            //if (!string.IsNullOrWhiteSpace(attrs))
-            //{
-            //    docArg.Description += System.Environment.NewLine + attrs;
-            //}
-
             if (argSource.Args.HasDefaultValue)
             {
                 docArg.DefaultValue = argSource.Args.DefaultValue;
