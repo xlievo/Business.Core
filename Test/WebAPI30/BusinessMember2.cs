@@ -64,7 +64,7 @@ public class BusinessMember3 : BusinessBase
         public string B { get; set; }
     }
 
-    public virtual async Task<dynamic> Test004(Session session, List<Test001> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task<dynamic> Test004(Session session, List<Test001> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
@@ -79,12 +79,12 @@ public class BusinessMember3 : BusinessBase
 [DocGroup("Module 2", Position = 2)]
 [DocGroup("Module 3", Position = 3)]
 [Info("API", Alias = "UserCentre", CommandGroupDefault = null)]
-[Testing("test2222", "\"2019-12-02T21:02\"", tokenMethod: login, Method = "Test000")]
-[Testing("test2222", "\"2019-12-02T22:02\"", tokenMethod: login, Method = "Test000")]
-[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, Method = "Test000")]
-[Testing("test2222", "\"2019-12-02T21:02\"", tokenMethod: login, Method = "Test000")]
-[Testing("test2222", "\"2019-12-02T22:02\"", tokenMethod: login, Method = "Test000")]
-[Testing("test3333", "\"2019-12-02T23:02\"", tokenMethod: login, Method = "Test000")]
+[Testing("test2222", "\"2019-12-02T21:02\"", Method = "Test000")]
+[Testing("test2222", "\"2019-12-02T22:02\"", Method = "Test000")]
+[Testing("test3333", "\"2019-12-02T23:02\"", Method = "Test000")]
+[Testing("test2222", "\"2019-12-02T21:02\"", Method = "Test000")]
+[Testing("test2222", "\"2019-12-02T22:02\"", Method = "Test000")]
+[Testing("test3333", "\"2019-12-02T23:02\"", Method = "Test000")]
 public partial class BusinessMember2
 {
     public BusinessMember2()
@@ -311,21 +311,16 @@ public partial class BusinessMember2 : BusinessBase
     [Command(Group = "zzz")]
     [Testing("test2",
          "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T04:24\",99.0234,777,false]",
-         "{\"AAA\":\"111\",\"BBB\":\"222\"}",
-         tokenMethod: login)]
+         "{\"AAA\":\"111\",\"BBB\":\"222\"}")]
     [Testing("test3",
-         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T05:24\",99.0234,777,false]",
-         tokenMethod: login)]
+         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T05:24\",99.0234,777,false]")]
     [Testing("test4",
-         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T06:24\",99.0234,777,false]",
-         tokenMethod: login)]
+         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T06:24\",99.0234,777,false]")]
     [Testing("test5",
-         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T07:24\",99.0234,777,false]",
-         tokenMethod: login)]
+         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T07:24\",99.0234,777,false]")]
     [Testing("test, important logic, do not delete!!!",
-         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]",
-         tokenMethod: login)]
-    public virtual async Task<dynamic> Test001(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+         "[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]")]
+    public virtual async Task<dynamic> Test001(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         DDD = 9;
         //Logger.loggerQueue?.queue.TryAdd(new Logger.LoggerData
@@ -385,12 +380,12 @@ public partial class BusinessMember2 : BusinessBase
         //return ss;
     }
 
-    public virtual async Task<MyEnum> TestMyEnum(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+    public virtual async Task<MyEnum> TestMyEnum(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         return MyEnum.B;
     }
 
-    public virtual async Task<Test0011> TestTest0011(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)]int fff = 666, [Ignore(IgnoreMode.BusinessArg)]bool bbb = true)
+    public virtual async Task<Test0011> TestTest0011(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         return new Test0011 { AAA = new List<string> { "aaa" } };
     }
@@ -422,7 +417,7 @@ public partial class BusinessMember2 : BusinessBase
     /// <returns>test return!!!</returns>
     [HttpFile]
     [Doc("Test002 222", Badge = "      ")]
-    public virtual async Task<dynamic> Test002(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m, [HttpFile]Dictionary<string, dynamic> context = null)
+    public virtual async Task<dynamic> Test002(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [HttpFile] Dictionary<string, dynamic> context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;
@@ -445,7 +440,7 @@ public partial class BusinessMember2 : BusinessBase
     /// <param name="mm"></param>
     /// <returns></returns>
     [Doc("Test003 222", Badge = "New", Group = "Module 3")]
-    public virtual async Task Test003(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task Test003(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m)
     {
         //await System.Threading.Tasks.Task.Delay(10000);
         dynamic args = new System.Dynamic.ExpandoObject();
@@ -458,7 +453,7 @@ public partial class BusinessMember2 : BusinessBase
     }
 
     [Doc]
-    public virtual async Task<dynamic> Test004(Token token, List<Test002> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async Task<dynamic> Test004(Token token, List<Test002> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
@@ -483,20 +478,20 @@ public partial class BusinessMember2 : BusinessBase
 
     public virtual async Task<dynamic> Test0061() => this.ResultCreate();
 
-    public virtual IResult<Test001Result?> Test0062([Ignore(IgnoreMode.BusinessArg)]string aaa)
+    public virtual IResult<Test001Result?> Test0062([Ignore(IgnoreMode.BusinessArg)] string aaa)
     {
         Test001Result? ss = new Test001Result { a = aaa, b = new List<Test001Result2> { new Test001Result2 { a = aaa, b = "sss" } } };
 
         return this.ResultCreate(ss);
     }
-    public virtual IResult<Test001Result?> Test00621([Ignore(IgnoreMode.BusinessArg)]decimal? bbb, [Ignore(IgnoreMode.BusinessArg)]decimal aaa = 111.123m)
+    public virtual IResult<Test001Result?> Test00621([Ignore(IgnoreMode.BusinessArg)] decimal? bbb, [Ignore(IgnoreMode.BusinessArg)] decimal aaa = 111.123m)
     {
         Test001Result? ss = new Test001Result { a = aaa.ToString(), b = new List<Test001Result2> { new Test001Result2 { a = aaa.ToString(), b = bbb?.ToString() } } };
 
         return this.ResultCreate(ss);
     }
 
-    public virtual IResult<Test001Result?> Test0063(Session session, [Ignore(IgnoreMode.BusinessArg)]string aaa)
+    public virtual IResult<Test001Result?> Test0063(Session session, [Ignore(IgnoreMode.BusinessArg)] string aaa)
     {
         Test001Result? ss = new Test001Result { a = aaa, b = new List<Test001Result2> { new Test001Result2 { a = aaa, b = "sss" } } };
 
@@ -696,7 +691,7 @@ public partial class BusinessMember2 : BusinessBase
     /// <returns></returns>
     public virtual async Task<dynamic> Test007(Test002 arg, List<string> arg2) => this.ResultCreate();
 
-    public virtual async void Test0033(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2]decimal mm = 0.0234m)
+    public virtual async void Test0033(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;

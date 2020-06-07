@@ -770,14 +770,13 @@ namespace Business.Core.Document
         /// <param name="value"></param>
         /// <param name="result"></param>
         /// <param name="token"></param>
-        /// <param name="tokenMethod"></param>
-        public Testing(string name, object value, string result, string token, string tokenMethod)
+        public Testing(string name, object value, string result, string token)
         {
             Name = name;
             Value = value;
             Result = result;
             Token = token;
-            TokenMethod = tokenMethod;
+            //TokenMethod = tokenMethod;
         }
 
         /// <summary>
@@ -800,10 +799,10 @@ namespace Business.Core.Document
         /// </summary>
         public string Token { get; }
 
-        /// <summary>
-        /// Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]
-        /// </summary>
-        public string TokenMethod { get; }
+        ///// <summary>
+        ///// Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]
+        ///// </summary>
+        //public string TokenMethod { get; }
     }
 
     /// <summary>

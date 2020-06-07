@@ -594,7 +594,7 @@ namespace Business.Core.Utils
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary;
 
-            docArg.DescriptionTip = argSource.Attributes;// string.Join(System.Environment.NewLine, argSource.Attributes);
+            docArg.DescriptionTip = 0 < argSource.Attributes?.Count ? argSource.Attributes : null;
 
             docArg.DescriptionEnum = argSource.EnumSummary;
 
@@ -704,31 +704,31 @@ namespace Business.Core.Utils
             switch (typeCode)
             {
                 case System.TypeCode.Boolean:
-                    return ("boolean", string.Empty);
+                    return ("boolean", null);
                 case System.TypeCode.Byte:
                     return ("string", "binary");
                 case System.TypeCode.DBNull:
                 case System.TypeCode.Empty:
                 case System.TypeCode.Char:
                 case System.TypeCode.String:
-                    return ("string", string.Empty);
+                    return ("string", null);
                 case System.TypeCode.DateTime:
                     return ("string", "datetime-local");
                 case System.TypeCode.Decimal:
                 case System.TypeCode.Double:
-                    return ("number", string.Empty);
+                    return ("number", null);
                 case System.TypeCode.Int16:
-                    return ("integer", string.Empty);
+                    return ("integer", null);
                 case System.TypeCode.Int32:
                     return ("integer", "int32");
                 case System.TypeCode.Int64:
                     return ("integer", "int64");
                 case System.TypeCode.SByte:
-                    return ("integer", string.Empty);
+                    return ("integer", null);
                 case System.TypeCode.Single:
                     return ("number", "float");
                 case System.TypeCode.UInt16:
-                    return ("integer", string.Empty);
+                    return ("integer", null);
                 case System.TypeCode.UInt32:
                     return ("integer", "int32");
                 case System.TypeCode.UInt64:
@@ -852,6 +852,7 @@ namespace Business.Core.Utils
                 xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
 
                 var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, groupDefault, $"{onlyName}.Returns");
+                var testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>();
 
                 var member2 = new Member<DocArg>
                 {
@@ -869,7 +870,7 @@ namespace Business.Core.Utils
                     Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
-                    Testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>().ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token, c3.TokenMethod))
+                    Testing = 0 < testing.Count ? testing.ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token)) : null
                 } as IMember<DocArg>;
 
                 foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))

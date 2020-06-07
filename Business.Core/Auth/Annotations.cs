@@ -324,14 +324,15 @@ namespace Business.Core.Annotations
         /// <param name="value"></param>
         /// <param name="result"></param>
         /// <param name="token"></param>
-        /// <param name="tokenMethod">Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]</param>
-        public TestingAttribute(string name, object value, string result = null, string token = null, string tokenMethod = null)
+        ///// <param name="tokenMethod">Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]</param>
+        //public TestingAttribute(string name, object value, string result = null, string token = null, string tokenMethod = null)
+        public TestingAttribute(string name, object value, string result = null, string token = null)
         {
             this.Name = name;
             this.Value = value;
             this.Result = result;
             this.Token = token;
-            this.TokenMethod = tokenMethod;
+            //this.TokenMethod = tokenMethod;
             //this.Method = method;
         }
 
@@ -355,10 +356,10 @@ namespace Business.Core.Annotations
         /// </summary>
         public string Token { get; set; }
 
-        /// <summary>
-        /// Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]
-        /// </summary>
-        public string TokenMethod { get; set; }
+        ///// <summary>
+        ///// Support method Result.D, input json array [\"Login\",\"{User:\\\"aaa\\\",Password:\\\"123456\\\"}\"]
+        ///// </summary>
+        //public string TokenMethod { get; set; }
 
         /// <summary>
         /// Target method
