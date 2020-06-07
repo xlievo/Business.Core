@@ -852,6 +852,7 @@ namespace Business.Core.Utils
                 xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
 
                 var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, groupDefault, $"{onlyName}.Returns");
+                var descriptionParam = member?._params?.ToDictionary(c3 => c3.name, c3 => c3.sub);
                 var testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>();
 
                 var member2 = new Member<DocArg>
@@ -864,7 +865,7 @@ namespace Business.Core.Utils
                     HasIResult = meta.HasIResult,
                     HasToken = meta.HasToken,
                     Description = member?.summary?.sub,
-                    DescriptionParam = member?._params?.ToDictionary(c3 => c3.name, c3 => c3.sub),
+                    DescriptionParam = 0 < descriptionParam?.Count ? descriptionParam : null,
                     DescriptionResult = member?.returns?.sub,
                     Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
                     Args = new Dictionary<string, DocArg>(),
