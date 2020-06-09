@@ -256,14 +256,12 @@ namespace Business.Core
         /// </summary>
         /// <param name="call"></param>
         /// <param name="batch"></param>
-        /// <param name="maxWorkThreads">Gets the maximum out queue thread for this queue, default 1</param>
-        /// <param name="syn">Whether each outgoing thread has synchronous callback, asynchronous by default</param>
         /// <param name="maxCapacity">Gets the max capacity of this queue</param>
-        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, ValueTask> call, BatchOptions batch = default, int maxWorkThreads = 1, bool syn = false, int? maxCapacity = null)//, LoggerValueType loggerValueType = LoggerValueType.In
+        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, ValueTask> call, BatchOptions batch = default, int? maxCapacity = null)//, LoggerValueType loggerValueType = LoggerValueType.In
         {
             //this.ValueType = loggerValueType;
 
-            loggerQueue = new Queue<LoggerData>(call, new Queue<LoggerData>.BatchOptions(batch.Interval, batch.MaxNumber), maxWorkThreads, syn, maxCapacity);
+            loggerQueue = new Queue<LoggerData>(call, new Queue<LoggerData>.BatchOptions(batch.Interval, batch.MaxNumber), maxCapacity: maxCapacity);
         }
 
         /*
