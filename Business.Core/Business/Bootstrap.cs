@@ -572,7 +572,7 @@ namespace Business.Core
 
                     if (exists)
                     {
-                        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.UTF8);
+                        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "business.doc"), doc.JsonSerialize(Configer.JsonOptionsDoc), Help.UTF8);
                         //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
                     }
                 }
@@ -749,7 +749,7 @@ namespace Business.Core
 
                     if (exists)
                     {
-                        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "business.doc"), doc.JsonSerialize(Configer.DocJsonSettings), Help.UTF8);
+                        System.IO.File.WriteAllText(System.IO.Path.Combine(dir, "business.doc"), doc.JsonSerialize(Configer.JsonOptionsDoc), Help.UTF8);
                         //System.IO.File.WriteAllText(System.IO.Path.Combine(outDir, "business.doc"), doc.JsonSerialize(DocJsonSettings2), Help.UTF8);
                     }
                 }

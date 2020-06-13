@@ -1558,7 +1558,12 @@ function propertyHandle(property) {
             property.enum.push(item.value);
         }
 
-        property.description += "<br/>" + description.join("<br/>");
+        if (property.description) {
+            property.description += "<br/>" + description.join("<br/>");
+        }
+        else {
+            property.description = description.join("<br/>");
+        }
     }
 
     //handle description
@@ -1573,7 +1578,12 @@ function propertyHandle(property) {
             description += "</code></h5>";
         }
 
-        property.description += "<br/>" + description;
+        if (property.description) {
+            property.description += "<br/>" + description;
+        }
+        else {
+            property.description = description;
+        }
     }
 
     if (property.description) {
@@ -2246,12 +2256,9 @@ function getData(input, format = true) {
             }
         }
         else {
-            var args = []
+            var args = {};
             for (var i in input.editors.d.editors) {
-                args.push(i);
-            }
-            for (var i = args.length - 1; i >= 0; i--) {
-                args[i] = input.editors.d.editors[args[i]].getValue();
+                args[i] = input.editors.d.editors[i].getValue();
             }
             d = JSON.stringify(args, null, format ? 2 : 0);
         }
@@ -2307,13 +2314,9 @@ function setData(input, value, refresh = true) {
             return input.editors.d.setValue(value);
         }
         else {
-            var args = []
             for (var i in input.editors.d.editors) {
-                args.push(i);
-            }
-            for (var i = 0; i < args.length; i++) {
-                if (i < value.length) {
-                    input.editors.d.editors[args[i]].setValue(value[i]);
+                if (i in value) {
+                    input.editors.d.editors[i].setValue(value[i]);
                 }
             }
         }

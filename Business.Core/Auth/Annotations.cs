@@ -2149,6 +2149,11 @@ namespace Business.Core.Annotations
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
+            if (this.ArgMeta.MemberType.Equals(value.GetType()))
+            {
+                return this.ResultCreate(value);
+            }
+
             try
             {
                 return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize<Type>(value, options));

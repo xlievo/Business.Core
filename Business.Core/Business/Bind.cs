@@ -1815,6 +1815,8 @@ namespace Business.Core
     /// </summary>
     public class Command
     {
+        System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Type>> parametersType;
+
         /// <summary>
         /// Command
         /// </summary>
@@ -1826,8 +1828,64 @@ namespace Business.Core
             this.call = call;
             this.Meta = meta;
             this.Key = key;
-            this.HasArgSingle = 1 >= this.Meta.Args.Count(c => !c.HasToken && !c.Group[Key].IgnoreArg);
             this.HasHttpFile = this.Meta.Args.Any(c => c.Group[Key].HttpFile) || this.Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
+            StatisArgs();
+        }
+
+        /// <summary>
+        /// Statistics of real submission parameters and archiving
+        /// </summary>
+        internal void StatisArgs()
+        {
+            var args = this.Meta.Args.Where(c => !c.HasToken && !c.UseType && !c.Group[Key].IgnoreArg).ToList();
+
+            HasArgSingle = 1 >= args.Count;
+
+            if (1 < args.Count)
+            {
+                parametersType = args.Select(c => new System.Collections.Generic.KeyValuePair<string, System.Type>(c.Name, c.CurrentOrigType));
+
+                ParametersType = Utils.Emit.Emit.BuildPropertys(this.Meta.FullName, parametersType);
+
+                ParametersType.LoadAccessors(Configer.AccessorsArgs, Key, fields: false, update: true);
+            }
+            else if (0 < args.Count)
+            {
+                ParametersType = args[0].LastType;
+            }
+        }
+
+        /// <summary>
+        /// Convert parameter object to array
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public object[] GetParametersObjects(object parameters)
+        {
+            if (parameters is null)
+            {
+                return null;
+            }
+
+            if (Configer.AccessorsArgs.TryGetValue(Key, out Accessors accessors))
+            {
+                var values = new object[parametersType.Count()];
+                var i = 0;
+
+                foreach (var item in parametersType)
+                {
+                    if (accessors.Accessor.TryGetValue(item.Key, out Accessor accessor))
+                    {
+                        values[i] = accessor.Getter(parameters);
+                    }
+
+                    i++;
+                }
+
+                return values;
+            }
+
+            return null;
         }
 
         //===============member==================//
@@ -2121,6 +2179,11 @@ namespace Business.Core
         /// HasHttpFile
         /// </summary>
         public bool HasHttpFile { get; internal set; }
+
+        /// <summary>
+        /// ParametersType
+        /// </summary>
+        public System.Type ParametersType { get; internal set; }
     }
 }
 
@@ -2443,7 +2506,7 @@ namespace Business.Core.Meta
         public System.Type LastType { get; private set; }
 
         /// <summary>
-        /// CurrentOrigType
+        /// Remove IArg type
         /// </summary>
         public System.Type CurrentOrigType { get; private set; }
 
@@ -2711,7 +2774,7 @@ namespace Business.Core.Meta
             MethodTypeFullName = methodTypeFullName;
             //Ignore = ignore;
             //HasArgSingle = hasArgSingle;
-            this.Doc = doc;
+            Doc = doc;
         }
 
         /// <summary>

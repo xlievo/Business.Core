@@ -151,6 +151,8 @@ function GetCurl(h, c, data, data2) {
 	value += "			#Built-in Route   " + h + "?c=&t=&d=";
 	value += "\n\n\curl -X GET \"" + h + "?c=" + encodeURIComponent(c);
 
+	// Built-in Route
+
 	if (data.hasOwnProperty("t")) {
 		value += "&t=" + encodeURIComponent(data.t);
 	}
@@ -173,6 +175,8 @@ function GetCurl(h, c, data, data2) {
 	value += "\n\n";
 	value += "			#Classical Route   " + h + "/" + encodeURIComponent(c);;
 	value += "\n\n\curl -X GET \"" + h + "/" + encodeURIComponent(c);
+
+	// Classical Route
 
 	if (data2.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
 		value += "?t=" + encodeURIComponent(data2.t) + "&" + data2.d;
@@ -200,6 +204,8 @@ function GetCurl(h, c, data, data2) {
 
 	value += "\n";
 	value += "\n\curl -H \"Content-Type:application/json\" -X POST -d \"";
+
+	// application/json
 
 	value += encodeURIComponent(data.d);
 

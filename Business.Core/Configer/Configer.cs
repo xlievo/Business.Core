@@ -390,6 +390,8 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
     {
         internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 
+        internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> AccessorsArgs = new ConcurrentReadOnlyDictionary<string, Accessors>();
+
         //internal readonly ConcurrentReadOnlyDictionary<string, Accessors> ResultAccessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 
         /// <summary>
@@ -545,7 +547,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// <summary>
         /// FirstCharToLowerNamingPolicy
         /// </summary>
-        public static System.Text.Json.JsonSerializerOptions DocJsonSettings = new System.Text.Json.JsonSerializerOptions
+        public static System.Text.Json.JsonSerializerOptions JsonOptionsDoc = new System.Text.Json.JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
             AllowTrailingCommas = true,
@@ -554,10 +556,24 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
+        /// <summary>
+        /// Responsible for parsing the overall request data
+        /// </summary>
+        public static System.Text.Json.JsonSerializerOptions JsonOptions = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            AllowTrailingCommas = true,
+            IgnoreNullValues = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
         static Configer()
         {
-            DocJsonSettings.Converters.Add(new Help.DateTimeConverter());
-            DocJsonSettings.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+            JsonOptionsDoc.Converters.Add(new Help.DateTimeConverter());
+            JsonOptionsDoc.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+
+            JsonOptions.Converters.Add(new Help.DateTimeConverter());
+            JsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         /// <summary>

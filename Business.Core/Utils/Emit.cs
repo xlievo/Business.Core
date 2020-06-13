@@ -19,6 +19,7 @@ namespace Business.Core.Utils.Emit
 {
     using System.Reflection;
     using System.Reflection.Emit;
+    using System.Linq;
 
     internal static class Emit
     {
@@ -74,6 +75,61 @@ namespace Business.Core.Utils.Emit
             }
 
             return declaringType;
+        }
+
+        public static System.Type BuildPropertys(string className, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Type>> propertys)
+        {
+            if (!(propertys?.Any() ?? false)) { return null; }
+
+            var myAsmBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName() { Name = "DynamicAssembly" }, AssemblyBuilderAccess.RunAndCollect);
+
+            var module = myAsmBuilder.DefineDynamicModule("DynamicModule");
+
+            var type = module.DefineType(className, TypeAttributes.Public);
+
+            foreach (var item in propertys)
+            {
+                CreateAutoImplementedProperty(type, item.Key, item.Value);
+            }
+
+            return type.CreateTypeInfo();
+        }
+
+        static void CreateAutoImplementedProperty(TypeBuilder builder, string propertyName, System.Type propertyType)
+        {
+            const string PrivateFieldPrefix = "m_";
+            const string GetterPrefix = "get_";
+            const string SetterPrefix = "set_";
+            // Generate the field.
+            var fieldBuilder = builder.DefineField(string.Concat(PrivateFieldPrefix, propertyName), propertyType, FieldAttributes.Private);
+            // Generate the property
+            var propertyBuilder = builder.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
+            // Property getter and setter attributes.
+            var propertyMethodAttributes = MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig;
+            // Define the getter method.
+            var getterMethod = builder.DefineMethod(string.Concat(GetterPrefix, propertyName), propertyMethodAttributes, propertyType, System.Type.EmptyTypes);
+            // Emit the IL code.
+            // ldarg.0
+            // ldfld,_field
+            // ret
+            var getterILCode = getterMethod.GetILGenerator();
+            getterILCode.Emit(OpCodes.Ldarg_0);
+            getterILCode.Emit(OpCodes.Ldfld, fieldBuilder);
+            getterILCode.Emit(OpCodes.Ret);
+            // Define the setter method.
+            var setterMethod = builder.DefineMethod(string.Concat(SetterPrefix, propertyName), propertyMethodAttributes, null, new System.Type[] { propertyType });
+            // Emit the IL code.
+            // ldarg.0
+            // ldarg.1
+            // stfld,_field
+            // ret
+            var setterILCode = setterMethod.GetILGenerator();
+            setterILCode.Emit(OpCodes.Ldarg_0);
+            setterILCode.Emit(OpCodes.Ldarg_1);
+            setterILCode.Emit(OpCodes.Stfld, fieldBuilder);
+            setterILCode.Emit(OpCodes.Ret);
+            propertyBuilder.SetGetMethod(getterMethod);
+            propertyBuilder.SetSetMethod(setterMethod);
         }
     }
 

@@ -340,36 +340,51 @@ namespace Business.Core.Utils
 
         internal static readonly ObjectMethods BaseObjectMethods = new ObjectMethods(new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.GetHashCode())), new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.Equals(null))), new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.ToString())));
 
-        internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null, bool methods = false)
+        internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null, bool propertys = true, bool fields = true, bool methods = false, bool update = false)
         {
             var key2 = string.IsNullOrWhiteSpace(key) ? type.FullName : key;
 
-            if (type.IsAbstract || accessors.ContainsKey(key2)) { return; }
+            if (type.IsAbstract) { return; }
+
+            if (update)
+            {
+                accessors.dictionary.TryRemove(key2, out _);
+            }
+            else if (accessors.ContainsKey(key2))
+            {
+                return;
+            }
 
             var member = accessors.dictionary.GetOrAdd(key2, _ => new Accessors { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : c.ParameterType.IsValueType ? System.Activator.CreateInstance(c.ParameterType) : default).ToArray(), Methods = new ConcurrentReadOnlyDictionary<string, Proces>() });
 
-            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
+            if (fields)
             {
-                if (typeof(System.MulticastDelegate).IsAssignableFrom(field.FieldType))
+                foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
                 {
-                    continue;
-                }
+                    if (typeof(System.MulticastDelegate).IsAssignableFrom(field.FieldType))
+                    {
+                        continue;
+                    }
 
-                var accessor = field.GetAccessor();
-                if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                member.Accessor.dictionary.TryAdd(field.Name, accessor);
+                    var accessor = field.GetAccessor();
+                    if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                    member.Accessor.dictionary.TryAdd(field.Name, accessor);
+                }
             }
 
-            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
+            if (propertys)
             {
-                if (typeof(System.MulticastDelegate).IsAssignableFrom(property.PropertyType))
+                foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
                 {
-                    continue;
-                }
+                    if (typeof(System.MulticastDelegate).IsAssignableFrom(property.PropertyType))
+                    {
+                        continue;
+                    }
 
-                var accessor = property.GetAccessor();
-                if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                member.Accessor.dictionary.TryAdd(property.Name, accessor);
+                    var accessor = property.GetAccessor();
+                    if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                    member.Accessor.dictionary.TryAdd(property.Name, accessor);
+                }
             }
 
             if (methods)
@@ -408,6 +423,8 @@ namespace Business.Core.Utils
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
 #endif
             {
+                var hasUpdate = false;
+
                 foreach (var arg in item.Args)
                 {
                     var type2 = (arg.HasIArg && !arg.HasCast) ? arg.IArgInType : arg.LastType;
@@ -456,8 +473,17 @@ namespace Business.Core.Utils
                             //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
                         }
                     }
+
+                    hasUpdate = true;
                 }
 
+                if (hasUpdate)
+                {
+                    foreach (var group in item.CommandGroup.Group.Values)
+                    {
+                        business.Command[group.Group][group.OnlyName].StatisArgs();
+                    }
+                }
                 //item.HasArgSingle = 1 >= item.Args.Count(c => !c.UseType);
 #if DEBUG
             };
@@ -491,6 +517,8 @@ namespace Business.Core.Utils
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
 #endif
             {
+                var hasUpdate = false;
+
                 foreach (var arg in item.Args)
                 {
                     var type2 = (arg.HasIArg && !arg.HasCast) ? arg.IArgInType : arg.LastType;
@@ -540,9 +568,21 @@ namespace Business.Core.Utils
                             attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
                             item2.Value.Attrs.Collection.Add(attr);
                         }
+
+                        //business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.UseType && !c.Group[group.Key].IgnoreArg);
+                        //business.Command[group.Group][group.OnlyName].SetParametersType();
                     }
+
+                    hasUpdate = true;
                 }
 
+                if (hasUpdate)
+                {
+                    foreach (var group in item.CommandGroup.Group.Values)
+                    {
+                        business.Command[group.Group][group.OnlyName].StatisArgs();
+                    }
+                }
                 //item.HasArgSingle = 1 >= item.Args.Count(c => !c.UseType);
 #if DEBUG
             };
@@ -552,6 +592,11 @@ namespace Business.Core.Utils
 
             return business;
         }
+
+        //public static void SetParametersType(this System.Type parametersType)
+        //{
+
+        //}
 
         //public static string GetXmlPath(this Assembly assembly) => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(assembly.Location), $"{System.IO.Path.GetFileNameWithoutExtension(assembly.ManifestModule.Name)}.xml");
 
@@ -1427,6 +1472,8 @@ namespace Business.Core.Utils
                 {
                     foreach (var group in groups)
                     {
+                        var hasUpdate = false;
+
                         foreach (var arg in item.Args)
                         {
                             if (Equals(arg.Type, type) || Equals(arg.IArgOutType, type))
@@ -1438,8 +1485,14 @@ namespace Business.Core.Utils
                                 }
                                 g.Ignore.Collection.Add(ignore);
                                 g.IgnoreArg = g.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.Arg);
-                                business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.Group[group.Key].IgnoreArg);
+
+                                hasUpdate = true;
                             }
+                        }
+
+                        if (hasUpdate)
+                        {
+                            business.Command[group.Group][group.OnlyName].StatisArgs();
                         }
                     }
                 });
@@ -1478,6 +1531,8 @@ namespace Business.Core.Utils
                 {
                     foreach (var group in groups)
                     {
+                        var hasUpdate = false;
+
                         foreach (var arg in item.Args)
                         {
                             if (Equals(arg.Name, name))
@@ -1489,8 +1544,14 @@ namespace Business.Core.Utils
                                 }
                                 g.Ignore.Collection.Add(ignore);
                                 g.IgnoreArg = g.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.Arg);
-                                business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.Group[group.Key].IgnoreArg);
+
+                                hasUpdate = true;
                             }
+                        }
+
+                        if (hasUpdate)
+                        {
+                            business.Command[group.Group][group.OnlyName].StatisArgs();
                         }
                     }
                 });
@@ -2959,7 +3020,7 @@ namespace Business.Core.Utils
             return Newtonsoft.Json.JsonConvert.SerializeObject(value, settings);
         }
         */
-
+        /*
         /// <summary>
         /// TryJsonDeserializeStringArray
         /// </summary>
@@ -2982,7 +3043,7 @@ namespace Business.Core.Utils
                 return default;
             }
         }
-
+        */
         /// <summary>
         /// TryJsonDeserialize
         /// </summary>
@@ -3000,6 +3061,30 @@ namespace Business.Core.Utils
             try
             {
                 return System.Text.Json.JsonSerializer.Deserialize<Type>(value, options ?? JsonOptions);
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        /// <summary>
+        /// TryJsonDeserialize
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static object TryJsonDeserialize(this string value, System.Type type, System.Text.Json.JsonSerializerOptions options = null)
+        {
+            if (string.IsNullOrWhiteSpace(value) || type is null)
+            {
+                return default;
+            }
+
+            try
+            {
+                return System.Text.Json.JsonSerializer.Deserialize(value, type, options ?? JsonOptions);
             }
             catch
             {

@@ -672,7 +672,7 @@ namespace Business.Core.Document
         /// Json format
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => new Dictionary<string, Doc<DocArg>> { { this.Name, this } }.JsonSerialize(Configer.DocJsonSettings);
+        public override string ToString() => new Dictionary<string, Doc<DocArg>> { { this.Name, this } }.JsonSerialize(Configer.JsonOptionsDoc);
     }
 
     /// <summary>

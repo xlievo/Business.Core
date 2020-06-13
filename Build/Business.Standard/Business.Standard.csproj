@@ -4,16 +4,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Business.Core</AssemblyName>
     <RootNamespace>Business</RootNamespace>
-    <Version>1.5.6.3</Version>
-    <Description>https://github.com/xlievo/Business.Core</Description>
+    <Version>1.5.7</Version>
+    <Description>https://github.com/xlievo/Business.Core
+https://www.nuget.org/packages/Business.Core/</Description>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/xlievo/Business.Core</PackageProjectUrl>
     <Copyright>Copyright ©  2014~2020 Business Project - http://www.tmopen.com</Copyright>
     <PackageIconUrl></PackageIconUrl>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>1.5.6.3</AssemblyVersion>
-    <FileVersion>1.5.6.3</FileVersion>
+    <AssemblyVersion>1.5.7</AssemblyVersion>
+    <FileVersion>1.5.7</FileVersion>
     <LangVersion>7.3</LangVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
@@ -59,7 +60,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Utils\" />
     <Folder Include="Result\" />
     <Folder Include="Configer\" />
     <Folder Include="Business\" />
