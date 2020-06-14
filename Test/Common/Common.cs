@@ -19,6 +19,9 @@ using Business.Core.Annotations;
 using Business.Core.Result;
 using Business.Core.Document;
 using Business.Core.Utils;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using System.Reflection;
 
 #region Socket Support
 

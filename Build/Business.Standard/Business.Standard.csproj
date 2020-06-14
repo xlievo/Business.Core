@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Business.Core</AssemblyName>
     <RootNamespace>Business</RootNamespace>
-    <Version>1.5.7</Version>
+    <Version>1.5.7.1</Version>
     <Description>https://github.com/xlievo/Business.Core
 https://www.nuget.org/packages/Business.Core/</Description>
     <PackageLicenseUrl></PackageLicenseUrl>
@@ -13,8 +13,8 @@ https://www.nuget.org/packages/Business.Core/</Description>
     <PackageIconUrl></PackageIconUrl>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>1.5.7</AssemblyVersion>
-    <FileVersion>1.5.7</FileVersion>
+    <AssemblyVersion>1.5.7.1</AssemblyVersion>
+    <FileVersion>1.5.7.1</FileVersion>
     <LangVersion>7.3</LangVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>

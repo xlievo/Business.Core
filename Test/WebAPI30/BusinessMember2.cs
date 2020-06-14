@@ -329,7 +329,7 @@ public partial class BusinessMember2 : BusinessBase
     [Testing("test, important logic, do not delete!!!",
         "{\"arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4},\"dateTime\":\"2019-12-02T08:24\",\"mm\":111.0123456,\"fff\":555,\"bbb\":true}")]
     //"[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]")]
-    public virtual async Task<dynamic> Test001(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
+    public virtual async Task<dynamic> Test001(Session session222, Arg<Test111> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         DDD = 9;
         //Logger.loggerQueue?.queue.TryAdd(new Logger.LoggerData
@@ -760,6 +760,96 @@ public class Test2Attribute : ArgumentAttribute
 
 public class Args
 {
+    /// <summary>
+    /// Test001Test001Tes
+    /// t001Test001Test001Test001
+    /// </summary>
+    public struct Test111
+    {
+        /// <summary>
+        /// Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
+        /// </summary>
+        public string BBB { get; set; }
+
+        /// <summary>
+        /// Test004 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+        /// </summary>
+        public string BBBB { get; set; }
+
+        /// <summary>
+        /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+        /// </summary>
+        //[Test]
+        public List<string> AAA { get; set; }
+
+        /// <summary>
+        /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+        /// </summary>
+        //[Test]
+        [Alias("password")]
+        [@CheckNull]
+        //[@CheckEmail]
+        [@CheckUrl]
+        public string A { get; set; }
+
+        /// <summary>
+        /// BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+        /// </summary>
+        public string B { get; set; }
+
+
+        //[Test]
+        public Test0010<Test0011> C { get; set; }
+
+        /// <summary>
+        /// DDD
+        /// </summary>
+        public decimal? D { get; set; }
+
+        public bool E { get; set; }
+
+        /// <summary>
+        /// FF
+        /// </summary>
+        public DateTime F { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public MyEnum myEnum { get; set; }
+
+        /// <summary>
+        /// Test0010 Test0010 Test0010 Test0010
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public struct Test0010<T>
+        {
+            /// <summary>
+            /// C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
+            /// </summary>
+            [Test]
+            public string C1 { get; set; }
+
+            /// <summary>
+            /// C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2
+            /// </summary>
+            public string C2 { get; set; }
+
+            /// <summary>
+            /// C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
+            /// </summary>
+            public List<T> C3 { get; set; }
+
+            //public string C22 { get; set; }
+
+            //public Test0011 C33 { get; set; }
+
+            //public Test0011 C34 { get; set; }
+
+            //public string C35 { get; set; }
+        }
+    }
+
     /// <summary>
     /// MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
     /// </summary>

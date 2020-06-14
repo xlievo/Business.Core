@@ -298,7 +298,8 @@ namespace Business.Core.Utils
 
                     //var isUpdate = false;
 
-                    if (item.HasLower)// || item.HasCollectionAttr
+                    //!item.HasCollection !!!Checking arrays is not supported
+                    if (item.HasLower && !item.HasCollection)// || item.HasCollectionAttr
                     {
                         #region Collection
                         /*

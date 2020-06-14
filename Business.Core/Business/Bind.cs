@@ -999,6 +999,7 @@ namespace Business.Core
                     argInfo.Position,
                     argInfo.HasDefaultValue ? argInfo.DefaultValue : default,
                     argInfo.HasDefaultValue,
+                    current.origType.IsValueType ? System.Activator.CreateInstance(current.origType) : null,
                     current.hasDictionary,
                     current.hasCollection,
                     //false,//hasCollectionAttr || hasCollectionAttr2,
@@ -1050,7 +1051,7 @@ namespace Business.Core
                 //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
-                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, method.GetMethodFullName(), name, fullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, cfg.ArgTypeDefinition, hasToken, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
+                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, cfg.ArgTypeDefinition, hasToken, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
 
                 if (!metaData.dictionary.TryAdd(name, meta))
                 {
@@ -1234,6 +1235,7 @@ namespace Business.Core
                     current.outType,
                     current.origType,
                     position++,
+                    default,
                     default,
                     default,
                     current.hasDictionary,
@@ -1815,6 +1817,7 @@ namespace Business.Core
     /// </summary>
     public class Command
     {
+        readonly string parametersTypeKey;
         System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Type>> parametersType;
 
         /// <summary>
@@ -1829,6 +1832,7 @@ namespace Business.Core
             this.Meta = meta;
             this.Key = key;
             this.HasHttpFile = this.Meta.Args.Any(c => c.Group[Key].HttpFile) || this.Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
+            parametersTypeKey = $"{this.Meta.Business}.{Key}";
             StatisArgs();
         }
 
@@ -1847,7 +1851,7 @@ namespace Business.Core
 
                 ParametersType = Utils.Emit.Emit.BuildPropertys(this.Meta.FullName, parametersType);
 
-                ParametersType.LoadAccessors(Configer.AccessorsArgs, Key, fields: false, update: true);
+                ParametersType.LoadAccessors(Configer.AccessorsArgs, parametersTypeKey, fields: false, update: true);
             }
             else if (0 < args.Count)
             {
@@ -1867,7 +1871,7 @@ namespace Business.Core
                 return null;
             }
 
-            if (Configer.AccessorsArgs.TryGetValue(Key, out Accessors accessors))
+            if (Configer.AccessorsArgs.TryGetValue(parametersTypeKey, out Accessors accessors))
             {
                 var values = new object[parametersType.Count()];
                 var i = 0;
@@ -2421,6 +2425,7 @@ namespace Business.Core.Meta
         /// <param name="position"></param>
         /// <param name="defaultValue"></param>
         /// <param name="hasDefaultValue"></param>
+        /// <param name="defaultTypeValue"></param>
         /// <param name="hasDictionary"></param>
         /// <param name="hasCollection"></param>
         /// <param name="hasCollectionIArg"></param>
@@ -2441,7 +2446,7 @@ namespace Business.Core.Meta
         /// <param name="fullName"></param>
         /// <param name="memberDefinition"></param>
         /// <param name="hasCast"></param>
-        public Args(string name, System.Type type, System.Type origType, System.Type lastType, System.Type currentOrigType, int position, object defaultValue, bool hasDefaultValue, bool hasDictionary, bool hasCollection, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
+        public Args(string name, System.Type type, System.Type origType, System.Type lastType, System.Type currentOrigType, int position, object defaultValue, bool hasDefaultValue, object defaultTypeValue, bool hasDictionary, bool hasCollection, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
         {
             Name = name;
             Type = type;
@@ -2471,6 +2476,8 @@ namespace Business.Core.Meta
 
             DefaultValue = defaultValue;// type.GetTypeInfo().IsValueType ? System.Activator.CreateInstance(type) : null;
             HasDefaultValue = hasDefaultValue;
+
+            DefaultTypeValue = defaultTypeValue;
             //Logger = default;
             //IArgInLogger = default;
             //Group2 = group2;
@@ -2524,6 +2531,11 @@ namespace Business.Core.Meta
         /// HasDefaultValue
         /// </summary>
         public bool HasDefaultValue { get; private set; }
+
+        /// <summary>
+        /// DefaultTypeValue
+        /// </summary>
+        public object DefaultTypeValue { get; private set; }
 
         /// <summary>
         /// HasDictionary
@@ -2714,6 +2726,7 @@ namespace Business.Core.Meta
         /// <param name="path"></param>
         /// <param name="name"></param>
         /// <param name="fullName"></param>
+        /// <param name="business"></param>
         /// <param name="hasAsync"></param>
         /// <param name="hasReturn"></param>
         /// <param name="hasIResult"></param>
@@ -2730,7 +2743,7 @@ namespace Business.Core.Meta
         /// <param name="useTypePosition"></param>
         /// <param name="methodTypeFullName"></param>
         /// <param name="doc"></param>
-        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, System.Type argTypeDefinition, bool hasToken, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
+        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, string business, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, System.Type argTypeDefinition, bool hasToken, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
         {
             Accessor = accessor;
             CommandGroup = commandGroup;
@@ -2741,7 +2754,7 @@ namespace Business.Core.Meta
             Path = path;
             Name = name;
             FullName = fullName;
-
+            Business = business;
             //this.returnType = returnType;
             //this.hasAsync = Utils.Help.IsAssignableFrom(typeof(System.Threading.Tasks.Task<>).GetTypeInfo(), returnType, out System.Type[] arguments) || typeof(System.Threading.Tasks.Task).IsAssignableFrom(returnType);
             //typeof(void) != method.ReturnType
@@ -2821,6 +2834,11 @@ namespace Business.Core.Meta
         /// FullName
         /// </summary>
         public string FullName { get; }
+
+        /// <summary>
+        /// Business
+        /// </summary>
+        public string Business { get; }
 
         /// <summary>
         /// HasReturn

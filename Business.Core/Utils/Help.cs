@@ -829,13 +829,13 @@ namespace Business.Core.Utils
             business.Configer.Doc = UseDoc(business, argCallback, Configer.Xmls, options);
 
             //business.Configer.Info.DocFileName = $"{business.Configer.Info.TypeFullName}.doc";
-            business.Configer.Info.DocFileName = "business.doc";
+            //business.Configer.Info.DocFileName = "business.doc";
 
             if (!string.IsNullOrEmpty(outDir))
             {
                 if (System.IO.Directory.Exists(outDir))
                 {
-                    var file = System.IO.Path.Combine(outDir, business.Configer.Info.DocFileName);
+                    var file = System.IO.Path.Combine(outDir, business.Configer.Info.DocFileName ?? Configer.documentFileName);
 
                     business.Configer.Info.DocPhysicalPath = file;
 

@@ -68,7 +68,7 @@
             <param name="state"></param>
             <param name="message"></param>
         </member>
-        <member name="M:BusinessMember2.Test001(Session,Business.Core.Arg{Args.Test004},Business.Core.Arg{System.Nullable{System.DateTime}},BusinessMember2.HttpFile,System.Decimal,System.Int32,System.Boolean)">
+        <member name="M:BusinessMember2.Test001(Session,Business.Core.Arg{Args.Test111},Business.Core.Arg{System.Nullable{System.DateTime}},BusinessMember2.HttpFile,System.Decimal,System.Int32,System.Boolean)">
             <summary>
             test doc Test001
             and Test001
@@ -126,6 +126,73 @@
             <param name="arg"></param>
             <param name="arg2">arg2!!!</param>
             <returns></returns>
+        </member>
+        <member name="T:Args.Test111">
+            <summary>
+            Test001Test001Tes
+            t001Test001Test001Test001
+            </summary>
+        </member>
+        <member name="P:Args.Test111.BBB">
+            <summary>
+            Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
+            </summary>
+        </member>
+        <member name="P:Args.Test111.BBBB">
+            <summary>
+            Test004 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:Args.Test111.AAA">
+            <summary>
+            AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+            </summary>
+        </member>
+        <member name="P:Args.Test111.A">
+            <summary>
+            AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+            </summary>
+        </member>
+        <member name="P:Args.Test111.B">
+            <summary>
+            BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:Args.Test111.D">
+            <summary>
+            DDD
+            </summary>
+        </member>
+        <member name="P:Args.Test111.F">
+            <summary>
+            FF
+            </summary>
+        </member>
+        <member name="P:Args.Test111.myEnum">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Args.Test111.Test0010`1">
+            <summary>
+            Test0010 Test0010 Test0010 Test0010
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:Args.Test111.Test0010`1.C1">
+            <summary>
+            C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
+            </summary>
+        </member>
+        <member name="P:Args.Test111.Test0010`1.C2">
+            <summary>
+            C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2
+            </summary>
+        </member>
+        <member name="P:Args.Test111.Test0010`1.C3">
+            <summary>
+            C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
+            </summary>
         </member>
         <member name="T:Args.MyEnum">
             <summary>

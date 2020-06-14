@@ -388,6 +388,11 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
     /// </summary>
     public partial class Configer
     {
+        /// <summary>
+        /// Document file name
+        /// </summary>
+        public static string documentFileName = "business.doc";
+
         internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 
         internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> AccessorsArgs = new ConcurrentReadOnlyDictionary<string, Accessors>();

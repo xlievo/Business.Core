@@ -1180,6 +1180,28 @@ namespace Business.Core.Annotations
 
             return attribute.ResultCreate(data: value);
         }
+
+        /// <summary>
+        /// Check whether the defined value type is the default value
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <param name="value"></param>
+        /// <param name="check"></param>
+        /// <returns></returns>
+        public static IResult CheckDefinitionValueType(ArgumentAttribute attribute, dynamic value, bool check)
+        {
+            if (attribute.ArgMeta.MemberType.Equals(value.GetType()))
+            {
+                if (check && !attribute.CanNull && attribute.ArgMeta.MemberType.IsValueType && object.Equals(attribute.ArgMeta.Arg.DefaultTypeValue, value))
+                {
+                    return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Alias}\" can not null.");
+                }
+
+                return attribute.ResultCreate(data: value);
+            }
+
+            return null;
+        }
     }
 
     /// <summary>
@@ -2139,6 +2161,11 @@ namespace Business.Core.Annotations
         public System.Text.Json.JsonSerializerOptions options;
 
         /// <summary>
+        /// Check whether the defined value type is the default value, (top-level object commit), Default true
+        /// </summary>
+        public bool CheckValueType { get; set; } = true;
+
+        /// <summary>
         /// Proces
         /// </summary>
         /// <typeparam name="Type"></typeparam>
@@ -2149,9 +2176,11 @@ namespace Business.Core.Annotations
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
 
-            if (this.ArgMeta.MemberType.Equals(value.GetType()))
+            //Check whether the defined value type is the default value, (top-level object commit)
+            result = CheckDefinitionValueType(this, value, CheckValueType);
+            if (!Equals(null, result))
             {
-                return this.ResultCreate(value);
+                return result;
             }
 
             try
