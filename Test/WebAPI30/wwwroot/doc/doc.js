@@ -1626,7 +1626,7 @@ function loadMember(member) {
             t: {},
             d: {
                 id: member.name + '.d',
-                title: "d (Array)",
+                title: "d (Object)",
                 type: "object",
                 description: "API data",
                 properties: {}
