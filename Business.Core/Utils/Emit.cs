@@ -77,13 +77,14 @@ namespace Business.Core.Utils.Emit
             return declaringType;
         }
 
-        public static System.Type BuildPropertys(string className, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Type>> propertys)
+        public static System.Type BuildPropertys(this ModuleBuilder module, string className, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Type>> propertys)
         {
+            if (null != module.Assembly.GetType(className, false))
+            {
+                return null;
+            }
+
             if (!(propertys?.Any() ?? false)) { return null; }
-
-            var myAsmBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName() { Name = "DynamicAssembly" }, AssemblyBuilderAccess.RunAndCollect);
-
-            var module = myAsmBuilder.DefineDynamicModule("DynamicModule");
 
             var type = module.DefineType(className, TypeAttributes.Public);
 

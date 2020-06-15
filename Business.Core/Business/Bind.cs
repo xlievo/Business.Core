@@ -1817,6 +1817,8 @@ namespace Business.Core
     /// </summary>
     public class Command
     {
+        readonly static System.Reflection.Emit.ModuleBuilder dynamicArgsModule = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName() { Name = "DynamicArgsAssembly" }, System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("MainModule");
+
         readonly string parametersTypeKey;
         System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Type>> parametersType;
 
@@ -1848,10 +1850,15 @@ namespace Business.Core
             if (1 < args.Count)
             {
                 parametersType = args.Select(c => new System.Collections.Generic.KeyValuePair<string, System.Type>(c.Name, c.CurrentOrigType));
+                
+                var parametersType2 = Utils.Emit.Emit.BuildPropertys(dynamicArgsModule, parametersTypeKey, parametersType);
 
-                ParametersType = Utils.Emit.Emit.BuildPropertys(this.Meta.FullName, parametersType);
+                if (null != parametersType2)
+                {
+                    parametersType2.LoadAccessors(Configer.AccessorsArgs, parametersTypeKey, fields: false, update: true);
 
-                ParametersType.LoadAccessors(Configer.AccessorsArgs, parametersTypeKey, fields: false, update: true);
+                    ParametersType = parametersType2;
+                }
             }
             else if (0 < args.Count)
             {
