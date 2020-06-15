@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <Description>https://github.com/xlievo/Business.Core
 https://www.nuget.org/packages/Business.DocUI</Description>
     <Copyright>Copyright ©  2014~2020 Business Project - http://www.tmopen.com</Copyright>
     <PackageProjectUrl>https://github.com/xlievo/Business.Core</PackageProjectUrl>
     <PackageIconUrl></PackageIconUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <AssemblyVersion>1.2.1.0</AssemblyVersion>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 

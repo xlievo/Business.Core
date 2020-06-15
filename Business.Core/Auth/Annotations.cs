@@ -486,10 +486,10 @@ namespace Business.Core.Annotations
         /// </summary>
         public string DocPhysicalPath { get; internal set; }
 
-        /// <summary>
-        /// Document file name
-        /// </summary>
-        public string DocFileName { get; internal set; }
+        ///// <summary>
+        ///// Document file name
+        ///// </summary>
+        //public string DocFileName { get; internal set; }
 
         ///// <summary>
         ///// Document web request path

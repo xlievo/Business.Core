@@ -86,8 +86,9 @@
         /// </summary>
         /// <param name="outDir"></param>
         /// <param name="docRequestPath"></param>
+        /// <param name="docFileName"></param>
         /// <param name="debug"></param>
-        public static void Write(string outDir = null, string docRequestPath = null, bool debug = false)
+        public static void Write(string outDir = null, string docRequestPath = null, string docFileName = null, bool debug = false)
         {
             if (string.IsNullOrWhiteSpace(outDir))
             {
@@ -155,6 +156,7 @@
                         if (Index == c.Key)
                         {
                             text = text.Replace("{URL}", docRequestPath);
+                            text = text.Replace("{DOC}", docFileName);
                         }
 
                         System.IO.File.WriteAllText(path, text, System.Text.Encoding.UTF8);
@@ -187,6 +189,7 @@
                 var text = System.IO.File.ReadAllText(path, System.Text.Encoding.UTF8);
 
                 text = text.Replace("{URL}", docRequestPath);
+                text = text.Replace("{DOC}", docFileName);
 
                 System.IO.File.WriteAllText(path, text, System.Text.Encoding.UTF8);
             }

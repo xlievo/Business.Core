@@ -1446,8 +1446,12 @@ function go() {
     destroy(true);
 
     var url = document.getElementById('url').value;
+    var docFileName = document.getElementById('doc').value;
+    if (docFileName == null || docFileName == undefined || docFileName === '') {
+        docFileName = "business.json";
+    }
     if (url == null || url == undefined || url === '') {
-        url = document.location.origin + "/business.doc"
+        url = document.location.origin + "/" + docFileName;
     }
     else {
         var http = "http://*:";

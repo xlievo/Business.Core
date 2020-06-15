@@ -835,7 +835,7 @@ namespace Business.Core.Utils
             {
                 if (System.IO.Directory.Exists(outDir))
                 {
-                    var file = System.IO.Path.Combine(outDir, business.Configer.Info.DocFileName ?? Configer.documentFileName);
+                    var file = System.IO.Path.Combine(outDir, Configer.documentFileName);
 
                     business.Configer.Info.DocPhysicalPath = file;
 

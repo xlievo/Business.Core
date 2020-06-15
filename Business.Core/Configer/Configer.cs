@@ -389,9 +389,9 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
     public partial class Configer
     {
         /// <summary>
-        /// Document file name
+        /// Document file name, business.json
         /// </summary>
-        public static string documentFileName = "business.doc";
+        public static string documentFileName = "business.json";
 
         internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
 

@@ -485,7 +485,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         bootstrap.Build();
 
         //writ url to page
-        DocUI.Write(docDir, debug: true);
+        DocUI.Write(docDir, docFileName: Configer.documentFileName, debug: true);
 
         //add route
         app.UseMvc(routes =>

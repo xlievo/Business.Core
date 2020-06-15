@@ -90,6 +90,8 @@ public class Startup
 
         Console.WriteLine($"wwwroot: {wwwroot}");
 
+        //Business.Core.Configer.documentFileName = "business.doc";
+
         // Set up custom content types -associating file extension to MIME type
         var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
         //provider.Mappings[".yaml"] = "text/yaml";
@@ -100,7 +102,8 @@ public class Startup
             ContentTypeProvider = provider,
             OnPrepareResponse = c =>
             {
-                if (c.File.Exists && string.Equals(".doc", System.IO.Path.GetExtension(c.File.Name)))
+                //if (c.File.Exists && string.Equals(".doc", System.IO.Path.GetExtension(c.File.Name)))
+                if (c.File.Exists && Business.Core.Configer.documentFileName.Equals(c.File.Name))
                 {
                     //c.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=600"; //600
                     c.Context.Response.Headers[HeaderNames.CacheControl] = "public, no-cache, no-store";
