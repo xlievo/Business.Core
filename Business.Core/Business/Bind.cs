@@ -1820,6 +1820,7 @@ namespace Business.Core
         readonly static System.Reflection.Emit.ModuleBuilder dynamicArgsModule = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(new AssemblyName() { Name = "DynamicArgsAssembly" }, System.Reflection.Emit.AssemblyBuilderAccess.Run).DefineDynamicModule("MainModule");
 
         readonly string parametersTypeKey;
+
         System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Type>> parametersType;
 
         /// <summary>
@@ -1843,26 +1844,29 @@ namespace Business.Core
         /// </summary>
         internal void StatisArgs()
         {
-            var args = this.Meta.Args.Where(c => !c.HasToken && !c.UseType && !c.Group[Key].IgnoreArg).ToList();
+            Parameters = this.Meta.Args.Where(c => (!c.UseType || c.HasToken) && !c.Group[Key].IgnoreArg);
+            var args = Parameters.Where(c => !c.HasToken).ToList();
 
             HasArgSingle = 1 >= args.Count;
 
             if (1 < args.Count)
             {
                 parametersType = args.Select(c => new System.Collections.Generic.KeyValuePair<string, System.Type>(c.Name, c.CurrentOrigType));
-                
-                var parametersType2 = Utils.Emit.Emit.BuildPropertys(dynamicArgsModule, parametersTypeKey, parametersType);
 
-                if (null != parametersType2)
+                ParametersType = Utils.Emit.Emit.BuildPropertys(dynamicArgsModule, parametersTypeKey, parametersType);
+
+                if (null != ParametersType)
                 {
-                    parametersType2.LoadAccessors(Configer.AccessorsArgs, parametersTypeKey, fields: false, update: true);
-
-                    ParametersType = parametersType2;
+                    ParametersType.LoadAccessors(Configer.AccessorsArgs, parametersTypeKey, fields: false, update: true);
+                }
+                else
+                {
+                    Configer.AccessorsArgs.dictionary.TryRemove(parametersTypeKey, out _);
                 }
             }
             else if (0 < args.Count)
             {
-                ParametersType = args[0].LastType;
+                ParametersType = args[0].CurrentOrigType;
             }
         }
 
@@ -1871,14 +1875,14 @@ namespace Business.Core
         /// </summary>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public object[] GetParametersObjects(object parameters)
+        public virtual object[] GetParametersObjects(object parameters)
         {
             if (parameters is null)
             {
                 return null;
             }
 
-            if (Configer.AccessorsArgs.TryGetValue(parametersTypeKey, out Accessors accessors))
+            if (null != parametersType && Configer.AccessorsArgs.TryGetValue(parametersTypeKey, out Accessors accessors))
             {
                 var values = new object[parametersType.Count()];
                 var i = 0;
@@ -2192,9 +2196,14 @@ namespace Business.Core
         public bool HasHttpFile { get; internal set; }
 
         /// <summary>
-        /// ParametersType
+        /// Parameter type called
         /// </summary>
         public System.Type ParametersType { get; internal set; }
+
+        /// <summary>
+        /// Parameter list containing token
+        /// </summary>
+        public System.Collections.Generic.IEnumerable<Args> Parameters { get; internal set; }
     }
 }
 

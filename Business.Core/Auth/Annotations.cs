@@ -1752,10 +1752,6 @@ namespace Business.Core.Annotations
         /// <summary>
         /// Sets up the <see cref="Regex"/> property from the <see cref="Pattern"/> property.
         /// </summary>
-        /// <exception cref="ArgumentException"> is thrown if the current <see cref="Pattern"/> cannot be parsed</exception>
-        /// <exception cref="InvalidOperationException"> is thrown if the current attribute is ill-formed.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"> thrown if <see cref="MatchTimeoutInMilliseconds" /> is negative (except -1),
-        /// zero or greater than approximately 24 days </exception>
         private void SetupRegex()
         {
             if (this.Regex == null)
@@ -2142,7 +2138,7 @@ namespace Business.Core.Annotations
             this.CanNull = false;
             this.Description = "Json parsing";
             //this.ArgMeta.Filter |= FilterModel.NotDefinition;
-            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments) => !hasDefinition || this.ArgMeta.Arg.Parameters;
+            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection) || this.ArgMeta.Arg.Parameters;
 
             options = new System.Text.Json.JsonSerializerOptions
             {

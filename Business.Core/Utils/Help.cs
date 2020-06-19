@@ -635,7 +635,9 @@ namespace Business.Core.Utils
 
             var docArg = new DocArg { Id = group.Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection, Name = argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
 
-            docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} {alias}" : $"{argSource.Args.Name} ({docArg.LastType}){alias}";
+            var titleArgsName = argSource.TitleArgsName ?? argSource.Args.Name;
+
+            docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} {alias}" : $"{titleArgsName} ({docArg.LastType}){alias}";
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary;
 
@@ -693,7 +695,7 @@ namespace Business.Core.Utils
             }
             else if (argSource.Args.HasCollection && !hideArray)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} (Array){alias}" : $"{argSource.Args.Name} ({docArg.LastType} Array){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Array){alias}" : $"{titleArgsName} ({docArg.LastType} Array){alias}";
 
                 docArg.Type = "array";
                 docArg.Items = new Items<DocArg>();
@@ -725,7 +727,7 @@ namespace Business.Core.Utils
 
             if (argSource.Args.HasCollection)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{argSource.Args.Name} (Array){alias}" : $"{argSource.Args.Name} ({docArg.LastType} Array){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Array){alias}" : $"{titleArgsName} ({docArg.LastType} Array){alias}";
             }
 
             return docArg;
@@ -789,7 +791,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, string outDir = null, Options options = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Business UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, string outDir = null, Options options = default) where Business : IBusiness where DocArg : IDocArg<DocArg>, new()
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
@@ -865,7 +867,7 @@ namespace Business.Core.Utils
         /// <param name="xmlMembers"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static Doc<DocArg> UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Options options = default) where Business : IBusiness where DocArg : IDocArg<DocArg>
+        public static Doc<DocArg> UseDoc<Business, DocArg>(Business business, System.Func<DocArgSource<Args>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, Options options = default) where Business : IBusiness where DocArg : IDocArg<DocArg>, new()
         {
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
@@ -899,16 +901,27 @@ namespace Business.Core.Utils
                     DescriptionParam = 0 < member?._params?.Count ? member?._params?.ToDictionary(c3 => c3.name, c3 => c3.sub) : null,
                     DescriptionResult = member?.returns?.sub,
                     Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
-                    Args = new Dictionary<string, DocArg>(),
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
                     Testing = 0 < testing.Count ? testing.ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token)) : null
                 } as IMember<DocArg>;
 
-                foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))
+                var titleArgsName = "d";
+                var args = c2.Value.Parameters.ToDictionary(c3 => c3.Name, c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle && !c3.HasToken ? titleArgsName : c3.Name));
+
+                if (1 < args.Count)
                 {
-                    member2.Args.Add(item.Name, GetDocArg(key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                    member2.Args = new DocArg { Id = $"{member2.Name}.{titleArgsName}", Title = $"{titleArgsName} (Object)", Type = "object", Children = args, Description = "API data" };
                 }
+                else if (0 < args.Count)
+                {
+                    member2.Args = args.First().Value;
+                }
+
+                //foreach (var item in meta.Args.Where(c3 => !c3.Group[key].IgnoreArg))
+                //{
+                //    member2.Args.Add(item.Name, GetDocArg(key, item, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == item.Name)?.text));
+                //}
 
                 return member2;
             }));
@@ -935,7 +948,7 @@ namespace Business.Core.Utils
             });
         }
 
-        static DocArg GetDocArg<DocArg, TypeDefinition>(string group, TypeDefinition args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null)
+        static DocArg GetDocArg<DocArg, TypeDefinition>(string group, TypeDefinition args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null, string titleArgsName = null)
             where DocArg : IDocArg<DocArg>
             where TypeDefinition : ITypeDefinition<TypeDefinition>
         {
@@ -1005,7 +1018,7 @@ namespace Business.Core.Utils
                 }
             }
 
-            var arg = argCallback(new DocArgSource<TypeDefinition>(group, args, attrs, summary, args.LastType.IsEnum ? args.LastType.GetEnums(xmlMembers) : null));
+            var arg = argCallback(new DocArgSource<TypeDefinition>(group, args, attrs, summary, args.LastType.IsEnum ? args.LastType.GetEnums(xmlMembers) : null, titleArgsName));
 
             if ((null == argGroup.Ignore || !argGroup.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.ArgChild)) && !args.LastType.IsEnum)
             {

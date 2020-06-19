@@ -79,12 +79,12 @@ namespace Business.Core.Utils.Emit
 
         public static System.Type BuildPropertys(this ModuleBuilder module, string className, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Type>> propertys)
         {
-            if (null != module.Assembly.GetType(className, false))
-            {
-                return null;
-            }
-
             if (!(propertys?.Any() ?? false)) { return null; }
+
+            if (null != module.GetType(className, false))
+            {
+                className = $"{className}.Repeat.{System.Guid.NewGuid():N}";
+            }
 
             var type = module.DefineType(className, TypeAttributes.Public);
 

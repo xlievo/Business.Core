@@ -119,11 +119,11 @@
             <param name="mm"></param>
             <returns></returns>
         </member>
-        <member name="M:BusinessMember2.Test007(Args.Test002,Business.Core.Arg{System.Collections.Generic.List{System.String}})">
+        <member name="M:BusinessMember2.Test007(Args.Test002,System.Collections.Generic.List{System.String})">
             <summary>
             
             </summary>
-            <param name="arg"></param>
+            <param name="arg">argargargarg</param>
             <param name="arg2">arg2!!!</param>
             <returns></returns>
         </member>

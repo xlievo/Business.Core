@@ -1607,7 +1607,7 @@ function propertyHandle(property) {
 
 function loadMember(member) {
 
-    propertyHandle(member);
+    propertyHandle(member.properties);
 
     propertyHandle(member.returns);
 
@@ -1624,13 +1624,14 @@ function loadMember(member) {
         name: member.name,
         properties: {
             t: {},
-            d: {
-                id: member.name + '.d',
-                title: "d (Object)",
-                type: "object",
-                description: "API data",
-                properties: {}
-            },
+            d: {},
+            //d: {
+            //    id: member.name + '.d',
+            //    title: "d (Object)",
+            //    type: "object",
+            //    description: "API data",
+            //    properties: {}
+            //},
             f: {
                 title: "files",
                 type: "array",
@@ -1654,25 +1655,41 @@ function loadMember(member) {
 
     var hasToken = false;
     var token = null;
-    for (var i in member.properties) {
-        if (member.properties[i].token) {
-            hasToken = true;
-            token = member.properties[i];
-        } else {
-            if (member.argSingle) {
-                input.properties.d = member.properties[i];
-                input.properties.d.id = member.name + '.d';
 
-                var title = member.properties[i].lastType;
-                if (member.properties[i].array) {
-                    title += " Array";
+    if (member.properties) {
+        if (member.properties.token) {
+            hasToken = true;
+            token = member.properties;
+            delete member.properties;
+        }
+
+        if (member.properties && member.properties.properties) {
+            for (var i in member.properties.properties) {
+                if (member.properties.properties[i].token) {
+                    hasToken = true;
+                    token = member.properties.properties[i];
+                    delete member.properties.properties[i];
                 }
-                input.properties.d.title = "d (" + title + ")";
-            }
-            else {
-                input.properties.d.properties[i] = member.properties[i];
             }
         }
+    }
+
+    if (member.properties) {
+        if (member.properties.properties) {
+            var keys = Object.keys(member.properties.properties);
+            if (1 == keys.length) {
+                input.properties.d = member.properties.properties[keys[0]];
+            }
+            else {
+                input.properties.d = member.properties;
+            }
+        }
+        else {
+            input.properties.d = member.properties;
+        }
+    }
+    else {
+        delete input.properties.d;
     }
 
     if (null != member.returns) {
@@ -1695,10 +1712,6 @@ function loadMember(member) {
         if (null != tokenvalue && '' !== tokenvalue) {
             input.properties.t.default = tokenvalue;
         }
-    }
-
-    if ("{}" == JSON.stringify(input.properties.d.properties)) {
-        delete input.properties.d;
     }
 
     if (!member.httpFile) {

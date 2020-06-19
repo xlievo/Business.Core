@@ -566,7 +566,7 @@ namespace Business.Core.Document
         /// Args
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
-        Dictionary<string, DocArg> Args { get; set; }
+        DocArg Args { get; set; }
 
         /// <summary>
         /// ArgSingle
@@ -590,6 +590,26 @@ namespace Business.Core.Document
     /// <typeparam name="DocArg"></typeparam>
     public interface IDocArg<DocArg> where DocArg : IDocArg<DocArg>
     {
+        /// <summary>
+        /// Id
+        /// </summary>
+        string Id { get; set; }
+
+        /// <summary>
+        /// Title
+        /// </summary>
+        string Title { get; set; }
+
+        /// <summary>
+        /// Description
+        /// </summary>
+        string Description { get; set; }
+
+        /// <summary>
+        /// LastType
+        /// </summary>
+        string LastType { get; set; }
+
         /// <summary>
         /// Children
         /// </summary>
@@ -740,7 +760,7 @@ namespace Business.Core.Document
         /// Args
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
-        public Dictionary<string, DocArg> Args { get; set; }
+        public DocArg Args { get; set; }
 
         /// <summary>
         /// ArgSingle
@@ -910,8 +930,17 @@ namespace Business.Core.Document
         #endregion
     }
 
+    /// <summary>
+    /// EnumItems
+    /// </summary>
     public readonly struct EnumItems
     {
+        /// <summary>
+        /// EnumItems
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="description"></param>
         public EnumItems(string name, int value, string description)
         {
             Name = name;
@@ -919,10 +948,19 @@ namespace Business.Core.Document
             Description = description;
         }
 
+        /// <summary>
+        /// Name
+        /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        /// Value
+        /// </summary>
         public int Value { get; }
 
+        /// <summary>
+        /// Description
+        /// </summary>
         public string Description { get; }
     }
 
@@ -1043,13 +1081,15 @@ namespace Business.Core.Document
         /// <param name="attributes"></param>
         /// <param name="summary"></param>
         /// <param name="enums"></param>
-        public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary, IEnumerable<EnumItems> enums)
+        /// <param name="titleArgsName"></param>
+        public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary, IEnumerable<EnumItems> enums, string titleArgsName)
         {
             Group = group;
             Args = args;
             Attributes = attributes;
             Summary = summary;
             Enums = enums;
+            TitleArgsName = titleArgsName;
         }
 
         /// <summary>
@@ -1076,6 +1116,11 @@ namespace Business.Core.Document
         /// Enums
         /// </summary>
         public IEnumerable<EnumItems> Enums { get; }
+
+        /// <summary>
+        /// TitleArgsName
+        /// </summary>
+        public string TitleArgsName { get; }
     }
     /*
     //            color

@@ -462,13 +462,13 @@ public partial class BusinessMember2 : BusinessBase
     }
 
     [Doc]
-    public virtual async Task<dynamic> Test004(Token token, List<Test002> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m)
+    public virtual async Task<dynamic> Test004(Token token, List<string> arg)
     {
-        Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
+        //Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
         //await socket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, null, CancellationToken.None);
         //return this.ResultCreate();
-        return this.ResultCreate(new { token, arg = arg, State = httpContext.Connection.RemoteIpAddress.ToString() });
+        return this.ResultCreate(new { arg = arg });
         //return this.ResultCreate(new { token, arg = arg?.Out, State = context.WebSocket.State });
     }
 
@@ -695,10 +695,10 @@ public partial class BusinessMember2 : BusinessBase
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="arg"></param>
+    /// <param name="arg">argargargarg</param>
     /// <param name="arg2">arg2!!!</param>
     /// <returns></returns>
-    public virtual async Task<dynamic> Test007(Test002 arg, Arg<List<string>> arg2) => this.ResultCreate();
+    public virtual async Task<dynamic> Test007(Test002 arg, List<string> arg2) => this.ResultCreate();
 
     public virtual async void Test0033(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m)
     {
