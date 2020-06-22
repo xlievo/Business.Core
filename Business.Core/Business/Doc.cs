@@ -569,6 +569,11 @@ namespace Business.Core.Document
         DocArg Args { get; set; }
 
         /// <summary>
+        /// Token
+        /// </summary>
+        DocArg Token { get; set; }
+
+        /// <summary>
         /// ArgSingle
         /// </summary>
         bool ArgSingle { get; set; }
@@ -761,6 +766,11 @@ namespace Business.Core.Document
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         public DocArg Args { get; set; }
+
+        /// <summary>
+        /// Token
+        /// </summary>
+        public DocArg Token { get; set; }
 
         /// <summary>
         /// ArgSingle

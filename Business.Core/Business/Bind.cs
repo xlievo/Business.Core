@@ -1844,14 +1844,18 @@ namespace Business.Core
         /// </summary>
         internal void StatisArgs()
         {
-            Parameters = this.Meta.Args.Where(c => (!c.UseType || c.HasToken) && !c.Group[Key].IgnoreArg);
-            var args = Parameters.Where(c => !c.HasToken).ToList();
+            var parameters = this.Meta.Args.Where(c => (!c.UseType || c.HasToken) && !c.Group[Key].IgnoreArg);
 
-            HasArgSingle = 1 >= args.Count;
+            Parameters = parameters.Where(c => !c.HasToken).ToList();
+            Token = parameters.FirstOrDefault(c => c.HasToken);
 
-            if (1 < args.Count)
+            //var args = Parameters.ToList();
+
+            HasArgSingle = 1 >= Parameters.Count;
+
+            if (1 < Parameters.Count)
             {
-                parametersType = args.Select(c => new System.Collections.Generic.KeyValuePair<string, System.Type>(c.Name, c.CurrentOrigType));
+                parametersType = Parameters.Select(c => new System.Collections.Generic.KeyValuePair<string, System.Type>(c.Name, c.CurrentOrigType));
 
                 ParametersType = Utils.Emit.Emit.BuildPropertys(dynamicArgsModule, parametersTypeKey, parametersType);
 
@@ -1864,9 +1868,9 @@ namespace Business.Core
                     Configer.AccessorsArgs.dictionary.TryRemove(parametersTypeKey, out _);
                 }
             }
-            else if (0 < args.Count)
+            else if (0 < Parameters.Count)
             {
-                ParametersType = args[0].CurrentOrigType;
+                ParametersType = Parameters[0].CurrentOrigType;
             }
         }
 
@@ -2201,9 +2205,14 @@ namespace Business.Core
         public System.Type ParametersType { get; internal set; }
 
         /// <summary>
-        /// Parameter list containing token
+        /// Parameter list without token
         /// </summary>
-        public System.Collections.Generic.IEnumerable<Args> Parameters { get; internal set; }
+        public System.Collections.Generic.IList<Args> Parameters { get; internal set; }
+
+        /// <summary>
+        /// token parameter
+        /// </summary>
+        public Args Token { get; internal set; }
     }
 }
 

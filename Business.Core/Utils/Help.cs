@@ -903,13 +903,14 @@ namespace Business.Core.Utils
                     Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
-                    Testing = 0 < testing.Count ? testing.ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token)) : null
+                    Testing = 0 < testing.Count ? testing.ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token)) : null,
+                    Token = GetDocArg(key, c2.Value.Token, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c2.Value.Token?.Name)?.text)
                 } as IMember<DocArg>;
 
                 var titleArgsName = "d";
-                var args = c2.Value.Parameters.ToDictionary(c3 => c3.Name, c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle && !c3.HasToken ? titleArgsName : c3.Name));
+                var args = c2.Value.Parameters.ToDictionary(c3 => c3.Name, c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle ? titleArgsName : c3.Name));
 
-                if (1 < args.Count)
+                if (!member2.ArgSingle)
                 {
                     member2.Args = new DocArg { Id = $"{member2.Name}.{titleArgsName}", Title = $"{titleArgsName} (Object)", Type = "object", Children = args, Description = "API data" };
                 }
@@ -952,6 +953,7 @@ namespace Business.Core.Utils
             where DocArg : IDocArg<DocArg>
             where TypeDefinition : ITypeDefinition<TypeDefinition>
         {
+            if (null == args) { return default; }
             if (null == argCallback) { throw new System.ArgumentNullException(nameof(argCallback)); }
 
             if (string.IsNullOrWhiteSpace(summary))

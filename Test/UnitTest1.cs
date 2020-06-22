@@ -1374,8 +1374,8 @@ public class TestBusinessMember
         Assert.AreEqual(Cfg.Doc.Group["G01"].ContainsKey("G01Test002"), true);
 
         Assert.AreEqual(Cfg.Doc.Group[CommandGroupDefault.Group]["Test001"].Description, "This is Test001.");
-        Assert.AreEqual(Cfg.Doc.Group[CommandGroupDefault.Group]["Test001"].Args["use01"].Description, "This is use01.");
-        Assert.IsTrue(Cfg.Doc.Group[CommandGroupDefault.Group]["Test001"].Args["arg01"].Description.StartsWith("This is Arg01."));
+        //Assert.AreEqual(Cfg.Doc.Group[CommandGroupDefault.Group]["Test001"].Args["use01"].Description, "This is use01.");
+        Assert.IsTrue(Cfg.Doc.Group[CommandGroupDefault.Group]["Test001"].Args.Children["arg01"].Description.StartsWith("This is Arg01."));
     }
 
     [TestMethod]

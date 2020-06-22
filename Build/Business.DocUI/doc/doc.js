@@ -1653,40 +1653,10 @@ function loadMember(member) {
         properties: {}
     }
 
-    var hasToken = false;
-    var token = null;
+    var token = member.token;
 
     if (member.properties) {
-        if (member.properties.token) {
-            hasToken = true;
-            token = member.properties;
-            delete member.properties;
-        }
-
-        if (member.properties && member.properties.properties) {
-            for (var i in member.properties.properties) {
-                if (member.properties.properties[i].token) {
-                    hasToken = true;
-                    token = member.properties.properties[i];
-                    delete member.properties.properties[i];
-                }
-            }
-        }
-    }
-
-    if (member.properties) {
-        if (member.properties.properties) {
-            var keys = Object.keys(member.properties.properties);
-            if (1 == keys.length) {
-                input.properties.d = member.properties.properties[keys[0]];
-            }
-            else {
-                input.properties.d = member.properties;
-            }
-        }
-        else {
-            input.properties.d = member.properties;
-        }
+        input.properties.d = member.properties;
     }
     else {
         delete input.properties.d;
@@ -1702,7 +1672,7 @@ function loadMember(member) {
         }
     }
 
-    if (!hasToken) {
+    if (null == token) {
         delete input.properties.t;
     }
     else {
