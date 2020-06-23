@@ -1653,8 +1653,6 @@ function loadMember(member) {
         properties: {}
     }
 
-    var token = member.token;
-
     if (member.properties) {
         input.properties.d = member.properties;
     }
@@ -1672,11 +1670,11 @@ function loadMember(member) {
         }
     }
 
-    if (null == token) {
+    if (null == member.token) {
         delete input.properties.t;
     }
     else {
-        input.properties.t = token;
+        input.properties.t = member.token;
         input.properties.t.id = member.name + '.t';
         input.properties.t.title = "t (String)";
         if (null != tokenvalue && '' !== tokenvalue) {

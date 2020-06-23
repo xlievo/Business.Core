@@ -888,6 +888,8 @@ namespace Business.Core.Utils
                 var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, groupDefault, $"{onlyName}.Returns");
                 var testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>();
 
+                var token = meta.Tokens.FirstOrDefault();
+
                 var member2 = new Member<DocArg>
                 {
                     Key = meta.Name,
@@ -896,7 +898,7 @@ namespace Business.Core.Utils
                     AliasGroup = meta.Doc?.Group,
                     HasReturn = meta.HasReturn,
                     HasIResult = meta.HasIResult,
-                    HasToken = meta.HasToken,
+                    HasToken = null != token,
                     Description = member?.summary?.sub,
                     DescriptionParam = 0 < member?._params?.Count ? member?._params?.ToDictionary(c3 => c3.name, c3 => c3.sub) : null,
                     DescriptionResult = member?.returns?.sub,
@@ -904,7 +906,7 @@ namespace Business.Core.Utils
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
                     Testing = 0 < testing.Count ? testing.ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token)) : null,
-                    Token = GetDocArg(key, c2.Value.Token, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c2.Value.Token?.Name)?.text)
+                    Token = GetDocArg(key, token, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == token?.Name)?.text)
                 } as IMember<DocArg>;
 
                 var titleArgsName = "d";

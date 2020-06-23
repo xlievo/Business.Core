@@ -922,8 +922,7 @@ namespace Business.Core
 
                 var childAll = new ReadOnlyCollection<Args>();
                 var args = new ReadOnlyCollection<Args>(parameters.Length);
-
-                var hasToken = false;
+                var tokens = new ReadOnlyCollection<Args>();
 
                 foreach (var argInfo in parameters)
                 {
@@ -938,9 +937,9 @@ namespace Business.Core
 
                     var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
 
-                    var hasToken2 = typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || typeof(Auth.IToken).IsAssignableFrom(use?.ParameterType);//true == use?.Token;
+                    var hasToken = typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || typeof(Auth.IToken).IsAssignableFrom(use?.ParameterType);//true == use?.Token;
 
-                    var hasUse = hasToken2 || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
+                    var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
                     //var nick = argAttrAll.GetAttr<NickAttribute>();
 
                     //var hasCollectionAttr = false;
@@ -1017,7 +1016,7 @@ namespace Business.Core
                     //path,
                     use,
                     hasUse,
-                    hasToken2,
+                    hasToken,
                     //item.Value.CommandAttr.OnlyName,
                     GetMethodTypeFullName(parameterType),
                     current.outType.GetTypeName(),
@@ -1041,9 +1040,9 @@ namespace Business.Core
                     //arg.HasCollectionAttr = hasCollectionAttr || hasCollectionAttr2;
                     arg.Group = argGroup;
 
-                    if (hasToken2 && hasToken2 != hasToken)
+                    if (hasToken)
                     {
-                        hasToken = hasToken2;
+                        tokens.Collection.Add(arg);
                     }
                 }
 
@@ -1051,7 +1050,7 @@ namespace Business.Core
                 //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
-                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, cfg.ArgTypeDefinition, hasToken, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
+                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), tokens, loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, cfg.ArgTypeDefinition, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
 
                 if (!metaData.dictionary.TryAdd(name, meta))
                 {
@@ -1844,12 +1843,7 @@ namespace Business.Core
         /// </summary>
         internal void StatisArgs()
         {
-            var parameters = this.Meta.Args.Where(c => (!c.UseType || c.HasToken) && !c.Group[Key].IgnoreArg);
-
-            Parameters = parameters.Where(c => !c.HasToken).ToList();
-            Token = parameters.FirstOrDefault(c => c.HasToken);
-
-            //var args = Parameters.ToList();
+            Parameters = this.Meta.Args.Where(c => !c.UseType && !c.HasToken && !c.Group[Key].IgnoreArg).ToList();
 
             HasArgSingle = 1 >= Parameters.Count;
 
@@ -2208,11 +2202,6 @@ namespace Business.Core
         /// Parameter list without token
         /// </summary>
         public System.Collections.Generic.IList<Args> Parameters { get; internal set; }
-
-        /// <summary>
-        /// token parameter
-        /// </summary>
-        public Args Token { get; internal set; }
     }
 }
 
@@ -2747,6 +2736,7 @@ namespace Business.Core.Meta
         /// <param name="args"></param>
         /// <param name="argAll"></param>
         /// <param name="iArgs"></param>
+        /// <param name="tokens"></param>
         /// <param name="metaLogger"></param>
         /// <param name="path"></param>
         /// <param name="name"></param>
@@ -2760,7 +2750,6 @@ namespace Business.Core.Meta
         /// <param name="resultTypeDefinition"></param>
         /// <param name="resultType"></param>
         /// <param name="argTypeDefinition"></param>
-        /// <param name="hasToken"></param>
         /// <param name="defaultValue"></param>
         /// <param name="attributes"></param>
         /// <param name="position"></param>
@@ -2768,13 +2757,14 @@ namespace Business.Core.Meta
         /// <param name="useTypePosition"></param>
         /// <param name="methodTypeFullName"></param>
         /// <param name="doc"></param>
-        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, string business, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, System.Type argTypeDefinition, bool hasToken, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
+        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ReadOnlyCollection<Args> tokens, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, string business, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, System.Type argTypeDefinition, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
         {
             Accessor = accessor;
             CommandGroup = commandGroup;
             Args = args;
             ArgAll = argAll;
             IArgs = iArgs;
+            Tokens = tokens;
             MetaLogger = metaLogger;
             Path = path;
             Name = name;
@@ -2799,8 +2789,6 @@ namespace Business.Core.Meta
             ResultGeneric = resultType.GenericTypeArguments[0];
 
             ArgTypeDefinition = argTypeDefinition;
-
-            HasToken = hasToken;
 
             DefaultValue = defaultValue;
             //this.logAttrs = logAttrs;
@@ -2839,6 +2827,11 @@ namespace Business.Core.Meta
         /// IArgs
         /// </summary>
         public ReadOnlyCollection<Args> IArgs { get; }
+
+        /// <summary>
+        /// Tokens
+        /// </summary>
+        public ReadOnlyCollection<Args> Tokens { get; }
 
         /// <summary>
         /// MetaLogger
@@ -2909,11 +2902,6 @@ namespace Business.Core.Meta
         /// ArgTypeDefinition
         /// </summary>
         public System.Type ArgTypeDefinition { get; }
-
-        /// <summary>
-        /// HasToken
-        /// </summary>
-        public bool HasToken { get; }
 
         /// <summary>
         /// HasAsync
