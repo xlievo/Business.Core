@@ -809,7 +809,20 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                 self.rows[i].register();
             }
             else {
-                self.addRow();
+                if (self.row_number) {
+                    var rows = Number(self.row_number.value);
+                    if (!isNaN(rows) && 1 < rows) {
+                        for (var i2 = 0; i2 < rows; i2++) {
+                            self.addRow();
+                        }
+                    }
+                    else {
+                        self.addRow();
+                    }
+                }
+                else {
+                    self.addRow();
+                }
             }
             self.active_tab = self.rows[i].tab;
             self.refreshTabs();
@@ -856,13 +869,22 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         else {
             this.add_row_button = this.getButton(this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
             this.add_row_button.classList.add('json-editor-btntype-add');
-            this.add_row_button.style.borderTopRightRadius = '4px';
-            this.add_row_button.style.borderBottomRightRadius = '4px';
+            this.add_row_button.style.borderTopRightRadius = "0px";
+            this.add_row_button.style.borderBottomRightRadius = "0px";
             this.add_row_button.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 click();
             });
+
+            //row_number
+            this.row_number = document.createElement('input');
+            this.row_number.classList.add('form-control');
+            this.row_number.style.width = '55px';
+            this.row_number.style.borderTopLeftRadius = "0px";
+            this.row_number.style.borderBottomLeftRadius = "0px";
+            this.row_number.setAttribute('tag', 'input');
+            self.controls.className = "form-inline";
         }
 
         self.controls.appendChild(this.add_row_button);
@@ -917,7 +939,17 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                 self.panel.style.display = 'none';
             }
         });
+
+        this.remove_all_rows_button.style.borderTopRightRadius = "0px";
+        this.remove_all_rows_button.style.borderBottomRightRadius = "0px";
+        this.remove_all_rows_button.style.borderTopLeftRadius = "0px";
+        this.remove_all_rows_button.style.borderBottomLeftRadius = "0px";
+
         self.controls.appendChild(this.remove_all_rows_button);
+
+        if (this.row_number) {
+            self.controls.appendChild(this.row_number);
+        }
 
         if (self.tabs) {
             this.add_row_button.style.width = '100%';
@@ -978,6 +1010,16 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
 
     //    this.adding_property = false;
     //},
+    onChange: function (bubble) {
+        this.notify();
+        if (this.watch_listener) this.watch_listener();
+        if (bubble) {
+            this.change();
+        }
+        else {
+            this.row_cache = [];
+        }
+    },
     addRow: function (value, initial) {
         var self = this;
         var i = this.rows.length;
@@ -1576,7 +1618,8 @@ function propertyHandle(property) {
         var description = "";
         for (var i2 = 0; i2 < property.descriptionTip.length; i2++) {
             description += "<h5 tag=\"h5\" style=\"margin:0px;margin-bottom:";
-            description += property.descriptionTip.length - 1 > i2 ? 2 : !property.token && property.properties ? 15 : 2;
+            //description += property.descriptionTip.length - 1 > i2 ? 2 : !property.token && property.properties ? 15 : 2;
+            description += property.descriptionTip.length - 1 > i2 ? 2 : property.properties ? 15 : 2;
             description += "px;margin-top:2px;\"><code>";
             description += property.descriptionTip[i2];
             description += "</code></h5>";

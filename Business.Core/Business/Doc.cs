@@ -868,11 +868,6 @@ namespace Business.Core.Document
         public string LastType { get; set; }
 
         /// <summary>
-        /// Token
-        /// </summary>
-        public bool Token { get; set; }
-
-        /// <summary>
         /// Format
         /// </summary>
         public string Format { get; set; }

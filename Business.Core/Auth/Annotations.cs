@@ -2174,10 +2174,7 @@ namespace Business.Core.Annotations
 
             //Check whether the defined value type is the default value, (top-level object commit)
             result = CheckDefinitionValueType(this, value, CheckValueType);
-            if (!Equals(null, result))
-            {
-                return result;
-            }
+            if (!Equals(null, result)) { return result; }
 
             try
             {

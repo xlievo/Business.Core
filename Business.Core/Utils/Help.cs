@@ -645,14 +645,14 @@ namespace Business.Core.Utils
 
             docArg.Enums = argSource.Enums;
 
-            docArg.Token = argSource.Args.HasToken;
+            //docArg.Token = argSource.Args.HasToken;
 
             if (argSource.Args.HasDefaultValue)
             {
                 docArg.DefaultValue = argSource.Args.DefaultValue;
             }
 
-            if (!docArg.Token && argSource.Args.HasDefinition)
+            if (!argSource.Args.HasToken && argSource.Args.HasDefinition)
             {
                 docArg.Type = "object";
             }
@@ -712,6 +712,10 @@ namespace Business.Core.Utils
                     {
                         docArg.Items.Type = type.Item1;
                         docArg.Items.Format = type.Item2;
+                    }
+                    else
+                    {
+                        docArg.Items = null;
                     }
                 }
             }
