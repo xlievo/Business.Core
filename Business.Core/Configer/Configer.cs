@@ -557,7 +557,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             PropertyNameCaseInsensitive = true,
             AllowTrailingCommas = true,
             IgnoreNullValues = true,
-            PropertyNamingPolicy = new Help.FirstCharToLowerNamingPolicy(),
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase, // new Help.FirstCharToLowerNamingPolicy(),
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 

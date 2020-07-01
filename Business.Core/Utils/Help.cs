@@ -3476,18 +3476,18 @@ namespace Business.Core.Utils
             public override void Write(System.Text.Json.Utf8JsonWriter writer, System.DateTime value, System.Text.Json.JsonSerializerOptions options) => writer.WriteStringValue(value.ToLocalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss"));
         }
 
-        /// <summary>
-        /// FirstCharToLowerNamingPolicy
-        /// </summary>
-        public class FirstCharToLowerNamingPolicy : System.Text.Json.JsonNamingPolicy
-        {
-            /// <summary>
-            /// ConvertName
-            /// </summary>
-            /// <param name="name"></param>
-            /// <returns></returns>
-            public override string ConvertName(string name) => FirstCharToLower(name);
-        }
+        ///// <summary>
+        ///// FirstCharToLowerNamingPolicy
+        ///// </summary>
+        //public class FirstCharToLowerNamingPolicy : System.Text.Json.JsonNamingPolicy
+        //{
+        //    /// <summary>
+        //    /// ConvertName
+        //    /// </summary>
+        //    /// <param name="name"></param>
+        //    /// <returns></returns>
+        //    public override string ConvertName(string name) => FirstCharToLower(name);
+        //}
 
         internal static string GetTypeName(this System.Type type, System.Type declaringType = null)
         {

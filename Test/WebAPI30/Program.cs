@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
+using System.Text.Json;
 //using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 public class Program
@@ -70,7 +71,12 @@ public class Startup
             });
         });
 
-        services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+        services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+            .AddJsonOptions(options =>
+            {
+                //options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            }); ;
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
