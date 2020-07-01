@@ -252,8 +252,10 @@ namespace Business.Core.Utils
             {
                 current.outType = dict[1];
                 //current.outType = current.outType.GenericTypeArguments[1];
+                current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out coll);
             }
-            else if (current.hasCollection)
+
+            if (current.hasCollection)
             {
                 current.outType = coll[0];
             }
@@ -633,11 +635,12 @@ namespace Business.Core.Utils
                 alias = $" {alias}";
             }
 
-            var docArg = new DocArg { Id = group.Path, LastType = argSource.Args.LastType.Name, Array = argSource.Args.HasCollection, Name = argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
+            var docArg = new DocArg { Id = group.Path, LastType = TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.LastType.IsEnum ? typeof(int) : argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
 
-            var titleArgsName = argSource.TitleArgsName ?? argSource.Args.Name;
+            var titleArgsName = argSource.TopTitleArgsName ?? (argSource.Args.HasToken ? "t" : argSource.Args.Name);
 
-            docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} {alias}" : $"{titleArgsName} ({docArg.LastType}){alias}";
+            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object) {alias}" : $"{titleArgsName} ({docArg.LastType}){alias}";
+
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary;
 
@@ -677,29 +680,35 @@ namespace Business.Core.Utils
                 };
             }
 
-            if (argSource.Args.HasDictionary)
+            //if (argSource.Args.HasDictionary && !hideArray)
+            //{
+            //    docArg.Type = "object";
+            //    //docArg.Type = "array";
+            //    //docArg.Format = "table";
+            //    //docArg.UniqueItems = true;
+            //    //docArg.Items = new Items
+            //    //{
+            //    //    Type = "object",
+            //    //    Children = new Dictionary<string, IDocArg>
+            //    //    {
+            //    //        { "Key", new DocArg { Type = "string" } },
+            //    //        { "Value", new DocArg { Type = "string" } },
+            //    //    }
+            //    //};
+            //}
+            if ((argSource.Args.HasCollection || argSource.Args.HasDictionary) && !hideArray)
             {
-                docArg.Type = "object";
-                //docArg.Type = "array";
-                //docArg.Format = "table";
-                //docArg.UniqueItems = true;
-                //docArg.Items = new Items
-                //{
-                //    Type = "object",
-                //    Children = new Dictionary<string, IDocArg>
-                //    {
-                //        { "Key", new DocArg { Type = "string" } },
-                //        { "Value", new DocArg { Type = "string" } },
-                //    }
-                //};
-            }
-            else if (argSource.Args.HasCollection && !hideArray)
-            {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Array){alias}" : $"{titleArgsName} ({docArg.LastType} Array){alias}";
+                //docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Array){alias}" : $"{titleArgsName} ({docArg.LastType} Array){alias}";
 
-                docArg.Type = "array";
+                docArg.Type = argSource.Args.HasDictionary ? "object" : "array";
                 docArg.Items = new Items<DocArg>();
                 docArg.Options = new Dictionary<string, object> { { "disable_array_delete_last_row", true }, { "array_controls_top", true } };
+
+                if (argSource.Args.HasDictionary)
+                {
+                    var type = GetDocArgType(argSource.Args.CurrentOrigType.GenericTypeArguments[0].GetTypeCode());
+                    docArg.Items.KeyType = type.Item1;
+                }
 
                 if (argSource.Args.HasDefinition)
                 {
@@ -729,9 +738,13 @@ namespace Business.Core.Utils
                 }
             }
 
-            if (argSource.Args.HasCollection)
+            if (argSource.Args.HasDictionary)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Array){alias}" : $"{titleArgsName} ({docArg.LastType} Array){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object Dict){alias}" : $"{titleArgsName} ({docArg.LastType} Dict){alias}";
+            }
+            else if (argSource.Args.HasCollection)
+            {
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object Array){alias}" : $"{titleArgsName} ({docArg.LastType} Array){alias}";
             }
 
             return docArg;
@@ -783,7 +796,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c), outDir, options);
+        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c, false, true), outDir, options);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -904,7 +917,7 @@ namespace Business.Core.Utils
                     HasIResult = meta.HasIResult,
                     HasToken = null != token,
                     Description = member?.summary?.sub,
-                    DescriptionParam = 0 < member?._params?.Count ? member?._params?.ToDictionary(c3 => c3.name, c3 => c3.sub) : null,
+                    //DescriptionParam = 0 < member?._params?.Count ? member?._params?.ToDictionary(c3 => c3.name, c3 => c3.sub) : null,
                     DescriptionResult = member?.returns?.sub,
                     Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
                     ArgSingle = c2.Value.HasArgSingle,
@@ -913,12 +926,12 @@ namespace Business.Core.Utils
                     Token = GetDocArg(key, token, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == token?.Name)?.text)
                 } as IMember<DocArg>;
 
-                var titleArgsName = "d";
-                var args = c2.Value.Parameters.ToDictionary(c3 => c3.Name, c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle ? titleArgsName : c3.Name));
+                var topTitleArgsName = "d";
+                var args = c2.Value.Parameters.ToDictionary(c3 => c3.Name, c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle ? topTitleArgsName : c3.Name));
 
                 if (!member2.ArgSingle)
                 {
-                    member2.Args = new DocArg { Id = $"{member2.Name}.{titleArgsName}", Title = $"{titleArgsName} (Object)", Type = "object", Children = args, Description = "API data" };
+                    member2.Args = new DocArg { Id = $"{member2.Name}.{topTitleArgsName}", Title = $"{topTitleArgsName} (Object)", Type = "object", Children = args, Description = "API data" };
                 }
                 else if (0 < args.Count)
                 {
@@ -955,7 +968,7 @@ namespace Business.Core.Utils
             });
         }
 
-        static DocArg GetDocArg<DocArg, TypeDefinition>(string group, TypeDefinition args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null, string titleArgsName = null)
+        static DocArg GetDocArg<DocArg, TypeDefinition>(string group, TypeDefinition args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null, string topTitleArgsName = null)
             where DocArg : IDocArg<DocArg>
             where TypeDefinition : ITypeDefinition<TypeDefinition>
         {
@@ -1026,7 +1039,7 @@ namespace Business.Core.Utils
                 }
             }
 
-            var arg = argCallback(new DocArgSource<TypeDefinition>(group, args, attrs, summary, args.LastType.IsEnum ? args.LastType.GetEnums(xmlMembers) : null, titleArgsName));
+            var arg = argCallback(new DocArgSource<TypeDefinition>(group, args, attrs, summary, args.LastType.IsEnum ? args.LastType.GetEnums(xmlMembers) : null, topTitleArgsName));
 
             if ((null == argGroup.Ignore || !argGroup.Ignore.Any(c => c.Mode == Annotations.IgnoreMode.ArgChild)) && !args.LastType.IsEnum)
             {
@@ -1035,7 +1048,7 @@ namespace Business.Core.Utils
 
                 if (childrens.Any())
                 {
-                    if ("array" == arg.Type)
+                    if ("array" == arg.Type || (args.HasDictionary && null != arg.Items))
                     {
                         arg.Items.Children = new Dictionary<string, DocArg>();
                     }
@@ -1046,7 +1059,7 @@ namespace Business.Core.Utils
 
                     foreach (var item in childrens)
                     {
-                        if ("array" == arg.Type)
+                        if ("array" == arg.Type || (args.HasDictionary && null != arg.Items))
                         {
                             if (arg.Items.Children.ContainsKey(item.Name))
                             {
@@ -1111,6 +1124,7 @@ namespace Business.Core.Utils
                 Name = name,//current.outType.Name,
                 Type = type,
                 LastType = current.outType,
+                CurrentOrigType = current.origType,
                 HasDefinition = current.hasDefinition,
                 DefaultValue = type.IsValueType && typeof(void) != type ? System.Activator.CreateInstance(type) : null,
 
@@ -1215,6 +1229,7 @@ namespace Business.Core.Utils
                     Name = item.Name,
                     Type = memberType,
                     LastType = current.outType,
+                    CurrentOrigType = current.origType,
                     HasDefinition = current.hasDefinition,
                     DefaultValue = memberType.IsValueType ? System.Activator.CreateInstance(memberType) : null,
 
@@ -1266,6 +1281,11 @@ namespace Business.Core.Utils
             /// LastType
             /// </summary>
             public System.Type LastType { get; set; }
+
+            /// <summary>
+            /// CurrentOrigType
+            /// </summary>
+            public System.Type CurrentOrigType { get; set; }
 
             /// <summary>
             /// HasDefinition

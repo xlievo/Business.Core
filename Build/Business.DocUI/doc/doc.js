@@ -1719,7 +1719,7 @@ function loadMember(member) {
     else {
         input.properties.t = member.token;
         input.properties.t.id = member.name + '.t';
-        input.properties.t.title = "t (String)";
+        input.properties.t.title = member.token.title;
         if (null != tokenvalue && '' !== tokenvalue) {
             input.properties.t.default = tokenvalue;
         }

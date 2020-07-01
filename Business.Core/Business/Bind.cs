@@ -2348,6 +2348,11 @@ namespace Business.Core.Meta
         System.Type LastType { get; }
 
         /// <summary>
+        /// CurrentOrigType
+        /// </summary>
+        System.Type CurrentOrigType { get; }
+
+        /// <summary>
         /// HasDefinition
         /// </summary>
         bool HasDefinition { get; }

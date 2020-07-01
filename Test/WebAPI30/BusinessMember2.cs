@@ -519,7 +519,7 @@ public partial class BusinessMember2 : BusinessBase
     {
         return this.ResultCreate();
     }
-    public virtual async Task<IResult<Test002>> Test0013(Session session, Test002 arg)
+    public virtual async Task<IResult<Dictionary<string, List<Test002>>>> Test0013(Session session, Dictionary<string, List<Test002>> arg)
     {
         return this.ResultCreate(arg);
     }

@@ -48,6 +48,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{B621B862
 	ProjectSection(SolutionItems) = preProject
 		Business.Core\Utils\Emit.cs = Business.Core\Utils\Emit.cs
 		Business.Core\Utils\Help.cs = Business.Core\Utils\Help.cs
+		Business.Core\Utils\TypeNameFormatter.cs = Business.Core\Utils\TypeNameFormatter.cs
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Business.Standard", "Build\Business.Standard\Business.Standard.csproj", "{79A7AE80-F893-44F1-BE12-F218B24B8794}"

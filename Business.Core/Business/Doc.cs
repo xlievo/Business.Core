@@ -547,10 +547,10 @@ namespace Business.Core.Document
         /// </summary>
         string Description { get; set; }
 
-        /// <summary>
-        /// DescriptionParam
-        /// </summary>
-        Dictionary<string, string> DescriptionParam { get; set; }
+        ///// <summary>
+        ///// DescriptionParam
+        ///// </summary>
+        //Dictionary<string, string> DescriptionParam { get; set; }
 
         /// <summary>
         /// DescriptionResult
@@ -746,10 +746,10 @@ namespace Business.Core.Document
         /// </summary>
         public string Description { get; set; }
 
-        /// <summary>
-        /// DescriptionParam
-        /// </summary>
-        public Dictionary<string, string> DescriptionParam { get; set; }
+        ///// <summary>
+        ///// DescriptionParam
+        ///// </summary>
+        //public Dictionary<string, string> DescriptionParam { get; set; }
 
         /// <summary>
         /// DescriptionResult
@@ -883,6 +883,11 @@ namespace Business.Core.Document
         public bool Array { get; set; }
 
         /// <summary>
+        /// Dict
+        /// </summary>
+        public bool Dict { get; set; }
+
+        /// <summary>
         /// Enums
         /// </summary>
         public IEnumerable<EnumItems> Enums { get; set; }
@@ -996,6 +1001,11 @@ namespace Business.Core.Document
         [System.Text.Json.Serialization.JsonPropertyName("properties")]
         public Dictionary<string, DocArg> Children { get; set; }
 
+        /// <summary>
+        /// KeyType
+        /// </summary>
+        public string KeyType { get; set; }
+
         //public Dictionary<string, object> Options { get; set; }
     }
 
@@ -1086,15 +1096,15 @@ namespace Business.Core.Document
         /// <param name="attributes"></param>
         /// <param name="summary"></param>
         /// <param name="enums"></param>
-        /// <param name="titleArgsName"></param>
-        public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary, IEnumerable<EnumItems> enums, string titleArgsName)
+        /// <param name="topTitleArgsName"></param>
+        public DocArgSource(string group, Meta.ITypeDefinition<TypeDefinition> args, IList<string> attributes, string summary, IEnumerable<EnumItems> enums, string topTitleArgsName)
         {
             Group = group;
             Args = args;
             Attributes = attributes;
             Summary = summary;
             Enums = enums;
-            TitleArgsName = titleArgsName;
+            TopTitleArgsName = topTitleArgsName;
         }
 
         /// <summary>
@@ -1123,9 +1133,9 @@ namespace Business.Core.Document
         public IEnumerable<EnumItems> Enums { get; }
 
         /// <summary>
-        /// TitleArgsName
+        /// TopTitleArgsName
         /// </summary>
-        public string TitleArgsName { get; }
+        public string TopTitleArgsName { get; }
     }
     /*
     //            color
