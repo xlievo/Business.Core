@@ -635,11 +635,12 @@ namespace Business.Core.Utils
                 alias = $" {alias}";
             }
 
-            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && argSource.Args.HasDefinition) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.LastType.IsEnum ? typeof(int) : argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
+            //argSource.Args.LastType.IsEnum ? typeof(int) :
+            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
 
             var titleArgsName = argSource.TopTitleArgsName ?? (argSource.Args.HasToken ? "t" : argSource.Args.Name);
 
-            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object) {alias}" : $"{titleArgsName} ({docArg.LastType}){alias}";
+            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : docArg.LastType)}){alias}";
 
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary;
@@ -740,11 +741,11 @@ namespace Business.Core.Utils
 
             if (argSource.Args.HasDictionary)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object Dict){alias}" : $"{titleArgsName} ({docArg.LastType} Dict){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object Dict){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : docArg.LastType)} Dict){alias}";
             }
             else if (argSource.Args.HasCollection)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object Array){alias}" : $"{titleArgsName} ({docArg.LastType} Array){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object Array){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : docArg.LastType)} Array){alias}";
             }
 
             return docArg;
