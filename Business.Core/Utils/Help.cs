@@ -635,7 +635,7 @@ namespace Business.Core.Utils
                 alias = $" {alias}";
             }
 
-            var docArg = new DocArg { Id = group.Path, LastType = TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.LastType.IsEnum ? typeof(int) : argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
+            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && argSource.Args.HasDefinition) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.LastType.IsEnum ? typeof(int) : argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
 
             var titleArgsName = argSource.TopTitleArgsName ?? (argSource.Args.HasToken ? "t" : argSource.Args.Name);
 
