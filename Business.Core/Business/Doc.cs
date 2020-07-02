@@ -446,6 +446,11 @@ namespace Business.Core.Document
         /// Benchmark tests whether the passed parameters are JSON serialized. By default false, does not need to be serialized
         /// </summary>
         public bool BenchmarkJSON { get; set; }
+
+        /// <summary>
+        /// CamelCase
+        /// </summary>
+        public bool CamelCase { get; set; } = true;
     }
 
     /// <summary>

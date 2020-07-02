@@ -481,6 +481,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 o.GroupEnable = true;
                 o.Host = Common.Host.Addresses;
                 o.Navigtion = true;
+                //o.CamelCase = false;
             });
         bootstrap.Build();
 
@@ -829,7 +830,7 @@ public class BusinessController : Controller
                 await cmd.AsyncCall(
                     //the data of this request, allow null.
                     //cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeStringArray(),
-                    cmd.HasArgSingle ? new object[] { d } : cmd.GetParametersObjects(d.TryJsonDeserialize(cmd.ParametersType, Configer.JsonOptions)),
+                    cmd.HasArgSingle ? new object[] { d } : cmd.GetParametersObjects(d.TryJsonDeserialize(cmd.ParametersType, Configer.JsonOptionsMultipleParameter)),
                     //the incoming use object
                     new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session"));

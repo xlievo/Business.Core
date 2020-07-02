@@ -487,9 +487,9 @@ public partial class BusinessMember2 : BusinessBase
 
     public virtual async Task<dynamic> Test0061() => this.ResultCreate();
 
-    public virtual IResult<Test001Result?> Test0062([Ignore(IgnoreMode.BusinessArg)] string aaa)
+    public virtual IResult<Test001Result> Test0062([Ignore(IgnoreMode.BusinessArg)] string aaa)
     {
-        Test001Result? ss = new Test001Result { a = aaa, b = new List<Test001Result2> { new Test001Result2 { a = aaa, b = "sss" } } };
+        Test001Result ss = new Test001Result { a = aaa, b = new List<Test001Result2> { new Test001Result2 { a = aaa, b = "sss" } } };
 
         return this.ResultCreate(ss);
     }

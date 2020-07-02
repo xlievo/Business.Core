@@ -625,7 +625,7 @@ namespace Business.Core.Utils
         };
         */
 
-        static DocArg GetDocArg<TypeDefinition>(DocArgSource<TypeDefinition> argSource, bool hideArray = false, bool hideTitleType = false)
+        static DocArg GetDocArg<TypeDefinition>(DocArgSource<TypeDefinition> argSource, bool hideArray = false, bool hideTitleType = false, bool camelCase = false)
             where TypeDefinition : ITypeDefinition<TypeDefinition>
         {
             var group = argSource.Args.Group[argSource.Group];
@@ -635,12 +635,11 @@ namespace Business.Core.Utils
                 alias = $" {alias}";
             }
 
-            //argSource.Args.LastType.IsEnum ? typeof(int) :
-            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
+            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase ? JsonNamingPolicyCamelCase(argSource.Args.Name) : argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
 
-            var titleArgsName = argSource.TopTitleArgsName ?? (argSource.Args.HasToken ? "t" : argSource.Args.Name);
+            var titleArgsName = argSource.TopTitleArgsName ?? (argSource.Args.HasToken ? "t" : docArg.Name);
 
-            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : docArg.LastType)}){alias}";
+            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : JsonNamingPolicyCamelCase(docArg.LastType))}){alias}";
 
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary;
@@ -741,11 +740,11 @@ namespace Business.Core.Utils
 
             if (argSource.Args.HasDictionary)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object Dict){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : docArg.LastType)} Dict){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object dict){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : JsonNamingPolicyCamelCase(docArg.LastType))} dict){alias}";
             }
             else if (argSource.Args.HasCollection)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (Object Array){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : docArg.LastType)} Array){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object array){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : JsonNamingPolicyCamelCase(docArg.LastType))} array){alias}";
             }
 
             return docArg;
@@ -797,7 +796,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c, false, true), outDir, options);
+        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c, false, true, options.CamelCase), outDir, options);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -869,13 +868,6 @@ namespace Business.Core.Utils
         }
 
         /// <summary>
-        /// FirstCharToLower
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public static string FirstCharToLower(this string input) => string.IsNullOrEmpty(input) ? input : $"{input[0].ToString().ToLower()}{input.Substring(1)}";
-
-        /// <summary>
         /// Gets the document object of the specified business class.
         /// </summary>
         /// <typeparam name="Business"></typeparam>
@@ -920,7 +912,7 @@ namespace Business.Core.Utils
                     Description = member?.summary?.sub,
                     //DescriptionParam = 0 < member?._params?.Count ? member?._params?.ToDictionary(c3 => c3.name, c3 => c3.sub) : null,
                     DescriptionResult = member?.returns?.sub,
-                    Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true), xmlMembers, returnType.Summary) : default,
+                    Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true, options.CamelCase), xmlMembers, returnType.Summary) : default,
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
                     Testing = 0 < testing.Count ? testing.ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token)) : null,
@@ -932,7 +924,7 @@ namespace Business.Core.Utils
 
                 if (!member2.ArgSingle)
                 {
-                    member2.Args = new DocArg { Id = $"{member2.Name}.{topTitleArgsName}", Title = $"{topTitleArgsName} (Object)", Type = "object", Children = args, Description = "API data" };
+                    member2.Args = new DocArg { Id = $"{member2.Name}.{topTitleArgsName}", Title = $"{topTitleArgsName} (object)", Type = "object", Children = args, Description = "API data" };
                 }
                 else if (0 < args.Count)
                 {
@@ -3148,8 +3140,61 @@ namespace Business.Core.Utils
         /// </summary>
         public static System.Text.Json.JsonSerializerOptions JsonOptions = new System.Text.Json.JsonSerializerOptions
         {
+            //PropertyNameCaseInsensitive = true,
+            //PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
+
+        ///// <summary>
+        ///// FirstCharToLower
+        ///// </summary>
+        ///// <param name="input"></param>
+        ///// <returns></returns>
+        //public static string FirstCharToLower(this string input) => string.IsNullOrEmpty(input) ? input : $"{input[0].ToString().ToLower()}{input.Substring(1)}";
+
+        /// <summary>
+        /// JsonNamingPolicyCamelCase
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string JsonNamingPolicyCamelCase(string name)
+        {
+            if (string.IsNullOrEmpty(name) || !char.IsUpper(name[0]))
+            {
+                return name;
+            }
+
+            char[] chars = name.ToCharArray();
+            FixCasing(chars);
+            return new string(chars);
+        }
+
+        private static void FixCasing(System.Span<char> chars)
+        {
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (i == 1 && !char.IsUpper(chars[i]))
+                {
+                    break;
+                }
+
+                bool hasNext = (i + 1 < chars.Length);
+
+                // Stop when next char is already lowercase.
+                if (i > 0 && hasNext && !char.IsUpper(chars[i + 1]))
+                {
+                    // If the next char is a space, lowercase current char before exiting.
+                    if (chars[i + 1] == ' ')
+                    {
+                        chars[i] = char.ToLowerInvariant(chars[i]);
+                    }
+
+                    break;
+                }
+
+                chars[i] = char.ToLowerInvariant(chars[i]);
+            }
+        }
 
         /// <summary>
         /// TryJsonSerialize
