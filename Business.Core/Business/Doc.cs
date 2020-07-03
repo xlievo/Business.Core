@@ -641,7 +641,10 @@ namespace Business.Core.Document
         /// </summary>
         bool ValueType { get; set; }
 
-        //string Name { get; set; }
+        /// <summary>
+        /// Name
+        /// </summary>
+        string Name { get; set; }
 
         //bool Token { get; set; }
 

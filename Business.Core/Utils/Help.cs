@@ -637,7 +637,9 @@ namespace Business.Core.Utils
 
             var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase ? JsonNamingPolicyCamelCase(argSource.Args.Name) : argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
 
-            var titleArgsName = argSource.TopTitleArgsName ?? (argSource.Args.HasToken ? "t" : docArg.Name);
+            var topTitleArgsName = camelCase && null != argSource.TopTitleArgsName ? JsonNamingPolicyCamelCase(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
+
+            var titleArgsName = topTitleArgsName ?? (argSource.Args.HasToken ? "t" : docArg.Name);
 
             docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : JsonNamingPolicyCamelCase(docArg.LastType))}){alias}";
 
@@ -796,7 +798,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c, false, true, options.CamelCase), outDir, options);
+        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c, false, true, options?.CamelCase ?? false), outDir, options);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -920,7 +922,8 @@ namespace Business.Core.Utils
                 } as IMember<DocArg>;
 
                 var topTitleArgsName = "d";
-                var args = c2.Value.Parameters.ToDictionary(c3 => c3.Name, c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle ? topTitleArgsName : c3.Name));
+                //var args = c2.Value.Parameters.ToDictionary(c3 => c3.Name, c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle ? topTitleArgsName : c3.Name));
+                var args = c2.Value.Parameters.Select(c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle ? topTitleArgsName : c3.Name)).ToDictionary(c3 => c3.Name, c3 => c3);
 
                 if (!member2.ArgSingle)
                 {
@@ -1041,35 +1044,27 @@ namespace Business.Core.Utils
 
                 if (childrens.Any())
                 {
-                    if ("array" == arg.Type || (args.HasDictionary && null != arg.Items))
-                    {
-                        arg.Items.Children = new Dictionary<string, DocArg>();
-                    }
-                    else
-                    {
-                        arg.Children = new Dictionary<string, DocArg>();
-                    }
+                    var children = new Dictionary<string, DocArg>();
 
                     foreach (var item in childrens)
                     {
-                        if ("array" == arg.Type || (args.HasDictionary && null != arg.Items))
-                        {
-                            if (arg.Items.Children.ContainsKey(item.Name))
-                            {
-                                throw new System.ArgumentException($"{item.Group[group].Path} already exist!");
-                            }
+                        var docArg = GetDocArg(group, item, argCallback, xmlMembers);
 
-                            arg.Items.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
-                        }
-                        else
+                        if (children.ContainsKey(docArg.Name))
                         {
-                            if (arg.Children.ContainsKey(item.Name))
-                            {
-                                throw new System.ArgumentException($"{item.Group[group].Path} already exist!");
-                            }
-
-                            arg.Children.Add(item.Name, GetDocArg(group, item, argCallback, xmlMembers));
+                            throw new System.ArgumentException($"{item.Group[group].Path} already exist!");
                         }
+
+                        children.Add(docArg.Name, docArg);
+                    }
+
+                    if ("array" == arg.Type || (args.HasDictionary && null != arg.Items))
+                    {
+                        arg.Items.Children = children;
+                    }
+                    else
+                    {
+                        arg.Children = children;
                     }
                 }
             }

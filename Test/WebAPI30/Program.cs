@@ -72,6 +72,10 @@ public class Startup
         });
 
         services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            //.AddJsonOptions(c =>
+            //{
+            //    c.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            //});
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

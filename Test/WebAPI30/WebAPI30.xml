@@ -68,6 +68,21 @@
             <param name="state"></param>
             <param name="message"></param>
         </member>
+        <member name="P:BusinessMember2.Test1110.BBB">
+            <summary>
+            Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test1110.BBBB">
+            <summary>
+            Test004 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test1110.AAA">
+            <summary>
+            AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+            </summary>
+        </member>
         <member name="M:BusinessMember2.Test001(Session,Business.Core.Arg{Args.Test111},Business.Core.Arg{System.Nullable{System.DateTime}},BusinessMember2.HttpFile,System.Decimal,System.Int32,System.Boolean)">
             <summary>
             test doc Test001
@@ -75,7 +90,7 @@
             </summary>
             <param name="session222">A token 
             sample222</param>
-            <param name="arg"></param>
+            <param name="Arg"></param>
             <param name="dateTime"></param>
             <param name="httpFile"></param>
             <param name="mm">mmmmmmmm!</param>

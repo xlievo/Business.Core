@@ -13,6 +13,64 @@ function renderSize(value) {
     return size + unitArr[index];
 }
 
+Element.prototype.removeChildAll = function () {
+    while (this.hasChildNodes()) {
+        this.removeChild(this.firstChild);
+    }
+}
+
+String.prototype.replace_r_n = function (newValue = "<br/>") {
+    if (this === undefined) {
+        return null;
+    }
+    return this.replace(/(?:\\[rn]|[\r\n])+/g, newValue);
+}
+
+String.prototype.toCharArray = function () {
+    charArray = [];
+    for (var i = 0; i < this.length; i++) {
+        charArray.push(this[i]);
+    }
+    return charArray;
+}
+
+String.prototype.isUpper = function () {
+    var reg = /^[A-Z]+$/;
+    return reg.test(this)
+}
+
+function JsonCamelCase(name) {
+    if (null == name || 0 >= name.length || !name.charAt(0).isUpper()) {
+        return name;
+    }
+
+    var chars = name.toCharArray();
+    fixCasing(chars);
+    return chars.join("");
+}
+
+function fixCasing(chars) {
+    for (var i = 0; i < chars.length; i++) {
+        if (i == 1 && !chars[i].isUpper()) {
+            break;
+        }
+
+        var hasNext = (i + 1 < chars.length);
+
+        // Stop when next char is already lowercase.
+        if (i > 0 && hasNext && !chars[i + 1].isUpper()) {
+            // If the next char is a space, lowercase current char before exiting.
+            if (chars[i + 1] == ' ') {
+                chars[i] = char.toLowerCase(chars[i]);
+            }
+
+            break;
+        }
+
+        chars[i] = chars[i].toLowerCase();
+    }
+}
+
 var $each = function (obj, callback) {
     if (!obj || typeof obj !== "object") return;
     var i;
@@ -883,7 +941,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             this.row_number.style.width = '55px';
             this.row_number.style.borderTopLeftRadius = "0px";
             this.row_number.style.borderBottomLeftRadius = "0px";
-            this.row_number.setAttribute('tag', 'input');
+            this.row_number.setAttribute('tag', 'row_number');
             self.controls.className = "form-inline";
         }
 
@@ -938,6 +996,11 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             if (0 == self.rows.length) {
                 self.panel.style.display = 'none';
             }
+
+            //files
+            if (null != self.rowsContainer) {
+                self.rowsContainer.firstChild.removeChildAll();
+            }
         });
 
         this.remove_all_rows_button.style.borderTopRightRadius = "0px";
@@ -966,58 +1029,202 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         }
 
         if (fileform !== this.formname) {
-            this.add_row_button.setAttribute('tag', 'input');
+            //this.add_row_button.setAttribute('tag', 'input');
             this.panel.setAttribute('tag', 'input');
             this.remove_all_rows_button.setAttribute('tag', 'array');
         }
 
         this.panel.style.display = 'none';
+
+        this.rowsContainer = self.container.querySelector("div[tag='input']");
+
+        self.controls.setAttribute('tag', 'array_but_group');
     },
+    setValue: function (value, initial) {
+        // Update the array's value, adding/removing rows when necessary
+        value = value || [];
 
-    //copyJSON: function () {
-    //    if (!this.editjson_holder) return;
-    //    var ta = document.createElement('textarea');
-    //    ta.value = this.editjson_textarea.value;
-    //    ta.setAttribute('readonly', '');
-    //    ta.style.position = 'absolute';
-    //    ta.style.left = '-9999px';
-    //    document.body.appendChild(ta);
-    //    ta.select();
-    //    document.execCommand('copy');
-    //    document.body.removeChild(ta);
-    //},
-    //saveJSON: function () {
-    //    if (!this.editjson_holder) return;
+        if (!(Array.isArray(value))) value = [value];
 
-    //    try {
-    //        var json = JSON.parse(this.editjson_textarea.value);
-    //        this.setValue(json);
-    //        this.hideEditJSON();
-    //        this.onChange(true);
-    //    }
-    //    catch (e) {
-    //        window.alert('invalid JSON');
-    //        throw e;
-    //    }
-    //},
+        var serialized = JSON.stringify(value);
+        if (serialized === this.serialized) return;
 
-    //hideAddProperty: function () {
-    //    if (!this.addproperty_holder) return;
-    //    if (!this.adding_property) return;
+        // Make sure value has between minItems and maxItems items in it
+        if (this.schema.minItems) {
+            while (value.length < this.schema.minItems) {
+                value.push(this.getItemInfo(value.length)["default"]);
+            }
+        }
+        if (this.getMax() && value.length > this.getMax()) {
+            value = value.slice(0, this.getMax());
+        }
 
-    //    this.addproperty_holder.style.display = 'none';
-    //    this.enable();
+        var self = this;
 
-    //    this.adding_property = false;
-    //},
-    onChange: function (bubble) {
-        this.notify();
-        if (this.watch_listener) this.watch_listener();
-        if (bubble) {
-            this.change();
+        //files
+        if (null != self.rowsContainer && 0 == value.length) {
+            self.rowsContainer.firstChild.removeChildAll();
+        }
+
+        $each(value, function (i, val) {
+            if (self.rows[i]) {
+                // TODO: don't set the row's value if it hasn't changed
+                self.rows[i].setValue(val, initial);
+            }
+            else if (self.row_cache[i]) {
+                self.rows[i] = self.row_cache[i];
+                self.rows[i].setValue(val, initial);
+                self.rows[i].container.style.display = '';
+                if (self.rows[i].tab) self.rows[i].tab.style.display = '';
+                self.rows[i].register();
+            }
+            else {
+                self.addRow(val, initial);
+            }
+        });
+
+        for (var j = value.length; j < self.rows.length; j++) {
+            self.destroyRow(self.rows[j]);
+            self.rows[j] = null;
+        }
+        self.rows = self.rows.slice(0, value.length);
+
+        // Set the active tab
+        var new_active_tab = null;
+        $each(self.rows, function (i, row) {
+            if (row.tab === self.active_tab) {
+                new_active_tab = row.tab;
+                return false;
+            }
+        });
+        if (!new_active_tab && self.rows.length) new_active_tab = self.rows[0].tab;
+
+        self.active_tab = new_active_tab;
+
+        self.refreshValue(initial);
+        self.refreshTabs(true);
+        self.refreshTabs();
+
+        self.onChange();
+
+        // TODO: sortable
+
+        if (1 < self.rows.length) {
+            self.remove_all_rows_button.style.display = "";
         }
         else {
-            this.row_cache = [];
+            self.remove_all_rows_button.style.display = "none";
+        }
+    },
+    refreshValue: function (force) {
+        var self = this;
+        var oldi = this.value ? this.value.length : 0;
+        this.value = [];
+
+        $each(this.rows, function (i, editor) {
+            // Get the value for this editor
+            self.value[i] = editor.getValue();
+        });
+
+        if (oldi !== this.value.length || force) {
+            // If we currently have minItems items in the array
+            var minItems = this.schema.minItems && this.schema.minItems >= this.rows.length;
+
+            $each(this.rows, function (i, editor) {
+                if (1 < self.rows.length) {
+                    editor.delete_button.style.borderTopRightRadius = '0px';
+                    editor.delete_button.style.borderBottomRightRadius = '0px';
+                }
+                else {
+                    editor.delete_button.style.borderTopRightRadius = '4px';
+                    editor.delete_button.style.borderBottomRightRadius = '4px';
+                }
+
+                // Hide the move down button for the last row
+                if (editor.movedown_button) {
+                    if (i === self.rows.length - 1) {
+                        editor.movedown_button.style.display = 'none';
+
+                        if (editor.moveup_button) {
+                            editor.moveup_button.style.borderTopRightRadius = '4px';
+                            editor.moveup_button.style.borderBottomRightRadius = '4px';
+                        }
+                    }
+                    else {
+                        editor.movedown_button.style.display = '';
+
+                        if (editor.moveup_button) {
+                            editor.moveup_button.style.borderTopRightRadius = '0px';
+                            editor.moveup_button.style.borderBottomRightRadius = '0px';
+                        }
+                    }
+                }
+
+                // Hide the delete button if we have minItems items
+                if (editor.delete_button) {
+                    if (minItems) {
+                        editor.delete_button.style.display = 'none';
+                    }
+                    else {
+                        editor.delete_button.style.display = '';
+                    }
+                }
+
+                // Get the value for this editor
+                self.value[i] = editor.getValue();
+            });
+
+            var controls_needed = false;
+
+            if (!this.value.length) {
+                this.delete_last_row_button.style.display = 'none';
+                this.remove_all_rows_button.style.display = 'none';
+            }
+            else if (this.value.length === 1) {
+                this.remove_all_rows_button.style.display = 'none';
+
+                // If there are minItems items in the array, or configured to hide the delete_last_row button, hide the delete button beneath the rows
+                if (minItems || this.hide_delete_last_row_buttons) {
+                    this.delete_last_row_button.style.display = 'none';
+                }
+                else {
+                    this.delete_last_row_button.style.display = '';
+                    controls_needed = true;
+                }
+            }
+            else {
+                if (minItems || this.hide_delete_last_row_buttons) {
+                    this.delete_last_row_button.style.display = 'none';
+                }
+                else {
+                    this.delete_last_row_button.style.display = '';
+                    controls_needed = true;
+                }
+
+                if (minItems || this.hide_delete_all_rows_buttons) {
+                    this.remove_all_rows_button.style.display = 'none';
+                }
+                else {
+                    this.remove_all_rows_button.style.display = '';
+                    controls_needed = true;
+                }
+            }
+
+            // If there are maxItems in the array, hide the add button beneath the rows
+            if ((this.getMax() && this.getMax() <= this.rows.length) || this.hide_add_button) {
+                this.add_row_button.style.display = 'none';
+            }
+            else {
+                this.add_row_button.style.display = '';
+                controls_needed = true;
+            }
+
+            if (!this.collapsed && controls_needed) {
+                this.controls.style.display = 'inline-block';
+            }
+            else {
+                this.controls.style.display = 'none';
+            }
         }
     },
     addRow: function (value, initial) {
@@ -1025,7 +1232,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         var i = this.rows.length;
 
         self.rows[i] = this.getElementEditor(i);
-        self.row_cache[i] = self.rows[i];
+        //self.row_cache[i] = self.rows[i];
 
         if (fileform === this.formname) {
             self.rows[i].input.removeAttribute("tag");
@@ -1137,6 +1344,8 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                         row.style.paddingBottom = "5px";
                     }
                 });
+
+                setEdit(self.container, !self.jsoneditor.input.schema.edit);
             });
 
             if (controls_holder) {
@@ -1578,13 +1787,6 @@ function load(m) {
     //console.timeEnd("timer");
 }
 
-String.prototype.replace_r_n = function (newValue = "<br/>") {
-    if (this === undefined) {
-        return null;
-    }
-    return this.replace(/(?:\\[rn]|[\r\n])+/g, newValue);
-}
-
 function propertyHandle(property) {
     if (property === undefined) {
         return;
@@ -1862,35 +2064,13 @@ function setEdit(root, edit) {
     if (!edit) {
         root.querySelectorAll("[tag='input']").forEach(c => { c.style.display = "none"; });
         root.querySelectorAll("[tag='description']").forEach(c => { c.style.display = ""; });
-
-        root.querySelectorAll("button[tag='array']").forEach(c => {
-            if ("" == c.style.display) {
-                c.style.display = "none";
-            }
-        });
+        root.querySelectorAll("[tag='array_but_group']").forEach(c => { c.style.display = "none"; });
     }
     else {
         root.querySelectorAll("[tag='input']").forEach(c => { c.style.display = ""; });
         root.querySelectorAll("[tag='description']").forEach(c => { c.style.display = "none"; });
-
-        root.querySelectorAll("div[data-schematype='array']").forEach(c => {
-            var items = c.querySelectorAll("button[tag='del']");
-            if (0 == items.length) {
-                var p = c.querySelector("div[tag='input']");
-                if (null !== p) {
-                    p.style.display = "none";
-                }
-            }
-            else if (1 < items.length) {
-                var b = c.querySelector("button[tag='array']");
-                if (null !== b) {
-                    b.style.display = "";
-                }
-            }
-        });
+        root.querySelectorAll("[tag='array_but_group']").forEach(c => { c.style.display = "inline-block"; });
     }
-
-    //root.querySelectorAll("[tag='input']")
 }
 
 function ready(editor) {
@@ -2063,12 +2243,28 @@ function ready(editor) {
                 var obj = el.currentTarget;
                 if (-1 !== obj.selectedIndex) {
                     setData(input, input.schema.data.d, 0 === obj.selectedIndex);
+                    input.container.querySelectorAll("[tag='row_number']").forEach(c => { c.value = ""; });
                     if (0 === obj.selectedIndex) {
+                        setEdit(input.container, !input.schema.edit);
                         return;
                     }
                     var select = obj.options[obj.selectedIndex];
-                    var value = JSON.parse(input.schema.testing[select.value].value);
+                    var value = JSON.parse(input.schema.testing[select.value].value, function (key, value) {
+                        if (!doc[businessName].options.camelCase) {
+                            return value
+                        }
+
+                        var key2 = JsonCamelCase(key);
+                        if (key2 === key) {
+                            return value;
+                        }
+                        this[key2] = value;
+                        return undefined;
+                    });
+
                     setData(input, value);
+
+                    setEdit(input.container, !input.schema.edit);
                 }
             }, false);
 
@@ -2352,6 +2548,8 @@ function setData(input, value, refresh = true) {
     if (refresh) {
         input.editors.d.onChange(true);
     }
+
+    //input.editors.d.onChange(refresh);
 }
 
 go();
