@@ -635,7 +635,7 @@ namespace Business.Core.Utils
                 alias = $" {alias}";
             }
 
-            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase ? JsonNamingPolicyCamelCase(argSource.Args.Name) : argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType };
+            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase ? JsonNamingPolicyCamelCase(argSource.Args.Name) : argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name };
 
             var topTitleArgsName = camelCase && null != argSource.TopTitleArgsName ? JsonNamingPolicyCamelCase(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
 

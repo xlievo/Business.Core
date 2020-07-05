@@ -931,6 +931,11 @@ namespace Business.Core.Document
         public string Name { get; set; }
 
         /// <summary>
+        /// OrigName
+        /// </summary>
+        public string OrigName { get; set; }
+
+        /// <summary>
         /// ValueType
         /// </summary>
         public bool ValueType { get; set; }
