@@ -32,6 +32,8 @@
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf" />
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff" />
     <Content Remove="wwwroot\doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Remove="wwwroot\doc\doc-icon-15.png" />
+    <Content Remove="wwwroot\doc\doc-icon-20.png" />
     <Content Remove="wwwroot\doc\doc.css" />
     <Content Remove="wwwroot\doc\doc.js" />
     <Content Remove="wwwroot\doc\DOMPurify\purify.min.js" />
@@ -84,6 +86,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="wwwroot\doc\doc.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\doc-icon-15.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="wwwroot\doc\doc-icon-20.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="wwwroot\doc\DOMPurify\purify.min.js.map">

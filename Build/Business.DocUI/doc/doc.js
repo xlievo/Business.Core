@@ -13,6 +13,64 @@ function renderSize(value) {
     return size + unitArr[index];
 }
 
+Element.prototype.removeChildAll = function () {
+    while (this.hasChildNodes()) {
+        this.removeChild(this.firstChild);
+    }
+}
+
+String.prototype.replace_r_n = function (newValue = "<br/>") {
+    if (this === undefined) {
+        return null;
+    }
+    return this.replace(/(?:\\[rn]|[\r\n])+/g, newValue);
+}
+
+String.prototype.toCharArray = function () {
+    charArray = [];
+    for (var i = 0; i < this.length; i++) {
+        charArray.push(this[i]);
+    }
+    return charArray;
+}
+
+String.prototype.isUpper = function () {
+    var reg = /^[A-Z]+$/;
+    return reg.test(this)
+}
+
+function JsonCamelCase(name) {
+    if (null == name || 0 >= name.length || !name.charAt(0).isUpper()) {
+        return name;
+    }
+
+    var chars = name.toCharArray();
+    fixCasing(chars);
+    return chars.join("");
+}
+
+function fixCasing(chars) {
+    for (var i = 0; i < chars.length; i++) {
+        if (i == 1 && !chars[i].isUpper()) {
+            break;
+        }
+
+        var hasNext = (i + 1 < chars.length);
+
+        // Stop when next char is already lowercase.
+        if (i > 0 && hasNext && !chars[i + 1].isUpper()) {
+            // If the next char is a space, lowercase current char before exiting.
+            if (chars[i + 1] == ' ') {
+                chars[i] = char.toLowerCase(chars[i]);
+            }
+
+            break;
+        }
+
+        chars[i] = chars[i].toLowerCase();
+    }
+}
+
 var $each = function (obj, callback) {
     if (!obj || typeof obj !== "object") return;
     var i;
@@ -854,7 +912,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             this.setButtonText(this.add_row_button, this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
 
             var file = document.createElement('input');
-            file.type = 'file';
+            file.type = "file";
             file.id = "file";
             this.add_row_button.classList.add("btn", "json-editor-btntype-add", "a-upload");
             this.add_row_button.appendChild(file);
@@ -865,6 +923,11 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                     click();
                 }
             }, false);
+
+            var icon = document.createElement('i');
+            icon.className = "glyphicon glyphicon-file";
+            this.controls.parentNode.childNodes[0].style.paddingLeft = "3px";
+            this.controls.parentNode.insertBefore(icon, this.controls.parentNode.childNodes[0]);
         }
         else {
             this.add_row_button = this.getButton(this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
@@ -883,7 +946,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             this.row_number.style.width = '55px';
             this.row_number.style.borderTopLeftRadius = "0px";
             this.row_number.style.borderBottomLeftRadius = "0px";
-            this.row_number.setAttribute('tag', 'input');
+            this.row_number.setAttribute('tag', 'row_number');
             self.controls.className = "form-inline";
         }
 
@@ -938,10 +1001,13 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             if (0 == self.rows.length) {
                 self.panel.style.display = 'none';
             }
+
+            //files
+            if (self.rowsContainer) {
+                self.rowsContainer.firstChild.removeChildAll();
+            }
         });
 
-        this.remove_all_rows_button.style.borderTopRightRadius = "0px";
-        this.remove_all_rows_button.style.borderBottomRightRadius = "0px";
         this.remove_all_rows_button.style.borderTopLeftRadius = "0px";
         this.remove_all_rows_button.style.borderBottomLeftRadius = "0px";
 
@@ -966,58 +1032,149 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         }
 
         if (fileform !== this.formname) {
-            this.add_row_button.setAttribute('tag', 'input');
+            //this.add_row_button.setAttribute('tag', 'input');
             this.panel.setAttribute('tag', 'input');
             this.remove_all_rows_button.setAttribute('tag', 'array');
+
+            this.remove_all_rows_button.style.borderTopRightRadius = "0px";
+            this.remove_all_rows_button.style.borderBottomRightRadius = "0px";
+
+            self.controls.setAttribute('tag', 'array_but_group');
         }
 
         this.panel.style.display = 'none';
+
+        this.rowsContainer = self.container.querySelector("div[tag='input']");
     },
+    refreshValue: function (force) {
+        var self = this;
+        var oldi = this.value ? this.value.length : 0;
+        this.value = [];
 
-    //copyJSON: function () {
-    //    if (!this.editjson_holder) return;
-    //    var ta = document.createElement('textarea');
-    //    ta.value = this.editjson_textarea.value;
-    //    ta.setAttribute('readonly', '');
-    //    ta.style.position = 'absolute';
-    //    ta.style.left = '-9999px';
-    //    document.body.appendChild(ta);
-    //    ta.select();
-    //    document.execCommand('copy');
-    //    document.body.removeChild(ta);
-    //},
-    //saveJSON: function () {
-    //    if (!this.editjson_holder) return;
+        $each(this.rows, function (i, editor) {
+            // Get the value for this editor
+            self.value[i] = editor.getValue();
+        });
 
-    //    try {
-    //        var json = JSON.parse(this.editjson_textarea.value);
-    //        this.setValue(json);
-    //        this.hideEditJSON();
-    //        this.onChange(true);
-    //    }
-    //    catch (e) {
-    //        window.alert('invalid JSON');
-    //        throw e;
-    //    }
-    //},
+        if (oldi !== this.value.length || force) {
+            //files
+            if (self.rowsContainer && 0 == self.rows.length) {
+                self.rowsContainer.firstChild.removeChildAll();
+            }
 
-    //hideAddProperty: function () {
-    //    if (!this.addproperty_holder) return;
-    //    if (!this.adding_property) return;
+            if (!self.rowsContainer) {
+                if (1 < self.rows.length) {
+                    self.remove_all_rows_button.style.display = "";
+                    self.add_row_button.style.borderTopRightRadius = '0px';
+                    self.add_row_button.style.borderBottomRightRadius = '0px';
+                }
+                else {
+                    self.remove_all_rows_button.style.display = "none";
+                    self.add_row_button.style.borderTopRightRadius = '4px';
+                    self.add_row_button.style.borderBottomRightRadius = '4px';
+                }
+            }
 
-    //    this.addproperty_holder.style.display = 'none';
-    //    this.enable();
+            // If we currently have minItems items in the array
+            var minItems = this.schema.minItems && this.schema.minItems >= this.rows.length;
 
-    //    this.adding_property = false;
-    //},
-    onChange: function (bubble) {
-        this.notify();
-        if (this.watch_listener) this.watch_listener();
-        if (bubble) {
-            this.change();
-        }
-        else {
-            this.row_cache = [];
+            $each(this.rows, function (i, editor) {
+                if (self.rowsContainer) {
+                    if (1 < self.rows.length) {
+                        editor.delete_button.style.borderTopRightRadius = '0px';
+                        editor.delete_button.style.borderBottomRightRadius = '0px';
+                    }
+                    else {
+                        editor.delete_button.style.borderTopRightRadius = '4px';
+                        editor.delete_button.style.borderBottomRightRadius = '4px';
+                    }
+                }
+
+                // Hide the move down button for the last row
+                if (editor.movedown_button) {
+                    if (i === self.rows.length - 1) {
+                        editor.movedown_button.style.display = 'none';
+
+                        if (editor.moveup_button) {
+                            editor.moveup_button.style.borderTopRightRadius = '4px';
+                            editor.moveup_button.style.borderBottomRightRadius = '4px';
+                        }
+                    }
+                    else {
+                        editor.movedown_button.style.display = '';
+
+                        if (editor.moveup_button) {
+                            editor.moveup_button.style.borderTopRightRadius = '0px';
+                            editor.moveup_button.style.borderBottomRightRadius = '0px';
+                        }
+                    }
+                }
+
+                // Hide the delete button if we have minItems items
+                if (editor.delete_button) {
+                    if (minItems) {
+                        editor.delete_button.style.display = 'none';
+                    }
+                    else {
+                        editor.delete_button.style.display = '';
+                    }
+                }
+
+                // Get the value for this editor
+                self.value[i] = editor.getValue();
+            });
+
+            var controls_needed = false;
+
+            if (!this.value.length) {
+                this.delete_last_row_button.style.display = 'none';
+                this.remove_all_rows_button.style.display = 'none';
+            }
+            else if (this.value.length === 1) {
+                this.remove_all_rows_button.style.display = 'none';
+
+                // If there are minItems items in the array, or configured to hide the delete_last_row button, hide the delete button beneath the rows
+                if (minItems || this.hide_delete_last_row_buttons) {
+                    this.delete_last_row_button.style.display = 'none';
+                }
+                else {
+                    this.delete_last_row_button.style.display = '';
+                    controls_needed = true;
+                }
+            }
+            else {
+                if (minItems || this.hide_delete_last_row_buttons) {
+                    this.delete_last_row_button.style.display = 'none';
+                }
+                else {
+                    this.delete_last_row_button.style.display = '';
+                    controls_needed = true;
+                }
+
+                if (minItems || this.hide_delete_all_rows_buttons) {
+                    this.remove_all_rows_button.style.display = 'none';
+                }
+                else {
+                    this.remove_all_rows_button.style.display = '';
+                    controls_needed = true;
+                }
+            }
+
+            // If there are maxItems in the array, hide the add button beneath the rows
+            if ((this.getMax() && this.getMax() <= this.rows.length) || this.hide_add_button) {
+                this.add_row_button.style.display = 'none';
+            }
+            else {
+                this.add_row_button.style.display = '';
+                controls_needed = true;
+            }
+
+            if (!this.collapsed && controls_needed) {
+                this.controls.style.display = 'inline-block';
+            }
+            else {
+                this.controls.style.display = 'none';
+            }
         }
     },
     addRow: function (value, initial) {
@@ -1025,7 +1182,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         var i = this.rows.length;
 
         self.rows[i] = this.getElementEditor(i);
-        self.row_cache[i] = self.rows[i];
+        //self.row_cache[i] = self.rows[i];
 
         if (fileform === this.formname) {
             self.rows[i].input.removeAttribute("tag");
@@ -1137,6 +1294,8 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                         row.style.paddingBottom = "5px";
                     }
                 });
+
+                setEdit(self.container, !self.jsoneditor.input.schema.edit);
             });
 
             if (controls_holder) {
@@ -1541,11 +1700,12 @@ function expand(ev) {
         var input = parent.querySelector("#" + inputid);
 
         if ('' === input.innerHTML) {
-            loadMember(member.member);
+            var hasInput = loadMember(member.member);
 
             setEdit(input, edit);
-            setInput(input, member.member.hasReturn);
+            setInput(input, hasInput, member.member.hasReturn);
             setSdk(parent.querySelector("div[id='SDK & Debug']"));
+            setSdkHead(parent.querySelector("ul[id='SDK & Debug']"));
         }
     }
 }
@@ -1576,13 +1736,6 @@ function load(m) {
     disclosure = new Houdini('[data-houdini]', { btnClass: 'btn btn-primary' });
 
     //console.timeEnd("timer");
-}
-
-String.prototype.replace_r_n = function (newValue = "<br/>") {
-    if (this === undefined) {
-        return null;
-    }
-    return this.replace(/(?:\\[rn]|[\r\n])+/g, newValue);
 }
 
 function propertyHandle(property) {
@@ -1668,13 +1821,6 @@ function loadMember(member) {
         properties: {
             t: {},
             d: {},
-            //d: {
-            //    id: member.name + '.d',
-            //    title: "d (Object)",
-            //    type: "object",
-            //    description: "API data",
-            //    properties: {}
-            //},
             f: {
                 title: "files",
                 type: "array",
@@ -1753,8 +1899,6 @@ function loadMember(member) {
     //==================sdk==================//
     var sdkid = member.name + '_sdk';
     inputouteditor.sdkeditor = new JSONEditor(document.getElementById(sdkid), {
-        // Enable fetching schemas via ajax
-        //ajax: true,
         schema: {
             title: "SDK & Debug",
             type: "object",
@@ -1770,11 +1914,12 @@ function loadMember(member) {
         }
     });
 
+    return input.properties.hasOwnProperty("t") || input.properties.hasOwnProperty("d") || input.properties.hasOwnProperty("f");
     //document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
     //========================================//
 }
 
-function setInput(input, hasReturn) {
+function setInput(input, hasInput, hasReturn) {
     if (null == input) { return; }
 
     input.querySelectorAll("p[tag='description']").forEach(c => {
@@ -1853,6 +1998,10 @@ function setInput(input, hasReturn) {
     var out2 = input.querySelector("#Out > div > div > div[tag='panel']");
     out2.removeAttribute("class"); out2.removeAttribute("style"); out2.style.margin = "8px";
 
+    if (!hasInput) {
+        input.querySelector('#Input > div').style.display = 'none';
+    }
+
     if (!hasReturn) {
         input.querySelector('#Out > div').style.display = 'none';
     }
@@ -1862,35 +2011,13 @@ function setEdit(root, edit) {
     if (!edit) {
         root.querySelectorAll("[tag='input']").forEach(c => { c.style.display = "none"; });
         root.querySelectorAll("[tag='description']").forEach(c => { c.style.display = ""; });
-
-        root.querySelectorAll("button[tag='array']").forEach(c => {
-            if ("" == c.style.display) {
-                c.style.display = "none";
-            }
-        });
+        root.querySelectorAll("[tag='array_but_group']").forEach(c => { c.style.display = "none"; });
     }
     else {
         root.querySelectorAll("[tag='input']").forEach(c => { c.style.display = ""; });
         root.querySelectorAll("[tag='description']").forEach(c => { c.style.display = "none"; });
-
-        root.querySelectorAll("div[data-schematype='array']").forEach(c => {
-            var items = c.querySelectorAll("button[tag='del']");
-            if (0 == items.length) {
-                var p = c.querySelector("div[tag='input']");
-                if (null !== p) {
-                    p.style.display = "none";
-                }
-            }
-            else if (1 < items.length) {
-                var b = c.querySelector("button[tag='array']");
-                if (null !== b) {
-                    b.style.display = "";
-                }
-            }
-        });
+        root.querySelectorAll("[tag='array_but_group']").forEach(c => { c.style.display = "inline-block"; });
     }
-
-    //root.querySelectorAll("[tag='input']")
 }
 
 function ready(editor) {
@@ -1958,11 +2085,14 @@ function ready(editor) {
 
         var header = debug.root.header.parentNode;
 
+        button_holder = debug.root.theme.getHeaderButtonHolder();
+        button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
+
         if (doc[businessName].options.debug) {
-            var buttonDebug = debug.root.getButton('', 'debug', 'Debug');
-            button_holder = debug.root.theme.getHeaderButtonHolder();
-            button_holder.appendChild(buttonDebug);
-            header.appendChild(button_holder);
+            var button_holder2 = debug.root.theme.getHeaderButtonHolder();
+            var buttonDebug = button_holder.querySelector('#' + editor.schema.properties.input.name + '_debug');
+            button_holder2.appendChild(buttonDebug);
+            header.appendChild(button_holder2);
             buttonDebug.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -2028,11 +2158,6 @@ function ready(editor) {
             }, false);
         }
 
-        button_holder = debug.root.theme.getHeaderButtonHolder();
-        button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
-        //button_holder.classList.add("input-group");
-        //header.appendChild(button_holder);
-
         header.parentNode.removeChild(header.nextSibling);
         var header2 = document.createElement('div');
         header2.classList.add("form-inline");
@@ -2063,12 +2188,28 @@ function ready(editor) {
                 var obj = el.currentTarget;
                 if (-1 !== obj.selectedIndex) {
                     setData(input, input.schema.data.d, 0 === obj.selectedIndex);
+                    input.container.querySelectorAll("[tag='row_number']").forEach(c => { c.value = ""; });
                     if (0 === obj.selectedIndex) {
+                        setEdit(input.container, !input.schema.edit);
                         return;
                     }
                     var select = obj.options[obj.selectedIndex];
-                    var value = JSON.parse(input.schema.testing[select.value].value);
+                    var value = JSON.parse(input.schema.testing[select.value].value, function (key, value) {
+                        if (!doc[businessName].options.camelCase) {
+                            return value
+                        }
+
+                        var key2 = JsonCamelCase(key);
+                        if (key2 === key) {
+                            return value;
+                        }
+                        this[key2] = value;
+                        return undefined;
+                    });
+
                     setData(input, value);
+
+                    setEdit(input.container, !input.schema.edit);
                 }
             }, false);
 
@@ -2176,6 +2317,35 @@ function ready(editor) {
             //console.log(this.sdkeditor.getValue());
         });
         //console.timeEnd("timer");
+
+        if (input.editors.t) {
+            var icon = document.createElement('i');
+            icon.className = "doc-icon-15 doc-icon-15-token3";
+            icon.style.position = "relative";
+            icon.style.top = "3px";
+            var text = input.editors.t.control.childNodes[0];
+            text.style.paddingLeft = "3px";
+            text.parentNode.insertBefore(icon, text);
+        }
+
+        if (input.editors.d) {
+            var icon = document.createElement('i');
+            icon.className = "doc-icon-15 doc-icon-15-data";
+            icon.style.position = "relative";
+            icon.style.top = "object" == input.editors.d.schema.type ? "1px" : "2px";
+            var text = null;
+            if (input.editors.d.control) {
+                text = input.editors.d.control.childNodes[0];
+            }
+            else if (input.editors.d.title) {
+                text = input.editors.d.title.childNodes[0];
+            }
+
+            if (null != text) {
+                text.style.paddingLeft = "3px";
+                text.parentNode.insertBefore(icon, text);
+            }
+        }
     });
 }
 
@@ -2240,6 +2410,88 @@ function setSdk(sdk) {
     var row = sdk.querySelector("#Debug > div > div > div[tag='panel'] > div > div > div[tag='row']");
     row.removeAttribute("class"); row.removeAttribute("style");
     sdk.querySelector("#Debug > div > div > div[tag='panel'] > div > div > div[tag='row'] > div").classList.add("emacs-mode");
+}
+
+function setSdkHead(sdk) {
+    if (null == sdk) { return; }
+
+    var tab = sdk.querySelector("a[aria-controls='Curl'] > span");
+    tab.parentNode.style.width = "82px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    var icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-curl3";
+    tab.appendChild(icon);
+    var text = document.createElement('i');
+    text.textContent = "Curl";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='JavaScript'] > span");
+    tab.parentNode.style.width = "120px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-javascript";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "JavaScript";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='NET'] > span");
+    tab.parentNode.style.width = "85px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-dotnet";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "NET";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='Java'] > span");
+    tab.parentNode.style.width = "85px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-java";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "Java";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='PHP'] > span");
+    tab.parentNode.style.width = "85px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-php";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "PHP";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='Debug'] > span");
+    tab.parentNode.style.width = "95px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-debug2";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "Debug";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
 }
 
 function getSdk(format) {
@@ -2352,6 +2604,8 @@ function setData(input, value, refresh = true) {
     if (refresh) {
         input.editors.d.onChange(true);
     }
+
+    //input.editors.d.onChange(refresh);
 }
 
 go();

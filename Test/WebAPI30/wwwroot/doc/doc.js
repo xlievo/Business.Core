@@ -912,7 +912,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             this.setButtonText(this.add_row_button, this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
 
             var file = document.createElement('input');
-            file.type = 'file';
+            file.type = "file";
             file.id = "file";
             this.add_row_button.classList.add("btn", "json-editor-btntype-add", "a-upload");
             this.add_row_button.appendChild(file);
@@ -923,6 +923,11 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                     click();
                 }
             }, false);
+
+            var icon = document.createElement('i');
+            icon.className = "glyphicon glyphicon-file";
+            this.controls.parentNode.childNodes[0].style.paddingLeft = "3px";
+            this.controls.parentNode.insertBefore(icon, this.controls.parentNode.childNodes[0]);
         }
         else {
             this.add_row_button = this.getButton(this.getItemTitle(), 'add', this.translate('button_add_row_title', [this.getItemTitle()]));
@@ -998,13 +1003,11 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             }
 
             //files
-            if (null != self.rowsContainer) {
+            if (self.rowsContainer) {
                 self.rowsContainer.firstChild.removeChildAll();
             }
         });
 
-        this.remove_all_rows_button.style.borderTopRightRadius = "0px";
-        this.remove_all_rows_button.style.borderBottomRightRadius = "0px";
         this.remove_all_rows_button.style.borderTopLeftRadius = "0px";
         this.remove_all_rows_button.style.borderBottomLeftRadius = "0px";
 
@@ -1032,89 +1035,16 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
             //this.add_row_button.setAttribute('tag', 'input');
             this.panel.setAttribute('tag', 'input');
             this.remove_all_rows_button.setAttribute('tag', 'array');
+
+            this.remove_all_rows_button.style.borderTopRightRadius = "0px";
+            this.remove_all_rows_button.style.borderBottomRightRadius = "0px";
+
+            self.controls.setAttribute('tag', 'array_but_group');
         }
 
         this.panel.style.display = 'none';
 
         this.rowsContainer = self.container.querySelector("div[tag='input']");
-
-        self.controls.setAttribute('tag', 'array_but_group');
-    },
-    setValue: function (value, initial) {
-        // Update the array's value, adding/removing rows when necessary
-        value = value || [];
-
-        if (!(Array.isArray(value))) value = [value];
-
-        var serialized = JSON.stringify(value);
-        if (serialized === this.serialized) return;
-
-        // Make sure value has between minItems and maxItems items in it
-        if (this.schema.minItems) {
-            while (value.length < this.schema.minItems) {
-                value.push(this.getItemInfo(value.length)["default"]);
-            }
-        }
-        if (this.getMax() && value.length > this.getMax()) {
-            value = value.slice(0, this.getMax());
-        }
-
-        var self = this;
-
-        //files
-        if (null != self.rowsContainer && 0 == value.length) {
-            self.rowsContainer.firstChild.removeChildAll();
-        }
-
-        $each(value, function (i, val) {
-            if (self.rows[i]) {
-                // TODO: don't set the row's value if it hasn't changed
-                self.rows[i].setValue(val, initial);
-            }
-            else if (self.row_cache[i]) {
-                self.rows[i] = self.row_cache[i];
-                self.rows[i].setValue(val, initial);
-                self.rows[i].container.style.display = '';
-                if (self.rows[i].tab) self.rows[i].tab.style.display = '';
-                self.rows[i].register();
-            }
-            else {
-                self.addRow(val, initial);
-            }
-        });
-
-        for (var j = value.length; j < self.rows.length; j++) {
-            self.destroyRow(self.rows[j]);
-            self.rows[j] = null;
-        }
-        self.rows = self.rows.slice(0, value.length);
-
-        // Set the active tab
-        var new_active_tab = null;
-        $each(self.rows, function (i, row) {
-            if (row.tab === self.active_tab) {
-                new_active_tab = row.tab;
-                return false;
-            }
-        });
-        if (!new_active_tab && self.rows.length) new_active_tab = self.rows[0].tab;
-
-        self.active_tab = new_active_tab;
-
-        self.refreshValue(initial);
-        self.refreshTabs(true);
-        self.refreshTabs();
-
-        self.onChange();
-
-        // TODO: sortable
-
-        if (1 < self.rows.length) {
-            self.remove_all_rows_button.style.display = "";
-        }
-        else {
-            self.remove_all_rows_button.style.display = "none";
-        }
     },
     refreshValue: function (force) {
         var self = this;
@@ -1127,17 +1057,37 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         });
 
         if (oldi !== this.value.length || force) {
+            //files
+            if (self.rowsContainer && 0 == self.rows.length) {
+                self.rowsContainer.firstChild.removeChildAll();
+            }
+
+            if (!self.rowsContainer) {
+                if (1 < self.rows.length) {
+                    self.remove_all_rows_button.style.display = "";
+                    self.add_row_button.style.borderTopRightRadius = '0px';
+                    self.add_row_button.style.borderBottomRightRadius = '0px';
+                }
+                else {
+                    self.remove_all_rows_button.style.display = "none";
+                    self.add_row_button.style.borderTopRightRadius = '4px';
+                    self.add_row_button.style.borderBottomRightRadius = '4px';
+                }
+            }
+
             // If we currently have minItems items in the array
             var minItems = this.schema.minItems && this.schema.minItems >= this.rows.length;
 
             $each(this.rows, function (i, editor) {
-                if (1 < self.rows.length) {
-                    editor.delete_button.style.borderTopRightRadius = '0px';
-                    editor.delete_button.style.borderBottomRightRadius = '0px';
-                }
-                else {
-                    editor.delete_button.style.borderTopRightRadius = '4px';
-                    editor.delete_button.style.borderBottomRightRadius = '4px';
+                if (self.rowsContainer) {
+                    if (1 < self.rows.length) {
+                        editor.delete_button.style.borderTopRightRadius = '0px';
+                        editor.delete_button.style.borderBottomRightRadius = '0px';
+                    }
+                    else {
+                        editor.delete_button.style.borderTopRightRadius = '4px';
+                        editor.delete_button.style.borderBottomRightRadius = '4px';
+                    }
                 }
 
                 // Hide the move down button for the last row
@@ -1750,11 +1700,12 @@ function expand(ev) {
         var input = parent.querySelector("#" + inputid);
 
         if ('' === input.innerHTML) {
-            loadMember(member.member);
+            var hasInput = loadMember(member.member);
 
             setEdit(input, edit);
-            setInput(input, member.member.hasReturn);
+            setInput(input, hasInput, member.member.hasReturn);
             setSdk(parent.querySelector("div[id='SDK & Debug']"));
+            setSdkHead(parent.querySelector("ul[id='SDK & Debug']"));
         }
     }
 }
@@ -1870,13 +1821,6 @@ function loadMember(member) {
         properties: {
             t: {},
             d: {},
-            //d: {
-            //    id: member.name + '.d',
-            //    title: "d (Object)",
-            //    type: "object",
-            //    description: "API data",
-            //    properties: {}
-            //},
             f: {
                 title: "files",
                 type: "array",
@@ -1955,8 +1899,6 @@ function loadMember(member) {
     //==================sdk==================//
     var sdkid = member.name + '_sdk';
     inputouteditor.sdkeditor = new JSONEditor(document.getElementById(sdkid), {
-        // Enable fetching schemas via ajax
-        //ajax: true,
         schema: {
             title: "SDK & Debug",
             type: "object",
@@ -1972,11 +1914,12 @@ function loadMember(member) {
         }
     });
 
+    return input.properties.hasOwnProperty("t") || input.properties.hasOwnProperty("d") || input.properties.hasOwnProperty("f");
     //document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
     //========================================//
 }
 
-function setInput(input, hasReturn) {
+function setInput(input, hasInput, hasReturn) {
     if (null == input) { return; }
 
     input.querySelectorAll("p[tag='description']").forEach(c => {
@@ -2054,6 +1997,10 @@ function setInput(input, hasReturn) {
     out.removeAttribute("style");
     var out2 = input.querySelector("#Out > div > div > div[tag='panel']");
     out2.removeAttribute("class"); out2.removeAttribute("style"); out2.style.margin = "8px";
+
+    if (!hasInput) {
+        input.querySelector('#Input > div').style.display = 'none';
+    }
 
     if (!hasReturn) {
         input.querySelector('#Out > div').style.display = 'none';
@@ -2138,11 +2085,14 @@ function ready(editor) {
 
         var header = debug.root.header.parentNode;
 
+        button_holder = debug.root.theme.getHeaderButtonHolder();
+        button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
+
         if (doc[businessName].options.debug) {
-            var buttonDebug = debug.root.getButton('', 'debug', 'Debug');
-            button_holder = debug.root.theme.getHeaderButtonHolder();
-            button_holder.appendChild(buttonDebug);
-            header.appendChild(button_holder);
+            var button_holder2 = debug.root.theme.getHeaderButtonHolder();
+            var buttonDebug = button_holder.querySelector('#' + editor.schema.properties.input.name + '_debug');
+            button_holder2.appendChild(buttonDebug);
+            header.appendChild(button_holder2);
             buttonDebug.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -2207,11 +2157,6 @@ function ready(editor) {
                 }
             }, false);
         }
-
-        button_holder = debug.root.theme.getHeaderButtonHolder();
-        button_holder.innerHTML = compiled_benchmark.render({ name: editor.schema.properties.input.name });
-        //button_holder.classList.add("input-group");
-        //header.appendChild(button_holder);
 
         header.parentNode.removeChild(header.nextSibling);
         var header2 = document.createElement('div');
@@ -2372,6 +2317,35 @@ function ready(editor) {
             //console.log(this.sdkeditor.getValue());
         });
         //console.timeEnd("timer");
+
+        if (input.editors.t) {
+            var icon = document.createElement('i');
+            icon.className = "doc-icon-15 doc-icon-15-token3";
+            icon.style.position = "relative";
+            icon.style.top = "3px";
+            var text = input.editors.t.control.childNodes[0];
+            text.style.paddingLeft = "3px";
+            text.parentNode.insertBefore(icon, text);
+        }
+
+        if (input.editors.d) {
+            var icon = document.createElement('i');
+            icon.className = "doc-icon-15 doc-icon-15-data";
+            icon.style.position = "relative";
+            icon.style.top = "object" == input.editors.d.schema.type ? "1px" : "2px";
+            var text = null;
+            if (input.editors.d.control) {
+                text = input.editors.d.control.childNodes[0];
+            }
+            else if (input.editors.d.title) {
+                text = input.editors.d.title.childNodes[0];
+            }
+
+            if (null != text) {
+                text.style.paddingLeft = "3px";
+                text.parentNode.insertBefore(icon, text);
+            }
+        }
     });
 }
 
@@ -2436,6 +2410,88 @@ function setSdk(sdk) {
     var row = sdk.querySelector("#Debug > div > div > div[tag='panel'] > div > div > div[tag='row']");
     row.removeAttribute("class"); row.removeAttribute("style");
     sdk.querySelector("#Debug > div > div > div[tag='panel'] > div > div > div[tag='row'] > div").classList.add("emacs-mode");
+}
+
+function setSdkHead(sdk) {
+    if (null == sdk) { return; }
+
+    var tab = sdk.querySelector("a[aria-controls='Curl'] > span");
+    tab.parentNode.style.width = "82px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    var icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-curl3";
+    tab.appendChild(icon);
+    var text = document.createElement('i');
+    text.textContent = "Curl";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='JavaScript'] > span");
+    tab.parentNode.style.width = "120px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-javascript";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "JavaScript";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='NET'] > span");
+    tab.parentNode.style.width = "85px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-dotnet";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "NET";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='Java'] > span");
+    tab.parentNode.style.width = "85px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-java";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "Java";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='PHP'] > span");
+    tab.parentNode.style.width = "85px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-php";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "PHP";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
+
+    tab = sdk.querySelector("a[aria-controls='Debug'] > span");
+    tab.parentNode.style.width = "95px";
+    tab.parentNode.style.paddingBottom = "5px";
+    tab.textContent = "";
+    icon = document.createElement('i');
+    icon.className = "doc-icon-20 doc-icon-20-debug2";
+    tab.appendChild(icon);
+    text = document.createElement('i');
+    text.textContent = "Debug";
+    text.style.position = "absolute";
+    text.style.paddingLeft = "5px";
+    tab.appendChild(text);
 }
 
 function getSdk(format) {

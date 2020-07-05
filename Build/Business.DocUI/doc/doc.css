@@ -129,3 +129,275 @@ html, body {
 .well {
     background-color: rgba(0,0,0,.01);
 }
+
+.doc-icon-20 {
+    width: 20px;
+    height: 20px;
+    background-image: url(doc-icon-20.png);
+    background-repeat: no-repeat;
+    display: inline-block;
+}
+
+.doc-icon-20-api {
+    background-position: -1px -1px;
+}
+
+.doc-icon-20-api2 {
+    background-position: -23px -1px;
+}
+
+.doc-icon-20-curl {
+    background-position: -1px -23px;
+}
+
+.doc-icon-20-curl2 {
+    background-position: -23px -23px;
+}
+
+.doc-icon-20-curl3 {
+    background-position: -45px -1px;
+}
+
+.doc-icon-20-data {
+    background-position: -45px -23px;
+}
+
+.doc-icon-20-debug {
+    background-position: -1px -45px;
+}
+
+.doc-icon-20-debug2 {
+    background-position: -23px -45px;
+}
+
+.doc-icon-20-dns {
+    background-position: -45px -45px;
+}
+
+.doc-icon-20-dotnet {
+    background-position: -67px -1px;
+}
+
+.doc-icon-20-download {
+    background-position: -67px -23px;
+}
+
+.doc-icon-20-file {
+    background-position: -67px -45px;
+}
+
+.doc-icon-20-github {
+    background-position: -1px -67px;
+}
+
+.doc-icon-20-http {
+    background-position: -23px -67px;
+}
+
+.doc-icon-20-https {
+    background-position: -45px -67px;
+}
+
+.doc-icon-20-id {
+    background-position: -67px -67px;
+}
+
+.doc-icon-20-in {
+    background-position: -89px -1px;
+}
+
+.doc-icon-20-in2 {
+    background-position: -89px -23px;
+}
+
+.doc-icon-20-java {
+    background-position: -89px -45px;
+}
+
+.doc-icon-20-javascript {
+    background-position: -89px -67px;
+}
+
+.doc-icon-20-out {
+    background-position: -1px -89px;
+}
+
+.doc-icon-20-out2 {
+    background-position: -23px -89px;
+}
+
+.doc-icon-20-php {
+    background-position: -45px -89px;
+}
+
+.doc-icon-20-session {
+    background-position: -67px -89px;
+}
+
+.doc-icon-20-socket {
+    background-position: -89px -89px;
+}
+
+.doc-icon-20-test {
+    background-position: -111px -1px;
+}
+
+.doc-icon-20-test2 {
+    background-position: -111px -23px;
+}
+
+.doc-icon-20-token {
+    background-position: -111px -45px;
+}
+
+.doc-icon-20-token2 {
+    background-position: -111px -67px;
+}
+
+.doc-icon-20-token3 {
+    background-position: -111px -89px;
+}
+
+.doc-icon-20-url {
+    background-position: -1px -111px;
+}
+
+.doc-icon-20-warning {
+    background-position: -23px -111px;
+}
+
+.doc-icon-15 {
+    width: 15px;
+    height: 15px;
+    background-image: url(doc-icon-15.png);
+    background-repeat: no-repeat;
+    display: inline-block;
+}
+
+.doc-icon-15-api {
+    background-position: -1px -1px;
+}
+
+.doc-icon-15-api2 {
+    background-position: -18px -1px;
+}
+
+.doc-icon-15-curl {
+    background-position: -1px -18px;
+}
+
+.doc-icon-15-curl2 {
+    background-position: -18px -18px;
+}
+
+.doc-icon-15-curl3 {
+    background-position: -35px -1px;
+}
+
+.doc-icon-15-data {
+    background-position: -35px -18px;
+}
+
+.doc-icon-15-debug {
+    background-position: -1px -35px;
+}
+
+.doc-icon-15-debug2 {
+    background-position: -18px -35px;
+}
+
+.doc-icon-15-dns {
+    background-position: -35px -35px;
+}
+
+.doc-icon-15-dotnet {
+    background-position: -52px -1px;
+}
+
+.doc-icon-15-download {
+    background-position: -52px -18px;
+}
+
+.doc-icon-15-file {
+    background-position: -52px -35px;
+}
+
+.doc-icon-15-github {
+    background-position: -1px -52px;
+}
+
+.doc-icon-15-http {
+    background-position: -18px -52px;
+}
+
+.doc-icon-15-https {
+    background-position: -35px -52px;
+}
+
+.doc-icon-15-id {
+    background-position: -52px -52px;
+}
+
+.doc-icon-15-in {
+    background-position: -69px -1px;
+}
+
+.doc-icon-15-in2 {
+    background-position: -69px -18px;
+}
+
+.doc-icon-15-java {
+    background-position: -69px -35px;
+}
+
+.doc-icon-15-javascript {
+    background-position: -69px -52px;
+}
+
+.doc-icon-15-out {
+    background-position: -1px -69px;
+}
+
+.doc-icon-15-out2 {
+    background-position: -18px -69px;
+}
+
+.doc-icon-15-php {
+    background-position: -35px -69px;
+}
+
+.doc-icon-15-session {
+    background-position: -52px -69px;
+}
+
+.doc-icon-15-socket {
+    background-position: -69px -69px;
+}
+
+.doc-icon-15-test {
+    background-position: -86px -1px;
+}
+
+.doc-icon-15-test2 {
+    background-position: -86px -18px;
+}
+
+.doc-icon-15-token {
+    background-position: -86px -35px;
+}
+
+.doc-icon-15-token2 {
+    background-position: -86px -52px;
+}
+
+.doc-icon-15-token3 {
+    background-position: -86px -69px;
+}
+
+.doc-icon-15-url {
+    background-position: -1px -86px;
+}
+
+.doc-icon-15-warning {
+    background-position: -18px -86px;
+}

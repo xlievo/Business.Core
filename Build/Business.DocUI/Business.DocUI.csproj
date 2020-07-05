@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.2.7</Version>
+    <Version>1.2.8</Version>
     <Description>https://github.com/xlievo/Business.Core
 https://www.nuget.org/packages/Business.DocUI</Description>
     <Copyright>Copyright ©  2014~2020 Business Project - http://www.tmopen.com</Copyright>
     <PackageProjectUrl>https://github.com/xlievo/Business.Core</PackageProjectUrl>
     <PackageIconUrl></PackageIconUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>1.2.7.0</AssemblyVersion>
+    <AssemblyVersion>1.2.8.0</AssemblyVersion>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
@@ -41,6 +41,8 @@ https://www.nuget.org/packages/Business.DocUI</Description>
     <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf" />
     <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff" />
     <None Remove="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2" />
+    <None Remove="doc\doc-icon-15.png" />
+    <None Remove="doc\doc-icon-20.png" />
     <None Remove="doc\doc.css" />
     <None Remove="doc\doc.js" />
     <None Remove="doc\DOMPurify\purify.min.js" />
@@ -117,6 +119,12 @@ https://www.nuget.org/packages/Business.DocUI</Description>
     <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.ttf" />
     <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff" />
     <EmbeddedResource Include="doc\bootstrap-3.3.7\fonts\glyphicons-halflings-regular.woff2" />
+    <EmbeddedResource Include="doc\doc-icon-15.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="doc\doc-icon-20.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="doc\doc.css">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
