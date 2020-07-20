@@ -24,6 +24,7 @@ namespace Business.Core.Utils
     using System.Reflection;
     using Business.Core.Result;
     using Business.Core.Meta;
+    using System.Runtime.CompilerServices;
 
     /// <summary>
     /// Accessor
@@ -625,7 +626,7 @@ namespace Business.Core.Utils
         };
         */
 
-        static DocArg GetDocArg<TypeDefinition>(DocArgSource<TypeDefinition> argSource, bool hideArray = false, bool hideTitleType = false, bool camelCase = false)
+        static DocArg GetDocArg<TypeDefinition>(DocArgSource<TypeDefinition> argSource, bool hideArray = false, bool hideTitleType = false, System.Func<string, string> camelCase = null)
             where TypeDefinition : ITypeDefinition<TypeDefinition>
         {
             var group = argSource.Args.Group[argSource.Group];
@@ -635,13 +636,15 @@ namespace Business.Core.Utils
                 alias = $" {alias}";
             }
 
-            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase ? JsonNamingPolicyCamelCase(argSource.Args.Name) : argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name };
+            //var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase ? CamelCase(argSource.Args.Name) : argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name };
+            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase?.Invoke(argSource.Args.Name) ?? argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name };
 
-            var topTitleArgsName = camelCase && null != argSource.TopTitleArgsName ? JsonNamingPolicyCamelCase(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
+            //var topTitleArgsName = camelCase && null != argSource.TopTitleArgsName ? CamelCase(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
+            var topTitleArgsName = null != camelCase && null != argSource.TopTitleArgsName ? camelCase.Invoke(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
 
             var titleArgsName = topTitleArgsName ?? (argSource.Args.HasToken ? "t" : docArg.Name);
 
-            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : JsonNamingPolicyCamelCase(docArg.LastType))}){alias}";
+            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))}){alias}";
 
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary;
@@ -742,11 +745,11 @@ namespace Business.Core.Utils
 
             if (argSource.Args.HasDictionary)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object dict){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : JsonNamingPolicyCamelCase(docArg.LastType))} dict){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object dict){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} dict){alias}";
             }
             else if (argSource.Args.HasCollection)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object array){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : JsonNamingPolicyCamelCase(docArg.LastType))} array){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object array){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} array){alias}";
             }
 
             return docArg;
@@ -798,7 +801,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c, false, true, options?.CamelCase ?? false), outDir, options);
+        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c, false, true, options?.CamelCase), outDir, options);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -2125,14 +2128,52 @@ namespace Business.Core.Utils
         /// FileReadByteAsync
         /// </summary>
         /// <param name="path"></param>
+        /// <param name="handle"></param>
         /// <returns></returns>
-        public static async System.Threading.Tasks.ValueTask<byte[]> FileReadByteAsync(string path)
+        public static async System.Threading.Tasks.ValueTask<byte[]> FileReadByteAsync(string path, System.Func<System.IO.Stream, System.Threading.Tasks.ValueTask<byte[]>> handle = null)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
 
             using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
             {
+                if (null != handle)
+                {
+                    return await handle(fileStream);
+                }
+
                 return await fileStream.StreamCopyByteAsync();
+            }
+        }
+
+        /// <summary>
+        /// gzip to Stream
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public static async System.Threading.Tasks.ValueTask<byte[]> GZipByteAsync(this System.IO.Stream value, System.IO.Compression.CompressionMode mode = System.IO.Compression.CompressionMode.Compress)
+        {
+            if (null == value) { throw new System.ArgumentNullException(nameof(value)); }
+
+            switch (mode)
+            {
+                case System.IO.Compression.CompressionMode.Compress:
+                    using (var m = new System.IO.MemoryStream())
+                    {
+                        using (var g = new System.IO.Compression.GZipStream(m, System.IO.Compression.CompressionLevel.Fastest, true))
+                        {
+                            await value.CopyToAsync(g);
+                        }
+                        return m.ToArray();
+                    }
+                case System.IO.Compression.CompressionMode.Decompress:
+                    using (var g = new System.IO.Compression.GZipStream(value, mode, true))
+                    using (var m = new System.IO.MemoryStream())
+                    {
+                        await g.CopyToAsync(m);
+                        return m.ToArray();
+                    }
+                default: return null;
             }
         }
 
@@ -2166,37 +2207,37 @@ namespace Business.Core.Utils
             }
         }
 
-        /// <summary>
-        /// gzip to byte[]
-        /// </summary>
-        /// <param name="value">byte[]</param>
-        /// <returns>byte[]</returns>
-        public static byte[] GZipDecompressByte(this byte[] value)
-        {
-            if (null == value) { throw new System.ArgumentNullException(nameof(value)); }
+        ///// <summary>
+        ///// gzip to byte[]
+        ///// </summary>
+        ///// <param name="value">byte[]</param>
+        ///// <returns>byte[]</returns>
+        //public static byte[] GZipDecompressByte(this byte[] value)
+        //{
+        //    if (null == value) { throw new System.ArgumentNullException(nameof(value)); }
 
-            using (var m = GZipDecompressStream(value)) { return m.ToArray(); }
-        }
-        /// <summary>
-        /// gzip to byte[]
-        /// </summary>
-        /// <param name="value">byte[]</param>
-        /// <returns>MemoryStream</returns>
-        public static System.IO.MemoryStream GZipDecompressStream(this byte[] value)
-        {
-            if (null == value) { throw new System.ArgumentNullException(nameof(value)); }
+        //    using (var m = GZipDecompressStream(value)) { return m.ToArray(); }
+        //}
+        ///// <summary>
+        ///// gzip to byte[]
+        ///// </summary>
+        ///// <param name="value">byte[]</param>
+        ///// <returns>MemoryStream</returns>
+        //public static System.IO.MemoryStream GZipDecompressStream(this byte[] value)
+        //{
+        //    if (null == value) { throw new System.ArgumentNullException(nameof(value)); }
 
-            using (var m = new System.IO.MemoryStream(value))
-            {
-                m.Seek(0, System.IO.SeekOrigin.Begin);
-                using (var g = new System.IO.Compression.GZipStream(m, System.IO.Compression.CompressionMode.Decompress, true))
-                {
-                    var m2 = new System.IO.MemoryStream();
-                    g.CopyTo(m2);
-                    return m2;
-                }
-            }
-        }
+        //    using (var m = new System.IO.MemoryStream(value))
+        //    {
+        //        m.Seek(0, System.IO.SeekOrigin.Begin);
+        //        using (var g = new System.IO.Compression.GZipStream(m, System.IO.Compression.CompressionMode.Decompress, true))
+        //        {
+        //            var m2 = new System.IO.MemoryStream();
+        //            g.CopyTo(m2);
+        //            return m2;
+        //        }
+        //    }
+        //}
 
         #region Crypto
 
@@ -3148,11 +3189,11 @@ namespace Business.Core.Utils
         //public static string FirstCharToLower(this string input) => string.IsNullOrEmpty(input) ? input : $"{input[0].ToString().ToLower()}{input.Substring(1)}";
 
         /// <summary>
-        /// JsonNamingPolicyCamelCase
+        /// CamelCase
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static string JsonNamingPolicyCamelCase(string name)
+        public static string CamelCase(string name)
         {
             if (string.IsNullOrEmpty(name) || !char.IsUpper(name[0]))
             {
@@ -3164,7 +3205,7 @@ namespace Business.Core.Utils
             return new string(chars);
         }
 
-        private static void FixCasing(System.Span<char> chars)
+        static void FixCasing(System.Span<char> chars)
         {
             for (int i = 0; i < chars.Length; i++)
             {
@@ -3176,7 +3217,7 @@ namespace Business.Core.Utils
                 bool hasNext = (i + 1 < chars.Length);
 
                 // Stop when next char is already lowercase.
-                if (i > 0 && hasNext && !char.IsUpper(chars[i + 1]))
+                if (i > 0 && hasNext && !char.IsUpper(chars[i + 1]) && '_' != chars[i + 1])
                 {
                     // If the next char is a space, lowercase current char before exiting.
                     if (chars[i + 1] == ' ')
@@ -3189,6 +3230,24 @@ namespace Business.Core.Utils
 
                 chars[i] = char.ToLowerInvariant(chars[i]);
             }
+        }
+
+        /// <summary>
+        /// JsonNamingPolicyCamelCase
+        /// </summary>
+        public class JsonNamingPolicyCamelCase : System.Text.Json.JsonNamingPolicy
+        {
+            /// <summary>
+            /// JsonNamingPolicyCamelCase
+            /// </summary>
+            public static JsonNamingPolicyCamelCase Instance { get; } = new JsonNamingPolicyCamelCase();
+
+            /// <summary>
+            /// ConvertName
+            /// </summary>
+            /// <param name="name"></param>
+            /// <returns></returns>
+            public override string ConvertName(string name) => CamelCase(name);
         }
 
         /// <summary>
@@ -3515,19 +3574,6 @@ namespace Business.Core.Utils
             /// <param name="options"></param>
             public override void Write(System.Text.Json.Utf8JsonWriter writer, System.DateTime value, System.Text.Json.JsonSerializerOptions options) => writer.WriteStringValue(value.ToLocalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss"));
         }
-
-        ///// <summary>
-        ///// FirstCharToLowerNamingPolicy
-        ///// </summary>
-        //public class FirstCharToLowerNamingPolicy : System.Text.Json.JsonNamingPolicy
-        //{
-        //    /// <summary>
-        //    /// ConvertName
-        //    /// </summary>
-        //    /// <param name="name"></param>
-        //    /// <returns></returns>
-        //    public override string ConvertName(string name) => FirstCharToLower(name);
-        //}
 
         internal static string GetTypeName(this System.Type type, System.Type declaringType = null)
         {

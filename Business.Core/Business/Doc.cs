@@ -450,7 +450,8 @@ namespace Business.Core.Document
         /// <summary>
         /// CamelCase
         /// </summary>
-        public bool CamelCase { get; set; } = true;
+        [System.Text.Json.Serialization.JsonIgnore]
+        public System.Func<string, string> CamelCase { get; set; } = c => Help.JsonNamingPolicyCamelCase.Instance.ConvertName(c);
     }
 
     /// <summary>

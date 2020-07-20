@@ -9,12 +9,32 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Business.Core.Utils;
 //using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
+        //var fileName = "2019-02-12-23-59-03";
+        //var fileName2 = System.IO.Path.GetFileNameWithoutExtension(fileName);
+        //var ext = System.IO.Path.GetExtension(fileName);
+        //var fileName3 = $"{fileName2}_2{ext}";
+
+        //var file2 = await Help.FileReadByteAsync(System.IO.Path.Combine(@"D:\", fileName));
+
+        //var file = await Help.FileReadByteAsync(System.IO.Path.Combine(@"D:\", fileName), async c => await c.GZipByteAsync(System.IO.Compression.CompressionMode.Compress));
+
+        //using (var m = new System.IO.MemoryStream(file))
+        //{
+        //    //var file3 = await m.GZipByteAsync(System.IO.Compression.CompressionMode.Decompress);
+
+        //    await System.IO.File.WriteAllBytesAsync(System.IO.Path.Combine(@"D:\", fileName3), file);
+        //}
+
+
+
         var host = WebHost.CreateDefaultBuilder(args)
             .UseKestrel(options =>
             {
@@ -71,11 +91,12 @@ public class Startup
             });
         });
 
-        services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            //.AddJsonOptions(c =>
-            //{
-            //    c.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-            //});
+        services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+            .AddJsonOptions(o =>
+            {
+                //o.JsonSerializerOptions.IgnoreNullValues = true;
+                o.JsonSerializerOptions.PropertyNamingPolicy = Help.JsonNamingPolicyCamelCase.Instance;
+            });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

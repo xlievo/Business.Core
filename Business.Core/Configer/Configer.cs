@@ -555,8 +555,8 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         public static System.Text.Json.JsonSerializerOptions JsonOptionsDoc = new System.Text.Json.JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
-            DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+            PropertyNamingPolicy = Help.JsonNamingPolicyCamelCase.Instance,
+            DictionaryKeyPolicy = Help.JsonNamingPolicyCamelCase.Instance,
             AllowTrailingCommas = true,
             IgnoreNullValues = true,
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping

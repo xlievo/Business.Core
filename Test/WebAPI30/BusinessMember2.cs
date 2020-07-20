@@ -355,7 +355,7 @@ public partial class BusinessMember2 : BusinessBase
     [Testing("test, important logic, do not delete!!!",
         "{\"arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4},\"dateTime\":\"2019-12-02T08:24\",\"mm\":111.0123456,\"fff\":555,\"bbb\":true}")]
     //"[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]")]
-    public virtual async Task<dynamic> Test001(Session session222, Arg<Test111> Arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
+    public virtual async Task<IResult<Test111>> Test001(Session session222, Arg<Test111> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         DDD = 9;
         //Logger.loggerQueue?.queue.TryAdd(new Logger.LoggerData
@@ -377,7 +377,7 @@ public partial class BusinessMember2 : BusinessBase
 
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = session222;
-        args.arg = Arg.Out;
+        args.arg = arg.Out;
         if (args.arg.B == "ex")
         {
             throw new System.Exception("Method exception!");
@@ -410,7 +410,7 @@ public partial class BusinessMember2 : BusinessBase
 
         var files = httpFile?.Select(c => new { key = c.Name, length = c.Length }).ToList();
 
-        return this.ResultCreate(new { arg = Arg.Out, files });
+        return this.ResultCreate(arg.Out);
         //return this.ResultCreate(new List<Test001Result?> { ss });
         //return ss;
     }
@@ -792,6 +792,11 @@ public class Args
     /// </summary>
     public struct Test111
     {
+        /// <summary>
+        /// Test004 MENU_ITEMMENU_ITEMMENU_ITEM@@@
+        /// </summary>
+        public string MENU_ITEM { get; set; }
+
         /// <summary>
         /// Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
         /// </summary>
