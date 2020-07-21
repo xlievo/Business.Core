@@ -39,38 +39,6 @@ String.prototype.isUpper = function () {
     return reg.test(this)
 }
 
-function JsonCamelCase(name) {
-    if (null == name || 0 >= name.length || !name.charAt(0).isUpper()) {
-        return name;
-    }
-
-    var chars = name.toCharArray();
-    fixCasing(chars);
-    return chars.join("");
-}
-
-function fixCasing(chars) {
-    for (var i = 0; i < chars.length; i++) {
-        if (i == 1 && !chars[i].isUpper()) {
-            break;
-        }
-
-        var hasNext = (i + 1 < chars.length);
-
-        // Stop when next char is already lowercase.
-        if (i > 0 && hasNext && !chars[i + 1].isUpper()) {
-            // If the next char is a space, lowercase current char before exiting.
-            if (chars[i + 1] == ' ') {
-                chars[i] = char.toLowerCase(chars[i]);
-            }
-
-            break;
-        }
-
-        chars[i] = chars[i].toLowerCase();
-    }
-}
-
 var $each = function (obj, callback) {
     if (!obj || typeof obj !== "object") return;
     var i;
@@ -94,6 +62,18 @@ var $each = function (obj, callback) {
         }
     }
 };
+
+function getKeyIgnoreCase(value, key) {
+    let k2;
+    let keys = Object.keys(value);
+    for (var i = 0; i < keys.length; i++) {
+        if (keys[i].toLowerCase() === key.toLowerCase()) {
+            k2 = keys[i];
+            break;
+        }
+    }
+    return k2;
+}
 
 var $trigger = function (el, event) {
     var e = document.createEvent('HTMLEvents');
@@ -675,6 +655,43 @@ JSONEditor.defaults.editors.object = JSONEditor.defaults.editors.object.extend({
         this.editjson_holder.style.display = '';
         buttonData.disabled = false;
         this.editing_json = true;
+    },
+    setValue: function (value, initial) {
+        var self = this;
+        value = value || {};
+
+        if (typeof value !== "object" || Array.isArray(value)) value = {};
+
+        // First, set the values for all of the defined properties
+        $each(this.cached_editors, function (i, editor) {
+            // Value explicitly set
+            var key = getKeyIgnoreCase(value, i);
+            if (null != key) {
+                //if (typeof value[i] !== "undefined") {
+                self.addObjectProperty(i);
+                editor.setValue(value[key], initial);
+            }
+            // Otherwise, remove value unless this is the initial set or it's required
+            else if (!initial && !self.isRequired(editor)) {
+                self.removeObjectProperty(i);
+            }
+            // Otherwise, set the value to the default
+            else {
+                editor.setValue(editor.getDefault(), initial);
+            }
+        });
+
+        $each(value, function (i, val) {
+            var key = getKeyIgnoreCase(self.cached_editors, i);
+            if (!self.cached_editors[key]) {
+                self.addObjectProperty(i);
+                if (self.editors[i]) self.editors[i].setValue(val, initial);
+            }
+        });
+
+        this.refreshValue();
+        this.layoutEditors();
+        this.onChange();
     }
 });
 
@@ -2187,25 +2204,14 @@ function ready(editor) {
                 }
                 var obj = el.currentTarget;
                 if (-1 !== obj.selectedIndex) {
-                    setData(input, input.schema.data.d, 0 === obj.selectedIndex);
+                    setData(input, input.schema.data.d, recovery = true, refresh = 0 === obj.selectedIndex);
                     input.container.querySelectorAll("[tag='row_number']").forEach(c => { c.value = ""; });
                     if (0 === obj.selectedIndex) {
                         setEdit(input.container, !input.schema.edit);
                         return;
                     }
                     var select = obj.options[obj.selectedIndex];
-                    var value = JSON.parse(input.schema.testing[select.value].value, function (key, value) {
-                        if (!doc[businessName].options.camelCase) {
-                            return value
-                        }
-
-                        var key2 = JsonCamelCase(key);
-                        if (key2 === key) {
-                            return value;
-                        }
-                        this[key2] = value;
-                        return undefined;
-                    });
+                    var value = JSON.parse(input.schema.testing[select.value].value);
 
                     setData(input, value);
 
@@ -2588,15 +2594,27 @@ function getData2(input, format = true) {
     return data;
 }
 
-function setData(input, value, refresh = true) {
+function setData(input, value, recovery = false, refresh = true) {
     if (input.editors.d) {
         if (input.schema.argSingle) {
-            return input.editors.d.setValue(value);
+            if (recovery) {
+                input.editors.d.setValue(value);
+            }
+            else {
+                var k = input.editors.d.schema.name;
+                var key = getKeyIgnoreCase(value, k);
+                if (null != key) {
+                    input.editors.d.setValue(value[key]);
+                }
+            }
         }
         else {
+
             for (var i in input.editors.d.editors) {
-                if (i in value) {
-                    input.editors.d.editors[i].setValue(value[i]);
+                var key = getKeyIgnoreCase(value, i);
+                if (null != key) {
+                    //if (i in value) {
+                    input.editors.d.editors[i].setValue(value[key]);
                 }
             }
         }

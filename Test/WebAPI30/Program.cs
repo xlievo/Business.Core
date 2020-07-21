@@ -95,7 +95,7 @@ public class Startup
             .AddJsonOptions(o =>
             {
                 //o.JsonSerializerOptions.IgnoreNullValues = true;
-                o.JsonSerializerOptions.PropertyNamingPolicy = Help.JsonNamingPolicyCamelCase.Instance;
+                //o.JsonSerializerOptions.PropertyNamingPolicy = Help.JsonNamingPolicyCamelCase.Instance;
             });
     }
 
