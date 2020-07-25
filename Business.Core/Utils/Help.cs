@@ -267,12 +267,12 @@ namespace Business.Core.Utils
         }
 
         /// <summary>
-        /// string.IsNullOrWhiteSpace(x.Group) || x.Group == group
+        /// null != x and (string.IsNullOrWhiteSpace(x.Group) || x.Group == group)
         /// </summary>
         /// <param name="x"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        internal static bool GroupEquals(Annotations.GroupAttribute x, string group) => string.IsNullOrWhiteSpace(x.Group) || x.Group == group;
+        internal static bool GroupEquals(this Annotations.GroupAttribute x, string group) => null != x && (string.IsNullOrWhiteSpace(x.Group) || x.Group == group);
 
         #endregion
 
@@ -893,7 +893,7 @@ namespace Business.Core.Utils
 
             var group = command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
             {
-                var key = c2.Value.Key;
+                var key = c2.Value.key;
                 var meta = c2.Value.Meta;
                 var onlyName = meta.CommandGroup.Group[key].OnlyName;
 
@@ -902,6 +902,7 @@ namespace Business.Core.Utils
 
                 var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, groupDefault, $"{onlyName}.Returns");
                 var testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>();
+                var annotations = meta.Attributes.Where(c3 => !(c3 is Annotations.ArgumentAttribute || c3 is Annotations.CommandAttribute || c3 is Annotations.LoggerAttribute || c3 is Annotations.TestingAttribute || c3 is Annotations.Ignore || c3 is Annotations.DocAttribute) && GroupEquals(c3 as Annotations.GroupAttribute, c2.Value.group)).Select(c3 => c3.Meta.Type.Name.EndsWith(AttributeSign) ? c3.Meta.Type.Name.Substring(0, c3.Meta.Type.Name.Length - AttributeSign.Length) : c3.Meta.Type.Name).Distinct();
 
                 var token = meta.Tokens.FirstOrDefault();
 
@@ -921,7 +922,8 @@ namespace Business.Core.Utils
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
                     Testing = 0 < testing.Count ? testing.ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token)) : null,
-                    Token = GetDocArg(key, token, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == token?.Name)?.text)
+                    Token = GetDocArg(key, token, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == token?.Name)?.text),
+                    Annotations = annotations.Any() ? annotations : null
                 } as IMember<DocArg>;
 
                 var topTitleArgsName = "d";
@@ -1400,7 +1402,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Group.Values.Where(c => GroupEquals(logger, c.Group));
+                var groups = item.CommandGroup.Group.Values.Where(c => logger.GroupEquals(c.Group));
 
                 if (!groups.Any()) { return; }
 
@@ -1449,7 +1451,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Group.Values.Where(c => GroupEquals(logger, c.Group));
+                var groups = item.CommandGroup.Group.Values.Where(c => logger.GroupEquals(c.Group));
 
                 if (!groups.Any()) { return; }
 
@@ -1494,7 +1496,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Group.Values.Where(c => GroupEquals(ignore, c.Group));
+                var groups = item.CommandGroup.Group.Values.Where(c => ignore.GroupEquals(c.Group));
 
                 if (!groups.Any()) { return; }
 
@@ -1553,7 +1555,7 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Parallel.ForEach(business.Configer.MetaData.Values, item =>
             {
-                var groups = item.CommandGroup.Group.Values.Where(c => GroupEquals(ignore, c.Group));
+                var groups = item.CommandGroup.Group.Values.Where(c => ignore.GroupEquals(c.Group));
                 //checked group
                 if (!groups.Any()) { return; }
 

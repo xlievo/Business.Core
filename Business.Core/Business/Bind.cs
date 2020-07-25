@@ -488,7 +488,7 @@ namespace Business.Core
 
             var metaLogger = new MetaLogger();
 
-            var loggers2 = loggers.Where(c => Help.GroupEquals(c, group));
+            var loggers2 = loggers.Where(c => c.GroupEquals(group));
 
             foreach (var item in loggers2)
             {
@@ -778,7 +778,7 @@ namespace Business.Core
                         var args = GetArgsObj(meta.DefaultValue, arguments, meta.IArgs, meta.Args);
 
                         return business.Configer.Interceptor.Intercept(business.Configer, meta.Name, args, () => meta.Accessor(business, args), item2.Key).Result;
-                    }, meta, item2.Key)))
+                    }, meta, item2.Key, item2.Value.Group)))
                     {
                         throw new System.Exception($"Command \"{item2.Key}\" member \"{item2.Value.OnlyName}\" name exists");
                     }
@@ -1304,7 +1304,7 @@ namespace Business.Core
                 var onlyName = item.Value.OnlyName;
                 var group = item.Value.Group;
 
-                var ignores = argAttrAll.GetAttrs<Ignore>(c => Help.GroupEquals(c, group), clone: true);
+                var ignores = argAttrAll.GetAttrs<Ignore>(c => c.GroupEquals(group), clone: true);
 
                 var ignoreBusinessArg = ignores.Any(c => c.Mode == IgnoreMode.BusinessArg);
                 // || (item.Group == c.Group || string.IsNullOrWhiteSpace(c.Group))
@@ -1312,12 +1312,12 @@ namespace Business.Core
                 //var argAttrChild = (hasUse || item.Value.IgnoreBusinessArg || ignoreBusinessArg) ?
                 //var argAttrChild = (hasUse || ignoreBusinessArg) ?
                 var argAttrChild = ignoreBusinessArg ?
-                    argAttrs.FindAll(c => Help.GroupEquals(c, group) && c.Meta.Declaring == AttributeBase.MetaData.DeclaringType.Parameter).Select(c => c.Clone()).ToList() :
-                    argAttrs.FindAll(c => Help.GroupEquals(c, group)).Select(c => c.Clone()).ToList();
+                    argAttrs.FindAll(c => c.GroupEquals(group) && c.Meta.Declaring == AttributeBase.MetaData.DeclaringType.Parameter).Select(c => c.Clone()).ToList() :
+                    argAttrs.FindAll(c => c.GroupEquals(group)).Select(c => c.Clone()).ToList();
 
                 //var nickValue = string.IsNullOrWhiteSpace(nick?.Name) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Nick) && Help.GroupEquals(c, item.Value.Group)).GroupBy(c => c.Nick, System.StringComparer.InvariantCultureIgnoreCase).FirstOrDefault()?.Key : nick.Name;
-                var alias = aliass.FirstOrDefault(c => Help.GroupEquals(c, group));
-                var aliasValue = string.IsNullOrWhiteSpace(alias?.Name) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Alias) && Help.GroupEquals(c, group)).FirstOrDefault()?.Alias : alias.Name;
+                var alias = aliass.FirstOrDefault(c => c.GroupEquals(group));
+                var aliasValue = string.IsNullOrWhiteSpace(alias?.Name) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Alias) && c.GroupEquals(group)).FirstOrDefault()?.Alias : alias.Name;
 
                 //var argAttr = new ConcurrentLinkedList<ArgumentAttribute>();//argAttrChild.Count
                 var argAttr = new ReadOnlyCollection<ArgumentAttribute>();
@@ -1828,13 +1828,15 @@ namespace Business.Core
         /// <param name="call"></param>
         /// <param name="meta"></param>
         /// <param name="key"></param>
-        public Command(System.Func<object[], dynamic> call, MetaData meta, string key)
+        /// <param name="group"></param>
+        public Command(System.Func<object[], dynamic> call, MetaData meta, string key, string group)
         {
             this.call = call;
             this.Meta = meta;
-            this.Key = key;
-            this.HasHttpFile = this.Meta.Args.Any(c => c.Group[Key].HttpFile) || this.Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
-            parametersTypeKey = $"{this.Meta.Business}.{Key}";
+            this.key = key;
+            this.group = group;
+            this.HasHttpFile = this.Meta.Args.Any(c => c.Group[key].HttpFile) || this.Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
+            parametersTypeKey = $"{this.Meta.Business}.{key}";
             StatisArgs();
         }
 
@@ -1843,7 +1845,7 @@ namespace Business.Core
         /// </summary>
         internal void StatisArgs()
         {
-            Parameters = this.Meta.Args.Where(c => !c.UseType && !c.HasToken && !c.Group[Key].IgnoreArg).ToList();
+            Parameters = this.Meta.Args.Where(c => !c.UseType && !c.HasToken && !c.Group[key].IgnoreArg).ToList();
 
             HasArgSingle = 1 >= Parameters.Count;
 
@@ -1919,7 +1921,7 @@ namespace Business.Core
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     var arg = Meta.Args[i];
-                    arg.Group.TryGetValue(Key, out ArgGroup group);
+                    arg.Group.TryGetValue(key, out ArgGroup group);
 
                     if (Meta.UseTypePosition.ContainsKey(i))
                     {
@@ -2176,7 +2178,12 @@ namespace Business.Core
         /// <summary>
         /// Key
         /// </summary>
-        public readonly string Key;
+        public readonly string key;
+
+        /// <summary>
+        /// Generate only documents for the specified group
+        /// </summary>
+        public readonly string group;
 
         /// <summary>
         /// Meta

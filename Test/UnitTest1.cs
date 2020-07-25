@@ -1426,15 +1426,15 @@ public class TestBusinessMember
         Assert.AreEqual(Cmd.ContainsKey("G01"), true);
         Assert.AreEqual(Cmd.ContainsKey("G02"), true);
 
-        Assert.AreEqual(Cmd[CommandGroupDefault.Group].Values.Any(c => c.Key == $"{CommandGroupDefault.Group}.Test001"), true);
-        Assert.AreEqual(Cmd[CommandGroupDefault.Group].Values.Any(c => c.Key == $"{CommandGroupDefault.Group}.DEFTest001"), true);
-        Assert.AreEqual(Cmd[CommandGroupDefault.Group].Values.Any(c => c.Key == $"{CommandGroupDefault.Group}.Test002"), true);
+        Assert.AreEqual(Cmd[CommandGroupDefault.Group].Values.Any(c => c.key == $"{CommandGroupDefault.Group}.Test001"), true);
+        Assert.AreEqual(Cmd[CommandGroupDefault.Group].Values.Any(c => c.key == $"{CommandGroupDefault.Group}.DEFTest001"), true);
+        Assert.AreEqual(Cmd[CommandGroupDefault.Group].Values.Any(c => c.key == $"{CommandGroupDefault.Group}.Test002"), true);
 
-        Assert.AreEqual(Cmd["G01"].Values.Any(c => c.Key == "G01.G01Test001"), true);
-        Assert.AreEqual(Cmd["G01"].Values.Any(c => c.Key == "G01.G01Test002"), true);
-        Assert.AreEqual(Cmd["G01"].Values.Any(c => c.Key == "G01.Test002"), true);
+        Assert.AreEqual(Cmd["G01"].Values.Any(c => c.key == "G01.G01Test001"), true);
+        Assert.AreEqual(Cmd["G01"].Values.Any(c => c.key == "G01.G01Test002"), true);
+        Assert.AreEqual(Cmd["G01"].Values.Any(c => c.key == "G01.Test002"), true);
 
-        Assert.AreEqual(Cmd["G02"].Values.Any(c => c.Key == "G02.G02Test002"), true);
+        Assert.AreEqual(Cmd["G02"].Values.Any(c => c.key == "G02.G02Test002"), true);
     }
 
     [TestMethod]

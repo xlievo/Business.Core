@@ -593,6 +593,11 @@ namespace Business.Core.Document
         /// Testing
         /// </summary>
         Dictionary<string, Testing> Testing { get; set; }
+
+        /// <summary>
+        /// Annotations
+        /// </summary>
+        IEnumerable<string> Annotations { get; set; }
     }
 
     /// <summary>
@@ -795,6 +800,11 @@ namespace Business.Core.Document
         /// Testing
         /// </summary>
         public Dictionary<string, Testing> Testing { get; set; }
+
+        /// <summary>
+        /// Annotations
+        /// </summary>
+        public IEnumerable<string> Annotations { get; set; }
     }
 
     /// <summary>
