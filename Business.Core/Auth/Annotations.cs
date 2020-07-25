@@ -587,12 +587,6 @@ namespace Business.Core.Annotations
         public string Name { get; internal set; }
     }
 
-    [System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class WebSocketPushAttribute : GroupAttribute
-    {
-        
-    }
-
     /// <summary>
     /// Document grouping configuration
     /// </summary>

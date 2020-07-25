@@ -415,9 +415,6 @@ public partial class BusinessMember2 : BusinessBase
         //return ss;
     }
 
-    [WebSocketPush]
-    [WebSocketPush]
-    [WebSocketPush(Group = "j")]
     public virtual async Task<MyEnum> TestMyEnum(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         return MyEnum.B;
