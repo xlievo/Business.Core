@@ -88,15 +88,29 @@ namespace Business.Core.Utils.Emit
 
             var type = module.DefineType(className, TypeAttributes.Public);
 
+            type.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+            var constructor = type.DefineConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName, CallingConventions.Standard, propertys.Select(c => c.Value).ToArray()).GetILGenerator();
+
+            constructor.Emit(OpCodes.Ldarg_0);
+            constructor.Emit(OpCodes.Call, typeof(object).GetConstructor(System.Type.EmptyTypes));
+
+            var i = 0;
             foreach (var item in propertys)
             {
-                CreateAutoImplementedProperty(type, item.Key, item.Value);
+                var property = CreateAutoImplementedProperty(type, item.Key, item.Value);
+
+                constructor.Emit(OpCodes.Ldarg_0);
+                constructor.Emit(OpCodes.Ldarg, i++ + 1);
+                constructor.Emit(OpCodes.Call, property.SetMethod);
             }
+            constructor.Emit(OpCodes.Ret);
 
             return type.CreateTypeInfo();
         }
 
-        static void CreateAutoImplementedProperty(TypeBuilder builder, string propertyName, System.Type propertyType)
+
+
+        static PropertyBuilder CreateAutoImplementedProperty(TypeBuilder builder, string propertyName, System.Type propertyType)
         {
             const string PrivateFieldPrefix = "m_";
             const string GetterPrefix = "get_";
@@ -131,6 +145,7 @@ namespace Business.Core.Utils.Emit
             setterILCode.Emit(OpCodes.Ret);
             propertyBuilder.SetGetMethod(getterMethod);
             propertyBuilder.SetSetMethod(setterMethod);
+            return propertyBuilder;
         }
     }
 
