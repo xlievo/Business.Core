@@ -481,7 +481,6 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 o.GroupEnable = true;
                 o.Host = Common.Host.Addresses;
                 o.Navigtion = true;
-                //o.CamelCase = null;
             });
         bootstrap.Build();
 

@@ -38,6 +38,33 @@ namespace Business.Core.Annotations
         /// </summary>
         public class MetaData
         {
+            const string AttributeSign = "Attribute";
+
+            /// <summary>
+            /// MetaData
+            /// </summary>
+            /// <param name="type"></param>
+            public MetaData(System.Type type)
+            {
+                Type = type;
+                Name = type.Name.EndsWith(AttributeSign) ? type.Name.Substring(0, type.Name.Length - AttributeSign.Length) : type.Name;
+            }
+
+            /// <summary>
+            /// Gets the fully qualified type name, including the namespace but not the assembly
+            /// </summary>
+            public System.Type Type { get; }
+
+            /// <summary>
+            /// type name
+            /// </summary>
+            public string Name { get; }
+
+            /// <summary>
+            /// Declare the source of this feature
+            /// </summary>
+            public DeclaringType Declaring { get; internal set; }
+
             /// <summary>
             /// Source types that declare this feature
             /// </summary>
@@ -68,16 +95,6 @@ namespace Business.Core.Annotations
                 /// </summary>
                 Children,
             }
-
-            /// <summary>
-            /// Gets the fully qualified type name, including the namespace but not the assembly
-            /// </summary>
-            public System.Type Type { get; internal set; }
-
-            /// <summary>
-            /// Declare the source of this feature
-            /// </summary>
-            public DeclaringType Declaring { get; internal set; }
 
             /// <summary>
             /// Clone
@@ -239,7 +256,7 @@ namespace Business.Core.Annotations
         /// </summary>
         public AttributeBase()
         {
-            this.Meta = new MetaData { Type = this.TypeId as System.Type };
+            this.Meta = new MetaData(this.TypeId as System.Type);
 
             this.Meta.Type.LoadAccessors(Accessors, methods: true);
         }
@@ -305,6 +322,12 @@ namespace Business.Core.Annotations
 
             return sb.ToString();
         }
+
+        /// <summary>
+        /// return type name
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() => Meta.Name;
     }
 
     #endregion
@@ -726,7 +749,7 @@ namespace Business.Core.Annotations
         /// ToString
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => $"{this.Meta.Type.Name} {this.LogType.ToString()}";
+        public override string ToString() => $"{Meta.Name} {this.LogType.ToString()}";
     }
 
     /// <summary>
@@ -1311,7 +1334,7 @@ namespace Business.Core.Annotations
         /// ToString
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => $"{this.Meta.Type.Name} {Group} {OnlyName}";
+        public override string ToString() => $"{Meta.Name} {Group} {OnlyName}";
     }
 
     #region

@@ -902,7 +902,7 @@ namespace Business.Core.Utils
 
                 var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, groupDefault, $"{onlyName}.Returns");
                 var testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>();
-                var annotations = meta.Attributes.Where(c3 => !(c3 is Annotations.ArgumentAttribute || c3 is Annotations.CommandAttribute || c3 is Annotations.LoggerAttribute || c3 is Annotations.TestingAttribute || c3 is Annotations.Ignore || c3 is Annotations.DocAttribute) && GroupEquals(c3 as Annotations.GroupAttribute, c2.Value.group)).Select(c3 => c3.Meta.Type.Name.EndsWith(AttributeSign) ? c3.Meta.Type.Name.Substring(0, c3.Meta.Type.Name.Length - AttributeSign.Length) : c3.Meta.Type.Name).Distinct();
+                var annotations = meta.Attributes.Where(c3 => !(c3 is Annotations.ArgumentAttribute || c3 is Annotations.CommandAttribute || c3 is Annotations.LoggerAttribute || c3 is Annotations.TestingAttribute || c3 is Annotations.Ignore || c3 is Annotations.DocAttribute) && GroupEquals(c3 as Annotations.GroupAttribute, c2.Value.group)).Select(c3 => c3.Meta.Name).Distinct();
 
                 var token = meta.Tokens.FirstOrDefault();
 
@@ -954,8 +954,6 @@ namespace Business.Core.Utils
 
             return new Doc<DocArg> { Name = business.Configer.Info.BusinessName, Alias = business.Configer.Info.Alias, Group = group, GroupDefault = groupDefault, Description = member3?.summary?.text, Options = options, DocGroup = business.Configer.DocGroup.OrderBy(c => c.Key.position).ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.position) as IEnumerable<DocInfo>) };
         }
-
-        const string AttributeSign = "Attribute";
 
         static IEnumerable<EnumItems> GetEnums(this System.Type type, IDictionary<string, Xml.member> xmlMembers)
         {
@@ -1036,7 +1034,7 @@ namespace Business.Core.Utils
                         continue;
                     }
 
-                    attrs.Add(string.IsNullOrWhiteSpace(attr.Description) ? attr.Meta.Type.Name.EndsWith(AttributeSign) ? attr.Meta.Type.Name.Substring(0, attr.Meta.Type.Name.Length - AttributeSign.Length) : attr.Meta.Type.Name : attr.Description);
+                    attrs.Add(string.IsNullOrWhiteSpace(attr.Description) ? attr.ToString() : attr.Description);
                 }
             }
 
