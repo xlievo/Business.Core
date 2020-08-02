@@ -448,6 +448,11 @@ namespace Business.Core.Document
         public bool BenchmarkJSON { get; set; }
 
         /// <summary>
+        /// Other configurations
+        /// </summary>
+        public Dictionary<string, object> Config { get; set; }
+
+        /// <summary>
         /// CamelCase
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
