@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static Args;
+using static Common;
 
 [Info("API/v2", CommandGroupDefault = null, Alias = "TEST0")]
 [@JsonArg2(Group = "j")]
@@ -250,44 +251,7 @@ public partial class BusinessMember2 : BusinessBase
     //    return date;
     //}
 
-    /// <summary>
-    /// Simple asp.net HTTP request file
-    /// </summary>
-    [Use(typeof(BusinessController))]
-    [HttpFile]
-    public class HttpFile : ReadOnlyCollection<IFormFile>
-    {
-        public HttpFile() { }
 
-        public HttpFile(IEnumerable<IFormFile> values) : base(values) { }
-    }
-
-    /// <summary>
-    /// Simple asp.net HTTP request file attribute
-    /// </summary>
-    public class HttpFileAttribute : Business.Core.Annotations.HttpFileAttribute
-    {
-        readonly IEqualityComparer<IFormFile> comparer = Equality<IFormFile>.CreateComparer(c => c.Name);
-
-        /// <summary>
-        /// Simple asp.net HTTP request file attribute
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="message"></param>
-        public HttpFileAttribute(int state = 830, string message = null) : base(state, message) { comparer = null; }
-
-        public override async ValueTask<IResult> Proces<Type>(dynamic value)
-        {
-            BusinessController context = value;
-
-            if (!context.Request.HasFormContentType || Equals(null, context))
-            {
-                return this.ResultCreate<Type>(default);
-            }
-
-            return this.ResultCreate(new HttpFile(context.Request.Form.Files.Distinct(comparer)));
-        }
-    }
 
     public const string login = "[\"Login\",\"{User:\\\"ddd\\\",Password:\\\"123456\\\"}\",\"D\"]";
 
@@ -309,11 +273,16 @@ public partial class BusinessMember2 : BusinessBase
         public List<string> AAA { get; set; }
     }
 
-    [Testing("test2", "{\"Arg\":{\"BBB\":\"分发给\",\"bbbb\":\"的撒\",\"aaa\":[\"aaa\",\"sss单独\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
-    [Testing("test3", "{\"arg\":{\"bbb\":\"分发给222\",\"bbbb\":\"的撒333\",\"aaa\":[\"aaa\",\"sss单独\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
+    [Testing("test2", "{\"Arg\":{\"BBB\":\"sss\",\"bbbb\":\"dd\",\"aaa\":[\"aaa\",\"ssssaaazzzxxx\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
+    [Testing("test3", "{\"arg\":{\"bbb\":\"fff222\",\"bbbb\":\"的撒333\",\"aaa\":[\"aaa\",\"sssaa\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
     public virtual async Task<dynamic> Test0001(Test1110 ARG, Arg<DateTime?> DateTime)
     {
         return this.ResultCreate(ARG);
+    }
+
+    public virtual async ValueTask Test010X(Test0011 test, int b, WebSocket webSocket = null, [Ignore(IgnoreMode.Arg)]params string[] id)
+    {
+
     }
 
     /// <summary>
@@ -355,7 +324,7 @@ public partial class BusinessMember2 : BusinessBase
     [Testing("test, important logic, do not delete!!!",
         "{\"Arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4},\"dateTime\":\"2019-12-02T08:24\",\"MM\":111.0123456,\"fFf\":555,\"bbB\":true}")]
     //"[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]")]
-    public virtual async Task<IResult<Test111>> Test001(Session session222, Arg<Test111> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
+    public virtual async Task<IResult<Test111>> Test001(Session session222, Arg<Test111> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true, HttpContext context = null)
     {
         DDD = 9;
         //Logger.loggerQueue?.queue.TryAdd(new Logger.LoggerData
@@ -450,9 +419,9 @@ public partial class BusinessMember2 : BusinessBase
     /// <param name="arg"></param>
     /// <param name="mm"></param>
     /// <returns>test return!!!</returns>
-    [HttpFile]
+    [Common.HttpFile]
     [Doc("Test002 222", Badge = "      ")]
-    public virtual async Task<dynamic> Test002(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [HttpFile] Dictionary<string, dynamic> context = null)
+    public virtual async Task<dynamic> Test002(Token token, Test002 arg, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Common.HttpFile] Dictionary<string, dynamic> context = null)
     {
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = token;

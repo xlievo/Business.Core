@@ -51,23 +51,6 @@
             bbb2
             </summary>
         </member>
-        <member name="T:BusinessMember2.HttpFile">
-            <summary>
-            Simple asp.net HTTP request file
-            </summary>
-        </member>
-        <member name="T:BusinessMember2.HttpFileAttribute">
-            <summary>
-            Simple asp.net HTTP request file attribute
-            </summary>
-        </member>
-        <member name="M:BusinessMember2.HttpFileAttribute.#ctor(System.Int32,System.String)">
-            <summary>
-            Simple asp.net HTTP request file attribute
-            </summary>
-            <param name="state"></param>
-            <param name="message"></param>
-        </member>
         <member name="P:BusinessMember2.Test1110.BBB">
             <summary>
             Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
@@ -83,7 +66,7 @@
             AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Session,Business.Core.Arg{Args.Test111},Business.Core.Arg{System.Nullable{System.DateTime}},BusinessMember2.HttpFile,System.Decimal,System.Int32,System.Boolean)">
+        <member name="M:BusinessMember2.Test001(Session,Business.Core.Arg{Args.Test111},Business.Core.Arg{System.Nullable{System.DateTime}},Common.HttpFile,System.Decimal,System.Int32,System.Boolean,Microsoft.AspNetCore.Http.HttpContext)">
             <summary>
             test doc Test001
             and Test001

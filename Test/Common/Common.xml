@@ -155,6 +155,23 @@
             my session
             </summary>
         </member>
+        <member name="T:Common.HttpFile">
+            <summary>
+            Simple asp.net HTTP request file
+            </summary>
+        </member>
+        <member name="T:Common.HttpFileAttribute">
+            <summary>
+            Simple asp.net HTTP request file attribute
+            </summary>
+        </member>
+        <member name="M:Common.HttpFileAttribute.#ctor(System.Int32,System.String)">
+            <summary>
+            Simple asp.net HTTP request file attribute
+            </summary>
+            <param name="state"></param>
+            <param name="message"></param>
+        </member>
         <member name="F:Common.contextParameterNames">
             <summary>
             "context", "socket", "httpFile" 

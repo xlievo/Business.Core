@@ -591,7 +591,8 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// <param name="argTypeDefinition"></param>
         /// <param name="attributes"></param>
         /// <param name="interceptor"></param>
-        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Type argTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor)
+        /// <param name="useTypes"></param>
+        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Type argTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -615,6 +616,14 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             this.Interceptor = interceptor;
             //GetCommandGroupDefault = name => GetCommandGroup(CommandGroupDefault, name);
             //this.LoggerUseThreadPool = loggerUseThreadPool;
+
+            if (null != useTypes)
+            {
+                foreach (var item in useTypes)
+                {
+                    this.UseTypes.dictionary.TryAdd(item.FullName, item);
+                }
+            }
         }
 
         ///// <summary>

@@ -248,7 +248,7 @@ namespace Business.Core
 
         internal readonly bool hasBusiness;
 
-        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, object[] constructorArguments = null, System.Type resultType = null, System.Type argType = null)
+        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, object[] constructorArguments = null, System.Type resultType = null, System.Type argType = null, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
         {
             var typeInfo = type.GetTypeInfo();
 
@@ -336,7 +336,7 @@ namespace Business.Core
 #else
             
 #endif
-            var cfg = new Configer(info, resultType, argType, attributes, interceptor)
+            var cfg = new Configer(info, resultType, argType, attributes, interceptor, useTypes)
             {
                 DocInfo = attributes.GetAttr<DocAttribute>()
             };
@@ -939,7 +939,8 @@ namespace Business.Core
 
                     var hasToken = typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || typeof(Auth.IToken).IsAssignableFrom(use?.ParameterType);//true == use?.Token;
 
-                    var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
+                    //var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
+                    var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : cfg.UseTypes.ContainsKey(current.origType.FullName));
                     //var nick = argAttrAll.GetAttr<NickAttribute>();
 
                     //var hasCollectionAttr = false;
@@ -1306,6 +1307,8 @@ namespace Business.Core
 
                 var ignores = argAttrAll.GetAttrs<Ignore>(c => c.GroupEquals(group), clone: true);
 
+                var ignoreArg = ignores.Any(c => c.Mode == IgnoreMode.Arg);
+
                 var ignoreBusinessArg = ignores.Any(c => c.Mode == IgnoreMode.BusinessArg);
                 // || (item.Group == c.Group || string.IsNullOrWhiteSpace(c.Group))
 
@@ -1335,7 +1338,7 @@ namespace Business.Core
                         continue;
                     }
 
-                    if (null != c.ArgMeta.Skip && c.ArgMeta.Skip(hasUse, arg.HasDefinition, c.Meta.Declaring, argAttrChild))
+                    if (null != c.ArgMeta.Skip && c.ArgMeta.Skip(hasUse, arg.HasDefinition, c.Meta.Declaring, argAttrChild, ignoreArg))
                     {
                         continue;
                     }
@@ -1417,9 +1420,9 @@ namespace Business.Core
 
                     if (!hasLower) { hasLower = true; }
                 }
-
+                
                 //owner ?? Do need only the superior, not the superior path? For doc
-                var group2 = new ArgGroup(ignores.ToReadOnly(), ignores.Any(c => c.Mode == IgnoreMode.Arg), argAttr, aliasValue, $"{onlyName}.{path}", default == owner ? onlyName : $"{onlyName}.{owner}", $"{onlyName}.{root}", httpFile);
+                var group2 = new ArgGroup(ignores.ToReadOnly(), ignoreArg, argAttr, aliasValue, $"{onlyName}.{path}", default == owner ? onlyName : $"{onlyName}.{owner}", $"{onlyName}.{root}", httpFile);
 
                 if (0 < log?.Count)
                 {

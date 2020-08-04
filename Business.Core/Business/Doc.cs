@@ -450,7 +450,7 @@ namespace Business.Core.Document
         /// <summary>
         /// Other configurations
         /// </summary>
-        public Dictionary<string, object> Config { get; set; }
+        public Dictionary<string, object> Config { get; set; } = new Dictionary<string, object>();
 
         /// <summary>
         /// CamelCase

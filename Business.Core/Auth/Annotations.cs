@@ -887,7 +887,7 @@ namespace Business.Core.Annotations
             /// <summary>
             /// Custom filtering, Returns true to indicate that it does not work on this object, default false
             /// </summary>
-            public System.Func<bool, bool, AttributeBase.MetaData.DeclaringType, System.Collections.Generic.IEnumerable<ArgumentAttribute>, bool> Skip { get; set; }
+            public System.Func<bool, bool, AttributeBase.MetaData.DeclaringType, System.Collections.Generic.IEnumerable<ArgumentAttribute>, bool, bool> Skip { get; set; }
 
             /// <summary>
             /// Clone
@@ -2093,7 +2093,7 @@ namespace Business.Core.Annotations
         {
             this.CanNull = false;
             this.Description = "Parameters parsing";
-            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments) => !hasDefinition;
+            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg) => !hasDefinition;
         }
 
         /// <summary>
@@ -2161,7 +2161,7 @@ namespace Business.Core.Annotations
             this.CanNull = false;
             this.Description = "Json parsing";
             //this.ArgMeta.Filter |= FilterModel.NotDefinition;
-            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection) || this.ArgMeta.Arg.Parameters;
+            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection) || this.ArgMeta.Arg.Parameters || ignoreArg;
 
             options = new System.Text.Json.JsonSerializerOptions
             {
@@ -2177,7 +2177,7 @@ namespace Business.Core.Annotations
         /// <summary>
         /// options
         /// </summary>
-        public System.Text.Json.JsonSerializerOptions options;
+        readonly System.Text.Json.JsonSerializerOptions options;
 
         /// <summary>
         /// Check whether the defined value type is the default value, (top-level object commit), Default true

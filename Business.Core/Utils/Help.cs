@@ -3156,7 +3156,7 @@ namespace Business.Core.Utils
             {
                 return System.Text.Json.JsonSerializer.Deserialize(value, type, options ?? JsonOptions);
             }
-            catch(System.Exception ex)
+            catch (System.Exception)
             {
                 return default;
             }

@@ -124,6 +124,8 @@ namespace Business.Core
         /// </summary>
         public System.Action<IBootstrap> BuildAfter { get; set; }
 
+        internal readonly System.Collections.Generic.IList<System.Type> useTypes = new System.Collections.Generic.List<System.Type>();
+
         /// <summary>
         /// UseDocConfig
         /// </summary>
@@ -253,7 +255,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType, Config.useTypes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -377,7 +379,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType, Config.useTypes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -510,7 +512,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
+                            new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType, Config.useTypes);
                             //Create(type, bootstrap.constructorArguments);
                             return true;
                         }
@@ -518,7 +520,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType);
+                        new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType, Config.useTypes);
                         return true;
                     }
                 }
@@ -681,7 +683,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType).instance is Business business)
+                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType, Config.useTypes).instance is Business business)
                             {
                                 BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                             }
@@ -692,7 +694,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType).instance is Business business)
+                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ResultType, Config.ArgType, Config.useTypes).instance is Business business)
                         {
                             BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                         }
@@ -826,6 +828,7 @@ namespace Business.Core.Utils
             return bootstrap;
         }
 
+        /*
         /// <summary>
         /// Inject a parameter type, depending on the parameter type
         /// </summary>
@@ -842,6 +845,25 @@ namespace Business.Core.Utils
         /// <param name="parameterName"></param>
         /// <returns></returns>
         public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.UseType(c, parameterName));
+        */
+
+        /// <summary>
+        /// Inject a parameter type, depending on the parameter type
+        /// </summary>
+        /// <param name="bootstrap"></param>
+        /// <param name="parameterType"></param>
+        /// <returns></returns>
+        public static Bootstrap UseType<Bootstrap>(this Bootstrap bootstrap, params System.Type[] parameterType) where Bootstrap : IBootstrap
+        {
+            if (null != parameterType)
+            {
+                foreach (var item in parameterType)
+                {
+                    bootstrap.Config.useTypes.Add(item);
+                }
+            }
+            return bootstrap;
+        }
 
         /// <summary>
         /// Set the log characteristics of a parameter, depending on the parameter type
