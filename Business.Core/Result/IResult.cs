@@ -114,8 +114,9 @@ namespace Business.Core.Result
         /// <param name="resultTypeDefinition"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null) => (IResult)System.Activator.CreateInstance(resultType, new object[] { resultType.GenericTypeArguments[0], default, state, message, resultTypeDefinition, false, false });
+        public static IResult ResultCreate(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null, string callback = null) => (IResult)System.Activator.CreateInstance(resultType, new object[] { resultType.GenericTypeArguments[0], default, state, message, callback, resultTypeDefinition, false, false });
 
         // Interceptor use
         /// <summary>
@@ -124,8 +125,9 @@ namespace Business.Core.Result
         /// <param name="meta"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(Meta.MetaData meta, int state = 1, string message = null) => ResultCreate(meta.ResultType, meta.ResultTypeDefinition, state, message);
+        public static IResult ResultCreate(Meta.MetaData meta, int state = 1, string message = null, string callback = null) => ResultCreate(meta.ResultType, meta.ResultTypeDefinition, state, message, callback);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -135,13 +137,14 @@ namespace Business.Core.Result
         /// <param name="data"></param>
         /// <param name="message"></param>
         /// <param name="state"></param>
+        /// <param name="callback"></param>
         /// <param name="checkData"></param>
         /// <param name="hasDataResult"></param>
         /// <returns></returns>
-        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, bool checkData = true, bool hasDataResult = true)
+        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, string callback = null, bool checkData = true, bool hasDataResult = true)
         {
             var type = typeof(Data);
-            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, resultTypeDefinition, checkData, hasDataResult });
+            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, callback, resultTypeDefinition, checkData, hasDataResult });
             //0 > state ? System.Math.Abs(state) : state
             return result;
         }
@@ -153,8 +156,9 @@ namespace Business.Core.Result
         /// <param name="resultTypeDefinition"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, int state, string message) => ResultCreate<Data>(resultTypeDefinition, state: state, message: message, checkData: false, hasDataResult: false);
+        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, int state, string message, string callback = null) => ResultCreate<Data>(resultTypeDefinition, state: state, message: message, callback: callback, checkData: false, hasDataResult: false);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -164,6 +168,16 @@ namespace Business.Core.Result
         /// <param name="message"></param>
         /// <returns></returns>
         public static IResult ResultCreate(this System.Type resultTypeDefinition, int state = 1, string message = null) => ResultCreate<string>(resultTypeDefinition, state, message);
+
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public static IResult ResultCreate(this System.Type resultTypeDefinition, int state = 1, string message = null, string callback = null) => ResultCreate<string>(resultTypeDefinition, state, message, callback);
 
         /// <summary>
         /// Used to create IResult.Data secondary encapsulation

@@ -248,11 +248,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
     public Action<Configer> BindBefore { get; set; }
 
-    public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => this.Configer.MetaData.TryGetValue(method ?? string.Empty, out Business.Core.Meta.MetaData meta) ? ResultFactory.ResultCreate(meta, state, message) : ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, state, message);
+    public dynamic ResultCreate(int state = 1, string message = null, string callback = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => this.Configer.MetaData.TryGetValue(method ?? string.Empty, out Business.Core.Meta.MetaData meta) ? ResultFactory.ResultCreate(meta, state, message) : ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, state, message);
 
-    public IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+    public IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1, string callback = null) => ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
-    public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+    public IResult ResultCreate(object data, string message = null, int state = 1, string callback = null) => ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
 
     #endregion
 

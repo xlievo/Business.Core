@@ -57,9 +57,10 @@ namespace Business.Core
         /// </summary>
         /// <param name="state"></param>
         /// <param name="message"></param>
+        /// <param name="callback"></param>
         /// <param name="method"></param>
         /// <returns></returns>
-        dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null);
+        dynamic ResultCreate(int state = 1, string message = null, string callback = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -68,8 +69,9 @@ namespace Business.Core
         /// <param name="data"></param>
         /// <param name="message"></param>
         /// <param name="state"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1);
+        Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1, string callback = null);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -77,8 +79,9 @@ namespace Business.Core
         /// <param name="data"></param>
         /// <param name="message"></param>
         /// <param name="state"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        Result.IResult ResultCreate(object data, string message = null, int state = 1);
+        Result.IResult ResultCreate(object data, string message = null, int state = 1, string callback = null);
 
         /*
         /// <summary>
@@ -140,9 +143,10 @@ namespace Business.Core
         /// </summary>
         /// <param name="state"></param>
         /// <param name="message"></param>
+        /// <param name="callback"></param>
         /// <param name="method"></param>
         /// <returns></returns>
-        public dynamic ResultCreate(int state = 1, string message = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => this.Configer.MetaData.TryGetValue(method ?? string.Empty, out Meta.MetaData meta) ? Result.ResultFactory.ResultCreate(meta, state, message) : Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, state, message);
+        public dynamic ResultCreate(int state = 1, string message = null, string callback = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null) => this.Configer.MetaData.TryGetValue(method ?? string.Empty, out Meta.MetaData meta) ? Result.ResultFactory.ResultCreate(meta, state, message, callback) : Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, state, message, callback);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -151,8 +155,9 @@ namespace Business.Core
         /// <param name="data"></param>
         /// <param name="message"></param>
         /// <param name="state"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        public Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+        public Result.IResult<Data> ResultCreate<Data>(Data data, string message = null, int state = 1, string callback = null) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state, callback);
 
         /// <summary>
         /// Used to create the IResult returns object
@@ -160,8 +165,9 @@ namespace Business.Core
         /// <param name="data"></param>
         /// <param name="message"></param>
         /// <param name="state"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        public Result.IResult ResultCreate(object data, string message = null, int state = 1) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state);
+        public Result.IResult ResultCreate(object data, string message = null, int state = 1, string callback = null) => Result.ResultFactory.ResultCreate(this.Configer.ResultTypeDefinition, data, message, state, callback);
 
         #endregion
     }
