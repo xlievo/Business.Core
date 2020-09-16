@@ -82,21 +82,9 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:ResultObject`1.ToDataString">
+        <member name="M:ResultObject`1.ToBytes(System.Boolean)">
             <summary>
-            Json format Data
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:ResultObject`1.ToBytes">
-            <summary>
-            ProtoBuf format
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:ResultObject`1.ToDataBytes">
-            <summary>
-            ProtoBuf format Data
+            ProtoBuf,MessagePack or Other
             </summary>
             <returns></returns>
         </member>

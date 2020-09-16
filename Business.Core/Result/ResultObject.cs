@@ -129,22 +129,23 @@ namespace Business.Core.Result
         /// <returns></returns>
         public override string ToString() => Utils.Help.JsonSerialize(this);
 
-        /// <summary>
-        /// Json format Data
-        /// </summary>
-        /// <returns></returns>
-        public string ToDataString() => Utils.Help.JsonSerialize(this.Data);
+        ///// <summary>
+        ///// Json format Data
+        ///// </summary>
+        ///// <returns></returns>
+        //public string ToDataString() => Utils.Help.JsonSerialize(this.Data);
 
         /// <summary>
-        /// ProtoBuf format
+        /// ProtoBuf,MessagePack or Other
         /// </summary>
+        /// <param name="dataBytes"></param>
         /// <returns></returns>
-        public byte[] ToBytes() => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
+        public byte[] ToBytes(bool dataBytes = false) => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
 
-        /// <summary>
-        /// ProtoBuf format Data
-        /// </summary>
-        /// <returns></returns>
-        public byte[] ToDataBytes() => throw new System.NotImplementedException();
+        ///// <summary>
+        ///// ProtoBuf format Data
+        ///// </summary>
+        ///// <returns></returns>
+        //public byte[] ToDataBytes() => throw new System.NotImplementedException();
     }
 }

@@ -149,23 +149,23 @@ public struct ResultObject<Type> : IResult<Type>
     /// <returns></returns>
     public override string ToString() => Help.JsonSerialize(this);
 
-    /// <summary>
-    /// Json format Data
-    /// </summary>
-    /// <returns></returns>
-    public string ToDataString() => Help.JsonSerialize(this.Data);
+    ///// <summary>
+    ///// Json format Data
+    ///// </summary>
+    ///// <returns></returns>
+    //public string ToDataString() => Help.JsonSerialize(this.Data);
 
     /// <summary>
-    /// ProtoBuf format
+    /// ProtoBuf,MessagePack or Other
     /// </summary>
     /// <returns></returns>
-    public byte[] ToBytes() => MessagePack.MessagePackSerializer.Serialize(this);
+    public byte[] ToBytes(bool dataBytes = false) => dataBytes ? (HasDataResult ? ResultFactory.ResultCreate(GenericDefinition, HasData ? MessagePack.MessagePackSerializer.Serialize(Data) : null, Message, State, Callback).ToBytes() : ResultFactory.ResultCreate(GenericDefinition, State, Message, Callback).ToBytes()) : MessagePack.MessagePackSerializer.Serialize(this);
 
-    /// <summary>
-    /// ProtoBuf format Data
-    /// </summary>
-    /// <returns></returns>
-    public byte[] ToDataBytes() => MessagePack.MessagePackSerializer.Serialize(this.Data);
+    ///// <summary>
+    ///// ProtoBuf format Data
+    ///// </summary>
+    ///// <returns></returns>
+    //public byte[] ToDataBytes() => MessagePack.MessagePackSerializer.Serialize(this.Data);
 }
 
 public struct ReceiveData
@@ -669,7 +669,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                                 var result2 = result as IResult;
                                 result2.Callback = b;
 
-                                var data = ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
+                                var data = result2.ToBytes(true);
+
+                                //var data = ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
 
                                 await SendAsync(data, id);
                             }

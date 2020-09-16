@@ -52,23 +52,24 @@ namespace Business.Core.Result
         /// </summary>
         string Callback { get; set; }
 
-        /// <summary>
-        /// Json data
-        /// </summary>
-        /// <returns></returns>
-        string ToDataString();
+        ///// <summary>
+        ///// Json data
+        ///// </summary>
+        ///// <returns></returns>
+        //string ToDataString();
 
-        /// <summary>
-        /// Byte data
-        /// </summary>
-        /// <returns></returns>
-        byte[] ToDataBytes();
+        ///// <summary>
+        ///// Byte data
+        ///// </summary>
+        ///// <returns></returns>
+        //byte[] ToDataBytes();
 
         /// <summary>
         /// ProtoBuf,MessagePack or Other
         /// </summary>
+        /// <param name="dataBytes"></param>
         /// <returns></returns>
-        byte[] ToBytes();
+        byte[] ToBytes(bool dataBytes = false);
 
         /// <summary>
         /// Json
@@ -179,60 +180,60 @@ namespace Business.Core.Result
         /// <returns></returns>
         public static IResult ResultCreate(this System.Type resultTypeDefinition, int state = 1, string message = null, string callback = null) => ResultCreate<string>(resultTypeDefinition, state, message, callback);
 
-        /// <summary>
-        /// Used to create IResult.Data secondary encapsulation
-        /// </summary>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static IResult ResultCreateToDataBytes(this IResult result)
-        {
-            if (Equals(null, result))
-            {
-                return null;
-            }
+        ///// <summary>
+        ///// Used to create IResult.Data secondary encapsulation
+        ///// </summary>
+        ///// <param name="result"></param>
+        ///// <returns></returns>
+        //public static IResult ResultCreateToDataBytes(this IResult result)
+        //{
+        //    if (Equals(null, result))
+        //    {
+        //        return null;
+        //    }
 
-            IResult result2;
+        //    IResult result2;
 
-            if (result.HasDataResult)
-            {
-                result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataBytes() : null, result.Message, result.State);
-            }
-            else
-            {
-                result2 = ResultCreate(result.GenericDefinition, result.State, result.Message);
-            }
-            //====================================//
-            result2.Callback = result.Callback;
+        //    if (result.HasDataResult)
+        //    {
+        //        result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataBytes() : null, result.Message, result.State);
+        //    }
+        //    else
+        //    {
+        //        result2 = ResultCreate(result.GenericDefinition, result.State, result.Message);
+        //    }
+        //    //====================================//
+        //    result2.Callback = result.Callback;
 
-            return result2;
-        }
+        //    return result2;
+        //}
 
-        /// <summary>
-        /// Used to create IResult.Data secondary encapsulation
-        /// </summary>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static IResult ResultCreateToDataString(this IResult result)
-        {
-            if (Equals(null, result))
-            {
-                return null;
-            }
+        ///// <summary>
+        ///// Used to create IResult.Data secondary encapsulation
+        ///// </summary>
+        ///// <param name="result"></param>
+        ///// <returns></returns>
+        //public static IResult ResultCreateToDataString(this IResult result)
+        //{
+        //    if (Equals(null, result))
+        //    {
+        //        return null;
+        //    }
 
-            IResult result2;
+        //    IResult result2;
 
-            if (result.HasDataResult)
-            {
-                result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataString() : null, result.Message, result.State);
-            }
-            else
-            {
-                result2 = ResultCreate(result.GenericDefinition, result.State, result.Message);
-            }
-            //====================================//
-            result2.Callback = result.Callback;
+        //    if (result.HasDataResult)
+        //    {
+        //        result2 = ResultCreate(result.GenericDefinition, result.HasData ? result.ToDataString() : null, result.Message, result.State);
+        //    }
+        //    else
+        //    {
+        //        result2 = ResultCreate(result.GenericDefinition, result.State, result.Message);
+        //    }
+        //    //====================================//
+        //    result2.Callback = result.Callback;
 
-            return result2;
-        }
+        //    return result2;
+        //}
     }
 }
