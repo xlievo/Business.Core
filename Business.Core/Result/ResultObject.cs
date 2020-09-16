@@ -140,7 +140,7 @@ namespace Business.Core.Result
         /// </summary>
         /// <param name="dataBytes"></param>
         /// <returns></returns>
-        public byte[] ToBytes(bool dataBytes = false) => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
+        public byte[] ToBytes(bool dataBytes = true) => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
 
         ///// <summary>
         ///// ProtoBuf format Data

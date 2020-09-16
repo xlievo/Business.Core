@@ -69,7 +69,7 @@ namespace Business.Core.Result
         /// </summary>
         /// <param name="dataBytes"></param>
         /// <returns></returns>
-        byte[] ToBytes(bool dataBytes = false);
+        byte[] ToBytes(bool dataBytes = true);
 
         /// <summary>
         /// Json

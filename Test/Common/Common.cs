@@ -159,7 +159,7 @@ public struct ResultObject<Type> : IResult<Type>
     /// ProtoBuf,MessagePack or Other
     /// </summary>
     /// <returns></returns>
-    public byte[] ToBytes(bool dataBytes = false) => dataBytes ? (HasDataResult ? ResultFactory.ResultCreate(GenericDefinition, HasData ? MessagePack.MessagePackSerializer.Serialize(Data) : null, Message, State, Callback).ToBytes() : ResultFactory.ResultCreate(GenericDefinition, State, Message, Callback).ToBytes()) : MessagePack.MessagePackSerializer.Serialize(this);
+    public byte[] ToBytes(bool dataBytes = true) => dataBytes ? (HasDataResult ? ResultFactory.ResultCreate(GenericDefinition, HasData ? MessagePack.MessagePackSerializer.Serialize(Data) : null, Message, State, Callback).ToBytes(false) : ResultFactory.ResultCreate(GenericDefinition, State, Message, Callback).ToBytes(false)) : MessagePack.MessagePackSerializer.Serialize(this);
 
     ///// <summary>
     ///// ProtoBuf format Data
@@ -669,7 +669,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                                 var result2 = result as IResult;
                                 result2.Callback = b;
 
-                                var data = result2.ToBytes(true);
+                                var data = result2.ToBytes();
 
                                 //var data = ResultFactory.ResultCreateToDataBytes(result2).ToBytes();
 
