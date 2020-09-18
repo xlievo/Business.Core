@@ -57,12 +57,13 @@ namespace Business.Core.Result
         /// <param name="data"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public ResultObject(Type data, int state = 1, string message = null)
+        /// <param name="hasData"></param>
+        public ResultObject(Type data, int state, string message, bool hasData)
         {
             this.Data = data;
             this.State = state;
             this.Message = message;
-            this.HasData = !Equals(null, data);
+            this.HasData = hasData;
 
             this.Callback = null;
             this.DataType = null;
@@ -74,13 +75,13 @@ namespace Business.Core.Result
         /// The results of the state is greater than or equal to 1: success, equal to 0: system level exceptions, less than 0: business class error.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("S")]
-        public int State { get; set; }
+        public int State { get; }
 
         /// <summary>
         /// Success can be null
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("M")]
-        public string Message { get; set; }
+        public string Message { get; }
 
         /// <summary>
         /// Specific dynamic data objects
@@ -91,13 +92,13 @@ namespace Business.Core.Result
         /// Specific Byte/Json data objects
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("D")]
-        public Type Data { get; set; }
+        public Type Data { get; }
 
         /// <summary>
         /// Whether there is value
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("H")]
-        public bool HasData { get; set; }
+        public bool HasData { get; }
 
         /// <summary>
         /// Gets the token of this result, used for callback
@@ -109,7 +110,7 @@ namespace Business.Core.Result
         /// Data type
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
-        public System.Type DataType { get; set; }
+        public System.Type DataType { get; }
 
         /// <summary>
         /// GenericDefinition
@@ -129,23 +130,11 @@ namespace Business.Core.Result
         /// <returns></returns>
         public override string ToString() => Utils.Help.JsonSerialize(this);
 
-        ///// <summary>
-        ///// Json format Data
-        ///// </summary>
-        ///// <returns></returns>
-        //public string ToDataString() => Utils.Help.JsonSerialize(this.Data);
-
         /// <summary>
         /// ProtoBuf,MessagePack or Other
         /// </summary>
         /// <param name="dataBytes"></param>
         /// <returns></returns>
         public byte[] ToBytes(bool dataBytes = true) => throw new System.NotImplementedException(); //Utils.Help.ProtoBufSerialize(this);
-
-        ///// <summary>
-        ///// ProtoBuf format Data
-        ///// </summary>
-        ///// <returns></returns>
-        //public byte[] ToDataBytes() => throw new System.NotImplementedException();
     }
 }

@@ -23,13 +23,14 @@
             <param name="checkData"></param>
             <param name="hasDataResult"></param>
         </member>
-        <member name="M:ResultObject`1.#ctor(`0,System.Int32,System.String)">
+        <member name="M:ResultObject`1.#ctor(`0,System.Int32,System.String,System.Boolean)">
             <summary>
             MessagePack.MessagePackSerializer.Serialize(this)
             </summary>
             <param name="data"></param>
             <param name="state"></param>
             <param name="message"></param>
+            <param name="hasData"></param>
         </member>
         <member name="P:ResultObject`1.State">
             <summary>
@@ -59,16 +60,6 @@
         <member name="P:ResultObject`1.Callback">
             <summary>
             Gets the token of this result, used for callback
-            </summary>
-        </member>
-        <member name="P:ResultObject`1.Business">
-            <summary>
-            Business to call
-            </summary>
-        </member>
-        <member name="P:ResultObject`1.Command">
-            <summary>
-            Command to call
             </summary>
         </member>
         <member name="P:ResultObject`1.HasDataResult">
