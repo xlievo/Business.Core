@@ -358,6 +358,8 @@ namespace BenchmarkTest
             {
                 if (value == "sss")
                 {
+                    //this.ResultCreate(this.State, "");
+                    //this.ResultCreate(this.State, "", "");
                     return this.ResultCreate(this.State);
                 }
 

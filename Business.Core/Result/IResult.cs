@@ -117,7 +117,7 @@ namespace Business.Core.Result
         /// <param name="message"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public static IResult ResultCreate(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null, string callback = null) => (IResult)System.Activator.CreateInstance(resultType, new object[] { resultType.GenericTypeArguments[0], default, state, message, callback, resultTypeDefinition, false, false });
+        public static IResult ResultCreate(System.Type resultType, System.Type resultTypeDefinition, int state = 1, string message = null, string callback = null) => (IResult)System.Activator.CreateInstance(resultType, new object[] { resultType.GenericTypeArguments[0], default, state, message, callback, resultTypeDefinition, false, false, false });
 
         // Interceptor use
         /// <summary>
@@ -140,12 +140,13 @@ namespace Business.Core.Result
         /// <param name="state"></param>
         /// <param name="callback"></param>
         /// <param name="checkData"></param>
+        /// <param name="hasData"></param>
         /// <param name="hasDataResult"></param>
         /// <returns></returns>
-        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, string callback = null, bool checkData = true, bool hasDataResult = true)
+        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, string callback = null, bool checkData = true, bool hasData = false, bool hasDataResult = true)
         {
             var type = typeof(Data);
-            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, callback, resultTypeDefinition, checkData, hasDataResult });
+            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, callback, resultTypeDefinition, checkData, hasData, hasDataResult });
             //0 > state ? System.Math.Abs(state) : state
             return result;
         }

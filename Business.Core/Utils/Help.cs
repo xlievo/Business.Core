@@ -318,9 +318,9 @@ namespace Business.Core.Utils
                 ToString = toString;
             }
 
-            public ObjectMethod GetHashCode { get; }
-            public ObjectMethod Equals { get; }
-            public ObjectMethod ToString { get; }
+            public new ObjectMethod GetHashCode { get; }
+            public new ObjectMethod Equals { get; }
+            public new ObjectMethod ToString { get; }
 
             public bool CompareTo(MethodInfo method)
             {

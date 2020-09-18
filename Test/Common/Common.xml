@@ -10,7 +10,7 @@
             </summary>
             <typeparam name="Type"></typeparam>
         </member>
-        <member name="M:ResultObject`1.#ctor(System.Type,`0,System.Int32,System.String,System.String,System.Type,System.Boolean,System.Boolean)">
+        <member name="M:ResultObject`1.#ctor(System.Type,`0,System.Int32,System.String,System.String,System.Type,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Activator.CreateInstance
             </summary>
@@ -21,6 +21,7 @@
             <param name="callback"></param>
             <param name="genericDefinition"></param>
             <param name="checkData"></param>
+            <param name="hasData"></param>
             <param name="hasDataResult"></param>
         </member>
         <member name="M:ResultObject`1.#ctor(`0,System.Int32,System.String,System.Boolean)">

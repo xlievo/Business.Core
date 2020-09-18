@@ -37,14 +37,15 @@ namespace Business.Core.Result
         /// <param name="callback"></param>
         /// <param name="genericDefinition"></param>
         /// <param name="checkData"></param>
+        /// <param name="hasData"></param>
         /// <param name="hasDataResult"></param>
-        public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, string callback = null, System.Type genericDefinition = null, bool checkData = true, bool hasDataResult = false)
+        public ResultObject(System.Type dataType, Type data, int state = 1, string message = null, string callback = null, System.Type genericDefinition = null, bool checkData = true, bool hasData = false, bool hasDataResult = false)
         {
             this.DataType = dataType;
             this.Data = data;
             this.State = state;
             this.Message = message;
-            this.HasData = checkData && !Equals(null, data);
+            this.HasData = checkData ? !Equals(null, data) : hasData;
 
             this.Callback = callback;
             this.GenericDefinition = genericDefinition;

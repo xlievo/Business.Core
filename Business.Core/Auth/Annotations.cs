@@ -1150,7 +1150,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state) => ResultFactory.ResultCreate(ArgMeta.resultType, ArgMeta.resultTypeDefinition, state);
+        public IResult ResultCreate(int state = 1) => ResultFactory.ResultCreate(ArgMeta.resultType, ArgMeta.resultTypeDefinition, state);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -1158,7 +1158,16 @@ namespace Business.Core.Annotations
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public IResult ResultCreate(int state = 1, string message = null) => ResultFactory.ResultCreate(ArgMeta.resultType, ArgMeta.resultTypeDefinition, state, message);
+        public IResult ResultCreate(int state, string message) => ResultFactory.ResultCreate(ArgMeta.resultType, ArgMeta.resultTypeDefinition, state, message);
+
+        /// <summary>
+        /// Used to create the Proces() method returns object
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public IResult ResultCreate(int state, string message, string callback = null) => ResultFactory.ResultCreate(ArgMeta.resultType, ArgMeta.resultTypeDefinition, state, message, callback);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -1167,8 +1176,9 @@ namespace Business.Core.Annotations
         /// <param name="data"></param>
         /// <param name="message"></param>
         /// <param name="state"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgMeta.resultTypeDefinition, data, message, state);
+        public IResult ResultCreate<Data>(Data data, string message = null, int state = 1, string callback = null) => ResultFactory.ResultCreate(ArgMeta.resultTypeDefinition, data, message, state, callback);
 
         /// <summary>
         /// Used to create the Proces() method returns object
@@ -1176,8 +1186,9 @@ namespace Business.Core.Annotations
         /// <param name="data"></param>
         /// <param name="message"></param>
         /// <param name="state"></param>
+        /// <param name="callback"></param>
         /// <returns></returns>
-        public IResult ResultCreate(object data, string message = null, int state = 1) => ResultFactory.ResultCreate(ArgMeta.resultTypeDefinition, data, message, state);
+        public IResult ResultCreate(object data, string message = null, int state = 1, string callback = null) => ResultFactory.ResultCreate(ArgMeta.resultTypeDefinition, data, message, state, callback);
 
         #endregion
 
