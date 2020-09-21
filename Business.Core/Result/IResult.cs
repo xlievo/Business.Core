@@ -143,10 +143,24 @@ namespace Business.Core.Result
         /// <param name="hasData"></param>
         /// <param name="hasDataResult"></param>
         /// <returns></returns>
-        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, string callback = null, bool checkData = true, bool hasData = false, bool hasDataResult = true)
+        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, string callback = null, bool checkData = true, bool hasData = false, bool hasDataResult = true) => (IResult<Data>)ResultCreate(resultTypeDefinition, typeof(Data), data, message, state, callback, checkData, hasData, hasDataResult);
+
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="dataType"></param>
+        /// <param name="data"></param>
+        /// <param name="message"></param>
+        /// <param name="state"></param>
+        /// <param name="callback"></param>
+        /// <param name="checkData"></param>
+        /// <param name="hasData"></param>
+        /// <param name="hasDataResult"></param>
+        /// <returns></returns>
+        public static IResult ResultCreate(this System.Type resultTypeDefinition, System.Type dataType, object data = null, string message = null, int state = 1, string callback = null, bool checkData = true, bool hasData = false, bool hasDataResult = true)
         {
-            var type = typeof(Data);
-            var result = (IResult<Data>)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(type), new object[] { type, data, state, message, callback, resultTypeDefinition, checkData, hasData, hasDataResult });
+            var result = (IResult)System.Activator.CreateInstance(resultTypeDefinition.MakeGenericType(dataType), new object[] { dataType, data, state, message, callback, resultTypeDefinition, checkData, hasData, hasDataResult });
             //0 > state ? System.Math.Abs(state) : state
             return result;
         }
