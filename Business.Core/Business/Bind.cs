@@ -248,13 +248,13 @@ namespace Business.Core
 
         internal readonly bool hasBusiness;
 
-        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, object[] constructorArguments = null, System.Type resultType = null, System.Type argType = null, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
+        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type resultType = null, System.Type argType = null, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
         {
             var typeInfo = type.GetTypeInfo();
 
             var (methods, ignores) = GetMethods(typeInfo);
 
-            instance = interceptor.Create(type, constructorArguments, ignores);
+            instance = interceptor.Create(type, constructorArguments, constructorArgumentsFunc, ignores);
 
             //var proxy = new Castle.DynamicProxy.ProxyGenerator();
 
@@ -1420,7 +1420,7 @@ namespace Business.Core
 
                     if (!hasLower) { hasLower = true; }
                 }
-                
+
                 //owner ?? Do need only the superior, not the superior path? For doc
                 var group2 = new ArgGroup(ignores.ToReadOnly(), ignoreArg, argAttr, aliasValue, $"{onlyName}.{path}", default == owner ? onlyName : $"{onlyName}.{owner}", $"{onlyName}.{root}", httpFile);
 
@@ -2017,7 +2017,7 @@ namespace Business.Core
         {
             return GetArgsUse(useObj, (args2, i, arg, group) =>
             {
-                if (null != parameters && 0 < parameters.Count)
+                if (0 < parameters?.Count)
                 {
                     if (arg.Parameters)
                     {

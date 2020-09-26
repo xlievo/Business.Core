@@ -2092,7 +2092,7 @@ namespace Business.Core.Annotations
     /// <summary>
     /// ParametersAttribute
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
     public class ParametersAttribute : ArgumentAttribute
     {
         /// <summary>

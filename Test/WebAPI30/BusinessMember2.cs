@@ -3,7 +3,9 @@ using Business.Core.Annotations;
 using Business.Core.Auth;
 using Business.Core.Result;
 using Business.Core.Utils;
+using LinqToDB.Tools;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -21,8 +23,15 @@ using static Common;
 [@JsonArg2(Group = "j")]
 public class BusinessMember3 : BusinessBase
 {
-    public BusinessMember3() : base()
+    System.Net.Http.IHttpClientFactory httpClientFactory;
+
+    public BusinessMember3(System.Net.Http.IHttpClientFactory httpClientFactory, IMemoryCache memoryCache, string dd = "ttt", int cc = 999) : base()
     {
+        memoryCache.Set("a", 333);
+        var ddd = memoryCache.Get<int>("a");
+
+        this.httpClientFactory = httpClientFactory;
+
         this.BindBefore = c =>
         {
             c.CallBeforeMethod = async method =>
@@ -280,7 +289,7 @@ public partial class BusinessMember2 : BusinessBase
         return this.ResultCreate(ARG);
     }
 
-    public virtual async ValueTask Test010X(Test0011 test, int b, WebSocket webSocket = null, [Ignore(IgnoreMode.Arg)]params string[] id)
+    public virtual async ValueTask Test010X(Test0011 test, int b, WebSocket webSocket = null, [Ignore(IgnoreMode.Arg)] params string[] id)
     {
 
     }

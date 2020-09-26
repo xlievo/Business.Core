@@ -133,21 +133,6 @@ namespace Business.Core.Result
         /// <summary>
         /// Used to create the IResult returns object
         /// </summary>
-        /// <typeparam name="Data"></typeparam>
-        /// <param name="resultTypeDefinition"></param>
-        /// <param name="data"></param>
-        /// <param name="message"></param>
-        /// <param name="state"></param>
-        /// <param name="callback"></param>
-        /// <param name="checkData"></param>
-        /// <param name="hasData"></param>
-        /// <param name="hasDataResult"></param>
-        /// <returns></returns>
-        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, string callback = null, bool checkData = true, bool hasData = false, bool hasDataResult = true) => (IResult<Data>)ResultCreate(resultTypeDefinition, typeof(Data), data, message, state, callback, checkData, hasData, hasDataResult);
-
-        /// <summary>
-        /// Used to create the IResult returns object
-        /// </summary>
         /// <param name="resultTypeDefinition"></param>
         /// <param name="dataType"></param>
         /// <param name="data"></param>
@@ -164,6 +149,21 @@ namespace Business.Core.Result
             //0 > state ? System.Math.Abs(state) : state
             return result;
         }
+
+        /// <summary>
+        /// Used to create the IResult returns object
+        /// </summary>
+        /// <typeparam name="Data"></typeparam>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="data"></param>
+        /// <param name="message"></param>
+        /// <param name="state"></param>
+        /// <param name="callback"></param>
+        /// <param name="checkData"></param>
+        /// <param name="hasData"></param>
+        /// <param name="hasDataResult"></param>
+        /// <returns></returns>
+        public static IResult<Data> ResultCreate<Data>(this System.Type resultTypeDefinition, Data data = default, string message = null, int state = 1, string callback = null, bool checkData = true, bool hasData = false, bool hasDataResult = true) => (IResult<Data>)ResultCreate(resultTypeDefinition, typeof(Data), data, message, state, callback, checkData, hasData, hasDataResult);
 
         /// <summary>
         /// Used to create the IResult returns object

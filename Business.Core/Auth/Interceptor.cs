@@ -20,6 +20,7 @@ namespace Business.Core.Auth
     using Core;
     using Utils;
     using System.Linq;
+    using Castle.Core.Internal;
 
     /// <summary>
     /// IInterceptor
@@ -34,11 +35,12 @@ namespace Business.Core.Auth
         /// <summary>
         /// Create
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="businessType"></param>
         /// <param name="constructorArguments"></param>
+        /// <param name="constructorArgumentsFunc"></param>
         /// <param name="ignoreMethods"></param>
         /// <returns></returns>
-        object Create(System.Type type, object[] constructorArguments = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null);
+        object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null);
 
         /// <summary>
         /// Intercept
@@ -97,19 +99,49 @@ namespace Business.Core.Auth
         /// </summary>
         /// <param name="businessType"></param>
         /// <param name="constructorArguments"></param>
+        /// <param name="constructorArgumentsFunc"></param>
         /// <param name="ignoreMethods"></param>
         /// <returns></returns>
-        public object Create(System.Type businessType, object[] constructorArguments = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
+        public object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
         {
             var proxy = new Castle.DynamicProxy.ProxyGenerator();
 
             try
             {
-                var types = constructorArguments?.Select(c => c.GetType())?.ToArray();
+                var parameters = businessType.GetConstructors()?.FirstOrDefault()?.GetParameters();
 
-                var constructor = null == types ? null : businessType.GetConstructor(types);
+                var args = new object[parameters?.Length ?? 0];
 
-                var instance = proxy.CreateClassProxy(businessType, new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(ignoreMethods)), null == constructor ? businessType.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() : constructorArguments, this);
+                if (0 < parameters?.Length)
+                {
+                    var arguments = constructorArguments?.ToDictionary(c => c.GetType(), c => c);
+
+                    var i = 0;
+                    foreach (var parameter in parameters)
+                    {
+                        var arg = parameter.HasDefaultValue ? parameter.DefaultValue : null;
+
+                        object value = null;
+
+                        if (0 < arguments?.Count && (arguments?.TryGetValue(parameter.ParameterType, out value) ?? false))
+                        {
+                            arg = value;
+                        }
+                        else
+                        {
+                            value = constructorArgumentsFunc?.Invoke(parameter.ParameterType);
+
+                            if (!Equals(null, value))
+                            {
+                                arg = value;
+                            }
+                        }
+
+                        args[i++] = arg;
+                    }
+                }
+
+                var instance = proxy.CreateClassProxy(businessType, new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(ignoreMethods)), args, this);
 
                 return instance;
             }
@@ -118,6 +150,33 @@ namespace Business.Core.Auth
                 throw ex.ExceptionWrite(true, true);
             }
         }
+
+        ///// <summary>
+        ///// Create
+        ///// </summary>
+        ///// <param name="businessType"></param>
+        ///// <param name="constructorArguments"></param>
+        ///// <param name="ignoreMethods"></param>
+        ///// <returns></returns>
+        //public object Create(System.Type businessType, object[] constructorArguments = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
+        //{
+        //    var proxy = new Castle.DynamicProxy.ProxyGenerator();
+
+        //    try
+        //    {
+        //        var types = constructorArguments?.Select(c => c.GetType())?.ToArray();
+
+        //        var constructor = null == types ? null : businessType.GetConstructor(types);
+
+        //        var instance = proxy.CreateClassProxy(businessType, new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(ignoreMethods)), null == constructor ? businessType.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : default).ToArray() : constructorArguments, this);
+
+        //        return instance;
+        //    }
+        //    catch (System.Exception ex)
+        //    {
+        //        throw ex.ExceptionWrite(true, true);
+        //    }
+        //}
 
         /// <summary>
         /// Intercept

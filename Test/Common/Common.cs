@@ -491,7 +491,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         //Bootstrap.Create().Config.UseDoc.OutDir = "";
 
-        bootstrap = Bootstrap.CreateAll<BusinessBase>()
+        bootstrap = Bootstrap.CreateAll<BusinessBase>(null, type => app.ApplicationServices.GetService(type))
             //.UseType(contextParameterNames)
             .UseType(typeof(HttpContext), typeof(HttpFile), typeof(WebSocket))
             .IgnoreSet(new Ignore(IgnoreMode.Arg), typeof(HttpContext), typeof(HttpFile), typeof(WebSocket))

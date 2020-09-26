@@ -97,6 +97,8 @@ public class Startup
                 //o.JsonSerializerOptions.IgnoreNullValues = true;
                 //o.JsonSerializerOptions.PropertyNamingPolicy = Help.JsonNamingPolicyCamelCase.Instance;
             });
+
+        services.AddHttpClient();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
