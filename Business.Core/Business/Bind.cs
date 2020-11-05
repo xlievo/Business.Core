@@ -931,7 +931,7 @@ namespace Business.Core
                     //==================================//
                     var current = Help.GetCurrentType(parameterType.GetTypeInfo());
 
-                    var argAttrAll = AttributeBase.GetAttributes(argInfo, current.outType, current.hasCollection ? current.origType : null);
+                    var argAttrAll = AttributeBase.GetAttributes(argInfo, current.outType, current.hasCollection ? current.type : null);
 
                     //var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() : argAttrAll.GetAttr<UseAttribute>();
 
@@ -940,7 +940,7 @@ namespace Business.Core
                     var hasToken = typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || typeof(Auth.IToken).IsAssignableFrom(use?.ParameterType);//true == use?.Token;
 
                     //var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
-                    var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : cfg.UseTypes.ContainsKey(current.origType.FullName));
+                    var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : cfg.UseTypes.ContainsKey(current.type.FullName));
                     //var nick = argAttrAll.GetAttr<NickAttribute>();
 
                     //var hasCollectionAttr = false;
@@ -996,10 +996,11 @@ namespace Business.Core
                     parameterType,
                     current.outType,
                     current.origType,
+                    current.type,
                     argInfo.Position,
                     argInfo.HasDefaultValue ? argInfo.DefaultValue : default,
                     argInfo.HasDefaultValue,
-                    current.origType.IsValueType ? System.Activator.CreateInstance(current.origType) : null,
+                    current.type.IsValueType ? System.Activator.CreateInstance(current.type) : null,
                     current.hasDictionary,
                     current.hasCollection,
                     //false,//hasCollectionAttr || hasCollectionAttr2,
@@ -1234,10 +1235,11 @@ namespace Business.Core
                     memberType,
                     current.outType,
                     current.origType,
+                    current.type,
                     position++,
                     default,
                     default,
-                    default,
+                    current.type.IsValueType ? System.Activator.CreateInstance(current.type) : null,
                     current.hasDictionary,
                     current.hasCollection,
                     //false,//hasCollectionAttr || hasCollectionAttr2,
@@ -1374,7 +1376,8 @@ namespace Business.Core
                     attr.ArgMeta.MethodOnlyName = onlyName;
                     attr.ArgMeta.MemberPath = path;
                     attr.ArgMeta.Member = member;
-                    attr.ArgMeta.MemberType = arg.CurrentOrigType;
+                    attr.ArgMeta.MemberType = arg.CurrentType;
+                    //attr.ArgMeta.MemberOrigType = arg.CurrentOrigType;
 
                     //attr.ArgumentMeta.Method = item.Value.OnlyName;
                     //attr.ArgumentMeta.Member = path2;
@@ -1854,7 +1857,7 @@ namespace Business.Core
 
             if (1 < Parameters.Count)
             {
-                parametersType = Parameters.Select(c => new System.Collections.Generic.KeyValuePair<string, System.Type>(c.Name, c.CurrentOrigType));
+                parametersType = Parameters.Select(c => new System.Collections.Generic.KeyValuePair<string, System.Type>(c.Name, c.CurrentType));
 
                 ParametersType = Utils.Emit.Emit.BuildPropertys(dynamicArgsModule, parametersTypeKey, parametersType);
 
@@ -1869,7 +1872,7 @@ namespace Business.Core
             }
             else if (0 < Parameters.Count)
             {
-                ParametersType = Parameters[0].CurrentOrigType;
+                ParametersType = Parameters[0].CurrentType;
             }
         }
 
@@ -2358,9 +2361,14 @@ namespace Business.Core.Meta
         System.Type LastType { get; }
 
         /// <summary>
-        /// CurrentOrigType
+        /// Remove IArg type
         /// </summary>
         System.Type CurrentOrigType { get; }
+
+        /// <summary>
+        /// Remove IArg Null type
+        /// </summary>
+        System.Type CurrentType { get; }
 
         /// <summary>
         /// HasDefinition
@@ -2451,6 +2459,7 @@ namespace Business.Core.Meta
         /// <param name="origType"></param>
         /// <param name="lastType"></param>
         /// <param name="currentOrigType"></param>
+        /// <param name="currentType"></param>
         /// <param name="position"></param>
         /// <param name="defaultValue"></param>
         /// <param name="hasDefaultValue"></param>
@@ -2475,13 +2484,14 @@ namespace Business.Core.Meta
         /// <param name="fullName"></param>
         /// <param name="memberDefinition"></param>
         /// <param name="hasCast"></param>
-        public Args(string name, System.Type type, System.Type origType, System.Type lastType, System.Type currentOrigType, int position, object defaultValue, bool hasDefaultValue, object defaultTypeValue, bool hasDictionary, bool hasCollection, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
+        public Args(string name, System.Type type, System.Type origType, System.Type lastType, System.Type currentOrigType, System.Type currentType, int position, object defaultValue, bool hasDefaultValue, object defaultTypeValue, bool hasDictionary, bool hasCollection, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
         {
             Name = name;
             Type = type;
             OrigType = origType;
             LastType = lastType;
             CurrentOrigType = currentOrigType;
+            CurrentType = currentType;
             Position = position;
             HasDictionary = hasDictionary;
             HasCollection = hasCollection;
@@ -2545,6 +2555,11 @@ namespace Business.Core.Meta
         /// Remove IArg type
         /// </summary>
         public System.Type CurrentOrigType { get; private set; }
+
+        /// <summary>
+        /// Remove IArg Null type
+        /// </summary>
+        public System.Type CurrentType { get; private set; }
 
         /// <summary>
         /// Position

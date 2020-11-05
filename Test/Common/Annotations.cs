@@ -58,6 +58,11 @@ namespace Business.Core.Annotations
             this.Description = "{Alias} must be filled in";
             this.Message = "{Alias} must be filled in";
         }
+
+        public override ValueTask<IResult> Proces<Type>(dynamic value)
+        {
+            return base.Proces(value as object);
+        }
     }
 
     public class Size : SizeAttribute
@@ -65,7 +70,9 @@ namespace Business.Core.Annotations
         public Size(int state = -801, string message = null) : base(state, message)
         {
             this.Description = "{Alias} Range [{Min} {Max}]";
-            this.Message = "{Alias} Range [{Min} {Max}]";
+            //this.Message = "{Alias} Range [{Min} {Max}]";
+            this.MaxMsg = "{Alias} Max range [{Max}]";
+            this.MinMsg = "{Alias} Min range [{Min}]";
         }
     }
 

@@ -230,7 +230,7 @@ namespace Business.Core.Utils
             return result;
         }
 
-        internal struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type origType; public bool nullable; public bool hasDefinition; }
+        internal struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type origType; public System.Type type; public bool nullable; public bool hasDefinition; }
 
         internal static CurrentType GetCurrentType(System.Type type)
         {
@@ -238,12 +238,14 @@ namespace Business.Core.Utils
 
             var current = new CurrentType { hasIArg = hasIArg, outType = hasIArg ? iArgOutType[0] : type, inType = (hasIArg && 2 == iArgOutType.Length) ? iArgOutType[1] : type };
             var nullType = System.Nullable.GetUnderlyingType(current.outType);
+            current.origType = current.outType;
+
             if (null != nullType)
             {
                 current.outType = nullType;
                 current.nullable = true;
             }
-            current.origType = current.outType;
+            current.type = current.outType;
 
             current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out System.Type[] coll);// current.outType.IsCollection();
             current.hasDictionary = typeof(IDictionary<,>).IsAssignableFrom(current.outType, out System.Type[] dict) || typeof(System.Collections.IDictionary).IsAssignableFrom(current.outType, out dict);
@@ -711,7 +713,7 @@ namespace Business.Core.Utils
 
                 if (argSource.Args.HasDictionary)
                 {
-                    var type = GetDocArgType(argSource.Args.CurrentOrigType.GenericTypeArguments[0].GetTypeCode());
+                    var type = GetDocArgType(argSource.Args.CurrentType.GenericTypeArguments[0].GetTypeCode());
                     docArg.Items.KeyType = type.Item1;
                 }
 
@@ -1116,6 +1118,7 @@ namespace Business.Core.Utils
                 Type = type,
                 LastType = current.outType,
                 CurrentOrigType = current.origType,
+                CurrentType = current.type,
                 HasDefinition = current.hasDefinition,
                 DefaultValue = type.IsValueType && typeof(void) != type ? System.Activator.CreateInstance(type) : null,
 
@@ -1221,6 +1224,7 @@ namespace Business.Core.Utils
                     Type = memberType,
                     LastType = current.outType,
                     CurrentOrigType = current.origType,
+                    CurrentType = current.type,
                     HasDefinition = current.hasDefinition,
                     DefaultValue = memberType.IsValueType ? System.Activator.CreateInstance(memberType) : null,
 
@@ -1274,9 +1278,14 @@ namespace Business.Core.Utils
             public System.Type LastType { get; set; }
 
             /// <summary>
-            /// CurrentOrigType
+            /// Remove IArg type
             /// </summary>
             public System.Type CurrentOrigType { get; set; }
+
+            /// <summary>
+            /// Remove IArg Null type
+            /// </summary>
+            public System.Type CurrentType { get; set; }
 
             /// <summary>
             /// HasDefinition

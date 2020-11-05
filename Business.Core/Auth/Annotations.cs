@@ -867,9 +867,14 @@ namespace Business.Core.Annotations
             public string Member { get; internal set; }
 
             /// <summary>
-            /// MemberType
+            /// Remove IArg Null type
             /// </summary>
             public System.Type MemberType { get; internal set; }
+
+            ///// <summary>
+            ///// Remove IArg type
+            ///// </summary>
+            //public System.Type MemberOrigType { get; internal set; }
 
             /// <summary>
             /// Arg
@@ -904,6 +909,7 @@ namespace Business.Core.Annotations
                 this.MemberPath = metaData.MemberPath;
                 this.Member = metaData.Member;
                 this.MemberType = metaData.MemberType;
+                //this.MemberOrigType = metaData.MemberOrigType;
                 this.Arg = metaData.Arg;
 
                 if (null != metaData.Proces)
@@ -1103,7 +1109,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces(dynamic value) => this.ResultCreate<dynamic>(value);
+        public virtual ValueTask<IResult> Proces(dynamic value) => new ValueTask<IResult>(this.ResultCreate<dynamic>(value));
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -1111,7 +1117,7 @@ namespace Business.Core.Annotations
         /// <typeparam name="Type"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces<Type>(dynamic value) => this.ResultCreate<Type>(value);
+        public virtual ValueTask<IResult> Proces<Type>(dynamic value) => new ValueTask<IResult>(this.ResultCreate<Type>(value));
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -1120,7 +1126,7 @@ namespace Business.Core.Annotations
         /// <param name="token"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual async ValueTask<IResult> Proces<Type>(dynamic token, dynamic value) => this.ResultCreate<Type>(value);
+        public virtual ValueTask<IResult> Proces<Type>(dynamic token, dynamic value) => new ValueTask<IResult>(this.ResultCreate<Type>(value));
 
         ///// <summary>
         ///// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -1363,25 +1369,35 @@ namespace Business.Core.Annotations
         public CheckNullAttribute(int state = -800, string message = null) : base(state, message) => this.CanNull = false;
 
         /// <summary>
+        /// Compare type defaults
+        /// </summary>
+        public bool CheckValueType { get; set; }
+
+        /// <summary>
         /// Proces
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             if (typeof(string).Equals(this.ArgMeta.MemberType))
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" can not null.");
+                    return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" can not null."));
                 }
             }
             else if (object.Equals(null, value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{ this.Alias}\" can not null.");
+                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" can not null."));
+            }
+            else
+            {
+                var result = CheckDefinitionValueType(this, value, CheckValueType);
+                if (!Equals(null, result) && !result.HasData) { return new ValueTask<IResult>(result); }
             }
 
-            return this.ResultCreate();
+            return new ValueTask<IResult>(this.ResultCreate());
         }
     }
 
@@ -1434,12 +1450,13 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
-            var type = System.Nullable.GetUnderlyingType(this.ArgMeta.MemberType) ?? this.ArgMeta.MemberType;
+            var type = this.ArgMeta.MemberType;
+            //var type = System.Nullable.GetUnderlyingType(this.ArgMeta.MemberType) ?? this.ArgMeta.MemberType;
 
             string msg = null;
 
@@ -1538,7 +1555,7 @@ namespace Business.Core.Annotations
                     }
                     else
                     {
-                        return this.ResultCreate(State, $"argument \"{this.Alias}\" type error");
+                        return new ValueTask<IResult>(this.ResultCreate(State, $"argument \"{this.Alias}\" type error"));
                     }
                     break;
             }
@@ -1546,10 +1563,10 @@ namespace Business.Core.Annotations
             //checked error
             if (!string.IsNullOrEmpty(msg))
             {
-                return this.ResultCreate(State, Message ?? msg);
+                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? msg));
             }
 
-            return this.ResultCreate();
+            return new ValueTask<IResult>(this.ResultCreate());
         }
     }
 
@@ -1575,7 +1592,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
             if (!result.HasData) { return result; }
@@ -1583,10 +1600,10 @@ namespace Business.Core.Annotations
             switch (this.ArgMeta.MemberType.GetTypeCode())
             {
                 case System.TypeCode.Decimal:
-                    return this.ResultCreate(Help.Scale((decimal)value, Size));
+                    return new ValueTask<IResult>(this.ResultCreate(Help.Scale((decimal)value, Size)));
                 case System.TypeCode.Double:
-                    return this.ResultCreate(Help.Scale((double)value, Size));
-                default: return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" type error");
+                    return new ValueTask<IResult>(this.ResultCreate(Help.Scale((double)value, Size)));
+                default: return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" type error"));
             }
         }
     }
@@ -1608,17 +1625,17 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
             //if (!Utils.Help.CheckEmail(value))
             if (!IsValid(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" email error");
+                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" email error"));
             }
-            return this.ResultCreate();
+            return new ValueTask<IResult>(this.ResultCreate());
         }
 
         bool IsValid(dynamic value)
@@ -1686,16 +1703,16 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
             if (!Utils.Help.CheckChar(value, Mode))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" char verification failed");
+                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" char verification failed"));
             }
-            return this.ResultCreate();
+            return new ValueTask<IResult>(this.ResultCreate());
         }
     }
 
@@ -1722,18 +1739,18 @@ namespace Business.Core.Annotations
         /// </summary>
         //public System.Text.RegularExpressions.RegexOptions Options { get; set; } = System.Text.RegularExpressions.RegexOptions.None;
 
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
             //if (!System.Text.RegularExpressions.Regex.IsMatch(value.Trim(), Pattern, Options))
             if (!IsValid(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" regular expression verification failed");
+                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" regular expression verification failed"));
             }
 
-            return this.ResultCreate();
+            return new ValueTask<IResult>(this.ResultCreate());
         }
 
         bool IsValid(object value)
@@ -1832,16 +1849,16 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
             if (!IsValid(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" phone error");
+                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" phone error"));
             }
-            return this.ResultCreate();
+            return new ValueTask<IResult>(this.ResultCreate());
         }
 
         bool IsValid(dynamic value)
@@ -1903,16 +1920,16 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
             if (!IsValid(value))
             {
-                return this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" url error");
+                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" url error"));
             }
-            return this.ResultCreate();
+            return new ValueTask<IResult>(this.ResultCreate());
         }
 
         bool IsValid(object value)
@@ -1986,12 +2003,12 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
-            return this.ResultCreate(Help.MD5(value, HasUpper, Encoding));
+            return new ValueTask<IResult>(this.ResultCreate(Help.MD5(value, HasUpper, Encoding)));
         }
     }
 
@@ -2028,12 +2045,12 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces(dynamic value)
+        public override ValueTask<IResult> Proces(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
-            return this.ResultCreate(Help.AES.Encrypt(value, Key, Salt, Encoding));
+            return new ValueTask<IResult>(this.ResultCreate(Help.AES.Encrypt(value, Key, Salt, Encoding)));
         }
 
         /// <summary>
@@ -2113,10 +2130,10 @@ namespace Business.Core.Annotations
         /// <typeparam name="Type"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces<Type>(dynamic value)
+        public override ValueTask<IResult> Proces<Type>(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
             try
             {
@@ -2147,12 +2164,12 @@ namespace Business.Core.Annotations
                     }
 
                     //return this.ResultCreate(dict2.JsonSerialize().TryJsonDeserialize<Type>());
-                    return this.ResultCreate(arg);
+                    return new ValueTask<IResult>(this.ResultCreate(arg));
                 }
 
-                return this.ResultCreate<Type>(default);
+                return new ValueTask<IResult>(this.ResultCreate<Type>(default));
             }
-            catch (System.Exception ex) { return this.ResultCreate(State, Message ?? $"Parameters {this.Alias} Proces error. {ex.Message}"); }
+            catch (System.Exception ex) { return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"Parameters {this.Alias} Proces error. {ex.Message}")); }
         }
     }
 
@@ -2174,21 +2191,21 @@ namespace Business.Core.Annotations
             //this.ArgMeta.Filter |= FilterModel.NotDefinition;
             this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection) || this.ArgMeta.Arg.Parameters || ignoreArg;
 
-            options = new System.Text.Json.JsonSerializerOptions
+            textJsonOptions = new System.Text.Json.JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
                 AllowTrailingCommas = true,
                 IgnoreNullValues = true,
                 Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             };
-            options.Converters.Add(new Help.DateTimeConverter());
-            options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+            textJsonOptions.Converters.Add(new Help.DateTimeConverter());
+            textJsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         /// <summary>
-        /// options
+        /// Options to control the behavior during parsing.
         /// </summary>
-        readonly System.Text.Json.JsonSerializerOptions options;
+        public readonly System.Text.Json.JsonSerializerOptions textJsonOptions;
 
         /// <summary>
         /// Check whether the defined value type is the default value, (top-level object commit), Default true
@@ -2201,20 +2218,68 @@ namespace Business.Core.Annotations
         /// <typeparam name="Type"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public override async ValueTask<IResult> Proces<Type>(dynamic value)
+        public override ValueTask<IResult> Proces<Type>(dynamic value)
         {
             var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
 
             //Check whether the defined value type is the default value, (top-level object commit)
             result = CheckDefinitionValueType(this, value, CheckValueType);
-            if (!Equals(null, result)) { return result; }
+            if (!Equals(null, result)) { return new ValueTask<IResult>(result); }
 
             try
             {
-                return this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize<Type>(value, options));
+                return new ValueTask<IResult>(this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize<Type>(value, textJsonOptions)));
             }
-            catch (System.Exception ex) { return this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Json deserialize error. {ex.Message}"); }
+            catch (System.Exception ex) { return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Json deserialize error. {ex.Message}")); }
+        }
+    }
+
+    /// <summary>
+    /// XML.Deserialize
+    /// </summary>
+    public class XmlArgAttribute : JsonArgAttribute
+    {
+        /// <summary>
+        /// XmlArgAttribute
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        /// <param name="rootElementName">Controls XML serialization of the attribute target as an XML root element.</param>
+        public XmlArgAttribute(int state = -12, string message = null, string rootElementName = "xml") : base(state, message)
+        {
+            this.Description = "Xml parsing";
+            this.RootElementName = rootElementName;
+        }
+
+        /// <summary>
+        /// Controls XML serialization of the attribute target as an XML root element.
+        /// </summary>
+        public string RootElementName { get; set; }
+
+        /// <summary>
+        /// Proces
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public override ValueTask<IResult> Proces(dynamic value)
+        {
+            var result = CheckNull(this, value);
+            if (!result.HasData) { return new ValueTask<IResult>(result); }
+
+            //Check whether the defined value type is the default value, (top-level object commit)
+            result = CheckDefinitionValueType(this, value, CheckValueType);
+            if (!Equals(null, result)) { return new ValueTask<IResult>(result); }
+
+            try
+            {
+                using (var reader = new System.IO.StringReader(value))
+                {
+                    var xmlSerializer = new System.Xml.Serialization.XmlSerializer(this.ArgMeta.MemberType, new System.Xml.Serialization.XmlRootAttribute(RootElementName));
+                    return new ValueTask<IResult>(this.ResultCreate(xmlSerializer.Deserialize(reader)));
+                }
+            }
+            catch (System.Exception ex) { return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Xml deserialize error. {ex.Message}")); }
         }
     }
 

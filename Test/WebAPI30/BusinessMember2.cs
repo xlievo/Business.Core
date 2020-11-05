@@ -295,13 +295,13 @@ public partial class BusinessMember2 : BusinessBase
     }
 
     /// <summary>
-    /// test doc Test001
-    /// and Test001
+    /// test doc Test001!!!
+    /// and Test001!!!
     /// </summary>
     /// <param name="session222">A token 
     /// sample222</param>
     /// <param name="Arg"></param>
-    /// <param name="dateTime"></param>
+    /// <param name="dateTime">datetime!!!</param>
     /// <param name="httpFile"></param>
     /// <param name="mm">mmmmmmmm!</param>
     /// <param name="fff"></param>
@@ -331,9 +331,9 @@ public partial class BusinessMember2 : BusinessBase
         "{\"arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":2},\"dateTime\":\"2019-12-02T07:24\",\"mm\":99.0234,\"fff\":777,\"bbb\":false}")]
     //"[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T07:24\",99.0234,777,false]")]
     [Testing("test, important logic, do not delete!!!",
-        "{\"Arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4},\"dateTime\":\"2019-12-02T08:24\",\"MM\":111.0123456,\"fFf\":555,\"bbB\":true}")]
+        "{\"Arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":900.87,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4},\"dateTime\":\"2019-12-02T08:24\",\"MM\":111.0123456,\"fFf\":555,\"bbB\":true}")]
     //"[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]")]
-    public virtual async Task<IResult<Test111>> Test001(Session session222, Arg<Test111> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true, HttpContext context = null)
+    public virtual async Task<IResult<Test111>> Test001(Session session222, Test111? arg, [@CheckNull(CheckValueType = true)] DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal? mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true, HttpContext context = null)
     {
         DDD = 9;
         //Logger.loggerQueue?.queue.TryAdd(new Logger.LoggerData
@@ -355,7 +355,7 @@ public partial class BusinessMember2 : BusinessBase
 
         dynamic args = new System.Dynamic.ExpandoObject();
         args.token = session222;
-        args.arg = arg.Out;
+        args.arg = arg.Value;
         if (args.arg.B == "ex")
         {
             throw new System.Exception("Method exception!");
@@ -388,7 +388,7 @@ public partial class BusinessMember2 : BusinessBase
 
         var files = httpFile?.Select(c => new { key = c.Name, length = c.Length }).ToList();
 
-        return this.ResultCreate(arg.Out);
+        return this.ResultCreate(arg.Value);
         //return this.ResultCreate(new List<Test001Result?> { ss });
         //return ss;
     }
@@ -767,8 +767,8 @@ public class Test2Attribute : ArgumentAttribute
 public class Args
 {
     /// <summary>
-    /// Test001Test001Tes
-    /// t001Test001Test001Test001
+    /// Test001Test001Tes!!!
+    /// t001Test001Test001Test001!!!
     /// </summary>
     public struct Test111
     {
@@ -815,6 +815,8 @@ public class Args
         /// <summary>
         /// DDD
         /// </summary>
+        [@Scale(Size = 2)]
+        [@Size(Max = 900.88)]
         public decimal? D { get; set; }
 
         public bool E { get; set; }
@@ -822,6 +824,7 @@ public class Args
         /// <summary>
         /// FF
         /// </summary>
+        [@CheckNull(CheckValueType = true)]
         public DateTime F { get; set; }
 
         /// <summary>
