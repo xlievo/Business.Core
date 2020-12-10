@@ -24,7 +24,6 @@ namespace Business.Core.Utils
     using System.Reflection;
     using Business.Core.Result;
     using Business.Core.Meta;
-    using System.Runtime.CompilerServices;
 
     /// <summary>
     /// Accessor
@@ -3472,9 +3471,9 @@ namespace Business.Core.Utils
         /// <summary>
         /// Filters our all types not assignable to <typeparamref name="TType"/>.
         /// </summary>
-        /// <typeparam name="TType">The type that all resulting <see cref="Type"/> should be assignable to.</typeparam>
-        /// <param name="types">An <see cref="IEnumerable{T}"/> of <see cref="Type"/> instances that should be filtered.</param>
-        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="Type"/> instances.</returns>
+        /// <typeparam name="TType">The type that all resulting <see cref="System.Type"/> should be assignable to.</typeparam>
+        /// <param name="types">An <see cref="IEnumerable{T}"/> of <see cref="System.Type"/> instances that should be filtered.</param>
+        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="System.Type"/> instances.</returns>
         public static IEnumerable<System.Type> NotOfType<TType>(this IEnumerable<System.Type> types)
         {
             return types.Where(t => !typeof(TType).IsAssignableFrom(t));
@@ -4038,17 +4037,31 @@ namespace Business.Core.Utils
 
             System.Threading.Tasks.Task.Factory.StartNew(() =>
             {
-                foreach (var item in queue.GetConsumingEnumerable())
+                if (1 == dequeues.Length)
                 {
-                    if (1 == dequeues.Length)
+                    foreach (var item in queue.GetConsumingEnumerable())
                     {
                         dequeues[0].Add(item);
                     }
-                    else
+                }
+                else
+                {
+                    foreach (var item in queue.GetConsumingEnumerable())
                     {
                         System.Collections.Concurrent.BlockingCollection<T>.AddToAny(dequeues, item);
                     }
                 }
+                //foreach (var item in queue.GetConsumingEnumerable())
+                //{
+                //    if (1 == dequeues.Length)
+                //    {
+                //        dequeues[0].Add(item);
+                //    }
+                //    else
+                //    {
+                //        System.Collections.Concurrent.BlockingCollection<T>.AddToAny(dequeues, item);
+                //    }
+                //}
             }, System.Threading.Tasks.TaskCreationOptions.LongRunning);
 
             System.Threading.Tasks.Parallel.For(0, maxWorkThreads, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = maxWorkThreads }, async c =>

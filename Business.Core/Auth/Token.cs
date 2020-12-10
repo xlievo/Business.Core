@@ -30,7 +30,9 @@ namespace Business.Core.Auth
         /// <summary>
         /// Remote
         /// </summary>
-        string Remote { get; set; }
+        Remote Remote { get; set; }
+
+        //System.Net.IPEndPoint Remote2 { get; set; }
 
         /// <summary>
         /// Callback
@@ -85,7 +87,7 @@ namespace Business.Core.Auth
         /// </summary>
         //[Newtonsoft.Json.JsonProperty(PropertyName = "R")]
         [System.Text.Json.Serialization.JsonPropertyName("R")]
-        public string Remote { get; set; }
+        public Remote Remote { get; set; }
 
         ///// <summary>
         ///// Socket identity
@@ -99,5 +101,51 @@ namespace Business.Core.Auth
         //[Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
         public string Callback { get; set; }
+    }
+
+    /// <summary>
+    /// Remote
+    /// </summary>
+    public struct Remote
+    {
+        /// <summary>
+        /// Remote
+        /// </summary>
+        /// <param name="address">An IP address.</param>
+        /// <param name="port">The port number associated with the address, or 0 to specify any available port. port is in host order.</param>
+        public Remote(string address, int port = default)
+        {
+            this.Address = address;
+            this.Port = port;
+        }
+
+        /// <summary>
+        /// Address
+        /// </summary>
+        public string Address { get; set; }
+
+        /// <summary>
+        /// Port
+        /// </summary>
+        public int Port { get; set; }
+
+        /// <summary>
+        /// Indicates whether this instance and a specified object are equal.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current instance.</param>
+        /// <returns>true if obj and this instance are the same type and represent the same value; otherwise, false.</returns>
+        public override bool Equals(object obj) => GetHashCode().Equals(obj.GetHashCode());
+
+        /// <summary>
+        /// Returns the hash code for this instance.
+        /// </summary>
+        /// <returns>A 32-bit signed integer that is the hash code for this instance.</returns>
+        public override int GetHashCode() => this.ToString().GetHashCode();
+
+        /// <summary>
+        /// Returns the IP address and port number of the specified endpoint.
+        /// </summary>
+        /// <returns>A string containing the IP address and the port number of the specified endpoint (for example, 192.168.1.2:80).</returns>
+        public override string ToString() => $"{this.Address}:{this.Port}";
     }
 }

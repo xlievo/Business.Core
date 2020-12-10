@@ -66,7 +66,7 @@
             AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
             </summary>
         </member>
-        <member name="M:BusinessMember2.Test001(Session,System.Nullable{Args.Test111},System.Nullable{System.DateTime},Common.HttpFile,System.Nullable{System.Decimal},System.Int32,System.Boolean,Microsoft.AspNetCore.Http.HttpContext)">
+        <member name="M:BusinessMember2.Test001(Session,Token,System.Nullable{Args.Test111},System.Nullable{System.DateTime},Common.HttpFile,System.Nullable{System.Decimal},System.Int32,System.Boolean,BusinessController)">
             <summary>
             test doc Test001!!!
             and Test001!!!

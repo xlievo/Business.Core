@@ -796,7 +796,8 @@ namespace Business.Core.Annotations
         /// <summary>
         /// GroupAttribute
         /// </summary>
-        public GroupAttribute() => type = GetType(this.Meta.Type);
+        /// <param name="type"></param>
+        public GroupAttribute(System.Type type = null) => this.type = GetType(type ?? this.Meta.Type);
 
         string group = string.Empty;
 
@@ -956,7 +957,8 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public ArgumentAttribute(int state, string message = null)
+        /// <param name="type"></param>
+        public ArgumentAttribute(int state, string message = null, System.Type type = null) : base(type)
         {
             this.State = state;
             this.Message = message;
@@ -2176,7 +2178,7 @@ namespace Business.Core.Annotations
     /// <summary>
     /// System.Text.Json.JsonSerializer.Deserialize
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    //[System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public class JsonArgAttribute : ArgumentAttribute
     {
         /// <summary>
@@ -2184,7 +2186,8 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public JsonArgAttribute(int state = -12, string message = null) : base(state, message)
+        /// <param name="type"></param>
+        public JsonArgAttribute(int state = -12, string message = null, System.Type type = null) : base(state, message, type)
         {
             this.CanNull = false;
             this.Description = "Json parsing";
@@ -2205,7 +2208,7 @@ namespace Business.Core.Annotations
         /// <summary>
         /// Options to control the behavior during parsing.
         /// </summary>
-        public readonly System.Text.Json.JsonSerializerOptions textJsonOptions;
+        readonly System.Text.Json.JsonSerializerOptions textJsonOptions;
 
         /// <summary>
         /// Check whether the defined value type is the default value, (top-level object commit), Default true
@@ -2238,7 +2241,7 @@ namespace Business.Core.Annotations
     /// <summary>
     /// XML.Deserialize
     /// </summary>
-    public class XmlArgAttribute : JsonArgAttribute
+    public class XmlArgAttribute : ArgumentAttribute
     {
         /// <summary>
         /// XmlArgAttribute
@@ -2246,16 +2249,24 @@ namespace Business.Core.Annotations
         /// <param name="state"></param>
         /// <param name="message"></param>
         /// <param name="rootElementName">Controls XML serialization of the attribute target as an XML root element.</param>
-        public XmlArgAttribute(int state = -12, string message = null, string rootElementName = "xml") : base(state, message)
+        /// <param name="type"></param>
+        public XmlArgAttribute(int state = -12, string message = null, string rootElementName = "xml", System.Type type = null) : base(state, message, type)
         {
+            this.CanNull = false;
             this.Description = "Xml parsing";
             this.RootElementName = rootElementName;
+            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection) || this.ArgMeta.Arg.Parameters || ignoreArg;
         }
 
         /// <summary>
         /// Controls XML serialization of the attribute target as an XML root element.
         /// </summary>
         public string RootElementName { get; set; }
+
+        /// <summary>
+        /// Check whether the defined value type is the default value, (top-level object commit), Default true
+        /// </summary>
+        public bool CheckValueType { get; set; } = true;
 
         /// <summary>
         /// Proces

@@ -127,17 +127,17 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
 
         Arg<Arg01> arg01,
 
-        [Use(ParameterName = true)]Arg<Use01> use02,
+        [Use(ParameterName = true)] Arg<Use01> use02,
 
         Arg<dynamic, Use01> use03,
 
         Arg<Use01, Use01> use04,
 
-        [ProcesUse02]Arg<dynamic, Use01> use05,
+        [ProcesUse02] Arg<dynamic, Use01> use05,
 
-        [ProcesUse02]Arg<Use02, Use01> use06,
+        [ProcesUse02] Arg<Use02, Use01> use06,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
         this.ResultCreate(arg01.Out.A);
 }
@@ -154,7 +154,7 @@ public enum TestMode
 public class BusinessMember2
 {
     public virtual async Task<dynamic> Test000(
-        [Use(ParameterName = true)]dynamic use01,
+        [Use(ParameterName = true)] dynamic use01,
 
         Arg00 arg01,
 
@@ -168,7 +168,7 @@ public class BusinessMember2
             [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
         arg01.A.Out;
 
@@ -177,7 +177,7 @@ public class BusinessMember2
     [Command(OnlyName = "DEFTest001")]
     [Command(OnlyName = "Test001")]
     public virtual async Task<dynamic> Test001(
-        [Use(ParameterName = true)]dynamic use01,
+        [Use(ParameterName = true)] dynamic use01,
 
         Arg01 arg01,
 
@@ -191,7 +191,7 @@ public class BusinessMember2
             [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
         arg01.A.Out;
 }
@@ -257,7 +257,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     #endregion
 
     public virtual async Task<dynamic> Test000(
-        [Use(ParameterName = true)]dynamic use01,
+        [Use(ParameterName = true)] dynamic use01,
 
         Arg00 arg01,
 
@@ -271,7 +271,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default) => this.ResultCreate(arg01.A.Out);
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default) => this.ResultCreate(arg01.A.Out);
 
     /// <summary>
     /// This is Test001.
@@ -287,7 +287,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     [Command(OnlyName = "DEFTest001")]
     [Command(OnlyName = "Test001")]
     public virtual async Task<dynamic> Test001(
-        [Use(ParameterName = true)]dynamic use01,
+        [Use(ParameterName = true)] dynamic use01,
 
         Arg01 arg01,
 
@@ -301,7 +301,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
         this.ResultCreate(arg01.A.Out);
 
@@ -319,7 +319,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     [Command(OnlyName = "DEFTest0001")]
     [Command(OnlyName = "Test0001")]
     public virtual IResult Test0001(
-        [Use(ParameterName = true)]dynamic use01,
+        [Use(ParameterName = true)] dynamic use01,
 
         Arg01 arg01,
 
@@ -333,7 +333,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
         this.ResultCreate(arg01.A.Out);
 
@@ -351,7 +351,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     [Command(OnlyName = "DEFTest00001")]
     [Command(OnlyName = "Test00001")]
     public virtual dynamic Test00001(
-        [Use(ParameterName = true)]dynamic use01,
+        [Use(ParameterName = true)] dynamic use01,
 
         Arg01 arg01,
 
@@ -365,12 +365,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
         this.ResultCreate(arg01.A.Out);
 
     public virtual async Task Test0011(
-        [Use(ParameterName = true)]dynamic use01,
+        [Use(ParameterName = true)] dynamic use01,
 
         Arg01 arg01,
 
@@ -384,12 +384,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
         this.ResultCreate(arg01.A.Out);
 
     public virtual async void Test0012(
-        [Use(ParameterName = true)]dynamic use01,
+        [Use(ParameterName = true)] dynamic use01,
 
         Arg01 arg01,
 
@@ -403,7 +403,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)]Token token = default)
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
     { }
 
     [Command(Group = "G02", OnlyName = "G02Test002")]
@@ -883,7 +883,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     }
 
     //TestUse01
-    public virtual async Task<dynamic> TestUse01(TestMode mode, [Use(ParameterName = true)]dynamic use01)
+    public virtual async Task<dynamic> TestUse01(TestMode mode, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -896,7 +896,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult> TestUse01a(TestMode mode, [Use(ParameterName = true)]dynamic use01)
+    public virtual async Task<IResult> TestUse01a(TestMode mode, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -909,7 +909,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             default: return this.ResultCreate();
         }
     }
-    public virtual IResult TestUse01b(TestMode mode, [Use(ParameterName = true)]dynamic use01)
+    public virtual IResult TestUse01b(TestMode mode, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -964,7 +964,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
     //TestUse03
-    public virtual async Task<dynamic> TestUse03(TestMode mode, dynamic a, [Use(ParameterName = true)]dynamic use01)
+    public virtual async Task<dynamic> TestUse03(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -977,7 +977,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult<string>> TestUse03a(TestMode mode, dynamic a, [Use(ParameterName = true)]dynamic use01)
+    public virtual async Task<IResult<string>> TestUse03a(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -990,7 +990,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             default: return this.ResultCreate();
         }
     }
-    public virtual IResult<string> TestUse03b(TestMode mode, dynamic a, [Use(ParameterName = true)]dynamic use01)
+    public virtual IResult<string> TestUse03b(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -1004,7 +1004,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
     //TestAnonymous
-    public virtual async Task<dynamic> TestAnonymous(TestMode mode, dynamic a, [Use(ParameterName = true)]dynamic use01)
+    public virtual async Task<dynamic> TestAnonymous(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -1017,7 +1017,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult> TestAnonymousa(TestMode mode, dynamic a, [Use(ParameterName = true)]dynamic use01)
+    public virtual async Task<IResult> TestAnonymousa(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -1030,7 +1030,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             default: return this.ResultCreate();
         }
     }
-    public virtual IResult TestAnonymousb(TestMode mode, dynamic a, [Use(ParameterName = true)]dynamic use01)
+    public virtual IResult TestAnonymousb(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -1044,10 +1044,10 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    public virtual async Task<dynamic> TestAnonymous2(dynamic a, [Use(ParameterName = true)]dynamic use01) => new { a, b = use01 };
-    public virtual async Task<dynamic> TestAnonymous2e(dynamic a, [Use(ParameterName = true)]dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async Task<dynamic> TestAnonymous2(dynamic a, [Use(ParameterName = true)] dynamic use01) => new { a, b = use01 };
+    public virtual async Task<dynamic> TestAnonymous2e(dynamic a, [Use(ParameterName = true)] dynamic use01) => this.ResultCreate(-999, "test error");
 
-    public virtual async Task<dynamic> TestDynamic(dynamic a, [Use(ParameterName = true)]dynamic use01) => use01;
+    public virtual async Task<dynamic> TestDynamic(dynamic a, [Use(ParameterName = true)] dynamic use01) => use01;
 
     /// <summary>
     /// Attr01
@@ -1536,7 +1536,7 @@ public class TestBusinessMember
             //args
             new object[] { new Arg01 { A = "abc" }.JsonSerialize(), 2, 2 },
             //useObj
-            new UseEntry(new Token { Key = "a", Remote = "b" }));
+            new UseEntry(new Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
         Assert.AreEqual(t4.Message, null);
         Assert.AreEqual(t4.State, t2.State);
         Assert.AreEqual(t4.HasData, false);
@@ -1640,7 +1640,7 @@ public class TestBusinessMember
         t8 = Checked("TestUse01b", 1, null, null, new UseEntry("sss", "use01"));
         Assert.AreEqual(t8, "sss");
 
-        var token = new Token { Key = "a", Remote = "b" };
+        var token = new Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") };
         t8 = Checked("TestUse02", 1, null, null, new UseEntry(token));
         Assert.AreEqual(t8, token);
         t8 = Checked("TestUse02a", 1, null, null, new UseEntry(token));
@@ -1670,7 +1670,7 @@ public class TestBusinessMember
         Assert.AreEqual(t20.a, "abc");
         Assert.AreEqual(t20.b, "sss");
 
-        var t21result = new Token { Key = "a", Remote = "b" };
+        var t21result = new Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") };
         var t21 = AsyncCall(business.Command, "TestDynamic", null, new object[] { "abc" }, new UseEntry(t21result, "use01"));
         Assert.AreEqual(t21, t21result);
 

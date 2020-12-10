@@ -227,7 +227,7 @@ public struct Token : Business.Core.Auth.IToken
     public string Key { get; set; }
 
     [System.Text.Json.Serialization.JsonPropertyName("R")]
-    public string Remote { get; set; }
+    public Business.Core.Auth.Remote Remote { get; set; }
 
     [System.Text.Json.Serialization.JsonPropertyName("P")]
     public string Path { get; set; }
@@ -527,15 +527,15 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         #region AcceptWebSocket
 
         var webSocketcfg = Host.AppSettings.GetSection("WebSocket");
-        var keepAliveInterval = webSocketcfg.GetValue("KeepAliveInterval", 120);
-        receiveBufferSize = webSocketcfg.GetValue("ReceiveBufferSize", 4096);
-        maxDegreeOfParallelism = webSocketcfg.GetValue("MaxDegreeOfParallelism", -1);
-        //var allowedOrigins = webSocketcfg.GetSection("AllowedOrigins").GetChildren();
+        //var keepAliveInterval = webSocketcfg.GetValue("KeepAliveInterval", 120);
+        //receiveBufferSize = webSocketcfg.GetValue("ReceiveBufferSize", 4096);
+        //maxDegreeOfParallelism = webSocketcfg.GetValue("MaxDegreeOfParallelism", -1);
+        ////var allowedOrigins = webSocketcfg.GetSection("AllowedOrigins").GetChildren();
 
         var webSocketOptions = new WebSocketOptions()
         {
-            KeepAliveInterval = TimeSpan.FromSeconds(keepAliveInterval),
-            ReceiveBufferSize = receiveBufferSize
+            //KeepAliveInterval = TimeSpan.FromSeconds(keepAliveInterval),
+            //ReceiveBufferSize = receiveBufferSize
         };
 
         //foreach (var item in allowedOrigins)
@@ -642,7 +642,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                         new UseEntry(new Token //token
                         {
                             Key = receiveData.t,
-                            Remote = string.Format("{0}:{1}", context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
+                            Remote = new Business.Core.Auth.Remote(context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
                             Callback = b
                         }, "session")
                         );
@@ -840,7 +840,7 @@ public class BusinessController : Controller
         var token = new Token //token
         {
             Key = t,
-            Remote = string.Format("{0}:{1}", this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
+            Remote = new Business.Core.Auth.Remote(this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
             Path = this.Request.Path.Value,
         };
 

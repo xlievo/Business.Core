@@ -61,7 +61,7 @@ namespace BenchmarkTest
 
             Parallel.For(0, count, async c =>
             {
-                var result = Cmd.Call("Test000", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = "b" }));
+                var result = Cmd.Call("Test000", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
 
                 results.Add(result.Data);
 
@@ -72,11 +72,11 @@ namespace BenchmarkTest
 
                 //tasks.Add(task);
 
-                var task = await Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = "b" }));
+                var task = await Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
 
                 results.Add(task.Data);
 
-                result = Cmd.CallIResult("Test002", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = "b" }));
+                result = Cmd.CallIResult("Test002", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
 
                 results.Add(result.Data);
             });
@@ -340,14 +340,14 @@ namespace BenchmarkTest
             });
         }
 
-        public virtual dynamic Test000([Use(ParameterName = true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
+        public virtual dynamic Test000([Use(ParameterName = true)] dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
 
-        public virtual async Task<dynamic> Test001([Use(ParameterName = true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token)
+        public virtual async Task<dynamic> Test001([Use(ParameterName = true)] dynamic use01, Arg00 arg00, Business.Core.Auth.Token token)
         {
             return this.ResultCreate(data: arg00.A + 1);
         }
 
-        public virtual IResult Test002([Use(ParameterName = true)]dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
+        public virtual IResult Test002([Use(ParameterName = true)] dynamic use01, Arg00 arg00, Business.Core.Auth.Token token) => this.ResultCreate(data: arg00.A + 1);
 
 
         public class TestCollectionAttribute : ArgumentAttribute
