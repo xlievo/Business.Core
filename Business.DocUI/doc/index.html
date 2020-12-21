@@ -156,28 +156,28 @@
 
         <script id="menuGroup" type="text/template">
             <!--<li class="header-menu">
-                <span>General</span>
-            </li>-->
+        <span>General</span>
+    </li>-->
             {@each _ as member, index}
-            {@if true === member.Key.active}
+            {@if true === member.key.active}
             <li class="sidebar-dropdown active">
                 {@else}
             <li class="sidebar-dropdown">
                 {@/if}
                 <a href="javascript:void(0)">
                     <i class="fa fa-folder"></i>
-                    <span class="menu-text" style="font-size:115%">${member.Key.group}</span>
-                    {@if undefined !== member.Key.badge}
-                    <span class="badge badge-pill badge-warning">${member.Key.badge}</span>
+                    <span class="menu-text" style="font-size:115%">${member.key.group}</span>
+                    {@if undefined !== member.key.badge}
+                    <span class="badge badge-pill badge-warning">${member.key.badge}</span>
                     {@/if}
                 </a>
-                {@if true === member.Key.active}
+                {@if true === member.key.active}
                 <div class="sidebar-submenu" style="display: block;">
                     {@else}
                     <div class="sidebar-submenu">
                         {@/if}
                         <ul>
-                            {@each member.Value as item}{@include "#menuItem", item}{@/each}
+                            {@each member.value as item}{@include "#menuItem", item}{@/each}
                         </ul>
                     </div>
             </li>
