@@ -1960,6 +1960,15 @@
             <param name="callback"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.Utils.Help.LoadAssemblys(System.Collections.Generic.IEnumerable{System.Reflection.Assembly},System.Boolean,System.Func{System.Type,System.Boolean})">
+            <summary>
+            LoadAssemblys
+            </summary>
+            <param name="assemblys"></param>
+            <param name="parallel"></param>
+            <param name="callback"></param>
+            <returns></returns>
+        </member>
         <member name="M:Business.Core.Utils.Help.LoadAssembly(System.String)">
             <summary>
             LoadAssembly

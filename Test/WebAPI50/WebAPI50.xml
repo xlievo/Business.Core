@@ -1,0 +1,491 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WebAPI50</name>
+    </assembly>
+    <members>
+        <member name="T:BusinessMember2">
+            <summary>
+            BusinessMember2
+            businessDescription
+            businessDescription3
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test001Result.a">
+            <summary>
+            aaa
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test001Result.b">
+            <summary>
+            bbb
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.ObjectList.Data">
+            <summary>
+            aaa2
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test001Result2.a">
+            <summary>
+            aaa2
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test001Result2.b">
+            <summary>
+            bbb2
+            </summary>
+        </member>
+        <member name="T:BusinessMember2.Z">
+            <summary>
+            zzzzZZZZZZZZZZZZZZZZZZZZZzzzzzzzzzzzz
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Z.a">
+            <summary>
+            aaa2
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Z.b">
+            <summary>
+            bbb2
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test1110.BBB">
+            <summary>
+            Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test1110.BBBB">
+            <summary>
+            Test004 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test1110.AAA">
+            <summary>
+            AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+            </summary>
+        </member>
+        <member name="M:BusinessMember2.Test001(Session,Token,System.Nullable{Args.Test111},System.Nullable{System.DateTime},Common.HttpFile,System.Nullable{System.Decimal},System.Int32,System.Boolean,BusinessController)">
+            <summary>
+            test doc Test001!!!
+            and Test001!!!
+            </summary>
+            <param name="session222">A token 
+            sample222</param>
+            <param name="Arg"></param>
+            <param name="dateTime">datetime!!!</param>
+            <param name="httpFile"></param>
+            <param name="mm">mmmmmmmm!</param>
+            <param name="fff"></param>
+            <param name="bbb"></param>
+            <returns>
+            rrrrrr
+            rrrrrr2
+            </returns>
+        </member>
+        <member name="T:BusinessMember2.MyEnum">
+            <summary>
+            MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
+            </summary>
+        </member>
+        <member name="F:BusinessMember2.MyEnum.A">
+            <summary>
+            MyEnum A
+            </summary>
+        </member>
+        <member name="F:BusinessMember2.MyEnum.C">
+            <summary>
+            MyEnum C
+            </summary>
+        </member>
+        <member name="M:BusinessMember2.Test002(Token,Args.Test002,System.Decimal,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            222
+            </summary>
+            <param name="token">A token sample</param>
+            <param name="arg"></param>
+            <param name="mm"></param>
+            <returns>test return!!!</returns>
+        </member>
+        <member name="M:BusinessMember2.Test003(Token,Args.Test002,System.Decimal)">
+            <summary>
+            
+            </summary>
+            <param name="token"></param>
+            <param name="arg"></param>
+            <param name="mm"></param>
+            <returns></returns>
+        </member>
+        <member name="M:BusinessMember2.Test007(Args.Test002,System.Collections.Generic.List{System.String})">
+            <summary>
+            
+            </summary>
+            <param name="arg">argargargarg</param>
+            <param name="arg2">arg2!!!</param>
+            <returns></returns>
+        </member>
+        <member name="T:Args.Test111">
+            <summary>
+            Test001Test001Tes!!!
+            t001Test001Test001Test001!!!
+            </summary>
+        </member>
+        <member name="P:Args.Test111.MENU_ITEM">
+            <summary>
+            Test004 MENU_ITEMMENU_ITEMMENU_ITEM@@@
+            </summary>
+        </member>
+        <member name="P:Args.Test111.BBB">
+            <summary>
+            Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
+            </summary>
+        </member>
+        <member name="P:Args.Test111.BBBB">
+            <summary>
+            Test004 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:Args.Test111.AAA">
+            <summary>
+            AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+            </summary>
+        </member>
+        <member name="P:Args.Test111.A">
+            <summary>
+            AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+            </summary>
+        </member>
+        <member name="P:Args.Test111.B">
+            <summary>
+            BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:Args.Test111.D">
+            <summary>
+            DDD
+            </summary>
+        </member>
+        <member name="P:Args.Test111.F">
+            <summary>
+            FF
+            </summary>
+        </member>
+        <member name="P:Args.Test111.myEnum">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Args.Test111.Test0010`1">
+            <summary>
+            Test0010 Test0010 Test0010 Test0010
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:Args.Test111.Test0010`1.C1">
+            <summary>
+            C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
+            </summary>
+        </member>
+        <member name="P:Args.Test111.Test0010`1.C2">
+            <summary>
+            C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2
+            </summary>
+        </member>
+        <member name="P:Args.Test111.Test0010`1.C3">
+            <summary>
+            C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
+            </summary>
+        </member>
+        <member name="T:Args.MyEnum">
+            <summary>
+            MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
+            </summary>
+        </member>
+        <member name="F:Args.MyEnum.A">
+            <summary>
+            MyEnum A
+            </summary>
+        </member>
+        <member name="F:Args.MyEnum.B">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:Args.MyEnum.C">
+            <summary>
+            MyEnum C
+            </summary>
+        </member>
+        <member name="P:Args.Test002.BB">
+            <summary>
+            Test002 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:Args.Test003`1.BBB">
+            <summary>
+            Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
+            </summary>
+        </member>
+        <member name="T:Args.Test004">
+            <summary>
+            Test004Test004Test004Test004Test004Test004Test004
+            Test004Test004Test004Test004Test004Test004Test004
+            </summary>
+        </member>
+        <member name="P:Args.Test004.BBBB">
+            <summary>
+            Test004 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="T:Args.Test001`1">
+            <summary>
+            Test001Test001Tes
+            t001Test001Test001Test001
+            </summary>
+        </member>
+        <member name="P:Args.Test001`1.AAA">
+            <summary>
+            AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+            </summary>
+        </member>
+        <member name="P:Args.Test001`1.A">
+            <summary>
+            AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+            </summary>
+        </member>
+        <member name="P:Args.Test001`1.B">
+            <summary>
+            BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:Args.Test001`1.D">
+            <summary>
+            DDD
+            </summary>
+        </member>
+        <member name="P:Args.Test001`1.F">
+            <summary>
+            FF
+            </summary>
+        </member>
+        <member name="P:Args.Test001`1.myEnum">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:Args.Test001`1.Test0010`1">
+            <summary>
+            Test0010 Test0010 Test0010 Test0010
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:Args.Test001`1.Test0010`1.C1">
+            <summary>
+            C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
+            </summary>
+        </member>
+        <member name="P:Args.Test001`1.Test0010`1.C2">
+            <summary>
+            C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2
+            </summary>
+        </member>
+        <member name="P:Args.Test001`1.Test0010`1.C3">
+            <summary>
+            C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
+            </summary>
+        </member>
+        <member name="T:Args.Test0011">
+            <summary>
+            Test0011Test0011Test0011Test0011
+            </summary>
+        </member>
+        <member name="P:Args.Test0011.C31">
+            <summary>
+            C31C31C31C31C31C31
+            </summary>
+        </member>
+        <member name="P:Args.Test0011.C32">
+            <summary>
+            C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32C32
+            </summary>
+        </member>
+        <member name="P:Args.Test0011.AAA">
+            <summary>
+            AAA@@@
+            </summary>
+        </member>
+        <member name="T:ResultObject`1">
+            <summary>
+            result
+            </summary>
+            <typeparam name="Type"></typeparam>
+        </member>
+        <member name="M:ResultObject`1.#ctor(System.Type,`0,System.Int32,System.String,System.String,System.Type,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Activator.CreateInstance
+            </summary>
+            <param name="dataType"></param>
+            <param name="data"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <param name="callback"></param>
+            <param name="genericDefinition"></param>
+            <param name="checkData"></param>
+            <param name="hasData"></param>
+            <param name="hasDataResult"></param>
+        </member>
+        <member name="M:ResultObject`1.#ctor(`0,System.Int32,System.String,System.Boolean)">
+            <summary>
+            MessagePack.MessagePackSerializer.Serialize(this)
+            </summary>
+            <param name="data"></param>
+            <param name="state"></param>
+            <param name="message"></param>
+            <param name="hasData"></param>
+        </member>
+        <member name="P:ResultObject`1.State">
+            <summary>
+            The results of the state is greater than or equal to 1: success, equal to 0: system level exceptions, less than 0: business class error.
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.Message">
+            <summary>
+            Success can be null
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.Business#Core#Result#IResult#Data">
+            <summary>
+            Specific dynamic data objects
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.Data">
+            <summary>
+            Specific Byte/Json data objects
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.HasData">
+            <summary>
+            Whether there is value
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.Callback">
+            <summary>
+            Gets the token of this result, used for callback
+            </summary>
+        </member>
+        <member name="P:ResultObject`1.HasDataResult">
+            <summary>
+            Return data or not
+            </summary>
+        </member>
+        <member name="M:ResultObject`1.ToString">
+            <summary>
+            Json format
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ResultObject`1.ToBytes(System.Boolean)">
+            <summary>
+            ProtoBuf,MessagePack or Other
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="F:ReceiveData.a">
+            <summary>
+            business
+            </summary>
+        </member>
+        <member name="F:ReceiveData.c">
+            <summary>
+            cmd
+            </summary>
+        </member>
+        <member name="F:ReceiveData.t">
+            <summary>
+            token
+            </summary>
+        </member>
+        <member name="F:ReceiveData.d">
+            <summary>
+            data
+            </summary>
+        </member>
+        <member name="F:ReceiveData.b">
+            <summary>
+            callback
+            </summary>
+        </member>
+        <member name="T:JsonCommandAttribute">
+            <summary>
+            Json command
+            </summary>
+        </member>
+        <member name="M:JsonCommandAttribute.#ctor(System.String)">
+            <summary>
+            Command attribute on a method, for multiple sources to invoke the method
+            </summary>
+            <param name="onlyName"></param>
+        </member>
+        <member name="P:JsonCommandAttribute.Group">
+            <summary>
+            Used for the command group
+            </summary>
+        </member>
+        <member name="T:Host">
+            <summary>
+            Business constructor would match given arguments
+            </summary>
+        </member>
+        <member name="T:Token">
+            <summary>
+            my token
+            </summary>
+        </member>
+        <member name="T:Session">
+            <summary>
+            my session
+            </summary>
+        </member>
+        <member name="T:Common.HttpFile">
+            <summary>
+            Simple asp.net HTTP request file
+            </summary>
+        </member>
+        <member name="T:Common.HttpFileAttribute">
+            <summary>
+            Simple asp.net HTTP request file attribute
+            </summary>
+        </member>
+        <member name="M:Common.HttpFileAttribute.#ctor(System.Int32,System.String)">
+            <summary>
+            Simple asp.net HTTP request file attribute
+            </summary>
+            <param name="state"></param>
+            <param name="message"></param>
+        </member>
+        <member name="F:Common.contextParameterNames">
+            <summary>
+            "context", "socket", "httpFile" 
+            </summary>
+        </member>
+        <member name="M:Common.InitBusiness(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.String)">
+            <summary>
+            Call this method after environment initialization is complete
+            </summary>
+            <param name="app"></param>
+            <param name="docDir"></param>
+        </member>
+        <member name="T:BusinessController">
+            <summary>
+            A class for an MVC controller with view support.
+            </summary>
+        </member>
+        <member name="M:BusinessController.Call">
+            <summary>
+            Call
+            </summary>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

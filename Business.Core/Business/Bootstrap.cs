@@ -524,7 +524,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
+            _ = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {
@@ -532,7 +532,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
+                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
                             //Create(type, bootstrap.constructorArguments);
                             return true;
                         }
@@ -540,7 +540,32 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
+                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
+                        return true;
+                    }
+                }
+
+                return false;
+            });
+
+            //Get self reference assembly under single file publishing
+            _ = Help.LoadAssemblys(System.AppDomain.CurrentDomain.GetAssemblies(), true, type =>
+            {
+                if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
+                {
+                    if (null != businessTypeFullName && businessTypeFullName.Any())
+                    {
+                        if (businessTypeFullName.Contains(type.FullName))
+                        {
+                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
+                            //Create(type, bootstrap.constructorArguments);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        //Create(type, bootstrap.constructorArguments);
+                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
                         return true;
                     }
                 }
@@ -695,7 +720,38 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
+            _ = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
+              {
+                  if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
+                  {
+                      if (null != businessTypeFullName && businessTypeFullName.Any())
+                      {
+                          if (businessTypeFullName.Contains(type.FullName))
+                          {
+                              if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes).instance is Business business)
+                              {
+                                  BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
+                              }
+                            //Create(type, bootstrap.constructorArguments);
+                            return true;
+                          }
+                      }
+                      else
+                      {
+                        //Create(type, bootstrap.constructorArguments);
+                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes).instance is Business business)
+                          {
+                              BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
+                          }
+                          return true;
+                      }
+                  }
+
+                  return false;
+              });
+
+            //Get self reference assembly under single file publishing
+            _ = Help.LoadAssemblys(System.AppDomain.CurrentDomain.GetAssemblies(), true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {

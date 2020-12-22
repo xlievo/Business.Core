@@ -31,8 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Build\Business.DocUI\Business.DocUI.csproj" />
     <ProjectReference Include="..\..\Business.Core\Business.Core.csproj" />
+    <ProjectReference Include="..\..\Business.DocUI\Business.DocUI.csproj" />
   </ItemGroup>
 
 </Project>

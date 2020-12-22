@@ -1679,11 +1679,37 @@ namespace Business.Core.Utils
 
             if (parallel)
             {
-                assemblyFiles.AsParallel().ForAll(item => LoadAssembly(item, ass, callback));
+                assemblyFiles.AsParallel().ForAll(item => LoadAssembly(LoadAssembly(item), ass, callback));
             }
             else
             {
                 foreach (var item in assemblyFiles)
+                {
+                    LoadAssembly(LoadAssembly(item), ass, callback);
+                }
+            }
+
+            return ass;
+        }
+
+        /// <summary>
+        /// LoadAssemblys
+        /// </summary>
+        /// <param name="assemblys"></param>
+        /// <param name="parallel"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public static List<System.Type> LoadAssemblys(IEnumerable<Assembly> assemblys, bool parallel = false, System.Func<System.Type, bool> callback = null)
+        {
+            var ass = new List<System.Type>();
+
+            if (parallel)
+            {
+                assemblys.AsParallel().ForAll(item => LoadAssembly(item, ass, callback));
+            }
+            else
+            {
+                foreach (var item in assemblys)
                 {
                     LoadAssembly(item, ass, callback);
                 }
@@ -1692,11 +1718,11 @@ namespace Business.Core.Utils
             return ass;
         }
 
-        static void LoadAssembly(string assemblyFile, List<System.Type> ass, System.Func<System.Type, bool> callback = null)
-        {
-            var assembly = LoadAssembly(assemblyFile);
+        //static void LoadAssembly(string assemblyFile, List<System.Type> ass, System.Func<System.Type, bool> callback = null) => LoadAssembly(LoadAssembly(assemblyFile), ass, callback);
 
-            if (null != assembly)
+        static void LoadAssembly(Assembly assembly, List<System.Type> ass, System.Func<System.Type, bool> callback = null)
+        {
+            if (null != assembly && !assembly.IsDynamic)
             {
                 if (null == callback)
                 {
