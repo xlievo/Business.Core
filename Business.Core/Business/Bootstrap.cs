@@ -524,32 +524,10 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            _ = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
-            {
-                if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
-                {
-                    if (null != businessTypeFullName && businessTypeFullName.Any())
-                    {
-                        if (businessTypeFullName.Contains(type.FullName))
-                        {
-                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
-                            //Create(type, bootstrap.constructorArguments);
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        //Create(type, bootstrap.constructorArguments);
-                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
-                        return true;
-                    }
-                }
-
-                return false;
-            });
-
             //Get self reference assembly under single file publishing
-            _ = Help.LoadAssemblys(System.AppDomain.CurrentDomain.GetAssemblies(), true, type =>
+            var aas = (null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll").Select(c => Help.LoadAssembly(c)).Concat(System.AppDomain.CurrentDomain.GetAssemblies()).Distinct(Equality<System.Reflection.Assembly>.CreateComparer(c => c?.FullName, System.StringComparer.CurrentCultureIgnoreCase)) : assemblyFiles.Select(c => Help.LoadAssembly(c));
+
+            _ = Help.LoadAssemblys(aas, true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {
@@ -720,38 +698,10 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            _ = Help.LoadAssemblys((null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll") : assemblyFiles, true, type =>
-              {
-                  if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
-                  {
-                      if (null != businessTypeFullName && businessTypeFullName.Any())
-                      {
-                          if (businessTypeFullName.Contains(type.FullName))
-                          {
-                              if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes).instance is Business business)
-                              {
-                                  BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
-                              }
-                            //Create(type, bootstrap.constructorArguments);
-                            return true;
-                          }
-                      }
-                      else
-                      {
-                        //Create(type, bootstrap.constructorArguments);
-                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes).instance is Business business)
-                          {
-                              BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
-                          }
-                          return true;
-                      }
-                  }
-
-                  return false;
-              });
-
             //Get self reference assembly under single file publishing
-            _ = Help.LoadAssemblys(System.AppDomain.CurrentDomain.GetAssemblies(), true, type =>
+            var aas = (null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll").Select(c => Help.LoadAssembly(c)).Concat(System.AppDomain.CurrentDomain.GetAssemblies()).Distinct(Equality<System.Reflection.Assembly>.CreateComparer(c => c?.FullName, System.StringComparer.CurrentCultureIgnoreCase)) : assemblyFiles.Select(c => Help.LoadAssembly(c));
+
+            _ = Help.LoadAssemblys(aas, true, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {

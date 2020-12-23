@@ -255,7 +255,7 @@ namespace Business.Core
             /*
              * Get self reference assembly under single file publishing
              * Exclude duplicate routes
-            */
+            
             var attributes = AttributeBase.GetTopAttributes(typeInfo);//GetArgAttr(typeInfo);
 
             var info = attributes.GetAttr<Info>() ?? new Info(type.Name);
@@ -275,8 +275,7 @@ namespace Business.Core
             {
                 return;
             }
-            //Configer.BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
-
+            */
             var (methods, ignores) = GetMethods(typeInfo);
 
             instance = interceptor.Create(type, constructorArguments, constructorArgumentsFunc, ignores);
@@ -310,6 +309,8 @@ namespace Business.Core
                 argType = (argType ?? typeof(Arg<>)).GetGenericTypeDefinition();
             }
 
+            var attributes = AttributeBase.GetTopAttributes(typeInfo);//GetArgAttr(typeInfo);
+
             #region LoggerAttribute
 
             //var loggerBase = attributes.GetAttr<LoggerAttribute>();//AssemblyAttr<LoggerAttribute>(typeInfo.Assembly, GropuAttribute.Comparer);
@@ -339,6 +340,18 @@ namespace Business.Core
 
 #endregion
             */
+            var info = attributes.GetAttr<Info>() ?? new Info(type.Name);
+            info.TypeFullName = type.FullName.Replace('+', '.');
+
+            if (string.IsNullOrWhiteSpace(info.BusinessName))
+            {
+                info.BusinessName = type.Name;
+            }
+
+            if (string.IsNullOrWhiteSpace(info.Alias))
+            {
+                info.Alias = info.BusinessName;
+            }
 
             hasBusiness = typeof(IBusiness).IsAssignableFrom(type);
             var business = hasBusiness ? (IBusiness)instance : null;
