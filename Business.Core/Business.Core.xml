@@ -2118,6 +2118,13 @@
             <param name="encoding"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.Utils.Help.GetBase(System.Exception)">
+            <summary>
+            When overridden in a derived class, returns the System.Exception that is the root cause of one or more subsequent exceptions.
+            </summary>
+            <param name="ex"></param>
+            <returns></returns>
+        </member>
         <member name="M:Business.Core.Utils.Help.ExceptionWrite(System.Exception,System.Boolean,System.Boolean,System.String,System.String,System.Text.Encoding)">
             <summary>
             Write exception to file

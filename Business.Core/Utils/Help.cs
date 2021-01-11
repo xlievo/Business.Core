@@ -2426,6 +2426,18 @@ namespace Business.Core.Utils
         #region WriteLocal
 
         /// <summary>
+        /// When overridden in a derived class, returns the System.Exception that is the root cause of one or more subsequent exceptions.
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <returns></returns>
+        public static System.Exception GetBase(this System.Exception ex)
+        {
+            var inner = ex;
+            while (null != inner?.InnerException) { inner = inner.InnerException; }
+            return inner;
+        }
+
+        /// <summary>
         /// Write exception to file
         /// </summary>
         /// <param name="ex"></param>
@@ -2437,9 +2449,7 @@ namespace Business.Core.Utils
         /// <returns></returns>
         public static System.Exception ExceptionWrite(this System.Exception ex, bool write = false, bool console = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null)
         {
-            var inner = ex;
-            while (null != inner && null != inner.InnerException) { inner = inner.InnerException; }
-
+            var inner = ex.GetBase();
             if (null == inner || (!write && !console)) { return inner; }
 
             var message = string.Format("{0}{1}{0}{2}{3}{2}{4}{2}{5}{2}{6}",
