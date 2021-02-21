@@ -48,7 +48,7 @@ public class Program
             .UseStartup<Startup>()
 
 #if !DEBUG
-            .UseUrls("http://192.168.1.107:5000")
+            //.UseUrls("http://192.168.1.107:5000")
 #endif
             //.UseUrls("http://192.168.1.107:5000")
             //.ConfigureKestrel((context, options) =>

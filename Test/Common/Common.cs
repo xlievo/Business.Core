@@ -308,10 +308,10 @@ public abstract class BusinessBase : BusinessBase<ResultObject<object>>
 
         this.Logger = new Logger(async x =>
         {
-            foreach (var item in x)
-            {
-                Help.Console(item.ToString());
-            }
+            //foreach (var item in x)
+            //{
+            //    Help.Console(item.ToString());
+            //}
             //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
 
         }, new Logger.BatchOptions

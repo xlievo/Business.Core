@@ -132,61 +132,105 @@ namespace Business.Core.Utils
         /// <returns></returns>
         public static IResult ErrorCmd(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, string.Format("Without this Cmd{0}", string.IsNullOrEmpty(cmd) ? null : $" {cmd}"));
 
-        internal static dynamic GetReturnValue(IResult result, MetaData meta)
+        /*
+        /// <summary>
+        /// Exceptions and logic that does not return objects will come here to handle the returned objects
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="meta"></param>
+        /// <returns></returns>
+        internal static dynamic GetReturnValue2(IResult result, MetaData meta)
         {
-            object result2 = result;
+            //Exception status does not conform to the handling of returned object
+            //Exclude object
+            dynamic result2 = meta.HasObject ? result : (meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null);
 
-            if (meta.HasReturn)
-            {
-                if (!meta.HasObject)
-                {
-                    dynamic result3 = null;
-
-                    if (meta.ReturnType.IsValueType)
-                    {
-                        result3 = System.Activator.CreateInstance(meta.ReturnType);
-                    }
-                    //else
-                    //{
-                    //    result3 = Help.CreateInstance(meta.ReturnType);
-                    //}
-
-                    if (meta.HasAsync)
-                    {
-                        return System.Threading.Tasks.Task.FromResult<dynamic>(result3);
-                    }
-
-                    return result3;
-                }
-                else if (meta.ReturnType.IsValueType)
-                {
-                    result2 = System.Activator.CreateInstance(meta.ReturnType);
-                }
-            }
-            else
-            {
-
-                result2 = null;
-            }
-
+            //Processing asynchrony
             if (meta.HasAsync)
             {
+                if (meta.HasValueTask)
+                {
+                    if (meta.HasReturn)
+                    {
+                        if (!meta.HasObject)
+                        {
+                            return System.Activator.CreateInstance(meta.ReturnValueTaskType, result2);
+                        }
+                        //#if NETSTANDARD2_0
+                        //                        if (!meta.HasObject)
+                        //                        {
+                        //                            return System.Activator.CreateInstance(meta.ReturnValueTaskType, result2);
+                        //                        }
+                        //#else
+                        //                        if (meta.ReturnType.IsValueType)
+                        //                        {
+                        //                            return System.Threading.Tasks.ValueTask.FromResult(result2);
+                        //                        }
+
+                        //                        if (!meta.HasObject && !meta.ReturnType.IsValueType)
+                        //                        {
+                        //                            return System.Activator.CreateInstance(meta.ReturnValueTaskType, result2);
+                        //                        }
+                        //#endif
+                        return new System.Threading.Tasks.ValueTask<dynamic>(result2);
+                    }
+
+                    return new System.Threading.Tasks.ValueTask();
+                }
+
+                if (meta.HasReturn && meta.ReturnType.IsValueType)
+                {
+                    return System.Threading.Tasks.Task.FromResult(result2);
+                }
+
+                //check !meta.HasObject && Equals(null, result2)
+                if (!meta.HasObject && meta.HasReturn && !meta.ReturnType.IsValueType)
+                {
+                    return System.Activator.CreateInstance(meta.ReturnValueTaskType, result2).AsTask();
+                }
+
                 return System.Threading.Tasks.Task.FromResult<dynamic>(result2);
             }
 
             return result2;
         }
+        */
 
-        internal static dynamic GetReturnValueIResult<Data>(IResult<Data> result, MetaData meta)
+        /// <summary>
+        /// Exceptions and logic that does not return objects will come here to handle the returned objects
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="meta"></param>
+        /// <returns></returns>
+        internal static dynamic GetReturnValue(IResult result, MetaData meta)
+        {
+            //Exception status does not conform to the handling of returned object
+            //Exclude object
+            if (meta.HasAsync)
+            {
+                dynamic async =
+                    meta.HasReturn ?
+                        meta.HasObject ?
+                            new System.Threading.Tasks.ValueTask<dynamic>(result) :
+                            System.Activator.CreateInstance(meta.ReturnValueTaskType) :
+                        new System.Threading.Tasks.ValueTask();
+
+                return meta.HasValueTask ? async : async.AsTask();
+            }
+
+            return meta.HasObject ? result : (meta.HasReturn && meta.ReturnType.IsValueType ? System.Activator.CreateInstance(meta.ReturnType) : null);
+        }
+
+        internal static dynamic GetReturnValueIResult(dynamic result, MetaData meta)
         {
             if (meta.HasAsync)
             {
-                if (meta.HasIResultGeneric)
+                if (meta.HasValueTask)
                 {
-                    return System.Threading.Tasks.Task.FromResult(result);
+                    return new System.Threading.Tasks.ValueTask<dynamic>(result);
                 }
 
-                return System.Threading.Tasks.Task.FromResult(result as IResult);
+                return System.Threading.Tasks.Task.FromResult(result);
             }
 
             return result;
@@ -3309,7 +3353,7 @@ namespace Business.Core.Utils
             }
             catch (System.Exception ex)
             {
-                return System.Convert.ToString(ex.ExceptionWrite());
+                return System.Convert.ToString(ex.GetBase());
             }
         }
 
@@ -4031,7 +4075,7 @@ namespace Business.Core.Utils
             public System.TimeSpan Interval { get; set; }
 
             /// <summary>
-            /// Return log number, less than 1 no restrictions
+            /// Return log number, less than 1 no restrictions, more than 100 is recommended, MaxNumber = 1 may cause log queue accumulation and memory overflow
             /// </summary>
             public int MaxNumber { get; set; }
         }
@@ -4041,14 +4085,13 @@ namespace Business.Core.Utils
         /// </summary>
         public readonly System.Collections.Concurrent.BlockingCollection<T> queue;
 
-        readonly System.Collections.Concurrent.BlockingCollection<T>[] dequeues;
-
+        /*
         /// <summary>
         /// Queue
         /// </summary>
         /// <param name="call"></param>
         /// <param name="batch"></param>
-        /// <param name="maxWorkThreads">Gets the maximum out queue thread for this queue, default 1</param>
+        /// <param name="maxWorkThreads">The maximum out queue thread for this queue, default 1</param>
         /// <param name="syn">Whether each outgoing thread has synchronous callback, asynchronous by default</param>
         /// <param name="maxCapacity">Gets the max capacity of this queue</param>
         public Queue(System.Func<IEnumerable<T>, System.Threading.Tasks.ValueTask> call, BatchOptions batch = default, int maxWorkThreads = 1, bool syn = false, int? maxCapacity = null)
@@ -4071,6 +4114,7 @@ namespace Business.Core.Utils
                 dequeues[i] = 0 < batch.MaxNumber ? new System.Collections.Concurrent.BlockingCollection<T>(batch.MaxNumber) : isBatch ? new System.Collections.Concurrent.BlockingCollection<T>() : new System.Collections.Concurrent.BlockingCollection<T>(1);
             }
 
+            //out
             System.Threading.Tasks.Task.Factory.StartNew(() =>
             {
                 if (1 == dequeues.Length)
@@ -4087,17 +4131,6 @@ namespace Business.Core.Utils
                         System.Collections.Concurrent.BlockingCollection<T>.AddToAny(dequeues, item);
                     }
                 }
-                //foreach (var item in queue.GetConsumingEnumerable())
-                //{
-                //    if (1 == dequeues.Length)
-                //    {
-                //        dequeues[0].Add(item);
-                //    }
-                //    else
-                //    {
-                //        System.Collections.Concurrent.BlockingCollection<T>.AddToAny(dequeues, item);
-                //    }
-                //}
             }, System.Threading.Tasks.TaskCreationOptions.LongRunning);
 
             System.Threading.Tasks.Parallel.For(0, maxWorkThreads, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = maxWorkThreads }, async c =>
@@ -4119,7 +4152,7 @@ namespace Business.Core.Utils
 
                     if (0 < count && ((0 < capacity && count == capacity) || !isBatch || !isInterval || (isInterval && 0 < watch.Elapsed.CompareTo(batch.Interval))))
                     {
-                        for (int i2 = 0; i2 < count; i2++)
+                        for (int i = 0; i < count; i++)
                         {
                             if (queue.TryTake(out T logger))
                             {
@@ -4156,6 +4189,82 @@ namespace Business.Core.Utils
 
                 list.Clear();// count > 0 ?
             });
+        }
+        */
+
+        /// <summary>
+        /// Queue
+        /// </summary>
+        /// <param name="call"></param>
+        /// <param name="batch"></param>
+        /// <param name="syn">Whether each outgoing thread has synchronous callback, asynchronous by default</param>
+        /// <param name="maxCapacity">the max capacity of this queue</param>
+        public Queue(System.Func<IEnumerable<T>, System.Threading.Tasks.ValueTask> call, BatchOptions batch = default, bool syn = false, int? maxCapacity = null)
+        {
+            if (null == call) { throw new System.ArgumentNullException(nameof(call)); }
+
+            var isInterval = 0 != System.TimeSpan.Zero.CompareTo(batch.Interval);
+            var maxNumber = batch.MaxNumber;
+
+            queue = maxCapacity.HasValue && 0 < maxCapacity.Value ? new System.Collections.Concurrent.BlockingCollection<T>(maxCapacity.Value) : new System.Collections.Concurrent.BlockingCollection<T>();
+
+            var watch = new System.Diagnostics.Stopwatch();
+
+            //out
+            System.Threading.Tasks.Task.Factory.StartNew(async () =>
+            {
+                if (isInterval)
+                {
+                    watch.Start();
+                }
+
+                while (!queue.IsCompleted)
+                {
+                    var count = queue.Count;
+
+                    if (0 < count && ((0 < maxNumber && count >= maxNumber) || !isInterval || (isInterval && 0 < watch.Elapsed.CompareTo(batch.Interval))))
+                    {
+                        var take = 0 < maxNumber ? System.Math.Min(count, maxNumber) : count;
+
+                        var list = new LinkedList<T>();
+
+                        for (int i = 0; i < take; i++)
+                        {
+                            if (queue.TryTake(out T logger))
+                            {
+                                list.AddLast(logger);
+                            }
+                        }
+
+                        if (0 == list.Count)
+                        {
+                            continue;
+                        }
+
+                        if (syn)
+                        {
+                            await call(list).AsTask().ContinueWith(c2 => c2.Exception?.Console());
+                        }
+                        else
+                        {
+                            System.Threading.Tasks.Task.Factory.StartNew(obj => call(obj as IEnumerable<T>).AsTask().ContinueWith(c2 => c2.Exception?.Console()), list);
+                        }
+
+                        if (watch.IsRunning)
+                        {
+                            watch.Restart();
+                        }
+                    }
+
+                    await System.Threading.Tasks.Task.Delay(1);
+                }
+
+                if (watch.IsRunning)
+                {
+                    watch.Stop();
+                }
+
+            }, System.Threading.Tasks.TaskCreationOptions.LongRunning);
         }
     }
 

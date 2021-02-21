@@ -207,8 +207,8 @@ namespace Business.Core
             /// <summary>
             /// BatchOptions
             /// </summary>
-            /// <param name="interval"></param>
-            /// <param name="maxNumber"></param>
+            /// <param name="interval">Return log time interval, default System.TimeSpan.Zero equals not enabled, x seconds is reasonable</param>
+            /// <param name="maxNumber">Return log number, less than 1 no restrictions</param>
             public BatchOptions(System.TimeSpan interval, int maxNumber)
             {
                 Interval = interval;
@@ -226,13 +226,6 @@ namespace Business.Core
             public int MaxNumber { get; set; }
         }
 
-        /// <summary>
-        /// Batch
-        /// </summary>
-        public BatchOptions Batch { get; }
-
-        //public LoggerValueType ValueType { get; set; } = LoggerValueType.In;
-
         internal readonly System.Func<LoggerData, ValueTask> call;
 
         /// <summary>
@@ -244,12 +237,7 @@ namespace Business.Core
         /// Logger
         /// </summary>
         /// <param name="call"></param>
-        public Logger(System.Func<LoggerData, ValueTask> call)//, LoggerValueType loggerValueType = LoggerValueType.In
-        {
-            //this.ValueType = loggerValueType;
-
-            this.call = call;
-        }
+        public Logger(System.Func<LoggerData, ValueTask> call) => this.call = call;
 
         /// <summary>
         /// Logger
@@ -257,57 +245,7 @@ namespace Business.Core
         /// <param name="call"></param>
         /// <param name="batch"></param>
         /// <param name="maxCapacity">Gets the max capacity of this queue</param>
-        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, ValueTask> call, BatchOptions batch = default, int? maxCapacity = null)//, LoggerValueType loggerValueType = LoggerValueType.In
-        {
-            //this.ValueType = loggerValueType;
-
-            loggerQueue = new Queue<LoggerData>(call, new Queue<LoggerData>.BatchOptions(batch.Interval, batch.MaxNumber), maxCapacity: maxCapacity);
-        }
-
-        /*
-        public static LoggerData GetLoggerData(IBusiness business, System.Collections.Generic.IDictionary<string, dynamic> value, string group = null, [System.Runtime.CompilerServices.CallerMemberName] string method = null)
-        {
-            if (!business.Configer.MetaData.TryGetValue(method ?? string.Empty, out MetaData meta))
-            {
-                return default;
-            }
-
-            if (string.IsNullOrWhiteSpace(group))
-            {
-                group = business.Configer.Info.CommandGroupDefault;
-            }
-
-            if (!meta.CommandGroup.Full.TryGetValue(group, out ReadOnlyDictionary<string, CommandAttribute> commands) || 0 == commands?.Count)
-            {
-                return default;
-            }
-
-            var command = commands.First().Value;
-
-            //var argsObjLog = new System.Collections.Generic.List<ArgsLog>(meta.Args.Count);
-
-            //foreach (var c in meta.Args)
-            //{
-            //    if (!c.Group.TryGetValue(command.Key, out ArgGroup argGroup))
-            //    {
-            //        continue;
-            //    }
-
-            //    argsObjLog.Add(new ArgsLog { name = c.Name, value = value[c.Position], logger = argGroup.Logger, iArgInLogger = c.Group[command.Key].IArgInLogger, hasIArg = c.HasIArg });
-            //}
-
-            //if (!meta.MetaLogger.TryGetValue(command.Key, out MetaLogger metaLogger))
-            //{
-            //    return default;
-            //}
-
-            //var logType = Type.Record;
-
-            //var logObjs = LoggerSet(logType, metaLogger, argsObjLog, out _, out _, business.Configer.Logger?.ValueType);
-
-            return new LoggerData { Type = Type.Record, Value = value, Member = meta.FullName, Group = command.Group };
-        }
-        */
+        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, ValueTask> call, BatchOptions batch = default, int? maxCapacity = null) => loggerQueue = new Queue<LoggerData>(call, new Queue<LoggerData>.BatchOptions(batch.Interval, batch.MaxNumber), maxCapacity: maxCapacity);
 
         internal readonly struct ArgsLog
         {
@@ -480,49 +418,4 @@ namespace Business.Core
             }
         }
     }
-
-    /*
-    /// <summary>
-    /// The parameters of the method
-    /// </summary>
-    public class LoggerValue : System.Collections.Generic.Dictionary<string, dynamic>
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="hasIArg"></param>
-        /// <param name="capacity"></param>
-        protected internal LoggerValue(System.Collections.Generic.IDictionary<string, bool> hasIArg, int capacity) : base(capacity) => this.HasIArg = hasIArg;
-
-        /// <summary>
-        /// A combination of parameter names and HasIArg
-        /// </summary>
-        public System.Collections.Generic.IDictionary<string, bool> HasIArg { get; private set; }
-
-        //LoggerValue dictionary;
-
-        /// <summary>
-        /// Filtering input or output objects
-        /// </summary>
-        /// <param name="valueType"></param>
-        /// <returns></returns>
-        public LoggerValue ToValue(Logger.LoggerValueType valueType = Logger.LoggerValueType.In)
-        {
-            var dictionary = new LoggerValue(0 < this.Count ? HasIArg.ToDictionary(c => c.Key, c => false) : HasIArg, this.Count);
-
-            foreach (var item in this)
-            {
-                dictionary.Add(item.Key, HasIArg[item.Key] ? (valueType == Logger.LoggerValueType.Out ? (item.Value as IArg).Out : (item.Value as IArg).In) : item.Value);
-            }
-
-            return dictionary;
-        }
-
-        /// <summary>
-        /// JSON format, if the total number to 0, then returned null
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString() => this.JsonSerialize();
-    }
-    */
 }

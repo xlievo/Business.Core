@@ -333,7 +333,7 @@ public partial class BusinessMember2 : BusinessBase
     [Testing("test, important logic, do not delete!!!",
         "{\"Arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":900.87,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4},\"dateTime\":\"2019-12-02T08:24\",\"MM\":111.0123456,\"fFf\":555,\"bbB\":true}")]
     //"[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]")]
-    public virtual async Task<IResult<Test111>> Test001(Session session222, Token token, Test111? arg, [@CheckNull(CheckValueType = true)] DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal? mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true, BusinessController context2 = null)
+    public virtual async ValueTask<IResult<Test111>> Test001(Session session222, Token token, Test111? arg, [@CheckNull(CheckValueType = true)] DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal? mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true, BusinessController context2 = null)
     {
         var ip = new Business.Core.Auth.Token { Remote = new Business.Core.Auth.Remote(context2.Request.HttpContext.Connection.RemoteIpAddress.ToString(), context2.Request.HttpContext.Connection.RemotePort), Key = "Key", Callback = "Callback" };
 

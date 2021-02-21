@@ -248,7 +248,7 @@ namespace Business.Core
 
         internal readonly bool hasBusiness;
 
-        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type resultType = null, System.Type argType = null, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
+        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type resultType = null, System.Type argType = null, System.Collections.Generic.IEnumerable<System.Type> useTypes = null, Logger logger = null)
         {
             var typeInfo = type.GetTypeInfo();
 
@@ -381,6 +381,11 @@ namespace Business.Core
 
             if (null != business)
             {
+                if (null == business.Logger)
+                {
+                    business.Logger = logger;
+                }
+
                 cfg.Logger = business.Logger;
 
                 business.Configer = cfg;
@@ -886,7 +891,13 @@ namespace Business.Core
 
                 #region method info
 
-                var hasAsync = Help.IsAssignableFrom(typeof(System.Threading.Tasks.Task<>), method.ReturnType, out System.Type[] asyncGeneric) || method.ReturnType == typeof(System.Threading.Tasks.Task);
+                var hasValueTask = Help.IsAssignableFrom(typeof(System.Threading.Tasks.ValueTask<>), method.ReturnType, out System.Type[] asyncGeneric) || method.ReturnType == typeof(System.Threading.Tasks.ValueTask);
+                var hasAsync = Help.IsAssignableFrom(typeof(System.Threading.Tasks.Task<>), method.ReturnType, out System.Type[] asyncGeneric2) || method.ReturnType == typeof(System.Threading.Tasks.Task) || hasValueTask;
+                if (null == asyncGeneric)
+                {
+                    asyncGeneric = asyncGeneric2;
+                }
+
                 var hasReturn = !(typeof(void) == method.ReturnType || (hasAsync && null == asyncGeneric));
                 var hasAsyncGeneric = hasAsync && null != asyncGeneric;
                 var hasIResult = typeof(IResult<>).IsAssignableFrom(hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType, out System.Type[] resultGeneric) || typeof(IResult).IsAssignableFrom(hasAsyncGeneric ? asyncGeneric[0] : method.ReturnType);
@@ -1076,7 +1087,7 @@ namespace Business.Core
                 //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
-                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), tokens, loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, cfg.ArgTypeDefinition, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
+                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), tokens, loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasValueTask, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, cfg.ArgTypeDefinition, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
 
                 if (!metaData.dictionary.TryAdd(name, meta))
                 {
@@ -2093,7 +2104,7 @@ namespace Business.Core
             }
             catch (System.Exception ex)
             {
-                return ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(Help.ExceptionWrite(ex)));
+                return ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(ex.GetBase()));
             }
         }
 
@@ -2157,6 +2168,13 @@ namespace Business.Core
             {
                 if (Meta.HasAsync)
                 {
+                    if (!Meta.HasReturn)
+                    {
+                        await call(parameters);
+
+                        return null;
+                    }
+
                     return await call(parameters);
                 }
                 else
@@ -2174,7 +2192,7 @@ namespace Business.Core
             }
             catch (System.Exception ex)
             {
-                return await System.Threading.Tasks.Task.FromResult(ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(ex.ExceptionWrite())));
+                return await System.Threading.Tasks.Task.FromResult(ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(ex.GetBase())));
             }
         }
 
@@ -2797,6 +2815,7 @@ namespace Business.Core.Meta
         /// <param name="fullName"></param>
         /// <param name="business"></param>
         /// <param name="hasAsync"></param>
+        /// <param name="hasValueTask"></param>
         /// <param name="hasReturn"></param>
         /// <param name="hasIResult"></param>
         /// <param name="hasIResultGeneric"></param>
@@ -2811,7 +2830,7 @@ namespace Business.Core.Meta
         /// <param name="useTypePosition"></param>
         /// <param name="methodTypeFullName"></param>
         /// <param name="doc"></param>
-        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ReadOnlyCollection<Args> tokens, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, string business, bool hasAsync, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, System.Type argTypeDefinition, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
+        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ReadOnlyCollection<Args> tokens, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, string business, bool hasAsync, bool hasValueTask, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, System.Type argTypeDefinition, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
         {
             Accessor = accessor;
             CommandGroup = commandGroup;
@@ -2828,6 +2847,7 @@ namespace Business.Core.Meta
             //this.hasAsync = Utils.Help.IsAssignableFrom(typeof(System.Threading.Tasks.Task<>).GetTypeInfo(), returnType, out System.Type[] arguments) || typeof(System.Threading.Tasks.Task).IsAssignableFrom(returnType);
             //typeof(void) != method.ReturnType
             HasAsync = hasAsync;// Help.IsAssignableFrom(typeof(System.Threading.Tasks.Task<>), returnType, out System.Type[] arguments) || returnType == typeof(System.Threading.Tasks.Task);
+            HasValueTask = hasValueTask;
             HasReturn = hasReturn;// !(typeof(void) == returnType || (HasAsync && null == asyncArguments));
             //typeof(IResult).IsAssignableFrom(method.ReturnType),
             //typeof(System.Object).Equals(method.ReturnType)
@@ -2836,6 +2856,7 @@ namespace Business.Core.Meta
             HasIResultGeneric = hasIResultGeneric;
             //HasObject = hasObject;// typeof(object).Equals(hasAsyncGeneric ? asyncArguments[0] : returnType);
             ReturnType = returnType;// hasAsyncGeneric ? asyncArguments[0] : returnType;
+            ReturnValueTaskType = hasReturn ? typeof(System.Threading.Tasks.ValueTask<>).MakeGenericType(returnType) : null;
             HasObject = typeof(object).Equals(returnType);
             ResultTypeDefinition = resultTypeDefinition;
             //ReturnResult = HasIResult ? resultType.MakeGenericType(null != resultGeneric ? resultGeneric[0] : typeof(string)) : null;
@@ -2938,6 +2959,11 @@ namespace Business.Core.Meta
         public System.Type ReturnType { get; }
 
         /// <summary>
+        /// ReturnValueTaskType
+        /// </summary>
+        public System.Type ReturnValueTaskType { get; }
+
+        /// <summary>
         /// ResultTypeDefinition
         /// </summary>
         public System.Type ResultTypeDefinition { get; }
@@ -2961,6 +2987,11 @@ namespace Business.Core.Meta
         /// HasAsync
         /// </summary>
         public bool HasAsync { get; }
+
+        /// <summary>
+        /// HasValueTask
+        /// </summary>
+        public bool HasValueTask { get; }
 
         /// <summary>
         /// DefaultValue

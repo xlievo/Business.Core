@@ -1349,7 +1349,7 @@
             <param name="group"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.InterceptorExtensions.Finally(Business.Core.Logger,Business.Core.Annotations.CommandAttribute,Business.Core.Meta.MetaData,System.Object,Business.Core.Logger.Type,System.Collections.Generic.Dictionary{System.Int32,Business.Core.IArg},System.Object[],System.String,System.Diagnostics.Stopwatch,System.Object,System.DateTimeOffset)">
+        <member name="M:Business.Core.Utils.InterceptorExtensions.Finally(Business.Core.Logger,Business.Core.Annotations.CommandAttribute,Business.Core.Meta.MetaData,System.Object,Business.Core.Logger.Type,System.Collections.Generic.Dictionary{System.Int32,Business.Core.IArg},System.Object[],System.String,System.Diagnostics.Stopwatch,System.Object,System.DateTimeOffset,System.Func{Business.Core.Configer.MethodAfter,System.Threading.Tasks.Task})">
             <summary>
             Finally
             </summary>
@@ -1364,6 +1364,7 @@
             <param name="watch"></param>
             <param name="token"></param>
             <param name="dtt"></param>
+            <param name="callAfterMethod"></param>
         </member>
         <member name="M:Business.Core.Utils.InterceptorExtensions.GetProcesResult(Business.Core.Annotations.ArgumentAttribute,System.Object,System.Object)">
             <summary>
@@ -1685,6 +1686,14 @@
             </summary>
             <param name="resultTypeDefinition"></param>
             <param name="cmd"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Utils.Help.GetReturnValue(Business.Core.Result.IResult,Business.Core.Meta.MetaData)">
+            <summary>
+            Exceptions and logic that does not return objects will come here to handle the returned objects
+            </summary>
+            <param name="result"></param>
+            <param name="meta"></param>
             <returns></returns>
         </member>
         <member name="M:Business.Core.Utils.Help.GroupEquals(Business.Core.Annotations.GroupAttribute,System.String)">
@@ -2629,7 +2638,7 @@
         </member>
         <member name="P:Business.Core.Utils.Queue`1.BatchOptions.MaxNumber">
             <summary>
-            Return log number, less than 1 no restrictions
+            Return log number, less than 1 no restrictions, more than 100 is recommended, MaxNumber = 1 may cause log queue accumulation and memory overflow
             </summary>
         </member>
         <member name="F:Business.Core.Utils.Queue`1.queue">
@@ -2637,15 +2646,14 @@
             queue
             </summary>
         </member>
-        <member name="M:Business.Core.Utils.Queue`1.#ctor(System.Func{System.Collections.Generic.IEnumerable{`0},System.Threading.Tasks.ValueTask},Business.Core.Utils.Queue{`0}.BatchOptions,System.Int32,System.Boolean,System.Nullable{System.Int32})">
+        <member name="M:Business.Core.Utils.Queue`1.#ctor(System.Func{System.Collections.Generic.IEnumerable{`0},System.Threading.Tasks.ValueTask},Business.Core.Utils.Queue{`0}.BatchOptions,System.Boolean,System.Nullable{System.Int32})">
             <summary>
             Queue
             </summary>
             <param name="call"></param>
             <param name="batch"></param>
-            <param name="maxWorkThreads">Gets the maximum out queue thread for this queue, default 1</param>
             <param name="syn">Whether each outgoing thread has synchronous callback, asynchronous by default</param>
-            <param name="maxCapacity">Gets the max capacity of this queue</param>
+            <param name="maxCapacity">the max capacity of this queue</param>
         </member>
         <member name="T:Business.Core.IArg">
             <summary>
@@ -3694,7 +3702,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Meta.MetaData.#ctor(System.Func{System.Object,System.Object[],System.Object},Business.Core.Meta.CommandGroup,Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Meta.MetaLogger},System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Type,System.Type,System.Type,System.Type,System.Object[],System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},System.Int32,System.String,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.Int32,System.Type},System.String,Business.Core.Annotations.DocAttribute)">
+        <member name="M:Business.Core.Meta.MetaData.#ctor(System.Func{System.Object,System.Object[],System.Object},Business.Core.Meta.CommandGroup,Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Meta.MetaLogger},System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Type,System.Type,System.Type,System.Type,System.Object[],System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},System.Int32,System.String,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.Int32,System.Type},System.String,Business.Core.Annotations.DocAttribute)">
             <summary>
             MetaData
             </summary>
@@ -3710,6 +3718,7 @@
             <param name="fullName"></param>
             <param name="business"></param>
             <param name="hasAsync"></param>
+            <param name="hasValueTask"></param>
             <param name="hasReturn"></param>
             <param name="hasIResult"></param>
             <param name="hasIResultGeneric"></param>
@@ -3805,6 +3814,11 @@
             ReturnType
             </summary>
         </member>
+        <member name="P:Business.Core.Meta.MetaData.ReturnValueTaskType">
+            <summary>
+            ReturnValueTaskType
+            </summary>
+        </member>
         <member name="P:Business.Core.Meta.MetaData.ResultTypeDefinition">
             <summary>
             ResultTypeDefinition
@@ -3828,6 +3842,11 @@
         <member name="P:Business.Core.Meta.MetaData.HasAsync">
             <summary>
             HasAsync
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.HasValueTask">
+            <summary>
+            HasValueTask
             </summary>
         </member>
         <member name="P:Business.Core.Meta.MetaData.DefaultValue">
@@ -3889,6 +3908,13 @@
             <summary>
             UseArgType
             </summary>
+        </member>
+        <member name="M:Business.Core.IBootstrap.UseLogger(Business.Core.Logger)">
+            <summary>
+            Log callback for all business classes
+            </summary>
+            <param name="logger"></param>
+            <returns></returns>
         </member>
         <member name="M:Business.Core.IBootstrap.Build">
             <summary>
@@ -3962,6 +3988,11 @@
         <member name="P:Business.Core.BootstrapConfig.BuildAfter">
             <summary>
             BuildAfter
+            </summary>
+        </member>
+        <member name="P:Business.Core.BootstrapConfig.Logger">
+            <summary>
+            Log callback for all business classes
             </summary>
         </member>
         <member name="T:Business.Core.BootstrapConfig.UseDocConfig">
@@ -4105,6 +4136,13 @@
             <param name="argType"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.Bootstrap.UseLogger(Business.Core.Logger)">
+            <summary>
+            Log callback for all business classes
+            </summary>
+            <param name="logger"></param>
+            <returns></returns>
+        </member>
         <member name="T:Business.Core.Bootstrap`1">
             <summary>
             Bootstrap
@@ -4157,6 +4195,13 @@
             <param name="argType"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.Bootstrap`1.UseLogger(Business.Core.Logger)">
+            <summary>
+            Log callback for all business classes
+            </summary>
+            <param name="logger"></param>
+            <returns></returns>
+        </member>
         <member name="T:Business.Core.BootstrapAll">
             <summary>
             BootstrapAll
@@ -4207,6 +4252,13 @@
             use arg type
             </summary>
             <param name="argType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.BootstrapAll.UseLogger(Business.Core.Logger)">
+            <summary>
+            Log callback for all business classes
+            </summary>
+            <param name="logger"></param>
             <returns></returns>
         </member>
         <member name="T:Business.Core.BootstrapAll`1">
@@ -4265,6 +4317,13 @@
             use arg type
             </summary>
             <param name="argType"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.BootstrapAll`1.UseLogger(Business.Core.Logger)">
+            <summary>
+            Log callback for all business classes
+            </summary>
+            <param name="logger"></param>
             <returns></returns>
         </member>
         <member name="T:Business.Core.Document.Xml">
@@ -4521,12 +4580,12 @@
         </member>
         <member name="P:Business.Core.Document.Options.Debug">
             <summary>
-            Whether to render the Debug element in the UI
+            Whether to render the Debug element in the UI, true is on by default
             </summary>
         </member>
         <member name="P:Business.Core.Document.Options.Benchmark">
             <summary>
-            Whether to render the Benchmark element in the UI
+            Whether to render the Benchmark element in the UI, true is on by default
             </summary>
         </member>
         <member name="P:Business.Core.Document.Options.Testing">
@@ -5441,8 +5500,8 @@
             <summary>
             BatchOptions
             </summary>
-            <param name="interval"></param>
-            <param name="maxNumber"></param>
+            <param name="interval">Return log time interval, default System.TimeSpan.Zero equals not enabled, x seconds is reasonable</param>
+            <param name="maxNumber">Return log number, less than 1 no restrictions</param>
         </member>
         <member name="P:Business.Core.Logger.BatchOptions.Interval">
             <summary>
@@ -5452,11 +5511,6 @@
         <member name="P:Business.Core.Logger.BatchOptions.MaxNumber">
             <summary>
             Return log number, less than 1 no restrictions
-            </summary>
-        </member>
-        <member name="P:Business.Core.Logger.Batch">
-            <summary>
-            Batch
             </summary>
         </member>
         <member name="F:Business.Core.Logger.loggerQueue">

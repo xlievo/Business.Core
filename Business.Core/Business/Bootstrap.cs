@@ -47,6 +47,13 @@ namespace Business.Core
         IBootstrap UseArgType(System.Type argType);
 
         /// <summary>
+        /// Log callback for all business classes
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        IBootstrap UseLogger(Logger logger);
+
+        /// <summary>
         /// Build
         /// </summary>
         dynamic Build();
@@ -131,6 +138,11 @@ namespace Business.Core
         /// </summary>
         public System.Action<IBootstrap> BuildAfter { get; set; }
 
+        /// <summary>
+        /// Log callback for all business classes
+        /// </summary>
+        public Logger Logger { get; set; }
+
         internal readonly System.Collections.Generic.IList<System.Type> useTypes = new System.Collections.Generic.List<System.Type>();
 
         /// <summary>
@@ -179,6 +191,8 @@ namespace Business.Core
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
         IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+
+        IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
         #endregion
 
@@ -275,7 +289,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -356,6 +370,17 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// Log callback for all business classes
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public virtual Bootstrap UseLogger(Logger logger)
+        {
+            Config.Logger = logger;
+            return this;
+        }
+
         #endregion
     }
 
@@ -385,6 +410,8 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
 
+        IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
+
         dynamic IBootstrap.Build() => Build();
 
         #endregion
@@ -399,7 +426,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -480,6 +507,17 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// Log callback for all business classes
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public virtual Bootstrap<Business> UseLogger(Logger logger)
+        {
+            Config.Logger = logger;
+            return this;
+        }
+
         #endregion
     }
 
@@ -506,6 +544,8 @@ namespace Business.Core
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
         IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+
+        IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
         dynamic IBootstrap.Build()
         {
@@ -535,7 +575,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
+                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger);
                             //Create(type, bootstrap.constructorArguments);
                             return true;
                         }
@@ -543,7 +583,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes);
+                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger);
                         return true;
                     }
                 }
@@ -647,6 +687,17 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// Log callback for all business classes
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public virtual BootstrapAll UseLogger(Logger logger)
+        {
+            Config.Logger = logger;
+            return this;
+        }
+
         #endregion
     }
 
@@ -681,6 +732,8 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
 
+        IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
+
         dynamic IBootstrap.Build()
         {
             Build();
@@ -709,7 +762,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes).instance is Business business)
+                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger).instance is Business business)
                             {
                                 BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                             }
@@ -720,7 +773,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes).instance is Business business)
+                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger).instance is Business business)
                         {
                             BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                         }
@@ -824,6 +877,17 @@ namespace Business.Core
             }
 
             Config.ArgType = argType;
+            return this;
+        }
+
+        /// <summary>
+        /// Log callback for all business classes
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <returns></returns>
+        public virtual BootstrapAll<Business> UseLogger(Logger logger)
+        {
+            Config.Logger = logger;
             return this;
         }
 

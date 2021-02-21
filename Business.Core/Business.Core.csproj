@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
     <AssemblyName>Business.Core</AssemblyName>
     <RootNamespace>Business</RootNamespace>
-    <Version>1.6.6.2</Version>
+    <Version>1.7.0</Version>
     <Description>https://github.com/xlievo/Business.Core
 https://www.nuget.org/packages/Business.Core/
 </Description>
@@ -14,8 +14,8 @@ https://www.nuget.org/packages/Business.Core/
     <PackageIconUrl></PackageIconUrl>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <AssemblyVersion>1.6.6.2</AssemblyVersion>
-    <FileVersion>1.6.6.2</FileVersion>
+    <AssemblyVersion>1.7.0.0</AssemblyVersion>
+    <FileVersion>1.7.0.0</FileVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
     <PackageTags>Business.Core</PackageTags>
@@ -33,7 +33,7 @@ https://www.nuget.org/packages/Business.Core/
     <PackageReference Include="Castle.Core" Version="4.4.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-    <PackageReference Include="System.Text.Json" Version="5.0.0" />
+    <PackageReference Include="System.Text.Json" Version="5.0.1" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageReference Include="System.Text.Encodings.Web" Version="5.0.0" />
   </ItemGroup>

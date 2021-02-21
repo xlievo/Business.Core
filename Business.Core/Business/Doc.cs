@@ -403,14 +403,14 @@ namespace Business.Core.Document
         public string Host { get; set; }
 
         /// <summary>
-        /// Whether to render the Debug element in the UI
+        /// Whether to render the Debug element in the UI, true is on by default
         /// </summary>
-        public bool Debug { get; set; }
+        public bool Debug { get; set; } = true;
 
         /// <summary>
-        /// Whether to render the Benchmark element in the UI
+        /// Whether to render the Benchmark element in the UI, true is on by default
         /// </summary>
-        public bool Benchmark { get; set; }
+        public bool Benchmark { get; set; } = true;
 
         /// <summary>
         /// Whether to render the Testing element in the UI

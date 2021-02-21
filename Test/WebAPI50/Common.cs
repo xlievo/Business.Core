@@ -306,19 +306,23 @@ public abstract class BusinessBase : BusinessBase<ResultObject<object>>
         //    }
         //});
 
-        this.Logger = new Logger(async x =>
-        {
-            //foreach (var item in x)
-            //{
-            //    Help.Console(item.ToString());
-            //}
-            //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
+        //this.Logger = new Logger(async x =>
+        //{
+        //    //foreach (var item in x)
+        //    //{
+        //    //    Help.Console(item.ToString());
+        //    //}
+        //    //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
+        //    //Help.Console(.ToString());
 
-        }, new Logger.BatchOptions
-        {
-            Interval = TimeSpan.FromSeconds(6),
-            MaxNumber = 2
-        });
+        //    Help.Console(x.Count().ToString());
+
+        //}, new Logger.BatchOptions()
+        //{
+        //    Interval = TimeSpan.FromSeconds(6),
+        //    MaxNumber = 2011
+        //    //,MaxWorkThreads = 30
+        //});
     }
 }
 
@@ -506,7 +510,23 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 o.GroupEnable = true;
                 //o.Host = Common.Host.Addresses;
                 o.Navigtion = true;
-            });
+            })
+            .UseLogger(new Logger(async x =>
+            {
+                //foreach (var item in x)
+                //{
+                //    Help.Console(item.ToString());
+                //}
+                //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
+                //Help.Console(.ToString());
+
+                Help.Console(x.Count().ToString());
+
+            }, new Logger.BatchOptions()
+            {
+                Interval = TimeSpan.FromSeconds(6),
+                MaxNumber = 2011
+            }));
         bootstrap.Build();
 
         //writ url to page

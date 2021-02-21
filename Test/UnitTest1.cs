@@ -122,7 +122,7 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
         });
     }
 
-    public virtual async Task<dynamic> TestLoggerAndArg(
+    public virtual async ValueTask<dynamic> TestLoggerAndArg(
         Use01 use01,
 
         Arg<Arg01> arg01,
@@ -153,7 +153,7 @@ public enum TestMode
 [Logger]
 public class BusinessMember2
 {
-    public virtual async Task<dynamic> Test000(
+    public virtual async ValueTask<dynamic> Test000(
         [Use(ParameterName = true)] dynamic use01,
 
         Arg00 arg01,
@@ -176,7 +176,7 @@ public class BusinessMember2
     [Command(Group = "G01", OnlyName = "G01Test002")]
     [Command(OnlyName = "DEFTest001")]
     [Command(OnlyName = "Test001")]
-    public virtual async Task<dynamic> Test001(
+    public virtual async ValueTask<dynamic> Test001(
         [Use(ParameterName = true)] dynamic use01,
 
         Arg01 arg01,
@@ -234,6 +234,19 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         //        }
         //    }
         //};
+
+        this.Logger = new Logger(async (Logger.LoggerData x) =>
+        {
+            //foreach (var item in x)
+            //{
+            //    Help.Console(item.ToString());
+            //}
+            //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
+            //Help.Console(.ToString());
+
+            Help.Console(x.ToString());
+
+        });
     }
 
     #region realization
@@ -256,7 +269,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
     #endregion
 
-    public virtual async Task<dynamic> Test000(
+    public virtual async ValueTask<dynamic> Test000(
         [Use(ParameterName = true)] dynamic use01,
 
         Arg00 arg01,
@@ -286,7 +299,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
     [Command(Group = "G01", OnlyName = "G01Test002")]
     [Command(OnlyName = "DEFTest001")]
     [Command(OnlyName = "Test001")]
-    public virtual async Task<dynamic> Test001(
+    public virtual async ValueTask<dynamic> Test001(
         [Use(ParameterName = true)] dynamic use01,
 
         Arg01 arg01,
@@ -369,7 +382,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         =>
         this.ResultCreate(arg01.A.Out);
 
-    public virtual async Task Test0011(
+    public virtual async ValueTask Test0011(
         [Use(ParameterName = true)] dynamic use01,
 
         Arg01 arg01,
@@ -406,16 +419,121 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
     { }
 
+    public virtual async ValueTask Test00122(
+        [Use(ParameterName = true)] dynamic use01,
+
+        Arg01 arg01,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
+    { }
+
     [Command(Group = "G02", OnlyName = "G02Test002")]
-    public virtual async Task<dynamic> Test002() => this.ResultCreate(200);
+    public virtual async ValueTask<dynamic> Test002() => this.ResultCreate(200);
 
-    public virtual async Task<dynamic> Test003() => this.ResultCreate(-200);
+    public virtual async ValueTask<dynamic> Test003() => this.ResultCreate(-200);
 
-    public virtual async Task<dynamic> Test004() => this.ResultCreate(new { a = "aaa" });
+    public virtual async ValueTask<dynamic> Test004() => this.ResultCreate(new { a = "aaa" });
 
+    // public virtual async ValueTask Test0044() => this.ResultCreate(-200);
+
+    public virtual async ValueTask<int> Test001222(
+        [Use(ParameterName = true)] dynamic use01,
+
+        Arg01 arg01,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default) => 333;
+
+    public virtual async ValueTask<string> Test001223(
+       [Use(ParameterName = true)] dynamic use01,
+
+       Arg01 arg01,
+
+       [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
+            decimal b = 0.0234m,
+
+       [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+       [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default) => "333";
+
+    public virtual async void Test00122x(
+        [Use(ParameterName = true)] dynamic use01,
+
+        Arg01 arg01,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
+    { }
+
+    public virtual int Test001222x(
+        [Use(ParameterName = true)] dynamic use01,
+
+        Arg01 arg01,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
+            decimal b = 0.0234m,
+
+        [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default) => -333;
+
+    public virtual string Test001223x(
+       [Use(ParameterName = true)] dynamic use01,
+
+       Arg01 arg01,
+
+       [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113)]
+            [Alias("arg.b")]
+            decimal b = 0.0234m,
+
+       [Business.Core.Annotations.Ignore(IgnoreMode.BusinessArg)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 113, Alias = "arg.c", Group = CommandGroupDefault.Group)]
+            [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
+            decimal c = 0.0234m,
+
+       [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default) => "333";
 
     //Test005
-    public virtual async Task<dynamic> Test005(TestMode mode)
+    public virtual async ValueTask<dynamic> Test005(TestMode mode)
     {
         switch (mode)
         {
@@ -425,11 +543,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult> Test005a(TestMode mode)
+    public virtual async ValueTask<IResult> Test005a(TestMode mode)
     {
         switch (mode)
         {
@@ -439,7 +557,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -453,12 +571,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //Test006
-    public virtual async Task<dynamic> Test006(TestMode mode)
+    public virtual async ValueTask<dynamic> Test006(TestMode mode)
     {
         switch (mode)
         {
@@ -468,11 +586,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult<string>> Test006a(TestMode mode)
+    public virtual async ValueTask<IResult<string>> Test006a(TestMode mode)
     {
         switch (mode)
         {
@@ -482,7 +600,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -496,12 +614,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //Test007
-    public virtual async Task<dynamic> Test007(TestMode mode)
+    public virtual async ValueTask<dynamic> Test007(TestMode mode)
     {
         switch (mode)
         {
@@ -510,11 +628,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult<decimal>> Test007a(TestMode mode)
+    public virtual async ValueTask<IResult<decimal>> Test007a(TestMode mode)
     {
         switch (mode)
         {
@@ -523,7 +641,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -536,12 +654,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //Test008
-    public virtual async Task<dynamic> Test008(TestMode mode)
+    public virtual async ValueTask<dynamic> Test008(TestMode mode)
     {
         switch (mode)
         {
@@ -550,11 +668,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult<int>> Test008a(TestMode mode)
+    public virtual async ValueTask<IResult<int>> Test008a(TestMode mode)
     {
         switch (mode)
         {
@@ -563,7 +681,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -576,12 +694,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //Test009
-    public virtual async Task<dynamic> Test009(TestMode mode)
+    public virtual async ValueTask<dynamic> Test009(TestMode mode)
     {
         switch (mode)
         {
@@ -591,11 +709,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult<dynamic>> Test009a(TestMode mode)
+    public virtual async ValueTask<IResult<dynamic>> Test009a(TestMode mode)
     {
         switch (mode)
         {
@@ -605,7 +723,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -619,12 +737,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //Test010
-    public virtual async Task<dynamic> Test010(TestMode mode)
+    public virtual async ValueTask<dynamic> Test010(TestMode mode)
     {
         switch (mode)
         {
@@ -633,11 +751,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult> Test010a(TestMode mode)
+    public virtual async ValueTask<IResult> Test010a(TestMode mode)
     {
         switch (mode)
         {
@@ -646,7 +764,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -659,12 +777,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //Test011
-    public virtual async Task<dynamic> Test011(TestMode mode)
+    public virtual async ValueTask<dynamic> Test011(TestMode mode)
     {
         switch (mode)
         {
@@ -674,11 +792,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult<int?>> Test011a(TestMode mode)
+    public virtual async ValueTask<IResult<int?>> Test011a(TestMode mode)
     {
         switch (mode)
         {
@@ -688,7 +806,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -702,12 +820,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //Test012
-    public virtual async Task<dynamic> Test012(TestMode mode)
+    public virtual async ValueTask<dynamic> Test012(TestMode mode)
     {
         switch (mode)
         {
@@ -716,11 +834,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult<DateTime>> Test012a(TestMode mode)
+    public virtual async ValueTask<IResult<DateTime>> Test012a(TestMode mode)
     {
         switch (mode)
         {
@@ -729,7 +847,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -742,12 +860,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //Test013
-    public virtual async Task<dynamic> Test013(TestMode mode)
+    public virtual async ValueTask<dynamic> Test013(TestMode mode)
     {
         switch (mode)
         {
@@ -757,11 +875,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult<DateTime?>> Test013a(TestMode mode)
+    public virtual async ValueTask<IResult<DateTime?>> Test013a(TestMode mode)
     {
         switch (mode)
         {
@@ -771,7 +889,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -785,7 +903,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -798,7 +916,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -811,7 +929,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return default;
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return default;
         }
     }
@@ -824,7 +942,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return default;
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return default;
         }
     }
@@ -837,12 +955,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return default;
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return default;
         }
     }
     //Test014
-    public virtual async Task Test014(TestMode mode)
+    public virtual async ValueTask Test014(TestMode mode)
     {
         switch (mode)
         {
@@ -851,7 +969,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 break;
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: break;
         }
     }
@@ -877,13 +995,13 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 break;
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: break;
         }
     }
 
     //TestUse01
-    public virtual async Task<dynamic> TestUse01(TestMode mode, [Use(ParameterName = true)] dynamic use01)
+    public virtual async ValueTask<dynamic> TestUse01(TestMode mode, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -892,11 +1010,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult> TestUse01a(TestMode mode, [Use(ParameterName = true)] dynamic use01)
+    public virtual async ValueTask<IResult> TestUse01a(TestMode mode, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -905,7 +1023,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -918,12 +1036,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //TestUse02
-    public virtual async Task<dynamic> TestUse02(TestMode mode, IToken token = default)
+    public virtual async ValueTask<dynamic> TestUse02(TestMode mode, IToken token = default)
     {
         switch (mode)
         {
@@ -932,12 +1050,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
 
-    public virtual async Task<IResult<IToken>> TestUse02a(TestMode mode, IToken token = default)
+    public virtual async ValueTask<IResult<IToken>> TestUse02a(TestMode mode, IToken token = default)
     {
         switch (mode)
         {
@@ -946,7 +1064,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -959,12 +1077,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //TestUse03
-    public virtual async Task<dynamic> TestUse03(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
+    public virtual async ValueTask<dynamic> TestUse03(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -973,11 +1091,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult<string>> TestUse03a(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
+    public virtual async ValueTask<IResult<string>> TestUse03a(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -986,7 +1104,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -999,12 +1117,12 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
     //TestAnonymous
-    public virtual async Task<dynamic> TestAnonymous(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
+    public virtual async ValueTask<dynamic> TestAnonymous(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -1013,11 +1131,11 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
-    public virtual async Task<IResult> TestAnonymousa(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
+    public virtual async ValueTask<IResult> TestAnonymousa(TestMode mode, dynamic a, [Use(ParameterName = true)] dynamic use01)
     {
         switch (mode)
         {
@@ -1026,7 +1144,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
@@ -1039,15 +1157,15 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             case TestMode.ERROR:
                 return this.ResultCreate(-999, "test error");
             case TestMode.Exception:
-                throw new System.Exception("exception");
+                throw new Exception("exception");
             default: return this.ResultCreate();
         }
     }
 
-    public virtual async Task<dynamic> TestAnonymous2(dynamic a, [Use(ParameterName = true)] dynamic use01) => new { a, b = use01 };
-    public virtual async Task<dynamic> TestAnonymous2e(dynamic a, [Use(ParameterName = true)] dynamic use01) => this.ResultCreate(-999, "test error");
+    public virtual async ValueTask<dynamic> TestAnonymous2(dynamic a, [Use(ParameterName = true)] dynamic use01) => new { a, b = use01 };
+    public virtual async ValueTask<dynamic> TestAnonymous2e(dynamic a, [Use(ParameterName = true)] dynamic use01) => this.ResultCreate(-999, "test error");
 
-    public virtual async Task<dynamic> TestDynamic(dynamic a, [Use(ParameterName = true)] dynamic use01) => use01;
+    public virtual async ValueTask<dynamic> TestDynamic(dynamic a, [Use(ParameterName = true)] dynamic use01) => use01;
 
     /// <summary>
     /// Attr01
@@ -1174,7 +1292,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    public virtual async Task<dynamic> TestCollection(
+    public virtual async ValueTask<dynamic> TestCollection(
         [CheckNull(-1100)]
         [ArgumentDefault(-1102)]
         //[CheckNull(-1101, CollectionItem = true)]
@@ -1183,7 +1301,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         return this.ResultCreate();
     }
 
-    public virtual async Task<dynamic> TestDict(
+    public virtual async ValueTask<dynamic> TestDict(
         [CheckNull(-1100)]
         [ArgumentDefault(-1102)]
         //[CheckNull(-1101, CollectionItem = true)]
@@ -1218,7 +1336,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         public string A { get; set; }
     }
 
-    public virtual async Task<dynamic> TestHasLower(Arg<List<TestHasLowerArg>> a, TestHasLowerArg_b b = default, string c = default)
+    public virtual async ValueTask<dynamic> TestHasLower(Arg<List<TestHasLowerArg>> a, TestHasLowerArg_b b = default, string c = default)
     {
         return this.ResultCreate();
     }
@@ -1243,7 +1361,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    public virtual async Task<dynamic> TestHasLower2(Arg<TestHasLowerArg2> a, TestHasLowerArg_b b = default, string c = default)
+    public virtual async ValueTask<dynamic> TestHasLower2(Arg<TestHasLowerArg2> a, TestHasLowerArg_b b = default, string c = default)
     {
         return this.ResultCreate();
     }
@@ -1269,7 +1387,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
         public async override ValueTask<IResult> Proces(dynamic value)
         {
-            throw new System.Exception($"Attribute Proces exception!");
+            throw new Exception($"Attribute Proces exception!");
         }
     }
 
@@ -1293,7 +1411,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    public virtual async Task<dynamic> TestCollectionException(Arg<List<TestCollectionExceptionArg>> a) => this.ResultCreate();
+    public virtual async ValueTask<dynamic> TestCollectionException(Arg<List<TestCollectionExceptionArg>> a) => this.ResultCreate();
 
     public class TestExceptionArg
     {
@@ -1315,7 +1433,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    public virtual async Task<dynamic> TestException(Arg<TestExceptionArg> a) => this.ResultCreate();
+    public virtual async ValueTask<dynamic> TestException(Arg<TestExceptionArg> a) => this.ResultCreate();
 }
 
 [TestClass]
@@ -1536,7 +1654,7 @@ public class TestBusinessMember
             //args
             new object[] { new Arg01 { A = "abc" }.JsonSerialize(), 2, 2 },
             //useObj
-            new UseEntry(new Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
+            new UseEntry(new Token { Key = "a", Remote = new Remote("b") }));
         Assert.AreEqual(t4.Message, null);
         Assert.AreEqual(t4.State, t2.State);
         Assert.AreEqual(t4.HasData, false);
@@ -1552,6 +1670,9 @@ public class TestBusinessMember
         var t7 = AsyncCall(business.Command, "Test004");
         Assert.AreEqual(t7.Message, null);
         Assert.AreEqual(t7.Data.a, "aaa");
+
+        //var t77 = AsyncCall(business.Command, "Test0044");
+        //Assert.AreEqual(t77, null);
 
 
         var t8 = Checked("Test005", 1, null, null);
@@ -1640,7 +1761,7 @@ public class TestBusinessMember
         t8 = Checked("TestUse01b", 1, null, null, new UseEntry("sss", "use01"));
         Assert.AreEqual(t8, "sss");
 
-        var token = new Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") };
+        var token = new Token { Key = "a", Remote = new Remote("b") };
         t8 = Checked("TestUse02", 1, null, null, new UseEntry(token));
         Assert.AreEqual(t8, token);
         t8 = Checked("TestUse02a", 1, null, null, new UseEntry(token));
@@ -1670,18 +1791,18 @@ public class TestBusinessMember
         Assert.AreEqual(t20.a, "abc");
         Assert.AreEqual(t20.b, "sss");
 
-        var t21result = new Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") };
+        var t21result = new Token { Key = "a", Remote = new Remote("b") };
         var t21 = AsyncCall(business.Command, "TestDynamic", null, new object[] { "abc" }, new UseEntry(t21result, "use01"));
         Assert.AreEqual(t21, t21result);
 
         var b2 = Member2.Test001(null, new Arg01 { A = "abc" });
-        b2.Wait();
+        b2.AsTask().Wait();
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(b2.Result.GetType()), true);
         Assert.AreEqual(b2.Result.State, -113);
         Assert.AreEqual(b2.Result.Message, "arg.b minimum range 2");
 
         var t00 = Member2.Test000(null, new Arg00 { A = "abc" });
-        t00.Wait();
+        t00.AsTask().Wait();
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(t00.Result.GetType()), true);
         Assert.AreEqual(t00.Result.State, -113);
         Assert.AreEqual(t00.Result.Message, "arg.b minimum range 2");
@@ -1690,11 +1811,11 @@ public class TestBusinessMember
     [TestMethod]
     public void TestResult01()
     {
-        var t00 = Member.Test000(null, new Arg00 { A = "abc" });
-        t00.Wait();
-        Assert.AreEqual(typeof(IResult).IsAssignableFrom(t00.Result.GetType()), true);
-        Assert.AreEqual(t00.Result.State, -113);
-        Assert.AreEqual(t00.Result.Message, "arg.b minimum range 2");
+        //var t00 = Member.Test000(null, new Arg00 { A = "abc" });
+        //t00.AsTask().Wait();
+        //Assert.AreEqual(typeof(IResult).IsAssignableFrom(t00.Result.GetType()), true);
+        //Assert.AreEqual(t00.Result.State, -113);
+        //Assert.AreEqual(t00.Result.Message, "arg.b minimum range 2");
 
         var t000 = AsyncCall(Member.Command, "Test000", null, new object[] { new Arg00 { A = "abc" }, 2, 2 });
         Assert.AreEqual(t000.State, 1);
@@ -1702,13 +1823,13 @@ public class TestBusinessMember
         Assert.AreEqual(t000.HasData, true);
 
         var t0 = Member.Test001(null, new Arg01 { A = "abc" });
-        t0.Wait();
+        t0.AsTask().Wait();
         Assert.AreEqual(typeof(IResult).IsAssignableFrom(t0.Result.GetType()), true);
         Assert.AreEqual(t0.Result.State, -113);
         Assert.AreEqual(t0.Result.Message, "arg.b minimum range 2");
 
         var t1 = Member.Test001(null, new Arg01 { A = "abc" }, 2, 2);
-        t1.Wait();
+        t1.AsTask().Wait();
         Assert.AreEqual(t1.Result.State, 1);
         Assert.AreEqual(t1.Result.HasData, true);
 
@@ -1801,10 +1922,10 @@ public class TestBusinessMember
     public void TestResult011()
     {
         var t0 = Member.Test0011(null, new Arg01 { A = "abc" });
-        t0.Wait();
+        t0.AsTask().Wait();
 
         var t1 = Member.Test0011(null, new Arg01 { A = "abc" }, 2, 2);
-        t1.Wait();
+        t1.AsTask().Wait();
 
         //Cmd
         var t2 = Cmd.AsyncCall("Test0011", new object[] { new Arg01 { A = "abc" } });
@@ -1834,6 +1955,129 @@ public class TestBusinessMember
         t3.AsTask().Wait();
         Assert.IsNull(t3.Result);
     }
+
+    [TestMethod]
+    public void TestResult0122()
+    {
+        Member.Test00122(null, new Arg01 { A = "abc" });
+
+        Member.Test00122(null, new Arg01 { A = "abc" }, 2, 2);
+
+        Member.Test00122(null, new Arg01 { A = "abc", B = "ex" }, 2, 2);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test00122", new object[] { new Arg01 { A = "abc" } });
+        t2.AsTask().Wait();
+        Assert.IsNull(t2.Result);
+
+        var t3 = Cmd.AsyncCall("Test00122", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.AsTask().Wait();
+        Assert.IsNull(t3.Result);
+    }
+
+    [TestMethod]
+    public void TestResult01222()
+    {
+        var d =  Member.Test001222(null, new Arg01 { A = "abc" });
+
+        Assert.AreEqual(d.Result, 0);
+
+        d = Member.Test001222(null, new Arg01 { A = "abc" }, 2, 2);
+
+        d = Member.Test001222(null, new Arg01 { A = "abc", B = "ex" }, 2, 2);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test001222", new object[] { new Arg01 { A = "abc" } });
+        t2.AsTask().Wait();
+        Assert.AreEqual(t2.Result, 0);
+
+        var t3 = Cmd.AsyncCall("Test001222", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.AsTask().Wait();
+        Assert.AreEqual(t3.Result, 333);
+    }
+
+    [TestMethod]
+    public void TestResult01223()
+    {
+        var d = Member.Test001223(null, new Arg01 { A = "abc" });
+
+        Assert.AreEqual(d.Result, null);
+
+        d = Member.Test001223(null, new Arg01 { A = "abc" }, 2, 2);
+
+        d = Member.Test001223(null, new Arg01 { A = "abc", B = "ex" }, 2, 2);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test001223", new object[] { new Arg01 { A = "abc" } });
+        t2.AsTask().Wait();
+        Assert.AreEqual(t2.Result, null);
+
+        var t3 = Cmd.AsyncCall("Test001223", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.AsTask().Wait();
+        Assert.AreEqual(t3.Result, "333");
+    }
+
+    [TestMethod]
+    public void TestResult0122x()
+    {
+        Member.Test00122x(null, new Arg01 { A = "abc" });
+
+        Member.Test00122x(null, new Arg01 { A = "abc" }, 2, 2);
+
+        Member.Test00122x(null, new Arg01 { A = "abc", B = "ex" }, 2, 2);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test00122x", new object[] { new Arg01 { A = "abc" } });
+        t2.AsTask().Wait();
+        Assert.IsNull(t2.Result);
+
+        var t3 = Cmd.AsyncCall("Test00122x", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.AsTask().Wait();
+        Assert.IsNull(t3.Result);
+    }
+
+    [TestMethod]
+    public void TestResult01222x()
+    {
+        var d = Member.Test001222x(null, new Arg01 { A = "abc" });
+
+        Assert.AreEqual(d, 0);
+
+        d = Member.Test001222x(null, new Arg01 { A = "abc" }, 2, 2);
+
+        d = Member.Test001222x(null, new Arg01 { A = "abc", B = "ex" }, 2, 2);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test001222x", new object[] { new Arg01 { A = "abc" } });
+        t2.AsTask().Wait();
+        Assert.AreEqual(t2.Result, 0);
+
+        var t3 = Cmd.AsyncCall("Test001222x", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.AsTask().Wait();
+        Assert.AreEqual(t3.Result, -333);
+    }
+
+    [TestMethod]
+    public void TestResult01223x()
+    {
+        var d = Member.Test001223x(null, new Arg01 { A = "abc" });
+
+        Assert.AreEqual(d, null);
+
+        d = Member.Test001223x(null, new Arg01 { A = "abc" }, 2, 2);
+
+        d = Member.Test001223x(null, new Arg01 { A = "abc", B = "ex" }, 2, 2);
+
+        //Cmd
+        var t2 = Cmd.AsyncCall("Test001223x", new object[] { new Arg01 { A = "abc" } });
+        t2.AsTask().Wait();
+        Assert.AreEqual(t2.Result, null);
+
+        var t3 = Cmd.AsyncCall("Test001223x", new object[] { new Arg01 { A = "abc" }, 2, 2 });
+        t3.AsTask().Wait();
+        Assert.AreEqual(t3.Result, "333");
+    }
+
     /*
     [TestMethod]
     public void TestCollection()
