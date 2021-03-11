@@ -18,6 +18,38 @@ using System.Threading.Tasks;
 using static Args;
 using static Common;
 
+/// <summary>
+/// Paging
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public struct Paging<T>
+{
+    /// <summary>
+    /// Data2
+    /// </summary>
+    public List<T> Data { get; set; }
+
+    /// <summary>
+    /// Length2
+    /// </summary>
+    public int Length { get; set; }
+
+    /// <summary>
+    /// CurrentPage2
+    /// </summary>
+    public int CurrentPage { get; set; }
+
+    /// <summary>
+    /// Count2
+    /// </summary>
+    public int Count { get; set; }
+
+    /// <summary>
+    /// CountPage2
+    /// </summary>
+    public int CountPage { get; set; }
+}
+
 [Info("API/v2", CommandGroupDefault = null, Alias = "TEST0")]
 [@JsonArg2(Group = "j")]
 public class BusinessMember3 : BusinessBase
@@ -283,9 +315,10 @@ public partial class BusinessMember2 : BusinessBase
 
     [Testing("test2", "{\"Arg\":{\"BBB\":\"sss\",\"bbbb\":\"dd\",\"aaa\":[\"aaa\",\"ssssaaazzzxxx\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
     [Testing("test3", "{\"arg\":{\"bbb\":\"fff222\",\"bbbb\":\"的撒333\",\"aaa\":[\"aaa\",\"sssaa\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
-    public virtual async ValueTask<dynamic> Test0001(Test1110 ARG, Arg<DateTime?> DateTime)
+    public virtual async ValueTask<IResult<Paging<Test1110>>> Test0001(Test1110 ARG, Arg<DateTime?> DateTime)
     {
-        return this.ResultCreate(ARG);
+        var data = new Paging<Test1110> { };
+        return this.ResultCreate(data);
     }
 
     public virtual async ValueTask Test010X(Test0011 test, int b, WebSocket webSocket = null, [Ignore(IgnoreMode.Arg)] params string[] id)

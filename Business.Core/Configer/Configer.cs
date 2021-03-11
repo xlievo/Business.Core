@@ -17,8 +17,8 @@
 
 namespace Business.Core
 {
-    using Meta;
     using Document;
+    using Meta;
     using Utils;
 
     /*

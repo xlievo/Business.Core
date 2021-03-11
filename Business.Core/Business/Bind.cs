@@ -17,13 +17,13 @@
 
 namespace Business.Core
 {
-    using Utils;
-    using Result;
-    using Meta;
     using Annotations;
-    using System.Reflection;
-    using System.Linq;
     using Business.Core.Document;
+    using Meta;
+    using Result;
+    using System.Linq;
+    using System.Reflection;
+    using Utils;
 
     //internal partial class Bind
     //{

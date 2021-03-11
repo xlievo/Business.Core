@@ -17,10 +17,10 @@
 
 namespace Business.Core
 {
-    using Utils;
     using Annotations;
     using Meta;
     using System.Threading.Tasks;
+    using Utils;
 
     /// <summary>
     /// Log subscription queue

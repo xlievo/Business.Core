@@ -17,13 +17,13 @@
 
 namespace Business.Core.Utils
 {
-    using Document;
+    using Business.Core.Meta;
+    using Business.Core.Result;
     using Core;
+    using Document;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Business.Core.Result;
-    using Business.Core.Meta;
 
     /// <summary>
     /// Accessor
@@ -3679,7 +3679,8 @@ namespace Business.Core.Utils
                 }
             }
 
-            return (type.IsGenericType ? null == type.DeclaringType ? $"{type.Namespace}.{type.Name}" : $"{type.DeclaringType.GetTypeName()}.{type.Name}" : type.FullName).Replace('+', '.');
+            return (type.IsGenericType ? null == type.DeclaringType ? (null == type.Namespace ? type.Name
+            : $"{type.Namespace}.{type.Name}") : $"{type.DeclaringType.GetTypeName()}.{type.Name}" : type.FullName).Replace('+', '.');
         }
 
         internal static bool Contains<T>(this T @enum, T value) where T : System.Enum => 0 != (@enum & (dynamic)value);

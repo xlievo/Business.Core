@@ -18,8 +18,8 @@
 namespace Business.Core.Auth
 {
     using Core;
-    using Utils;
     using System.Linq;
+    using Utils;
 
     /// <summary>
     /// IInterceptor
@@ -185,10 +185,10 @@ namespace Business.Core.Auth
 
 namespace Business.Core.Utils
 {
-    using Result;
     using Annotations;
-    using Meta;
     using Auth;
+    using Meta;
+    using Result;
     using System.Linq;
 
     /// <summary>

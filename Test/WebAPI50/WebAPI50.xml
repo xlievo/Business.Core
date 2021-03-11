@@ -4,6 +4,37 @@
         <name>WebAPI50</name>
     </assembly>
     <members>
+        <member name="T:Paging`1">
+            <summary>
+            Paging
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="P:Paging`1.Data">
+            <summary>
+            Data2
+            </summary>
+        </member>
+        <member name="P:Paging`1.Length">
+            <summary>
+            Length2
+            </summary>
+        </member>
+        <member name="P:Paging`1.CurrentPage">
+            <summary>
+            CurrentPage2
+            </summary>
+        </member>
+        <member name="P:Paging`1.Count">
+            <summary>
+            Count2
+            </summary>
+        </member>
+        <member name="P:Paging`1.CountPage">
+            <summary>
+            CountPage2
+            </summary>
+        </member>
         <member name="T:BusinessMember2">
             <summary>
             BusinessMember2

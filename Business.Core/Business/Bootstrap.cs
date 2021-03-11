@@ -17,9 +17,9 @@
 
 namespace Business.Core
 {
-    using Utils;
     using Document;
     using System.Linq;
+    using Utils;
 
     /// <summary>
     /// IBootstrap

@@ -17,9 +17,9 @@
 
 namespace Business.Core.Utils.Emit
 {
+    using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
-    using System.Linq;
 
     internal static class Emit
     {

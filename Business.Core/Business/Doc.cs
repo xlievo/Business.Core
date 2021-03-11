@@ -17,9 +17,9 @@
 
 namespace Business.Core.Document
 {
-    using Utils;
     using System.Collections.Generic;
     using System.Linq;
+    using Utils;
 
     /// <summary>
     /// doc .xml
