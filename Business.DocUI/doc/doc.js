@@ -1720,7 +1720,7 @@ function expand(ev) {
             var hasInput = loadMember(member.member);
 
             setEdit(input, edit);
-            setInput(input, hasInput, member.member.hasReturn);
+            setInput(input, hasInput, member.member.hasReturn, (member.member.returns && "object" === member.member.returns.type && member.member.returns.array));
             setSdk(parent.querySelector("div[id='SDK & Debug']"));
             setSdkHead(parent.querySelector("ul[id='SDK & Debug']"));
         }
@@ -1868,8 +1868,14 @@ function loadMember(member) {
 
     if (null != member.returns) {
         if ("object" == member.returns.type) {
-            out.properties = member.returns.properties;
-            out.description = member.returns.description;
+            if (member.returns.array) {
+                out = member.returns;
+                out.title = "Out";
+            }
+            else {
+                out.properties = member.returns.properties;
+                out.description = member.returns.description;
+            }
         }
         else {
             out.properties[member.returns.id] = member.returns;
@@ -1936,7 +1942,7 @@ function loadMember(member) {
     //========================================//
 }
 
-function setInput(input, hasInput, hasReturn) {
+function setInput(input, hasInput, hasReturn, objectArray) {
     if (null == input) { return; }
 
     input.querySelectorAll("p[tag='description']").forEach(c => {
@@ -2003,17 +2009,25 @@ function setInput(input, hasInput, hasReturn) {
     input_out.className = "tab-content";
 
     input.querySelector('#Input > div > div > h4').style.display = 'none';
-    input.querySelector('#Out > div > div > h4').style.display = 'none';
+
+    var out = input.querySelector("#Out > div[tag='row']");
+    var out2 = input.querySelector("#Out > div > div > div[tag='panel']");
+    if (!objectArray) {
+        input.querySelector('#Out > div > div > h4').style.display = 'none';
+
+        out.removeAttribute("style");
+        out2.removeAttribute("class"); out2.removeAttribute("style");
+    }
+    else {
+        var h4 = out.querySelector("h4[tag='h4'] > label");
+        h4.innerText = "(object array)";
+    }
+    out2.style.margin = "8px";
 
     var panel = input.querySelector("#Input > div[tag='row']");
     panel.removeAttribute("style");
     var panel2 = input.querySelector("#Input > div > div > div[tag='panel']");
     panel2.removeAttribute("class"); panel2.removeAttribute("style"); panel2.style.margin = "8px";
-
-    var out = input.querySelector("#Out > div[tag='row']");
-    out.removeAttribute("style");
-    var out2 = input.querySelector("#Out > div > div > div[tag='panel']");
-    out2.removeAttribute("class"); out2.removeAttribute("style"); out2.style.margin = "8px";
 
     if (!hasInput) {
         input.querySelector('#Input > div').style.display = 'none';

@@ -12,7 +12,7 @@
         </member>
         <member name="P:Paging`1.Data">
             <summary>
-            Data2
+            Data222
             </summary>
         </member>
         <member name="P:Paging`1.Length">
@@ -82,6 +82,11 @@
             bbb2
             </summary>
         </member>
+        <member name="T:BusinessMember2.Test1110">
+            <summary>
+            Test1110!!!
+            </summary>
+        </member>
         <member name="P:BusinessMember2.Test1110.BBB">
             <summary>
             Test003 BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB!!!
@@ -95,6 +100,11 @@
         <member name="P:BusinessMember2.Test1110.AAA">
             <summary>
             AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
+            </summary>
+        </member>
+        <member name="P:BusinessMember2.Test1110.CCC">
+            <summary>
+            Test001Result2!!!
             </summary>
         </member>
         <member name="M:BusinessMember2.Test001(Session,Token,System.Nullable{Args.Test111},System.Nullable{System.DateTime},Common.HttpFile,System.Nullable{System.Decimal},System.Int32,System.Boolean,BusinessController)">
@@ -190,6 +200,11 @@
         <member name="P:Args.Test111.B">
             <summary>
             BBBBBBBBbbbbbbbbbbbbbbbbbBBBBBBBBBBBBBBBBBB
+            </summary>
+        </member>
+        <member name="P:Args.Test111.C">
+            <summary>
+            CCCCCCCCCCCCCCCCCCCCCCC!!!
             </summary>
         </member>
         <member name="P:Args.Test111.D">

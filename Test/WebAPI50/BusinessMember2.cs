@@ -25,7 +25,7 @@ using static Common;
 public struct Paging<T>
 {
     /// <summary>
-    /// Data2
+    /// Data222
     /// </summary>
     public List<T> Data { get; set; }
 
@@ -295,6 +295,9 @@ public partial class BusinessMember2 : BusinessBase
 
     public const string login = "[\"Login\",\"{User:\\\"ddd\\\",Password:\\\"123456\\\"}\",\"D\"]";
 
+    /// <summary>
+    /// Test1110!!!
+    /// </summary>
     public struct Test1110
     {
         /// <summary>
@@ -311,6 +314,11 @@ public partial class BusinessMember2 : BusinessBase
         /// AAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaAAAAAAA
         /// </summary>
         public List<string> AAA { get; set; }
+
+        /// <summary>
+        /// Test001Result2!!!
+        /// </summary>
+        public List<Test001Result2> CCC { get; set; }
     }
 
     [Testing("test2", "{\"Arg\":{\"BBB\":\"sss\",\"bbbb\":\"dd\",\"aaa\":[\"aaa\",\"ssssaaazzzxxx\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
@@ -318,6 +326,22 @@ public partial class BusinessMember2 : BusinessBase
     public virtual async ValueTask<IResult<Paging<Test1110>>> Test0001(Test1110 ARG, Arg<DateTime?> DateTime)
     {
         var data = new Paging<Test1110> { };
+        return this.ResultCreate(data);
+    }
+
+    public virtual async ValueTask<IResult<List<dynamic>>> Test00012X(Test1110 ARG, Arg<DateTime?> DateTime)
+    {
+        return this.ResultCreate();
+    }
+
+    public virtual async ValueTask<IResult<List<string>>> Test00012X1(Test1110 ARG, Arg<DateTime?> DateTime)
+    {
+        return this.ResultCreate();
+    }
+
+    public virtual async ValueTask<IResult<List<Test1110>>> Test00012(Test1110 ARG, Arg<DateTime?> DateTime)
+    {
+        var data = new List<Test1110> { };
         return this.ResultCreate(data);
     }
 
@@ -860,6 +884,9 @@ public class Args
 
 
         //[Test]
+        /// <summary>
+        /// CCCCCCCCCCCCCCCCCCCCCCC!!!
+        /// </summary>
         public Test0010<Test0011> C { get; set; }
 
         /// <summary>

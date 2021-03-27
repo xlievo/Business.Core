@@ -797,6 +797,8 @@ namespace Business.Core.Utils
                 docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object array){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} array){alias}";
             }
 
+            docArg.Title = docArg.Title.TrimStart(); // titleArgsName is null
+
             return docArg;
         }
 
@@ -1012,6 +1014,37 @@ namespace Business.Core.Utils
             });
         }
 
+        static string GetSummary(IDictionary<string, Xml.member> xmlMembers, MemberDefinitionCode memberDefinition, string fullName, bool hasDefinition, bool isEnum, string fullName2)
+        {
+            Xml.member member = null;
+
+            switch (memberDefinition)
+            {
+                case MemberDefinitionCode.No:
+                    break;
+                case MemberDefinitionCode.Definition:
+                    xmlMembers?.TryGetValue($"T:{fullName}", out member);
+                    break;
+                case MemberDefinitionCode.Field:
+                    xmlMembers?.TryGetValue($"F:{fullName}", out member);
+                    break;
+                case MemberDefinitionCode.Property:
+                    xmlMembers?.TryGetValue($"P:{fullName}", out member);
+                    break;
+            }
+
+            var summary = member?.summary?.text;
+
+            if (string.IsNullOrWhiteSpace(summary) && (hasDefinition || isEnum))
+            {
+                xmlMembers?.TryGetValue($"T:{fullName2}", out member);
+
+                summary = member?.summary?.text;
+            }
+
+            return summary;
+        }
+
         static DocArg GetDocArg<DocArg, TypeDefinition>(string group, TypeDefinition args, System.Func<DocArgSource<TypeDefinition>, DocArg> argCallback, IDictionary<string, Xml.member> xmlMembers, string summary = null, string topTitleArgsName = null)
             where DocArg : IDocArg<DocArg>
             where TypeDefinition : ITypeDefinition<TypeDefinition>
@@ -1021,6 +1054,7 @@ namespace Business.Core.Utils
 
             if (string.IsNullOrWhiteSpace(summary))
             {
+                /*
                 Xml.member member = null;
 
                 switch (args.MemberDefinition)
@@ -1046,6 +1080,8 @@ namespace Business.Core.Utils
 
                     summary = member?.summary?.text;
                 }
+                */
+                summary = GetSummary(xmlMembers, args.MemberDefinition, args.FullName, args.HasDefinition, args.LastType.IsEnum, args.LastType.GetTypeName());
             }
 
             //if (args.LastType.IsEnum)
@@ -1136,11 +1172,18 @@ namespace Business.Core.Utils
             var definitions = current.hasDefinition ? new List<string> { type.FullName } : new List<string>();
             var childrens = new ReadOnlyCollection<TypeDefinition>();
             var fullName = type.GetTypeName();
-            var memberDefinition = current.hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No;
             //..//
 
             Xml.member member = null;
-            if (string.IsNullOrWhiteSpace(summary) && (memberDefinition == MemberDefinitionCode.Definition || current.outType.IsEnum))
+
+            if (string.IsNullOrWhiteSpace(summary) && current.hasDefinition)
+            {
+                xmlMembers?.TryGetValue($"T:{fullName}", out member);
+
+                summary = member?.summary?.text;
+            }
+
+            if (string.IsNullOrWhiteSpace(summary) && (current.hasDefinition || current.outType.IsEnum))
             {
                 xmlMembers?.TryGetValue($"T:{current.outType.GetTypeName()}", out member);
 
@@ -1176,7 +1219,7 @@ namespace Business.Core.Utils
                 FullName = fullName,
                 Children = current.hasDefinition ? GetTypeDefinition(current.outType, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                 Childrens = childrens,
-                MemberDefinition = memberDefinition,
+                MemberDefinition = current.hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No,
                 Summary = summary,
                 Path = type.Name,
                 Group = group
@@ -1216,12 +1259,11 @@ namespace Business.Core.Utils
                 }
 
                 var current = GetCurrentType(memberType);
-                //var hasDefinition = memberType.IsDefinition();
                 if (definitions.Contains(memberType.FullName)) { continue; }
                 else if (current.hasDefinition) { definitions.Add(memberType.FullName); }
                 var childrens2 = new ReadOnlyCollection<TypeDefinition>();
                 var fullName = $"{type.GetTypeName(item.DeclaringType)}.{item.Name}";
-
+                /*
                 Xml.member member2 = null;
 
                 switch (memberDefinition)
@@ -1241,12 +1283,14 @@ namespace Business.Core.Utils
 
                 var summary = member2?.summary?.text;
 
-                if (string.IsNullOrWhiteSpace(summary) && (memberDefinition == MemberDefinitionCode.Definition || current.outType.IsEnum))
+                if (string.IsNullOrWhiteSpace(summary) && (current.hasDefinition || current.outType.IsEnum))
                 {
                     xmlMembers?.TryGetValue($"T:{current.outType.GetTypeName()}", out member2);
 
                     summary = member2?.summary?.text;
                 }
+                */
+                var summary = GetSummary(xmlMembers, memberDefinition, fullName, current.hasDefinition, current.outType.IsEnum, current.outType.GetTypeName());
 
                 //if (current.outType.IsEnum)
                 //{
