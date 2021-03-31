@@ -1886,6 +1886,7 @@ function loadMember(member) {
         delete input.properties.t;
     }
     else {
+        propertyHandle(member.token);
         input.properties.t = member.token;
         input.properties.t.id = member.name + '.t';
         input.properties.t.title = member.token.title;
