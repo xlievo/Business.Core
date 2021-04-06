@@ -639,15 +639,16 @@ JSONEditor.defaults.editors.object = JSONEditor.defaults.editors.object.extend({
         // Position the form directly beneath the button
         // TODO: edge detection
 
+        var route = doc[businessName].options.routeCTD;
         var input = this.jsoneditor.input;
-        var holder = input.editors.d.header.parentNode;
+        var holder = input.editors[route.d].header.parentNode;
         var buttonData = holder.querySelector("#data");
 
         this.editjson_holder.style.left = buttonData.offsetLeft + 11 + "px";
         this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
 
         // Start the textarea with the current value
-        this.editjson_textarea.value = getData(input).d;
+        this.editjson_textarea.value = getData(route, input).d;
 
         // Disable the rest of the form while editing JSON
         this.disable();
@@ -852,15 +853,16 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         // Position the form directly beneath the button
         // TODO: edge detection
 
+        var route = doc[businessName].options.routeCTD;
         var input = this.jsoneditor.input;
-        var holder = input.editors.d.header.parentNode;
+        var holder = input.editors[route.d].header.parentNode;
         var buttonData = holder.querySelector("#data");
 
         this.editjson_holder.style.left = buttonData.offsetLeft + 11 + "px";
         this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
 
         // Start the textarea with the current value
-        this.editjson_textarea.value = getData(input).d;
+        this.editjson_textarea.value = getData(route, input).d;
 
         // Disable the rest of the form while editing JSON
         this.disable();
@@ -1835,21 +1837,39 @@ function loadMember(member) {
         httpFile: member.httpFile,
         testing: member.testing,
         name: member.name,
-        properties: {
-            t: {},
-            d: {},
-            f: {
-                title: "files",
-                type: "array",
-                options: {
-                    disable_array_delete_last_row: true,
-                    array_controls_top: true
-                },
-                items: {
-                    type: "string",
-                    title: "file"
-                }
-            }
+        properties: {}
+        //properties: {
+        //    t: {},
+        //    d: {},
+        //    f: {
+        //        title: "files",
+        //        type: "array",
+        //        options: {
+        //            disable_array_delete_last_row: true,
+        //            array_controls_top: true
+        //        },
+        //        items: {
+        //            type: "string",
+        //            title: "file"
+        //        }
+        //    }
+        //}
+    };
+
+    var route = doc[businessName].options.routeCTD;
+
+    input.properties[route.t] = {};
+    input.properties[route.d] = {};
+    input.properties.f = {
+        title: "files",
+        type: "array",
+        options: {
+            disable_array_delete_last_row: true,
+            array_controls_top: true
+        },
+        items: {
+            type: "string",
+            title: "file"
         }
     };
 
@@ -1860,10 +1880,10 @@ function loadMember(member) {
     }
 
     if (member.properties) {
-        input.properties.d = member.properties;
+        input.properties[route.d] = member.properties;
     }
     else {
-        delete input.properties.d;
+        delete input.properties[route.d];
     }
 
     if (null != member.returns) {
@@ -1883,15 +1903,15 @@ function loadMember(member) {
     }
 
     if (null == member.token) {
-        delete input.properties.t;
+        delete input.properties[route.t];
     }
     else {
         propertyHandle(member.token);
-        input.properties.t = member.token;
-        input.properties.t.id = member.name + '.t';
-        input.properties.t.title = member.token.title;
+        input.properties[route.t] = member.token;
+        input.properties[route.t].id = member.name + '.' + [route.t];
+        input.properties[route.t].title = member.token.title;
         if (null != tokenvalue && '' !== tokenvalue) {
-            input.properties.t.default = tokenvalue;
+            input.properties[route.t].default = tokenvalue;
         }
     }
 
@@ -1899,7 +1919,7 @@ function loadMember(member) {
         delete input.properties.f;
     }
 
-    //if (input.properties.t || input.properties.d) {
+    //if (input.properties[route.t] || input.properties[route.d]) {
     //    input.type = "null";
     //}
 
@@ -1938,7 +1958,7 @@ function loadMember(member) {
         }
     });
 
-    return input.properties.hasOwnProperty("t") || input.properties.hasOwnProperty("d") || input.properties.hasOwnProperty("f");
+    return input.properties.hasOwnProperty(route.t) || input.properties.hasOwnProperty(route.d) || input.properties.hasOwnProperty("f");
     //document.querySelector('#' + sdkid + ' > div > div.well.well-sm > div > div').style.cssText = 'padding: 0px;border: 0px;margin: 0px;';
     //========================================//
 }
@@ -2055,20 +2075,21 @@ function setEdit(root, edit) {
 function ready(editor) {
     editor.on('ready', function () {
         //console.time("timer");
+        var route = doc[businessName].options.routeCTD;
         var input = editor.input;
-        var hasObject = input.editors.d && ("object" === input.schema.properties.d.type || "array" === input.schema.properties.d.type);
-        var data = getData(input, false);
-        if (input.schema.argSingle && !input.editors.d) {
+        var hasObject = input.editors[route.d] && ("object" === input.schema.properties[route.d].type || "array" === input.schema.properties[route.d].type);
+        var data = getData(route, input, false);
+        if (input.schema.argSingle && !input.editors[route.d]) {
             input.schema.data = { t: data.t };
         }
-        else if (input.schema.argSingle && input.editors.d && !hasObject) {
+        else if (input.schema.argSingle && input.editors[route.d] && !hasObject) {
             input.schema.data = { t: data.t, d: data.d };
         }
         else {
             input.schema.data = { t: data.t, d: JSON.parse(data.d) };
         }
 
-        if (input.editors.t || input.editors.d) {
+        if (input.editors[route.t] || input.editors[route.d]) {
             var buttonEdit = editor.root.getButton('', 'edit', 'Edit');
             button_holder = editor.root.theme.getHeaderButtonHolder();
             button_holder.appendChild(buttonEdit);
@@ -2081,24 +2102,24 @@ function ready(editor) {
             }, false);
         }
 
-        if (input.editors.d && !(input.schema.argSingle && !hasObject)) {
+        if (input.editors[route.d] && !(input.schema.argSingle && !hasObject)) {
             var buttonData = editor.root.getButton('', 'data', 'Data');
             buttonData.id = "data";
-            button_holder = input.editors.d.theme.getHeaderButtonHolder();
+            button_holder = input.editors[route.d].theme.getHeaderButtonHolder();
             button_holder.appendChild(buttonData);
-            input.editors.d.header.parentNode.appendChild(button_holder);
+            input.editors[route.d].header.parentNode.appendChild(button_holder);
             //this.editjson_controls.appendChild(this.buttonData);
             buttonData.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                //editor.root.editors.d.container.hidden = true; test
-                input.editors.d.toggleEditJSON();
+                //editor.root.editors[route.d].container.hidden = true; test
+                input.editors[route.d].toggleEditJSON();
             }, false);
 
-            if (input.editors.d.editjson_textarea) {
-                input.editors.d.editjson_textarea.removeAttribute('tag');
-                input.editors.d.editjson_textarea.style.display = '';
-                //editor.root.editors.d.editjson_save.style.display = 'none';
+            if (input.editors[route.d].editjson_textarea) {
+                input.editors[route.d].editjson_textarea.removeAttribute('tag');
+                input.editors[route.d].editjson_textarea.style.display = '';
+                //editor.root.editors[route.d].editjson_save.style.display = 'none';
             }
         }
         //console.timeEnd("timer");
@@ -2137,13 +2158,13 @@ function ready(editor) {
 
                 if (input.editors.f) {
                     var form = new FormData();
-                    var data = getData(input, false);
-                    form.append("c", input.schema.name);
+                    var data = getData(route, input, false);
+                    form.append(route.c, input.schema.name);
                     if (data.hasOwnProperty("t")) {
-                        form.append("t", data.t);
+                        form.append(route.t, data.t);
                     }
                     if (data.hasOwnProperty("d")) {
-                        form.append("d", data.d);
+                        form.append(route.d, data.d);
                     }
 
                     var files = input.container.querySelectorAll("[tag='file']");
@@ -2166,13 +2187,13 @@ function ready(editor) {
                         });
                 }
                 else {
-                    var data = getData(input, false);
-                    var d = { c: input.schema.name };
+                    var data = getData(route, input, false);
+                    var d = { [route.c]: input.schema.name };
                     if (data.hasOwnProperty("t")) {
-                        d.t = data.t;
+                        d[route.t] = data.t;
                     }
                     if (data.hasOwnProperty("d")) {
-                        d.d = data.d;
+                        d[route.d] = data.d;
                     }
                     ajax.post(doc[businessName].options.host + "/" + businessName, d,
                         function (response) {
@@ -2219,7 +2240,7 @@ function ready(editor) {
                 }
                 var obj = el.currentTarget;
                 if (-1 !== obj.selectedIndex) {
-                    setData(input, input.schema.data.d, recovery = true, refresh = 0 === obj.selectedIndex);
+                    setData(route, input, input.schema.data.d, recovery = true, refresh = 0 === obj.selectedIndex);
                     input.container.querySelectorAll("[tag='row_number']").forEach(c => { c.value = ""; });
                     if (0 === obj.selectedIndex) {
                         setEdit(input.container, !input.schema.edit);
@@ -2228,7 +2249,7 @@ function ready(editor) {
                     var select = obj.options[obj.selectedIndex];
                     var value = JSON.parse(input.schema.testing[select.value].value);
 
-                    setData(input, value);
+                    setData(route, input, value);
 
                     setEdit(input.container, !input.schema.edit);
                 }
@@ -2277,16 +2298,16 @@ function ready(editor) {
                         return;
                     }
 
-                    var data = getData(input, false);
+                    var data = getData(route, input, false);
                     //input.schema.name
                     ajax.post(doc[businessName].options.host + "/" + businessName,
                         {
-                            c: "benchmark",
-                            t: null,//token check
-                            d: JSON.stringify({
+                            [route.c]: "benchmark",
+                            [route.t]: null,//token check
+                            [route.d]: JSON.stringify({
                                 n: n,
                                 c: c,
-                                data: "&c=" + encodeURIComponent(input.schema.name) + "&t=" + encodeURIComponent(data.t) + "&d=" + encodeURIComponent((doc[businessName].options.benchmarkJSON ? JSON.stringify(data.d) : data.d)),
+                                data: "&" + route.c + "=" + encodeURIComponent(input.schema.name) + "&" + route.t + "=" + encodeURIComponent(data.t) + "&" + route.d + "=" + encodeURIComponent((doc[businessName].options.benchmarkJSON ? JSON.stringify(data.d) : data.d)),
                                 host: doc[businessName].options.host + "/" + businessName
                             })
                         },
@@ -2328,38 +2349,38 @@ function ready(editor) {
 
         editor.on('change', function () {
             var input = this.editors["root.input"];
-            var data = getData(input, false);
+            var data = getData(route, input, false);
             var h = doc[businessName].options.host + "/" + businessName;
 
-            curlValue.setValue(GetCurl(h, input.schema.name, data, getData2(input, false)));
-            javascriptValue.setValue(GetSdkJavaScript(h, input.schema.name, data));
-            netValue.setValue(GetSdkNet(h, input.schema.name, data));
+            curlValue.setValue(GetCurl(route, h, input.schema.name, data, getData2(route, input, false)));
+            javascriptValue.setValue(GetSdkJavaScript(route, h, input.schema.name, data));
+            netValue.setValue(GetSdkNet(route, h, input.schema.name, data));
 
             //console.log(this.sdkeditor.getValue());
         });
         //console.timeEnd("timer");
 
-        if (input.editors.t) {
+        if (input.editors[route.t]) {
             var icon = document.createElement('i');
             icon.className = "doc-icon-15 doc-icon-15-token3";
             icon.style.position = "relative";
             icon.style.top = "3px";
-            var text = input.editors.t.control.childNodes[0];
+            var text = input.editors[route.t].control.childNodes[0];
             text.style.paddingLeft = "3px";
             text.parentNode.insertBefore(icon, text);
         }
 
-        if (input.editors.d) {
+        if (input.editors[route.d]) {
             var icon = document.createElement('i');
             icon.className = "doc-icon-15 doc-icon-15-data";
             icon.style.position = "relative";
-            icon.style.top = "object" == input.editors.d.schema.type ? "1px" : "2px";
+            icon.style.top = "object" == input.editors[route.d].schema.type ? "1px" : "2px";
             var text = null;
-            if (input.editors.d.control) {
-                text = input.editors.d.control.childNodes[0];
+            if (input.editors[route.d].control) {
+                text = input.editors[route.d].control.childNodes[0];
             }
-            else if (input.editors.d.title) {
-                text = input.editors.d.title.childNodes[0];
+            else if (input.editors[route.d].title) {
+                text = input.editors[route.d].title.childNodes[0];
             }
 
             if (null != text) {
@@ -2544,101 +2565,101 @@ function getSdk(format) {
     };
 }
 
-function getData(input, format = true) {
+function getData(route, input, format = true) {
     var data = {};
-    if (input.editors.d) {
+    if (input.editors[route.d]) {
         var d = null;
         if (input.schema.argSingle) {
-            if (input.schema.argSingle && "object" !== input.schema.properties.d.type && "array" !== input.schema.properties.d.type) {
-                d = input.editors.d.getValue();
+            if (input.schema.argSingle && "object" !== input.schema.properties[route.d].type && "array" !== input.schema.properties[route.d].type) {
+                d = input.editors[route.d].getValue();
             }
             else {
-                d = JSON.stringify(input.editors.d.getValue(), null, format ? 2 : 0);
+                d = JSON.stringify(input.editors[route.d].getValue(), null, format ? 2 : 0);
             }
         }
         else {
             var args = {};
-            for (var i in input.editors.d.editors) {
-                args[i] = input.editors.d.editors[i].getValue();
+            for (var i in input.editors[route.d].editors) {
+                args[i] = input.editors[route.d].editors[i].getValue();
             }
             d = JSON.stringify(args, null, format ? 2 : 0);
         }
         data.d = d;
     }
 
-    if (input.editors.t) {
-        data.t = input.editors.t.getValue();
+    if (input.editors[route.t]) {
+        data.t = input.editors[route.t].getValue();
     }
 
     return data;
 }
 
-function getData2(input, format = true) {
+function getData2(route, input, format = true) {
     var data = {};
-    if (input.editors.d) {
+    if (input.editors[route.d]) {
         if (input.schema.argSingle) {
-            if (input.schema.argSingle && "object" !== input.schema.properties.d.type && "array" !== input.schema.properties.d.type) {
-                d = input.editors.d.schema.name + "=" + encodeURIComponent(input.editors.d.getValue());
+            if (input.schema.argSingle && "object" !== input.schema.properties[route.d].type && "array" !== input.schema.properties[route.d].type) {
+                d = input.editors[route.d].schema.name + "=" + encodeURIComponent(input.editors[route.d].getValue());
             }
             else {
-                d = input.editors.d.schema.name + "=" + encodeURIComponent(JSON.stringify(input.editors.d.getValue(), null, format ? 2 : 0));
+                d = input.editors[route.d].schema.name + "=" + encodeURIComponent(JSON.stringify(input.editors[route.d].getValue(), null, format ? 2 : 0));
             }
             data.d = d;
         }
         else {
             var args = []
-            for (var i in input.editors.d.editors) {
+            for (var i in input.editors[route.d].editors) {
                 args.push(i);
             }
             for (var i = args.length - 1; i >= 0; i--) {
-                if ("object" !== input.editors.d.editors[args[i]].schema.type && "array" !== input.editors.d.editors[args[i]].schema.type) {
-                    args[i] = args[i] + "=" + encodeURIComponent(input.editors.d.editors[args[i]].getValue());
+                if ("object" !== input.editors[route.d].editors[args[i]].schema.type && "array" !== input.editors[route.d].editors[args[i]].schema.type) {
+                    args[i] = args[i] + "=" + encodeURIComponent(input.editors[route.d].editors[args[i]].getValue());
                 }
                 else {
-                    args[i] = args[i] + "=" + encodeURIComponent(JSON.stringify(input.editors.d.editors[args[i]].getValue(), null, format ? 2 : 0));
+                    args[i] = args[i] + "=" + encodeURIComponent(JSON.stringify(input.editors[route.d].editors[args[i]].getValue(), null, format ? 2 : 0));
                 }
             }
             data.d = args.join("&");
         }
     }
 
-    if (input.editors.t) {
-        data.t = input.editors.t.getValue();
+    if (input.editors[route.t]) {
+        data.t = input.editors[route.t].getValue();
     }
 
     return data;
 }
 
-function setData(input, value, recovery = false, refresh = true) {
-    if (input.editors.d) {
+function setData(route, input, value, recovery = false, refresh = true) {
+    if (input.editors[route.d]) {
         if (input.schema.argSingle) {
             if (recovery) {
-                input.editors.d.setValue(value);
+                input.editors[route.d].setValue(value);
             }
             else {
-                var k = input.editors.d.schema.name;
+                var k = input.editors[route.d].schema.name;
                 var key = getKeyIgnoreCase(value, k);
                 if (null != key) {
-                    input.editors.d.setValue(value[key]);
+                    input.editors[route.d].setValue(value[key]);
                 }
             }
         }
         else {
 
-            for (var i in input.editors.d.editors) {
+            for (var i in input.editors[route.d].editors) {
                 var key = getKeyIgnoreCase(value, i);
                 if (null != key) {
                     //if (i in value) {
-                    input.editors.d.editors[i].setValue(value[key]);
+                    input.editors[route.d].editors[i].setValue(value[key]);
                 }
             }
         }
     }
     if (refresh) {
-        input.editors.d.onChange(true);
+        input.editors[route.d].onChange(true);
     }
 
-    //input.editors.d.onChange(refresh);
+    //input.editors[route.d].onChange(refresh);
 }
 
 go();

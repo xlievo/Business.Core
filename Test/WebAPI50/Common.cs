@@ -510,6 +510,12 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 o.GroupEnable = true;
                 //o.Host = Common.Host.Addresses;
                 o.Navigtion = true;
+                o.RouteCTD = new RouteCTD
+                {
+                    C = "command",
+                    T = "token",
+                    D = "data"
+                };
             })
             .UseLogger(new Logger(async x =>
             {

@@ -448,6 +448,11 @@ namespace Business.Core.Document
         public bool BenchmarkJSON { get; set; }
 
         /// <summary>
+        /// Custom route "c", "t", "d" parameter name.
+        /// </summary>
+        public RouteCTD RouteCTD { get; set; } = new RouteCTD();
+
+        /// <summary>
         /// Other configurations
         /// </summary>
         public Dictionary<string, object> Config { get; set; } = new Dictionary<string, object>();
@@ -457,6 +462,32 @@ namespace Business.Core.Document
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Func<string, string> CamelCase { get; set; } = c => Help.JsonNamingPolicyCamelCase.Instance.ConvertName(c);
+    }
+
+    /// <summary>
+    /// Custom route "c", "t", "d" parameter name.
+    /// </summary>
+    public class RouteCTD
+    {
+        /// <summary>
+        /// Default value "c". command
+        /// </summary>
+        public string C { get; set; } = "c";
+
+        /// <summary>
+        /// Default value "t". token
+        /// </summary>
+        public string T { get; set; } = "t";
+
+        /// <summary>
+        /// Default value "d". data
+        /// </summary>
+        public string D { get; set; } = "d";
+
+        ///// <summary>
+        ///// Default value "g". group
+        ///// </summary>
+        //public string G { get; set; } = "g";
     }
 
     /// <summary>

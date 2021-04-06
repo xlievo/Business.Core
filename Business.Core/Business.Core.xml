@@ -4623,6 +4623,11 @@
             Benchmark tests whether the passed parameters are JSON serialized. By default false, does not need to be serialized
             </summary>
         </member>
+        <member name="P:Business.Core.Document.Options.RouteCTD">
+            <summary>
+            Custom route "c", "t", "d" parameter name.
+            </summary>
+        </member>
         <member name="P:Business.Core.Document.Options.Config">
             <summary>
             Other configurations
@@ -4631,6 +4636,26 @@
         <member name="P:Business.Core.Document.Options.CamelCase">
             <summary>
             CamelCase
+            </summary>
+        </member>
+        <member name="T:Business.Core.Document.RouteCTD">
+            <summary>
+            Custom route "c", "t", "d" parameter name.
+            </summary>
+        </member>
+        <member name="P:Business.Core.Document.RouteCTD.C">
+            <summary>
+            Default value "c". command
+            </summary>
+        </member>
+        <member name="P:Business.Core.Document.RouteCTD.T">
+            <summary>
+            Default value "t". token
+            </summary>
+        </member>
+        <member name="P:Business.Core.Document.RouteCTD.D">
+            <summary>
+            Default value "d". data
             </summary>
         </member>
         <member name="T:Business.Core.Document.IDoc">

@@ -671,7 +671,7 @@ namespace Business.Core.Utils
         };
         */
 
-        static DocArg GetDocArg<TypeDefinition>(DocArgSource<TypeDefinition> argSource, bool hideArray = false, bool hideTitleType = false, System.Func<string, string> camelCase = null)
+        static DocArg GetDocArg<TypeDefinition>(DocArgSource<TypeDefinition> argSource, bool hideArray = false, bool hideTitleType = false, System.Func<string, string> camelCase = null, RouteCTD route = null)
             where TypeDefinition : ITypeDefinition<TypeDefinition>
         {
             var group = argSource.Args.Group[argSource.Group];
@@ -687,7 +687,7 @@ namespace Business.Core.Utils
             //var topTitleArgsName = camelCase && null != argSource.TopTitleArgsName ? CamelCase(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
             var topTitleArgsName = null != camelCase && null != argSource.TopTitleArgsName ? camelCase.Invoke(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
 
-            var titleArgsName = topTitleArgsName ?? (argSource.Args.HasToken ? "t" : docArg.Name);
+            var titleArgsName = topTitleArgsName ?? (argSource.Args.HasToken ? route?.T ?? "t" : docArg.Name);
 
             docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))}){alias}";
 
@@ -848,7 +848,7 @@ namespace Business.Core.Utils
         /// <param name="outDir"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c, false, true, options?.CamelCase), outDir, options);
+        public static Business UseDoc<Business>(Business business, string outDir = null, Options options = default) where Business : IBusiness => UseDoc(business, c => GetDocArg(c, false, true, options?.CamelCase, options?.RouteCTD), outDir, options);
 
         /// <summary>
         /// Generate document objects for specified business classes.
@@ -936,6 +936,10 @@ namespace Business.Core.Utils
             var groupDefault = business.Configer.Info.CommandGroupDefault;
 
             options = options ?? new Options();
+            if (null == options.RouteCTD)
+            {
+                options.RouteCTD = new RouteCTD();
+            }
             var command = null != options.Group ? business.Command.Where(c => c.Key.Equals(options.Group, System.StringComparison.InvariantCultureIgnoreCase)) : business.Command;
 
             var group = command.OrderBy(c => c.Key).AsParallel().ToDictionary(c => c.Key, c => c.Value.OrderBy(c2 => c2.Value.Meta.Position).ToDictionary(c2 => c2.Key, c2 =>
@@ -965,7 +969,7 @@ namespace Business.Core.Utils
                     Description = member?.summary?.sub,
                     //DescriptionParam = 0 < member?._params?.Count ? member?._params?.ToDictionary(c3 => c3.name, c3 => c3.sub) : null,
                     DescriptionResult = member?.returns?.sub,
-                    Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true, options.CamelCase), xmlMembers, returnType.Summary) : default,
+                    Returns = meta.HasReturn ? GetDocArg(groupDefault, returnType, c3 => GetDocArg(c3, true, true, options.CamelCase, options.RouteCTD), xmlMembers, returnType.Summary) : default,
                     ArgSingle = c2.Value.HasArgSingle,
                     HttpFile = c2.Value.HasHttpFile,
                     Testing = 0 < testing.Count ? testing.ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token)) : null,
@@ -973,7 +977,7 @@ namespace Business.Core.Utils
                     Annotations = annotations.Any() ? annotations : null
                 } as IMember<DocArg>;
 
-                var topTitleArgsName = "d";
+                var topTitleArgsName = options.RouteCTD?.D ?? "d";
                 //var args = c2.Value.Parameters.ToDictionary(c3 => c3.Name, c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle ? topTitleArgsName : c3.Name));
                 var args = c2.Value.Parameters.Select(c3 => GetDocArg(key, c3, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == c3.Name)?.text, member2.ArgSingle ? topTitleArgsName : c3.Name)).ToDictionary(c3 => c3.Name, c3 => c3);
 

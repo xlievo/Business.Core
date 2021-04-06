@@ -1,15 +1,15 @@
 ﻿
-function GetSdkJavaScript(h, c, data) {
-	var value = "\n\    { c: \"" + c + "\"";
-	if (data.hasOwnProperty("t")) {
-		value += ", t: \"" + data.t + "\"";
-	}
-	if (data.hasOwnProperty("d")) {
-		value += ", d: " + JSON.stringify(data.d);
-	}
-	value += " }";
+function GetSdkJavaScript(route, h, c, data) {
+    var value = "\n\    { " + route.c + ": \"" + c + "\"";
+    if (data.hasOwnProperty("t")) {
+        value += ", " + route.t + ": \"" + data.t + "\"";
+    }
+    if (data.hasOwnProperty("d")) {
+        value += ", " + route.d + ": " + JSON.stringify(data.d);
+    }
+    value += " }";
 
-	return "var ajax = {};\n\
+    return "var ajax = {};\n\
 ajax.x = function () {\n\
 	if (typeof XMLHttpRequest !== 'undefined') {\n\
 		return new XMLHttpRequest();\n\
@@ -83,10 +83,10 @@ ajax.postForm = function (url, data, callback, failed, async) {\n\
 };\n\
 \n\
 ajax.post(\"" + h + "\","
-		+
-		value
-		+
-		"\n\    , function (response) {\n\
+        +
+        value
+        +
+        "\n\    , function (response) {\n\
         //succcess\n\
         console.log(response);\n\
     }, function (response) {\n\
@@ -95,16 +95,16 @@ ajax.post(\"" + h + "\","
     });";
 }
 
-function GetSdkNet(h, c, data) {
-	var value = "\n\            KeyValuePair.Create(\"c\", \"" + c + "\")";
-	if (data.hasOwnProperty("t")) {
-		value += ",\n\            KeyValuePair.Create(\"t\", \"" + data.t + "\")";
-	}
-	if (data.hasOwnProperty("d")) {
-		value += ",\n\            KeyValuePair.Create(\"d\", " + JSON.stringify(data.d) + ")";
-	}
+function GetSdkNet(route, h, c, data) {
+    var value = "\n\            KeyValuePair.Create(\"" + route.c + "\", \"" + c + "\")";
+    if (data.hasOwnProperty("t")) {
+        value += ",\n\            KeyValuePair.Create(\"" + route.t + "\", \"" + data.t + "\")";
+    }
+    if (data.hasOwnProperty("d")) {
+        value += ",\n\            KeyValuePair.Create(\"" + route.d + "\", " + JSON.stringify(data.d) + ")";
+    }
 
-	return "\
+    return "\
 using System;\n\
 using System.Collections.Generic;\n\
 using System.Net.Http;\n\
@@ -124,10 +124,10 @@ class Program\n\
         httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
 \n\
         var result = await Call("
-		+
-		value
-		+
-		");\n\
+        +
+        value
+        +
+        ");\n\
 \n\
         Console.WriteLine(result);\n\
 \n\
@@ -146,72 +146,72 @@ class Program\n\
 }";
 }
 
-function GetCurl(h, c, data, data2) {
-	var value = "\n";
-	value += "			#Built-in Route   " + h + "?c=&t=&d=";
-	value += "\n\n\curl -X GET \"" + h + "?c=" + encodeURIComponent(c);
+function GetCurl(route, h, c, data, data2) {
+    var value = "\n";
+    value += "			#Built-in Route   " + h + "?" + route.c + "=&" + route.t + "=&" + route.d + "=";
+    value += "\n\n\curl -X GET \"" + h + "?" + route.c + "=" + encodeURIComponent(c);
 
-	// Built-in Route
+    // Built-in Route
 
-	if (data.hasOwnProperty("t")) {
-		value += "&t=" + encodeURIComponent(data.t);
-	}
-	if (data.hasOwnProperty("d")) {
-		value += "&d=" + encodeURIComponent(data.d);
-	}
+    if (data.hasOwnProperty("t")) {
+        value += "&" + route.t + "=" + encodeURIComponent(data.t);
+    }
+    if (data.hasOwnProperty("d")) {
+        value += "&" + route.d + "=" + encodeURIComponent(data.d);
+    }
 
-	value += "\"";
-	value += "\n";
-	value += "\n\curl -X POST -d \"" + "c=" + encodeURIComponent(c);
+    value += "\"";
+    value += "\n";
+    value += "\n\curl -X POST -d \"" + "c=" + encodeURIComponent(c);
 
-	if (data.hasOwnProperty("t")) {
-		value += "&t=" + encodeURIComponent(data.t);
-	}
-	if (data.hasOwnProperty("d")) {
-		value += "&d=" + encodeURIComponent(data.d);
-	}
-	value += "\" " + h;
+    if (data.hasOwnProperty("t")) {
+        value += "&" + route.t + "=" + encodeURIComponent(data.t);
+    }
+    if (data.hasOwnProperty("d")) {
+        value += "&" + route.d + "=" + encodeURIComponent(data.d);
+    }
+    value += "\" " + h;
 
-	value += "\n\n";
-	value += "			#Classical Route   " + h + "/" + encodeURIComponent(c);;
-	value += "\n\n\curl -X GET \"" + h + "/" + encodeURIComponent(c);
+    value += "\n\n";
+    value += "			#Classical Route   " + h + "/" + encodeURIComponent(c);;
+    value += "\n\n\curl -X GET \"" + h + "/" + encodeURIComponent(c);
 
-	// Classical Route
+    // Classical Route
 
-	if (data2.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
-		value += "?t=" + encodeURIComponent(data2.t) + "&" + data2.d;
-	}
-	else if (data2.hasOwnProperty("t")) {
-		value += "?t=" + encodeURIComponent(data2.t);
-	} else if (data2.hasOwnProperty("d")) {
-		value += "?" + data2.d;
-	}
+    if (data2.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
+        value += "?" + route.t + "=" + encodeURIComponent(data2.t) + "&" + data2.d;
+    }
+    else if (data2.hasOwnProperty("t")) {
+        value += "?" + route.t + "=" + encodeURIComponent(data2.t);
+    } else if (data2.hasOwnProperty("d")) {
+        value += "?" + data2.d;
+    }
 
-	value += "\"";
-	value += "\n";
-	value += "\n\curl -X POST -d \"";
+    value += "\"";
+    value += "\n";
+    value += "\n\curl -X POST -d \"";
 
-	if (data2.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
-		value += "t=" + encodeURIComponent(data2.t) + "&" + data2.d;
-	}
-	else if (data2.hasOwnProperty("t")) {
-		value += "t=" + encodeURIComponent(data2.t);
-	} else if (data2.hasOwnProperty("d")) {
-		value += data2.d;
-	}
+    if (data2.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
+        value += route.t + "=" + encodeURIComponent(data2.t) + "&" + data2.d;
+    }
+    else if (data2.hasOwnProperty("t")) {
+        value += route.t + "=" + encodeURIComponent(data2.t);
+    } else if (data2.hasOwnProperty("d")) {
+        value += data2.d;
+    }
 
-	value += "\" " + h + "/" + encodeURIComponent(c);
+    value += "\" " + h + "/" + encodeURIComponent(c);
 
-	value += "\n";
-	value += "\n\curl -H \"Content-Type:application/json\" -X POST -d \"";
+    value += "\n";
+    value += "\n\curl -H \"Content-Type:application/json\" -X POST -d \"";
 
-	// application/json
+    // application/json
 
-	value += encodeURIComponent(data.d);
+    value += encodeURIComponent(data.d);
 
-	value += "\" " + h + "/" + encodeURIComponent(c);
+    value += "\" " + h + "/" + encodeURIComponent(c);
 
-	value += "\n";
+    value += "\n";
 
-	return value;
+    return value;
 }
