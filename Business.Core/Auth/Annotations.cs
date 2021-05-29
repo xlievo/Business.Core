@@ -2125,7 +2125,19 @@ namespace Business.Core.Annotations
             this.Description = "Parameters parsing";
             this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg) => !hasDefinition;
         }
+        /*
+        delegate void SetStructHandler<T>(ref T source, object value);
 
+        static SetStructHandler<T> GetDelegate<T>(PropertyInfo fieldInfo)
+        {
+            return (ref T obj, object value) =>
+            {
+                object obj2 = obj;
+                fieldInfo.SetValue(obj2, value);
+                obj = (T)obj2;
+            };
+        }
+        */
         /// <summary>
         /// Proces
         /// </summary>
@@ -2144,6 +2156,7 @@ namespace Business.Core.Annotations
                 if (0 < dict.Count && 0 < this.ArgMeta.Arg.Children?.Count)
                 {
                     var arg = System.Activator.CreateInstance<Type>();
+
                     //var dict2 = new System.Collections.Generic.Dictionary<string, object>(dict.Count);
 
                     foreach (var item in this.ArgMeta.Arg.Children)

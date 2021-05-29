@@ -22,6 +22,7 @@ using Business.Core.Utils;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Reflection;
+using Microsoft.Extensions.Primitives;
 
 #region Socket Support
 
@@ -512,9 +513,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 o.Navigtion = true;
                 o.RouteCTD = new RouteCTD
                 {
-                    C = "command",
-                    T = "token",
-                    D = "data"
+                    //C = "command",
+                    //T = "token",
+                    //D = "data"
                 };
             })
             .UseLogger(new Logger(async x =>
@@ -807,7 +808,7 @@ public class BusinessController : Controller
                 {
                     var v2 = (string)v.Value;
                     return !string.IsNullOrEmpty(v2) ? v2 : null;
-                });
+                }, StringComparer.InvariantCultureIgnoreCase);
                 c = route.Command ?? (parameters.TryGetValue("c", out value) ? value : null);
                 t = parameters.TryGetValue("t", out value) ? value : null;
                 d = parameters.TryGetValue("d", out value) ? value : null;
@@ -820,7 +821,7 @@ public class BusinessController : Controller
                         {
                             var v2 = (string)v.Value;
                             return !string.IsNullOrEmpty(v2) ? v2 : null;
-                        });
+                        }, StringComparer.InvariantCultureIgnoreCase);
                         c = route.Command ?? (parameters.TryGetValue("c", out value) ? value : null);
                         t = parameters.TryGetValue("t", out value) ? value : null;
                         d = parameters.TryGetValue("d", out value) ? value : null;
@@ -834,6 +835,8 @@ public class BusinessController : Controller
                 break;
             default: return this.NotFound();
         }
+
+        var hasParameters = null != route.Command && null != parameters;
 
         #endregion
 
@@ -873,7 +876,7 @@ public class BusinessController : Controller
 
         var token = new Token //token
         {
-            Key = t,
+            Key = hasParameters ? (this.Request.Query.TryGetValue("t", out StringValues value2) ? (string)value2 : (parameters.TryGetValue("t", out value) ? value : null)) : t,
             Remote = new Business.Core.Auth.Remote(this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
             Path = this.Request.Path.Value,
         };

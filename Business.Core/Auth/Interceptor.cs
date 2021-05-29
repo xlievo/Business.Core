@@ -585,7 +585,7 @@ namespace Business.Core.Utils
                     continue;
                 }
 
-                if (item.HasLower && null != currentValue2)
+                if (item.HasLower && !item.HasCollection)// && null != currentValue2
                 {
                     var result2 = await ArgsResult(meta, group, item.Children, currentValue2, token);
 
