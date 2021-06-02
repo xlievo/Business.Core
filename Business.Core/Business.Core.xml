@@ -684,6 +684,12 @@
             <param name="callback"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.Annotations.ArgumentAttribute.ResultError">
+            <summary>
+            Using the current State, Message returns an error result
+            </summary>
+            <returns></returns>
+        </member>
         <member name="M:Business.Core.Annotations.ArgumentAttribute.CheckNull(Business.Core.Annotations.ArgumentAttribute,System.Object)">
             <summary>
             CheckNull

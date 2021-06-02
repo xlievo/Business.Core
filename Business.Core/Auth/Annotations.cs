@@ -261,14 +261,10 @@ namespace Business.Core.Annotations
             this.Meta.Type.LoadAccessors(Accessors, methods: true);
         }
 
-        #region
-
         /// <summary>
         /// Meta
         /// </summary>
         public MetaData Meta { get; }
-
-        #endregion
 
         /// <summary>
         /// Depth Clone
@@ -284,7 +280,10 @@ namespace Business.Core.Annotations
                 return default;
             }
 
-            if (!(System.Activator.CreateInstance(this.Meta.Type, meta.ConstructorArgs) is AttributeBase attr)) { return default; }
+            if (!(System.Activator.CreateInstance(this.Meta.Type, meta.ConstructorArgs) is AttributeBase attr))
+            {
+                return default;
+            }
 
             foreach (var item in meta.Accessor)
             {
@@ -1197,6 +1196,12 @@ namespace Business.Core.Annotations
         /// <param name="callback"></param>
         /// <returns></returns>
         public IResult ResultCreate(object data, string message = null, int state = 1, string callback = null) => ResultFactory.ResultCreate(ArgMeta.resultTypeDefinition, data, message, state, callback);
+
+        /// <summary>
+        /// Using the current State, Message returns an error result
+        /// </summary>
+        /// <returns></returns>
+        public IResult ResultError() => ResultCreate(State, Message);
 
         #endregion
 
