@@ -834,6 +834,23 @@ namespace Business.Core.Annotations
             internal System.Type resultTypeDefinition;
             internal System.Type argTypeDefinition;
 
+            internal static System.Collections.Generic.Dictionary<string, Accessor> Accessor = new System.Collections.Generic.Dictionary<string, Accessor>();
+
+            static MetaData()
+            {
+                foreach (var property in typeof(MetaData).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
+                {
+                    if (typeof(System.MulticastDelegate).IsAssignableFrom(property.PropertyType))
+                    {
+                        continue;
+                    }
+
+                    var accessor = property.GetAccessor();
+                    if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                    Accessor.Add($"ArgMeta.{property.Name}", accessor);
+                }
+            }
+
             //public dynamic Business { get; internal set; }
 
             /// <summary>
@@ -994,6 +1011,33 @@ namespace Business.Core.Annotations
                     this.Description = this.Replace(this.Description);
                 }
             };
+        }
+
+        /// <summary>
+        /// Replace
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public override string Replace(string value)
+        {
+            var sb = new System.Text.StringBuilder(base.Replace(value));
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+
+            foreach (var item in MetaData.Accessor)
+            {
+                var member = $"{{{item.Key}}}";
+
+                if (-1 < value.IndexOf(member))
+                {
+                    sb = sb.Replace(member, System.Convert.ToString(item.Value.Getter(this.ArgMeta)));
+                }
+            }
+
+            return sb.ToString();
         }
 
         //public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.CollectionItem}";

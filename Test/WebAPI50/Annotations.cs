@@ -55,7 +55,7 @@ namespace Business.Core.Annotations
         public CheckNull(int state = -800, string message = null) : base(state, message)
         {
             this.CanNull = false;
-            this.Description = "{Alias} must be filled in";
+            this.Description = "{ArgMeta.MemberPath} {Alias} must be filled in";
             this.Message = "{Alias} must be filled in";
         }
 

@@ -580,6 +580,13 @@
             <param name="message"></param>
             <param name="type"></param>
         </member>
+        <member name="M:Business.Core.Annotations.ArgumentAttribute.Replace(System.String)">
+            <summary>
+            Replace
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
         <member name="P:Business.Core.Annotations.ArgumentAttribute.BindAfter">
             <summary>
             BindAfter
