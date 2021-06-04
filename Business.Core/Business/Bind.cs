@@ -1424,7 +1424,7 @@ namespace Business.Core
 
                     if (string.IsNullOrWhiteSpace(attr.Alias))
                     {
-                        attr.Alias = !string.IsNullOrWhiteSpace(aliasValue) ? aliasValue : attr.ArgMeta.Member;
+                        attr.Alias = !string.IsNullOrWhiteSpace(aliasValue) ? aliasValue : Configer.JsonOptionsDoc.PropertyNamingPolicy.ConvertName(attr.ArgMeta.Member);
                     }
 
                     attr.BindAfter?.Invoke();
