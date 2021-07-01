@@ -244,8 +244,9 @@ namespace Business.Core
         /// </summary>
         /// <param name="call"></param>
         /// <param name="batch"></param>
+        /// <param name="syn"></param>
         /// <param name="maxCapacity">Gets the max capacity of this queue</param>
-        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, ValueTask> call, BatchOptions batch = default, int? maxCapacity = null) => loggerQueue = new Queue<LoggerData>(call, new Queue<LoggerData>.BatchOptions(batch.Interval, batch.MaxNumber), maxCapacity: maxCapacity);
+        public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, ValueTask> call, BatchOptions batch = default, bool syn = false, int? maxCapacity = null) => loggerQueue = new Queue<LoggerData>(call, new Queue<LoggerData>.BatchOptions(batch.Interval, batch.MaxNumber), syn, maxCapacity: maxCapacity);
 
         internal readonly struct ArgsLog
         {

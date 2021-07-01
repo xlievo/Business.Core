@@ -313,6 +313,10 @@ public abstract class BusinessBase : BusinessBase<ResultObject<object>>
             //    Help.Console(item.ToString());
             //}
             //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
+            Parallel.ForEach(x, c =>
+            {
+                Help.Console(c.JsonSerialize());
+            });
 
         }, new Logger.BatchOptions
         {
@@ -350,7 +354,7 @@ public static class Common
         //Console.WriteLine($"Min {workerThreads}, {completionPortThreads}");
         //Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
 
-        AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as Exception)?.ExceptionWrite(true, true, LogPath);
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) => Console.WriteLine((e.ExceptionObject as Exception)?.ToString());
 
         Console.WriteLine($"Date: {DateTimeOffset.Now}");
         Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
@@ -666,7 +670,8 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 }
                 catch (Exception ex)
                 {
-                    Help.ExceptionWrite(ex, true, true, LogPath);
+                    //Help.ExceptionWrite(ex, true, true, LogPath);
+                    Console.WriteLine(ex.ToString());
                     var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
                     await SendAsync(result.ToBytes(), id);
                 }
@@ -686,7 +691,8 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         }
         catch (Exception ex)
         {
-            Help.ExceptionWrite(ex, true, true, LogPath);
+            //Help.ExceptionWrite(ex, true, true, LogPath);
+            Console.WriteLine(ex.ToString());
             var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
             await SendAsync(result.ToBytes(), id);
         }

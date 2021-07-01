@@ -50,6 +50,15 @@ namespace WebAPI50
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var ss = Enumerable.Range(0, 98);
+
+            var ss2 = Business.Core.Utils.Help.Split(ss, 4);
+
+            foreach (var item in ss2)
+            {
+                Console.WriteLine(item.Length);
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

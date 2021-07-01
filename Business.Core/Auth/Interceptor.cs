@@ -146,7 +146,11 @@ namespace Business.Core.Auth
             }
             catch (System.Exception ex)
             {
-                throw ex.ExceptionWrite(true, true);
+                var inner = ex.GetBase();
+
+                inner.GlobalLog();
+
+                throw inner;
             }
         }
 
@@ -469,13 +473,13 @@ namespace Business.Core.Utils
 
                 if (null != logger.call)
                 {
-                    System.Threading.Tasks.Task.Run(() => logger.call(data).AsTask().ContinueWith(c => c.Exception?.Console()));
+                    System.Threading.Tasks.Task.Run(() => logger.call(data).AsTask().ContinueWith(c => c.Exception?.GlobalLog()));
                 }
                 else if (null != logger.loggerQueue)
                 {
                     if (!logger.loggerQueue.queue.TryAdd(data))
                     {
-                        Help.Console(data.TryJsonSerialize());
+                        data.TryJsonSerialize().GlobalLog(Logger.Type.Error);
                     }
                 }
             }

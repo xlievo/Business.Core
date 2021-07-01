@@ -355,7 +355,7 @@ public static class Common
         //Console.WriteLine($"Min {workerThreads}, {completionPortThreads}");
         //Console.WriteLine($"Max {workerThreads2}, {completionPortThreads2}");
 
-        AppDomain.CurrentDomain.UnhandledException += (sender, e) => (e.ExceptionObject as Exception)?.ExceptionWrite(true, true, LogPath);
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) => Console.WriteLine((e.ExceptionObject as Exception)?.ToString());
 
         Console.WriteLine($"Date: {DateTimeOffset.Now}");
         Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
@@ -534,6 +534,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 Interval = TimeSpan.FromSeconds(6),
                 MaxNumber = 2011
             }));
+
+        Configer.GlobalLog = (type, msg) => Help.Console(msg);
+
         bootstrap.Build();
 
         //writ url to page
@@ -693,7 +696,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 }
                 catch (Exception ex)
                 {
-                    Help.ExceptionWrite(ex, true, true, LogPath);
+                    Console.WriteLine(ex.ToString());
                     var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
                     await SendAsync(result.ToBytes(), id);
                 }
@@ -713,7 +716,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         }
         catch (Exception ex)
         {
-            Help.ExceptionWrite(ex, true, true, LogPath);
+            Console.WriteLine(ex.ToString());
             var result = ResultFactory.ResultCreate(ResultObject<string>.ResultTypeDefinition, 0, Convert.ToString(ex));
             await SendAsync(result.ToBytes(), id);
         }

@@ -1170,7 +1170,7 @@ namespace Business.Core.Utils
         /// <param name="pathRoot"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static TypeDefinition GetTypeDefinition(this System.Type type, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null, string name = null)
+        internal static TypeDefinition GetTypeDefinition(this System.Type type, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null, string name = null)
         {
             var current = GetCurrentType(type);
             var definitions = current.hasDefinition ? new List<string> { type.FullName } : new List<string>();
@@ -1351,7 +1351,7 @@ namespace Business.Core.Utils
         /// <summary>
         /// TypeDefinition
         /// </summary>
-        public struct TypeDefinition : ITypeDefinition<TypeDefinition>
+        internal struct TypeDefinition : ITypeDefinition<TypeDefinition>
         {
             /// <summary>
             /// Name
@@ -1765,7 +1765,7 @@ namespace Business.Core.Utils
         /// <param name="parallel"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public static List<System.Type> LoadAssemblys(IEnumerable<string> assemblyFiles, bool parallel = false, System.Func<System.Type, bool> callback = null)
+        internal static List<System.Type> LoadAssemblys(IEnumerable<string> assemblyFiles, bool parallel = false, System.Func<System.Type, bool> callback = null)
         {
             var ass = new List<System.Type>();
 
@@ -1791,7 +1791,7 @@ namespace Business.Core.Utils
         /// <param name="parallel"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public static List<System.Type> LoadAssemblys(IEnumerable<Assembly> assemblys, bool parallel = false, System.Func<System.Type, bool> callback = null)
+        internal static List<System.Type> LoadAssemblys(IEnumerable<Assembly> assemblys, bool parallel = false, System.Func<System.Type, bool> callback = null)
         {
             var ass = new List<System.Type>();
 
@@ -1835,8 +1835,8 @@ namespace Business.Core.Utils
                 }
                 catch (System.Exception ex)
                 {
-                    System.Console.WriteLine(assembly?.Location);
-                    ex.Console();
+                    assembly?.Location.GlobalLog();
+                    ex.GlobalLog();
                 }
             }
         }
@@ -1846,7 +1846,7 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="assemblyFile"></param>
         /// <returns></returns>
-        public static Assembly LoadAssembly(string assemblyFile)
+        internal static Assembly LoadAssembly(string assemblyFile)
         {
             try
             {
@@ -1857,8 +1857,8 @@ namespace Business.Core.Utils
             catch (System.Exception ex)
             {
 #if DEBUG
-                System.Console.WriteLine(assemblyFile);
-                ex.Console();
+                assemblyFile.GlobalLog();
+                ex.GlobalLog();
 #endif
                 return null;
             }
@@ -2529,41 +2529,55 @@ namespace Business.Core.Utils
             return inner;
         }
 
+        ///// <summary>
+        ///// Write exception to file
+        ///// </summary>
+        ///// <param name="ex"></param>
+        ///// <param name="write"></param>
+        ///// <param name="console"></param>
+        ///// <param name="path"></param>
+        ///// <param name="dateFormat"></param>
+        ///// <param name="encoding"></param>
+        ///// <returns></returns>
+        //public static System.Exception ExceptionWrite(this System.Exception ex, bool write = false, bool console = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null)
+        //{
+        //    var inner = ex.GetBase();
+        //    if (null == inner || (!write && !console)) { return inner; }
+
+        //    var message = string.Format("{0}{1}{0}{2}{3}{2}{4}{2}{5}{2}{6}",
+        //            "========================",//{0}
+        //            System.DateTime.Now.ToString(dateFormat),//{1}
+        //            System.Environment.NewLine,//{2}
+        //            inner.Message,         //{3}
+        //            inner.Source,          //{4}
+        //            inner.StackTrace,      //{5}
+        //            inner?.StackTrace);//{6}
+
+        //    WriteLocal(message, path, false, write, console, dateFormat, encoding);
+
+        //    return inner;
+        //}
+
+        ///// <summary>
+        ///// Console
+        ///// </summary>
+        ///// <param name="ex"></param>
+        ///// <param name="dateFormat"></param>
+        //public static void Console(this System.Exception ex, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff") => ex.ExceptionWrite(console: true, dateFormat: dateFormat);
+
         /// <summary>
-        /// Write exception to file
+        /// Global information output
         /// </summary>
         /// <param name="ex"></param>
-        /// <param name="write"></param>
-        /// <param name="console"></param>
-        /// <param name="path"></param>
-        /// <param name="dateFormat"></param>
-        /// <param name="encoding"></param>
         /// <returns></returns>
-        public static System.Exception ExceptionWrite(this System.Exception ex, bool write = false, bool console = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null)
-        {
-            var inner = ex.GetBase();
-            if (null == inner || (!write && !console)) { return inner; }
-
-            var message = string.Format("{0}{1}{0}{2}{3}{2}{4}{2}{5}{2}{6}",
-                    "========================",//{0}
-                    System.DateTime.Now.ToString(dateFormat),//{1}
-                    System.Environment.NewLine,//{2}
-                    inner.Message,         //{3}
-                    inner.Source,          //{4}
-                    inner.StackTrace,      //{5}
-                    inner?.StackTrace);//{6}
-
-            WriteLocal(message, path, false, write, console, dateFormat, encoding);
-
-            return inner;
-        }
+        internal static void GlobalLog(this System.Exception ex) => Configer.GlobalLog(Logger.Type.Exception, ex.GetBase()?.ToString());
 
         /// <summary>
-        /// Console
+        /// Global information output
         /// </summary>
-        /// <param name="ex"></param>
-        /// <param name="dateFormat"></param>
-        public static void Console(this System.Exception ex, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff") => ex.ExceptionWrite(console: true, dateFormat: dateFormat);
+        /// <param name="message"></param>
+        /// <param name="type"></param>
+        internal static void GlobalLog(this string message, Logger.Type type = Logger.Type.Record) => Configer.GlobalLog(type, message);
 
         static readonly System.Threading.ReaderWriterLockSlim locker = new System.Threading.ReaderWriterLockSlim();
 
@@ -2577,7 +2591,7 @@ namespace Business.Core.Utils
         /// <param name="console"></param>
         /// <param name="dateFormat"></param>
         /// <param name="encoding"></param>
-        public static void WriteLocal(string text, string path = "business.log.txt", bool autoTime = true, bool write = true, bool console = false, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null)
+        internal static void WriteLocal(string text, string path = "business.log.txt", bool autoTime = true, bool write = true, bool console = false, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(path)) { throw new System.ArgumentException(nameof(path)); }
 
@@ -2624,18 +2638,21 @@ namespace Business.Core.Utils
         /// Console
         /// </summary>
         /// <param name="text"></param>
-        /// <param name="autoTime"></param>
-        /// <param name="console"></param>
-        /// <param name="write"></param>
-        /// <param name="path"></param>
         /// <param name="dateFormat"></param>
-        /// <param name="encoding"></param>
-        public static void Console(string text, bool autoTime = true, bool console = true, bool write = false, string path = "business.log.txt", string dateFormat = "yyyy-MM-dd HH:mm:ss:fff", System.Text.Encoding encoding = null) => WriteLocal(text, path, autoTime, write, console, dateFormat, encoding);
+        public static void Console(string text, string dateFormat = "yyyy-MM-dd HH:mm:ss:fff")
+        {
+            if (!string.IsNullOrEmpty(dateFormat))
+            {
+                text = $"[{System.DateTime.Now.ToString(dateFormat)}] {text}";
+            }
+
+            System.Console.WriteLine(text);
+        }
 
         /// <summary>
         /// Ignore erroneous characters: Unable to translate Unicode...
         /// </summary>
-        public static System.Text.Encoding UTF8 = System.Text.Encoding.GetEncoding("UTF-8", new System.Text.EncoderReplacementFallback(string.Empty), new System.Text.DecoderExceptionFallback());
+        public static readonly System.Text.Encoding UTF8 = System.Text.Encoding.GetEncoding("UTF-8", new System.Text.EncoderReplacementFallback(string.Empty), new System.Text.DecoderExceptionFallback());
 
         #endregion
 
@@ -2865,14 +2882,13 @@ namespace Business.Core.Utils
         {
             if (null == source) { throw new System.ArgumentNullException(nameof(source)); }
 
-            var source2 = source.ToArray();
-            var span = new System.Span<T>(source2);
+            var span = new System.Span<T>(source.ToArray());
 
-            var sp = new LinkedList<T[]>();
+            var sp = new List<T[]>(span.Length);
 
-            for (int i = 0; i < source2.Length; i += length)
+            for (int i = 0; i < span.Length; i += length)
             {
-                sp.AddLast(span.Slice(i, i + length > source2.Length ? source2.Length - i : length).ToArray());
+                sp.Add(span.Slice(i, i + length > span.Length ? span.Length - i : length).ToArray());
             }
 
             return sp;
@@ -3117,7 +3133,7 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static bool IsDefinition(this System.Type type) => !SysTypes.Contains(type.FullName) && (type.IsClass || (type.IsValueType && !type.IsEnum && !type.IsArray && !type.IsCollection() && !type.IsEnumerable()));
+        internal static bool IsDefinition(this System.Type type) => !SysTypes.Contains(type.FullName) && (type.IsClass || (type.IsValueType && !type.IsEnum && !type.IsArray && !type.IsCollection() && !type.IsEnumerable()));
 
         #region Json
         /*
@@ -3500,7 +3516,7 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static System.TypeCode GetTypeCode(this System.Type type)
+        internal static System.TypeCode GetTypeCode(this System.Type type)
         {
             switch (type.FullName)
             {
@@ -3529,7 +3545,7 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="source">The type to check.</param>
         /// <returns><see langword="true" /> if the type is an array, otherwise <see langword="false" />.</returns>
-        public static bool IsArray(this System.Type source)
+        internal static bool IsArray(this System.Type source)
         {
             return source.GetTypeInfo().BaseType == typeof(System.Array);
         }
@@ -3538,7 +3554,7 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="source">The type to check.</param>
         /// <returns><see langword="true" /> if the type is an collection, otherwise <see langword="false" />.</returns>
-        public static bool IsCollection(this System.Type source)
+        internal static bool IsCollection(this System.Type source)
         {
             var collectionType = typeof(ICollection<>);
 
@@ -3551,7 +3567,7 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="source">The type to check.</param>
         /// <returns><see langword="true" /> if the type is an enumerable, otherwise <see langword="false" />.</returns>
-        public static bool IsEnumerable(this System.Type source)
+        internal static bool IsEnumerable(this System.Type source)
         {
             var enumerableType = typeof(IEnumerable<>);
 
@@ -3564,7 +3580,7 @@ namespace Business.Core.Utils
         /// <remarks>
         /// Boolean is not considered numeric.
         /// </remarks>
-        public static bool IsNumeric(this System.Type source)
+        internal static bool IsNumeric(this System.Type source)
         {
             if (source == null)
             {
@@ -3602,7 +3618,7 @@ namespace Business.Core.Utils
         /// <typeparam name="TType">The type that all resulting <see cref="System.Type"/> should be assignable to.</typeparam>
         /// <param name="types">An <see cref="IEnumerable{T}"/> of <see cref="System.Type"/> instances that should be filtered.</param>
         /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="System.Type"/> instances.</returns>
-        public static IEnumerable<System.Type> NotOfType<TType>(this IEnumerable<System.Type> types)
+        internal static IEnumerable<System.Type> NotOfType<TType>(this IEnumerable<System.Type> types)
         {
             return types.Where(t => !typeof(TType).IsAssignableFrom(t));
         }
@@ -3614,7 +3630,7 @@ namespace Business.Core.Utils
         /// <remarks>
         /// Borrowed from: http://tmont.com/blargh/2011/3/determining-if-an-open-generic-type-isassignablefrom-a-type
         /// </remarks>
-        public static bool IsAssignableToGenericType(this System.Type givenType, System.Type genericType)
+        internal static bool IsAssignableToGenericType(this System.Type givenType, System.Type genericType)
         {
             if (givenType == null || genericType == null)
             {
@@ -4246,9 +4262,10 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="call"></param>
         /// <param name="batch"></param>
-        /// <param name="syn">Whether each outgoing thread has synchronous callback, asynchronous by default</param>
-        /// <param name="maxCapacity">the max capacity of this queue</param>
-        public Queue(System.Func<IEnumerable<T>, System.Threading.Tasks.ValueTask> call, BatchOptions batch = default, bool syn = false, int? maxCapacity = null)
+        /// <param name="syn"></param>
+        /// <param name="maxCapacity"></param>
+        /// <param name="exception"></param>
+        public Queue(System.Func<IEnumerable<T>, System.Threading.Tasks.ValueTask> call, BatchOptions batch = default, bool syn = false, int? maxCapacity = null, System.Action<string> exception = null)
         {
             if (null == call) { throw new System.ArgumentNullException(nameof(call)); }
 
@@ -4292,11 +4309,11 @@ namespace Business.Core.Utils
 
                         if (syn)
                         {
-                            await call(list).AsTask().ContinueWith(c2 => c2.Exception?.Console());
+                            await call(list).AsTask().ContinueWith(c2 => c2.Exception?.GlobalLog());
                         }
                         else
                         {
-                            System.Threading.Tasks.Task.Factory.StartNew(obj => call(obj as IEnumerable<T>).AsTask().ContinueWith(c2 => c2.Exception?.Console()), list);
+                            System.Threading.Tasks.Task.Factory.StartNew(obj => call(obj as IEnumerable<T>).AsTask().ContinueWith(c2 => c2.Exception?.GlobalLog()), list);
                         }
 
                         if (watch.IsRunning)

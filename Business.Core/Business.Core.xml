@@ -2147,24 +2147,19 @@
             <param name="ex"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.ExceptionWrite(System.Exception,System.Boolean,System.Boolean,System.String,System.String,System.Text.Encoding)">
+        <member name="M:Business.Core.Utils.Help.GlobalLog(System.Exception)">
             <summary>
-            Write exception to file
+            Global information output
             </summary>
             <param name="ex"></param>
-            <param name="write"></param>
-            <param name="console"></param>
-            <param name="path"></param>
-            <param name="dateFormat"></param>
-            <param name="encoding"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.Console(System.Exception,System.String)">
+        <member name="M:Business.Core.Utils.Help.GlobalLog(System.String,Business.Core.Logger.Type)">
             <summary>
-            Console
+            Global information output
             </summary>
-            <param name="ex"></param>
-            <param name="dateFormat"></param>
+            <param name="message"></param>
+            <param name="type"></param>
         </member>
         <member name="M:Business.Core.Utils.Help.WriteLocal(System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.String,System.Text.Encoding)">
             <summary>
@@ -2178,17 +2173,12 @@
             <param name="dateFormat"></param>
             <param name="encoding"></param>
         </member>
-        <member name="M:Business.Core.Utils.Help.Console(System.String,System.Boolean,System.Boolean,System.Boolean,System.String,System.String,System.Text.Encoding)">
+        <member name="M:Business.Core.Utils.Help.Console(System.String,System.String)">
             <summary>
             Console
             </summary>
             <param name="text"></param>
-            <param name="autoTime"></param>
-            <param name="console"></param>
-            <param name="write"></param>
-            <param name="path"></param>
             <param name="dateFormat"></param>
-            <param name="encoding"></param>
         </member>
         <member name="F:Business.Core.Utils.Help.UTF8">
             <summary>
@@ -2659,14 +2649,15 @@
             queue
             </summary>
         </member>
-        <member name="M:Business.Core.Utils.Queue`1.#ctor(System.Func{System.Collections.Generic.IEnumerable{`0},System.Threading.Tasks.ValueTask},Business.Core.Utils.Queue{`0}.BatchOptions,System.Boolean,System.Nullable{System.Int32})">
+        <member name="M:Business.Core.Utils.Queue`1.#ctor(System.Func{System.Collections.Generic.IEnumerable{`0},System.Threading.Tasks.ValueTask},Business.Core.Utils.Queue{`0}.BatchOptions,System.Boolean,System.Nullable{System.Int32},System.Action{System.String})">
             <summary>
             Queue
             </summary>
             <param name="call"></param>
             <param name="batch"></param>
-            <param name="syn">Whether each outgoing thread has synchronous callback, asynchronous by default</param>
-            <param name="maxCapacity">the max capacity of this queue</param>
+            <param name="syn"></param>
+            <param name="maxCapacity"></param>
+            <param name="exception"></param>
         </member>
         <member name="T:Business.Core.IArg">
             <summary>
@@ -5562,17 +5553,23 @@
             </summary>
             <param name="call"></param>
         </member>
-        <member name="M:Business.Core.Logger.#ctor(System.Func{System.Collections.Generic.IEnumerable{Business.Core.Logger.LoggerData},System.Threading.Tasks.ValueTask},Business.Core.Logger.BatchOptions,System.Nullable{System.Int32})">
+        <member name="M:Business.Core.Logger.#ctor(System.Func{System.Collections.Generic.IEnumerable{Business.Core.Logger.LoggerData},System.Threading.Tasks.ValueTask},Business.Core.Logger.BatchOptions,System.Boolean,System.Nullable{System.Int32})">
             <summary>
             Logger
             </summary>
             <param name="call"></param>
             <param name="batch"></param>
+            <param name="syn"></param>
             <param name="maxCapacity">Gets the max capacity of this queue</param>
         </member>
         <member name="T:Business.Core.Configer">
             <summary>
             Configer
+            </summary>
+        </member>
+        <member name="F:Business.Core.Configer.GlobalLog">
+            <summary>
+            Global information output
             </summary>
         </member>
         <member name="F:Business.Core.Configer.documentFileName">

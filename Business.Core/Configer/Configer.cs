@@ -389,6 +389,11 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
     public partial class Configer
     {
         /// <summary>
+        /// Global information output
+        /// </summary>
+        public static System.Action<Logger.Type, string> GlobalLog = (logType, message) => Help.Console(message);
+
+        /// <summary>
         /// Document file name, business.json
         /// </summary>
         public static string documentFileName = "business.json";
