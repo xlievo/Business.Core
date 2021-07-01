@@ -2270,7 +2270,7 @@ namespace Business.Core.Annotations
         /// <summary>
         /// Options to control the behavior during parsing.
         /// </summary>
-        internal readonly System.Text.Json.JsonSerializerOptions textJsonOptions;
+        public readonly System.Text.Json.JsonSerializerOptions textJsonOptions;
 
         /// <summary>
         /// Check whether the defined value type is the default value, (top-level object commit), Default true
