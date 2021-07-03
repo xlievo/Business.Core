@@ -4592,7 +4592,7 @@
         </member>
         <member name="P:Business.Core.Document.Options.Testing">
             <summary>
-            Whether to render the Testing element in the UI
+            Whether to render the Testing element in the UI, true is on by default
             </summary>
         </member>
         <member name="P:Business.Core.Document.Options.Group">
@@ -5704,11 +5704,6 @@
         <member name="F:Business.Core.Configer.JsonOptionsDoc">
             <summary>
             FirstCharToLowerNamingPolicy
-            </summary>
-        </member>
-        <member name="F:Business.Core.Configer.JsonOptionsMultipleParameter">
-            <summary>
-            Responsible for parsing the overall request data
             </summary>
         </member>
         <member name="M:Business.Core.Configer.#ctor(Business.Core.Annotations.Info,System.Type,System.Type,System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},Business.Core.Auth.IInterceptor,System.Collections.Generic.IEnumerable{System.Type})">

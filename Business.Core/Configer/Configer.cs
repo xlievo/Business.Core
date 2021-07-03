@@ -567,25 +567,25 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
-        /// <summary>
-        /// Responsible for parsing the overall request data
-        /// </summary>
-        public static System.Text.Json.JsonSerializerOptions JsonOptionsMultipleParameter = new System.Text.Json.JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            //PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
-            AllowTrailingCommas = true,
-            IgnoreNullValues = true,
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        };
+        ///// <summary>
+        ///// Responsible for parsing the overall request data
+        ///// </summary>
+        //public static System.Text.Json.JsonSerializerOptions JsonOptionsMultipleParameter = new System.Text.Json.JsonSerializerOptions
+        //{
+        //    PropertyNameCaseInsensitive = true,
+        //    //PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        //    AllowTrailingCommas = true,
+        //    IgnoreNullValues = true,
+        //    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        //};
 
         static Configer()
         {
             JsonOptionsDoc.Converters.Add(new Help.DateTimeConverter());
             JsonOptionsDoc.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
 
-            JsonOptionsMultipleParameter.Converters.Add(new Help.DateTimeConverter());
-            JsonOptionsMultipleParameter.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+            //JsonOptionsMultipleParameter.Converters.Add(new Help.DateTimeConverter());
+            //JsonOptionsMultipleParameter.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         /// <summary>

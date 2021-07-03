@@ -2261,7 +2261,8 @@ namespace Business.Core.Annotations
                 PropertyNameCaseInsensitive = true,
                 AllowTrailingCommas = true,
                 IgnoreNullValues = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString | System.Text.Json.Serialization.JsonNumberHandling.WriteAsString
             };
             textJsonOptions.Converters.Add(new Help.DateTimeConverter());
             textJsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());

@@ -413,9 +413,9 @@ namespace Business.Core.Document
         public bool Benchmark { get; set; } = true;
 
         /// <summary>
-        /// Whether to render the Testing element in the UI
+        /// Whether to render the Testing element in the UI, true is on by default
         /// </summary>
-        public bool Testing { get; set; }
+        public bool Testing { get; set; } = true;
 
         /// <summary>
         /// Generate only documents for the specified group

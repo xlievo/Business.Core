@@ -2255,7 +2255,9 @@ function ready(editor) {
                 }
             }, false);
 
-            header2.style.display = "";
+            if (0 < tests.length) {
+                header2.style.display = "";
+            }
         }
 
         if (doc[businessName].options.benchmark) {
