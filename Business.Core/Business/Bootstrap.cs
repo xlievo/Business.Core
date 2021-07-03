@@ -565,9 +565,9 @@ namespace Business.Core
             Config.BuildBefore?.Invoke(this);
 
             //Get self reference assembly under single file publishing
-            var aas = (null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll").Select(c => Help.LoadAssembly(c)).Concat(System.AppDomain.CurrentDomain.GetAssemblies()).Distinct(Equality<System.Reflection.Assembly>.CreateComparer(c => c?.FullName, System.StringComparer.CurrentCultureIgnoreCase)) : assemblyFiles.Select(c => Help.LoadAssembly(c));
+            var aas = (null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll").AsParallel().Select(c => Help.LoadAssembly(c)).AsEnumerable().Concat(System.AppDomain.CurrentDomain.GetAssemblies()).Distinct(Equality<System.Reflection.Assembly>.CreateComparer(c => c?.FullName, System.StringComparer.CurrentCultureIgnoreCase)) : assemblyFiles.AsParallel().Select(c => Help.LoadAssembly(c));
 
-            _ = Help.LoadAssemblys(aas, true, type =>
+            _ = Help.LoadAssemblys(aas, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {
@@ -752,9 +752,9 @@ namespace Business.Core
             Config.BuildBefore?.Invoke(this);
 
             //Get self reference assembly under single file publishing
-            var aas = (null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll").Select(c => Help.LoadAssembly(c)).Concat(System.AppDomain.CurrentDomain.GetAssemblies()).Distinct(Equality<System.Reflection.Assembly>.CreateComparer(c => c?.FullName, System.StringComparer.CurrentCultureIgnoreCase)) : assemblyFiles.Select(c => Help.LoadAssembly(c));
+            var aas = (null == assemblyFiles || !assemblyFiles.Any()) ? System.IO.Directory.GetFiles(Help.BaseDirectory, "*.dll").AsParallel().Select(c => Help.LoadAssembly(c)).AsEnumerable().Concat(System.AppDomain.CurrentDomain.GetAssemblies()).Distinct(Equality<System.Reflection.Assembly>.CreateComparer(c => c?.FullName, System.StringComparer.CurrentCultureIgnoreCase)) : assemblyFiles.AsParallel().Select(c => Help.LoadAssembly(c));
 
-            _ = Help.LoadAssemblys(aas, true, type =>
+            _ = Help.LoadAssemblys(aas, type =>
             {
                 if (typeof(IBusiness).IsAssignableFrom(type) && !type.IsAbstract)
                 {

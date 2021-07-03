@@ -1973,21 +1973,19 @@
             <param name="cmd"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.LoadAssemblys(System.Collections.Generic.IEnumerable{System.String},System.Boolean,System.Func{System.Type,System.Boolean})">
+        <member name="M:Business.Core.Utils.Help.LoadAssemblys(System.Collections.Generic.IEnumerable{System.String},System.Func{System.Type,System.Boolean})">
             <summary>
             LoadAssemblys
             </summary>
             <param name="assemblyFiles"></param>
-            <param name="parallel"></param>
             <param name="callback"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.LoadAssemblys(System.Collections.Generic.IEnumerable{System.Reflection.Assembly},System.Boolean,System.Func{System.Type,System.Boolean})">
+        <member name="M:Business.Core.Utils.Help.LoadAssemblys(System.Collections.Generic.IEnumerable{System.Reflection.Assembly},System.Func{System.Type,System.Boolean})">
             <summary>
             LoadAssemblys
             </summary>
             <param name="assemblys"></param>
-            <param name="parallel"></param>
             <param name="callback"></param>
             <returns></returns>
         </member>

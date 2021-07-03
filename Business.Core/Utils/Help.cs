@@ -1762,82 +1762,51 @@ namespace Business.Core.Utils
         /// LoadAssemblys
         /// </summary>
         /// <param name="assemblyFiles"></param>
-        /// <param name="parallel"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        internal static List<System.Type> LoadAssemblys(IEnumerable<string> assemblyFiles, bool parallel = false, System.Func<System.Type, bool> callback = null)
-        {
-            var ass = new List<System.Type>();
-
-            if (parallel)
-            {
-                assemblyFiles.AsParallel().ForAll(item => LoadAssembly(LoadAssembly(item), ass, callback));
-            }
-            else
-            {
-                foreach (var item in assemblyFiles)
-                {
-                    LoadAssembly(LoadAssembly(item), ass, callback);
-                }
-            }
-
-            return ass;
-        }
+        internal static List<System.Type> LoadAssemblys(IEnumerable<string> assemblyFiles, System.Func<System.Type, bool> callback) => LoadAssemblys(assemblyFiles.AsParallel().Select(ass => LoadAssembly(ass)), callback);
 
         /// <summary>
         /// LoadAssemblys
         /// </summary>
         /// <param name="assemblys"></param>
-        /// <param name="parallel"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        internal static List<System.Type> LoadAssemblys(IEnumerable<Assembly> assemblys, bool parallel = false, System.Func<System.Type, bool> callback = null)
+        internal static List<System.Type> LoadAssemblys(IEnumerable<Assembly> assemblys, System.Func<System.Type, bool> callback)
         {
-            var ass = new List<System.Type>();
+            var types = new List<System.Type>();
 
-            if (parallel)
+            if (null == assemblys || !assemblys.Any() || null == callback)
             {
-                assemblys.AsParallel().ForAll(item => LoadAssembly(item, ass, callback));
-            }
-            else
-            {
-                foreach (var item in assemblys)
-                {
-                    LoadAssembly(item, ass, callback);
-                }
+                return types;
             }
 
-            return ass;
+            assemblys.AsParallel().ForAll(ass => LoadAssembly(ass, types, callback));
+
+            return types;
         }
 
-        //static void LoadAssembly(string assemblyFile, List<System.Type> ass, System.Func<System.Type, bool> callback = null) => LoadAssembly(LoadAssembly(assemblyFile), ass, callback);
-
-        static void LoadAssembly(Assembly assembly, List<System.Type> ass, System.Func<System.Type, bool> callback = null)
+        static void LoadAssembly(Assembly assembly, List<System.Type> types, System.Func<System.Type, bool> callback)
         {
-            if (null != assembly && !assembly.IsDynamic)
+            if (null == types || null == assembly || assembly.IsDynamic || null == callback)
             {
-                if (null == callback)
-                {
-                    return;
-                }
+                return;
+            }
 
-                try
+            try
+            {
+                assembly.GetExportedTypes().AsParallel().ForAll(type =>
                 {
-                    var types = assembly.GetExportedTypes();
-
-                    foreach (var type in types)
+                    if (callback.Invoke(type))
                     {
-                        if (callback.Invoke(type))
-                        {
-                            ass.Add(type);
-                        }
+                        types.Add(type);
                     }
-                }
-                catch (System.Exception ex)
-                {
-                    assembly?.Location.GlobalLog();
-                    ex.GlobalLog();
-                }
+                });
+            }
+            catch (System.Exception ex)
+            {
+                assembly?.Location.GlobalLog();
+                ex.GlobalLog();
             }
         }
 
