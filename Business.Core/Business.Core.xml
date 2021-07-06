@@ -4637,7 +4637,7 @@
         </member>
         <member name="P:Business.Core.Document.Options.CamelCase">
             <summary>
-            CamelCase
+            [Title] and submission [Key] of the responsible UIDoc parameter object
             </summary>
         </member>
         <member name="T:Business.Core.Document.RouteCTD">

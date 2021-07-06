@@ -561,7 +561,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         {
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = Help.JsonNamingPolicyCamelCase.Instance,
-            DictionaryKeyPolicy = Help.JsonNamingPolicyCamelCase.Instance,
+            //DictionaryKeyPolicy = Help.JsonNamingPolicyCamelCase.Instance,
             AllowTrailingCommas = true,
             IgnoreNullValues = true,
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping

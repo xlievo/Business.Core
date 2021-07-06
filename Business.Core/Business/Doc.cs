@@ -458,7 +458,7 @@ namespace Business.Core.Document
         public Dictionary<string, object> Config { get; set; } = new Dictionary<string, object>();
 
         /// <summary>
-        /// CamelCase
+        /// [Title] and submission [Key] of the responsible UIDoc parameter object
         /// </summary>
         [System.Text.Json.Serialization.JsonIgnore]
         public System.Func<string, string> CamelCase { get; set; } = c => Help.JsonNamingPolicyCamelCase.Instance.ConvertName(c);

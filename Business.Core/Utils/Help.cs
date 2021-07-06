@@ -681,10 +681,10 @@ namespace Business.Core.Utils
                 alias = $" {alias}";
             }
 
-            //var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase ? CamelCase(argSource.Args.Name) : argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name };
+            // The [Name] attribute is the UIDoc submission [Key]
+            // [camelCase] is also responsible for the parameter Title display
             var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase?.Invoke(argSource.Args.Name) ?? argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name };
 
-            //var topTitleArgsName = camelCase && null != argSource.TopTitleArgsName ? CamelCase(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
             var topTitleArgsName = null != camelCase && null != argSource.TopTitleArgsName ? camelCase.Invoke(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
 
             var titleArgsName = topTitleArgsName ?? (argSource.Args.HasToken ? route?.T ?? "t" : docArg.Name);
