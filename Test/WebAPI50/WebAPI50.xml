@@ -149,12 +149,12 @@
         </member>
         <member name="P:BusinessMember2.Test001222.TeamMember.UserId">
             <summary>
-            用户ID
+            UserId
             </summary>
         </member>
         <member name="P:BusinessMember2.Test001222.TeamMember.UserImg">
             <summary>
-            用户头像
+            UserImg
             </summary>
         </member>
         <member name="T:BusinessMember2.Test00122">

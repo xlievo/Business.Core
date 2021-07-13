@@ -2291,6 +2291,7 @@ namespace Business.Core.Annotations
 
             textJsonOptions = new System.Text.Json.JsonSerializerOptions
             {
+                IncludeFields = true,
                 PropertyNameCaseInsensitive = true,
                 AllowTrailingCommas = true,
                 IgnoreNullValues = true,
