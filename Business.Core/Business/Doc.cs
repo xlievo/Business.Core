@@ -987,6 +987,11 @@ namespace Business.Core.Document
         /// </summary>
         public bool ValueType { get; set; }
 
+        /// <summary>
+        /// Dynamic object, DocUI string type display
+        /// </summary>
+        public bool DynamicObject { get; set; }
+
         #region
         /*
         public string MinLength { get; set; }

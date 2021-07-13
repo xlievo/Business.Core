@@ -897,6 +897,7 @@ public class BusinessController : Controller
                     //the data of this request, allow null.
                     //cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeStringArray(),
                     cmd.HasArgSingle ? new object[] { d } : cmd.GetParametersObjects(d.TryJsonDeserialize(cmd.ParametersType, Configer.JsonOptionsDoc)),
+                    !cmd.HasArgSingle,
                     //the incoming use object
                     new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session"));

@@ -571,7 +571,7 @@ namespace Business.Core.Annotations
     /// <summary>
     /// Injecting Objects Corresponding to Parameters
     /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Interface | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    [System.AttributeUsage(System.AttributeTargets.Interface | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
     public sealed class UseAttribute : AttributeBase
     {
         /// <summary>
@@ -590,6 +590,12 @@ namespace Business.Core.Annotations
         /// </summary>
         public System.Type ParameterType { get; set; }
     }
+
+    /// <summary>
+    /// Dynamic object, DocUI string type display
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Interface | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+    public sealed class DynamicObjectAttribute : AttributeBase { }
 
     /// <summary>
     /// Friendly name
@@ -820,6 +826,24 @@ namespace Business.Core.Annotations
     }
 
     /// <summary>
+    /// ArgumentDeserialize
+    /// </summary>
+    public abstract class ArgumentDeserialize : ArgumentAttribute
+    {
+        /// <summary>
+        /// ArgumentDeserialize
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        /// <param name="type"></param>
+        protected ArgumentDeserialize(int state, string message = null, System.Type type = null) : base(state, message, type)
+        {
+            this.CanNull = false;
+            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection && !dynamicObject) || this.ArgMeta.Arg.Parameters || ignoreArg;
+            this.ArgMeta.Deserialize = true;
+        }
+    }
+    /// <summary>
     /// Base class for all attributes that apply to parameters
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
@@ -898,6 +922,11 @@ namespace Business.Core.Annotations
             /// </summary>
             public Meta.Args Arg { get; internal set; }
 
+            /// <summary>
+            /// is Deserialize
+            /// </summary>
+            public bool Deserialize { get; internal set; }
+
             internal Proces Proces { get; set; }
 
             /// <summary>
@@ -909,7 +938,7 @@ namespace Business.Core.Annotations
             /// <summary>
             /// Custom filtering, Returns true to indicate that it does not work on this object, default false
             /// </summary>
-            public System.Func<bool, bool, AttributeBase.MetaData.DeclaringType, System.Collections.Generic.IEnumerable<ArgumentAttribute>, bool, bool> Skip { get; set; }
+            public System.Func<bool, bool, AttributeBase.MetaData.DeclaringType, System.Collections.Generic.IEnumerable<ArgumentAttribute>, bool, bool, bool> Skip { get; set; }
 
             /// <summary>
             /// Clone
@@ -1445,7 +1474,10 @@ namespace Business.Core.Annotations
             else
             {
                 var result = CheckDefinitionValueType(this, value, CheckValueType);
-                if (!Equals(null, result) && !result.HasData) { return new ValueTask<IResult>(result); }
+                if (!Equals(null, result) && !result.HasData)
+                {
+                    return new ValueTask<IResult>(result);
+                }
             }
 
             return new ValueTask<IResult>(this.ResultCreate());
@@ -2161,7 +2193,7 @@ namespace Business.Core.Annotations
     /// ParametersAttribute
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
-    public class ParametersAttribute : ArgumentAttribute
+    public class ParametersAttribute : ArgumentDeserialize
     {
         /// <summary>
         /// ParametersAttribute
@@ -2170,9 +2202,9 @@ namespace Business.Core.Annotations
         /// <param name="message"></param>
         public ParametersAttribute(int state = -11, string message = null) : base(state, message)
         {
-            this.CanNull = false;
+            //this.CanNull = false;
             this.Description = "Parameters parsing";
-            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg) => !hasDefinition;
+            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => !hasDefinition;
         }
         /*
         delegate void SetStructHandler<T>(ref T source, object value);
@@ -2241,7 +2273,7 @@ namespace Business.Core.Annotations
     /// System.Text.Json.JsonSerializer.Deserialize
     /// </summary>
     //[System.AttributeUsage(System.AttributeTargets.Assembly | System.AttributeTargets.Method | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Property | System.AttributeTargets.Field | System.AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
-    public class JsonArgAttribute : ArgumentAttribute
+    public class JsonArgAttribute : ArgumentDeserialize
     {
         /// <summary>
         /// JsonArgAttribute
@@ -2251,10 +2283,11 @@ namespace Business.Core.Annotations
         /// <param name="type"></param>
         public JsonArgAttribute(int state = -12, string message = null, System.Type type = null) : base(state, message, type)
         {
-            this.CanNull = false;
+            //this.CanNull = false;
             this.Description = "Json parsing";
             //this.ArgMeta.Filter |= FilterModel.NotDefinition;
-            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection) || this.ArgMeta.Arg.Parameters || ignoreArg;
+            //this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection && !dynamicObject) || this.ArgMeta.Arg.Parameters || ignoreArg;
+            //this.ArgMeta.Deserialize = true;
 
             textJsonOptions = new System.Text.Json.JsonSerializerOptions
             {
@@ -2273,10 +2306,10 @@ namespace Business.Core.Annotations
         /// </summary>
         public System.Text.Json.JsonSerializerOptions textJsonOptions;
 
-        /// <summary>
-        /// Check whether the defined value type is the default value, (top-level object commit), Default true
-        /// </summary>
-        public bool CheckValueType { get; set; } = true;
+        ///// <summary>
+        ///// Check whether the defined value type is the default value, (top-level object commit), Default true
+        ///// </summary>
+        //public bool CheckValueType { get; set; } = true;
 
         /// <summary>
         /// Proces
@@ -2290,8 +2323,8 @@ namespace Business.Core.Annotations
             if (!result.HasData) { return new ValueTask<IResult>(result); }
 
             //Check whether the defined value type is the default value, (top-level object commit)
-            result = CheckDefinitionValueType(this, value, CheckValueType);
-            if (!Equals(null, result)) { return new ValueTask<IResult>(result); }
+            //result = CheckDefinitionValueType(this, value, CheckValueType);
+            //if (!Equals(null, result)) { return new ValueTask<IResult>(result); }
 
             try
             {
@@ -2304,7 +2337,7 @@ namespace Business.Core.Annotations
     /// <summary>
     /// XML.Deserialize
     /// </summary>
-    public class XmlArgAttribute : ArgumentAttribute
+    public class XmlArgAttribute : ArgumentDeserialize
     {
         /// <summary>
         /// XmlArgAttribute
@@ -2315,10 +2348,10 @@ namespace Business.Core.Annotations
         /// <param name="type"></param>
         public XmlArgAttribute(int state = -12, string message = null, string rootElementName = "xml", System.Type type = null) : base(state, message, type)
         {
-            this.CanNull = false;
+            //this.CanNull = false;
             this.Description = "Xml parsing";
             this.RootElementName = rootElementName;
-            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection) || this.ArgMeta.Arg.Parameters || ignoreArg;
+            //this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection && !dynamicObject) || this.ArgMeta.Arg.Parameters || ignoreArg;
         }
 
         /// <summary>
@@ -2342,8 +2375,8 @@ namespace Business.Core.Annotations
             if (!result.HasData) { return new ValueTask<IResult>(result); }
 
             //Check whether the defined value type is the default value, (top-level object commit)
-            result = CheckDefinitionValueType(this, value, CheckValueType);
-            if (!Equals(null, result)) { return new ValueTask<IResult>(result); }
+            //result = CheckDefinitionValueType(this, value, CheckValueType);
+            //if (!Equals(null, result)) { return new ValueTask<IResult>(result); }
 
             try
             {

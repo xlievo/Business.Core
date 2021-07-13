@@ -290,7 +290,7 @@ namespace Business.Core.Utils
             }
             current.type = current.outType;
 
-            current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out System.Type[] coll);// current.outType.IsCollection();
+            current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out System.Type[] coll) || current.outType.IsEnumerable(out coll);// current.outType.IsCollection();
             current.hasDictionary = typeof(IDictionary<,>).IsAssignableFrom(current.outType, out System.Type[] dict) || typeof(System.Collections.IDictionary).IsAssignableFrom(current.outType, out dict);
 
             //================================//
@@ -298,7 +298,7 @@ namespace Business.Core.Utils
             {
                 current.outType = dict[1];
                 //current.outType = current.outType.GenericTypeArguments[1];
-                current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out coll);
+                current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out coll) || current.outType.IsEnumerable(out coll);
             }
 
             if (current.hasCollection)
@@ -683,13 +683,13 @@ namespace Business.Core.Utils
 
             // The [Name] attribute is the UIDoc submission [Key]
             // [camelCase] is also responsible for the parameter Title display
-            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase?.Invoke(argSource.Args.Name) ?? argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name };
+            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase?.Invoke(argSource.Args.Name) ?? argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name, DynamicObject = argSource.Args.DynamicObject };
 
             var topTitleArgsName = null != camelCase && null != argSource.TopTitleArgsName ? camelCase.Invoke(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
 
             var titleArgsName = topTitleArgsName ?? (argSource.Args.HasToken ? route?.T ?? "t" : docArg.Name);
 
-            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))}){alias}";
+            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object{(argSource.Args.DynamicObject ? " dynamic" : null)}) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))}{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}";
 
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary;
@@ -760,7 +760,11 @@ namespace Business.Core.Utils
                     docArg.Items.KeyType = type.Item1;
                 }
 
-                if (argSource.Args.HasDefinition)
+                if (argSource.Args.DynamicObject)
+                {
+                    docArg.Items.Type = "string";
+                }
+                else if (argSource.Args.HasDefinition)
                 {
                     docArg.Items.Type = "object";
                 }
@@ -778,6 +782,10 @@ namespace Business.Core.Utils
                     }
                 }
             }
+            else if (argSource.Args.DynamicObject)
+            {
+                docArg.Type = "string";
+            }
             else
             {
                 var type = GetDocArgType(argSource.Args.LastType.GetTypeCode());
@@ -790,11 +798,13 @@ namespace Business.Core.Utils
 
             if (argSource.Args.HasDictionary)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object dict){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} dict){alias}";
+                //dynamic
+
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object dict{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} dict{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}";
             }
             else if (argSource.Args.HasCollection)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object array){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} array){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object array{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} array{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}";
             }
 
             docArg.Title = docArg.Title.TrimStart(); // titleArgsName is null
@@ -1173,7 +1183,7 @@ namespace Business.Core.Utils
         internal static TypeDefinition GetTypeDefinition(this System.Type type, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null, string name = null)
         {
             var current = GetCurrentType(type);
-            var definitions = current.hasDefinition ? new List<string> { type.FullName } : new List<string>();
+            var definitions = current.hasDefinition ? new System.Collections.Specialized.StringCollection { type.FullName } : new System.Collections.Specialized.StringCollection();
             var childrens = new ReadOnlyCollection<TypeDefinition>();
             var fullName = type.GetTypeName();
             //..//
@@ -1232,7 +1242,7 @@ namespace Business.Core.Utils
             return definition;
         }
 
-        static ReadOnlyCollection<TypeDefinition> GetTypeDefinition(System.Type type, List<string> definitions, ReadOnlyCollection<TypeDefinition> childrens, string path, IDictionary<string, Xml.member> xmlMembers = null, string groupKey = "")
+        static ReadOnlyCollection<TypeDefinition> GetTypeDefinition(System.Type type, System.Collections.Specialized.StringCollection definitions, ReadOnlyCollection<TypeDefinition> childrens, string path, IDictionary<string, Xml.member> xmlMembers = null, string groupKey = "")
         {
             var types = new ReadOnlyCollection<TypeDefinition>();
 
@@ -1263,8 +1273,15 @@ namespace Business.Core.Utils
                 }
 
                 var current = GetCurrentType(memberType);
-                if (definitions.Contains(memberType.FullName)) { continue; }
-                else if (current.hasDefinition) { definitions.Add(memberType.FullName); }
+                //if (definitions.Contains(memberType.FullName)) { continue; }
+                //else if (current.hasDefinition) { definitions.Add(memberType.FullName); }
+                var definitions2 = new System.Collections.Specialized.StringCollection();
+                foreach (var def in definitions)
+                {
+                    definitions2.Add(def);
+                }
+                if (definitions.Contains(current.outType.FullName)) { continue; }
+                else if (current.hasDefinition) { definitions2.Add(current.outType.FullName); }
                 var childrens2 = new ReadOnlyCollection<TypeDefinition>();
                 var fullName = $"{type.GetTypeName(item.DeclaringType)}.{item.Name}";
                 /*
@@ -1328,7 +1345,7 @@ namespace Business.Core.Utils
                     Nullable = current.nullable,
 
                     FullName = fullName,
-                    Children = current.hasDefinition ? GetTypeDefinition(current.outType, definitions, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
+                    Children = current.hasDefinition ? GetTypeDefinition(current.outType, definitions2, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                     Childrens = childrens2,
                     MemberDefinition = memberDefinition,
                     Summary = summary,
@@ -1469,6 +1486,11 @@ namespace Business.Core.Utils
             /// Summary
             /// </summary>
             public string Summary { get; set; }
+
+            /// <summary>
+            /// Dynamic object, DocUI string type display
+            /// </summary>
+            public bool DynamicObject { get; }
         }
 
         ///// <summary>
@@ -3541,6 +3563,24 @@ namespace Business.Core.Utils
             var enumerableType = typeof(IEnumerable<>);
 
             return source.GetTypeInfo().IsGenericType && source.GetGenericTypeDefinition() == enumerableType;
+        }
+        /// <summary>
+        /// Checks if a type is enumerable or not
+        /// </summary>
+        /// <param name="source">The type to check.</param>
+        /// <param name="type"></param>
+        /// <returns><see langword="true" /> if the type is an enumerable, otherwise <see langword="false" />.</returns>
+        internal static bool IsEnumerable(this System.Type source, out System.Type[] type)
+        {
+            type = null;
+            var enumerableType = typeof(IEnumerable<>);
+
+            if (source.GetTypeInfo().IsGenericType && source.GetGenericTypeDefinition() == enumerableType)
+            {
+                type = source.GenericTypeArguments;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="2.2.85" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.7" />
   </ItemGroup>
 
   <ItemGroup>

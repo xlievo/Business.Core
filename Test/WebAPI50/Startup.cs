@@ -40,9 +40,10 @@ namespace WebAPI50
             services.AddMvc(option => option.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddJsonOptions(o =>
                 {
+                    o.JsonSerializerOptions.IncludeFields = true;
                     //o.JsonSerializerOptions.IgnoreNullValues = true;
                     //o.JsonSerializerOptions.PropertyNamingPolicy = Help.JsonNamingPolicyCamelCase.Instance;
-                });
+                });//.AddNewtonsoftJson();
 
             services.AddHttpClient();
         }

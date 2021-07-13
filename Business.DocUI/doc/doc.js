@@ -39,6 +39,23 @@ String.prototype.isUpper = function () {
     return reg.test(this)
 }
 
+Object.defineProperty(Object.prototype, "isNull", {
+    value: function () {
+        var self = this;
+        if (typeof self === 'string' || self instanceof String) {
+            if (self == null || typeof (self) == 'undefined' || self === undefined || self.length == 0) {
+                return true;
+            }
+        }
+        else if (Object.keys(self).length === 0) {
+            return true;
+        }
+        return false;
+    },
+    //this keeps jquery happy
+    enumerable: false
+});
+
 var $each = function (obj, callback) {
     if (!obj || typeof obj !== "object") return;
     var i;
@@ -648,7 +665,7 @@ JSONEditor.defaults.editors.object = JSONEditor.defaults.editors.object.extend({
         this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
 
         // Start the textarea with the current value
-        this.editjson_textarea.value = getData(route, input).d;
+        this.editjson_textarea.value = getData(route, input, true).d;
 
         // Disable the rest of the form while editing JSON
         this.disable();
@@ -801,6 +818,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         this.editjson_textarea.style.width = '300px';
         this.editjson_textarea.style.display = 'block';
         this.editjson_save = this.getButton('Save', 'save', 'Save');
+        this.editjson_save.style.display = 'none';
         this.editjson_save.classList.add('json-editor-btntype-save');
         this.editjson_save.addEventListener('click', function (e) {
             e.preventDefault();
@@ -862,7 +880,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
         this.editjson_holder.style.top = buttonData.offsetTop + buttonData.offsetHeight - 17 + "px";
 
         // Start the textarea with the current value
-        this.editjson_textarea.value = getData(route, input).d;
+        this.editjson_textarea.value = getData(route, input, true).d;
 
         // Disable the rest of the form while editing JSON
         this.disable();
@@ -986,6 +1004,8 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
 
             rows.pop();
             self.empty(true);
+            self.setValue([]);
+            self.onChange(true);
             self.setValue(rows);
 
             if (self.rows[self.rows.length - 1]) {
@@ -1198,7 +1218,7 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
     },
     addRow: function (value, initial) {
         var self = this;
-        var i = this.rows.length;
+        var i = self.rows.length;
 
         self.rows[i] = this.getElementEditor(i);
         //self.row_cache[i] = self.rows[i];
@@ -1274,6 +1294,8 @@ JSONEditor.defaults.editors.array = JSONEditor.defaults.editors.array.extend({
                 }
 
                 self.empty(true);
+                self.setValue([]);
+                self.onChange(true);
                 self.setValue(newval);
 
                 if (null !== file && undefined !== file) {
@@ -2567,25 +2589,38 @@ function getSdk(format) {
     };
 }
 
-function getData(route, input, format = true) {
+function getData(route, input, format) {
     var data = {};
     if (input.editors[route.d]) {
         var d = null;
+        var schema_d = input.schema.properties[route.d];
         if (input.schema.argSingle) {
-            if (input.schema.argSingle && "object" !== input.schema.properties[route.d].type && "array" !== input.schema.properties[route.d].type) {
-                d = input.editors[route.d].getValue();
+            if (input.schema.argSingle && "object" !== schema_d.type && "array" !== schema_d.type) {
+                if (input.editors[route.d].schema.dynamicObject) {
+                    d = getDynamicObject(input.editors[route.d].schema, input.editors[route.d].getValue());
+                    if (null != d) {
+                        d = JSON.stringify(d, null, format ? 2 : 0);;
+                    }
+                }
+                else {
+                    d = getDynamicObject(input.editors[route.d].schema, input.editors[route.d].getValue());
+                }
             }
             else {
-                d = JSON.stringify(input.editors[route.d].getValue(), null, format ? 2 : 0);
+                d = getDynamicObject(input.editors[route.d].schema, input.editors[route.d].getValue());
+                if (null != d) {
+                    d = JSON.stringify(d, null, format ? 2 : 0);;
+                }
             }
         }
         else {
             var args = {};
             for (var i in input.editors[route.d].editors) {
-                args[i] = input.editors[route.d].editors[i].getValue();
+                args[i] = getDynamicObject(input.editors[route.d].editors[i].schema, input.editors[route.d].editors[i].getValue());
             }
             d = JSON.stringify(args, null, format ? 2 : 0);
         }
+
         data.d = d;
     }
 
@@ -2594,6 +2629,68 @@ function getData(route, input, format = true) {
     }
 
     return data;
+}
+
+function getDynamicObject(schema, data) {
+    var d = data;
+
+    if (schema.dynamicObject) {
+        if (schema.items) {
+            for (var i = 0; i < d.length; i++) {
+                if (typeof d[i] === 'string') {
+                    var d2 = d[i].trim().isNull() ? null : JSON.parse(d[i].trim());
+                    d[i] = d2;
+                }
+            }
+        }
+        else if (typeof d === 'string') {
+            d = d.trim().isNull() ? null : JSON.parse(d.trim());
+        }
+    }
+
+    if (schema.properties) {
+        for (var key in schema.properties) {
+            if (schema.properties[key].dynamicObject) {
+                if (null != d && typeof d === 'object') {
+                    var key2 = getKeyIgnoreCase(d, key);
+                    if (null != key2) {
+                        getDynamicObject(schema.properties[key], d[key2]);
+                    }
+                }
+            }
+        }
+    }
+
+    return d;
+}
+
+function getDynamicObject2(input, data) {
+    var schema = input.schema;
+    var d = data ?? input.getValue();
+
+    if (schema.dynamicObject) {
+        if (schema.items) {
+            for (var i = 0; i < d.length; i++) {
+                if (typeof d[i] === 'string') {
+                    var d2 = d[i].trim().isNull() ? null : JSON.parse(d[i].trim());
+                    d[i] = d2;
+                }
+            }
+        }
+        else if (typeof d === 'string') {
+            d = JSON.parse(d.trim().isNull() ? null : d);
+        }
+    }
+
+    if (schema.properties) {
+        for (var key in input.editors) {
+            if (input.editors[key].schema.dynamicObject) {
+                getDynamicObject(input.editors[key], input.editors[key].getValue());
+            }
+        }
+    }
+
+    return d;
 }
 
 function getData2(route, input, format = true) {

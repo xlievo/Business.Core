@@ -49,8 +49,9 @@ namespace Business.Core.Auth
         /// <param name="arguments"></param>
         /// <param name="call"></param>
         /// <param name="group"></param>
+        /// <param name="multipleParameterDeserialize"></param>
         /// <returns></returns>
-        System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null);
+        System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null, bool multipleParameterDeserialize = false);
     }
 
     readonly struct ArgResult
@@ -182,8 +183,9 @@ namespace Business.Core.Auth
         /// <param name="arguments"></param>
         /// <param name="call"></param>
         /// <param name="group"></param>
+        /// <param name="multipleParameterDeserialize"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null) => await InterceptorExtensions.Intercept(configer, method, arguments, call, group);
+        public async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null, bool multipleParameterDeserialize = false) => await InterceptorExtensions.Intercept(configer, method, arguments, call, group, multipleParameterDeserialize);
     }
 }
 
@@ -208,8 +210,9 @@ namespace Business.Core.Utils
         /// <param name="arguments"></param>
         /// <param name="call"></param>
         /// <param name="group"></param>
+        /// <param name="multipleParameterDeserialize"></param>
         /// <returns></returns>
-        public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null)
+        public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group, bool multipleParameterDeserialize)
         {
             var dtt = System.DateTimeOffset.Now;
             var watch = new System.Diagnostics.Stopwatch();
@@ -267,6 +270,27 @@ namespace Business.Core.Utils
                     for (int i = 0; i < attrs.Count; i++)
                     {
                         var argAttr = attrs[i];
+
+                        if (multipleParameterDeserialize && argAttr.ArgMeta.Deserialize)
+                        {
+                            if (i == attrs.Count - 1)
+                            {
+                                if (!item.HasIArg)
+                                {
+                                    argsObj[item.Position] = result.Data;
+                                }
+                                else
+                                {
+                                    iArgs[item.Position].Out = iArgIn;
+                                    if (item.HasCast)
+                                    {
+                                        argsObj[item.Position] = iArgIn;
+                                    }
+                                }
+                            }
+
+                            continue;
+                        }
 
                         result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value, token2);
 

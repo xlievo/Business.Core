@@ -802,11 +802,11 @@ namespace Business.Core
                 {
                     var groups = commandGroup.dictionary.GetOrAdd(item2.Value.Group, key => new ConcurrentReadOnlyDictionary<string, Command>());
 
-                    if (!groups.dictionary.TryAdd(item2.Value.OnlyName, new Command(arguments =>
+                    if (!groups.dictionary.TryAdd(item2.Value.OnlyName, new Command((arguments, multipleParameterDeserialize) =>
                     {
                         var args = GetArgsObj(meta.DefaultValue, arguments, meta.IArgs, meta.Args);
 
-                        return business.Configer.Interceptor.Intercept(business.Configer, meta.Name, args, () => meta.Accessor(business, args), item2.Key).Result;
+                        return business.Configer.Interceptor.Intercept(business.Configer, meta.Name, args, () => meta.Accessor(business, args), item2.Key, multipleParameterDeserialize).Result;
                     }, meta, item2.Key, item2.Value.Group)))
                     {
                         throw new System.Exception($"Command \"{item2.Key}\" member \"{item2.Value.OnlyName}\" name exists");
@@ -1018,11 +1018,11 @@ namespace Business.Core
 
                     //var argGroup = GetArgGroup(argAttrAll, current, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, default, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
-                    var definitions = current.hasDefinition ? new System.Collections.Generic.List<string> { current.outType.FullName } : new System.Collections.Generic.List<string>();
+                    var definitions = current.hasDefinition ? new System.Collections.Specialized.StringCollection { current.outType.FullName } : new System.Collections.Specialized.StringCollection();
                     var hasLower = false;
                     var childrens2 = hasUse && !current.hasIArg ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
 
-                    var children = hasUse && !current.hasIArg ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(current.outType, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, commandGroup.Group, ref definitions, resultType, cfg.ResultTypeDefinition, cfg.ArgTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : ReadOnlyCollection<Args>.Empty;
+                    var children = hasUse && !current.hasIArg ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(current.outType, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, commandGroup.Group, definitions, resultType, cfg.ResultTypeDefinition, cfg.ArgTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : ReadOnlyCollection<Args>.Empty;
 
                     var arg = new Args(argInfo.Name,
                     //cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
@@ -1058,7 +1058,8 @@ namespace Business.Core
                     GetMethodTypeFullName(parameterType),
                     current.outType.GetTypeName(),
                     current.hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No,
-                    cast);
+                    cast,
+                    null != argAttrAll.GetAttr<DynamicObjectAttribute>());
 
                     args.Collection.Add(arg);
                     childAll.Collection.Add(arg);
@@ -1171,7 +1172,7 @@ namespace Business.Core
         */
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, System.Collections.Generic.IDictionary<string, CommandAttribute> commands, ref System.Collections.Generic.List<string> definitions, System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)//, System.Type argTypeDefinition
+        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, System.Collections.Generic.IDictionary<string, CommandAttribute> commands, System.Collections.Specialized.StringCollection definitions, System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)//, System.Type argTypeDefinition
         {
             hasLower = false;
 
@@ -1180,8 +1181,6 @@ namespace Business.Core
             var position = 0;
 
             var members = type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.GetField | BindingFlags.GetProperty);
-
-            var definitions2 = new System.Collections.Generic.List<string>(definitions);
 
             foreach (var item in members)
             {
@@ -1217,6 +1216,11 @@ namespace Business.Core
 
                 //var hasDefinition = current.outType.IsDefinition();
 
+                var definitions2 = new System.Collections.Specialized.StringCollection();
+                foreach (var def in definitions)
+                {
+                    definitions2.Add(def);
+                }
                 if (definitions.Contains(current.outType.FullName)) { continue; }
                 else if (current.hasDefinition) { definitions2.Add(current.outType.FullName); }
 
@@ -1263,7 +1267,7 @@ namespace Business.Core
 
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
-                var children = current.hasDefinition ? GetArgChild(current.outType, declaring, businessName, method, path2, commands, ref definitions2, resultType, resultTypeDefinition, argTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
+                var children = current.hasDefinition ? GetArgChild(current.outType, declaring, businessName, method, path2, commands, definitions2, resultType, resultTypeDefinition, argTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
 
                 var arg = new Args(item.Name,
                     memberType,
@@ -1296,7 +1300,8 @@ namespace Business.Core
                     GetMethodTypeFullName(memberType),
                     $"{type.GetTypeName(item.DeclaringType)}.{item.Name}",
                     memberDefinition,
-                    false);
+                    false,
+                    null != argAttrAll.GetAttr<DynamicObjectAttribute>());
 
                 args.Collection.Add(arg);
                 childrens.Collection.Add(arg);
@@ -1375,7 +1380,7 @@ namespace Business.Core
                         continue;
                     }
 
-                    if (null != c.ArgMeta.Skip && c.ArgMeta.Skip(hasUse, arg.HasDefinition, c.Meta.Declaring, argAttrChild, ignoreArg))
+                    if (null != c.ArgMeta.Skip && c.ArgMeta.Skip(hasUse, arg.HasDefinition, c.Meta.Declaring, argAttrChild, ignoreArg, arg.DynamicObject))
                     {
                         continue;
                     }
@@ -1864,13 +1869,40 @@ namespace Business.Core
         System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Type>> parametersType;
 
         /// <summary>
+        /// ArgumentsEntry
+        /// </summary>
+        public readonly struct ArgumentsEntry
+        {
+            /// <summary>
+            /// ArgumentsEntry
+            /// </summary>
+            /// <param name="arguments"></param>
+            /// <param name="multipleParameterDeserialize"></param>
+            public ArgumentsEntry(object[] arguments, bool multipleParameterDeserialize)
+            {
+                Arguments = arguments;
+                MultipleParameterDeserialize = multipleParameterDeserialize;
+            }
+
+            /// <summary>
+            /// Arguments object
+            /// </summary>
+            public object[] Arguments { get; }
+
+            /// <summary>
+            /// Deserialize of multiple parameters submitted
+            /// </summary>
+            public bool MultipleParameterDeserialize { get; }
+        }
+
+        /// <summary>
         /// Command
         /// </summary>
         /// <param name="call"></param>
         /// <param name="meta"></param>
         /// <param name="key"></param>
         /// <param name="group"></param>
-        public Command(System.Func<object[], dynamic> call, MetaData meta, string key, string group)
+        public Command(System.Func<object[], bool, dynamic> call, MetaData meta, string key, string group)
         {
             this.call = call;
             this.Meta = meta;
@@ -1945,7 +1977,7 @@ namespace Business.Core
         }
 
         //===============member==================//
-        readonly System.Func<object[], dynamic> call;
+        readonly System.Func<object[], bool, dynamic> call;
 
         /// <summary>
         /// GetArgsUse
@@ -2075,6 +2107,15 @@ namespace Business.Core
         /// Call
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="multipleParameterDeserialize"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
+        public dynamic Call(System.Collections.Generic.IDictionary<string, string> parameters, bool multipleParameterDeserialize, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj), multipleParameterDeserialize);
+
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="parameters"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
         public dynamic Call(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj));
@@ -2096,17 +2137,26 @@ namespace Business.Core
         /// <returns></returns>
         public IResult CallIResult(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => Call(parameters, useObj);
 
-        dynamic Syn(object[] parameters)
+        dynamic Syn(object[] parameters, bool multipleParameterDeserialize = false)
         {
             try
             {
-                return call(parameters);
+                return call(parameters, multipleParameterDeserialize);
             }
             catch (System.Exception ex)
             {
                 return ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(ex.GetBase()));
             }
         }
+
+        /// <summary>
+        /// Call
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="multipleParameterDeserialize"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
+        public dynamic Call(object[] parameters, bool multipleParameterDeserialize, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj), multipleParameterDeserialize);
 
         /// <summary>
         /// Call
@@ -2141,6 +2191,15 @@ namespace Business.Core
         /// AsyncCall
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="multipleParameterDeserialize"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(System.Collections.Generic.IDictionary<string, string> parameters, bool multipleParameterDeserialize, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj), multipleParameterDeserialize);
+
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <param name="parameters"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj));
@@ -2162,7 +2221,7 @@ namespace Business.Core
         /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(System.Collections.Generic.IDictionary<string, string> parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
 
-        async System.Threading.Tasks.ValueTask<dynamic> Async(object[] parameters)
+        async System.Threading.Tasks.ValueTask<dynamic> Async(object[] parameters, bool multipleParameterDeserialize = false)
         {
             try
             {
@@ -2170,21 +2229,21 @@ namespace Business.Core
                 {
                     if (!Meta.HasReturn)
                     {
-                        await call(parameters);
+                        await call(parameters, multipleParameterDeserialize);
 
                         return null;
                     }
 
-                    return await call(parameters);
+                    return await call(parameters, multipleParameterDeserialize);
                 }
                 else
                 {
                     using (var task = System.Threading.Tasks.Task.Factory.StartNew(obj =>
                     {
                         var obj2 = (dynamic)obj;
-                        return obj2.call(obj2.parameters);
+                        return obj2.call(obj2.parameters, obj2.multipleParameterDeserialize);
 
-                    }, new { call, parameters }))
+                    }, new { call, parameters, multipleParameterDeserialize }))
                     {
                         return await task;
                     }
@@ -2195,6 +2254,15 @@ namespace Business.Core
                 return await System.Threading.Tasks.Task.FromResult(ResultFactory.ResultCreate(Meta, 0, System.Convert.ToString(ex.GetBase())));
             }
         }
+
+        /// <summary>
+        /// AsyncCall
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="multipleParameterDeserialize"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(object[] parameters, bool multipleParameterDeserialize, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj), multipleParameterDeserialize);
 
         /// <summary>
         /// AsyncCall
@@ -2483,6 +2551,11 @@ namespace Business.Core.Meta
         /// Childrens
         /// </summary>
         ReadOnlyCollection<TypeDefinition> Childrens { get; }
+
+        /// <summary>
+        /// Dynamic object, DocUI string type display
+        /// </summary>
+        bool DynamicObject { get; }
     }
 
     /// <summary>
@@ -2526,7 +2599,8 @@ namespace Business.Core.Meta
         /// <param name="fullName"></param>
         /// <param name="memberDefinition"></param>
         /// <param name="hasCast"></param>
-        public Args(string name, System.Type type, System.Type origType, System.Type lastType, System.Type currentOrigType, System.Type currentType, int position, object defaultValue, bool hasDefaultValue, object defaultTypeValue, bool hasDictionary, bool hasCollection, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast)
+        /// <param name="hasDynamicObject"></param>
+        public Args(string name, System.Type type, System.Type origType, System.Type lastType, System.Type currentOrigType, System.Type currentType, int position, object defaultValue, bool hasDefaultValue, object defaultTypeValue, bool hasDictionary, bool hasCollection, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast, bool hasDynamicObject)
         {
             Name = name;
             Type = type;
@@ -2571,6 +2645,7 @@ namespace Business.Core.Meta
             FullName = fullName;
             MemberDefinition = memberDefinition;
             HasCast = hasCast;
+            DynamicObject = hasDynamicObject;
         }
 
         /// <summary>
@@ -2743,6 +2818,11 @@ namespace Business.Core.Meta
         /// Parameters
         /// </summary>
         public bool Parameters { get; internal set; }
+
+        /// <summary>
+        /// Dynamic object, DocUI string type display
+        /// </summary>
+        public bool DynamicObject { get; }
     }
 
     /// <summary>
