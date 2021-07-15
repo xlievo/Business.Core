@@ -798,11 +798,6 @@
             OnlyName
             </summary>
         </member>
-        <member name="P:Business.Core.Annotations.CommandAttribute.OnlyNameByte">
-            <summary>
-            OnlyNameByte
-            </summary>
-        </member>
         <member name="M:Business.Core.Annotations.CommandAttribute.GroupKey(System.String)">
             <summary>
             GroupKey
@@ -4098,6 +4093,11 @@
         <member name="P:Business.Core.BootstrapConfig.Logger">
             <summary>
             Log callback for all business classes
+            </summary>
+        </member>
+        <member name="P:Business.Core.BootstrapConfig.Attributes">
+            <summary>
+            Attributes
             </summary>
         </member>
         <member name="T:Business.Core.BootstrapConfig.UseDocConfig">

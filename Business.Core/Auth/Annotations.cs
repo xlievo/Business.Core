@@ -1413,10 +1413,10 @@ namespace Business.Core.Annotations
         /// </summary>
         public string OnlyName { get; set; }
 
-        /// <summary>
-        /// OnlyNameByte
-        /// </summary>
-        public byte OnlyNameByte { get; set; }
+        ///// <summary>
+        ///// OnlyNameByte
+        ///// </summary>
+        //public byte OnlyNameByte { get; set; }
 
         //public bool IgnoreBusinessArg { get; set; }
 

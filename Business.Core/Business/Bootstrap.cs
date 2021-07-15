@@ -18,6 +18,7 @@
 namespace Business.Core
 {
     using Document;
+    using System.Collections.Generic;
     using System.Linq;
     using Utils;
 
@@ -143,7 +144,12 @@ namespace Business.Core
         /// </summary>
         public Logger Logger { get; set; }
 
-        internal readonly System.Collections.Generic.IList<System.Type> useTypes = new System.Collections.Generic.List<System.Type>();
+        /// <summary>
+        /// Attributes
+        /// </summary>
+        public IEnumerable<Annotations.GroupAttribute> Attributes { get; set; }
+
+        internal readonly IList<System.Type> useTypes = new List<System.Type>();
 
         /// <summary>
         /// UseDocConfig
@@ -289,7 +295,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -426,7 +432,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -575,7 +581,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger);
+                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes);
                             //Create(type, bootstrap.constructorArguments);
                             return true;
                         }
@@ -583,7 +589,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger);
+                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes);
                         return true;
                     }
                 }
@@ -622,7 +628,7 @@ namespace Business.Core
                 Use = (dir, opt) =>
                 {
                     var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
-                    var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
+                    var doc = new Dictionary<string, IDoc>();
 
                     foreach (var item in Configer.BusinessList.OrderBy(c => c.Key))
                     {
@@ -762,7 +768,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger).instance is Business business)
+                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
                             {
                                 BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                             }
@@ -773,7 +779,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger).instance is Business business)
+                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
                         {
                             BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                         }
@@ -815,7 +821,7 @@ namespace Business.Core
                 Use = (dir, opt) =>
                 {
                     var exists = !string.IsNullOrEmpty(dir) && System.IO.Directory.Exists(dir);
-                    var doc = new System.Collections.Generic.Dictionary<string, IDoc>();
+                    var doc = new Dictionary<string, IDoc>();
 
                     foreach (var item in BusinessList.OrderBy(c => c.Key))
                     {
