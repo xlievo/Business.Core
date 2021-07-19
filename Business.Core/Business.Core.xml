@@ -3270,24 +3270,26 @@
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncCallFull(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.AsyncCallFull``1(``0,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCallFull
             </summary>
+            <typeparam name="DataType"></typeparam>
             <param name="parameters"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncCallFull``1(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.AsyncCallFull``2(``1,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCallFull
             </summary>
             <typeparam name="Result"></typeparam>
+            <typeparam name="DataType"></typeparam>
             <param name="parameters"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncCallFullIResult(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.AsyncCallFullIResult``1(System.String,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCallFullIResult
             </summary>
@@ -3323,6 +3325,11 @@
         <member name="P:Business.Core.Command.Parameters">
             <summary>
             Parameter list without token
+            </summary>
+        </member>
+        <member name="P:Business.Core.Command.ParametersType">
+            <summary>
+            Parameter type called
             </summary>
         </member>
         <member name="T:Business.Core.Meta.ArgGroup">

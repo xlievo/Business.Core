@@ -1935,18 +1935,15 @@ namespace Business.Core
 
             HasArgSingle = 1 >= Parameters.Count;
 
-            //Parameter type called
-            System.Type parametersType = null;
-
             if (1 < Parameters.Count)
             {
                 parametersTypes = Parameters.Select(c => new KeyValuePair<string, System.Type>(c.Name, c.CurrentType)).ToList();
 
-                parametersType = Utils.Emit.Emit.BuildPropertys(dynamicArgsModule, parametersTypeKey, parametersTypes);
+                ParametersType = Utils.Emit.Emit.BuildPropertys(dynamicArgsModule, parametersTypeKey, parametersTypes);
 
-                if (null != parametersType)
+                if (null != ParametersType)
                 {
-                    parametersType.LoadAccessors(Configer.AccessorsArgs, parametersTypeKey, fields: false, update: true);
+                    ParametersType.LoadAccessors(Configer.AccessorsArgs, parametersTypeKey, fields: false, update: true);
                 }
                 else
                 {
@@ -1955,10 +1952,10 @@ namespace Business.Core
             }
             else if (0 < Parameters.Count)
             {
-                parametersType = Parameters[0].CurrentType;
+                ParametersType = Parameters[0].CurrentType;
             }
 
-            if (null != parametersType)
+            if (null != ParametersType)
             {
                 deserialize = Meta.Attributes.FirstOrDefault(c => c is ArgumentDeserialize attr && group == attr.Group)?.Clone() as ArgumentDeserialize;
 
@@ -1968,7 +1965,7 @@ namespace Business.Core
                     deserialize.ArgMeta.resultTypeDefinition = Meta.ResultTypeDefinition;
                     deserialize.ArgMeta.argTypeDefinition = Meta.ArgTypeDefinition;
 
-                    deserialize.ArgMeta.MemberType = parametersType;
+                    deserialize.ArgMeta.MemberType = ParametersType;
                     deserialize.ArgMeta.Proces.Call = Bind.dynamicMethodBuilder.GetDelegate(deserialize.ArgMeta.Proces.MethodInfo.MakeGenericMethod(deserialize.ArgMeta.MemberType));
                 }
             }
@@ -2331,10 +2328,11 @@ namespace Business.Core
         /// <summary>
         /// AsyncCallFull
         /// </summary>
+        /// <typeparam name="DataType"></typeparam>
         /// <param name="parameters"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCallFull(string parameters, params UseEntry[] useObj)
+        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCallFull<DataType>(DataType parameters, params UseEntry[] useObj)
         {
             if (HasArgSingle)
             {
@@ -2375,10 +2373,11 @@ namespace Business.Core
         /// AsyncCallFull
         /// </summary>
         /// <typeparam name="Result"></typeparam>
+        /// <typeparam name="DataType"></typeparam>
         /// <param name="parameters"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<Result> AsyncCallFull<Result>(string parameters, params UseEntry[] useObj) => await AsyncCallFull(parameters, useObj);
+        public async System.Threading.Tasks.ValueTask<Result> AsyncCallFull<Result, DataType>(DataType parameters, params UseEntry[] useObj) => await AsyncCallFull(parameters, useObj);
 
         /// <summary>
         /// AsyncCallFullIResult
@@ -2386,7 +2385,7 @@ namespace Business.Core
         /// <param name="parameters"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<IResult> AsyncCallFullIResult(string parameters, params UseEntry[] useObj) => await AsyncCallFull(parameters, useObj);
+        public async System.Threading.Tasks.ValueTask<IResult> AsyncCallFullIResult<DataType>(string parameters, params UseEntry[] useObj) => await AsyncCallFull(parameters, useObj);
 
         #endregion
 
@@ -2424,6 +2423,11 @@ namespace Business.Core
         /// Parameter list without token
         /// </summary>
         public IList<Args> Parameters { get; internal set; }
+
+        /// <summary>
+        /// Parameter type called
+        /// </summary>
+        public System.Type ParametersType { get; internal set; }
     }
 }
 
