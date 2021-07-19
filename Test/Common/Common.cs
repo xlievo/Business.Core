@@ -850,6 +850,7 @@ public class BusinessController : Controller
             Path = this.Request.Path.Value,
         };
 
+
         var result = null != route.Command && null != parameters ?
                 // Normal routing mode
                 await cmd.AsyncCall(
@@ -859,10 +860,10 @@ public class BusinessController : Controller
                     new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session")) :
                 // Framework routing mode
-                await cmd.AsyncCall(
-                    //the data of this request, allow null.
-                    //cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeStringArray(),
-                    cmd.HasArgSingle ? new object[] { d } : cmd.GetParametersObjects(d.TryJsonDeserialize(cmd.ParametersType, Configer.JsonOptionsDoc)),
+                await cmd.AsyncCallFull(
+                     //the data of this request, allow null.
+                     //cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeStringArray(),
+                     d,
                     //the incoming use object
                     new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session"));

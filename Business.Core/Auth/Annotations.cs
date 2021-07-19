@@ -754,7 +754,7 @@ namespace Business.Core.Annotations
         /// ToString
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => $"{Meta.Name} {this.LogType.ToString()}";
+        public override string ToString() => $"{Meta.Name} {this.LogType}";
     }
 
     /// <summary>
@@ -843,6 +843,7 @@ namespace Business.Core.Annotations
             this.ArgMeta.Deserialize = true;
         }
     }
+
     /// <summary>
     /// Base class for all attributes that apply to parameters
     /// </summary>
@@ -1040,6 +1041,30 @@ namespace Business.Core.Annotations
                     this.Description = this.Replace(this.Description);
                 }
             };
+        }
+
+        /// <summary>
+        /// GetProcesResult
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public async ValueTask<IResult> GetProcesResult(dynamic value, dynamic token = null)
+        {
+            switch (ArgMeta.Proces?.Mode)
+            {
+                case Utils.Proces.ProcesMode.ProcesGeneric:
+                    {
+                        dynamic result = ArgMeta.Proces.Call(this, new object[] { value });
+                        return await result;
+                    }
+                case Utils.Proces.ProcesMode.ProcesGenericToken:
+                    {
+                        dynamic result = ArgMeta.Proces.Call(this, new object[] { token, value });
+                        return await result;
+                    }
+                default: return await this.Proces(value);
+            }
         }
 
         /// <summary>

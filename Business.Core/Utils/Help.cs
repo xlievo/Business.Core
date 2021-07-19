@@ -132,6 +132,14 @@ namespace Business.Core.Utils
         /// <returns></returns>
         public static IResult ErrorCmd(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, string.Format("Without this Cmd{0}", string.IsNullOrEmpty(cmd) ? null : $" {cmd}"));
 
+        ///// <summary>
+        ///// ErrorNull
+        ///// </summary>
+        ///// <param name="resultTypeDefinition"></param>
+        ///// <param name="name"></param>
+        ///// <returns></returns>
+        //public static IResult ErrorNaull(System.Type resultTypeDefinition, string name) => ResultFactory.ResultCreate(resultTypeDefinition, -3, string.Format("Object reference not set to an instance of an object.{0}", string.IsNullOrEmpty(name) ? null : $" {name} is null"));
+
         /*
         /// <summary>
         /// Exceptions and logic that does not return objects will come here to handle the returned objects
@@ -683,13 +691,13 @@ namespace Business.Core.Utils
 
             // The [Name] attribute is the UIDoc submission [Key]
             // [camelCase] is also responsible for the parameter Title display
-            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase?.Invoke(argSource.Args.Name) ?? argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name, DynamicObject = argSource.Args.DynamicObject };
+            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase?.Invoke(argSource.Args.Name) ?? argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name, DynamicObject = argSource.Args.HasDynamicObject };
 
             var topTitleArgsName = null != camelCase && null != argSource.TopTitleArgsName ? camelCase.Invoke(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
 
             var titleArgsName = topTitleArgsName ?? (argSource.Args.HasToken ? route?.T ?? "t" : docArg.Name);
 
-            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object{(argSource.Args.DynamicObject ? " dynamic" : null)}) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))}{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}";
+            docArg.Title = !argSource.Args.HasToken && hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object{(argSource.Args.HasDynamicObject ? " dynamic" : null)}) {alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))}{(argSource.Args.HasDynamicObject ? " dynamic" : null)}){alias}";
 
             //{argSource.Args.Group[argSource.Group].Nick}
             docArg.Description = argSource.Summary;
@@ -760,7 +768,7 @@ namespace Business.Core.Utils
                     docArg.Items.KeyType = type.Item1;
                 }
 
-                if (argSource.Args.DynamicObject)
+                if (argSource.Args.HasDynamicObject)
                 {
                     docArg.Items.Type = "string";
                 }
@@ -782,7 +790,7 @@ namespace Business.Core.Utils
                     }
                 }
             }
-            else if (argSource.Args.DynamicObject)
+            else if (argSource.Args.HasDynamicObject)
             {
                 docArg.Type = "string";
             }
@@ -800,11 +808,11 @@ namespace Business.Core.Utils
             {
                 //dynamic
 
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object dict{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} dict{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object dict{(argSource.Args.HasDynamicObject ? " dynamic" : null)}){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} dict{(argSource.Args.HasDynamicObject ? " dynamic" : null)}){alias}";
             }
             else if (argSource.Args.HasCollection)
             {
-                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object array{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} array{(argSource.Args.DynamicObject ? " dynamic" : null)}){alias}";
+                docArg.Title = hideTitleType && argSource.Args.HasDefinition ? $"{titleArgsName} (object array{(argSource.Args.HasDynamicObject ? " dynamic" : null)}){alias}" : $"{titleArgsName} ({(argSource.Args.LastType.IsEnum ? TypeNameFormatter.TypeName.GetFormattedName(typeof(int)) : CamelCase(docArg.LastType))} array{(argSource.Args.HasDynamicObject ? " dynamic" : null)}){alias}";
             }
 
             docArg.Title = docArg.Title.TrimStart(); // titleArgsName is null
@@ -1490,7 +1498,7 @@ namespace Business.Core.Utils
             /// <summary>
             /// Dynamic object, DocUI string type display
             /// </summary>
-            public bool DynamicObject { get; }
+            public bool HasDynamicObject { get; }
         }
 
         ///// <summary>

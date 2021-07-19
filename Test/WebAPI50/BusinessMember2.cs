@@ -447,7 +447,7 @@ public partial class BusinessMember2 : BusinessBase
     /// Test0011Test0011Test0011Test0011
     /// </summary>
     [DynamicObject]
-    public class Test00122
+    public struct Test00122
     {
         /// <summary>
         /// C31C31C31C31C31C31
@@ -530,9 +530,11 @@ public partial class BusinessMember2 : BusinessBase
         "{\"arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":2},\"dateTime\":\"2019-12-02T07:24\",\"mm\":99.0234,\"fff\":777,\"bbb\":false}")]
     //"[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"\",\"C2\":\"\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T07:24\",99.0234,777,false]")]
     [Testing("test, important logic, do not delete!!!",
-        "{\"Arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":900.87,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4},\"dateTime\":\"2019-12-02T08:24\",\"MM\":111.0123456,\"fFf\":555,\"bbB\":true}")]
+        "{\"Arg\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":900.87,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4},\"dateTime\":\"2019-12-02T08:24\",\"MM\":111.0123456,\"fFf\":555,\"bbB\":true," +
+        "\"aaa\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":900.87,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4}," +
+        "\"bbbb\":\"{\\\"C31\\\":\\\"222\\\",\\\"C32\\\":555}\",\"ccc\":\"{\\\"C31\\\":\\\"222\\\",\\\"C32\\\":555}\"}")]
     //"[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]")]
-    public virtual async ValueTask<IResult<Test111>> Test001(Session session222, Token token, Test111? Arg, [@CheckNull(CheckValueType = true)] DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal? mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true, BusinessController context2 = null)
+    public virtual async ValueTask<IResult<Test111>> Test001(Session session222, Token token, Test111? Arg, [@CheckNull(CheckValueType = true)] DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal? mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true, BusinessController context2 = null, Test111 aaa = default, [DynamicObject]object bbbb = null, object ccc = null)
     {
         var ip = new Business.Core.Auth.Token { Remote = new Business.Core.Auth.Remote(context2.Request.HttpContext.Connection.RemoteIpAddress.ToString(), context2.Request.HttpContext.Connection.RemotePort), Key = "Key", Callback = "Callback" };
 

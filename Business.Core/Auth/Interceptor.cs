@@ -292,7 +292,7 @@ namespace Business.Core.Utils
                             continue;
                         }
 
-                        result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : value, token2);
+                        result = await argAttr.GetProcesResult(item.HasIArg ? iArgIn : value, token2);
 
                         if (1 > result.State)
                         {
@@ -508,7 +508,7 @@ namespace Business.Core.Utils
                 }
             }
         }
-
+        /*
         /// <summary>
         /// GetProcesResult
         /// </summary>
@@ -535,7 +535,7 @@ namespace Business.Core.Utils
                 default: return await argAttr.Proces(value);
             }
         }
-
+        */
         /// <summary>
         /// ArgsResult
         /// </summary>
@@ -565,7 +565,7 @@ namespace Business.Core.Utils
                 {
                     var argAttr = attrs[i];
 
-                    result = await GetProcesResult(argAttr, item.HasIArg ? iArgIn : memberValue, token);
+                    result = await argAttr.GetProcesResult(item.HasIArg ? iArgIn : memberValue, token);
 
                     if (1 > result.State)
                     {

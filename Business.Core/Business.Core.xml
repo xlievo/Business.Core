@@ -603,6 +603,14 @@
             <param name="message"></param>
             <param name="type"></param>
         </member>
+        <member name="M:Business.Core.Annotations.ArgumentAttribute.GetProcesResult(System.Object,System.Object)">
+            <summary>
+            GetProcesResult
+            </summary>
+            <param name="value"></param>
+            <param name="token"></param>
+            <returns></returns>
+        </member>
         <member name="M:Business.Core.Annotations.ArgumentAttribute.Replace(System.String)">
             <summary>
             Replace
@@ -1395,15 +1403,6 @@
             <param name="dtt"></param>
             <param name="callAfterMethod"></param>
         </member>
-        <member name="M:Business.Core.Utils.InterceptorExtensions.GetProcesResult(Business.Core.Annotations.ArgumentAttribute,System.Object,System.Object)">
-            <summary>
-            GetProcesResult
-            </summary>
-            <param name="argAttr"></param>
-            <param name="value"></param>
-            <param name="token"></param>
-            <returns></returns>
-        </member>
         <member name="M:Business.Core.Utils.InterceptorExtensions.ArgsResult(Business.Core.Meta.MetaData,System.String,System.Collections.Generic.IList{Business.Core.Meta.Args},System.Object,System.Object)">
             <summary>
             ArgsResult
@@ -1717,6 +1716,14 @@
             <param name="cmd"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.Utils.Help.ErrorNull(System.Type,System.String)">
+            <summary>
+            ErrorNull
+            </summary>
+            <param name="resultTypeDefinition"></param>
+            <param name="cmd"></param>
+            <returns></returns>
+        </member>
         <member name="M:Business.Core.Utils.Help.GetReturnValue(Business.Core.Result.IResult,Business.Core.Meta.MetaData)">
             <summary>
             Exceptions and logic that does not return objects will come here to handle the returned objects
@@ -1930,7 +1937,7 @@
             Summary
             </summary>
         </member>
-        <member name="P:Business.Core.Utils.Help.TypeDefinition.DynamicObject">
+        <member name="P:Business.Core.Utils.Help.TypeDefinition.HasDynamicObject">
             <summary>
             Dynamic object, DocUI string type display
             </summary>
@@ -3110,31 +3117,19 @@
             <param name="useObj"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.CommandGroup.AsyncCallFull(System.String,System.String,Business.Core.Annotations.UseEntry[],System.String)">
+            <summary>
+            AsyncCallFull
+            </summary>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="useObj"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
         <member name="T:Business.Core.Command">
             <summary>
             Command
-            </summary>
-        </member>
-        <member name="T:Business.Core.Command.ArgumentsEntry">
-            <summary>
-            ArgumentsEntry
-            </summary>
-        </member>
-        <member name="M:Business.Core.Command.ArgumentsEntry.#ctor(System.Object[],System.Boolean)">
-            <summary>
-            ArgumentsEntry
-            </summary>
-            <param name="arguments"></param>
-            <param name="multipleParameterDeserialize"></param>
-        </member>
-        <member name="P:Business.Core.Command.ArgumentsEntry.Arguments">
-            <summary>
-            Arguments object
-            </summary>
-        </member>
-        <member name="P:Business.Core.Command.ArgumentsEntry.MultipleParameterDeserialize">
-            <summary>
-            Deserialize of multiple parameters submitted
             </summary>
         </member>
         <member name="M:Business.Core.Command.#ctor(System.Func{System.Object[],System.Boolean,System.Object},Business.Core.Meta.MetaData,System.String,System.String)">
@@ -3150,13 +3145,6 @@
             <summary>
             Statistics of real submission parameters and archiving
             </summary>
-        </member>
-        <member name="M:Business.Core.Command.GetParametersObjects(System.Object)">
-            <summary>
-            Convert parameter object to array
-            </summary>
-            <param name="parameters"></param>
-            <returns></returns>
         </member>
         <member name="M:Business.Core.Command.GetArgsUse(Business.Core.Annotations.UseEntry[],System.Action{System.Object[],System.Int32,Business.Core.Meta.Args,Business.Core.Meta.ArgGroup})">
             <summary>
@@ -3179,15 +3167,6 @@
             GetAgs
             </summary>
             <param name="parameters"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Command.Call(System.Collections.Generic.IDictionary{System.String,System.String},System.Boolean,Business.Core.Annotations.UseEntry[])">
-            <summary>
-            Call
-            </summary>
-            <param name="parameters"></param>
-            <param name="multipleParameterDeserialize"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
@@ -3216,15 +3195,6 @@
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.Call(System.Object[],System.Boolean,Business.Core.Annotations.UseEntry[])">
-            <summary>
-            Call
-            </summary>
-            <param name="parameters"></param>
-            <param name="multipleParameterDeserialize"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
         <member name="M:Business.Core.Command.Call(System.Object[],Business.Core.Annotations.UseEntry[])">
             <summary>
             Call
@@ -3247,15 +3217,6 @@
             CallIResult
             </summary>
             <param name="parameters"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Command.AsyncCall(System.Collections.Generic.IDictionary{System.String,System.String},System.Boolean,Business.Core.Annotations.UseEntry[])">
-            <summary>
-            AsyncCall
-            </summary>
-            <param name="parameters"></param>
-            <param name="multipleParameterDeserialize"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
@@ -3284,15 +3245,6 @@
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncCall(System.Object[],System.Boolean,Business.Core.Annotations.UseEntry[])">
-            <summary>
-            AsyncCall
-            </summary>
-            <param name="parameters"></param>
-            <param name="multipleParameterDeserialize"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
         <member name="M:Business.Core.Command.AsyncCall(System.Object[],Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCall
@@ -3313,6 +3265,31 @@
         <member name="M:Business.Core.Command.AsyncIResult(System.Object[],Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncIResult
+            </summary>
+            <param name="parameters"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Command.AsyncCallFull(System.String,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            AsyncCallFull
+            </summary>
+            <param name="parameters"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Command.AsyncCallFull``1(System.String,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            AsyncCallFull
+            </summary>
+            <typeparam name="Result"></typeparam>
+            <param name="parameters"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Command.AsyncCallFullIResult(System.String,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            AsyncCallFullIResult
             </summary>
             <param name="parameters"></param>
             <param name="useObj"></param>
@@ -3341,11 +3318,6 @@
         <member name="P:Business.Core.Command.HasHttpFile">
             <summary>
             HasHttpFile
-            </summary>
-        </member>
-        <member name="P:Business.Core.Command.ParametersType">
-            <summary>
-            Parameter type called
             </summary>
         </member>
         <member name="P:Business.Core.Command.Parameters">
@@ -3543,7 +3515,7 @@
             Childrens
             </summary>
         </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.DynamicObject">
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasDynamicObject">
             <summary>
             Dynamic object, DocUI string type display
             </summary>
@@ -3744,9 +3716,14 @@
             Parameters
             </summary>
         </member>
-        <member name="P:Business.Core.Meta.Args.DynamicObject">
+        <member name="P:Business.Core.Meta.Args.HasDynamicObject">
             <summary>
             Dynamic object, DocUI string type display
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.HasObject">
+            <summary>
+            HasObject
             </summary>
         </member>
         <member name="T:Business.Core.Meta.MetaLogger">

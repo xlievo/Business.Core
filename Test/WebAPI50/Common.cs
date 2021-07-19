@@ -893,11 +893,10 @@ public class BusinessController : Controller
                     new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session")) :
                 // Framework routing mode
-                await cmd.AsyncCall(
+                await cmd.AsyncCallFull(
                     //the data of this request, allow null.
                     //cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeStringArray(),
-                    cmd.HasArgSingle ? new object[] { d } : cmd.GetParametersObjects(d.TryJsonDeserialize(cmd.ParametersType, Configer.JsonOptionsDoc)),
-                    !cmd.HasArgSingle,
+                    d,
                     //the incoming use object
                     new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session"));

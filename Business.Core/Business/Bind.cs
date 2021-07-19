@@ -621,7 +621,7 @@ namespace Business.Core
                                     continue;
                                 }
 
-                                defaultObj2[i] = Help.ChangeType(argsObj[i], args[i].LastType);
+                                defaultObj2[i] = args[i].HasCollection || args[i].HasDynamicObject || args[i].HasObject ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].LastType);
                             }
                             //defaultObj2[i] = args[i].UseType || args[i].HasDefinition ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].LastType);
 
@@ -696,40 +696,37 @@ namespace Business.Core
 
             for (int i = attributes.Count - 1; i >= 0; i--)
             {
-                var item = attributes[i];
-
-                if (item is CommandAttribute)
+                if (attributes[i] is CommandAttribute item)
                 {
-                    var item2 = item as CommandAttribute;
-                    if (string.IsNullOrWhiteSpace(item2.Group)) { item2.Group = groupDefault; }
-                    if (string.IsNullOrWhiteSpace(item2.OnlyName)) { item2.OnlyName = methodName; }
+                    if (string.IsNullOrWhiteSpace(item.Group)) { item.Group = groupDefault; }
+                    if (string.IsNullOrWhiteSpace(item.OnlyName)) { item.OnlyName = methodName; }
 
                     //ignore
-                    if (0 < ignores.Count && ignores.Exists(c => c.Group == item2.Group))
+                    if (0 < ignores.Count && ignores.Exists(c => c.Group == item.Group))
                     {
                         attributes.Remove(item);
                     }
                     else
                     {
-                        if (!isDef && item2.Group == groupDefault) { isDef = true; }
+                        if (!isDef && item.Group == groupDefault) { isDef = true; }
 
-                        if (item2.Meta.Declaring != AttributeBase.MetaData.DeclaringType.Method)
+                        if (item.Meta.Declaring != AttributeBase.MetaData.DeclaringType.Method)
                         {
-                            notMethods.Add(item2);
+                            notMethods.Add(item);
                         }
                         else
                         {
-                            var key = cfg.Info.GetCommandGroup(item2.Group, item2.OnlyName);
-                            item2.Key = key;
-                            group.Group.dictionary.Add(key, item2);
+                            var key = cfg.Info.GetCommandGroup(item.Group, item.OnlyName);
+                            item.Key = key;
+                            group.Group.dictionary.Add(key, item);
 
-                            if (group.Full.TryGetValue(item2.Group, out ReadOnlyDictionary<string, CommandAttribute> commands))
+                            if (group.Full.TryGetValue(item.Group, out ReadOnlyDictionary<string, CommandAttribute> commands))
                             {
-                                commands.dictionary.Add(key, item2);
+                                commands.dictionary.Add(key, item);
                             }
                             else
                             {
-                                group.Full.dictionary.Add(item2.Group, new ReadOnlyDictionary<string, CommandAttribute>(new Dictionary<string, CommandAttribute> { { key, item2 } }));
+                                group.Full.dictionary.Add(item.Group, new ReadOnlyDictionary<string, CommandAttribute>(new Dictionary<string, CommandAttribute> { { key, item } }));
                             }
                         }
                     }
@@ -876,7 +873,7 @@ namespace Business.Core
             return name;
         }
 
-        static readonly Utils.Emit.DynamicMethodBuilder dynamicMethodBuilder = new Utils.Emit.DynamicMethodBuilder();
+        internal static readonly Utils.Emit.DynamicMethodBuilder dynamicMethodBuilder = new Utils.Emit.DynamicMethodBuilder();
 
         static ConcurrentReadOnlyDictionary<string, MetaData> GetMetaData(Configer cfg, Dictionary<int, MethodInfo> methods)
         {
@@ -1382,7 +1379,7 @@ namespace Business.Core
                         continue;
                     }
 
-                    if (null != c.ArgMeta.Skip && c.ArgMeta.Skip(hasUse, arg.HasDefinition, c.Meta.Declaring, argAttrChild, ignoreArg, arg.DynamicObject))
+                    if (null != c.ArgMeta.Skip && c.ArgMeta.Skip(hasUse, arg.HasDefinition, c.Meta.Declaring, argAttrChild, ignoreArg, arg.HasDynamicObject))
                     {
                         continue;
                     }
@@ -1857,6 +1854,25 @@ namespace Business.Core
         public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
 
         #endregion
+
+        #region AsyncCallFull
+
+        /// <summary>
+        /// AsyncCallFull
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCallFull(string cmd, string parameters, UseEntry[] useObj = null, string group = null)
+        {
+            var command = GetCommand(cmd, group);
+
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCallFull(parameters, useObj);
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -1868,34 +1884,9 @@ namespace Business.Core
 
         readonly string parametersTypeKey;
 
-        IEnumerable<KeyValuePair<string, System.Type>> parametersType;
+        IList<KeyValuePair<string, System.Type>> parametersTypes;
 
-        /// <summary>
-        /// ArgumentsEntry
-        /// </summary>
-        public readonly struct ArgumentsEntry
-        {
-            /// <summary>
-            /// ArgumentsEntry
-            /// </summary>
-            /// <param name="arguments"></param>
-            /// <param name="multipleParameterDeserialize"></param>
-            public ArgumentsEntry(object[] arguments, bool multipleParameterDeserialize)
-            {
-                Arguments = arguments;
-                MultipleParameterDeserialize = multipleParameterDeserialize;
-            }
-
-            /// <summary>
-            /// Arguments object
-            /// </summary>
-            public object[] Arguments { get; }
-
-            /// <summary>
-            /// Deserialize of multiple parameters submitted
-            /// </summary>
-            public bool MultipleParameterDeserialize { get; }
-        }
+        ArgumentDeserialize deserialize;
 
         /// <summary>
         /// Command
@@ -1907,11 +1898,11 @@ namespace Business.Core
         public Command(System.Func<object[], bool, dynamic> call, MetaData meta, string key, string group)
         {
             this.call = call;
-            this.Meta = meta;
+            Meta = meta;
             this.key = key;
             this.group = group;
-            this.HasHttpFile = this.Meta.Args.Any(c => c.Group[key].HttpFile) || this.Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
-            parametersTypeKey = $"{this.Meta.Business}.{key}";
+            HasHttpFile = Meta.Args.Any(c => c.Group[key].HttpFile) || Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
+            parametersTypeKey = $"{Meta.Business}.{key}";
             StatisArgs();
         }
 
@@ -1920,19 +1911,22 @@ namespace Business.Core
         /// </summary>
         internal void StatisArgs()
         {
-            Parameters = this.Meta.Args.Where(c => !c.UseType && !c.HasToken && !c.Group[key].IgnoreArg).ToList();
+            Parameters = Meta.Args.Where(c => !c.UseType && !c.HasToken && !c.Group[key].IgnoreArg).ToList();
 
             HasArgSingle = 1 >= Parameters.Count;
 
+            //Parameter type called
+            System.Type parametersType = null;
+
             if (1 < Parameters.Count)
             {
-                parametersType = Parameters.Select(c => new KeyValuePair<string, System.Type>(c.Name, c.CurrentType));
+                parametersTypes = Parameters.Select(c => new KeyValuePair<string, System.Type>(c.Name, c.CurrentType)).ToList();
 
-                ParametersType = Utils.Emit.Emit.BuildPropertys(dynamicArgsModule, parametersTypeKey, parametersType);
+                parametersType = Utils.Emit.Emit.BuildPropertys(dynamicArgsModule, parametersTypeKey, parametersTypes);
 
-                if (null != ParametersType)
+                if (null != parametersType)
                 {
-                    ParametersType.LoadAccessors(Configer.AccessorsArgs, parametersTypeKey, fields: false, update: true);
+                    parametersType.LoadAccessors(Configer.AccessorsArgs, parametersTypeKey, fields: false, update: true);
                 }
                 else
                 {
@@ -1941,10 +1935,65 @@ namespace Business.Core
             }
             else if (0 < Parameters.Count)
             {
-                ParametersType = Parameters[0].CurrentType;
+                parametersType = Parameters[0].CurrentType;
+            }
+
+            if (null != parametersType)
+            {
+                deserialize = Meta.Attributes.FirstOrDefault(c => c is ArgumentDeserialize attr && group == attr.Group)?.Clone() as ArgumentDeserialize;
+
+                if (null != deserialize)
+                {
+                    deserialize.ArgMeta.resultType = Meta.ResultType;
+                    deserialize.ArgMeta.resultTypeDefinition = Meta.ResultTypeDefinition;
+                    deserialize.ArgMeta.argTypeDefinition = Meta.ArgTypeDefinition;
+
+                    deserialize.ArgMeta.MemberType = parametersType;
+                    deserialize.ArgMeta.Proces.Call = Bind.dynamicMethodBuilder.GetDelegate(deserialize.ArgMeta.Proces.MethodInfo.MakeGenericMethod(deserialize.ArgMeta.MemberType));
+                }
             }
         }
 
+        ///// <summary>
+        ///// Convert parameter object to array
+        ///// </summary>
+        ///// <param name="data"></param>
+        ///// <returns></returns>
+        //async System.Threading.Tasks.ValueTask<IResult> GetParametersObjects(string data)
+        //{
+        //    if (null == deserialize)
+        //    {
+        //        return Help.ErrorNull(Meta.ResultTypeDefinition, nameof(deserialize));
+        //    }
+
+        //    var result = await deserialize.GetProcesResult(data);
+
+        //    if (0 >= result.State || !result.HasData)
+        //    {
+        //        return result;
+        //    }
+
+        //    var parameters = result.Data;
+        //    var values = new object[parametersTypes?.Count ?? 0];
+
+        //    if (null != parametersTypes && Configer.AccessorsArgs.TryGetValue(parametersTypeKey, out Accessors accessors))
+        //    {
+        //        var i = 0;
+
+        //        foreach (var item in parametersTypes)
+        //        {
+        //            if (accessors.Accessor.TryGetValue(item.Key, out Accessor accessor))
+        //            {
+        //                values[i] = accessor.Getter(parameters);
+        //            }
+
+        //            i++;
+        //        }
+        //    }
+
+        //    return result.GenericDefinition.ResultCreate(values);
+        //}
+        /*
         /// <summary>
         /// Convert parameter object to array
         /// </summary>
@@ -1957,12 +2006,12 @@ namespace Business.Core
                 return null;
             }
 
-            if (null != parametersType && Configer.AccessorsArgs.TryGetValue(parametersTypeKey, out Accessors accessors))
+            if (null != parametersTypes && Configer.AccessorsArgs.TryGetValue(parametersTypeKey, out Accessors accessors))
             {
-                var values = new object[parametersType.Count()];
+                var values = new object[parametersTypes.Count()];
                 var i = 0;
 
-                foreach (var item in parametersType)
+                foreach (var item in parametersTypes)
                 {
                     if (accessors.Accessor.TryGetValue(item.Key, out Accessor accessor))
                     {
@@ -1977,7 +2026,7 @@ namespace Business.Core
 
             return null;
         }
-
+        */
         //===============member==================//
         readonly System.Func<object[], bool, dynamic> call;
 
@@ -2109,15 +2158,6 @@ namespace Business.Core
         /// Call
         /// </summary>
         /// <param name="parameters"></param>
-        /// <param name="multipleParameterDeserialize"></param>
-        /// <param name="useObj"></param>
-        /// <returns></returns>
-        public dynamic Call(IDictionary<string, string> parameters, bool multipleParameterDeserialize, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj), multipleParameterDeserialize);
-
-        /// <summary>
-        /// Call
-        /// </summary>
-        /// <param name="parameters"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
         public dynamic Call(IDictionary<string, string> parameters, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj));
@@ -2155,15 +2195,6 @@ namespace Business.Core
         /// Call
         /// </summary>
         /// <param name="parameters"></param>
-        /// <param name="multipleParameterDeserialize"></param>
-        /// <param name="useObj"></param>
-        /// <returns></returns>
-        public dynamic Call(object[] parameters, bool multipleParameterDeserialize, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj), multipleParameterDeserialize);
-
-        /// <summary>
-        /// Call
-        /// </summary>
-        /// <param name="parameters"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
         public dynamic Call(object[] parameters, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj));
@@ -2188,15 +2219,6 @@ namespace Business.Core
         #endregion
 
         #region AsyncCall
-
-        /// <summary>
-        /// AsyncCall
-        /// </summary>
-        /// <param name="parameters"></param>
-        /// <param name="multipleParameterDeserialize"></param>
-        /// <param name="useObj"></param>
-        /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(IDictionary<string, string> parameters, bool multipleParameterDeserialize, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj), multipleParameterDeserialize);
 
         /// <summary>
         /// AsyncCall
@@ -2261,15 +2283,6 @@ namespace Business.Core
         /// AsyncCall
         /// </summary>
         /// <param name="parameters"></param>
-        /// <param name="multipleParameterDeserialize"></param>
-        /// <param name="useObj"></param>
-        /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(object[] parameters, bool multipleParameterDeserialize, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj), multipleParameterDeserialize);
-
-        /// <summary>
-        /// AsyncCall
-        /// </summary>
-        /// <param name="parameters"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(object[] parameters, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj));
@@ -2290,6 +2303,70 @@ namespace Business.Core
         /// <param name="useObj"></param>
         /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(object[] parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
+
+        #endregion
+
+        #region AsyncCallFull
+
+        /// <summary>
+        /// AsyncCallFull
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCallFull(string parameters, params UseEntry[] useObj)
+        {
+            if (HasArgSingle)
+            {
+                return await Async(GetAgs(new object[] { parameters }, useObj), !HasArgSingle);
+            }
+            else
+            {
+                if (null != deserialize && null != parametersTypes && Configer.AccessorsArgs.TryGetValue(parametersTypeKey, out Accessors accessors))
+                {
+                    var result = await deserialize.GetProcesResult(parameters);
+
+                    if (0 >= result.State || !result.HasData)
+                    {
+                        return result;
+                    }
+
+                    var values = new object[parametersTypes?.Count ?? 0];
+                    var i = 0;
+
+                    foreach (var item in parametersTypes)
+                    {
+                        if (accessors.Accessor.TryGetValue(item.Key, out Accessor accessor))
+                        {
+                            values[i] = accessor.Getter(result.Data);
+                        }
+
+                        i++;
+                    }
+
+                    return await Async(GetAgs(values, useObj), !HasArgSingle);
+                }
+
+                return Help.ErrorNull(Meta.ResultTypeDefinition, nameof(deserialize));
+            }
+        }
+
+        /// <summary>
+        /// AsyncCallFull
+        /// </summary>
+        /// <typeparam name="Result"></typeparam>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.ValueTask<Result> AsyncCallFull<Result>(string parameters, params UseEntry[] useObj) => await AsyncCallFull(parameters, useObj);
+
+        /// <summary>
+        /// AsyncCallFullIResult
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="useObj"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.ValueTask<IResult> AsyncCallFullIResult(string parameters, params UseEntry[] useObj) => await AsyncCallFull(parameters, useObj);
 
         #endregion
 
@@ -2318,10 +2395,10 @@ namespace Business.Core
         /// </summary>
         public bool HasHttpFile { get; internal set; }
 
-        /// <summary>
-        /// Parameter type called
-        /// </summary>
-        public System.Type ParametersType { get; internal set; }
+        ///// <summary>
+        ///// Parameter type called
+        ///// </summary>
+        //public System.Type ParametersType { get; internal set; }
 
         /// <summary>
         /// Parameter list without token
@@ -2557,7 +2634,7 @@ namespace Business.Core.Meta
         /// <summary>
         /// Dynamic object, DocUI string type display
         /// </summary>
-        bool DynamicObject { get; }
+        bool HasDynamicObject { get; }
     }
 
     /// <summary>
@@ -2647,7 +2724,8 @@ namespace Business.Core.Meta
             FullName = fullName;
             MemberDefinition = memberDefinition;
             HasCast = hasCast;
-            DynamicObject = hasDynamicObject;
+            HasDynamicObject = hasDynamicObject;
+            HasObject = typeof(object).Equals(LastType);
         }
 
         /// <summary>
@@ -2824,7 +2902,12 @@ namespace Business.Core.Meta
         /// <summary>
         /// Dynamic object, DocUI string type display
         /// </summary>
-        public bool DynamicObject { get; }
+        public bool HasDynamicObject { get; }
+
+        /// <summary>
+        /// HasObject
+        /// </summary>
+        public bool HasObject { get; }
     }
 
     /// <summary>

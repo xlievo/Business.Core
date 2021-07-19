@@ -1655,6 +1655,11 @@ public class TestBusinessMember
             new object[] { new Arg01 { A = "abc" }.JsonSerialize(), 2, 2 },
             //useObj
             new UseEntry(new Token { Key = "a", Remote = new Remote("b") }));
+
+        //var t444 = business.Command.AsyncCallFull("G01Test001", new { arg01 = new Arg01 { A = "abc" }, b = 2, c = 2 }.JsonSerialize(), new UseEntry[] { new UseEntry(new Token { Key = "a", Remote = new Remote("b") }) }, "G01");
+        //t444.AsTask().Wait();
+        //var t4 = t444.Result;
+
         Assert.AreEqual(t4.Message, null);
         Assert.AreEqual(t4.State, t2.State);
         Assert.AreEqual(t4.HasData, false);
@@ -1978,7 +1983,7 @@ public class TestBusinessMember
     [TestMethod]
     public void TestResult01222()
     {
-        var d =  Member.Test001222(null, new Arg01 { A = "abc" });
+        var d = Member.Test001222(null, new Arg01 { A = "abc" });
 
         Assert.AreEqual(d.Result, 0);
 

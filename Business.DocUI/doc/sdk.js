@@ -173,7 +173,7 @@ function GetCurl(route, h, c, data, data2) {
     value += "\" " + h;
 
     value += "\n\n";
-    value += "			#Classical Route   " + h + "/" + encodeURIComponent(c);;
+    value += "			#Classical Route   " + h + "/" + encodeURIComponent(c);
     value += "\n\n\curl -X GET \"" + h + "/" + encodeURIComponent(c);
 
     // Classical Route
