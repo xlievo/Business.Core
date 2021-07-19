@@ -132,13 +132,13 @@ namespace Business.Core.Utils
         /// <returns></returns>
         public static IResult ErrorCmd(System.Type resultTypeDefinition, string cmd) => ResultFactory.ResultCreate(resultTypeDefinition, -2, string.Format("Without this Cmd{0}", string.IsNullOrEmpty(cmd) ? null : $" {cmd}"));
 
-        ///// <summary>
-        ///// ErrorNull
-        ///// </summary>
-        ///// <param name="resultTypeDefinition"></param>
-        ///// <param name="name"></param>
-        ///// <returns></returns>
-        //public static IResult ErrorNaull(System.Type resultTypeDefinition, string name) => ResultFactory.ResultCreate(resultTypeDefinition, -3, string.Format("Object reference not set to an instance of an object.{0}", string.IsNullOrEmpty(name) ? null : $" {name} is null"));
+        /// <summary>
+        /// ErrorNull
+        /// </summary>
+        /// <param name="resultTypeDefinition"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        internal static IResult ErrorNull(System.Type resultTypeDefinition, string name) => ResultFactory.ResultCreate(resultTypeDefinition, -3, string.Format("Object reference not set to an instance of an object.{0}", string.IsNullOrEmpty(name) ? null : $" {name} is null"));
 
         /*
         /// <summary>

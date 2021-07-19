@@ -1721,7 +1721,7 @@
             ErrorNull
             </summary>
             <param name="resultTypeDefinition"></param>
-            <param name="cmd"></param>
+            <param name="name"></param>
             <returns></returns>
         </member>
         <member name="M:Business.Core.Utils.Help.GetReturnValue(Business.Core.Result.IResult,Business.Core.Meta.MetaData)">

@@ -1264,6 +1264,26 @@ namespace Business.Core
 
                 argAttrAll = argAttrAll.Distinct();
 
+                //var iArgGenericType = new System.Type[argTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
+                //var parameterType2 = memberType;
+                //var cast = !hasUse && !current.hasIArg;
+                ////var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
+                //if (cast)
+                //{
+                //    current.hasIArg = true;
+                //    current.inType = typeof(object);
+
+                //    for (int i = 0; i < iArgGenericType.Length; i++)
+                //    {
+                //        iArgGenericType[i] = typeof(object);
+                //    }
+                //    if (0 < iArgGenericType.Length)
+                //    {
+                //        iArgGenericType[0] = memberType;
+                //        parameterType2 = argTypeDefinition.MakeGenericType(iArgGenericType);
+                //    }
+                //}
+
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
                 var children = current.hasDefinition ? GetArgChild(current.outType, declaring, businessName, method, path2, commands, definitions2, resultType, resultTypeDefinition, argTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
