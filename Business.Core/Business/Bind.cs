@@ -1906,7 +1906,7 @@ namespace Business.Core
 
         IList<KeyValuePair<string, System.Type>> parametersTypes;
 
-        ArgumentDeserialize deserialize;
+        ArgumentAttribute deserialize;
 
         /// <summary>
         /// Command
@@ -1957,7 +1957,7 @@ namespace Business.Core
 
             if (null != ParametersType)
             {
-                deserialize = Meta.Attributes.FirstOrDefault(c => c is ArgumentDeserialize attr && group == attr.Group)?.Clone() as ArgumentDeserialize;
+                deserialize = Meta.Attributes.FirstOrDefault(c => c is ArgumentAttribute attr && attr.ArgMeta.Deserialize && group == attr.Group)?.Clone() as ArgumentAttribute;
 
                 if (null != deserialize)
                 {
