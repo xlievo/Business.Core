@@ -2297,7 +2297,7 @@ public class TestBusinessMember
     [TestMethod]
     public void TestException()
     {
-        var arg = new TestExceptionArg { B = new TestExceptionArg.TestHasLower2 { C = new TestExceptionArg.TestHasLower3 { E = "EEE" }, D = 99 } };
+        var arg = new TestExceptionArg { B = new TestExceptionArg.TestHasLower2 { C = new TestExceptionArg.TestHasLower3 { E = "EEE", F = "666" }, D = 99 } };
 
         IResult r = AsyncCall(Member.Command, "TestException", null, new object[] { arg });
 

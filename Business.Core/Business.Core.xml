@@ -728,11 +728,10 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Annotations.ArgumentAttribute.CheckNull(Business.Core.Annotations.ArgumentAttribute,System.Object)">
+        <member name="M:Business.Core.Annotations.ArgumentAttribute.CheckNull(System.Object)">
             <summary>
             CheckNull
             </summary>
-            <param name="attribute"></param>
             <param name="value"></param>
             <returns></returns>
         </member>
@@ -1122,6 +1121,26 @@
             </summary>
             <param name="state"></param>
             <param name="message"></param>
+        </member>
+        <member name="T:Business.Core.Annotations.EnumCheckAttribute">
+            <summary>
+            Check whether the enumeration value is correct
+            </summary>
+        </member>
+        <member name="M:Business.Core.Annotations.EnumCheckAttribute.#ctor(System.Int32,System.String)">
+            <summary>
+            Check whether the enumeration value is correct
+            </summary>
+            <param name="state"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:Business.Core.Annotations.EnumCheckAttribute.Proces``1(System.Object)">
+            <summary>
+            Check whether the enumeration value is correct
+            </summary>
+            <typeparam name="Type"></typeparam>
+            <param name="value"></param>
+            <returns></returns>
         </member>
         <member name="T:Business.Core.Annotations.ParametersAttribute">
             <summary>
@@ -3322,6 +3341,11 @@
             HasHttpFile
             </summary>
         </member>
+        <member name="P:Business.Core.Command.HasReturn">
+            <summary>
+            HasReturn
+            </summary>
+        </member>
         <member name="P:Business.Core.Command.Parameters">
             <summary>
             Parameter list without token
@@ -5205,6 +5229,11 @@
         <member name="P:Business.Core.Document.DocArg.DynamicObject">
             <summary>
             Dynamic object, DocUI string type display
+            </summary>
+        </member>
+        <member name="P:Business.Core.Document.DocArg.CanNull">
+            <summary>
+            CanNull
             </summary>
         </member>
         <member name="T:Business.Core.Document.EnumItems">

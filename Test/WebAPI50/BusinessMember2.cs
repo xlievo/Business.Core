@@ -493,6 +493,38 @@ public partial class BusinessMember2 : BusinessBase
         return this.ResultCreate(new { arg, arg2, arg3 });
     }
 
+    public virtual async ValueTask<dynamic> TestMyEnum2(MyEnum? arg)
+    {
+        return this.ResultCreate(arg.HasValue ? null == arg.Value.GetName() ? null : arg.Value : null);
+    }
+
+    public virtual async Task Test012()
+    {
+        return;
+    }
+
+    /// <summary>
+    /// MyLogicArg!
+    /// </summary>
+    public struct MyLogicArg
+    {
+        /// <summary>
+        /// AAA
+        /// </summary>
+        [@CheckNull]
+        public string A { get; set; }
+
+        /// <summary>
+        /// BBB
+        /// </summary>
+        public string B { get; set; }
+    }
+
+    public virtual async ValueTask<dynamic> MyLogic(Token token, BusinessController context, HttpFile files, MyLogicArg arg)
+    {
+        return this.ResultCreate(new { token, arg });
+    }
+
     /// <summary>
     /// test doc Test001!!!
     /// and Test001!!!
@@ -534,7 +566,7 @@ public partial class BusinessMember2 : BusinessBase
         "\"aaa\":{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":900.87,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":4}," +
         "\"bbbb\":\"{\\\"C31\\\":\\\"222\\\",\\\"C32\\\":555}\",\"ccc\":\"{\\\"C31\\\":\\\"222\\\",\\\"C32\\\":555}\"}")]
     //"[{\"AAA\":[],\"A\":\"http://127.0.0.1:5000/doc/index.html\",\"B\":\"\",\"C\":{\"C1\":\"ok\",\"C2\":\"😀😭\",\"C3\":[]},\"D\":0,\"E\":false,\"F\":\"2019-12-02T06:24\",\"myEnum\":\"C\"},\"2019-12-02T08:24\",99.0234,777,false]")]
-    public virtual async ValueTask<IResult<Test111>> Test001(Session session222, Token token, Test111? Arg, [@CheckNull(CheckValueType = true)] DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal? mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true, BusinessController context2 = null, Test111 aaa = default, [DynamicObject]object bbbb = null, object ccc = null)
+    public virtual async ValueTask<IResult<Test111>> Test001(Session session222, Token token, Test111? Arg, [@CheckNull(CheckValueType = true)] DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal? mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true, BusinessController context2 = null, Test111 aaa = default, [DynamicObject] object bbbb = null, object ccc = null)
     {
         var ip = new Business.Core.Auth.Token { Remote = new Business.Core.Auth.Remote(context2.Request.HttpContext.Connection.RemoteIpAddress.ToString(), context2.Request.HttpContext.Connection.RemotePort), Key = "Key", Callback = "Callback" };
 
@@ -625,6 +657,7 @@ public partial class BusinessMember2 : BusinessBase
     /// <summary>
     /// MyEnumMyEnumMyEnumMyEnumMyEnumMyEnum
     /// </summary>
+    [EnumCheck]
     public enum MyEnum
     {
         /// <summary>
@@ -1052,7 +1085,7 @@ public class Args
         /// <summary>
         /// 
         /// </summary>
-        public MyEnum myEnum { get; set; }
+        public MyEnum? myEnum { get; set; }
 
         /// <summary>
         /// Test0010 Test0010 Test0010 Test0010

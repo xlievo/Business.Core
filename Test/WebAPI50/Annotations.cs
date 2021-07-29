@@ -7,16 +7,12 @@ namespace Business.Core.Annotations
     {
         public MessagePackArg(int state = -13, string message = null) : base(state, message)
         {
-            this.CanNull = false;
             this.Description = "MessagePackArg Binary parsing";
             this.ArgMeta.Filter |= FilterModel.NotDefinition;
         }
 
         public override async ValueTask<IResult> Proces<Type>(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
-
             try
             {
                 return this.ResultCreate(MessagePack.MessagePackSerializer.Deserialize<Type>(value));
@@ -29,7 +25,6 @@ namespace Business.Core.Annotations
     {
         public JsonArg(int state = -12, string message = null) : base(state, message)
         {
-            this.CanNull = false;
             this.Description = "Json parsing";
         }
     }
@@ -37,7 +32,6 @@ namespace Business.Core.Annotations
     {
         public JsonArg2(int state = -112, string message = null) : base(state, message)
         {
-            this.CanNull = false;
             this.Description = "Json2 parsing";
         }
     }
@@ -54,7 +48,6 @@ namespace Business.Core.Annotations
     {
         public CheckNull(int state = -800, string message = null) : base(state, message)
         {
-            this.CanNull = false;
             this.Description = "{ArgMeta.MemberPath} {Alias} must be filled in";
             this.Message = "{Alias} must be filled in";
         }
@@ -141,15 +134,11 @@ namespace Business.Core.Annotations
     {
         public SessionCheck(int state = -81, string message = null) : base(state, message)
         {
-            this.CanNull = false;
             this.Description = "Session check";
         }
 
         public override async ValueTask<IResult> Proces<Type>(dynamic token, dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
-
             var key = value.Key as string;
 
             //..1: check 2: convert
@@ -164,16 +153,12 @@ namespace Business.Core.Annotations
     {
         public TokenCheck(int state = -80, string message = null) : base(state, message)
         {
-            this.CanNull = false;
             this.Description = "Token check";
             this.Message = "Token is null";
         }
 
         public override async ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
-
             var key = value.Key as string;
 
             //..1: check token key

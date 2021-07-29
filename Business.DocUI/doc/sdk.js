@@ -146,43 +146,43 @@ class Program\n\
 }";
 }
 
-function GetCurl(route, h, c, data, data2) {
+function GetCurl(route, h, c, data, data2, encode = false) {
     var value = "\n";
     value += "			#Built-in Route   " + h + "?" + route.c + "=&" + route.t + "=&" + route.d + "=";
-    value += "\n\n\curl -X GET \"" + h + "?" + route.c + "=" + encodeURIComponent(c);
+    value += "\n\n\curl -X GET \"" + h + "?" + route.c + "=" + (encode ? encodeURIComponent(c) : c);
 
     // Built-in Route
 
     if (data.hasOwnProperty("t")) {
-        value += "&" + route.t + "=" + encodeURIComponent(data.t);
+        value += "&" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
     }
     if (data.hasOwnProperty("d")) {
-        value += "&" + route.d + "=" + encodeURIComponent(data.d);
+        value += "&" + route.d + "=" + (encode ? encodeURIComponent(data.d) : data.d);
     }
 
     value += "\"";
     value += "\n";
-    value += "\n\curl -X POST -d \"" + "c=" + encodeURIComponent(c);
+    value += "\n\curl -X POST -d \"" + "c=" + (encode ? encodeURIComponent(c) : c);
 
     if (data.hasOwnProperty("t")) {
-        value += "&" + route.t + "=" + encodeURIComponent(data.t);
+        value += "&" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
     }
     if (data.hasOwnProperty("d")) {
-        value += "&" + route.d + "=" + encodeURIComponent(data.d);
+        value += "&" + route.d + "=" + (encode ? encodeURIComponent(data.d) : data.d);
     }
     value += "\" " + h;
 
     value += "\n\n";
-    value += "			#Classical Route   " + h + "/" + encodeURIComponent(c);
-    value += "\n\n\curl -X GET \"" + h + "/" + encodeURIComponent(c);
+    value += "			#Classical Route   " + h + "/" + (encode ? encodeURIComponent(c) : c);
+    value += "\n\n\curl -X GET \"" + h + "/" + (encode ? encodeURIComponent(c) : c);
 
     // Classical Route
 
-    if (data2.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
-        value += "?" + route.t + "=" + encodeURIComponent(data2.t) + "&" + data2.d;
+    if (data.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
+        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t) + "&" + data2.d;
     }
-    else if (data2.hasOwnProperty("t")) {
-        value += "?" + route.t + "=" + encodeURIComponent(data2.t);
+    else if (data.hasOwnProperty("t")) {
+        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
     } else if (data2.hasOwnProperty("d")) {
         value += "?" + data2.d;
     }
@@ -191,25 +191,30 @@ function GetCurl(route, h, c, data, data2) {
     value += "\n";
     value += "\n\curl -X POST -d \"";
 
-    if (data2.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
-        value += route.t + "=" + encodeURIComponent(data2.t) + "&" + data2.d;
+    if (data.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
+        value += route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t) + "&" + data2.d;
     }
-    else if (data2.hasOwnProperty("t")) {
-        value += route.t + "=" + encodeURIComponent(data2.t);
+    else if (data.hasOwnProperty("t")) {
+        value += route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
     } else if (data2.hasOwnProperty("d")) {
         value += data2.d;
     }
 
-    value += "\" " + h + "/" + encodeURIComponent(c);
+    value += "\" " + h + "/" + (encode ? encodeURIComponent(c) : c);
 
     value += "\n";
     value += "\n\curl -H \"Content-Type:application/json\" -X POST -d \"";
 
     // application/json
+    if (data.hasOwnProperty("d")) {
+        value += (encode ? encodeURIComponent(data.d) : data.d);
+    }
 
-    value += encodeURIComponent(data.d);
+    value += "\" " + h + "/" + (encode ? encodeURIComponent(c) : c);
 
-    value += "\" " + h + "/" + encodeURIComponent(c);
+    if (data.hasOwnProperty("t")) {
+        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data2.t) : data2.t);
+    }
 
     value += "\n";
 

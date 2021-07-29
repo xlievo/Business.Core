@@ -20,7 +20,9 @@ namespace WebAPI50
             Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder
+                    .UseUrls("http://192.168.1.107:5000")
+                    .UseStartup<Startup>();
                 });
     }
 }

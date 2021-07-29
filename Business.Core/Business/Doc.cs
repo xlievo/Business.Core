@@ -992,6 +992,11 @@ namespace Business.Core.Document
         /// </summary>
         public bool DynamicObject { get; set; }
 
+        /// <summary>
+        /// CanNull
+        /// </summary>
+        public bool CanNull { get; set; }
+
         #region
         /*
         public string MinLength { get; set; }

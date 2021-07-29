@@ -2371,17 +2371,37 @@ function ready(editor) {
 
         //======================================================//
 
+        input.schema.encode = false;
+
         editor.on('change', function () {
-            var input = this.editors["root.input"];
             var data = getData(route, input, false);
             var h = doc[businessName].options.host + "/" + businessName;
 
-            curlValue.setValue(GetCurl(route, h, input.schema.name, data, getData(route, input, false, true)));
+            curlValue.setValue(GetCurl(route, h, input.schema.name, data, getData2(route, input, false, input.schema.encode), input.schema.encode));
             javascriptValue.setValue(GetSdkJavaScript(route, h, input.schema.name, data));
             netValue.setValue(GetSdkNet(route, h, input.schema.name, data));
-
-            //console.log(this.sdkeditor.getValue());
         });
+
+        curlValue.jsoneditor.on('ready', function () {
+            //set Curl 
+            let scroller = curlValue.container.querySelector("div[class='ace_scroller']");
+            if (null != scroller) {
+                let icon = document.createElement('i');
+                icon.className = "doc-icon-20 doc-icon-20-debug";
+                icon.style = "position:absolute;";
+                icon.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var data = getData(route, input, false);
+                    var h = doc[businessName].options.host + "/" + businessName;
+                    curlValue.setValue(GetCurl(route, h, input.schema.name, data, getData2(route, input, false, !input.schema.encode), !input.schema.encode));
+                    input.schema.encode = !input.schema.encode;
+                }, false);
+                scroller.appendChild(icon);
+            }
+        });
+
         //console.timeEnd("timer");
 
         if (input.editors[route.t]) {
@@ -2589,7 +2609,46 @@ function getSdk(format) {
     };
 }
 
-function getData(route, input, format, encode = false) {
+function getData(route, input, format) {
+    var data = {};
+    var editors = input.editors[route.d];
+    if (editors) {
+        var d = getDynamicObject(editors.schema, editors.getValue());
+        var schema_d = input.schema.properties[route.d];
+        if (input.schema.argSingle) {
+            if ("object" !== schema_d.type && "array" !== schema_d.type) {
+                if (editors.schema.dynamicObject) {
+                    if (null != d) {
+                        d = JSON.stringify(d, null, format ? 2 : 0);
+                    }
+                }
+                //string
+            }
+            else {
+                if (null != d) {
+                    d = JSON.stringify(d, null, format ? 2 : 0);
+                }
+            }
+        }
+        else {
+            var args = {};
+            for (var i in editors.editors) {
+                args[i] = getDynamicObject(editors.editors[i].schema, editors.editors[i].getValue());
+            }
+            d = JSON.stringify(args, null, format ? 2 : 0);
+        }
+
+        data.d = d;
+    }
+
+    if (input.editors[route.t]) {
+        data.t = input.editors[route.t].getValue();
+    }
+
+    return data;
+}
+
+function getData2(route, input, format, encode = false) {
     var data = {};
     var editors = input.editors[route.d];
     if (editors) {
@@ -2613,36 +2672,36 @@ function getData(route, input, format, encode = false) {
             if (encode) {
                 d = editors.schema.name + "=" + encodeURIComponent(d);
             }
+            else {
+                d = editors.schema.name + "=" + d;
+            }
         }
         else {
-            if (encode) {
-                var args = [];
-                for (var i in editors.editors) {
-                    var schema_d = editors.editors[i].schema;
-                    var d = getDynamicObject(schema_d, editors.editors[i].getValue());
-                    if ("object" !== schema_d.type && "array" !== schema_d.type) {
-                        if (schema_d.dynamicObject) {
-                            if (null != d) {
-                                d = JSON.stringify(d, null, format ? 2 : 0);
-                            }
-                        }
-                    }
-                    else {
+            var args = [];
+            for (var i in editors.editors) {
+                var schema_d = editors.editors[i].schema;
+                var d = getDynamicObject(schema_d, editors.editors[i].getValue());
+                if ("object" !== schema_d.type && "array" !== schema_d.type) {
+                    if (schema_d.dynamicObject) {
                         if (null != d) {
                             d = JSON.stringify(d, null, format ? 2 : 0);
                         }
                     }
+                }
+                else {
+                    if (null != d) {
+                        d = JSON.stringify(d, null, format ? 2 : 0);
+                    }
+                }
+                if (encode) {
                     args.push(i + "=" + encodeURIComponent(d));
                 }
-                d = args.join("&");
-            }
-            else {
-                var args = {};
-                for (var i in editors.editors) {
-                    args[i] = getDynamicObject(editors.editors[i].schema, editors.editors[i].getValue());
+                else {
+                    args.push(i + "=" + d);
                 }
-                d = JSON.stringify(args, null, format ? 2 : 0);
             }
+
+            d = args.join("&");
         }
 
         data.d = d;

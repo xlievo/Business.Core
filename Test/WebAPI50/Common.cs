@@ -788,21 +788,27 @@ public class BusinessController : Controller
     /// <returns></returns>
     [HttpGet]
     [HttpPost]
-    [EnableCors("any")]
-    public async Task<dynamic> Call()
+    //[EnableCors("any")]
+    public virtual async ValueTask<dynamic> Call()
     {
-        #region route fixed grouping j
+        #region route fixed grouping
 
+        //var g = Utils.GroupTextJson;//fixed grouping
         var g = "j";//fixed grouping
         var path = this.Request.Path.Value.TrimStart('/');
-        if (!(Configer.Routes.TryGetValue(path, out Configer.Route route) || Configer.Routes.TryGetValue($"{path}/{g}", out route)) || !Common.bootstrap.BusinessList.TryGetValue(route.Business, out BusinessBase business)) { return this.NotFound(); }
+        if (!(Configer.Routes.TryGetValue(path, out Configer.Route route) || Configer.Routes.TryGetValue($"{path}/{g}", out route)) || !Common.bootstrap.BusinessList.TryGetValue(route.Business, out BusinessBase business))
+        {
+            return this.NotFound();
+        }
 
         string c = null;
         string t = null;
         string d = null;
         string value = null;
+        StringValues value2;
         //g = route.Group;
         IDictionary<string, string> parameters = null;
+        var ctd = new { C = "c", T = "t", D = "d" };
 
         switch (this.Request.Method)
         {
@@ -812,9 +818,9 @@ public class BusinessController : Controller
                     var v2 = (string)v.Value;
                     return !string.IsNullOrEmpty(v2) ? v2 : null;
                 }, StringComparer.InvariantCultureIgnoreCase);
-                c = route.Command ?? (parameters.TryGetValue("c", out value) ? value : null);
-                t = parameters.TryGetValue("t", out value) ? value : null;
-                d = parameters.TryGetValue("d", out value) ? value : null;
+                c = route.Command ?? (parameters.TryGetValue(ctd.C, out value) ? value : null);
+                t = parameters.TryGetValue(ctd.T, out value) ? value : null;
+                d = parameters.TryGetValue(ctd.D, out value) ? value : null;
                 break;
             case "POST":
                 {
@@ -825,18 +831,22 @@ public class BusinessController : Controller
                             var v2 = (string)v.Value;
                             return !string.IsNullOrEmpty(v2) ? v2 : null;
                         }, StringComparer.InvariantCultureIgnoreCase);
-                        c = route.Command ?? (parameters.TryGetValue("c", out value) ? value : null);
-                        t = parameters.TryGetValue("t", out value) ? value : null;
-                        d = parameters.TryGetValue("d", out value) ? value : null;
+                        c = route.Command ?? (parameters.TryGetValue(ctd.C, out value) ? value : null);
+                        t = this.Request.Query.TryGetValue(ctd.T, out value2) ? (string)value2 : (parameters.TryGetValue(ctd.T, out value) ? value : null);
+                        d = parameters.TryGetValue(ctd.D, out value) ? value : null;
                     }
                     else
                     {
                         c = route.Command;
                         d = System.Web.HttpUtility.UrlDecode(await this.Request.Body.StreamReadStringAsync(), System.Text.Encoding.UTF8);
+                        t = this.Request.Query.TryGetValue(ctd.T, out value2) ? (string)value2 : null;
                     }
                 }
                 break;
-            default: return this.NotFound();
+            default:
+                {
+                    return this.NotFound();
+                }
         }
 
         var hasParameters = null != route.Command && null != parameters;
@@ -848,17 +858,9 @@ public class BusinessController : Controller
         if ("benchmark" == c)
         {
             var arg = d.TryJsonDeserialize<DocUI.BenchmarkArg>();
-            if (default(DocUI.BenchmarkArg).Equals(arg))
-            {
-                var argNull = new ArgumentNullException(nameof(arg));
-                return argNull.Message;
-            }
+            if (default(DocUI.BenchmarkArg).Equals(arg)) { return new ArgumentNullException(nameof(arg)).Message; }
             //arg.host = $"{this.Request.Scheme}://localhost:{this.HttpContext.Connection.LocalPort}/{business.Configer.Info.BusinessName}";
-            if (null != WebAPI50.Startup.httpAddress)
-            {
-                //arg.host = $"{Utils.Environment.Addresses[0]}/{business.Configer.Info.BusinessName}";
-                arg.host = $"{WebAPI50.Startup.httpAddress}/{business.Configer.Info.BusinessName}";
-            }
+            arg.host = $"{Common.Host.Addresses}/{business.Configer.Info.BusinessName}";
             return await DocUI.Benchmark(arg);
         }
 
@@ -874,32 +876,34 @@ public class BusinessController : Controller
 
         if (null == cmd)
         {
-            return Help.ErrorCmd(business, c);
+            var errorCmd = Help.ErrorCmd(business, c);
+            return errorCmd;
         }
 
         var token = new Token //token
         {
-            Key = hasParameters ? (this.Request.Query.TryGetValue("t", out StringValues value2) ? (string)value2 : (parameters.TryGetValue("t", out value) ? value : null)) : t,
-            Remote = new Business.Core.Auth.Remote(this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
+            Key = hasParameters ? (this.Request.Query.TryGetValue(ctd.T, out value2) ? (string)value2 : (parameters.TryGetValue(ctd.T, out value) ? value : null)) : t,
+            Remote = new Business.Core.Auth.Remote(this.HttpContext.Request.Headers.TryGetValue(Microsoft.AspNetCore.HttpOverrides.ForwardedHeadersDefaults.XForwardedForHeaderName, out StringValues remote2) ? remote2.ToString() : this.HttpContext.Connection.RemoteIpAddress.ToString(), this.HttpContext.Connection.RemotePort),
             Path = this.Request.Path.Value,
         };
 
-        var result = null != route.Command && null != parameters ?
+        var result = hasParameters ?
                 // Normal routing mode
                 await cmd.AsyncCall(
                     //the data of this request, allow null.
                     parameters,
                     //the incoming use object
-                    new UseEntry(this, Common.contextParameterNames), //context
-                    new UseEntry(token, "session")) :
+                    //new UseEntry(this.HttpContext), //context
+                    new UseEntry(this), //context
+                    new UseEntry(token)) :
                 // Framework routing mode
                 await cmd.AsyncCallFull(
                     //the data of this request, allow null.
-                    //cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeStringArray(),
                     d,
                     //the incoming use object
-                    new UseEntry(this, Common.contextParameterNames), //context
-                    new UseEntry(token, "session"));
+                    //new UseEntry(this.HttpContext), //context
+                    new UseEntry(this), //context
+                    new UseEntry(token));
 
         return result;
     }

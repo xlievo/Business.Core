@@ -100,7 +100,7 @@ namespace Business.Core.Annotations
             /// Clone
             /// </summary>
             /// <param name="metaData"></param>
-            public void Clone(MetaData metaData) => this.Declaring = metaData.Declaring;
+            public void Clone(MetaData metaData) => Declaring = metaData.Declaring;
         }
 
         internal static readonly ConcurrentReadOnlyDictionary<string, Accessors> Accessors = new ConcurrentReadOnlyDictionary<string, Accessors>();
@@ -232,13 +232,13 @@ namespace Business.Core.Annotations
         {
             get
             {
-                if (!Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return null; }
+                if (!Accessors.TryGetValue(Meta.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return null; }
 
                 return accessor.Getter(this);
             }
             set
             {
-                if (!Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return; }
+                if (!Accessors.TryGetValue(Meta.Type.FullName, out Accessors meta) || !meta.Accessor.TryGetValue(member, out Accessor accessor)) { return; }
 
                 try
                 {
@@ -256,9 +256,9 @@ namespace Business.Core.Annotations
         /// </summary>
         public AttributeBase()
         {
-            this.Meta = new MetaData(this.TypeId as System.Type);
+            Meta = new MetaData(TypeId as System.Type);
 
-            this.Meta.Type.LoadAccessors(Accessors, methods: true);
+            Meta.Type.LoadAccessors(Accessors, methods: true);
         }
 
         /// <summary>
@@ -273,14 +273,14 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public virtual T Clone<T>() where T : AttributeBase
         {
-            if (this.Meta.Type.IsAbstract) { return default; }
+            if (Meta.Type.IsAbstract) { return default; }
 
-            if (!Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta))
+            if (!Accessors.TryGetValue(Meta.Type.FullName, out Accessors meta))
             {
                 return default;
             }
 
-            if (!(System.Activator.CreateInstance(this.Meta.Type, meta.ConstructorArgs) is AttributeBase attr))
+            if (!(System.Activator.CreateInstance(Meta.Type, meta.ConstructorArgs) is AttributeBase attr))
             {
                 return default;
             }
@@ -302,7 +302,7 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public virtual string Replace(string value)
         {
-            if (string.IsNullOrWhiteSpace(value) || !Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta))
+            if (string.IsNullOrWhiteSpace(value) || !Accessors.TryGetValue(Meta.Type.FullName, out Accessors meta))
             {
                 return value;
             }
@@ -350,10 +350,10 @@ namespace Business.Core.Annotations
         //public TestingAttribute(string name, object value, string result = null, string token = null, string tokenMethod = null)
         public TestingAttribute(string name, object value, string result = null, string token = null)
         {
-            this.Name = name;
-            this.Value = value;
-            this.Result = result;
-            this.Token = token;
+            Name = name;
+            Value = value;
+            Result = result;
+            Token = token;
             //this.TokenMethod = tokenMethod;
             //this.Method = method;
         }
@@ -393,7 +393,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="space"></param>
         /// <returns></returns>
-        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.Method}{space}{this.Name}";
+        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{Method}{space}{Name}";
     }
 
     /// <summary>
@@ -441,7 +441,7 @@ namespace Business.Core.Annotations
         /// <param name="mode"></param>
         public Ignore(IgnoreMode mode = IgnoreMode.Method)
         {
-            this.Mode = mode;
+            Mode = mode;
         }
 
         /// <summary>
@@ -458,7 +458,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="space"></param>
         /// <returns></returns>
-        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.Mode.GetName()}";
+        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{Mode.GetName()}";
 
         //public bool Contains(IgnoreMode mode) => 0 != (this.Mode & mode);
     }
@@ -484,7 +484,7 @@ namespace Business.Core.Annotations
         /// <param name="businessName"></param>
         public Info(string businessName = null)
         {
-            this.BusinessName = businessName;
+            BusinessName = businessName;
             //this.ConfigFileName = System.IO.Path.Combine(Help.BaseDirectory, configFileName);
         }
 
@@ -547,9 +547,9 @@ namespace Business.Core.Annotations
         /// <param name="parameterName"></param>
         public UseEntry(object value, params string[] parameterName)
         {
-            this.Value = value;
-            this.Type = this.Value?.GetType();
-            this.ParameterName = parameterName;
+            Value = value;
+            Type = Value?.GetType();
+            ParameterName = parameterName;
         }
 
         /// <summary>
@@ -578,7 +578,7 @@ namespace Business.Core.Annotations
         /// Injecting Objects Corresponding to Parameter type
         /// </summary>
         /// <param name="parameterType"></param>
-        public UseAttribute(System.Type parameterType = null) => this.ParameterType = parameterType;
+        public UseAttribute(System.Type parameterType = null) => ParameterType = parameterType;
 
         /// <summary>
         /// Use parameter names to correspond to injection objects
@@ -607,7 +607,7 @@ namespace Business.Core.Annotations
         /// AliasAttribute
         /// </summary>
         /// <param name="name"></param>
-        public AliasAttribute(string name = null) => this.Name = name;
+        public AliasAttribute(string name = null) => Name = name;
 
         /// <summary>
         /// Friendly name
@@ -625,7 +625,7 @@ namespace Business.Core.Annotations
         /// Grouping name
         /// </summary>
         /// <param name="group"></param>
-        public DocGroupAttribute(string group = null) => this.Group = group;
+        public DocGroupAttribute(string group = null) => Group = group;
 
         /// <summary>
         /// Grouping name
@@ -658,7 +658,7 @@ namespace Business.Core.Annotations
         /// Friendly name
         /// </summary>
         /// <param name="alias"></param>
-        public DocAttribute(string alias = null) => this.Alias = alias;
+        public DocAttribute(string alias = null) => Alias = alias;
 
         /// <summary>
         /// Method alias grouping
@@ -697,9 +697,9 @@ namespace Business.Core.Annotations
         /// <param name="valueType"></param>
         public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true, Logger.ValueType valueType = Logger.ValueType.In)
         {
-            this.LogType = logType;
-            this.CanWrite = canWrite;
-            this.ValueType = valueType;
+            LogType = logType;
+            CanWrite = canWrite;
+            ValueType = valueType;
         }
 
         /// <summary>
@@ -733,7 +733,7 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public LoggerAttribute SetType(Logger.Type logType)
         {
-            this.LogType = logType;
+            LogType = logType;
             return this;
         }
 
@@ -748,13 +748,13 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="space"></param>
         /// <returns></returns>
-        public override string GroupKey(string space = "->") => $"{ base.GroupKey(space)}{space}{this.LogType.GetName()}";
+        public override string GroupKey(string space = "->") => $"{ base.GroupKey(space)}{space}{LogType.GetName()}";
 
         /// <summary>
         /// ToString
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => $"{Meta.Name} {this.LogType}";
+        public override string ToString() => $"{Meta.Name} {LogType}";
     }
 
     /// <summary>
@@ -802,7 +802,7 @@ namespace Business.Core.Annotations
         /// GroupAttribute
         /// </summary>
         /// <param name="type"></param>
-        public GroupAttribute(System.Type type = null) => this.type = GetType(type ?? this.Meta.Type);
+        public GroupAttribute(System.Type type = null) => this.type = GetType(type ?? Meta.Type);
 
         string group = string.Empty;
 
@@ -816,7 +816,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="space"></param>
         /// <returns></returns>
-        public virtual string GroupKey(string space = "->") => $"{type.FullName}{space}{this.Group.Trim()}";
+        public virtual string GroupKey(string space = "->") => $"{type.FullName}{space}{Group.Trim()}";
         //public virtual string GroupKey(string space = "->") => $"{this.Meta.Type.FullName}{space}{this.Group.Trim()}";
 
         /// <summary>
@@ -838,9 +838,8 @@ namespace Business.Core.Annotations
         /// <param name="type"></param>
         protected ArgumentDeserialize(int state, string message = null, System.Type type = null) : base(state, message, type)
         {
-            this.CanNull = false;
-            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection && !dynamicObject) || this.ArgMeta.Arg.Parameters || ignoreArg;
-            this.ArgMeta.Deserialize = true;
+            ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => (!hasDefinition && !ArgMeta.Arg.HasCollection && !dynamicObject) || ArgMeta.Arg.Parameters || ignoreArg;
+            ArgMeta.Deserialize = true;
         }
     }
 
@@ -947,21 +946,21 @@ namespace Business.Core.Annotations
             /// <param name="metaData"></param>
             public void Clone(MetaData metaData)
             {
-                this.resultType = metaData.resultType;
-                this.resultTypeDefinition = metaData.resultTypeDefinition;
-                this.Business = metaData.Business;
-                this.BusinessName = metaData.BusinessName;
-                this.Method = metaData.Method;
-                this.MethodOnlyName = metaData.MethodOnlyName;
-                this.MemberPath = metaData.MemberPath;
-                this.Member = metaData.Member;
-                this.MemberType = metaData.MemberType;
+                resultType = metaData.resultType;
+                resultTypeDefinition = metaData.resultTypeDefinition;
+                Business = metaData.Business;
+                BusinessName = metaData.BusinessName;
+                Method = metaData.Method;
+                MethodOnlyName = metaData.MethodOnlyName;
+                MemberPath = metaData.MemberPath;
+                Member = metaData.Member;
+                MemberType = metaData.MemberType;
                 //this.MemberOrigType = metaData.MemberOrigType;
-                this.Arg = metaData.Arg;
+                Arg = metaData.Arg;
 
                 if (null != metaData.Proces)
                 {
-                    this.Proces = new Proces(metaData.Proces.MethodInfo, metaData.Proces.ParameterType)
+                    Proces = new Proces(metaData.Proces.MethodInfo, metaData.Proces.ParameterType)
                     {
                         Mode = metaData.Proces.Mode,
                         Call = metaData.Proces.Call
@@ -1006,22 +1005,22 @@ namespace Business.Core.Annotations
         /// <param name="type"></param>
         public ArgumentAttribute(int state, string message = null, System.Type type = null) : base(type)
         {
-            this.State = state;
-            this.Message = message;
+            State = state;
+            Message = message;
             //this.CanNull = canNull;
-            this.ArgMeta = new MetaData();
+            ArgMeta = new MetaData();
 
-            if (Accessors.TryGetValue(this.Meta.Type.FullName, out Accessors meta) && meta.Methods.TryGetValue(nameof(ArgumentAttribute.Proces), out Proces method))
+            if (Accessors.TryGetValue(Meta.Type.FullName, out Accessors meta) && meta.Methods.TryGetValue(nameof(ArgumentAttribute.Proces), out Proces method))
             {
-                this.ArgMeta.Proces = new Proces(method.MethodInfo, method.ParameterType);
+                ArgMeta.Proces = new Proces(method.MethodInfo, method.ParameterType);
 
                 if (Enumerable.SequenceEqual(procesMethod.proces, method.ParameterType))
                 {
-                    this.ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ? Utils.Proces.ProcesMode.ProcesGeneric : Utils.Proces.ProcesMode.Proces;
+                    ArgMeta.Proces.Mode = method.MethodInfo.IsGenericMethod ? Utils.Proces.ProcesMode.ProcesGeneric : Utils.Proces.ProcesMode.Proces;
                 }
                 else if (Enumerable.SequenceEqual(procesMethod.procesToken, method.ParameterType))
                 {
-                    this.ArgMeta.Proces.Mode = Utils.Proces.ProcesMode.ProcesGenericToken;
+                    ArgMeta.Proces.Mode = Utils.Proces.ProcesMode.ProcesGenericToken;
                 }
                 //else if (Enumerable.SequenceEqual(procesMethod.procesCollection, method.ParameterType))
                 //{
@@ -1029,16 +1028,16 @@ namespace Business.Core.Annotations
                 //}
             }
 
-            this.BindAfter += () =>
+            BindAfter += () =>
             {
-                if (!string.IsNullOrWhiteSpace(this.Message))
+                if (!string.IsNullOrWhiteSpace(Message))
                 {
-                    this.Message = this.Replace(this.Message);
+                    Message = Replace(Message);
                 }
 
-                if (!string.IsNullOrWhiteSpace(this.Description))
+                if (!string.IsNullOrWhiteSpace(Description))
                 {
-                    this.Description = this.Replace(this.Description);
+                    Description = Replace(Description);
                 }
             };
         }
@@ -1051,16 +1050,23 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public async ValueTask<IResult> GetProcesResult(dynamic value, dynamic token = null)
         {
+            var result = await this.CheckNull(value);
+
+            if (0 >= result.State)
+            {
+                return result;
+            }
+
             switch (ArgMeta.Proces?.Mode)
             {
                 case Utils.Proces.ProcesMode.ProcesGeneric:
                     {
-                        dynamic result = ArgMeta.Proces.Call(this, new object[] { value });
+                        result = ArgMeta.Proces.Call(this, new object[] { value });
                         return await result;
                     }
                 case Utils.Proces.ProcesMode.ProcesGenericToken:
                     {
-                        dynamic result = ArgMeta.Proces.Call(this, new object[] { token, value });
+                        result = ArgMeta.Proces.Call(this, new object[] { token, value });
                         return await result;
                     }
                 default: return await this.Proces(value);
@@ -1087,7 +1093,7 @@ namespace Business.Core.Annotations
 
                 if (-1 < value.IndexOf(member))
                 {
-                    sb = sb.Replace(member, System.Convert.ToString(item.Value.Getter(this.ArgMeta)));
+                    sb = sb.Replace(member, System.Convert.ToString(item.Value.Getter(ArgMeta)));
                 }
             }
 
@@ -1114,7 +1120,7 @@ namespace Business.Core.Annotations
         /// <summary>
         /// By checking the Allow null value, Default to true
         /// </summary>
-        public bool CanNull { get; set; } = true;
+        public bool CanNull { get; set; }
 
         int state;
         /// <summary>
@@ -1208,7 +1214,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual ValueTask<IResult> Proces(dynamic value) => new ValueTask<IResult>(this.ResultCreate<dynamic>(value));
+        public virtual ValueTask<IResult> Proces(dynamic value) => new ValueTask<IResult>(ResultCreate<dynamic>(value));
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -1216,7 +1222,7 @@ namespace Business.Core.Annotations
         /// <typeparam name="Type"></typeparam>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual ValueTask<IResult> Proces<Type>(dynamic value) => new ValueTask<IResult>(this.ResultCreate<Type>(value));
+        public virtual ValueTask<IResult> Proces<Type>(dynamic value) => new ValueTask<IResult>(ResultCreate<Type>(value));
 
         /// <summary>
         /// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -1225,7 +1231,7 @@ namespace Business.Core.Annotations
         /// <param name="token"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual ValueTask<IResult> Proces<Type>(dynamic token, dynamic value) => new ValueTask<IResult>(this.ResultCreate<Type>(value));
+        public virtual ValueTask<IResult> Proces<Type>(dynamic token, dynamic value) => new ValueTask<IResult>(ResultCreate<Type>(value));
 
         ///// <summary>
         ///// Start processing the Parameter object, By this.ResultCreate() method returns
@@ -1303,27 +1309,42 @@ namespace Business.Core.Annotations
 
         #endregion
 
+        ///// <summary>
+        ///// CheckNull
+        ///// </summary>
+        ///// <param name="attribute"></param>
+        ///// <param name="value"></param>
+        ///// <returns></returns>
+        //public static IResult CheckNull(ArgumentAttribute attribute, dynamic value)
+        //{
+        //    if (object.Equals(null, value))
+        //    {
+        //        if (attribute.CanNull)
+        //        {
+        //            return attribute.ResultCreate();
+        //        }
+        //        else
+        //        {
+        //            return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Alias}\" can not null.");
+        //        }
+        //    }
+
+        //    return attribute.ResultCreate(data: value);
+        //}
+
         /// <summary>
         /// CheckNull
         /// </summary>
-        /// <param name="attribute"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static IResult CheckNull(ArgumentAttribute attribute, dynamic value)
+        public virtual ValueTask<IResult> CheckNull(dynamic value)
         {
-            if (object.Equals(null, value))
+            if ((!(this.ArgMeta.Arg?.Nullable ?? false) || ArgMeta.Arg.LastType.IsValueType || !this.CanNull) && Equals(null, value))
             {
-                if (attribute.CanNull)
-                {
-                    return attribute.ResultCreate();
-                }
-                else
-                {
-                    return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Alias}\" can not null.");
-                }
+                return new ValueTask<IResult>(this.ResultCreate(this.State, this.Message ?? $"argument \"{this.Alias}\" can not null."));
             }
 
-            return attribute.ResultCreate(data: value);
+            return new ValueTask<IResult>(this.ResultCreate());
         }
 
         /// <summary>
@@ -1337,7 +1358,7 @@ namespace Business.Core.Annotations
         {
             if (attribute.ArgMeta.MemberType.Equals(value.GetType()))
             {
-                if (check && !attribute.CanNull && attribute.ArgMeta.MemberType.IsValueType && object.Equals(attribute.ArgMeta.Arg.DefaultTypeValue, value))
+                if (check && !attribute.ArgMeta.Arg.Nullable && attribute.ArgMeta.MemberType.IsValueType && object.Equals(attribute.ArgMeta.Arg.DefaultTypeValue, value))
                 {
                     return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Alias}\" can not null.");
                 }
@@ -1426,7 +1447,7 @@ namespace Business.Core.Annotations
         /// Command attribute on a method, for multiple sources to invoke the method
         /// </summary>
         /// <param name="onlyName"></param>
-        public CommandAttribute(string onlyName = null) { this.OnlyName = onlyName; }
+        public CommandAttribute(string onlyName = null) { OnlyName = onlyName; }
 
         /// <summary>
         /// Key
@@ -1450,7 +1471,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="space"></param>
         /// <returns></returns>
-        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.OnlyName}";
+        public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{OnlyName}";
 
         /// <summary>
         /// ToString
@@ -1471,7 +1492,7 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public CheckNullAttribute(int state = -800, string message = null) : base(state, message) => this.CanNull = false;
+        public CheckNullAttribute(int state = -800, string message = null) : base(state, message) => this.CanNull = true;
 
         /// <summary>
         /// Compare type defaults
@@ -1485,16 +1506,16 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            if (typeof(string).Equals(this.ArgMeta.MemberType))
+            if (typeof(string).Equals(ArgMeta.MemberType))
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" can not null."));
+                    return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" can not null."));
                 }
             }
             else if (object.Equals(null, value))
             {
-                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" can not null."));
+                return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" can not null."));
             }
             else
             {
@@ -1505,7 +1526,7 @@ namespace Business.Core.Annotations
                 }
             }
 
-            return new ValueTask<IResult>(this.ResultCreate());
+            return new ValueTask<IResult>(ResultCreate());
         }
     }
 
@@ -1521,16 +1542,16 @@ namespace Business.Core.Annotations
         /// <param name="message"></param>
         public SizeAttribute(int state = -801, string message = null) : base(state, message)
         {
-            this.BindAfter += () =>
+            BindAfter += () =>
             {
-                if (!string.IsNullOrWhiteSpace(this.MinMsg))
+                if (!string.IsNullOrWhiteSpace(MinMsg))
                 {
-                    this.MinMsg = this.Replace(this.MinMsg);
+                    MinMsg = Replace(MinMsg);
                 }
 
-                if (!string.IsNullOrWhiteSpace(this.MaxMsg))
+                if (!string.IsNullOrWhiteSpace(MaxMsg))
                 {
-                    this.MaxMsg = this.Replace(this.MaxMsg);
+                    MaxMsg = Replace(MaxMsg);
                 }
             };
         }
@@ -1560,10 +1581,7 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
-            var type = this.ArgMeta.MemberType;
+            var type = ArgMeta.MemberType;
             //var type = System.Nullable.GetUnderlyingType(this.ArgMeta.MemberType) ?? this.ArgMeta.MemberType;
 
             string msg = null;
@@ -1663,7 +1681,7 @@ namespace Business.Core.Annotations
                     }
                     else
                     {
-                        return new ValueTask<IResult>(this.ResultCreate(State, $"argument \"{this.Alias}\" type error"));
+                        return new ValueTask<IResult>(ResultCreate(State, $"argument \"{Alias}\" type error"));
                     }
                     break;
             }
@@ -1671,10 +1689,10 @@ namespace Business.Core.Annotations
             //checked error
             if (!string.IsNullOrEmpty(msg))
             {
-                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? msg));
+                return new ValueTask<IResult>(ResultCreate(State, Message ?? msg));
             }
 
-            return new ValueTask<IResult>(this.ResultCreate());
+            return new ValueTask<IResult>(ResultCreate());
         }
     }
 
@@ -1702,16 +1720,13 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return result; }
-
-            switch (this.ArgMeta.MemberType.GetTypeCode())
+            switch (ArgMeta.MemberType.GetTypeCode())
             {
                 case System.TypeCode.Decimal:
-                    return new ValueTask<IResult>(this.ResultCreate(Help.Scale((decimal)value, Size)));
+                    return new ValueTask<IResult>(ResultCreate(Help.Scale((decimal)value, Size)));
                 case System.TypeCode.Double:
-                    return new ValueTask<IResult>(this.ResultCreate(Help.Scale((double)value, Size)));
-                default: return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" type error"));
+                    return new ValueTask<IResult>(ResultCreate(Help.Scale((double)value, Size)));
+                default: return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" type error"));
             }
         }
     }
@@ -1735,15 +1750,12 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             //if (!Utils.Help.CheckEmail(value))
             if (!IsValid(value))
             {
-                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" email error"));
+                return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" email error"));
             }
-            return new ValueTask<IResult>(this.ResultCreate());
+            return new ValueTask<IResult>(ResultCreate());
         }
 
         bool IsValid(dynamic value)
@@ -1813,14 +1825,11 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             if (!Utils.Help.CheckChar(value, Mode))
             {
-                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" char verification failed"));
+                return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" char verification failed"));
             }
-            return new ValueTask<IResult>(this.ResultCreate());
+            return new ValueTask<IResult>(ResultCreate());
         }
     }
 
@@ -1838,7 +1847,7 @@ namespace Business.Core.Annotations
         /// <param name="message"></param>
         public RegexAttribute(string pattern, int state = -805, string message = null) : base(state, message)
         {
-            this.Pattern = pattern;
+            Pattern = pattern;
             //this.Options = options;
         }
 
@@ -1849,21 +1858,18 @@ namespace Business.Core.Annotations
 
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             //if (!System.Text.RegularExpressions.Regex.IsMatch(value.Trim(), Pattern, Options))
             if (!IsValid(value))
             {
-                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" regular expression verification failed"));
+                return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" regular expression verification failed"));
             }
 
-            return new ValueTask<IResult>(this.ResultCreate());
+            return new ValueTask<IResult>(ResultCreate());
         }
 
         bool IsValid(object value)
         {
-            this.SetupRegex();
+            SetupRegex();
 
             // Convert the value to a string
             string stringValue = System.Convert.ToString(value, System.Globalization.CultureInfo.CurrentCulture);
@@ -1874,7 +1880,7 @@ namespace Business.Core.Annotations
                 return true;
             }
 
-            var m = this.Regex.Match(stringValue);
+            var m = Regex.Match(stringValue);
 
             // We are looking for an exact match, not just a search hit. This matches what
             // the RegularExpressionValidator control does
@@ -1913,11 +1919,11 @@ namespace Business.Core.Annotations
         /// </summary>
         private void SetupRegex()
         {
-            if (this.Regex == null)
+            if (Regex == null)
             {
-                if (string.IsNullOrEmpty(this.Pattern))
+                if (string.IsNullOrEmpty(Pattern))
                 {
-                    throw new System.ArgumentException(this.Pattern);
+                    throw new System.ArgumentException(Pattern);
                 }
 
                 if (!_matchTimeoutSet)
@@ -1959,14 +1965,11 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             if (!IsValid(value))
             {
-                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" phone error"));
+                return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" phone error"));
             }
-            return new ValueTask<IResult>(this.ResultCreate());
+            return new ValueTask<IResult>(ResultCreate());
         }
 
         bool IsValid(dynamic value)
@@ -2030,14 +2033,11 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             if (!IsValid(value))
             {
-                return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"argument \"{this.Alias}\" url error"));
+                return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" url error"));
             }
-            return new ValueTask<IResult>(this.ResultCreate());
+            return new ValueTask<IResult>(ResultCreate());
         }
 
         bool IsValid(object value)
@@ -2113,9 +2113,6 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             return new ValueTask<IResult>(this.ResultCreate(Help.MD5(value, HasUpper, Encoding)));
         }
     }
@@ -2146,7 +2143,7 @@ namespace Business.Core.Annotations
         /// <param name="key"></param>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public AESAttribute(string key = null, int state = -821, string message = null) : base(state, message) => this.Key = key;
+        public AESAttribute(string key = null, int state = -821, string message = null) : base(state, message) => Key = key;
 
         /// <summary>
         /// Proces
@@ -2155,9 +2152,6 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             return new ValueTask<IResult>(this.ResultCreate(Help.AES.Encrypt(value, Key, Salt, Encoding)));
         }
 
@@ -2201,9 +2195,9 @@ namespace Business.Core.Annotations
         /// <param name="message"></param>
         internal ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, int state = -11, string message = null) : base(state, message)
         {
-            this.ArgMeta.resultType = resultType;
-            this.ArgMeta.resultTypeDefinition = resultTypeDefinition;
-            this.ArgMeta.argTypeDefinition = argTypeDefinition;
+            ArgMeta.resultType = resultType;
+            ArgMeta.resultTypeDefinition = resultTypeDefinition;
+            ArgMeta.argTypeDefinition = argTypeDefinition;
         }
 
         /// <summary>
@@ -2211,7 +2205,44 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public ArgumentDefaultAttribute(int state = -11, string message = null) : base(state, message) { }
+        public ArgumentDefaultAttribute(int state = -10, string message = null) : base(state, message) { }
+    }
+
+    /// <summary>
+    /// Check whether the enumeration value is correct
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Enum | System.AttributeTargets.Parameter, AllowMultiple = true, Inherited = true)]
+    public class EnumCheckAttribute : ArgumentAttribute
+    {
+        /// <summary>
+        /// Check whether the enumeration value is correct
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="message"></param>
+        public EnumCheckAttribute(int state = 11, string message = null) : base(state, message) { }
+
+        /// <summary>
+        /// Check whether the enumeration value is correct
+        /// </summary>
+        /// <typeparam name="Type"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public override ValueTask<IResult> Proces<Type>(dynamic value)
+        {
+            System.Enum value2 = value;
+
+            if (ArgMeta.Arg.Nullable && Equals(null, value2))
+            {
+                return new ValueTask<IResult>(ResultCreate(value2));
+            }
+
+            if (null != value2.GetName())
+            {
+                return new ValueTask<IResult>(ResultCreate(value2));
+            }
+
+            return new ValueTask<IResult>(ResultCreate(State, Message ?? $"Arguments {Alias} Enum value error."));
+        }
     }
 
     /// <summary>
@@ -2228,8 +2259,8 @@ namespace Business.Core.Annotations
         public ParametersAttribute(int state = -11, string message = null) : base(state, message)
         {
             //this.CanNull = false;
-            this.Description = "Parameters parsing";
-            this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => !hasDefinition;
+            Description = "Parameters parsing";
+            ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => !hasDefinition;
         }
         /*
         delegate void SetStructHandler<T>(ref T source, object value);
@@ -2252,20 +2283,17 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces<Type>(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             try
             {
                 System.Collections.Generic.IDictionary<string, string> dict = value;
 
-                if (0 < dict.Count && 0 < this.ArgMeta.Arg.Children?.Count)
+                if (0 < dict.Count && 0 < ArgMeta.Arg.Children?.Count)
                 {
                     var arg = System.Activator.CreateInstance<Type>();
 
                     //var dict2 = new System.Collections.Generic.Dictionary<string, object>(dict.Count);
 
-                    foreach (var item in this.ArgMeta.Arg.Children)
+                    foreach (var item in ArgMeta.Arg.Children)
                     {
                         if (dict.TryGetValue(item.Name, out string v))
                         {
@@ -2276,7 +2304,7 @@ namespace Business.Core.Annotations
                             }
                             else if (typeof(IArg).IsAssignableFrom(item.OrigType))
                             {
-                                var iarg = System.Activator.CreateInstance(this.ArgMeta.argTypeDefinition.MakeGenericType(item.CurrentOrigType)) as IArg;
+                                var iarg = System.Activator.CreateInstance(ArgMeta.argTypeDefinition.MakeGenericType(item.CurrentOrigType)) as IArg;
                                 iarg.In = v;
                                 item.Accessor.Setter(arg, iarg);
                             }
@@ -2289,12 +2317,12 @@ namespace Business.Core.Annotations
                     }
 
                     //return this.ResultCreate(dict2.JsonSerialize().TryJsonDeserialize<Type>());
-                    return new ValueTask<IResult>(this.ResultCreate(arg));
+                    return new ValueTask<IResult>(ResultCreate(arg));
                 }
 
-                return new ValueTask<IResult>(this.ResultCreate<Type>(default));
+                return new ValueTask<IResult>(ResultCreate<Type>(default));
             }
-            catch (System.Exception ex) { return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"Parameters {this.Alias} Proces error. {ex.Message}")); }
+            catch (System.Exception ex) { return new ValueTask<IResult>(ResultCreate(State, Message ?? $"Parameters {Alias} Proces error. {ex.Message}")); }
         }
     }
 
@@ -2313,7 +2341,7 @@ namespace Business.Core.Annotations
         public JsonArgAttribute(int state = -12, string message = null, System.Type type = null) : base(state, message, type)
         {
             //this.CanNull = false;
-            this.Description = "Json parsing";
+            Description = "Json parsing";
             //this.ArgMeta.Filter |= FilterModel.NotDefinition;
             //this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection && !dynamicObject) || this.ArgMeta.Arg.Parameters || ignoreArg;
             //this.ArgMeta.Deserialize = true;
@@ -2349,9 +2377,6 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces<Type>(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             //Check whether the defined value type is the default value, (top-level object commit)
             //result = CheckDefinitionValueType(this, value, CheckValueType);
             //if (!Equals(null, result)) { return new ValueTask<IResult>(result); }
@@ -2360,7 +2385,7 @@ namespace Business.Core.Annotations
             {
                 return new ValueTask<IResult>(this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize<Type>(value, textJsonOptions)));
             }
-            catch (System.Exception ex) { return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Json deserialize error. {ex.Message}")); }
+            catch (System.Exception ex) { return new ValueTask<IResult>(ResultCreate(State, Message ?? $"Arguments {Alias} Json deserialize error. {ex.Message}")); }
         }
     }
 
@@ -2376,11 +2401,11 @@ namespace Business.Core.Annotations
         /// <param name="message"></param>
         /// <param name="rootElementName">Controls XML serialization of the attribute target as an XML root element.</param>
         /// <param name="type"></param>
-        public XmlArgAttribute(int state = -12, string message = null, string rootElementName = "xml", System.Type type = null) : base(state, message, type)
+        public XmlArgAttribute(int state = -13, string message = null, string rootElementName = "xml", System.Type type = null) : base(state, message, type)
         {
             //this.CanNull = false;
-            this.Description = "Xml parsing";
-            this.RootElementName = rootElementName;
+            Description = "Xml parsing";
+            RootElementName = rootElementName;
             //this.ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => (!hasDefinition && !this.ArgMeta.Arg.HasCollection && !dynamicObject) || this.ArgMeta.Arg.Parameters || ignoreArg;
         }
 
@@ -2401,9 +2426,6 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public override ValueTask<IResult> Proces(dynamic value)
         {
-            var result = CheckNull(this, value);
-            if (!result.HasData) { return new ValueTask<IResult>(result); }
-
             //Check whether the defined value type is the default value, (top-level object commit)
             //result = CheckDefinitionValueType(this, value, CheckValueType);
             //if (!Equals(null, result)) { return new ValueTask<IResult>(result); }
@@ -2412,11 +2434,11 @@ namespace Business.Core.Annotations
             {
                 using (var reader = new System.IO.StringReader(value))
                 {
-                    var xmlSerializer = new System.Xml.Serialization.XmlSerializer(this.ArgMeta.MemberType, new System.Xml.Serialization.XmlRootAttribute(RootElementName));
-                    return new ValueTask<IResult>(this.ResultCreate(xmlSerializer.Deserialize(reader)));
+                    var xmlSerializer = new System.Xml.Serialization.XmlSerializer(ArgMeta.MemberType, new System.Xml.Serialization.XmlRootAttribute(RootElementName));
+                    return new ValueTask<IResult>(ResultCreate(xmlSerializer.Deserialize(reader)));
                 }
             }
-            catch (System.Exception ex) { return new ValueTask<IResult>(this.ResultCreate(State, Message ?? $"Arguments {this.Alias} Xml deserialize error. {ex.Message}")); }
+            catch (System.Exception ex) { return new ValueTask<IResult>(ResultCreate(State, Message ?? $"Arguments {Alias} Xml deserialize error. {ex.Message}")); }
         }
     }
 

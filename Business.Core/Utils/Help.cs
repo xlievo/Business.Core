@@ -691,7 +691,7 @@ namespace Business.Core.Utils
 
             // The [Name] attribute is the UIDoc submission [Key]
             // [camelCase] is also responsible for the parameter Title display
-            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase?.Invoke(argSource.Args.Name) ?? argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name, DynamicObject = argSource.Args.HasDynamicObject };
+            var docArg = new DocArg { Id = group.Path, LastType = (!argSource.Args.HasToken && (argSource.Args.HasDefinition || argSource.Args.LastType.IsEnum)) ? argSource.Args.LastType.Name : TypeNameFormatter.TypeName.GetFormattedName(argSource.Args.HasToken ? typeof(string) : argSource.Args.LastType), Array = argSource.Args.HasCollection, Dict = argSource.Args.HasDictionary, Name = camelCase?.Invoke(argSource.Args.Name) ?? argSource.Args.Name, ValueType = argSource.Args.LastType.IsValueType, OrigName = argSource.Args.Name, DynamicObject = argSource.Args.HasDynamicObject, CanNull = argSource.Args.Nullable };
 
             var topTitleArgsName = null != camelCase && null != argSource.TopTitleArgsName ? camelCase.Invoke(argSource.TopTitleArgsName) : argSource.TopTitleArgsName;
 

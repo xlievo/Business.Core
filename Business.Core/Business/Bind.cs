@@ -1922,6 +1922,7 @@ namespace Business.Core
             this.key = key;
             this.group = group;
             HasHttpFile = Meta.Args.Any(c => c.Group[key].HttpFile) || Meta.Attributes.Any(c => typeof(HttpFileAttribute).IsAssignableFrom(c.Meta.Type));
+            HasReturn = Meta.HasReturn;
             parametersTypeKey = $"{Meta.Business}.{key}";
             StatisArgs();
         }
@@ -2413,6 +2414,11 @@ namespace Business.Core
         /// HasHttpFile
         /// </summary>
         public bool HasHttpFile { get; internal set; }
+
+        /// <summary>
+        /// HasReturn
+        /// </summary>
+        public bool HasReturn { get; internal set; }
 
         ///// <summary>
         ///// Parameter type called
