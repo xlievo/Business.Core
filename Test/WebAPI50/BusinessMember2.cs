@@ -506,18 +506,33 @@ public partial class BusinessMember2 : BusinessBase
     /// <summary>
     /// MyLogicArg!
     /// </summary>
+    [@CheckNull]
+    [@CheckNull]
     public struct MyLogicArg
     {
         /// <summary>
         /// AAA
         /// </summary>
         [@CheckNull]
+        [@CheckNull]
         public string A { get; set; }
 
         /// <summary>
         /// BBB
         /// </summary>
-        public string B { get; set; }
+        [@CheckNull]
+        [@CheckNull]
+        //[JsonArg2]
+        public MyStruct B { get; set; }
+
+        public class MyStruct
+        {
+            /// <summary>
+            /// BBB
+            /// </summary>
+            [@CheckNull]
+            public string BB { get; set; }
+        }
     }
 
     public virtual async ValueTask<dynamic> MyLogic(Token token, BusinessController context, HttpFile files, MyLogicArg arg)

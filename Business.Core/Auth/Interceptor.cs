@@ -271,56 +271,43 @@ namespace Business.Core.Utils
                     {
                         var argAttr = attrs[i];
 
-                        if (multipleParameterDeserialize && argAttr.ArgMeta.Deserialize)
+                        if (!(multipleParameterDeserialize && argAttr.ArgMeta.Deserialize))
                         {
-                            if (i == attrs.Count - 1)
+                            result = await argAttr.GetProcesResult(item.HasIArg ? iArgIn : value, token2);
+
+                            if (1 > result.State)
+                            {
+                                logType = Logger.Type.Error;
+                                returnValue = result;
+                                error = meta.HasIResult ? Help.GetReturnValueIResult(result, meta) : Help.GetReturnValue(result, meta);
+                                break;
+                            }
+
+                            if (result.HasDataResult)
                             {
                                 if (!item.HasIArg)
                                 {
-                                    argsObj[item.Position] = result.Data;
+                                    value = result.Data;
                                 }
                                 else
-                                {
-                                    iArgs[item.Position].Out = iArgIn;
-                                    if (item.HasCast)
-                                    {
-                                        argsObj[item.Position] = iArgIn;
-                                    }
-                                }
-                            }
-
-                            continue;
-                        }
-
-                        result = await argAttr.GetProcesResult(item.HasIArg ? iArgIn : value, token2);
-
-                        if (1 > result.State)
-                        {
-                            logType = Logger.Type.Error;
-                            returnValue = result;
-                            error = meta.HasIResult ? Help.GetReturnValueIResult(result, meta) : Help.GetReturnValue(result, meta);
-                            break;
-                        }
-
-                        if (result.HasDataResult)
-                        {
-                            if (!item.HasIArg)
-                            {
-                                argsObj[item.Position] = result.Data;
-                            }
-                            else
-                            {
-                                if (i < attrs.Count - 1)
                                 {
                                     iArgIn = result.Data;
                                 }
-                                else
+                            }
+                        }
+
+                        if (i == attrs.Count - 1)
+                        {
+                            if (!item.HasIArg)
+                            {
+                                argsObj[item.Position] = value;
+                            }
+                            else
+                            {
+                                iArgs[item.Position].Out = iArgIn;
+                                if (item.HasCast)
                                 {
-                                    iArgs[item.Position].Out = result.Data;
-                                    if (item.HasCast)
-                                    {
-                                        argsObj[item.Position] = result.Data;
-                                    }
+                                    argsObj[item.Position] = iArgIn;
                                 }
                             }
                         }
@@ -578,6 +565,17 @@ namespace Business.Core.Utils
                         if (!item.HasIArg)
                         {
                             memberValue = result.Data;
+                        }
+                        else
+                        {
+                            iArgIn = result.Data;
+                        }
+                    }
+
+                    if (i == attrs.Count - 1)
+                    {
+                        if (!item.HasIArg)
+                        {
                             if (null != currentValue)
                             {
                                 item.Accessor.Setter(currentValue, memberValue);
@@ -586,15 +584,8 @@ namespace Business.Core.Utils
                         }
                         else
                         {
-                            if (i < attrs.Count - 1)
-                            {
-                                iArgIn = result.Data;
-                            }
-                            else if (null != memberValue)
-                            {
-                                ((IArg)memberValue).Out = result.Data;
-                                item.Accessor.Setter(currentValue, memberValue);
-                            }
+                            ((IArg)memberValue).Out = iArgIn;
+                            item.Accessor.Setter(currentValue, memberValue);
                         }
                     }
                 }

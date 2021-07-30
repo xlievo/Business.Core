@@ -1050,7 +1050,7 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public async ValueTask<IResult> GetProcesResult(dynamic value, dynamic token = null)
         {
-            var result = await this.CheckNull(value);
+            var result = await CheckNull(value);
 
             if (0 >= result.State)
             {
@@ -1339,34 +1339,12 @@ namespace Business.Core.Annotations
         /// <returns></returns>
         public virtual ValueTask<IResult> CheckNull(dynamic value)
         {
-            if ((!(this.ArgMeta.Arg?.Nullable ?? false) || ArgMeta.Arg.LastType.IsValueType || !this.CanNull) && Equals(null, value))
+            if ((ArgMeta.Arg?.Nullable ?? false) || CanNull || !Equals(null, value))
             {
-                return new ValueTask<IResult>(this.ResultCreate(this.State, this.Message ?? $"argument \"{this.Alias}\" can not null."));
+                return new ValueTask<IResult>(ResultCreate());
             }
 
-            return new ValueTask<IResult>(this.ResultCreate());
-        }
-
-        /// <summary>
-        /// Check whether the defined value type is the default value
-        /// </summary>
-        /// <param name="attribute"></param>
-        /// <param name="value"></param>
-        /// <param name="check"></param>
-        /// <returns></returns>
-        public static IResult CheckDefinitionValueType(ArgumentAttribute attribute, dynamic value, bool check)
-        {
-            if (attribute.ArgMeta.MemberType.Equals(value.GetType()))
-            {
-                if (check && !attribute.ArgMeta.Arg.Nullable && attribute.ArgMeta.MemberType.IsValueType && object.Equals(attribute.ArgMeta.Arg.DefaultTypeValue, value))
-                {
-                    return attribute.ResultCreate(attribute.State, attribute.Message ?? $"argument \"{attribute.Alias}\" can not null.");
-                }
-
-                return attribute.ResultCreate(data: value);
-            }
-
-            return null;
+            return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" can not null."));
         }
     }
 
@@ -1492,12 +1470,19 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="state"></param>
         /// <param name="message"></param>
-        public CheckNullAttribute(int state = -800, string message = null) : base(state, message) => this.CanNull = true;
+        public CheckNullAttribute(int state = -800, string message = null) : base(state, message) => CanNull = true;
 
         /// <summary>
         /// Compare type defaults
         /// </summary>
         public bool CheckValueType { get; set; }
+
+        /// <summary>
+        /// CheckNull
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public override ValueTask<IResult> CheckNull(dynamic value) => new ValueTask<IResult>(ResultCreate());
 
         /// <summary>
         /// Proces
@@ -1517,16 +1502,47 @@ namespace Business.Core.Annotations
             {
                 return new ValueTask<IResult>(ResultCreate(State, Message ?? $"argument \"{Alias}\" can not null."));
             }
-            else
+            else if (CheckValueType)
             {
-                var result = CheckDefinitionValueType(this, value, CheckValueType);
-                if (!Equals(null, result) && !result.HasData)
+                var result = CheckDefinitionValueType(value);
+                //if (!Equals(null, result) && !result.HasData)
+                //{
+                //    return new ValueTask<IResult>(result);
+                //}
+                if (0 >= result.State)
                 {
                     return new ValueTask<IResult>(result);
                 }
             }
 
             return new ValueTask<IResult>(ResultCreate());
+        }
+
+        /// <summary>
+        /// Check whether the defined value type is the default value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public IResult CheckDefinitionValueType(dynamic value)
+        {
+            //if (ArgMeta.MemberType.Equals(value.GetType()))
+            //{
+            //    if (!ArgMeta.Arg.Nullable && ArgMeta.MemberType.IsValueType && object.Equals(ArgMeta.Arg.DefaultTypeValue, value))
+            //    {
+            //        return ResultCreate(State, Message ?? $"argument \"{Alias}\" can not null.");
+            //    }
+
+            //    return ResultCreate(data: value);
+            //}
+
+            //return null;
+
+            if (!ArgMeta.Arg.Nullable && ArgMeta.MemberType.IsValueType && object.Equals(ArgMeta.Arg.DefaultTypeValue, value))
+            {
+                return ResultCreate(State, Message ?? $"argument \"{Alias}\" can not null.");
+            }
+
+            return ResultCreate(data: value);
         }
     }
 

@@ -202,6 +202,11 @@
             BBB
             </summary>
         </member>
+        <member name="P:BusinessMember2.MyLogicArg.MyStruct.BB">
+            <summary>
+            BBB
+            </summary>
+        </member>
         <member name="M:BusinessMember2.Test001(Session,Token,System.Nullable{Args.Test111},System.Nullable{System.DateTime},Common.HttpFile,System.Nullable{System.Decimal},System.Int32,System.Boolean,BusinessController,Args.Test111,System.Object,System.Object)">
             <summary>
             test doc Test001!!!

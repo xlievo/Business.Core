@@ -735,15 +735,6 @@
             <param name="value"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Annotations.ArgumentAttribute.CheckDefinitionValueType(Business.Core.Annotations.ArgumentAttribute,System.Object,System.Boolean)">
-            <summary>
-            Check whether the defined value type is the default value
-            </summary>
-            <param name="attribute"></param>
-            <param name="value"></param>
-            <param name="check"></param>
-            <returns></returns>
-        </member>
         <member name="T:Business.Core.Annotations.FilterModel">
             <summary>
             FilterModel
@@ -835,9 +826,23 @@
             Compare type defaults
             </summary>
         </member>
+        <member name="M:Business.Core.Annotations.CheckNullAttribute.CheckNull(System.Object)">
+            <summary>
+            CheckNull
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
         <member name="M:Business.Core.Annotations.CheckNullAttribute.Proces(System.Object)">
             <summary>
             Proces
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Annotations.CheckNullAttribute.CheckDefinitionValueType(System.Object)">
+            <summary>
+            Check whether the defined value type is the default value
             </summary>
             <param name="value"></param>
             <returns></returns>
