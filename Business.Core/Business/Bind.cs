@@ -1264,32 +1264,32 @@ namespace Business.Core
 
                 argAttrAll = argAttrAll.Distinct();
 
-                //var iArgGenericType = new System.Type[argTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
-                //var parameterType2 = memberType;
-                //var cast = !hasUse && !current.hasIArg;
-                ////var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
-                //if (cast)
-                //{
-                //    current.hasIArg = true;
-                //    current.inType = typeof(object);
+                var iArgGenericType = new System.Type[argTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
+                var parameterType2 = memberType;
+                var cast = !hasUse && !current.hasIArg;
+                //var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
+                if (cast)
+                {
+                    current.hasIArg = true;
+                    current.inType = typeof(object);
 
-                //    for (int i = 0; i < iArgGenericType.Length; i++)
-                //    {
-                //        iArgGenericType[i] = typeof(object);
-                //    }
-                //    if (0 < iArgGenericType.Length)
-                //    {
-                //        iArgGenericType[0] = memberType;
-                //        parameterType2 = argTypeDefinition.MakeGenericType(iArgGenericType);
-                //    }
-                //}
+                    for (int i = 0; i < iArgGenericType.Length; i++)
+                    {
+                        iArgGenericType[i] = typeof(object);
+                    }
+                    if (0 < iArgGenericType.Length)
+                    {
+                        iArgGenericType[0] = memberType;
+                        parameterType2 = argTypeDefinition.MakeGenericType(iArgGenericType);
+                    }
+                }
 
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
                 var children = current.hasDefinition ? GetArgChild(current.outType, declaring, businessName, method, path2, commands, definitions2, resultType, resultTypeDefinition, argTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
 
                 var arg = new Args(item.Name,
-                    memberType,
+                    parameterType2,
                     memberType,
                     current.outType,
                     current.origType,
@@ -1319,7 +1319,7 @@ namespace Business.Core
                     GetMethodTypeFullName(memberType),
                     $"{type.GetTypeName(item.DeclaringType)}.{item.Name}",
                     memberDefinition,
-                    false,
+                    cast,
                     null != argAttrAll.GetAttr<DynamicObjectAttribute>());
 
                 args.Collection.Add(arg);

@@ -262,9 +262,10 @@ namespace Business.Core.Utils
                 foreach (var item in meta.Args)
                 {
                     IResult result = null;
-                    var value = argsObj[item.Position];
-                    var iArgIn = item.HasIArg ? iArgs[item.Position].In : null;
+                    //var value = argsObj[item.Position];
+                    var value = item.HasIArg ? iArgs[item.Position].In : argsObj[item.Position];
                     var attrs = item.Group[command.Key].Attrs;
+
                     dynamic error = null;
 
                     for (int i = 0; i < attrs.Count; i++)
@@ -273,7 +274,7 @@ namespace Business.Core.Utils
 
                         if (!(multipleParameterDeserialize && argAttr.ArgMeta.Deserialize))
                         {
-                            result = await argAttr.GetProcesResult(item.HasIArg ? iArgIn : value, token2);
+                            result = await argAttr.GetProcesResult(value, token2);
 
                             if (1 > result.State)
                             {
@@ -285,14 +286,7 @@ namespace Business.Core.Utils
 
                             if (result.HasDataResult)
                             {
-                                if (!item.HasIArg)
-                                {
-                                    value = result.Data;
-                                }
-                                else
-                                {
-                                    iArgIn = result.Data;
-                                }
+                                value = result.Data;
                             }
                         }
 
@@ -304,10 +298,10 @@ namespace Business.Core.Utils
                             }
                             else
                             {
-                                iArgs[item.Position].Out = iArgIn;
+                                iArgs[item.Position].Out = value;
                                 if (item.HasCast)
                                 {
-                                    argsObj[item.Position] = iArgIn;
+                                    argsObj[item.Position] = value;
                                 }
                             }
                         }
@@ -320,9 +314,11 @@ namespace Business.Core.Utils
 
                     //========================================//
 
-                    object currentValue = item.HasIArg ?
-                        ((null != result && result.HasData) ? result.Data : iArgs[item.Position].Out) :
-                        ((null != result && result.HasData) ? result.Data : value);
+                    object currentValue = value;//item.HasIArg ? iArgs[item.Position].Out : value;
+
+                    //object currentValue = item.HasIArg ?
+                    //    ((null != result && result.HasData) ? result.Data : iArgs[item.Position].Out) :
+                    //    ((null != result && result.HasData) ? result.Data : value);
 
                     //========================================//
                     //item.HasIArg && 
@@ -538,21 +534,31 @@ namespace Business.Core.Utils
 
             foreach (var item in args)
             {
+                //var iArgs = Help.GetIArgs(item.IArgs, currentValue);
+
                 IResult result = null;
 
                 var memberValue = null != currentValue ? item.Accessor.TryGetter(currentValue) : null;
                 //========================================//
 
-                var iArgIn = item.HasIArg ? null != memberValue ? ((IArg)memberValue).In : null : null;
+                var iArg = item.HasIArg ? Help.GetIArgs(item, memberValue) : null;
+                memberValue = item.HasIArg ? (null != memberValue ? iArg.In : null) : memberValue;
+
+                //var iArgIn = item.HasIArg ? (null != memberValue ? ((IArg)memberValue).In : null) : null;
 
                 var attrs = item.Group[group].Attrs;
+
+                if (item.HasIArg && !item.HasCast && 0 == attrs.Count)
+                {
+                    iArg.Out = iArg.In;
+                }
 
                 dynamic error = null;
                 for (int i = 0; i < attrs.Count; i++)
                 {
                     var argAttr = attrs[i];
 
-                    result = await argAttr.GetProcesResult(item.HasIArg ? iArgIn : memberValue, token);
+                    result = await argAttr.GetProcesResult(memberValue, token);
 
                     if (1 > result.State)
                     {
@@ -562,14 +568,7 @@ namespace Business.Core.Utils
 
                     if (result.HasDataResult)
                     {
-                        if (!item.HasIArg)
-                        {
-                            memberValue = result.Data;
-                        }
-                        else
-                        {
-                            iArgIn = result.Data;
-                        }
+                        memberValue = result.Data;
                     }
 
                     if (i == attrs.Count - 1)
@@ -584,8 +583,12 @@ namespace Business.Core.Utils
                         }
                         else
                         {
-                            ((IArg)memberValue).Out = iArgIn;
-                            item.Accessor.Setter(currentValue, memberValue);
+                            if (result.HasDataResult)
+                            {
+                                iArg.Out = result.Data;
+
+                                item.Accessor.Setter(currentValue, item.HasCast ? memberValue : iArg);
+                            }
                         }
                     }
                 }
@@ -595,9 +598,7 @@ namespace Business.Core.Utils
                     return error;
                 }
 
-                object currentValue2 = item.HasIArg ?
-                        ((null != result && result.HasData) ? result.Data : (null != memberValue ? ((IArg)memberValue).Out : null)) :
-                        ((null != result && result.HasData) ? result.Data : memberValue);
+                object currentValue2 = memberValue;
 
                 if (null == currentValue2)
                 {

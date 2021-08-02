@@ -281,6 +281,27 @@ namespace Business.Core.Utils
             return result;
         }
 
+        internal static IArg GetIArgs(Args args, object arg)
+        {
+            IArg iArg;
+
+            if (args.HasCast && !args.Type.IsAssignableFrom(arg?.GetType()))
+            {
+                iArg = (IArg)System.Activator.CreateInstance(args.Type);
+                //Not entry for value type
+                if (!(null == arg && args.IArgInType.IsValueType))
+                {
+                    iArg.In = arg;
+                }
+            }
+            else
+            {
+                iArg = (IArg)(arg ?? System.Activator.CreateInstance(args.Type));
+            }
+
+            return iArg;
+        }
+
         internal struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type origType; public System.Type type; public bool nullable; public bool hasDefinition; }
 
         internal static CurrentType GetCurrentType(System.Type type)
