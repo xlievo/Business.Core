@@ -266,7 +266,7 @@ public struct Log
 [@JsonArg(Group = "j")]
 [Command(Group = "s")]
 [@MessagePackArg(Group = "s")]
-[Logger(valueType: Logger.ValueType.In)]
+[Logger]
 public abstract class BusinessBase : BusinessBase<ResultObject<object>>
 {
     public BusinessBase()
@@ -638,6 +638,12 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                         receiveData.c,
                         //the data of this request, allow null.
                         new object[] { receiveData.d },
+                        new Token //token
+                        {
+                            Key = receiveData.t,
+                            Remote = new Business.Core.Auth.Remote(context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
+                            Callback = b
+                        },
                         //the group of this request.
                         "s", //fixed grouping
                         //the incoming use object
@@ -856,6 +862,7 @@ public class BusinessController : Controller
                 await cmd.AsyncCall(
                     //the data of this request, allow null.
                     parameters,
+                    token,
                     //the incoming use object
                     new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session")) :
@@ -864,6 +871,7 @@ public class BusinessController : Controller
                      //the data of this request, allow null.
                      //cmd.HasArgSingle ? new object[] { d } : d.TryJsonDeserializeStringArray(),
                      d,
+                     token,
                     //the incoming use object
                     new UseEntry(this, Common.contextParameterNames), //context
                     new UseEntry(token, "session"));

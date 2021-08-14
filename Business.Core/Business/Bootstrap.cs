@@ -42,10 +42,10 @@ namespace Business.Core
         /// </summary>
         IBootstrap UseResultType(System.Type resultType);
 
-        /// <summary>
-        /// UseArgType
-        /// </summary>
-        IBootstrap UseArgType(System.Type argType);
+        ///// <summary>
+        ///// UseArgType
+        ///// </summary>
+        //IBootstrap UseArgType(System.Type argType);
 
         /// <summary>
         /// Log callback for all business classes
@@ -125,11 +125,6 @@ namespace Business.Core
         public System.Type ResultType { get; set; }
 
         /// <summary>
-        /// ArgType
-        /// </summary>
-        public System.Type ArgType { get; set; }
-
-        /// <summary>
         /// BuildBefore
         /// </summary>
         public System.Action<IBootstrap> BuildBefore { get; set; }
@@ -196,7 +191,7 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
-        IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+        //IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
 
         IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
@@ -295,7 +290,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -360,21 +355,21 @@ namespace Business.Core
             return this;
         }
 
-        /// <summary>
-        /// use arg type
-        /// </summary>
-        /// <param name="argType"></param>
-        /// <returns></returns>
-        public virtual Bootstrap UseArgType(System.Type argType)
-        {
-            if (!typeof(IArg).IsAssignableFrom(argType))
-            {
-                throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
-            }
+        ///// <summary>
+        ///// use arg type
+        ///// </summary>
+        ///// <param name="argType"></param>
+        ///// <returns></returns>
+        //public virtual Bootstrap UseArgType(System.Type argType)
+        //{
+        //    if (!typeof(IArg).IsAssignableFrom(argType))
+        //    {
+        //        throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
+        //    }
 
-            Config.ArgType = argType;
-            return this;
-        }
+        //    Config.ArgType = argType;
+        //    return this;
+        //}
 
         /// <summary>
         /// Log callback for all business classes
@@ -414,7 +409,7 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
-        IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+        //IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
 
         IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
@@ -432,7 +427,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -497,21 +492,21 @@ namespace Business.Core
             return this;
         }
 
-        /// <summary>
-        /// use arg type
-        /// </summary>
-        /// <param name="argType"></param>
-        /// <returns></returns>
-        public virtual Bootstrap<Business> UseArgType(System.Type argType)
-        {
-            if (!typeof(IArg).IsAssignableFrom(argType))
-            {
-                throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
-            }
+        ///// <summary>
+        ///// use arg type
+        ///// </summary>
+        ///// <param name="argType"></param>
+        ///// <returns></returns>
+        //public virtual Bootstrap<Business> UseArgType(System.Type argType)
+        //{
+        //    if (!typeof(IArg).IsAssignableFrom(argType))
+        //    {
+        //        throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
+        //    }
 
-            Config.ArgType = argType;
-            return this;
-        }
+        //    Config.ArgType = argType;
+        //    return this;
+        //}
 
         /// <summary>
         /// Log callback for all business classes
@@ -549,7 +544,7 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
-        IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+        //IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
 
         IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
@@ -581,7 +576,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes);
+                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
                             //Create(type, bootstrap.constructorArguments);
                             return true;
                         }
@@ -589,7 +584,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes);
+                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
                         return true;
                     }
                 }
@@ -677,21 +672,21 @@ namespace Business.Core
             return this;
         }
 
-        /// <summary>
-        /// use arg type
-        /// </summary>
-        /// <param name="argType"></param>
-        /// <returns></returns>
-        public virtual BootstrapAll UseArgType(System.Type argType)
-        {
-            if (!typeof(IArg).IsAssignableFrom(argType))
-            {
-                throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
-            }
+        ///// <summary>
+        ///// use arg type
+        ///// </summary>
+        ///// <param name="argType"></param>
+        ///// <returns></returns>
+        //public virtual BootstrapAll UseArgType(System.Type argType)
+        //{
+        //    if (!typeof(IArg).IsAssignableFrom(argType))
+        //    {
+        //        throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
+        //    }
 
-            Config.ArgType = argType;
-            return this;
-        }
+        //    Config.ArgType = argType;
+        //    return this;
+        //}
 
         /// <summary>
         /// Log callback for all business classes
@@ -736,7 +731,7 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseResultType(System.Type resultType) => UseResultType(resultType);
 
-        IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
+        //IBootstrap IBootstrap.UseArgType(System.Type argType) => UseArgType(argType);
 
         IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
@@ -768,7 +763,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
+                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
                             {
                                 BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                             }
@@ -779,7 +774,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.ArgType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
+                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
                         {
                             BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                         }
@@ -870,21 +865,21 @@ namespace Business.Core
             return this;
         }
 
-        /// <summary>
-        /// use arg type
-        /// </summary>
-        /// <param name="argType"></param>
-        /// <returns></returns>
-        public virtual BootstrapAll<Business> UseArgType(System.Type argType)
-        {
-            if (!typeof(IArg).IsAssignableFrom(argType))
-            {
-                throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
-            }
+        ///// <summary>
+        ///// use arg type
+        ///// </summary>
+        ///// <param name="argType"></param>
+        ///// <returns></returns>
+        //public virtual BootstrapAll<Business> UseArgType(System.Type argType)
+        //{
+        //    if (!typeof(IArg).IsAssignableFrom(argType))
+        //    {
+        //        throw new System.ArgumentException(nameof(argType), "Business.Core.IArg interface not implemented");
+        //    }
 
-            Config.ArgType = argType;
-            return this;
-        }
+        //    Config.ArgType = argType;
+        //    return this;
+        //}
 
         /// <summary>
         /// Log callback for all business classes

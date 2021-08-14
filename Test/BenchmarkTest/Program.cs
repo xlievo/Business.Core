@@ -61,7 +61,7 @@ namespace BenchmarkTest
 
             Parallel.For(0, count, async c =>
             {
-                var result = Cmd.Call("Test000", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
+                var result = Cmd.Call("Test000", new object[] { new Arg00 { A = c } }, null, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
 
                 results.Add(result.Data);
 
@@ -72,11 +72,11 @@ namespace BenchmarkTest
 
                 //tasks.Add(task);
 
-                var task = await Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
+                var task = await Cmd.AsyncCall("Test001", new object[] { new Arg00 { A = c } }, null, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
 
                 results.Add(task.Data);
 
-                result = Cmd.CallIResult("Test002", new object[] { new Arg00 { A = c } }, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
+                result = Cmd.CallIResult("Test002", new object[] { new Arg00 { A = c } }, null, null, new UseEntry("abc", "use01"), new UseEntry(new Business.Core.Auth.Token { Key = "a", Remote = new Business.Core.Auth.Remote("b") }));
 
                 results.Add(result.Data);
             });
@@ -429,8 +429,8 @@ namespace BenchmarkTest
 
         public virtual async Task<dynamic> TestCollection(
         [CheckNull(-1100)]
-        [ArgumentDefault(-1102)]
+        //[ArgumentDefault(-1102)]
         //[CheckNull(-1101, CollectionItem = true)]
-        Arg<List<TestCollectionArg>> a) => this.ResultCreate();
+        List<TestCollectionArg> a) => this.ResultCreate();
     }
 }

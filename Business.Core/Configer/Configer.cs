@@ -484,7 +484,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             /// <summary>
             /// Args
             /// </summary>
-            public System.Collections.Generic.Dictionary<string, dynamic> Args { get; set; }
+            public System.Collections.Generic.Dictionary<string, MethodArgs> Args { get; set; }
 
             /// <summary>
             /// Cancel
@@ -529,24 +529,9 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             public dynamic Value;
 
             /// <summary>
-            /// HasIArg
-            /// </summary>
-            public bool HasIArg;
-
-            /// <summary>
             /// Type
             /// </summary>
             public System.Type Type;
-
-            /// <summary>
-            /// OutType
-            /// </summary>
-            public System.Type OutType;
-
-            /// <summary>
-            /// InType
-            /// </summary>
-            public System.Type InType;
         }
 
         /// <summary>
@@ -593,11 +578,10 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// </summary>
         /// <param name="info"></param>
         /// <param name="resultTypeDefinition"></param>
-        /// <param name="argTypeDefinition"></param>
         /// <param name="attributes"></param>
         /// <param name="interceptor"></param>
         /// <param name="useTypes"></param>
-        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Type argTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
+        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -609,7 +593,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         {
             this.Info = info;
             this.ResultTypeDefinition = resultTypeDefinition;
-            this.ArgTypeDefinition = argTypeDefinition;
+            //this.ArgTypeDefinition = argTypeDefinition;
             //this.token = token;
             //this.requestType = requestType;
             //this.requestDefault = RequestCreate<object>();
@@ -666,10 +650,10 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// </summary>
         public System.Type ResultTypeDefinition { get; private set; }
 
-        /// <summary>
-        /// ArgTypeDefinition
-        /// </summary>
-        public System.Type ArgTypeDefinition { get; private set; }
+        ///// <summary>
+        ///// ArgTypeDefinition
+        ///// </summary>
+        //public System.Type ArgTypeDefinition { get; private set; }
 
         /// <summary>
         /// Doc

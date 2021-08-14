@@ -44,14 +44,14 @@ namespace Business.Core.Auth
         /// <summary>
         /// Intercept
         /// </summary>
-        /// <param name="configer"></param>
         /// <param name="method"></param>
         /// <param name="arguments"></param>
         /// <param name="call"></param>
         /// <param name="group"></param>
+        /// <param name="token"></param>
         /// <param name="multipleParameterDeserialize"></param>
         /// <returns></returns>
-        System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null, bool multipleParameterDeserialize = false);
+        System.Threading.Tasks.ValueTask<dynamic> Intercept(string method, object[] arguments, System.Func<dynamic> call, string group, dynamic token, bool multipleParameterDeserialize);
     }
 
     readonly struct ArgResult
@@ -168,7 +168,7 @@ namespace Business.Core.Auth
 
             var proceed = invocation.CaptureProceedInfo();
 
-            invocation.ReturnValue = Intercept(this.Configer, invocation.Method.Name, invocation.Arguments, () =>
+            invocation.ReturnValue = Intercept(invocation.Method.Name, invocation.Arguments, () =>
             {
                 proceed.Invoke();
                 return invocation.ReturnValue;
@@ -178,21 +178,20 @@ namespace Business.Core.Auth
         /// <summary>
         /// Intercept
         /// </summary>
-        /// <param name="configer"></param>
         /// <param name="method"></param>
         /// <param name="arguments"></param>
         /// <param name="call"></param>
         /// <param name="group"></param>
+        /// <param name="token"></param>
         /// <param name="multipleParameterDeserialize"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group = null, bool multipleParameterDeserialize = false) => await InterceptorExtensions.Intercept(configer, method, arguments, call, group, multipleParameterDeserialize);
+        public async System.Threading.Tasks.ValueTask<dynamic> Intercept(string method, object[] arguments, System.Func<dynamic> call, string group = null, dynamic token = null, bool multipleParameterDeserialize = false) => await InterceptorExtensions.Intercept(Configer, method, arguments, call, group, token, multipleParameterDeserialize);
     }
 }
 
 namespace Business.Core.Utils
 {
     using Annotations;
-    using Auth;
     using Meta;
     using Result;
     using System.Linq;
@@ -210,9 +209,10 @@ namespace Business.Core.Utils
         /// <param name="arguments"></param>
         /// <param name="call"></param>
         /// <param name="group"></param>
+        /// <param name="token"></param>
         /// <param name="multipleParameterDeserialize"></param>
         /// <returns></returns>
-        public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group, bool multipleParameterDeserialize)
+        public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group, dynamic token, bool multipleParameterDeserialize)
         {
             var dtt = System.DateTimeOffset.Now;
             var watch = new System.Diagnostics.Stopwatch();
@@ -222,10 +222,8 @@ namespace Business.Core.Utils
             var argsObj = arguments;
             var logType = Logger.Type.Record;
             //==================================//
-            var iArgs = Help.GetIArgs(meta.IArgs, argsObj);
-
-            dynamic token = null;
             dynamic token2 = null;
+            dynamic token3 = null;
             dynamic returnValue = null;
 
             var group2 = group ?? meta.GroupDefault;
@@ -240,7 +238,7 @@ namespace Business.Core.Utils
                 //..CallBeforeMethod..//
                 if (null != configer.CallBeforeMethod)
                 {
-                    var before = new Configer.MethodBefore { Meta = meta, Args = meta.Args.ToDictionary(c => c.Name, c => c.HasIArg ? iArgs[c.Position].In : argsObj[c.Position]), Cancel = false };
+                    var before = new Configer.MethodBefore { Meta = meta, Args = meta.Args.ToDictionary(c => c.Name, c => new Configer.MethodArgs { Name = c.Name, Value = argsObj[c.Position], Type = c.Type }), Cancel = false };
 
                     await configer.CallBeforeMethod(before);
 
@@ -255,15 +253,18 @@ namespace Business.Core.Utils
                 var tokenArg = meta.Args.FirstOrDefault(c => c.HasToken);
                 if (null != tokenArg)
                 {
-                    token = argsObj[tokenArg.Position];
+                    token2 = argsObj[tokenArg.Position];
+                }
+                else
+                {
                     token2 = token;
                 }
+                token3 = token2;
 
                 foreach (var item in meta.Args)
                 {
                     IResult result = null;
-                    //var value = argsObj[item.Position];
-                    var value = item.HasIArg ? iArgs[item.Position].In : argsObj[item.Position];
+                    var value = argsObj[item.Position];// item.HasIArg ? iArgs[item.Position].In : argsObj[item.Position];
                     var attrs = item.Group[command.Key].Attrs;
 
                     dynamic error = null;
@@ -274,7 +275,7 @@ namespace Business.Core.Utils
 
                         if (!(multipleParameterDeserialize && argAttr.ArgMeta.Deserialize))
                         {
-                            result = await argAttr.GetProcesResult(value, token2);
+                            result = await argAttr.GetProcesResult(value, token3);
 
                             if (1 > result.State)
                             {
@@ -289,22 +290,6 @@ namespace Business.Core.Utils
                                 value = result.Data;
                             }
                         }
-
-                        if (i == attrs.Count - 1)
-                        {
-                            if (!item.HasIArg)
-                            {
-                                argsObj[item.Position] = value;
-                            }
-                            else
-                            {
-                                iArgs[item.Position].Out = value;
-                                if (item.HasCast)
-                                {
-                                    argsObj[item.Position] = value;
-                                }
-                            }
-                        }
                     }
 
                     if (logType == Logger.Type.Error)
@@ -313,27 +298,17 @@ namespace Business.Core.Utils
                     }
 
                     //========================================//
-
-                    object currentValue = value;//item.HasIArg ? iArgs[item.Position].Out : value;
-
-                    //object currentValue = item.HasIArg ?
-                    //    ((null != result && result.HasData) ? result.Data : iArgs[item.Position].Out) :
-                    //    ((null != result && result.HasData) ? result.Data : value);
-
-                    //========================================//
                     //item.HasIArg && 
-                    if (null == currentValue)
+                    if (null == value)
                     {
                         continue;
                     }
 
-                    //var isUpdate = false;
-
                     //!item.HasCollection !!!Checking arrays is not supported
                     if (item.HasLower && !item.HasCollection)// || item.HasCollectionAttr
                     {
-                        result = await ArgsResult(meta, command.Key, item.Children, currentValue, token2);
-                        //if (null != result)
+                        result = await ArgsResult(meta, command.Key, item.Children, value, token3);
+
                         if (1 > result.State)
                         {
                             logType = Logger.Type.Error;
@@ -341,23 +316,18 @@ namespace Business.Core.Utils
                             return meta.HasIResult ? Help.GetReturnValueIResult(returnValue, meta) : Help.GetReturnValue(result, meta);
                         }
 
-                        if (item.HasIArg && !Equals(null, result))
+                        if (result.HasData)
                         {
-                            if (result.Data is ArgResult && result.Data.isUpdate)
-                            {
-                                iArgs[item.Position].Out = currentValue;
-                                if (item.HasCast)
-                                {
-                                    argsObj[item.Position] = currentValue;
-                                }
-                            }
+                            value = result.Data;
                         }
                     }
 
                     if (item.HasToken)
                     {
-                        token2 = currentValue;
+                        token3 = value;
                     }
+
+                    argsObj[item.Position] = value;
                 }
 
                 //===============================//
@@ -389,7 +359,7 @@ namespace Business.Core.Utils
             }
             finally
             {
-                Finally(configer.Logger, command, meta, returnValue, logType, iArgs, argsObj, methodName, watch, token, dtt, configer.CallAfterMethod);
+                Finally(configer.Logger, command, meta, returnValue, logType, argsObj, methodName, watch, token2, dtt, configer.CallAfterMethod);
             }
         }
 
@@ -401,14 +371,13 @@ namespace Business.Core.Utils
         /// <param name="meta"></param>
         /// <param name="returnValue"></param>
         /// <param name="logType"></param>
-        /// <param name="iArgs"></param>
         /// <param name="argsObj"></param>
         /// <param name="methodName"></param>
         /// <param name="watch"></param>
         /// <param name="token"></param>
         /// <param name="dtt"></param>
         /// <param name="callAfterMethod"></param>
-        public async static void Finally(Logger logger, CommandAttribute command, MetaData meta, dynamic returnValue, Logger.Type logType, System.Collections.Generic.Dictionary<int, IArg> iArgs, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch, dynamic token, System.DateTimeOffset dtt, System.Func<Configer.MethodAfter, System.Threading.Tasks.Task> callAfterMethod)
+        public async static void Finally(Logger logger, CommandAttribute command, MetaData meta, dynamic returnValue, Logger.Type logType, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch, dynamic token, System.DateTimeOffset dtt, System.Func<Configer.MethodAfter, System.Threading.Tasks.Task> callAfterMethod)
         {
             if (meta.HasAsync && Logger.Type.Record == logType)
             {
@@ -435,7 +404,7 @@ namespace Business.Core.Utils
             //..CallAfterMethod..//
             if (null != callAfterMethod)
             {
-                await callAfterMethod(new Configer.MethodAfter { Meta = meta, Args = meta.Args.ToDictionary(c => c.Name, c => new Configer.MethodArgs { Name = c.Name, Value = c.HasCast ? iArgs[c.Position].In : c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], HasIArg = c.HasIArg && !c.HasCast, Type = c.HasCast ? c.LastType : c.Type, OutType = c.IArgOutType, InType = c.IArgInType }), Result = returnValue });
+                await callAfterMethod(new Configer.MethodAfter { Meta = meta, Args = meta.Args.ToDictionary(c => c.Name, c => new Configer.MethodArgs { Name = c.Name, Value = argsObj[c.Position], Type = c.Type }), Result = returnValue });
             }
 
             if (null == logger)
@@ -458,7 +427,7 @@ namespace Business.Core.Utils
                     continue;
                 }
 
-                argsObjLog.Add(new Logger.ArgsLog(c.Name, c.HasIArg ? iArgs[c.Position] : argsObj[c.Position], argGroup.Logger, c.Group[command.Key].IArgInLogger, c.HasIArg));
+                argsObjLog.Add(new Logger.ArgsLog(c.Name, argsObj[c.Position], argGroup.Logger));
             }
 
             if (!object.Equals(null, returnValue) && typeof(IResult).IsAssignableFrom(returnValue.GetType()))
@@ -491,34 +460,7 @@ namespace Business.Core.Utils
                 }
             }
         }
-        /*
-        /// <summary>
-        /// GetProcesResult
-        /// </summary>
-        /// <param name="argAttr"></param>
-        /// <param name="value"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public async static System.Threading.Tasks.ValueTask<IResult> GetProcesResult(ArgumentAttribute argAttr, dynamic value, dynamic token)
-        {
-            switch (argAttr.ArgMeta.Proces?.Mode)
-            {
-                case Proces.ProcesMode.Proces:
-                    return await argAttr.Proces(value);
-                case Proces.ProcesMode.ProcesGeneric:
-                    {
-                        dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { value });
-                        return await result;
-                    }
-                case Proces.ProcesMode.ProcesGenericToken:
-                    {
-                        dynamic result = argAttr.ArgMeta.Proces.Call(argAttr, new object[] { token, value });
-                        return await result;
-                    }
-                default: return await argAttr.Proces(value);
-            }
-        }
-        */
+
         /// <summary>
         /// ArgsResult
         /// </summary>
@@ -530,28 +472,14 @@ namespace Business.Core.Utils
         /// <returns></returns>
         public async static System.Threading.Tasks.ValueTask<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, object currentValue, dynamic token)
         {
-            bool isUpdate = false;
-
             foreach (var item in args)
             {
-                //var iArgs = Help.GetIArgs(item.IArgs, currentValue);
-
                 IResult result = null;
 
                 var memberValue = null != currentValue ? item.Accessor.TryGetter(currentValue) : null;
                 //========================================//
 
-                var iArg = item.HasIArg ? Help.GetIArgs(item, memberValue) : null;
-                memberValue = item.HasIArg ? (null != memberValue ? iArg.In : null) : memberValue;
-
-                //var iArgIn = item.HasIArg ? (null != memberValue ? ((IArg)memberValue).In : null) : null;
-
                 var attrs = item.Group[group].Attrs;
-
-                if (item.HasIArg && !item.HasCast && 0 == attrs.Count)
-                {
-                    iArg.Out = iArg.In;
-                }
 
                 dynamic error = null;
                 for (int i = 0; i < attrs.Count; i++)
@@ -570,27 +498,6 @@ namespace Business.Core.Utils
                     {
                         memberValue = result.Data;
                     }
-
-                    if (i == attrs.Count - 1)
-                    {
-                        if (!item.HasIArg)
-                        {
-                            if (null != currentValue)
-                            {
-                                item.Accessor.Setter(currentValue, memberValue);
-                            }
-                            if (!isUpdate) { isUpdate = !isUpdate; }
-                        }
-                        else
-                        {
-                            if (result.HasDataResult)
-                            {
-                                iArg.Out = result.Data;
-
-                                item.Accessor.Setter(currentValue, item.HasCast ? memberValue : iArg);
-                            }
-                        }
-                    }
                 }
 
                 if (!Equals(null, error))
@@ -598,38 +505,33 @@ namespace Business.Core.Utils
                     return error;
                 }
 
-                object currentValue2 = memberValue;
-
-                if (null == currentValue2)
+                if (null == memberValue)
                 {
                     continue;
                 }
 
                 if (item.HasLower && !item.HasCollection)// && null != currentValue2
                 {
-                    var result2 = await ArgsResult(meta, group, item.Children, currentValue2, token);
+                    var result2 = await ArgsResult(meta, group, item.Children, memberValue, token);
 
                     if (1 > result2.State)
                     {
                         return result2;
                     }
 
-                    if (!object.Equals(null, result2) && result2.Data is ArgResult && result2.Data.isUpdate)
+                    if (result2.HasData)
                     {
-                        if (item.Type.IsValueType || item.HasIArg)
-                        {
-                            if (null != currentValue)
-                            {
-                                item.Accessor.Setter(currentValue, currentValue2);
-                            }
-                        }
-
-                        if (!isUpdate) { isUpdate = !isUpdate; }
+                        memberValue = result2.Data;
                     }
+                }
+
+                if (null != currentValue)
+                {
+                    item.Accessor.Setter(currentValue, memberValue);
                 }
             }
 
-            return ResultFactory.ResultCreate(meta.ResultTypeDefinition, new ArgResult(isUpdate, currentValue));
+            return ResultFactory.ResultCreate(meta.ResultTypeDefinition, currentValue);
         }
     }
 }

@@ -267,7 +267,7 @@ public struct Log
 [@JsonArg(Group = "j")]
 [Command(Group = "s")]
 [@MessagePackArg(Group = "s")]
-[Logger(valueType: Logger.ValueType.In)]
+[Logger]
 public abstract class BusinessBase : BusinessBase<ResultObject<object>>
 {
     public BusinessBase()
@@ -520,14 +520,14 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             })
             .UseLogger(new Logger(async x =>
             {
-                //foreach (var item in x)
-                //{
-                //    Help.Console(item.ToString());
-                //}
+                foreach (var item in x)
+                {
+                    Help.Console(item.ToString());
+                }
                 //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
                 //Help.Console(.ToString());
 
-                Help.Console(x.Count().ToString());
+                //Help.Console(x.Count().ToString());
 
             }, new Logger.BatchOptions()
             {
@@ -664,6 +664,12 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                         receiveData.c,
                         //the data of this request, allow null.
                         new object[] { receiveData.d },
+                        new Token //token
+                        {
+                            Key = receiveData.t,
+                            Remote = new Business.Core.Auth.Remote(context.Connection.RemoteIpAddress.ToString(), context.Connection.RemotePort),
+                            Callback = b
+                        },
                         //the group of this request.
                         "s", //fixed grouping
                         //the incoming use object
@@ -860,7 +866,7 @@ public class BusinessController : Controller
             var arg = d.TryJsonDeserialize<DocUI.BenchmarkArg>();
             if (default(DocUI.BenchmarkArg).Equals(arg)) { return new ArgumentNullException(nameof(arg)).Message; }
             //arg.host = $"{this.Request.Scheme}://localhost:{this.HttpContext.Connection.LocalPort}/{business.Configer.Info.BusinessName}";
-            arg.host = $"{Common.Host.Addresses}/{business.Configer.Info.BusinessName}";
+            arg.host = $"{Common.Host.Addresses.FirstOrDefault()}/{business.Configer.Info.BusinessName}";
             return await DocUI.Benchmark(arg);
         }
 
@@ -892,18 +898,18 @@ public class BusinessController : Controller
                 await cmd.AsyncCall(
                     //the data of this request, allow null.
                     parameters,
+                    token,
                     //the incoming use object
                     //new UseEntry(this.HttpContext), //context
-                    new UseEntry(this), //context
-                    new UseEntry(token)) :
-                // Framework routing mode
+                    new UseEntry(this)) : //context
+                    // Framework routing mode
                 await cmd.AsyncCallFull(
                     //the data of this request, allow null.
                     d,
+                    token,
                     //the incoming use object
                     //new UseEntry(this.HttpContext), //context
-                    new UseEntry(this), //context
-                    new UseEntry(token));
+                    new UseEntry(this)); //context
 
         return result;
     }

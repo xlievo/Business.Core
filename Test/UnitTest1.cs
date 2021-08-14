@@ -81,7 +81,7 @@ public class Arg00
     [AES2("18dc5b9d92a843a8a178069b600fca47", Alias = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
     //[AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
     [Proces01(113, "{Alias} cannot be empty, please enter the correct {Alias}", Alias = "pas2", Group = CommandGroupDefault.Group)]
-    public Arg<object, dynamic> A { get; set; }
+    public dynamic A { get; set; }
 
     public string B { get; set; }
 }
@@ -98,7 +98,7 @@ public struct Arg01
     [AES2("18dc5b9d92a843a8a178069b600fca47", Alias = "pas", Group = CommandGroupDefault.Group, Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
     //[AES2("18dc5b9d92a843a8a178069b600fca47", Nick = "pas", Salt = "ZxeHNedT6bKpu9MEAlzq0w==")]
     [Proces01(113, "{Alias} cannot be empty, please enter the correct {Alias}", Alias = "pas2", Group = CommandGroupDefault.Group)]
-    public Arg<object, dynamic> A { get; set; }
+    public dynamic A { get; set; }
 
     public string B { get; set; }
 }
@@ -125,21 +125,21 @@ public class BusinessLoggerAndArg : BusinessBase<ResultObject<object>>
     public virtual async ValueTask<dynamic> TestLoggerAndArg(
         Use01 use01,
 
-        Arg<Arg01> arg01,
+        Arg01 arg01,
 
-        [Use(ParameterName = true)] Arg<Use01> use02,
+        [Use(ParameterName = true)] Use01 use02,
 
-        Arg<dynamic, Use01> use03,
+        [Use(typeof(Use01))] dynamic use03,
 
-        Arg<Use01, Use01> use04,
+        Use01 use04,
 
-        [ProcesUse02] Arg<dynamic, Use01> use05,
+        [ProcesUse02][Use(typeof(Use01))] dynamic use05,
 
-        [ProcesUse02] Arg<Use02, Use01> use06,
+        [ProcesUse02][Use(typeof(Use01))] Use02 use06,
 
         [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
-        this.ResultCreate(arg01.Out.A);
+        this.ResultCreate(arg01.A);
 }
 
 public enum TestMode
@@ -170,7 +170,7 @@ public class BusinessMember2
 
         [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
-        arg01.A.Out;
+        arg01.A;
 
     [Command(Group = "G01", OnlyName = "G01Test001")]
     [Command(Group = "G01", OnlyName = "G01Test002")]
@@ -193,11 +193,11 @@ public class BusinessMember2
 
         [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
-        arg01.A.Out;
+        arg01.A;
 }
 
 [Info("Business", CommandGroupDefault = CommandGroupDefault.Group)]
-public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
+public class BusinessMember : IBusiness<ResultObject<object>>
 {
     public BusinessMember()
     {
@@ -284,7 +284,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
             [Size(Min = 2, Max = 32, MinMsg = "{Alias} minimum range {Min}", MaxMsg = "{Alias} maximum range {Max}", State = 114, Alias = "G01arg.c", Group = "G01")]
             decimal c = 0.0234m,
 
-        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default) => this.ResultCreate(arg01.A.Out);
+        [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default) => this.ResultCreate(arg01.A);
 
     /// <summary>
     /// This is Test001.
@@ -316,7 +316,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
         [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
-        this.ResultCreate(arg01.A.Out);
+        this.ResultCreate(arg01.A);
 
     /// <summary>
     /// This is Test001.
@@ -348,7 +348,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
         [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
-        this.ResultCreate(arg01.A.Out);
+        this.ResultCreate(arg01.A);
 
     /// <summary>
     /// This is Test001.
@@ -380,7 +380,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
         [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
-        this.ResultCreate(arg01.A.Out);
+        this.ResultCreate(arg01.A);
 
     public virtual async ValueTask Test0011(
         [Use(ParameterName = true)] dynamic use01,
@@ -399,7 +399,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
         [Logger(Logger.Type.Record, Group = CommandGroupDefault.Group, CanWrite = false)] Token token = default)
         =>
-        this.ResultCreate(arg01.A.Out);
+        this.ResultCreate(arg01.A);
 
     public virtual async void Test0012(
         [Use(ParameterName = true)] dynamic use01,
@@ -1294,7 +1294,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
     public virtual async ValueTask<dynamic> TestCollection(
         [CheckNull(-1100)]
-        [ArgumentDefault(-1102)]
+        //[ArgumentDefault(-1102)]
         //[CheckNull(-1101, CollectionItem = true)]
         List<TestCollectionArg> a)
     {
@@ -1303,7 +1303,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
 
     public virtual async ValueTask<dynamic> TestDict(
         [CheckNull(-1100)]
-        [ArgumentDefault(-1102)]
+        //[ArgumentDefault(-1102)]
         //[CheckNull(-1101, CollectionItem = true)]
         Dictionary<string, TestDictArg> a)
     {
@@ -1336,7 +1336,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         public string A { get; set; }
     }
 
-    public virtual async ValueTask<dynamic> TestHasLower(Arg<List<TestHasLowerArg>> a, TestHasLowerArg_b b = default, string c = default)
+    public virtual async ValueTask<dynamic> TestHasLower(List<TestHasLowerArg> a, TestHasLowerArg_b b = default, string c = default)
     {
         return this.ResultCreate();
     }
@@ -1361,7 +1361,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    public virtual async ValueTask<dynamic> TestHasLower2(Arg<TestHasLowerArg2> a, TestHasLowerArg_b b = default, string c = default)
+    public virtual async ValueTask<dynamic> TestHasLower2(TestHasLowerArg2 a, TestHasLowerArg_b b = default, string c = default)
     {
         return this.ResultCreate();
     }
@@ -1411,7 +1411,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    public virtual async ValueTask<dynamic> TestCollectionException(Arg<List<TestCollectionExceptionArg>> a) => this.ResultCreate();
+    public virtual async ValueTask<dynamic> TestCollectionException(List<TestCollectionExceptionArg> a) => this.ResultCreate();
 
     public class TestExceptionArg
     {
@@ -1433,7 +1433,7 @@ public class BusinessMember : IBusiness<ResultObject<object>, Arg<object>>
         }
     }
 
-    public virtual async ValueTask<dynamic> TestException(Arg<TestExceptionArg> a) => this.ResultCreate();
+    public virtual async ValueTask<dynamic> TestException(TestExceptionArg a) => this.ResultCreate();
 }
 
 [TestClass]
@@ -1446,7 +1446,7 @@ public class TestBusinessMember
 
     public static dynamic AsyncCall(CommandGroup businessCommand, string cmd, string group = null, object[] args = null, params UseEntry[] useObj)
     {
-        var t = businessCommand.AsyncCall(cmd, args, useObj, group);
+        var t = businessCommand.AsyncCall(cmd, args, null, useObj, group);
         t.AsTask().Wait();
         return t.Result;
     }
@@ -1597,7 +1597,10 @@ public class TestBusinessMember
 
         Help.LoggerSet(member, new LoggerAttribute(Logger.Type.Record, canWrite: false) { Group = "333" }, typeof(Use02));
 
-        var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] { new Arg01 { A = "abc" } }, new UseEntry(new Use01 { A = "bbb" }, "use02"), new UseEntry(new Use01 { A = "aaa" }));
+        var t2 = AsyncCall(member.Command, "TestLoggerAndArg", null, new object[] {
+            new Arg01 { A = "abc" } },
+            new UseEntry(new Use01 { A = "bbb" }, "use02"),
+            new UseEntry(new Use01 { A = "aaa" }));
         Assert.AreEqual(t2.Message, null);
         Assert.AreEqual(t2.State, 1);
         Assert.AreEqual(t2.HasData, true);
@@ -1662,7 +1665,7 @@ public class TestBusinessMember
 
         Assert.AreEqual(t4.Message, null);
         Assert.AreEqual(t4.State, t2.State);
-        Assert.AreEqual(t4.HasData, false);
+        //Assert.AreEqual(t4.HasData, false);
 
         var t5 = AsyncCall(business.Command, "Test002");
         Assert.AreEqual(t5.Message, null);

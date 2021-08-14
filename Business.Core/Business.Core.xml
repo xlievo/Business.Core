@@ -397,13 +397,12 @@
             LoggerAttribute
             </summary>
         </member>
-        <member name="M:Business.Core.Annotations.LoggerAttribute.#ctor(Business.Core.Logger.Type,System.Boolean,Business.Core.Logger.ValueType)">
+        <member name="M:Business.Core.Annotations.LoggerAttribute.#ctor(Business.Core.Logger.Type,System.Boolean)">
             <summary>
             LoggerAttribute
             </summary>
             <param name="logType"></param>
             <param name="canWrite"></param>
-            <param name="valueType"></param>
         </member>
         <member name="P:Business.Core.Annotations.LoggerAttribute.LogType">
             <summary>
@@ -423,11 +422,6 @@
         <member name="P:Business.Core.Annotations.LoggerAttribute.CanResult">
             <summary>
             Allowed to return to results
-            </summary>
-        </member>
-        <member name="P:Business.Core.Annotations.LoggerAttribute.ValueType">
-            <summary>
-            Logger value type
             </summary>
         </member>
         <member name="M:Business.Core.Annotations.LoggerAttribute.SetType(Business.Core.Logger.Type)">
@@ -1105,28 +1099,6 @@
             <param name="salt"></param>
             <returns></returns>
         </member>
-        <member name="T:Business.Core.Annotations.ArgumentDefaultAttribute">
-            <summary>
-            ArgumentDefaultAttribute
-            </summary>
-        </member>
-        <member name="M:Business.Core.Annotations.ArgumentDefaultAttribute.#ctor(System.Type,System.Type,System.Type,System.Int32,System.String)">
-            <summary>
-            ArgumentDefaultAttribute
-            </summary>
-            <param name="resultType"></param>
-            <param name="resultTypeDefinition"></param>
-            <param name="argTypeDefinition"></param>
-            <param name="state"></param>
-            <param name="message"></param>
-        </member>
-        <member name="M:Business.Core.Annotations.ArgumentDefaultAttribute.#ctor(System.Int32,System.String)">
-            <summary>
-            ArgumentDefaultAttribute
-            </summary>
-            <param name="state"></param>
-            <param name="message"></param>
-        </member>
         <member name="T:Business.Core.Annotations.EnumCheckAttribute">
             <summary>
             Check whether the enumeration value is correct
@@ -1256,15 +1228,15 @@
             <param name="ignoreMethods"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Auth.IInterceptor.Intercept(Business.Core.Configer,System.String,System.Object[],System.Func{System.Object},System.String,System.Boolean)">
+        <member name="M:Business.Core.Auth.IInterceptor.Intercept(System.String,System.Object[],System.Func{System.Object},System.String,System.Object,System.Boolean)">
             <summary>
             Intercept
             </summary>
-            <param name="configer"></param>
             <param name="method"></param>
             <param name="arguments"></param>
             <param name="call"></param>
             <param name="group"></param>
+            <param name="token"></param>
             <param name="multipleParameterDeserialize"></param>
             <returns></returns>
         </member>
@@ -1294,15 +1266,15 @@
             </summary>
             <param name="invocation"></param>
         </member>
-        <member name="M:Business.Core.Auth.Interceptor.Intercept(Business.Core.Configer,System.String,System.Object[],System.Func{System.Object},System.String,System.Boolean)">
+        <member name="M:Business.Core.Auth.Interceptor.Intercept(System.String,System.Object[],System.Func{System.Object},System.String,System.Object,System.Boolean)">
             <summary>
             Intercept
             </summary>
-            <param name="configer"></param>
             <param name="method"></param>
             <param name="arguments"></param>
             <param name="call"></param>
             <param name="group"></param>
+            <param name="token"></param>
             <param name="multipleParameterDeserialize"></param>
             <returns></returns>
         </member>
@@ -1398,7 +1370,7 @@
             InterceptorExtensions
             </summary>
         </member>
-        <member name="M:Business.Core.Utils.InterceptorExtensions.Intercept(Business.Core.Configer,System.String,System.Object[],System.Func{System.Object},System.String,System.Boolean)">
+        <member name="M:Business.Core.Utils.InterceptorExtensions.Intercept(Business.Core.Configer,System.String,System.Object[],System.Func{System.Object},System.String,System.Object,System.Boolean)">
             <summary>
             Intercept
             </summary>
@@ -1407,10 +1379,11 @@
             <param name="arguments"></param>
             <param name="call"></param>
             <param name="group"></param>
+            <param name="token"></param>
             <param name="multipleParameterDeserialize"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.InterceptorExtensions.Finally(Business.Core.Logger,Business.Core.Annotations.CommandAttribute,Business.Core.Meta.MetaData,System.Object,Business.Core.Logger.Type,System.Collections.Generic.Dictionary{System.Int32,Business.Core.IArg},System.Object[],System.String,System.Diagnostics.Stopwatch,System.Object,System.DateTimeOffset,System.Func{Business.Core.Configer.MethodAfter,System.Threading.Tasks.Task})">
+        <member name="M:Business.Core.Utils.InterceptorExtensions.Finally(Business.Core.Logger,Business.Core.Annotations.CommandAttribute,Business.Core.Meta.MetaData,System.Object,Business.Core.Logger.Type,System.Object[],System.String,System.Diagnostics.Stopwatch,System.Object,System.DateTimeOffset,System.Func{Business.Core.Configer.MethodAfter,System.Threading.Tasks.Task})">
             <summary>
             Finally
             </summary>
@@ -1419,7 +1392,6 @@
             <param name="meta"></param>
             <param name="returnValue"></param>
             <param name="logType"></param>
-            <param name="iArgs"></param>
             <param name="argsObj"></param>
             <param name="methodName"></param>
             <param name="watch"></param>
@@ -1859,11 +1831,6 @@
         <member name="P:Business.Core.Utils.Help.TypeDefinition.LastType">
             <summary>
             LastType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Utils.Help.TypeDefinition.CurrentOrigType">
-            <summary>
-            Remove IArg type
             </summary>
         </member>
         <member name="P:Business.Core.Utils.Help.TypeDefinition.CurrentType">
@@ -2717,112 +2684,6 @@
             <param name="maxCapacity"></param>
             <param name="exception"></param>
         </member>
-        <member name="T:Business.Core.IArg">
-            <summary>
-            IArg
-            </summary>
-        </member>
-        <member name="P:Business.Core.IArg.In">
-            <summary>
-            The first input object
-            </summary>
-        </member>
-        <member name="P:Business.Core.IArg.Out">
-            <summary>
-            The final output object
-            </summary>
-        </member>
-        <member name="T:Business.Core.IArg`2">
-            <summary>
-            IArg
-            </summary>
-            <typeparam name="OutType"></typeparam>
-            <typeparam name="InType"></typeparam>
-        </member>
-        <member name="P:Business.Core.IArg`2.In">
-            <summary>
-            In
-            </summary>
-        </member>
-        <member name="P:Business.Core.IArg`2.Out">
-            <summary>
-            Out
-            </summary>
-        </member>
-        <member name="T:Business.Core.IArg`1">
-            <summary>
-            IArg
-            </summary>
-            <typeparam name="OutType"></typeparam>
-        </member>
-        <member name="P:Business.Core.IArg`1.Out">
-            <summary>
-            Out
-            </summary>
-        </member>
-        <member name="T:Business.Core.Arg`2">
-            <summary>
-            This is a parameter package, used to transform parameters
-            </summary>
-            <typeparam name="OutType"></typeparam>
-            <typeparam name="InType"></typeparam>
-        </member>
-        <member name="M:Business.Core.Arg`2.op_Implicit(`1)~Business.Core.Arg{`0,`1}">
-            <summary>
-            Arg
-            </summary>
-            <param name="value"></param>
-        </member>
-        <member name="M:Business.Core.Arg`2.op_Implicit(`0)~Business.Core.Arg{`0,`1}">
-            <summary>
-            Arg
-            </summary>
-            <param name="value"></param>
-        </member>
-        <member name="P:Business.Core.Arg`2.Out">
-            <summary>
-            The final output object
-            </summary>
-        </member>
-        <member name="P:Business.Core.Arg`2.In">
-            <summary>
-            The first input object
-            </summary>
-        </member>
-        <member name="T:Business.Core.Arg`1">
-            <summary>
-            This is a parameter package, used to transform parameters
-            </summary>
-            <typeparam name="OutType"></typeparam>
-        </member>
-        <member name="M:Business.Core.Arg`1.op_Implicit(System.String)~Business.Core.Arg{`0}">
-            <summary>
-            Arg
-            </summary>
-            <param name="value"></param>
-        </member>
-        <member name="M:Business.Core.Arg`1.op_Implicit(System.Byte[])~Business.Core.Arg{`0}">
-            <summary>
-            Arg
-            </summary>
-            <param name="value"></param>
-        </member>
-        <member name="M:Business.Core.Arg`1.op_Implicit(`0)~Business.Core.Arg{`0}">
-            <summary>
-            Arg
-            </summary>
-            <param name="value"></param>
-        </member>
-        <member name="P:Business.Core.Arg`1.Out">
-            <summary>
-            The final output object
-            </summary>
-        </member>
-        <member name="P:Business.Core.Arg`1.In">
-            <summary>
-            The first input object
-            </summary>
-        </member>
         <member name="T:Business.Core.CommandGroup">
             <summary>
             Command grouping
@@ -2843,312 +2704,332 @@
             <param name="group"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.Call``1(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.Call``1(System.String,Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             Call
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="cmd"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             CallIResult
             </summary>
             <param name="cmd"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.Call(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.Call(System.String,Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             Call
             </summary>
             <param name="cmd"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.Call``1(System.String,System.Object[],Business.Core.Annotations.UseEntry[],System.String)">
-            <summary>
-            Call
-            </summary>
-            <typeparam name="Result"></typeparam>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <param name="group"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,System.Object[],Business.Core.Annotations.UseEntry[],System.String)">
-            <summary>
-            CallIResult
-            </summary>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <param name="group"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.Call(System.String,System.Object[],Business.Core.Annotations.UseEntry[],System.String)">
-            <summary>
-            Call
-            </summary>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <param name="group"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.Call``1(System.String,System.Object[],System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.Call``1(System.String,System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
             <summary>
             Call
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="cmd"></param>
             <param name="parameters"></param>
-            <param name="group"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,System.Object[],System.String,Business.Core.Annotations.UseEntry[])">
-            <summary>
-            Call
-            </summary>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="group"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.Call(System.String,System.Object[],System.String,Business.Core.Annotations.UseEntry[])">
-            <summary>
-            Call
-            </summary>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="group"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.Call``1(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[],System.String)">
-            <summary>
-            Call
-            </summary>
-            <typeparam name="Result"></typeparam>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <param name="group"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[],System.String)">
+        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
             <summary>
             CallIResult
             </summary>
             <param name="cmd"></param>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <param name="group"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.Call(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[],System.String)">
+        <member name="M:Business.Core.CommandGroup.Call(System.String,System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
+            <summary>
+            Call
+            </summary>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.Call``1(System.String,System.Object[],Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            Call
+            </summary>
+            <typeparam name="Result"></typeparam>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="group"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,System.Object[],Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            Call
+            </summary>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="group"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.Call(System.String,System.Object[],Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            Call
+            </summary>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="group"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.Call``1(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
+            <summary>
+            Call
+            </summary>
+            <typeparam name="Result"></typeparam>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
+            <summary>
+            CallIResult
+            </summary>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.Call(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
             <summary>
             Call
             </summary>
             <param name="cmd"></param>
             <param name="args"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <param name="group"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.Call``1(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.Call``1(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
             <summary>
             Call
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="cmd"></param>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="group"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.CallIResult(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
             <summary>
             CallIResult
             </summary>
             <param name="cmd"></param>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="group"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.Call(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.Call(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
             <summary>
             Call
             </summary>
             <param name="cmd"></param>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="group"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCall
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="cmd"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncIResult
             </summary>
             <param name="cmd"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCall
             </summary>
             <param name="cmd"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,System.Object[],Business.Core.Annotations.UseEntry[],System.String)">
-            <summary>
-            AsyncCall
-            </summary>
-            <typeparam name="Result"></typeparam>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <param name="group"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,System.Object[],Business.Core.Annotations.UseEntry[],System.String)">
-            <summary>
-            AsyncIResult
-            </summary>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <param name="group"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,System.Object[],Business.Core.Annotations.UseEntry[],System.String)">
-            <summary>
-            AsyncCall
-            </summary>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <param name="group"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,System.Object[],System.String,Business.Core.Annotations.UseEntry[])">
-            <summary>
-            AsyncIResult
-            </summary>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="group"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,System.Object[],System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
             <summary>
             AsyncCall
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="cmd"></param>
             <param name="parameters"></param>
-            <param name="group"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
+            <param name="group"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,System.Object[],System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
+            <summary>
+            AsyncIResult
+            </summary>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
             <summary>
             AsyncCall
             </summary>
             <param name="cmd"></param>
             <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,System.Object[],Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            AsyncIResult
+            </summary>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
             <param name="group"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[],System.String)">
+        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,System.Object[],Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCall
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="cmd"></param>
             <param name="parameters"></param>
-            <param name="useObj"></param>
+            <param name="token"></param>
             <param name="group"></param>
+            <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[],System.String)">
-            <summary>
-            AsyncIResult
-            </summary>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <param name="group"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[],System.String)">
+        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,System.Object[],Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCall
             </summary>
             <param name="cmd"></param>
             <param name="parameters"></param>
-            <param name="useObj"></param>
-            <param name="group"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.String,Business.Core.Annotations.UseEntry[])">
-            <summary>
-            AsyncIResult
-            </summary>
-            <param name="cmd"></param>
-            <param name="parameters"></param>
+            <param name="token"></param>
             <param name="group"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
             <summary>
             AsyncCall
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="cmd"></param>
             <param name="parameters"></param>
-            <param name="group"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
+            <param name="group"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,System.Collections.Generic.IDictionary{System.String,System.String},System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
+            <summary>
+            AsyncIResult
+            </summary>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[],System.String)">
             <summary>
             AsyncCall
             </summary>
             <param name="cmd"></param>
             <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <param name="group"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.AsyncIResult(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            AsyncIResult
+            </summary>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
             <param name="group"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.CommandGroup.AsyncCallFull(System.String,System.String,Business.Core.Annotations.UseEntry[],System.String)">
+        <member name="M:Business.Core.CommandGroup.AsyncCall``1(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
             <summary>
-            AsyncCallFull
+            AsyncCall
+            </summary>
+            <typeparam name="Result"></typeparam>
+            <param name="cmd"></param>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="group"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.CommandGroup.AsyncCall(System.String,System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,System.String,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            AsyncCall
             </summary>
             <param name="cmd"></param>
             <param name="parameters"></param>
-            <param name="useObj"></param>
+            <param name="token"></param>
             <param name="group"></param>
+            <param name="useObj"></param>
             <returns></returns>
         </member>
         <member name="T:Business.Core.Command">
@@ -3156,168 +3037,186 @@
             Command
             </summary>
         </member>
-        <member name="M:Business.Core.Command.#ctor(System.Func{System.Object[],System.Boolean,System.Object},Business.Core.Meta.MetaData,System.String,System.String)">
+        <member name="M:Business.Core.Command.#ctor(Business.Core.Meta.MetaData,System.String,System.String,Business.Core.IBusiness)">
             <summary>
             Command
             </summary>
-            <param name="call"></param>
             <param name="meta"></param>
             <param name="key"></param>
             <param name="group"></param>
+            <param name="business"></param>
         </member>
         <member name="M:Business.Core.Command.StatisArgs">
             <summary>
             Statistics of real submission parameters and archiving
             </summary>
         </member>
-        <member name="M:Business.Core.Command.GetArgsUse(Business.Core.Annotations.UseEntry[],System.Action{System.Object[],System.Int32,Business.Core.Meta.Args,Business.Core.Meta.ArgGroup})">
+        <member name="M:Business.Core.Command.GetArgsUse(Business.Core.Annotations.UseEntry[],Business.Core.Auth.IToken,System.Action{System.Object[],System.Int32,Business.Core.Meta.Args,Business.Core.Meta.ArgGroup})">
             <summary>
             GetArgsUse
             </summary>
             <param name="useObj"></param>
+            <param name="token"></param>
             <param name="action"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.GetAgs(System.Object[],Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.GetAgs(System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             GetAgs
             </summary>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.GetAgs(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.GetAgs(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             GetAgs
             </summary>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.Call(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.Call(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             Call
             </summary>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.Call``1(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.Call``1(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             Call
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.CallIResult(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.CallIResult(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             CallIResult
             </summary>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.Call(System.Object[],Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.Call(System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             Call
             </summary>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.Call``1(System.Object[],Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.Call``1(System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             Call
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.CallIResult(System.Object[],Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.CallIResult(System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             CallIResult
             </summary>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncCall(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.AsyncCall(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCall
             </summary>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncCall``1(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[])">
-            <summary>
-            AsyncCall
-            </summary>
-            <typeparam name="Result"></typeparam>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Command.AsyncIResult(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Annotations.UseEntry[])">
-            <summary>
-            AsyncIResult
-            </summary>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Command.AsyncCall(System.Object[],Business.Core.Annotations.UseEntry[])">
-            <summary>
-            AsyncCall
-            </summary>
-            <param name="parameters"></param>
-            <param name="useObj"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Command.AsyncCall``1(System.Object[],Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.AsyncCall``1(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCall
             </summary>
             <typeparam name="Result"></typeparam>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncIResult(System.Object[],Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.AsyncIResult(System.Collections.Generic.IDictionary{System.String,System.String},Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncIResult
             </summary>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncCallFull``1(``0,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.AsyncCall(System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            AsyncCall
+            </summary>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Command.AsyncCall``1(System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            AsyncCall
+            </summary>
+            <typeparam name="Result"></typeparam>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Command.AsyncIResult(System.Object[],Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
+            <summary>
+            AsyncIResult
+            </summary>
+            <param name="parameters"></param>
+            <param name="token"></param>
+            <param name="useObj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Command.AsyncCallFull``1(``0,Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCallFull
             </summary>
             <typeparam name="DataType"></typeparam>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncCallFull``2(``1,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.AsyncCallFull``2(``1,Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCallFull
             </summary>
             <typeparam name="Result"></typeparam>
             <typeparam name="DataType"></typeparam>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Command.AsyncCallFullIResult``1(System.String,Business.Core.Annotations.UseEntry[])">
+        <member name="M:Business.Core.Command.AsyncIResultFull``1(``0,Business.Core.Auth.IToken,Business.Core.Annotations.UseEntry[])">
             <summary>
             AsyncCallFullIResult
             </summary>
             <param name="parameters"></param>
+            <param name="token"></param>
             <param name="useObj"></param>
             <returns></returns>
         </member>
@@ -3425,11 +3324,6 @@
             Logger
             </summary>
         </member>
-        <member name="P:Business.Core.Meta.ArgGroup.IArgInLogger">
-            <summary>
-            IArgInLogger
-            </summary>
-        </member>
         <member name="P:Business.Core.Meta.ArgGroup.HttpFile">
             <summary>
             HttpFile
@@ -3479,11 +3373,6 @@
         <member name="P:Business.Core.Meta.ITypeDefinition`1.LastType">
             <summary>
             LastType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.CurrentOrigType">
-            <summary>
-            Remove IArg type
             </summary>
         </member>
         <member name="P:Business.Core.Meta.ITypeDefinition`1.CurrentType">
@@ -3561,15 +3450,13 @@
             Argument
             </summary>
         </member>
-        <member name="M:Business.Core.Meta.Args.#ctor(System.String,System.Type,System.Type,System.Type,System.Type,System.Type,System.Int32,System.Object,System.Boolean,System.Object,System.Boolean,System.Boolean,System.Boolean,System.Boolean,Business.Core.Utils.Accessor,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Core.Meta.ArgGroup},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},System.Boolean,System.Boolean,System.Boolean,System.Type,System.Type,Business.Core.Annotations.UseAttribute,System.Boolean,System.Boolean,System.String,System.String,Business.Core.Meta.MemberDefinitionCode,System.Boolean,System.Boolean)">
+        <member name="M:Business.Core.Meta.Args.#ctor(System.String,System.Type,System.Type,System.Type,System.Int32,System.Object,System.Boolean,System.Object,System.Boolean,System.Boolean,System.Boolean,Business.Core.Utils.Accessor,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Core.Meta.ArgGroup},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},System.Boolean,System.Boolean,Business.Core.Annotations.UseAttribute,System.Boolean,System.Boolean,System.String,System.String,Business.Core.Meta.MemberDefinitionCode,System.Boolean)">
             <summary>
             Argument
             </summary>
             <param name="name"></param>
             <param name="type"></param>
-            <param name="origType"></param>
             <param name="lastType"></param>
-            <param name="currentOrigType"></param>
             <param name="currentType"></param>
             <param name="position"></param>
             <param name="defaultValue"></param>
@@ -3577,7 +3464,6 @@
             <param name="defaultTypeValue"></param>
             <param name="hasDictionary"></param>
             <param name="hasCollection"></param>
-            <param name="hasCollectionIArg"></param>
             <param name="nullable"></param>
             <param name="accessor"></param>
             <param name="group"></param>
@@ -3585,16 +3471,12 @@
             <param name="childrens"></param>
             <param name="hasLower"></param>
             <param name="hasDefinition"></param>
-            <param name="hasIArg"></param>
-            <param name="iArgOutType"></param>
-            <param name="iArgInType"></param>
             <param name="use"></param>
             <param name="useType"></param>
             <param name="hasToken"></param>
             <param name="methodTypeFullName"></param>
             <param name="fullName"></param>
             <param name="memberDefinition"></param>
-            <param name="hasCast"></param>
             <param name="hasDynamicObject"></param>
         </member>
         <member name="P:Business.Core.Meta.Args.Name">
@@ -3607,19 +3489,9 @@
             Type
             </summary>
         </member>
-        <member name="P:Business.Core.Meta.Args.OrigType">
-            <summary>
-            OrigType
-            </summary>
-        </member>
         <member name="P:Business.Core.Meta.Args.LastType">
             <summary>
             LastType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.CurrentOrigType">
-            <summary>
-            Remove IArg type
             </summary>
         </member>
         <member name="P:Business.Core.Meta.Args.CurrentType">
@@ -3657,11 +3529,6 @@
             HasCollection
             </summary>
         </member>
-        <member name="P:Business.Core.Meta.Args.HasCollectionIArg">
-            <summary>
-            HasCollectionIArg
-            </summary>
-        </member>
         <member name="P:Business.Core.Meta.Args.Nullable">
             <summary>
             Nullable
@@ -3697,21 +3564,6 @@
             HasDefinition
             </summary>
         </member>
-        <member name="P:Business.Core.Meta.Args.IArgOutType">
-            <summary>
-            IArgOutType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.IArgInType">
-            <summary>
-            IArgInType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasIArg">
-            <summary>
-            HasIArg
-            </summary>
-        </member>
         <member name="P:Business.Core.Meta.Args.Use">
             <summary>
             Use
@@ -3740,11 +3592,6 @@
         <member name="P:Business.Core.Meta.Args.MemberDefinition">
             <summary>
             xml using
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasCast">
-            <summary>
-            HasCast
             </summary>
         </member>
         <member name="P:Business.Core.Meta.Args.Parameters">
@@ -3815,7 +3662,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Meta.MetaData.#ctor(System.Func{System.Object,System.Object[],System.Object},Business.Core.Meta.CommandGroup,Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Meta.MetaLogger},System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Type,System.Type,System.Type,System.Type,System.Object[],System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},System.Int32,System.String,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.Int32,System.Type},System.String,Business.Core.Annotations.DocAttribute)">
+        <member name="M:Business.Core.Meta.MetaData.#ctor(System.Func{System.Object,System.Object[],System.Object},Business.Core.Meta.CommandGroup,Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Meta.MetaLogger},System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Type,System.Type,System.Type,System.Object[],System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},System.Int32,System.String,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.Int32,System.Type},System.String,Business.Core.Annotations.DocAttribute)">
             <summary>
             MetaData
             </summary>
@@ -3823,7 +3670,6 @@
             <param name="commandGroup"></param>
             <param name="args"></param>
             <param name="argAll"></param>
-            <param name="iArgs"></param>
             <param name="tokens"></param>
             <param name="metaLogger"></param>
             <param name="path"></param>
@@ -3838,7 +3684,6 @@
             <param name="returnType"></param>
             <param name="resultTypeDefinition"></param>
             <param name="resultType"></param>
-            <param name="argTypeDefinition"></param>
             <param name="defaultValue"></param>
             <param name="attributes"></param>
             <param name="position"></param>
@@ -3865,11 +3710,6 @@
         <member name="P:Business.Core.Meta.MetaData.ArgAll">
             <summary>
             ArgAll
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.IArgs">
-            <summary>
-            IArgs
             </summary>
         </member>
         <member name="P:Business.Core.Meta.MetaData.Tokens">
@@ -3947,11 +3787,6 @@
             ResultGeneric
             </summary>
         </member>
-        <member name="P:Business.Core.Meta.MetaData.ArgTypeDefinition">
-            <summary>
-            ArgTypeDefinition
-            </summary>
-        </member>
         <member name="P:Business.Core.Meta.MetaData.HasAsync">
             <summary>
             HasAsync
@@ -4015,11 +3850,6 @@
         <member name="M:Business.Core.IBootstrap.UseResultType(System.Type)">
             <summary>
             UseResultType
-            </summary>
-        </member>
-        <member name="M:Business.Core.IBootstrap.UseArgType(System.Type)">
-            <summary>
-            UseArgType
             </summary>
         </member>
         <member name="M:Business.Core.IBootstrap.UseLogger(Business.Core.Logger)">
@@ -4086,11 +3916,6 @@
         <member name="P:Business.Core.BootstrapConfig.ResultType">
             <summary>
             ResultType
-            </summary>
-        </member>
-        <member name="P:Business.Core.BootstrapConfig.ArgType">
-            <summary>
-            ArgType
             </summary>
         </member>
         <member name="P:Business.Core.BootstrapConfig.BuildBefore">
@@ -4247,13 +4072,6 @@
             <param name="resultType"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.UseArgType(System.Type)">
-            <summary>
-            use arg type
-            </summary>
-            <param name="argType"></param>
-            <returns></returns>
-        </member>
         <member name="M:Business.Core.Bootstrap.UseLogger(Business.Core.Logger)">
             <summary>
             Log callback for all business classes
@@ -4306,13 +4124,6 @@
             <param name="resultType"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap`1.UseArgType(System.Type)">
-            <summary>
-            use arg type
-            </summary>
-            <param name="argType"></param>
-            <returns></returns>
-        </member>
         <member name="M:Business.Core.Bootstrap`1.UseLogger(Business.Core.Logger)">
             <summary>
             Log callback for all business classes
@@ -4363,13 +4174,6 @@
             use result type
             </summary>
             <param name="resultType"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.BootstrapAll.UseArgType(System.Type)">
-            <summary>
-            use arg type
-            </summary>
-            <param name="argType"></param>
             <returns></returns>
         </member>
         <member name="M:Business.Core.BootstrapAll.UseLogger(Business.Core.Logger)">
@@ -4428,13 +4232,6 @@
             use result type
             </summary>
             <param name="resultType"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.BootstrapAll`1.UseArgType(System.Type)">
-            <summary>
-            use arg type
-            </summary>
-            <param name="argType"></param>
             <returns></returns>
         </member>
         <member name="M:Business.Core.BootstrapAll`1.UseLogger(Business.Core.Logger)">
@@ -5408,13 +5205,6 @@
             <param name="callback"></param>
             <returns></returns>
         </member>
-        <member name="T:Business.Core.IBusiness`2">
-            <summary>
-            IBusiness
-            </summary>
-            <typeparam name="Result"></typeparam>
-            <typeparam name="Arg"></typeparam>
-        </member>
         <member name="T:Business.Core.IBusiness`1">
             <summary>
             IBusiness
@@ -5482,13 +5272,6 @@
             <param name="callback"></param>
             <returns></returns>
         </member>
-        <member name="T:Business.Core.BusinessBase`2">
-            <summary>
-            BusinessBase
-            </summary>
-            <typeparam name="Result"></typeparam>
-            <typeparam name="Arg"></typeparam>
-        </member>
         <member name="T:Business.Core.BusinessBase`1">
             <summary>
             BusinessBase
@@ -5550,7 +5333,7 @@
             Logger data object
             </summary>
         </member>
-        <member name="M:Business.Core.Logger.LoggerData.#ctor(System.DateTimeOffset,System.Object,Business.Core.Logger.Type,System.Collections.Generic.IDictionary{System.String,System.Object},System.Object,System.Double,System.String,System.String)">
+        <member name="M:Business.Core.Logger.LoggerData.#ctor(System.DateTimeOffset,System.Object,Business.Core.Logger.Type,System.Object,System.Object,System.Double,System.String,System.String)">
             <summary>
             Logger data object
             </summary>
@@ -5802,24 +5585,9 @@
             Value
             </summary>
         </member>
-        <member name="F:Business.Core.Configer.MethodArgs.HasIArg">
-            <summary>
-            HasIArg
-            </summary>
-        </member>
         <member name="F:Business.Core.Configer.MethodArgs.Type">
             <summary>
             Type
-            </summary>
-        </member>
-        <member name="F:Business.Core.Configer.MethodArgs.OutType">
-            <summary>
-            OutType
-            </summary>
-        </member>
-        <member name="F:Business.Core.Configer.MethodArgs.InType">
-            <summary>
-            InType
             </summary>
         </member>
         <member name="F:Business.Core.Configer.Xmls">
@@ -5832,13 +5600,12 @@
             FirstCharToLowerNamingPolicy
             </summary>
         </member>
-        <member name="M:Business.Core.Configer.#ctor(Business.Core.Annotations.Info,System.Type,System.Type,System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},Business.Core.Auth.IInterceptor,System.Collections.Generic.IEnumerable{System.Type})">
+        <member name="M:Business.Core.Configer.#ctor(Business.Core.Annotations.Info,System.Type,System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},Business.Core.Auth.IInterceptor,System.Collections.Generic.IEnumerable{System.Type})">
             <summary>
             Configer
             </summary>
             <param name="info"></param>
             <param name="resultTypeDefinition"></param>
-            <param name="argTypeDefinition"></param>
             <param name="attributes"></param>
             <param name="interceptor"></param>
             <param name="useTypes"></param>
@@ -5866,11 +5633,6 @@
         <member name="P:Business.Core.Configer.ResultTypeDefinition">
             <summary>
             ResultTypeDefinition
-            </summary>
-        </member>
-        <member name="P:Business.Core.Configer.ArgTypeDefinition">
-            <summary>
-            ArgTypeDefinition
             </summary>
         </member>
         <member name="P:Business.Core.Configer.Doc">

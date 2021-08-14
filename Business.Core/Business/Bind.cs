@@ -18,6 +18,7 @@
 namespace Business.Core
 {
     using Annotations;
+    using Business.Core.Auth;
     using Business.Core.Document;
     using Meta;
     using Result;
@@ -249,7 +250,7 @@ namespace Business.Core
 
         internal readonly bool hasBusiness;
 
-        internal protected Bind(System.Type type, Auth.IInterceptor interceptor, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type resultType = null, System.Type argType = null, IEnumerable<System.Type> useTypes = null, Logger logger = null, IEnumerable<GroupAttribute> attributes = null)
+        internal protected Bind(System.Type type, IInterceptor interceptor, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type resultType = null, IEnumerable<System.Type> useTypes = null, Logger logger = null, IEnumerable<GroupAttribute> attributes = null)
         {
             var typeInfo = type.GetTypeInfo();
 
@@ -299,15 +300,15 @@ namespace Business.Core
             //var generics = typeof(IBusiness<,>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments);
             //var resultType = (generics ? businessArguments[0] : typeof(ResultObject<>)).GetGenericTypeDefinition();
             //var argType = (generics ? businessArguments[1] : typeof(Arg<object>)).GetGenericTypeDefinition();
-            if (typeof(IBusiness<,>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments))
+            if (typeof(IBusiness<>).IsAssignableFrom(type.GetTypeInfo(), out System.Type[] businessArguments))
             {
                 resultType = businessArguments[0].GetGenericTypeDefinition();
-                argType = businessArguments[1].GetGenericTypeDefinition();
+                //argType = businessArguments[1].GetGenericTypeDefinition();
             }
             else //if (typeof(IBusiness).IsAssignableFrom(type))
             {
                 resultType = (resultType ?? typeof(ResultObject<>)).GetGenericTypeDefinition();
-                argType = (argType ?? typeof(Arg<>)).GetGenericTypeDefinition();
+                //argType = (argType ?? typeof(Arg<>)).GetGenericTypeDefinition();
             }
 
             var topAttrs = AttributeBase.GetTopAttributes(typeInfo).Distinct(attributes);//GetArgAttr(typeInfo);
@@ -362,7 +363,7 @@ namespace Business.Core
 #else
             
 #endif
-            var cfg = new Configer(info, resultType, argType, topAttrs, interceptor, useTypes)
+            var cfg = new Configer(info, resultType, topAttrs, interceptor, useTypes)
             {
                 DocInfo = topAttrs.GetAttr<DocAttribute>()
             };
@@ -568,10 +569,10 @@ namespace Business.Core
             {
                 var arg = args[i];
 
-                if (arg.HasIArg && !arg.HasCast)
-                {
-                    continue;
-                }
+                //if (arg.HasIArg && !arg.HasCast)
+                //{
+                //    continue;
+                //}
 
                 if (!arg.Nullable && arg.LastType.IsValueType && null == arg.DefaultValue)
                 {
@@ -586,7 +587,8 @@ namespace Business.Core
             return argsObj;
         }
 
-        static object[] GetArgsObj(object[] defaultObj, object[] argsObj, IReadOnlyList<Args> iArgs, IList<Args> args)
+        /*
+        static object[] GetArgsObj(object[] defaultObj, object[] argsObj, IList<Args> args)
         {
             var defaultObj2 = new object[defaultObj.Length];
             System.Array.Copy(defaultObj, defaultObj2, defaultObj2.Length);
@@ -595,10 +597,13 @@ namespace Business.Core
             {
                 for (int i = 0; i < argsObj.Length; i++)
                 {
-                    if (!Equals(null, argsObj[i]) && i < defaultObj2.Length)
+                    var obj = argsObj[i];
+
+                    if (!Equals(null, obj) && i < defaultObj2.Length)
                     {
-                        if (!Equals(defaultObj2[i], argsObj[i]))
+                        if (!Equals(defaultObj2[i], obj))
                         {
+                            var arg = args[i];
                             //int/long
                             //defaultObj2[i] = args[i].HasIArg ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].Type);
                             //if (args[i].Nullable && args[i].LastType.GetTypeCode() == System.TypeCode.DateTime && string.IsNullOrEmpty(System.Convert.ToString(argsObj[i])))
@@ -610,18 +615,18 @@ namespace Business.Core
                             //    defaultObj2[i] = Help.ChangeType(argsObj[i], args[i].LastType);
                             //    continue;
                             //}
-                            if (args[i].UseType || args[i].HasDefinition)
+                            if (arg.UseType || arg.HasDefinition)
                             {
-                                defaultObj2[i] = argsObj[i];
+                                defaultObj2[i] = obj;
                             }
                             else
                             {
-                                if (args[i].Nullable && string.IsNullOrEmpty(argsObj[i]?.ToString()))
-                                {
-                                    continue;
-                                }
+                                //if (arg.Nullable && string.IsNullOrEmpty(obj.ToString()))//???
+                                //{
+                                //    continue;
+                                //}
 
-                                defaultObj2[i] = args[i].HasCollection || args[i].HasDynamicObject || args[i].HasObject ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].LastType);
+                                defaultObj2[i] = arg.HasCollection || arg.HasDynamicObject || arg.HasObject ? obj : Help.ChangeType(obj, arg.LastType);
                             }
                             //defaultObj2[i] = args[i].UseType || args[i].HasDefinition ? argsObj[i] : Help.ChangeType(argsObj[i], args[i].LastType);
 
@@ -633,26 +638,26 @@ namespace Business.Core
                 }
             }
 
-            foreach (var item in iArgs)
-            {
-                if (item.HasCast || (null == defaultObj2[item.Position] && !item.Type.IsValueType))
-                {
-                    continue;
-                }
+            //foreach (var item in iArgs)
+            //{
+            //    if (item.HasCast || (null == defaultObj2[item.Position] && !item.Type.IsValueType))
+            //    {
+            //        continue;
+            //    }
 
-                var iArg = (IArg)System.Activator.CreateInstance(item.Type);
+            //    var iArg = (IArg)System.Activator.CreateInstance(item.Type);
 
-                //Not entry for value type
-                if (!(null == defaultObj2[item.Position] && item.IArgInType.IsValueType))
-                {
-                    iArg.In = defaultObj2[item.Position];
-                }
+            //    //Not entry for value type
+            //    if (!(null == defaultObj2[item.Position] && item.IArgInType.IsValueType))
+            //    {
+            //        iArg.In = defaultObj2[item.Position];
+            //    }
 
-                //iArg.In = defaultObj2[item.Position];
-                //iArg.Group = group;
+            //    //iArg.In = defaultObj2[item.Position];
+            //    //iArg.Group = group;
 
-                defaultObj2[item.Position] = iArg;
-            }
+            //    defaultObj2[item.Position] = iArg;
+            //}
 
             //foreach (var item in iArgs)
             //{
@@ -671,7 +676,7 @@ namespace Business.Core
 
             return defaultObj2;
         }
-
+        */
         static Meta.CommandGroup CmdAttrGroup(Configer cfg, string methodName, List<AttributeBase> attributes, List<Ignore> ignore)
         {
             var groupDefault = cfg.Info.CommandGroupDefault;
@@ -801,12 +806,17 @@ namespace Business.Core
                 {
                     var groups = commandGroup.dictionary.GetOrAdd(item2.Value.Group, key => new ConcurrentReadOnlyDictionary<string, Command>());
 
-                    if (!groups.dictionary.TryAdd(item2.Value.OnlyName, new Command((arguments, multipleParameterDeserialize) =>
-                    {
-                        var args = GetArgsObj(meta.DefaultValue, arguments, meta.IArgs, meta.Args);
+                    //if (!groups.dictionary.TryAdd(item2.Value.OnlyName, new Command((arguments, token) =>
+                    //{
+                    //    var args = GetArgsObj(meta.DefaultValue, arguments, meta.Args);
 
-                        return business.Configer.Interceptor.Intercept(business.Configer, meta.Name, args, () => meta.Accessor(business, args), item2.Key, multipleParameterDeserialize).Result;
-                    }, meta, item2.Key, item2.Value.Group)))
+                    //    return business.Configer.Interceptor.Intercept(meta.Name, args, () => meta.Accessor(business, args), item2.Key, item2.Value, token).Result;
+                    //}, meta, item2.Key, item2.Value.Group)))
+                    //{
+                    //    throw new System.Exception($"Command \"{item2.Key}\" member \"{item2.Value.OnlyName}\" name exists");
+                    //}
+
+                    if (!groups.dictionary.TryAdd(item2.Value.OnlyName, new Command(meta, item2.Key, item2.Value.Group, business)))
                     {
                         throw new System.Exception($"Command \"{item2.Key}\" member \"{item2.Value.OnlyName}\" name exists");
                     }
@@ -965,16 +975,17 @@ namespace Business.Core
                     //==================================//
                     var current = Help.GetCurrentType(parameterType.GetTypeInfo());
 
-                    var argAttrAll = AttributeBase.GetAttributes(argInfo, current.outType, current.hasCollection ? current.type : null);
+                    var argAttrAll = AttributeBase.GetAttributes(argInfo, current.type, current.hasCollection ? current.currentType : null);
 
                     //var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() : argAttrAll.GetAttr<UseAttribute>();
 
-                    var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
+                    //var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
+                    var use = argAttrAll.GetAttr<UseAttribute>();
 
-                    var hasToken = typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || typeof(Auth.IToken).IsAssignableFrom(use?.ParameterType);//true == use?.Token;
+                    var hasToken = typeof(IToken).IsAssignableFrom(current.type) || typeof(IToken).IsAssignableFrom(use?.ParameterType);//true == use?.Token;
 
                     //var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
-                    var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : cfg.UseTypes.ContainsKey(current.type.FullName));
+                    var hasUse = hasToken || null != use || cfg.UseTypes.ContainsKey(current.currentType.FullName);
                     //var nick = argAttrAll.GetAttr<NickAttribute>();
 
                     //var hasCollectionAttr = false;
@@ -993,52 +1004,50 @@ namespace Business.Core
 
                     //==================================//
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
-                    var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GroupAttribute.Comparer) : null;
+                    //var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GroupAttribute.Comparer) : null;
 
-                    var iArgGenericType = new System.Type[cfg.ArgTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
-                    var parameterType2 = parameterType;
-                    var cast = !hasUse && !current.hasIArg;
-                    //var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
-                    if (cast)
-                    {
-                        current.hasIArg = true;
-                        current.inType = typeof(object);
+                    //var iArgGenericType = new System.Type[cfg.ArgTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
+                    //var parameterType2 = parameterType;
+                    //var cast = !hasUse && !current.hasIArg;
+                    ////var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
+                    //if (cast)
+                    //{
+                    //    current.hasIArg = true;
+                    //    current.inType = typeof(object);
 
-                        for (int i = 0; i < iArgGenericType.Length; i++)
-                        {
-                            iArgGenericType[i] = typeof(object);
-                        }
-                        if (0 < iArgGenericType.Length)
-                        {
-                            iArgGenericType[0] = parameterType;
-                            parameterType2 = cfg.ArgTypeDefinition.MakeGenericType(iArgGenericType);
-                        }
-                    }
+                    //    for (int i = 0; i < iArgGenericType.Length; i++)
+                    //    {
+                    //        iArgGenericType[i] = typeof(object);
+                    //    }
+                    //    if (0 < iArgGenericType.Length)
+                    //    {
+                    //        iArgGenericType[0] = parameterType;
+                    //        parameterType2 = cfg.ArgTypeDefinition.MakeGenericType(iArgGenericType);
+                    //    }
+                    //}
 
                     //var argGroup = GetArgGroup(argAttrAll, current, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, default, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
 
-                    var definitions = current.hasDefinition ? new System.Collections.Specialized.StringCollection { current.outType.FullName } : new System.Collections.Specialized.StringCollection();
+                    var definitions = current.hasDefinition ? new System.Collections.Specialized.StringCollection { current.type.FullName } : new System.Collections.Specialized.StringCollection();
                     var hasLower = false;
-                    var childrens2 = hasUse && !current.hasIArg ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
+                    var childrens2 = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
 
-                    var children = hasUse && !current.hasIArg ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(current.outType, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, commandGroup.Group, definitions, resultType, cfg.ResultTypeDefinition, cfg.ArgTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : ReadOnlyCollection<Args>.Empty;
+                    var children = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(current.type, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, commandGroup.Group, definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : ReadOnlyCollection<Args>.Empty;
 
                     var arg = new Args(argInfo.Name,
                     //cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
                     //cast ? cfg.ArgTypeDefinition.MakeGenericType(parameterType2) : parameterType,
-                    parameterType2,
                     parameterType,
-                    current.outType,
-                    current.origType,
                     current.type,
+                    current.currentType,
                     argInfo.Position,
                     argInfo.HasDefaultValue ? argInfo.DefaultValue : default,
                     argInfo.HasDefaultValue,
-                    current.type.IsValueType ? System.Activator.CreateInstance(current.type) : null,
+                    current.currentType.IsValueType ? System.Activator.CreateInstance(current.currentType) : null,
                     current.hasDictionary,
                     current.hasCollection,
                     //false,//hasCollectionAttr || hasCollectionAttr2,
-                    current.hasCollection ? typeof(IArg).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
+                    //current.hasCollection ? typeof(IArg).GetTypeInfo().IsAssignableFrom(current.type, out _) : false,
                     current.nullable,
                     default,
                     null,//argGroup,
@@ -1046,18 +1055,14 @@ namespace Business.Core
                     childrens2,
                     hasLower,
                     current.hasDefinition,
-                    current.hasIArg,
-                    current.hasIArg ? current.outType : default,
-                    current.hasIArg ? current.inType : default,
                     //path,
                     use,
                     hasUse,
                     hasToken,
                     //item.Value.CommandAttr.OnlyName,
                     GetMethodTypeFullName(parameterType),
-                    current.outType.GetTypeName(),
+                    current.type.GetTypeName(),
                     current.hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No,
-                    cast,
                     null != argAttrAll.GetAttr<DynamicObjectAttribute>());
 
                     args.Collection.Add(arg);
@@ -1070,10 +1075,10 @@ namespace Business.Core
 
                     if (hasUse)
                     {
-                        useTypePosition.dictionary.TryAdd(argInfo.Position, current.inType);
+                        useTypePosition.dictionary.TryAdd(argInfo.Position, current.origType);
                     }
 
-                    var argGroup = GetArgGroup(argAttrAll, arg, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, default, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, cfg.ArgTypeDefinition, hasUse, out _, argInfo.Name, logAttrArg, inLogAttrArg);
+                    var argGroup = GetArgGroup(argAttrAll, arg, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, default, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out _, argInfo.Name, logAttrArg);
                     //arg.HasCollectionAttr = hasCollectionAttr || hasCollectionAttr2;
                     arg.Group = argGroup;
 
@@ -1087,7 +1092,7 @@ namespace Business.Core
                 //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
-                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, args?.Where(c => c.HasIArg).ToReadOnly(), tokens, loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasValueTask, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, cfg.ArgTypeDefinition, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
+                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, tokens, loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasValueTask, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
 
                 if (!metaData.dictionary.TryAdd(name, meta))
                 {
@@ -1171,7 +1176,7 @@ namespace Business.Core
         */
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, IDictionary<string, CommandAttribute> commands, System.Collections.Specialized.StringCollection definitions, System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)//, System.Type argTypeDefinition
+        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, IDictionary<string, CommandAttribute> commands, System.Collections.Specialized.StringCollection definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)//, System.Type argTypeDefinition
         {
             hasLower = false;
 
@@ -1211,7 +1216,7 @@ namespace Business.Core
 
                 var current = Help.GetCurrentType(memberType);
 
-                var argAttrAll = AttributeBase.GetAttributes(item, current.outType);
+                var argAttrAll = AttributeBase.GetAttributes(item, current.type, current.hasCollection ? current.currentType : null);
 
                 //var hasDefinition = current.outType.IsDefinition();
 
@@ -1220,17 +1225,17 @@ namespace Business.Core
                 {
                     definitions2.Add(def);
                 }
-                if (definitions.Contains(current.outType.FullName)) { continue; }
-                else if (current.hasDefinition) { definitions2.Add(current.outType.FullName); }
+                if (definitions.Contains(current.type.FullName)) { continue; }
+                else if (current.hasDefinition) { definitions2.Add(current.type.FullName); }
 
                 var path2 = $"{path}.{item.Name}";
 
                 //var use = argAttrAll.GetAttr<UseAttribute>();
-                var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
+                var use = argAttrAll.GetAttr<UseAttribute>();
 
-                var hasToken = typeof(Auth.IToken).IsAssignableFrom(current.hasIArg ? current.inType : current.outType) || typeof(Auth.IToken).IsAssignableFrom(use?.ParameterType);// true == use?.Token;
+                var hasToken = typeof(IToken).IsAssignableFrom(current.type) || typeof(IToken).IsAssignableFrom(use?.ParameterType);// true == use?.Token;
 
-                var hasUse = hasToken || null != use || (current.hasIArg ? useTypes.ContainsKey(current.inType.FullName) : false);
+                var hasUse = hasToken || null != use || useTypes.ContainsKey(current.currentType.FullName);
 
                 //var hasCollectionAttr = false;
                 //if (current.hasCollection)
@@ -1264,44 +1269,42 @@ namespace Business.Core
 
                 argAttrAll = argAttrAll.Distinct();
 
-                var iArgGenericType = new System.Type[argTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
-                var parameterType2 = memberType;
-                var cast = !hasUse && !current.hasIArg;
-                //var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
-                if (cast)
-                {
-                    current.hasIArg = true;
-                    current.inType = typeof(object);
+                //var iArgGenericType = new System.Type[argTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
+                //var parameterType2 = memberType;
+                //var cast = !hasUse && !current.hasIArg;
+                ////var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
+                //if (cast)
+                //{
+                //    current.hasIArg = true;
+                //    current.inType = typeof(object);
 
-                    for (int i = 0; i < iArgGenericType.Length; i++)
-                    {
-                        iArgGenericType[i] = typeof(object);
-                    }
-                    if (0 < iArgGenericType.Length)
-                    {
-                        iArgGenericType[0] = memberType;
-                        parameterType2 = argTypeDefinition.MakeGenericType(iArgGenericType);
-                    }
-                }
+                //    for (int i = 0; i < iArgGenericType.Length; i++)
+                //    {
+                //        iArgGenericType[i] = typeof(object);
+                //    }
+                //    if (0 < iArgGenericType.Length)
+                //    {
+                //        iArgGenericType[0] = memberType;
+                //        parameterType2 = argTypeDefinition.MakeGenericType(iArgGenericType);
+                //    }
+                //}
 
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
-                var children = current.hasDefinition ? GetArgChild(current.outType, declaring, businessName, method, path2, commands, definitions2, resultType, resultTypeDefinition, argTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
+                var children = current.hasDefinition ? GetArgChild(current.type, declaring, businessName, method, path2, commands, definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
 
                 var arg = new Args(item.Name,
-                    parameterType2,
                     memberType,
-                    current.outType,
-                    current.origType,
                     current.type,
+                    current.currentType,
                     position++,
                     default,
                     default,
-                    current.type.IsValueType ? System.Activator.CreateInstance(current.type) : null,
+                    current.currentType.IsValueType ? System.Activator.CreateInstance(current.currentType) : null,
                     current.hasDictionary,
                     current.hasCollection,
                     //false,//hasCollectionAttr || hasCollectionAttr2,
-                    current.hasCollection ? typeof(IArg).GetTypeInfo().IsAssignableFrom(current.outType, out _) : false,
+                    //current.hasCollection ? typeof(IArg).GetTypeInfo().IsAssignableFrom(current.type, out _) : false,
                     current.nullable,
                     accessor,
                     null,//argGroup,
@@ -1309,9 +1312,6 @@ namespace Business.Core
                     childrens2,
                     false,//hasLower2 || hasLower3,
                     current.hasDefinition,
-                    current.hasIArg,
-                    current.hasIArg ? current.outType : default,
-                    current.hasIArg ? current.inType : default,
                     //path2,
                     use,
                     hasUse,
@@ -1319,7 +1319,6 @@ namespace Business.Core
                     GetMethodTypeFullName(memberType),
                     $"{type.GetTypeName(item.DeclaringType)}.{item.Name}",
                     memberDefinition,
-                    cast,
                     null != argAttrAll.GetAttr<DynamicObjectAttribute>());
 
                 args.Collection.Add(arg);
@@ -1330,7 +1329,7 @@ namespace Business.Core
                     childrens.Collection.Add(child);
                 }
 
-                var argGroup = GetArgGroup(argAttrAll, arg, declaring, businessName, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, argTypeDefinition, hasUse, out bool hasLower2, root);
+                var argGroup = GetArgGroup(argAttrAll, arg, declaring, businessName, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, root);
                 arg.Group = argGroup;
                 //arg.HasCollectionAttr = hasCollectionAttr || hasCollectionAttr2;
                 arg.HasLower = hasLower2 || hasLower3;
@@ -1347,7 +1346,7 @@ namespace Business.Core
         //static readonly System.Type[] procesTypes = new System.Type[] { typeof(object) };
         //static readonly System.Type[] procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(List<AttributeBase> argAttrAll, Args arg, string declaring, string businessName, string method, string path, string owner, string member, IDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, bool hasUse, out bool hasLower, string root, List<LoggerAttribute> log = null, List<LoggerAttribute> inLog = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(List<AttributeBase> argAttrAll, Args arg, string declaring, string businessName, string method, string path, string owner, string member, IDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, string root, List<LoggerAttribute> log = null)
         {
             hasLower = false;
             //hasCollectionAttr = false;
@@ -1413,11 +1412,10 @@ namespace Business.Core
 
                     attr.ArgMeta.resultType = resultType;
                     attr.ArgMeta.resultTypeDefinition = resultTypeDefinition;
-                    attr.ArgMeta.argTypeDefinition = argTypeDefinition;
 
                     if (null != attr.ArgMeta.Proces && attr.ArgMeta.Proces.MethodInfo.IsGenericMethod)
                     {
-                        attr.ArgMeta.Proces.Call = dynamicMethodBuilder.GetDelegate(attr.ArgMeta.Proces.MethodInfo.MakeGenericMethod(arg.CurrentOrigType));
+                        attr.ArgMeta.Proces.Call = dynamicMethodBuilder.GetDelegate(attr.ArgMeta.Proces.MethodInfo.MakeGenericMethod(arg.Type));
                     }
                     ////!procesIArgMethod.DeclaringType.FullName.Equals(argumentAttributeFullName)
                     //if (attr.Meta.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(attr.Meta.Type.FullName))
@@ -1472,16 +1470,16 @@ namespace Business.Core
                 //add default convert
                 //if (current.hasIArg && 0 == argAttr.Count)
                 //if (default == owner && current.hasIArg && null == argAttr.First.Value)
-                if (default == owner && arg.HasIArg && 0 == argAttr.Count)
-                {
-                    //if (default == owner) ?? Is the first level added or every level added?
-                    var def = new ArgumentDefaultAttribute(resultType, resultTypeDefinition, argTypeDefinition);
-                    def.Meta.Declaring = AttributeBase.MetaData.DeclaringType.Parameter;
-                    //argAttr.TryAdd(def);
-                    argAttr.Collection.Add(def);
+                //if (default == owner && 0 == argAttr.Count)
+                //{
+                //    //if (default == owner) ?? Is the first level added or every level added?
+                //    var def = new ArgumentDefaultAttribute(resultType, resultTypeDefinition);
+                //    def.Meta.Declaring = AttributeBase.MetaData.DeclaringType.Parameter;
+                //    //argAttr.TryAdd(def);
+                //    argAttr.Collection.Add(def);
 
-                    if (!hasLower) { hasLower = true; }
-                }
+                //    if (!hasLower) { hasLower = true; }
+                //}
 
                 //owner ?? Do need only the superior, not the superior path? For doc
                 var group2 = new ArgGroup(ignores.ToReadOnly(), ignoreArg, argAttr, aliasValue, $"{onlyName}.{path}", default == owner ? onlyName : $"{onlyName}.{owner}", $"{onlyName}.{root}", httpFile);
@@ -1491,10 +1489,10 @@ namespace Business.Core
                     group2.Logger = GetMetaLogger(log, group);
                 }
 
-                if (0 < inLog?.Count)
-                {
-                    group2.IArgInLogger = GetMetaLogger(inLog, group);
-                }
+                //if (0 < inLog?.Count)
+                //{
+                //    group2.IArgInLogger = GetMetaLogger(inLog, group);
+                //}
 
                 argGroup.dictionary.TryAdd(item.Key, group2);
             }
@@ -1548,25 +1546,28 @@ namespace Business.Core
         /// </summary>
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual Result Call<Result>(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
+        public virtual Result Call<Result>(string cmd, IToken token = null, params UseEntry[] useObj) => Call(cmd, null, token, useObj);
 
         /// <summary>
         /// CallIResult
         /// </summary>
         /// <param name="cmd"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual IResult CallIResult(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
+        public virtual IResult CallIResult(string cmd, IToken token = null, params UseEntry[] useObj) => Call(cmd, null, token, useObj);
 
         /// <summary>
         /// Call
         /// </summary>
         /// <param name="cmd"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual dynamic Call(string cmd, params UseEntry[] useObj) => Call(cmd, null, useObj);
+        public virtual dynamic Call(string cmd, IToken token = null, params UseEntry[] useObj) => Call(cmd, null, token, useObj);
 
         /// <summary>
         /// Call
@@ -1574,34 +1575,37 @@ namespace Business.Core
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual Result Call<Result>(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
+        public virtual Result Call<Result>(string cmd, object[] parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// CallIResult
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual IResult CallIResult(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
+        public virtual IResult CallIResult(string cmd, object[] parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// Call
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual dynamic Call(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null)
+        public virtual dynamic Call(string cmd, object[] parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null)
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? Help.ErrorCmd(resultTypeDefinition, cmd) : command.Call(parameters, useObj);
+            return null == command ? Help.ErrorCmd(resultTypeDefinition, cmd) : command.Call(parameters, token, useObj);
         }
 
         /// <summary>
@@ -1610,30 +1614,33 @@ namespace Business.Core
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual Result Call<Result>(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
+        public virtual Result Call<Result>(string cmd, object[] parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// Call
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual IResult CallIResult(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
+        public virtual IResult CallIResult(string cmd, object[] parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// Call
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual dynamic Call(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
+        public virtual dynamic Call(string cmd, object[] parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, token, useObj, group);
 
         #endregion
 
@@ -1645,34 +1652,37 @@ namespace Business.Core
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual Result Call<Result>(string cmd, IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
+        public virtual Result Call<Result>(string cmd, IDictionary<string, string> parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// CallIResult
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual IResult CallIResult(string cmd, IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, useObj, group);
+        public virtual IResult CallIResult(string cmd, IDictionary<string, string> parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null) => Call(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// Call
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="args"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual dynamic Call(string cmd, IDictionary<string, string> args, UseEntry[] useObj, string group)
+        public virtual dynamic Call(string cmd, IDictionary<string, string> args, IToken token, UseEntry[] useObj, string group)
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? Help.ErrorCmd(resultTypeDefinition, cmd) : command.Call(args, useObj);
+            return null == command ? Help.ErrorCmd(resultTypeDefinition, cmd) : command.Call(args, token, useObj);
         }
 
         /// <summary>
@@ -1681,30 +1691,33 @@ namespace Business.Core
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual Result Call<Result>(string cmd, IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
+        public virtual Result Call<Result>(string cmd, IDictionary<string, string> parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// CallIResult
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual IResult CallIResult(string cmd, IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
+        public virtual IResult CallIResult(string cmd, IDictionary<string, string> parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// Call
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual dynamic Call(string cmd, IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, useObj, group);
+        public virtual dynamic Call(string cmd, IDictionary<string, string> parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => Call(cmd, parameters, token, useObj, group);
 
         #endregion
 
@@ -1715,25 +1728,28 @@ namespace Business.Core
         /// </summary>
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
+        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, IToken token = null, params UseEntry[] useObj) => await AsyncCall(cmd, null, token, useObj);
 
         /// <summary>
         /// AsyncIResult
         /// </summary>
         /// <param name="cmd"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
+        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, IToken token = null, params UseEntry[] useObj) => await AsyncCall(cmd, null, token, useObj);
 
         /// <summary>
         /// AsyncCall
         /// </summary>
         /// <param name="cmd"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, params UseEntry[] useObj) => await AsyncCall(cmd, null, useObj);
+        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, IToken token = null, params UseEntry[] useObj) => await AsyncCall(cmd, null, token, useObj);
 
         /// <summary>
         /// AsyncCall
@@ -1741,34 +1757,37 @@ namespace Business.Core
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, object[] parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// AsyncIResult
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, object[] parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// AsyncCall
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, object[] parameters = null, UseEntry[] useObj = null, string group = null)
+        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, object[] parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null)
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, token, useObj);
         }
 
         /// <summary>
@@ -1776,10 +1795,11 @@ namespace Business.Core
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, object[] parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// AsyncCall
@@ -1787,20 +1807,22 @@ namespace Business.Core
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, object[] parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// AsyncCall
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, object[] parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, object[] parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         #endregion
 
@@ -1812,34 +1834,37 @@ namespace Business.Core
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, IDictionary<string, string> parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// AsyncIResult
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, IDictionary<string, string> parameters = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, IDictionary<string, string> parameters = null, IToken token = null, UseEntry[] useObj = null, string group = null) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// AsyncCall
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <param name="group"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, IDictionary<string, string> parameters, UseEntry[] useObj, string group)
+        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, IDictionary<string, string> parameters, IToken token, UseEntry[] useObj, string group)
         {
             var command = GetCommand(cmd, group);
 
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, useObj);
+            return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, token, useObj);
         }
 
         /// <summary>
@@ -1847,10 +1872,11 @@ namespace Business.Core
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(string cmd, IDictionary<string, string> parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// AsyncCall
@@ -1858,42 +1884,79 @@ namespace Business.Core
         /// <typeparam name="Result"></typeparam>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(string cmd, IDictionary<string, string> parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         /// <summary>
         /// AsyncCall
         /// </summary>
         /// <param name="cmd"></param>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="group"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, IDictionary<string, string> parameters = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, useObj, group);
+        public virtual async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(string cmd, IDictionary<string, string> parameters = null, IToken token = null, string group = null, params UseEntry[] useObj) => await AsyncCall(cmd, parameters, token, useObj, group);
 
         #endregion
 
-        #region AsyncCallFull
+        //#region AsyncCallFull
 
-        /// <summary>
-        /// AsyncCallFull
-        /// </summary>
-        /// <param name="cmd"></param>
-        /// <param name="parameters"></param>
-        /// <param name="useObj"></param>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCallFull(string cmd, string parameters, UseEntry[] useObj = null, string group = null)
-        {
-            var command = GetCommand(cmd, group);
+        ///// <summary>
+        ///// AsyncCallFull
+        ///// </summary>
+        ///// <param name="cmd"></param>
+        ///// <param name="parameters"></param>
+        ///// <param name="useObj"></param>
+        ///// <param name="group"></param>
+        ///// <param name="token"></param>
+        ///// <returns></returns>
+        //public async System.Threading.Tasks.ValueTask<dynamic> AsyncCallFull(string cmd, string parameters, UseEntry[] useObj = null, string group = null, IToken token = default)
+        //{
+        //    var command = GetCommand(cmd, group);
 
-            return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCallFull(parameters, useObj);
-        }
+        //    return null == command ? await System.Threading.Tasks.Task.FromResult(Help.ErrorCmd(resultTypeDefinition, cmd)) : await command.AsyncCall(parameters, token, useObj);
+        //}
 
-        #endregion
+        //#endregion
     }
+
+    ///// <summary>
+    ///// CallArg
+    ///// </summary>
+    //public readonly struct CallArg
+    //{
+    //    /// <summary>
+    //    /// CallArg
+    //    /// </summary>
+    //    /// <param name="group"></param>
+    //    /// <param name="token"></param>
+    //    /// <param name="multipleParameterDeserialize"></param>
+    //    public CallArg(string group, IToken token, bool multipleParameterDeserialize)
+    //    {
+    //        Group = group;
+    //        Token = token;
+    //        MultipleParameterDeserialize = multipleParameterDeserialize;
+    //    }
+
+    //    /// <summary>
+    //    /// Group
+    //    /// </summary>
+    //    public string Group { get; }
+
+    //    /// <summary>
+    //    /// Token
+    //    /// </summary>
+    //    public IToken Token { get; }
+
+    //    /// <summary>
+    //    /// MultipleParameterDeserialize
+    //    /// </summary>
+    //    public bool MultipleParameterDeserialize { get; }
+    //}
 
     /// <summary>
     /// Command
@@ -1908,16 +1971,24 @@ namespace Business.Core
 
         ArgumentAttribute deserialize;
 
+        readonly System.Func<object[], dynamic, bool, dynamic> call;
+
         /// <summary>
         /// Command
         /// </summary>
-        /// <param name="call"></param>
         /// <param name="meta"></param>
         /// <param name="key"></param>
         /// <param name="group"></param>
-        public Command(System.Func<object[], bool, dynamic> call, MetaData meta, string key, string group)
+        /// <param name="business"></param>
+        public Command(MetaData meta, string key, string group, IBusiness business)
         {
-            this.call = call;
+            this.call = (arguments, token, multipleParameterDeserialize) =>
+            {
+                var args = GetArgsObj(meta.DefaultValue, arguments, meta.Args);
+
+                return business.Configer.Interceptor.Intercept(meta.Name, args, new System.Func<dynamic>(() => meta.Accessor.Invoke(business, args)), key, token, multipleParameterDeserialize).Result;
+            };
+
             Meta = meta;
             this.key = key;
             this.group = group;
@@ -1925,6 +1996,39 @@ namespace Business.Core
             HasReturn = Meta.HasReturn;
             parametersTypeKey = $"{Meta.Business}.{key}";
             StatisArgs();
+        }
+
+        static object[] GetArgsObj(object[] defaultObj, object[] argsObj, IList<Args> args)
+        {
+            var defaultObj2 = new object[defaultObj.Length];
+            System.Array.Copy(defaultObj, defaultObj2, defaultObj2.Length);
+
+            if (null != argsObj)
+            {
+                for (int i = 0; i < argsObj.Length; i++)
+                {
+                    var obj = argsObj[i];
+
+                    if (!Equals(null, obj) && i < defaultObj2.Length)
+                    {
+                        if (!Equals(defaultObj2[i], obj))
+                        {
+                            var arg = args[i];
+
+                            if (arg.UseType || arg.HasDefinition)
+                            {
+                                defaultObj2[i] = obj;
+                            }
+                            else
+                            {
+                                defaultObj2[i] = arg.HasCollection || arg.HasDynamicObject || arg.HasObject ? obj : Help.ChangeType(obj, arg.LastType);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return defaultObj2;
         }
 
         /// <summary>
@@ -1958,13 +2062,12 @@ namespace Business.Core
 
             if (null != ParametersType)
             {
-                deserialize = Meta.Attributes.FirstOrDefault(c => c is ArgumentAttribute attr && attr.ArgMeta.Deserialize && group == attr.Group)?.Clone() as ArgumentAttribute;
+                deserialize = Meta.Attributes.FirstOrDefault(c => c is ArgumentAttribute attr && attr.ArgMeta.Deserialize && attr.GroupEquals(group))?.Clone() as ArgumentAttribute;
 
                 if (null != deserialize)
                 {
                     deserialize.ArgMeta.resultType = Meta.ResultType;
                     deserialize.ArgMeta.resultTypeDefinition = Meta.ResultTypeDefinition;
-                    deserialize.ArgMeta.argTypeDefinition = Meta.ArgTypeDefinition;
 
                     deserialize.ArgMeta.MemberType = ParametersType;
                     deserialize.ArgMeta.Proces.Call = Bind.dynamicMethodBuilder.GetDelegate(deserialize.ArgMeta.Proces.MethodInfo.MakeGenericMethod(deserialize.ArgMeta.MemberType));
@@ -2045,16 +2148,15 @@ namespace Business.Core
             return null;
         }
         */
-        //===============member==================//
-        readonly System.Func<object[], bool, dynamic> call;
 
         /// <summary>
         /// GetArgsUse
         /// </summary>
         /// <param name="useObj"></param>
+        /// <param name="token"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public virtual object[] GetArgsUse(UseEntry[] useObj, System.Action<object[], int, Args, ArgGroup> action)
+        public virtual object[] GetArgsUse(UseEntry[] useObj, IToken token, System.Action<object[], int, Args, ArgGroup> action)
         {
             var parameters = new object[Meta.Args.Count];
 
@@ -2063,6 +2165,12 @@ namespace Business.Core
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     var arg = Meta.Args[i];
+                    if (null != token && arg.HasToken)
+                    {
+                        parameters[i] = token;
+                        continue;
+                    }
+
                     arg.Group.TryGetValue(key, out ArgGroup group);
 
                     if (Meta.UseTypePosition.ContainsKey(i))
@@ -2124,50 +2232,52 @@ namespace Business.Core
         /// GetAgs
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual object[] GetAgs(object[] parameters, params UseEntry[] useObj)
+        public virtual object[] GetAgs(object[] parameters, IToken token, params UseEntry[] useObj)
         {
             int l = 0;
-            return GetArgsUse(useObj, (args2, i, arg, group) =>
-            {
-                if (null != parameters && 0 < parameters.Length)
-                {
-                    //if (args.Length < l)
-                    //{
-                    //    break;
-                    //}
+            return GetArgsUse(useObj, token, (args2, i, arg, group) =>
+             {
+                 if (null != parameters && 0 < parameters.Length)
+                 {
+                     //if (args.Length < l)
+                     //{
+                     //    break;
+                     //}
 
-                    if (l < parameters.Length)
-                    {
-                        args2[i] = parameters[l++];
-                    }
-                }
-            });
+                     if (l < parameters.Length)
+                     {
+                         args2[i] = parameters[l++];
+                     }
+                 }
+             });
         }
 
         /// <summary>
         /// GetAgs
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public virtual object[] GetAgs(IDictionary<string, string> parameters, params UseEntry[] useObj)
+        public virtual object[] GetAgs(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj)
         {
-            return GetArgsUse(useObj, (args2, i, arg, group) =>
-            {
-                if (0 < parameters?.Count)
-                {
-                    if (arg.Parameters)
-                    {
-                        args2[i] = parameters;
-                    }
-                    else if (parameters.TryGetValue(arg.Name, out string value))
-                    {
-                        args2[i] = value;
-                    }
-                }
-            });
+            return GetArgsUse(useObj, token, (args2, i, arg, group) =>
+             {
+                 if (0 < parameters?.Count)
+                 {
+                     if (arg.Parameters)
+                     {
+                         args2[i] = parameters;
+                     }
+                     else if (parameters.TryGetValue(arg.Name, out string value))
+                     {
+                         args2[i] = value;
+                     }
+                 }
+             });
         }
 
         #region Call
@@ -2176,32 +2286,35 @@ namespace Business.Core
         /// Call
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public dynamic Call(IDictionary<string, string> parameters, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj));
+        public dynamic Call(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj) => Syn(GetAgs(parameters, token, useObj), token);
 
         /// <summary>
         /// Call
         /// </summary>
         /// <typeparam name="Result"></typeparam>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public Result Call<Result>(IDictionary<string, string> parameters, params UseEntry[] useObj) => Call(parameters, useObj);
+        public Result Call<Result>(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj) => Call(parameters, token, useObj);
 
         /// <summary>
         /// CallIResult
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public IResult CallIResult(IDictionary<string, string> parameters, params UseEntry[] useObj) => Call(parameters, useObj);
+        public IResult CallIResult(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj) => Call(parameters, token, useObj);
 
-        dynamic Syn(object[] parameters, bool multipleParameterDeserialize = false)
+        dynamic Syn(object[] parameters, IToken token = default)
         {
             try
             {
-                return call(parameters, multipleParameterDeserialize);
+                return call(parameters, token, default);
             }
             catch (System.Exception ex)
             {
@@ -2213,26 +2326,29 @@ namespace Business.Core
         /// Call
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public dynamic Call(object[] parameters, params UseEntry[] useObj) => Syn(GetAgs(parameters, useObj));
+        public dynamic Call(object[] parameters, IToken token, params UseEntry[] useObj) => Syn(GetAgs(parameters, token, useObj), token);
 
         /// <summary>
         /// Call
         /// </summary>
         /// <typeparam name="Result"></typeparam>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public Result Call<Result>(object[] parameters, params UseEntry[] useObj) => Call(parameters, useObj);
+        public Result Call<Result>(object[] parameters, IToken token, params UseEntry[] useObj) => Call(parameters, token, useObj);
 
         /// <summary>
         /// CallIResult
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public IResult CallIResult(object[] parameters, params UseEntry[] useObj) => Call(parameters, useObj);
+        public IResult CallIResult(object[] parameters, IToken token, params UseEntry[] useObj) => Call(parameters, token, useObj);
 
         #endregion
 
@@ -2242,28 +2358,31 @@ namespace Business.Core
         /// AsyncCall
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(IDictionary<string, string> parameters, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj));
+        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj) => await Async(GetAgs(parameters, token, useObj), token);
 
         /// <summary>
         /// AsyncCall
         /// </summary>
         /// <typeparam name="Result"></typeparam>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(IDictionary<string, string> parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
+        public async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj) => await AsyncCall(parameters, token, useObj);
 
         /// <summary>
         /// AsyncIResult
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(IDictionary<string, string> parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
+        public async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj) => await AsyncCall(parameters, token, useObj);
 
-        async System.Threading.Tasks.ValueTask<dynamic> Async(object[] parameters, bool multipleParameterDeserialize = false)
+        async System.Threading.Tasks.ValueTask<dynamic> Async(object[] parameters, IToken token = default, bool multipleParameterDeserialize = default)
         {
             try
             {
@@ -2271,21 +2390,21 @@ namespace Business.Core
                 {
                     if (!Meta.HasReturn)
                     {
-                        await call(parameters, multipleParameterDeserialize);
+                        await call(parameters, token, multipleParameterDeserialize);
 
                         return null;
                     }
 
-                    return await call(parameters, multipleParameterDeserialize);
+                    return await call(parameters, token, multipleParameterDeserialize);
                 }
                 else
                 {
                     using (var task = System.Threading.Tasks.Task.Factory.StartNew(obj =>
                     {
                         var obj2 = (dynamic)obj;
-                        return obj2.call(obj2.parameters, obj2.multipleParameterDeserialize);
+                        return call(obj2.parameters, obj2.token, obj2.multipleParameterDeserialize);
 
-                    }, new { call, parameters, multipleParameterDeserialize }))
+                    }, new { parameters, token, multipleParameterDeserialize }))
                     {
                         return await task;
                     }
@@ -2301,26 +2420,29 @@ namespace Business.Core
         /// AsyncCall
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(object[] parameters, params UseEntry[] useObj) => await Async(GetAgs(parameters, useObj));
+        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(object[] parameters, IToken token, params UseEntry[] useObj) => await Async(GetAgs(parameters, token, useObj), token);
 
         /// <summary>
         /// AsyncCall
         /// </summary>
         /// <typeparam name="Result"></typeparam>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(object[] parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
+        public async System.Threading.Tasks.ValueTask<Result> AsyncCall<Result>(object[] parameters, IToken token, params UseEntry[] useObj) => await AsyncCall(parameters, token, useObj);
 
         /// <summary>
         /// AsyncIResult
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(object[] parameters, params UseEntry[] useObj) => await AsyncCall(parameters, useObj);
+        public async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(object[] parameters, IToken token, params UseEntry[] useObj) => await AsyncCall(parameters, token, useObj);
 
         #endregion
 
@@ -2331,13 +2453,14 @@ namespace Business.Core
         /// </summary>
         /// <typeparam name="DataType"></typeparam>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCallFull<DataType>(DataType parameters, params UseEntry[] useObj)
+        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCallFull<DataType>(DataType parameters, IToken token, params UseEntry[] useObj)
         {
             if (HasArgSingle)
             {
-                return await Async(GetAgs(new object[] { parameters }, useObj), !HasArgSingle);
+                return await Async(GetAgs(new object[] { parameters }, token, useObj), token, !HasArgSingle);
             }
             else
             {
@@ -2363,7 +2486,7 @@ namespace Business.Core
                         i++;
                     }
 
-                    return await Async(GetAgs(values, useObj), !HasArgSingle);
+                    return await Async(GetAgs(values, token, useObj), token, !HasArgSingle);
                 }
 
                 return Help.ErrorNull(Meta.ResultTypeDefinition, nameof(deserialize));
@@ -2376,17 +2499,19 @@ namespace Business.Core
         /// <typeparam name="Result"></typeparam>
         /// <typeparam name="DataType"></typeparam>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<Result> AsyncCallFull<Result, DataType>(DataType parameters, params UseEntry[] useObj) => await AsyncCallFull(parameters, useObj);
+        public async System.Threading.Tasks.ValueTask<Result> AsyncCallFull<Result, DataType>(DataType parameters, IToken token, params UseEntry[] useObj) => await AsyncCallFull(parameters, token, useObj);
 
         /// <summary>
         /// AsyncCallFullIResult
         /// </summary>
         /// <param name="parameters"></param>
+        /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<IResult> AsyncCallFullIResult<DataType>(string parameters, params UseEntry[] useObj) => await AsyncCallFull(parameters, useObj);
+        public async System.Threading.Tasks.ValueTask<IResult> AsyncIResultFull<DataType>(DataType parameters, IToken token, params UseEntry[] useObj) => await AsyncCallFull(parameters, token, useObj);
 
         #endregion
 
@@ -2476,7 +2601,6 @@ namespace Business.Core.Meta
             Owner = owner;
             Root = root;
             Logger = default;
-            IArgInLogger = default;
             HttpFile = httpFile;
         }
 
@@ -2521,10 +2645,10 @@ namespace Business.Core.Meta
         /// </summary>
         public MetaLogger Logger { get; internal set; }
 
-        /// <summary>
-        /// IArgInLogger
-        /// </summary>
-        public MetaLogger IArgInLogger { get; internal set; }
+        ///// <summary>
+        ///// IArgInLogger
+        ///// </summary>
+        //public MetaLogger IArgInLogger { get; internal set; }
 
         /// <summary>
         /// HttpFile
@@ -2578,11 +2702,6 @@ namespace Business.Core.Meta
         /// LastType
         /// </summary>
         System.Type LastType { get; }
-
-        /// <summary>
-        /// Remove IArg type
-        /// </summary>
-        System.Type CurrentOrigType { get; }
 
         /// <summary>
         /// Remove IArg Null type
@@ -2680,9 +2799,7 @@ namespace Business.Core.Meta
         /// </summary>
         /// <param name="name"></param>
         /// <param name="type"></param>
-        /// <param name="origType"></param>
         /// <param name="lastType"></param>
-        /// <param name="currentOrigType"></param>
         /// <param name="currentType"></param>
         /// <param name="position"></param>
         /// <param name="defaultValue"></param>
@@ -2690,7 +2807,6 @@ namespace Business.Core.Meta
         /// <param name="defaultTypeValue"></param>
         /// <param name="hasDictionary"></param>
         /// <param name="hasCollection"></param>
-        /// <param name="hasCollectionIArg"></param>
         /// <param name="nullable"></param>
         /// <param name="accessor"></param>
         /// <param name="group"></param>
@@ -2698,30 +2814,25 @@ namespace Business.Core.Meta
         /// <param name="childrens"></param>
         /// <param name="hasLower"></param>
         /// <param name="hasDefinition"></param>
-        /// <param name="hasIArg"></param>
-        /// <param name="iArgOutType"></param>
-        /// <param name="iArgInType"></param>
         /// <param name="use"></param>
         /// <param name="useType"></param>
         /// <param name="hasToken"></param>
         /// <param name="methodTypeFullName"></param>
         /// <param name="fullName"></param>
         /// <param name="memberDefinition"></param>
-        /// <param name="hasCast"></param>
         /// <param name="hasDynamicObject"></param>
-        public Args(string name, System.Type type, System.Type origType, System.Type lastType, System.Type currentOrigType, System.Type currentType, int position, object defaultValue, bool hasDefaultValue, object defaultTypeValue, bool hasDictionary, bool hasCollection, bool hasCollectionIArg, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, bool hasIArg, System.Type iArgOutType, System.Type iArgInType, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasCast, bool hasDynamicObject)
+        public Args(string name, System.Type type, System.Type lastType, System.Type currentType, int position, object defaultValue, bool hasDefaultValue, object defaultTypeValue, bool hasDictionary, bool hasCollection, bool nullable, Accessor accessor, ConcurrentReadOnlyDictionary<string, ArgGroup> group, ReadOnlyCollection<Args> children, ReadOnlyCollection<Args> childrens, bool hasLower, bool hasDefinition, UseAttribute use, bool useType, bool hasToken, string methodTypeFullName, string fullName, MemberDefinitionCode memberDefinition, bool hasDynamicObject)
         {
             Name = name;
             Type = type;
-            OrigType = origType;
+            //OrigType = origType;
             LastType = lastType;
-            CurrentOrigType = currentOrigType;
+            //CurrentOrigType = currentOrigType;
             CurrentType = currentType;
             Position = position;
             HasDictionary = hasDictionary;
             HasCollection = hasCollection;
             //HasCollectionAttr = hasCollectionAttr;
-            HasCollectionIArg = hasCollectionIArg;
             Nullable = nullable;
             //HasString = hasString;
             Accessor = accessor;
@@ -2731,9 +2842,9 @@ namespace Business.Core.Meta
 
             HasLower = hasLower;
             HasDefinition = hasDefinition;
-            HasIArg = hasIArg;
-            IArgOutType = iArgOutType;
-            IArgInType = iArgInType;
+            //HasIArg = hasIArg;
+            //IArgOutType = iArgOutType;
+            //IArgInType = iArgInType;
             //this.trim = trim;
             //Path = path;
             //Source = source;
@@ -2753,7 +2864,7 @@ namespace Business.Core.Meta
             MethodTypeFullName = methodTypeFullName;
             FullName = fullName;
             MemberDefinition = memberDefinition;
-            HasCast = hasCast;
+            //HasCast = hasCast;
             HasDynamicObject = hasDynamicObject;
             HasObject = typeof(object).Equals(LastType);
         }
@@ -2768,20 +2879,20 @@ namespace Business.Core.Meta
         /// </summary>
         public System.Type Type { get; internal set; }
 
-        /// <summary>
-        /// OrigType
-        /// </summary>
-        public System.Type OrigType { get; private set; }
+        ///// <summary>
+        ///// OrigType
+        ///// </summary>
+        //public System.Type OrigType { get; private set; }
 
         /// <summary>
         /// LastType
         /// </summary>
         public System.Type LastType { get; private set; }
 
-        /// <summary>
-        /// Remove IArg type
-        /// </summary>
-        public System.Type CurrentOrigType { get; private set; }
+        ///// <summary>
+        ///// Remove IArg type
+        ///// </summary>
+        //public System.Type CurrentOrigType { get; private set; }
 
         /// <summary>
         /// Remove IArg Null type
@@ -2821,11 +2932,6 @@ namespace Business.Core.Meta
         //public bool HasCollectionAttr { get; internal set; }
 
         /// <summary>
-        /// HasCollectionIArg
-        /// </summary>
-        public bool HasCollectionIArg { get; internal set; }
-
-        /// <summary>
         /// Nullable
         /// </summary>
         public bool Nullable { get; private set; }
@@ -2862,24 +2968,24 @@ namespace Business.Core.Meta
         /// </summary>
         public bool HasDefinition { get; private set; }
 
-        /// <summary>
-        /// IArgOutType
-        /// </summary>
-        public System.Type IArgOutType { get; private set; }
+        ///// <summary>
+        ///// IArgOutType
+        ///// </summary>
+        //public System.Type IArgOutType { get; private set; }
 
-        /// <summary>
-        /// IArgInType
-        /// </summary>
-        public System.Type IArgInType { get; private set; }
+        ///// <summary>
+        ///// IArgInType
+        ///// </summary>
+        //public System.Type IArgInType { get; private set; }
         ////==============path===================//
         //public string Path { get; private set; }
         ////==============source===================//
         //public string Source { get; private set; }
 
-        /// <summary>
-        /// HasIArg
-        /// </summary>
-        public bool HasIArg { get; internal set; }
+        ///// <summary>
+        ///// HasIArg
+        ///// </summary>
+        //public bool HasIArg { get; internal set; }
         //public MetaLogger Logger { get; private set; }
         //public MetaLogger IArgInLogger { get; private set; }
         //==============group===================//
@@ -2919,10 +3025,10 @@ namespace Business.Core.Meta
         /// </summary>
         public MemberDefinitionCode MemberDefinition { get; private set; }
 
-        /// <summary>
-        /// HasCast
-        /// </summary>
-        public bool HasCast { get; internal set; }
+        ///// <summary>
+        ///// HasCast
+        ///// </summary>
+        //public bool HasCast { get; internal set; }
 
         /// <summary>
         /// Parameters
@@ -3002,7 +3108,6 @@ namespace Business.Core.Meta
         /// <param name="commandGroup"></param>
         /// <param name="args"></param>
         /// <param name="argAll"></param>
-        /// <param name="iArgs"></param>
         /// <param name="tokens"></param>
         /// <param name="metaLogger"></param>
         /// <param name="path"></param>
@@ -3017,7 +3122,6 @@ namespace Business.Core.Meta
         /// <param name="returnType"></param>
         /// <param name="resultTypeDefinition"></param>
         /// <param name="resultType"></param>
-        /// <param name="argTypeDefinition"></param>
         /// <param name="defaultValue"></param>
         /// <param name="attributes"></param>
         /// <param name="position"></param>
@@ -3025,13 +3129,12 @@ namespace Business.Core.Meta
         /// <param name="useTypePosition"></param>
         /// <param name="methodTypeFullName"></param>
         /// <param name="doc"></param>
-        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> iArgs, ReadOnlyCollection<Args> tokens, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, string business, bool hasAsync, bool hasValueTask, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, System.Type argTypeDefinition, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
+        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> tokens, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, string business, bool hasAsync, bool hasValueTask, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
         {
             Accessor = accessor;
             CommandGroup = commandGroup;
             Args = args;
             ArgAll = argAll;
-            IArgs = iArgs;
             Tokens = tokens;
             MetaLogger = metaLogger;
             Path = path;
@@ -3057,8 +3160,6 @@ namespace Business.Core.Meta
             //ReturnResult = HasIResult ? resultType.MakeGenericType(null != resultGeneric ? resultGeneric[0] : typeof(string)) : null;
             ResultType = resultType;// resultType.MakeGenericType(HasIResult && null != resultGeneric ? resultGeneric[0] : typeof(string));
             ResultGeneric = resultType.GenericTypeArguments[0];
-
-            ArgTypeDefinition = argTypeDefinition;
 
             DefaultValue = defaultValue;
             //this.logAttrs = logAttrs;
@@ -3092,11 +3193,6 @@ namespace Business.Core.Meta
         /// ArgAll
         /// </summary>
         public ReadOnlyCollection<Args> ArgAll { get; }
-
-        /// <summary>
-        /// IArgs
-        /// </summary>
-        public ReadOnlyCollection<Args> IArgs { get; }
 
         /// <summary>
         /// Tokens
@@ -3172,11 +3268,6 @@ namespace Business.Core.Meta
         /// ResultGeneric
         /// </summary>
         public System.Type ResultGeneric { get; }
-
-        /// <summary>
-        /// ArgTypeDefinition
-        /// </summary>
-        public System.Type ArgTypeDefinition { get; }
 
         /// <summary>
         /// HasAsync

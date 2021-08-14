@@ -158,15 +158,15 @@ namespace Business.Core.Annotations
             return attributes;
         }
 
-        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(ParameterInfo member, System.Type outType, System.Type origType = null)
+        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(ParameterInfo member, System.Type type, System.Type origType = null)
         {
             var attributes = new System.Collections.Generic.List<AttributeBase>(member.GetAttributes<AttributeBase>());
             attributes.AddRange(member.ParameterType.GetAttributes<AttributeBase>());
-            if (!member.ParameterType.Equals(outType))
+            if (!member.ParameterType.Equals(type))
             {
-                attributes.AddRange(outType.GetAttributes<AttributeBase>());
+                attributes.AddRange(type.GetAttributes<AttributeBase>());
             }
-            if (null != origType && !outType.Equals(origType))
+            if (null != origType && !type.Equals(origType))
             {
                 attributes.AddRange(origType.GetAttributes<AttributeBase>());
             }
@@ -193,11 +193,15 @@ namespace Business.Core.Annotations
             }
             return attribute;
         }
-        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(MemberInfo member, System.Type type)
+        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(MemberInfo member, System.Type type, System.Type origType)
         {
             var attributes = new System.Collections.Generic.List<AttributeBase>();
             attributes.AddRange(member.GetAttributes<AttributeBase>());
             attributes.AddRange(type.GetAttributes<AttributeBase>());
+            if (null != origType && !type.Equals(origType))
+            {
+                attributes.AddRange(origType.GetAttributes<AttributeBase>());
+            }
             attributes.ForEach(c => c.Meta.Declaring = MetaData.DeclaringType.Children);
             return attributes;
         }
@@ -694,12 +698,10 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="logType"></param>
         /// <param name="canWrite"></param>
-        /// <param name="valueType"></param>
-        public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true, Logger.ValueType valueType = Logger.ValueType.In)
+        public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true)
         {
             LogType = logType;
             CanWrite = canWrite;
-            ValueType = valueType;
         }
 
         /// <summary>
@@ -720,11 +722,6 @@ namespace Business.Core.Annotations
         /// Allowed to return to results
         /// </summary>
         public bool CanResult { get; set; } = true;
-
-        /// <summary>
-        /// Logger value type
-        /// </summary>
-        public Logger.ValueType ValueType { get; set; } = Logger.ValueType.In;
 
         /// <summary>
         /// SetType
@@ -856,7 +853,7 @@ namespace Business.Core.Annotations
         {
             internal System.Type resultType;
             internal System.Type resultTypeDefinition;
-            internal System.Type argTypeDefinition;
+            //internal System.Type argTypeDefinition;
 
             internal static System.Collections.Generic.Dictionary<string, Accessor> Accessor = new System.Collections.Generic.Dictionary<string, Accessor>();
 
@@ -2195,34 +2192,34 @@ namespace Business.Core.Annotations
 
     #region Deserialize
 
-    /// <summary>
-    /// ArgumentDefaultAttribute
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.All, AllowMultiple = false)]
-    public sealed class ArgumentDefaultAttribute : ArgumentAttribute
-    {
-        /// <summary>
-        /// ArgumentDefaultAttribute
-        /// </summary>
-        /// <param name="resultType"></param>
-        /// <param name="resultTypeDefinition"></param>
-        /// <param name="argTypeDefinition"></param>
-        /// <param name="state"></param>
-        /// <param name="message"></param>
-        internal ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, System.Type argTypeDefinition, int state = -11, string message = null) : base(state, message)
-        {
-            ArgMeta.resultType = resultType;
-            ArgMeta.resultTypeDefinition = resultTypeDefinition;
-            ArgMeta.argTypeDefinition = argTypeDefinition;
-        }
+    ///// <summary>
+    ///// ArgumentDefaultAttribute
+    ///// </summary>
+    //[System.AttributeUsage(System.AttributeTargets.All, AllowMultiple = false)]
+    //public sealed class ArgumentDefaultAttribute : ArgumentAttribute
+    //{
+    //    /// <summary>
+    //    /// ArgumentDefaultAttribute
+    //    /// </summary>
+    //    /// <param name="resultType"></param>
+    //    /// <param name="resultTypeDefinition"></param>
+    //    /// <param name="state"></param>
+    //    /// <param name="message"></param>
+    //    internal ArgumentDefaultAttribute(System.Type resultType, System.Type resultTypeDefinition, int state = -11, string message = null) : base(state, message)
+    //    {
+    //        ArgMeta.resultType = resultType;
+    //        ArgMeta.resultTypeDefinition = resultTypeDefinition;
+    //        //ArgMeta.argTypeDefinition = argTypeDefinition;
+    //        CanNull = true;
+    //    }
 
-        /// <summary>
-        /// ArgumentDefaultAttribute
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="message"></param>
-        public ArgumentDefaultAttribute(int state = -10, string message = null) : base(state, message) { }
-    }
+    //    /// <summary>
+    //    /// ArgumentDefaultAttribute
+    //    /// </summary>
+    //    /// <param name="state"></param>
+    //    /// <param name="message"></param>
+    //    public ArgumentDefaultAttribute(int state = -10, string message = null) : base(state, message) { }
+    //}
 
     /// <summary>
     /// Check whether the enumeration value is correct
@@ -2315,15 +2312,15 @@ namespace Business.Core.Annotations
                         {
                             if (!item.HasDefinition)
                             {
-                                var v2 = Help.ChangeType(v, item.OrigType);
+                                var v2 = Help.ChangeType(v, item.Type);
                                 item.Accessor.Setter(arg, v2);
                             }
-                            else if (typeof(IArg).IsAssignableFrom(item.OrigType))
-                            {
-                                var iarg = System.Activator.CreateInstance(ArgMeta.argTypeDefinition.MakeGenericType(item.CurrentOrigType)) as IArg;
-                                iarg.In = v;
-                                item.Accessor.Setter(arg, iarg);
-                            }
+                            //else if (typeof(IArg).IsAssignableFrom(item.Type))
+                            //{
+                            //    var iarg = System.Activator.CreateInstance(ArgMeta.argTypeDefinition.MakeGenericType(item.Type)) as IArg;
+                            //    iarg.In = v;
+                            //    item.Accessor.Setter(arg, iarg);
+                            //}
                             //else
                             //{
                             //    //item.Accessor.Setter(arg, value);

@@ -218,7 +218,7 @@ public partial class BusinessMember2 : BusinessBase
         public int c { get; set; }
 
         [@JsonArg]
-        public Arg<Test001Result2> d { get; set; }
+        public Test001Result2 d { get; set; }
     }
 
     //post json
@@ -324,23 +324,23 @@ public partial class BusinessMember2 : BusinessBase
 
     [Testing("test2", "{\"Arg\":{\"BBB\":\"sss\",\"bbbb\":\"dd\",\"aaa\":[\"aaa\",\"ssssaaazzzxxx\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
     [Testing("test3", "{\"arg\":{\"bbb\":\"fff222\",\"bbbb\":\"的撒333\",\"aaa\":[\"aaa\",\"sssaa\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
-    public virtual async ValueTask<IResult<Paging<Test1110>>> Test0001(Test1110 ARG, Arg<DateTime?> DateTime)
+    public virtual async ValueTask<IResult<Paging<Test1110>>> Test0001(Test1110 ARG, DateTime? DateTime)
     {
         var data = new Paging<Test1110> { };
         return this.ResultCreate(data);
     }
 
-    public virtual async ValueTask<IResult<List<dynamic>>> Test00012X(Test1110 ARG, Arg<DateTime?> DateTime)
+    public virtual async ValueTask<IResult<List<dynamic>>> Test00012X(Test1110 ARG, DateTime? DateTime)
     {
         return this.ResultCreate();
     }
 
-    public virtual async ValueTask<IResult<List<string>>> Test00012X1(Test1110 ARG, Arg<DateTime?> DateTime)
+    public virtual async ValueTask<IResult<List<string>>> Test00012X1(Test1110 ARG, DateTime? DateTime)
     {
         return this.ResultCreate();
     }
 
-    public virtual async ValueTask<IResult<List<Test1110>>> Test00012(Test1110 ARG, Arg<DateTime?> DateTime)
+    public virtual async ValueTask<IResult<List<Test1110>>> Test00012(Test1110 ARG, DateTime? DateTime)
     {
         var data = new List<Test1110> { };
         return this.ResultCreate(data);
@@ -659,12 +659,12 @@ public partial class BusinessMember2 : BusinessBase
 
     public virtual int? Test001x() => this.Logger.loggerQueue?.queue.Count;
 
-    public virtual async ValueTask<MyEnum> TestMyEnum(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
+    public virtual async ValueTask<MyEnum> TestMyEnum(Session session222, Test004 arg, DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         return MyEnum.B;
     }
 
-    public virtual async ValueTask<Test0011> TestTest0011(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
+    public virtual async ValueTask<Test0011> TestTest0011(Session session222, Test004 arg, DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         return new Test0011 { AAA = new List<string> { "aaa" } };
     }
@@ -1080,7 +1080,7 @@ public class Args
         /// <summary>
         /// CCCCCCCCCCCCCCCCCCCCCCC!!!
         /// </summary>
-        public Test0010<Test0011> C { get; set; }
+        public Test00100 C { get; set; }
 
         /// <summary>
         /// DDD
@@ -1123,6 +1123,37 @@ public class Args
             /// C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
             /// </summary>
             public List<T> C3 { get; set; }
+
+            //public string C22 { get; set; }
+
+            //public Test0011 C33 { get; set; }
+
+            //public Test0011 C34 { get; set; }
+
+            //public string C35 { get; set; }
+        }
+
+        /// <summary>
+        /// Test0010 Test0010 Test0010 Test0010
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public struct Test00100
+        {
+            /// <summary>
+            /// C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1C1
+            /// </summary>
+            [Test]
+            public string C1 { get; set; }
+
+            /// <summary>
+            /// C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2C2
+            /// </summary>
+            public string C2 { get; set; }
+
+            /// <summary>
+            /// C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3C3
+            /// </summary>
+            public List<Test0011> C3 { get; set; }
 
             //public string C22 { get; set; }
 

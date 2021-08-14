@@ -244,6 +244,7 @@ namespace Business.Core.Utils
             return result;
         }
 
+        /*
         internal static Dictionary<int, IArg> GetIArgs(IReadOnlyList<Args> iArgs, object[] argsObj)
         {
             var result = new Dictionary<int, IArg>();
@@ -301,41 +302,43 @@ namespace Business.Core.Utils
 
             return iArg;
         }
-
-        internal struct CurrentType { public bool hasIArg; public System.Type outType; public System.Type inType; public bool hasCollection; public bool hasDictionary; public System.Type origType; public System.Type type; public bool nullable; public bool hasDefinition; }
+        */
+        internal struct CurrentType { public bool hasCollection; public bool hasDictionary; public System.Type origType; public System.Type type; public System.Type currentType; public bool nullable; public bool hasDefinition; }
 
         internal static CurrentType GetCurrentType(System.Type type)
         {
-            var hasIArg = typeof(IArg<>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType) || typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out iArgOutType);
+            //var hasIArg = typeof(IArg<>).GetTypeInfo().IsAssignableFrom(type, out System.Type[] iArgOutType) || typeof(IArg<,>).GetTypeInfo().IsAssignableFrom(type, out iArgOutType);
 
-            var current = new CurrentType { hasIArg = hasIArg, outType = hasIArg ? iArgOutType[0] : type, inType = (hasIArg && 2 == iArgOutType.Length) ? iArgOutType[1] : type };
-            var nullType = System.Nullable.GetUnderlyingType(current.outType);
-            current.origType = current.outType;
+            //var current = new CurrentType { hasIArg = hasIArg, outType = hasIArg ? iArgOutType[0] : type, inType = (hasIArg && 2 == iArgOutType.Length) ? iArgOutType[1] : type };
+            var current = new CurrentType { origType = type, type = type };
+
+            var nullType = System.Nullable.GetUnderlyingType(type);
 
             if (null != nullType)
             {
-                current.outType = nullType;
+                current.type = nullType;
                 current.nullable = true;
             }
-            current.type = current.outType;
 
-            current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out System.Type[] coll) || current.outType.IsEnumerable(out coll);// current.outType.IsCollection();
-            current.hasDictionary = typeof(IDictionary<,>).IsAssignableFrom(current.outType, out System.Type[] dict) || typeof(System.Collections.IDictionary).IsAssignableFrom(current.outType, out dict);
+            current.currentType = current.type;
+
+            current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.type, out System.Type[] coll) || current.type.IsEnumerable(out coll);// current.outType.IsCollection();
+            current.hasDictionary = typeof(IDictionary<,>).IsAssignableFrom(current.type, out System.Type[] dict) || typeof(System.Collections.IDictionary).IsAssignableFrom(current.type, out dict);
 
             //================================//
             if (current.hasDictionary)
             {
-                current.outType = dict[1];
+                current.type = dict[1];
                 //current.outType = current.outType.GenericTypeArguments[1];
-                current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.outType, out coll) || current.outType.IsEnumerable(out coll);
+                current.hasCollection = typeof(ICollection<>).IsAssignableFrom(current.type, out coll) || current.type.IsEnumerable(out coll);
             }
 
             if (current.hasCollection)
             {
-                current.outType = coll[0];
+                current.type = coll[0];
             }
 
-            current.hasDefinition = current.outType.IsDefinition();
+            current.hasDefinition = current.type.IsDefinition();
 
             return current;
         }
@@ -504,7 +507,7 @@ namespace Business.Core.Utils
 
                 foreach (var arg in item.Args)
                 {
-                    var type2 = (arg.HasIArg && !arg.HasCast) ? arg.IArgInType : arg.LastType;
+                    var type2 = arg.LastType;
 
                     if (!business.Configer.UseTypes.ContainsKey(type2.FullName) || !item.UseTypePosition.dictionary.TryAdd(arg.Position, type2))
                     {
@@ -513,12 +516,12 @@ namespace Business.Core.Utils
 
                     arg.UseType = true;
 
-                    if (arg.HasCast)
-                    {
-                        arg.HasCast = arg.HasIArg = false;
-                        arg.Type = arg.OrigType;
-                        item.IArgs.Collection.Remove(arg);
-                    }
+                    //if (arg.HasCast)
+                    //{
+                    //    arg.HasCast = arg.HasIArg = false;
+                    //    arg.Type = arg.OrigType;
+                    //    item.IArgs.Collection.Remove(arg);
+                    //}
 
                     foreach (var item2 in arg.Group)
                     {
@@ -542,13 +545,13 @@ namespace Business.Core.Utils
                         item2.Value.Attrs = item2.Value.Attrs.Where(c => Annotations.AttributeBase.MetaData.DeclaringType.Parameter == c.Meta.Declaring).ToReadOnly();
 
                         //add default convert
-                        if (arg.HasIArg && 0 == item2.Value.Attrs.Count)
-                        {
-                            var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition, item.ArgTypeDefinition);
-                            attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
-                            item2.Value.Attrs.Collection.Add(attr);
-                            //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
-                        }
+                        //if (0 == item2.Value.Attrs.Count)
+                        //{
+                        //    var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
+                        //    attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
+                        //    item2.Value.Attrs.Collection.Add(attr);
+                        //    //arg.ArgAttr.collection.Add(new Attributes.ArgumentDefaultAttribute(business.Configer.ResultType) { Source = Attributes.AttributeBase.SourceType.Parameter });
+                        //}
                     }
 
                     hasUpdate = true;
@@ -598,7 +601,7 @@ namespace Business.Core.Utils
 
                 foreach (var arg in item.Args)
                 {
-                    var type2 = (arg.HasIArg && !arg.HasCast) ? arg.IArgInType : arg.LastType;
+                    var type2 = arg.LastType;
 
                     if (!argName.Contains(arg.Name) || !item.UseTypePosition.dictionary.TryAdd(arg.Position, type2))
                     {
@@ -609,12 +612,12 @@ namespace Business.Core.Utils
 
                     arg.Use = new Annotations.UseAttribute { ParameterName = true };
 
-                    if (arg.HasCast)
-                    {
-                        arg.HasCast = arg.HasIArg = false;
-                        arg.Type = arg.OrigType;
-                        item.IArgs.Collection.Remove(arg);
-                    }
+                    //if (arg.HasCast)
+                    //{
+                    //    arg.HasCast = arg.HasIArg = false;
+                    //    arg.Type = arg.OrigType;
+                    //    item.IArgs.Collection.Remove(arg);
+                    //}
 
                     foreach (var item2 in arg.Group)
                     {
@@ -638,13 +641,13 @@ namespace Business.Core.Utils
                         item2.Value.Attrs = item2.Value.Attrs.Where(c => Annotations.AttributeBase.MetaData.DeclaringType.Parameter == c.Meta.Declaring).ToReadOnly();
 
                         //add default convert
-                        if (arg.HasIArg && 0 == item2.Value.Attrs.Count)
-                        //if (arg.HasIArg && NodeState.DAT != first.State)
-                        {
-                            var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition, item.ArgTypeDefinition);
-                            attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
-                            item2.Value.Attrs.Collection.Add(attr);
-                        }
+                        //if (0 == item2.Value.Attrs.Count)
+                        ////if (arg.HasIArg && NodeState.DAT != first.State)
+                        //{
+                        //    var attr = new Annotations.ArgumentDefaultAttribute(item.ResultType, item.ResultTypeDefinition);
+                        //    attr.Meta.Declaring = Annotations.AttributeBase.MetaData.DeclaringType.Parameter;
+                        //    item2.Value.Attrs.Collection.Add(attr);
+                        //}
 
                         //business.Command[group.Group][group.OnlyName].HasArgSingle = 1 >= item.Args.Count(c => !c.HasToken && !c.UseType && !c.Group[group.Key].IgnoreArg);
                         //business.Command[group.Group][group.OnlyName].SetParametersType();
@@ -1153,10 +1156,10 @@ namespace Business.Core.Utils
             {
                 foreach (var attr in argGroup.Attrs)
                 {
-                    if (typeof(Annotations.ArgumentDefaultAttribute).IsAssignableFrom(attr.Meta.Type))
-                    {
-                        continue;
-                    }
+                    //if (typeof(Annotations.ArgumentDefaultAttribute).IsAssignableFrom(attr.Meta.Type))
+                    //{
+                    //    continue;
+                    //}
 
                     attrs.Add(string.IsNullOrWhiteSpace(attr.Description) ? attr.ToString() : attr.Description);
                 }
@@ -1226,9 +1229,9 @@ namespace Business.Core.Utils
                 summary = member?.summary?.text;
             }
 
-            if (string.IsNullOrWhiteSpace(summary) && (current.hasDefinition || current.outType.IsEnum))
+            if (string.IsNullOrWhiteSpace(summary) && (current.hasDefinition || current.type.IsEnum))
             {
-                xmlMembers?.TryGetValue($"T:{current.outType.GetTypeName()}", out member);
+                xmlMembers?.TryGetValue($"T:{current.type.GetTypeName()}", out member);
 
                 summary = member?.summary?.text;
             }
@@ -1245,9 +1248,8 @@ namespace Business.Core.Utils
             {
                 Name = name,//current.outType.Name,
                 Type = type,
-                LastType = current.outType,
-                CurrentOrigType = current.origType,
-                CurrentType = current.type,
+                LastType = current.type,
+                CurrentType = current.currentType,
                 HasDefinition = current.hasDefinition,
                 DefaultValue = type.IsValueType && typeof(void) != type ? System.Activator.CreateInstance(type) : null,
 
@@ -1260,7 +1262,7 @@ namespace Business.Core.Utils
                 Nullable = current.nullable,
 
                 FullName = fullName,
-                Children = current.hasDefinition ? GetTypeDefinition(current.outType, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
+                Children = current.hasDefinition ? GetTypeDefinition(current.type, definitions, childrens, pathRoot, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                 Childrens = childrens,
                 MemberDefinition = current.hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No,
                 Summary = summary,
@@ -1309,8 +1311,8 @@ namespace Business.Core.Utils
                 {
                     definitions2.Add(def);
                 }
-                if (definitions.Contains(current.outType.FullName)) { continue; }
-                else if (current.hasDefinition) { definitions2.Add(current.outType.FullName); }
+                if (definitions.Contains(current.type.FullName)) { continue; }
+                else if (current.hasDefinition) { definitions2.Add(current.type.FullName); }
                 var childrens2 = new ReadOnlyCollection<TypeDefinition>();
                 var fullName = $"{type.GetTypeName(item.DeclaringType)}.{item.Name}";
                 /*
@@ -1340,7 +1342,7 @@ namespace Business.Core.Utils
                     summary = member2?.summary?.text;
                 }
                 */
-                var summary = GetSummary(xmlMembers, memberDefinition, fullName, current.hasDefinition, current.outType.IsEnum, current.outType.GetTypeName());
+                var summary = GetSummary(xmlMembers, memberDefinition, fullName, current.hasDefinition, current.type.IsEnum, current.type.GetTypeName());
 
                 //if (current.outType.IsEnum)
                 //{
@@ -1359,9 +1361,8 @@ namespace Business.Core.Utils
                 {
                     Name = item.Name,
                     Type = memberType,
-                    LastType = current.outType,
-                    CurrentOrigType = current.origType,
-                    CurrentType = current.type,
+                    LastType = current.type,
+                    CurrentType = current.currentType,
                     HasDefinition = current.hasDefinition,
                     DefaultValue = memberType.IsValueType ? System.Activator.CreateInstance(memberType) : null,
 
@@ -1374,7 +1375,7 @@ namespace Business.Core.Utils
                     Nullable = current.nullable,
 
                     FullName = fullName,
-                    Children = current.hasDefinition ? GetTypeDefinition(current.outType, definitions2, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
+                    Children = current.hasDefinition ? GetTypeDefinition(current.type, definitions2, childrens2, path2, xmlMembers, groupKey) : new ReadOnlyCollection<TypeDefinition>(),
                     Childrens = childrens2,
                     MemberDefinition = memberDefinition,
                     Summary = summary,
@@ -1414,10 +1415,6 @@ namespace Business.Core.Utils
             /// </summary>
             public System.Type LastType { get; set; }
 
-            /// <summary>
-            /// Remove IArg type
-            /// </summary>
-            public System.Type CurrentOrigType { get; set; }
 
             /// <summary>
             /// Remove IArg Null type
@@ -1563,15 +1560,15 @@ namespace Business.Core.Utils
                     {
                         foreach (var arg in item.Args)
                         {
-                            if (Equals(arg.Type, type) || Equals(arg.IArgOutType, type))
+                            if (Equals(arg.Type, type))
                             {
                                 arg.Group[group.Key].Logger = GetMetaLogger(arg.Group[group.Key].Logger, logger, group.Group);
                             }
 
-                            if (Equals(arg.IArgInType, type))
-                            {
-                                arg.Group[group.Key].IArgInLogger = GetMetaLogger(arg.Group[group.Key].IArgInLogger, logger, group.Group);
-                            }
+                            //if (Equals(arg.IArgInType, type))
+                            //{
+                            //    arg.Group[group.Key].IArgInLogger = GetMetaLogger(arg.Group[group.Key].IArgInLogger, logger, group.Group);
+                            //}
                         }
                     }
                 });
@@ -1616,10 +1613,10 @@ namespace Business.Core.Utils
                             {
                                 arg.Group[group.Key].Logger = GetMetaLogger(arg.Group[group.Key].Logger, logger, group.Group);
 
-                                if (arg.HasIArg)
-                                {
-                                    arg.Group[group.Key].IArgInLogger = GetMetaLogger(arg.Group[group.Key].IArgInLogger, logger, group.Group);
-                                }
+                                //if (arg.HasIArg)
+                                //{
+                                //    arg.Group[group.Key].IArgInLogger = GetMetaLogger(arg.Group[group.Key].IArgInLogger, logger, group.Group);
+                                //}
                             }
                         }
                     }
@@ -1659,7 +1656,7 @@ namespace Business.Core.Utils
 
                         foreach (var arg in item.Args)
                         {
-                            if (Equals(arg.Type, type) || Equals(arg.IArgOutType, type))
+                            if (Equals(arg.Type, type))
                             {
                                 var g = arg.Group[group.Key];
                                 if (g.Ignore.Any(c => ignore.GroupKey() == c.GroupKey()))

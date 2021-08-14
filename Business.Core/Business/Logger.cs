@@ -88,7 +88,7 @@ namespace Business.Core
             /// <param name="time"></param>
             /// <param name="member"></param>
             /// <param name="group"></param>
-            public LoggerData(System.DateTimeOffset dtt, dynamic token, Type type, System.Collections.Generic.IDictionary<string, dynamic> value, dynamic result, double time, string member, string group)
+            public LoggerData(System.DateTimeOffset dtt, dynamic token, Type type, dynamic value, dynamic result, double time, string member, string group)
             {
                 Dtt = dtt;
                 Token = token;
@@ -115,10 +115,15 @@ namespace Business.Core
             /// </summary>
             public Type Type { get; }
 
+            ///// <summary>
+            ///// The parameters of the method
+            ///// </summary>
+            //public System.Collections.Generic.IDictionary<string, dynamic> Value { get; }
+
             /// <summary>
             /// The parameters of the method
             /// </summary>
-            public System.Collections.Generic.IDictionary<string, dynamic> Value { get; }
+            public dynamic Value { get; }
 
             /// <summary>
             /// The method's Return Value
@@ -144,7 +149,7 @@ namespace Business.Core
             /// Json format
             /// </summary>
             /// <returns></returns>
-            public override string ToString() => new LoggerDataJson(Dtt, Token, Type, Value?.JsonSerialize(), Result?.ToString(), Time, Member, Group).JsonSerialize();
+            public override string ToString() => new LoggerDataJson(Dtt, Token, Type, null != Value ? Help.JsonSerialize(Value) : null, Result?.ToString(), Time, Member, Group).JsonSerialize();
 
             readonly struct LoggerDataJson
             {
@@ -253,16 +258,12 @@ namespace Business.Core
             public readonly string name;
             public readonly dynamic value;
             public readonly MetaLogger logger;
-            public readonly MetaLogger iArgInLogger;
-            public readonly bool hasIArg;
 
-            public ArgsLog(string name, dynamic value, MetaLogger logger, MetaLogger iArgInLogger, bool hasIArg)
+            public ArgsLog(string name, dynamic value, MetaLogger logger)
             {
                 this.name = name;
                 this.value = value;
                 this.logger = logger;
-                this.iArgInLogger = iArgInLogger;
-                this.hasIArg = hasIArg;
             }
         }
 
@@ -287,7 +288,7 @@ namespace Business.Core
                             var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
                             foreach (var log in argsObjLog)
                             {
-                                LoggerSet(logger.Record.CanValue, log.logger.Record, log.iArgInLogger.Record, logObjs, log, logger.Record.ValueType);
+                                LoggerSet(logger.Record.CanValue, log.logger.Record, logObjs, log);
                             }
                             return 0 == logObjs.Count ? null : logObjs;
                         }
@@ -308,7 +309,7 @@ namespace Business.Core
                             var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
                             foreach (var log in argsObjLog)
                             {
-                                LoggerSet(logger.Error.CanValue, log.logger.Error, log.iArgInLogger.Error, logObjs, log, logger.Error.ValueType);
+                                LoggerSet(logger.Error.CanValue, log.logger.Error, logObjs, log);
                             }
                             return 0 == logObjs.Count ? null : logObjs;
                         }
@@ -329,7 +330,7 @@ namespace Business.Core
                             var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
                             foreach (var log in argsObjLog)
                             {
-                                LoggerSet(logger.Exception.CanValue, log.logger.Exception, log.iArgInLogger.Exception, logObjs, log, logger.Exception.ValueType);
+                                LoggerSet(logger.Exception.CanValue, log.logger.Exception, logObjs, log);
                             }
                             return 0 == logObjs.Count ? null : logObjs;
                         }
@@ -339,9 +340,31 @@ namespace Business.Core
             }
 
             //return 0 == logObjs.Count ? null : logObjs;
+
+            void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, System.Collections.Generic.IDictionary<string, dynamic> logObjs, ArgsLog log)
+            {
+                switch (canValue)
+                {
+                    case LoggerValueMode.All:
+                        if ((null != argLogAttr && !argLogAttr.CanWrite))
+                        {
+                            break;
+                        }
+                        logObjs.Add(log.name, log.value);
+                        break;
+                    case LoggerValueMode.Select:
+                        if (null != argLogAttr && argLogAttr.CanWrite)
+                        {
+                            logObjs.Add(log.name, log.value);
+                        }
+                        break;
+                    default: break;
+                }
+            }
         }
 
-        static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, LoggerAttribute iArgInLogAttr, System.Collections.Generic.IDictionary<string, dynamic> logObjs, ArgsLog log, ValueType? loggerValueType)
+        /*
+        static void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, System.Collections.Generic.IDictionary<string, dynamic> logObjs, ArgsLog log)
         {
             //meta
             switch (canValue)
@@ -352,71 +375,76 @@ namespace Business.Core
                         break;
                     }
 
-                    if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite && log.hasIArg)
-                    {
-                        var iArg = log.value as IArg;
-                        logObjs.Add(log.name, iArg.Out);
-                        //logObjs.HasIArg[log.name] = false;
-                    }
-                    else if (log.hasIArg)
-                    {
-                        var iArg = log.value as IArg;
-                        switch (loggerValueType ?? ValueType.In)
-                        {
-                            case ValueType.All:
-                                logObjs.Add(log.name, iArg ?? log.value);
-                                break;
-                            case ValueType.In:
-                                logObjs.Add(log.name, null == iArg ? log.value : iArg.In);
-                                //logObjs.HasIArg[log.name] = false;
-                                break;
-                            case ValueType.Out:
-                                logObjs.Add(log.name, null == iArg ? log.value : iArg.Out);
-                                //logObjs.HasIArg[log.name] = false;
-                                break;
-                            default: break;
-                        }
-                    }
-                    else
-                    {
-                        logObjs.Add(log.name, log.value);
-                    }
+                    logObjs.Add(log.name, log.value);
+
+                    //if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite)
+                    //{
+                    //    var iArg = log.value as IArg;
+                    //    logObjs.Add(log.name, iArg.Out);
+                    //    //logObjs.HasIArg[log.name] = false;
+                    //}
+                    //else if (log.hasIArg)
+                    //{
+                    //    var iArg = log.value as IArg;
+                    //    switch (loggerValueType ?? ValueType.In)
+                    //    {
+                    //        case ValueType.All:
+                    //            logObjs.Add(log.name, iArg ?? log.value);
+                    //            break;
+                    //        case ValueType.In:
+                    //            logObjs.Add(log.name, null == iArg ? log.value : iArg.In);
+                    //            //logObjs.HasIArg[log.name] = false;
+                    //            break;
+                    //        case ValueType.Out:
+                    //            logObjs.Add(log.name, null == iArg ? log.value : iArg.Out);
+                    //            //logObjs.HasIArg[log.name] = false;
+                    //            break;
+                    //        default: break;
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    logObjs.Add(log.name, log.value);
+                    //}
                     break;
                 case LoggerValueMode.Select:
                     if (null != argLogAttr && argLogAttr.CanWrite)
                     {
-                        if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite && log.hasIArg)
-                        {
-                            logObjs.Add(log.name, (log.value as IArg).Out);
-                            //logObjs.HasIArg[log.name] = false;
-                        }
-                        else if (log.hasIArg)
-                        {
-                            var iArg = log.value as IArg;
-                            switch (loggerValueType ?? ValueType.In)
-                            {
-                                case ValueType.All:
-                                    logObjs.Add(log.name, iArg ?? log.value);
-                                    break;
-                                case ValueType.In:
-                                    logObjs.Add(log.name, null == iArg ? log.value : iArg.In);
-                                    //logObjs.HasIArg[log.name] = false;
-                                    break;
-                                case ValueType.Out:
-                                    logObjs.Add(log.name, null == iArg ? log.value : iArg.Out);
-                                    //logObjs.HasIArg[log.name] = false;
-                                    break;
-                                default: break;
-                            }
-                        }
-                        else
-                        {
-                            logObjs.Add(log.name, log.value);
-                        }
+                        logObjs.Add(log.name, log.value);
+
+                        //if (null != iArgInLogAttr && !iArgInLogAttr.CanWrite && log.hasIArg)
+                        //{
+                        //    logObjs.Add(log.name, (log.value as IArg).Out);
+                        //    //logObjs.HasIArg[log.name] = false;
+                        //}
+                        //else if (log.hasIArg)
+                        //{
+                        //    var iArg = log.value as IArg;
+                        //    switch (loggerValueType ?? ValueType.In)
+                        //    {
+                        //        case ValueType.All:
+                        //            logObjs.Add(log.name, iArg ?? log.value);
+                        //            break;
+                        //        case ValueType.In:
+                        //            logObjs.Add(log.name, null == iArg ? log.value : iArg.In);
+                        //            //logObjs.HasIArg[log.name] = false;
+                        //            break;
+                        //        case ValueType.Out:
+                        //            logObjs.Add(log.name, null == iArg ? log.value : iArg.Out);
+                        //            //logObjs.HasIArg[log.name] = false;
+                        //            break;
+                        //        default: break;
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    logObjs.Add(log.name, log.value);
+                        //}
                     }
                     break;
                 default: break;
             }
         }
+        */
     }
 }

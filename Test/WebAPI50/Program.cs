@@ -21,7 +21,7 @@ namespace WebAPI50
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                    .UseUrls("http://192.168.1.107:5000")
+                    //.UseUrls("http://192.168.1.107:5000")
                     .UseStartup<Startup>();
                 });
     }

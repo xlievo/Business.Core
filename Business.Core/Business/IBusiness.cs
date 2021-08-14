@@ -93,18 +93,24 @@ namespace Business.Core
         */
     }
 
-    /// <summary>
-    /// IBusiness
-    /// </summary>
-    /// <typeparam name="Result"></typeparam>
-    /// <typeparam name="Arg"></typeparam>
-    public interface IBusiness<Result, Arg> : IBusiness where Result : Core.Result.IResult where Arg : IArg, new() { }
+    ///// <summary>
+    ///// IBusiness
+    ///// </summary>
+    ///// <typeparam name="Result"></typeparam>
+    ///// <typeparam name="Arg"></typeparam>
+    //public interface IBusiness<Result, Arg> : IBusiness where Result : Core.Result.IResult where Arg : IArg, new() { }
 
     /// <summary>
     /// IBusiness
     /// </summary>
     /// <typeparam name="Result"></typeparam>
-    public interface IBusiness<Result> : IBusiness<Result, Arg<object>> where Result : Core.Result.IResult { }
+    public interface IBusiness<Result> : IBusiness where Result : Core.Result.IResult, new() { }
+
+    ///// <summary>
+    ///// IBusiness
+    ///// </summary>
+    ///// <typeparam name="Result"></typeparam>
+    //public interface IBusiness<Result> : IBusiness<Result, Arg<object>> where Result : Core.Result.IResult { }
 
     /// <summary>
     /// BusinessBase
@@ -176,10 +182,8 @@ namespace Business.Core
     /// BusinessBase
     /// </summary>
     /// <typeparam name="Result"></typeparam>
-    /// <typeparam name="Arg"></typeparam>
-    public abstract partial class BusinessBase<Result, Arg> : BusinessBase, IBusiness<Result, Arg>
-        where Result : Core.Result.IResult
-        where Arg : IArg, new()
+    public abstract partial class BusinessBase<Result> : BusinessBase, IBusiness<Result>
+        where Result : Core.Result.IResult, new()
     {
         /*
         /// <summary>
@@ -210,9 +214,9 @@ namespace Business.Core
         */
     }
 
-    /// <summary>
-    /// BusinessBase
-    /// </summary>
-    /// <typeparam name="Result"></typeparam>
-    public abstract class BusinessBase<Result> : BusinessBase<Result, Arg<object>>, IBusiness<Result> where Result : Core.Result.IResult { }
+    ///// <summary>
+    ///// BusinessBase
+    ///// </summary>
+    ///// <typeparam name="Result"></typeparam>
+    //public abstract class BusinessBase<Result> : BusinessBase<Result, Arg<object>>, IBusiness<Result> where Result : Core.Result.IResult { }
 }

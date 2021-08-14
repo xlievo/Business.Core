@@ -186,7 +186,7 @@ public partial class BusinessMember2 : BusinessBase
         public int c { get; set; }
 
         [@JsonArg]
-        public Arg<Test001Result2> d { get; set; }
+        public Test001Result2 d { get; set; }
     }
 
     //post json
@@ -284,7 +284,7 @@ public partial class BusinessMember2 : BusinessBase
 
     [Testing("test2", "{\"Arg\":{\"BBB\":\"sss\",\"bbbb\":\"dd\",\"aaa\":[\"aaa\",\"ssssaaazzzxxx\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
     [Testing("test3", "{\"arg\":{\"bbb\":\"fff222\",\"bbbb\":\"的撒333\",\"aaa\":[\"aaa\",\"sssaa\"]},\"dateTime\":\"2020-07-03T02:24\"}")]
-    public virtual async Task<dynamic> Test0001(Test1110 ARG, Arg<DateTime?> DateTime)
+    public virtual async Task<dynamic> Test0001(Test1110 ARG, DateTime? DateTime)
     {
         return this.ResultCreate(ARG);
     }
@@ -409,12 +409,12 @@ public partial class BusinessMember2 : BusinessBase
         //return ss;
     }
 
-    public virtual async Task<MyEnum> TestMyEnum(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
+    public virtual async Task<MyEnum> TestMyEnum(Session session222, Test004 arg, DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         return MyEnum.B;
     }
 
-    public virtual async Task<Test0011> TestTest0011(Session session222, Arg<Test004> arg, Arg<DateTime?> dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
+    public virtual async Task<Test0011> TestTest0011(Session session222, Test004 arg, DateTime? dateTime, HttpFile httpFile = default, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m, [Ignore(IgnoreMode.BusinessArg)] int fff = 666, [Ignore(IgnoreMode.BusinessArg)] bool bbb = true)
     {
         return new Test0011 { AAA = new List<string> { "aaa" } };
     }

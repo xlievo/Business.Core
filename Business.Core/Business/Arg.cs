@@ -17,6 +17,7 @@
 
 namespace Business.Core
 {
+    /*
     /// <summary>
     /// IArg
     /// </summary>
@@ -136,4 +137,5 @@ namespace Business.Core
         /// </summary>
         public dynamic In { get; set; }
     }
+    */
 }
