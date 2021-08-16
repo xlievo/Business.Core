@@ -18,14 +18,14 @@
 namespace Business.Core
 {
     using Annotations;
-    using Business.Core.Auth;
-    using Business.Core.Document;
+    using Auth;
+    using Document;
     using Meta;
     using Result;
+    using Utils;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Utils;
 
     //internal partial class Bind
     //{
@@ -374,6 +374,7 @@ namespace Business.Core
             {
                 cfg.MetaData = GetMetaData(cfg, methods);
                 interceptor.Configer = cfg;
+                interceptor.Business = instance;
             }
             catch
             {
@@ -1986,7 +1987,7 @@ namespace Business.Core
             {
                 var args = GetArgsObj(meta.DefaultValue, arguments, meta.Args);
 
-                return business.Configer.Interceptor.Intercept(meta.Name, args, new System.Func<dynamic>(() => meta.Accessor.Invoke(business, args)), key, token, multipleParameterDeserialize).Result;
+                return InterceptorExtensions.Intercept(business.Configer.Interceptor, meta.Name, args, null, key, token, multipleParameterDeserialize).Result;
             };
 
             Meta = meta;
@@ -2564,8 +2565,8 @@ namespace Business.Core
 
 namespace Business.Core.Meta
 {
-    using Business.Core.Annotations;
-    using Business.Core.Utils;
+    using Annotations;
+    using Utils;
 
     #region Meta
 

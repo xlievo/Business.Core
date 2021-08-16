@@ -1213,6 +1213,11 @@
             IInterceptor
             </summary>
         </member>
+        <member name="P:Business.Core.Auth.IInterceptor.Business">
+            <summary>
+            Business
+            </summary>
+        </member>
         <member name="P:Business.Core.Auth.IInterceptor.Configer">
             <summary>
             Configer
@@ -1228,21 +1233,14 @@
             <param name="ignoreMethods"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Auth.IInterceptor.Intercept(System.String,System.Object[],System.Func{System.Object},System.String,System.Object,System.Boolean)">
-            <summary>
-            Intercept
-            </summary>
-            <param name="method"></param>
-            <param name="arguments"></param>
-            <param name="call"></param>
-            <param name="group"></param>
-            <param name="token"></param>
-            <param name="multipleParameterDeserialize"></param>
-            <returns></returns>
-        </member>
         <member name="T:Business.Core.Auth.Interceptor">
             <summary>
             Interceptor
+            </summary>
+        </member>
+        <member name="P:Business.Core.Auth.Interceptor.Business">
+            <summary>
+            Business
             </summary>
         </member>
         <member name="P:Business.Core.Auth.Interceptor.Configer">
@@ -1260,23 +1258,26 @@
             <param name="ignoreMethods"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Auth.Interceptor.Intercept(Castle.DynamicProxy.IInvocation)">
+        <member name="T:Business.Core.Auth.InterceptorCastle">
+            <summary>
+            InterceptorCastle
+            </summary>
+        </member>
+        <member name="M:Business.Core.Auth.InterceptorCastle.Create(System.Type,System.Object[],System.Func{System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
+            <summary>
+            Create
+            </summary>
+            <param name="businessType"></param>
+            <param name="constructorArguments"></param>
+            <param name="constructorArgumentsFunc"></param>
+            <param name="ignoreMethods"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Auth.InterceptorCastle.Intercept(Castle.DynamicProxy.IInvocation)">
             <summary>
             Intercept
             </summary>
             <param name="invocation"></param>
-        </member>
-        <member name="M:Business.Core.Auth.Interceptor.Intercept(System.String,System.Object[],System.Func{System.Object},System.String,System.Object,System.Boolean)">
-            <summary>
-            Intercept
-            </summary>
-            <param name="method"></param>
-            <param name="arguments"></param>
-            <param name="call"></param>
-            <param name="group"></param>
-            <param name="token"></param>
-            <param name="multipleParameterDeserialize"></param>
-            <returns></returns>
         </member>
         <member name="T:Business.Core.Auth.IToken">
             <summary>
@@ -1370,11 +1371,11 @@
             InterceptorExtensions
             </summary>
         </member>
-        <member name="M:Business.Core.Utils.InterceptorExtensions.Intercept(Business.Core.Configer,System.String,System.Object[],System.Func{System.Object},System.String,System.Object,System.Boolean)">
+        <member name="M:Business.Core.Utils.InterceptorExtensions.Intercept(Business.Core.Auth.IInterceptor,System.String,System.Object[],System.Func{System.Object[],System.Object},System.String,System.Object,System.Boolean)">
             <summary>
             Intercept
             </summary>
-            <param name="configer"></param>
+            <param name="interceptor"></param>
             <param name="method"></param>
             <param name="arguments"></param>
             <param name="call"></param>
@@ -1408,6 +1409,15 @@
             <param name="args"></param>
             <param name="currentValue"></param>
             <param name="token"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Utils.InterceptorExtensions.GetConstructorParameters(System.Type,System.Object[],System.Func{System.Type,System.Object})">
+            <summary>
+            GetConstructorParameters
+            </summary>
+            <param name="businessType"></param>
+            <param name="constructorArguments"></param>
+            <param name="constructorArgumentsFunc"></param>
             <returns></returns>
         </member>
         <member name="T:Business.Core.Utils.BootstrapExtensions">

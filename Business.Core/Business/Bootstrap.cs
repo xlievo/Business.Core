@@ -83,7 +83,7 @@ namespace Business.Core
         /// <param name="type"></param>
         public BootstrapConfig(Auth.IInterceptor interceptor, object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type type = null) : this()
         {
-            Interceptor = interceptor ?? new Auth.Interceptor();
+            Interceptor = interceptor ?? new Auth.InterceptorCastle();
             ConstructorArguments = constructorArguments;
             ConstructorArgumentsFunc = constructorArgumentsFunc;
             Type = type;

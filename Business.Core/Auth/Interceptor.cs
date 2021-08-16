@@ -27,6 +27,11 @@ namespace Business.Core.Auth
     public interface IInterceptor
     {
         /// <summary>
+        /// Business
+        /// </summary>
+        object Business { get; set; }
+
+        /// <summary>
         /// Configer
         /// </summary>
         Configer Configer { get; set; }
@@ -40,18 +45,6 @@ namespace Business.Core.Auth
         /// <param name="ignoreMethods"></param>
         /// <returns></returns>
         object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null);
-
-        /// <summary>
-        /// Intercept
-        /// </summary>
-        /// <param name="method"></param>
-        /// <param name="arguments"></param>
-        /// <param name="call"></param>
-        /// <param name="group"></param>
-        /// <param name="token"></param>
-        /// <param name="multipleParameterDeserialize"></param>
-        /// <returns></returns>
-        System.Threading.Tasks.ValueTask<dynamic> Intercept(string method, object[] arguments, System.Func<dynamic> call, string group, dynamic token, bool multipleParameterDeserialize);
     }
 
     readonly struct ArgResult
@@ -69,7 +62,51 @@ namespace Business.Core.Auth
     /// <summary>
     /// Interceptor
     /// </summary>
-    public class Interceptor : IInterceptor, Castle.DynamicProxy.IInterceptor
+    public class Interceptor : IInterceptor
+    {
+        /// <summary>
+        /// Business
+        /// </summary>
+        public object Business { get; set; }
+
+        /// <summary>
+        /// Configer
+        /// </summary>
+        public Configer Configer { get; set; }
+
+        /// <summary>
+        /// Create
+        /// </summary>
+        /// <param name="businessType"></param>
+        /// <param name="constructorArguments"></param>
+        /// <param name="constructorArgumentsFunc"></param>
+        /// <param name="ignoreMethods"></param>
+        /// <returns></returns>
+        public virtual object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
+        {
+            try
+            {
+                var args = InterceptorExtensions.GetConstructorParameters(businessType, constructorArguments, constructorArgumentsFunc);
+
+                var instance = System.Activator.CreateInstance(businessType, args);
+
+                return instance;
+            }
+            catch (System.Exception ex)
+            {
+                var inner = ex.GetBase();
+
+                inner.GlobalLog();
+
+                throw inner;
+            }
+        }
+    }
+
+    /// <summary>
+    /// InterceptorCastle
+    /// </summary>
+    public class InterceptorCastle : Interceptor, Castle.DynamicProxy.IInterceptor
     {
         class BusinessAllMethodsHook : Castle.DynamicProxy.AllMethodsHook
         {
@@ -90,11 +127,6 @@ namespace Business.Core.Auth
         }
 
         /// <summary>
-        /// Configer
-        /// </summary>
-        public Configer Configer { get; set; }
-
-        /// <summary>
         /// Create
         /// </summary>
         /// <param name="businessType"></param>
@@ -102,44 +134,13 @@ namespace Business.Core.Auth
         /// <param name="constructorArgumentsFunc"></param>
         /// <param name="ignoreMethods"></param>
         /// <returns></returns>
-        public object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
+        public override object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
         {
             var proxy = new Castle.DynamicProxy.ProxyGenerator();
 
             try
             {
-                var parameters = businessType.GetConstructors()?.FirstOrDefault()?.GetParameters();
-
-                var args = new object[parameters?.Length ?? 0];
-
-                if (0 < parameters?.Length)
-                {
-                    var arguments = constructorArguments?.ToDictionary(c => c.GetType(), c => c);
-
-                    var i = 0;
-                    foreach (var parameter in parameters)
-                    {
-                        var arg = parameter.HasDefaultValue ? parameter.DefaultValue : null;
-
-                        object value = null;
-
-                        if (0 < arguments?.Count && (arguments?.TryGetValue(parameter.ParameterType, out value) ?? false))
-                        {
-                            arg = value;
-                        }
-                        else
-                        {
-                            value = constructorArgumentsFunc?.Invoke(parameter.ParameterType);
-
-                            if (!Equals(null, value))
-                            {
-                                arg = value;
-                            }
-                        }
-
-                        args[i++] = arg;
-                    }
-                }
+                var args = InterceptorExtensions.GetConstructorParameters(businessType, constructorArguments, constructorArgumentsFunc);
 
                 var instance = proxy.CreateClassProxy(businessType, new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(ignoreMethods)), args, this);
 
@@ -161,31 +162,19 @@ namespace Business.Core.Auth
         /// <param name="invocation"></param>
         public void Intercept(Castle.DynamicProxy.IInvocation invocation)
         {
-            if (null == this.Configer.MetaData)
+            if (null == this.Configer?.MetaData)
             {
                 invocation.ReturnValue = null; return;
             }
 
             var proceed = invocation.CaptureProceedInfo();
 
-            invocation.ReturnValue = Intercept(invocation.Method.Name, invocation.Arguments, () =>
+            invocation.ReturnValue = this.Intercept(invocation.Method.Name, invocation.Arguments, arguments =>
             {
                 proceed.Invoke();
                 return invocation.ReturnValue;
             }).Result;
         }
-
-        /// <summary>
-        /// Intercept
-        /// </summary>
-        /// <param name="method"></param>
-        /// <param name="arguments"></param>
-        /// <param name="call"></param>
-        /// <param name="group"></param>
-        /// <param name="token"></param>
-        /// <param name="multipleParameterDeserialize"></param>
-        /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> Intercept(string method, object[] arguments, System.Func<dynamic> call, string group = null, dynamic token = null, bool multipleParameterDeserialize = false) => await InterceptorExtensions.Intercept(Configer, method, arguments, call, group, token, multipleParameterDeserialize);
     }
 }
 
@@ -204,7 +193,7 @@ namespace Business.Core.Utils
         /// <summary>
         /// Intercept
         /// </summary>
-        /// <param name="configer"></param>
+        /// <param name="interceptor"></param>
         /// <param name="method"></param>
         /// <param name="arguments"></param>
         /// <param name="call"></param>
@@ -212,8 +201,9 @@ namespace Business.Core.Utils
         /// <param name="token"></param>
         /// <param name="multipleParameterDeserialize"></param>
         /// <returns></returns>
-        public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(Configer configer, string method, object[] arguments, System.Func<dynamic> call, string group, dynamic token, bool multipleParameterDeserialize)
+        public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(this Auth.IInterceptor interceptor, string method, object[] arguments, System.Func<object[], dynamic> call, string group = null, dynamic token = null, bool multipleParameterDeserialize = false)
         {
+            var configer = interceptor.Configer;
             var dtt = System.DateTimeOffset.Now;
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
@@ -332,7 +322,7 @@ namespace Business.Core.Utils
 
                 //===============================//
 
-                var returnValue2 = call();
+                var returnValue2 = null == call ? meta.Accessor(interceptor.Business, argsObj) : call(argsObj);
 
                 //checked async exception
                 if (meta.HasAsync)
@@ -532,6 +522,51 @@ namespace Business.Core.Utils
             }
 
             return ResultFactory.ResultCreate(meta.ResultTypeDefinition, currentValue);
+        }
+
+        /// <summary>
+        /// GetConstructorParameters
+        /// </summary>
+        /// <param name="businessType"></param>
+        /// <param name="constructorArguments"></param>
+        /// <param name="constructorArgumentsFunc"></param>
+        /// <returns></returns>
+        public static object[] GetConstructorParameters(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null)
+        {
+            var parameters = businessType.GetConstructors()?.FirstOrDefault()?.GetParameters();
+
+            var args = new object[parameters?.Length ?? 0];
+
+            if (0 < parameters?.Length)
+            {
+                var arguments = constructorArguments?.ToDictionary(c => c.GetType(), c => c);
+
+                var i = 0;
+                foreach (var parameter in parameters)
+                {
+                    var arg = parameter.HasDefaultValue ? parameter.DefaultValue : null;
+
+                    object value = null;
+
+                    if (0 < arguments?.Count && (arguments?.TryGetValue(parameter.ParameterType, out value) ?? false))
+                    {
+                        arg = value;
+                    }
+                    else
+                    {
+                        value = constructorArgumentsFunc?.Invoke(parameter.ParameterType);
+
+                        if (!Equals(null, value))
+                        {
+                            arg = value;
+                        }
+                    }
+
+                    args[i++] = arg;
+                }
+            }
+
+            return args;
         }
     }
 }
