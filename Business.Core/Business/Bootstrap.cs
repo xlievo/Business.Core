@@ -81,9 +81,9 @@ namespace Business.Core
         /// <param name="constructorArguments"></param>
         /// <param name="constructorArgumentsFunc"></param>
         /// <param name="type"></param>
-        public BootstrapConfig(Auth.IInterceptor interceptor, object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type type = null) : this()
+        public BootstrapConfig(System.Type interceptor, object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type type = null) : this()
         {
-            Interceptor = interceptor ?? new Auth.InterceptorCastle();
+            Interceptor = interceptor ?? typeof(Auth.InterceptorCastle);
             ConstructorArguments = constructorArguments;
             ConstructorArgumentsFunc = constructorArgumentsFunc;
             Type = type;
@@ -102,7 +102,7 @@ namespace Business.Core
         /// <summary>
         /// Interceptor
         /// </summary>
-        public Auth.IInterceptor Interceptor { get; }
+        public System.Type Interceptor { get; }
 
         /// <summary>
         /// ConstructorArguments
@@ -215,7 +215,7 @@ namespace Business.Core
         /// <param name="constructorArgumentsFunc"></param>
         /// <param name="interceptor"></param>
         /// <returns></returns>
-        public static Bootstrap<Business> Create<Business>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc, Auth.IInterceptor interceptor = null) where Business : class => new Bootstrap<Business>(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc, typeof(Business)));
+        public static Bootstrap<Business> Create<Business>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type interceptor = null) where Business : class => new Bootstrap<Business>(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc, typeof(Business)));
 
         ///// <summary>
         ///// Initialize a Type proxy class
@@ -241,7 +241,7 @@ namespace Business.Core
         /// <param name="constructorArgumentsFunc"></param>
         /// <param name="interceptor"></param>
         /// <returns></returns>
-        public static Bootstrap Create(System.Type type, object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc, Auth.IInterceptor interceptor = null) => new Bootstrap(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc, type));
+        public static Bootstrap Create(System.Type type, object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type interceptor = null) => new Bootstrap(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc, type));
         //public static Bootstrap Create(System.Type type, Auth.IInterceptor interceptor = null, System.Func<System.Type, object> constructorArgumentsFunc = null, params object[] constructorArguments) => new Bootstrap(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc, type));
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Business.Core
         /// <param name="constructorArgumentsFunc"></param>
         /// <param name="interceptor"></param>
         /// <returns></returns>
-        public static BootstrapAll CreateAll(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc, Auth.IInterceptor interceptor = null) => new BootstrapAll(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc));
+        public static BootstrapAll CreateAll(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type interceptor = null) => new BootstrapAll(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc));
 
         /// <summary>
         /// bootstrap all Business class
@@ -276,7 +276,20 @@ namespace Business.Core
         /// <param name="constructorArgumentsFunc"></param>
         /// <param name="interceptor"></param>
         /// <returns></returns>
-        public static BootstrapAll<Business> CreateAll<Business>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc, Auth.IInterceptor interceptor = null) where Business : class, IBusiness => new BootstrapAll<Business>(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc));
+        public static BootstrapAll<Business> CreateAll<Business>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type interceptor = null) where Business : class, IBusiness => new BootstrapAll<Business>(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc));
+
+        ///// <summary>
+        ///// bootstrap all Business class
+        ///// </summary>
+        ///// <typeparam name="Business"></typeparam>
+        ///// <typeparam name="IInterceptor"></typeparam>
+        ///// <param name="constructorArguments"></param>
+        ///// <param name="constructorArgumentsFunc"></param>
+        ///// <returns></returns>
+        //public static BootstrapAll<Business> CreateAll<Business, IInterceptor>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc)
+        //    where Business : class, IBusiness
+        //    where IInterceptor : class, Auth.IInterceptor, new()
+        //    => new BootstrapAll<Business>(new BootstrapConfig(typeof(IInterceptor), constructorArguments, constructorArgumentsFunc));
 
         #endregion
 

@@ -1859,6 +1859,7 @@ function loadMember(member) {
         httpFile: member.httpFile,
         testing: member.testing,
         name: member.name,
+        parameters: member.parameters,
         properties: {}
         //properties: {
         //    t: {},
@@ -2178,15 +2179,27 @@ function ready(editor) {
                     $trigger(collapse, 'click');
                 }
 
+                var data = {};
+                var url = doc[businessName].options.host + "/" + businessName;
                 if (input.editors.f) {
                     var form = new FormData();
-                    var data = getData(route, input, false);
-                    form.append(route.c, input.schema.name);
-                    if (data.hasOwnProperty("t")) {
-                        form.append(route.t, data.t);
+
+                    if (!input.schema.parameters) {
+                        data = getData(route, input, false);
+                        form.append(route.c, input.schema.name);
+                        if (data.hasOwnProperty("t")) {
+                            form.append(route.t, data.t);
+                        }
+                        if (data.hasOwnProperty("d")) {
+                            form.append(route.d, data.d);
+                        }
                     }
-                    if (data.hasOwnProperty("d")) {
-                        form.append(route.d, data.d);
+                    else {
+                        data = getData3(route, input);
+                        url += "/" + input.schema.name;
+                        for (var i in data) {
+                            form.append(i, data[i]);
+                        }
                     }
 
                     var files = input.container.querySelectorAll("[tag='file']");
@@ -2194,7 +2207,7 @@ function ready(editor) {
                         form.append(c.file.name, c.file);
                     });
 
-                    ajax.postForm(doc[businessName].options.host + "/" + businessName,
+                    ajax.postForm(url,
                         form,
                         function (response) {
                             //succcess
@@ -2209,15 +2222,15 @@ function ready(editor) {
                         });
                 }
                 else {
-                    var data = getData(route, input, false);
-                    var d = { [route.c]: input.schema.name };
-                    if (data.hasOwnProperty("t")) {
-                        d[route.t] = data.t;
+                    if (!input.schema.parameters) {
+                        data = getData(route, input, false);
                     }
-                    if (data.hasOwnProperty("d")) {
-                        d[route.d] = data.d;
+                    else {
+                        data = getData3(route, input);
+                        url += "/" + input.schema.name;
                     }
-                    ajax.post(doc[businessName].options.host + "/" + businessName, d,
+
+                    ajax.post(url, data,
                         function (response) {
                             //succcess
                             try {
@@ -2322,7 +2335,23 @@ function ready(editor) {
                         return;
                     }
 
-                    var data = getData(route, input, false);
+                    var cmd = "";
+                    var d = "";
+                    if (!input.schema.parameters) {
+                        var data = getData(route, input, false);
+                        d = "&" + route.c + "=" + encodeURIComponent(input.schema.name)
+                            + "&" + route.t + "=" + encodeURIComponent(data.t)
+                            + "&" + route.d + "="
+                            + encodeURIComponent(doc[businessName].options.benchmarkJSON ? JSON.stringify(data.d) : data.d);
+                    }
+                    else {
+                        data = getData3(route, input);
+                        for (var i in data) {
+                            d += "&" + i + "=" + encodeURIComponent(doc[businessName].options.benchmarkJSON ? JSON.stringify(data[i]) : data[i]);
+                        }
+                        cmd = input.schema.name;
+                    }
+
                     //input.schema.name
                     ajax.post(doc[businessName].options.host + "/" + businessName,
                         {
@@ -2331,8 +2360,9 @@ function ready(editor) {
                             [route.d]: JSON.stringify({
                                 n: n,
                                 c: c,
-                                data: "&" + route.c + "=" + encodeURIComponent(input.schema.name) + "&" + route.t + "=" + encodeURIComponent(data.t) + "&" + route.d + "=" + encodeURIComponent((doc[businessName].options.benchmarkJSON ? JSON.stringify(data.d) : data.d)),
-                                host: doc[businessName].options.host + "/" + businessName
+                                data: d,
+                                host: doc[businessName].options.host + "/" + businessName,
+                                cmd: cmd
                             })
                         },
                         function (response) {
@@ -2374,12 +2404,18 @@ function ready(editor) {
         input.schema.encode = false;
 
         editor.on('change', function () {
-            var data = getData(route, input, false);
+            var data = {};
             var h = doc[businessName].options.host + "/" + businessName;
+            if (!input.schema.parameters) {
+                data = getData(route, input, false);
+            }
+            else {
+                data = getData3(route, input);
+            }
 
-            curlValue.setValue(GetCurl(route, h, input.schema.name, data, getData2(route, input, false, input.schema.encode), input.schema.encode));
+            curlValue.setValue(GetCurl(route, h, input.schema.name, data, getData2(route, input, false, input.schema.encode), input.schema.encode, input.schema.parameters));
             javascriptValue.setValue(GetSdkJavaScript(route, h, input.schema.name, data));
-            netValue.setValue(GetSdkNet(route, h, input.schema.name, data));
+            netValue.setValue(GetSdkNet(route, !input.schema.parameters ? h : h += "/" + input.schema.name, input.schema.name, !input.schema.parameters ? data : getData4(route, input), input.schema.parameters));
         });
 
         curlValue.jsoneditor.on('ready', function () {
@@ -2395,7 +2431,7 @@ function ready(editor) {
 
                     var data = getData(route, input, false);
                     var h = doc[businessName].options.host + "/" + businessName;
-                    curlValue.setValue(GetCurl(route, h, input.schema.name, data, getData2(route, input, false, !input.schema.encode), !input.schema.encode));
+                    curlValue.setValue(GetCurl(route, h, input.schema.name, data, getData2(route, input, false, !input.schema.encode), !input.schema.encode, input.schema.parameters));
                     input.schema.encode = !input.schema.encode;
                 }, false);
                 scroller.appendChild(icon);
@@ -2638,11 +2674,11 @@ function getData(route, input, format) {
             d = JSON.stringify(args, null, format ? 2 : 0);
         }
 
-        data.d = d;
+        data[route.d] = d;
     }
 
     if (input.editors[route.t]) {
-        data.t = input.editors[route.t].getValue();
+        data[route.t] = input.editors[route.t].getValue();
     }
 
     return data;
@@ -2654,7 +2690,7 @@ function getData2(route, input, format, encode = false) {
     if (editors) {
         var d = getDynamicObject(editors.schema, editors.getValue());
         var schema_d = input.schema.properties[route.d];
-        if (input.schema.argSingle) {
+        if (input.schema.argSingle && !input.schema.parameters) {
             if ("object" !== schema_d.type && "array" !== schema_d.type) {
                 if (editors.schema.dynamicObject) {
                     if (null != d) {
@@ -2709,6 +2745,54 @@ function getData2(route, input, format, encode = false) {
 
     if (input.editors[route.t]) {
         data.t = input.editors[route.t].getValue();
+    }
+
+    return data;
+}
+
+//parameters
+function getData3(route, input) {
+    var data = {};
+    var editors = input.editors[route.d];
+    if (editors) {
+        for (var i in editors.editors) {
+            var schema_d = editors.editors[i].schema;
+            var d = getDynamicObject(editors.editors[i].schema, editors.editors[i].getValue());
+            if ("object" == schema_d.type || "array" == schema_d.type) {
+                d = JSON.stringify(d, null);
+            }
+            data[i] = d;
+        }
+    }
+
+    if (input.editors[route.t]) {
+        data[route.t] = input.editors[route.t].getValue();
+    }
+
+    return data;
+}
+function getData4(route, input) {
+    var data = {};
+    var editors = input.editors[route.d];
+    if (editors) {
+        for (var i in editors.editors) {
+            var schema_d = editors.editors[i].schema;
+            var d = getDynamicObject(editors.editors[i].schema, editors.editors[i].getValue());
+            if ("object" == schema_d.type || "array" == schema_d.type) {
+                d = JSON.stringify(d, null);
+            }
+            var kv = {};
+            kv.t = schema_d.type;
+            kv.d = d;
+            data[i] = kv;
+        }
+    }
+
+    if (input.editors[route.t]) {
+        var kv = {};
+        kv.t = "string";
+        kv.d = input.editors[route.t].getValue();
+        data[route.t] = kv;
     }
 
     return data;

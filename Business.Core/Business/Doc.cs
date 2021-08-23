@@ -634,6 +634,11 @@ namespace Business.Core.Document
         /// Annotations
         /// </summary>
         IEnumerable<string> Annotations { get; set; }
+
+        /// <summary>
+        /// Parameters
+        /// </summary>
+        bool Parameters { get; set; }
     }
 
     /// <summary>
@@ -841,6 +846,11 @@ namespace Business.Core.Document
         /// Annotations
         /// </summary>
         public IEnumerable<string> Annotations { get; set; }
+
+        /// <summary>
+        /// Parameters
+        /// </summary>
+        public bool Parameters { get; set; }
     }
 
     /// <summary>

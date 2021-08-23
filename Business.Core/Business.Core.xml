@@ -565,6 +565,11 @@
             is Deserialize
             </summary>
         </member>
+        <member name="P:Business.Core.Annotations.ArgumentAttribute.MetaData.Key">
+            <summary>
+            command key
+            </summary>
+        </member>
         <member name="P:Business.Core.Annotations.ArgumentAttribute.MetaData.Filter">
             <summary>
             This value indicates that the annotation is a filter model used to apply parameters. The default value is UseNotParameterLevel, which means that the injection parameters are filtered out and the annotation is non parameter level
@@ -1131,12 +1136,13 @@
             <param name="state"></param>
             <param name="message"></param>
         </member>
-        <member name="M:Business.Core.Annotations.ParametersAttribute.Proces``1(System.Object)">
+        <member name="M:Business.Core.Annotations.ParametersAttribute.Proces``1(System.Object,System.Object)">
             <summary>
             Proces
             </summary>
             <typeparam name="Type"></typeparam>
             <param name="value"></param>
+            <param name="token"></param>
             <returns></returns>
         </member>
         <member name="T:Business.Core.Annotations.JsonArgAttribute">
@@ -1371,7 +1377,7 @@
             InterceptorExtensions
             </summary>
         </member>
-        <member name="M:Business.Core.Utils.InterceptorExtensions.Intercept(Business.Core.Auth.IInterceptor,System.String,System.Object[],System.Func{System.Object[],System.Object},System.String,System.Object,System.Boolean)">
+        <member name="M:Business.Core.Utils.InterceptorExtensions.Intercept(Business.Core.Auth.IInterceptor,System.String,System.Object[],System.Func{System.Object[],System.Object},System.String,Business.Core.Auth.IToken,System.Boolean,System.Object)">
             <summary>
             Intercept
             </summary>
@@ -1382,9 +1388,10 @@
             <param name="group"></param>
             <param name="token"></param>
             <param name="multipleParameterDeserialize"></param>
+            <param name="origParameters"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.InterceptorExtensions.Finally(Business.Core.Logger,Business.Core.Annotations.CommandAttribute,Business.Core.Meta.MetaData,System.Object,Business.Core.Logger.Type,System.Object[],System.String,System.Diagnostics.Stopwatch,System.Object,System.DateTimeOffset,System.Func{Business.Core.Configer.MethodAfter,System.Threading.Tasks.Task})">
+        <member name="M:Business.Core.Utils.InterceptorExtensions.Finally(Business.Core.Logger,Business.Core.Annotations.CommandAttribute,Business.Core.Meta.MetaData,System.Object,Business.Core.Logger.Type,System.Object[],System.String,System.Diagnostics.Stopwatch,Business.Core.Auth.IToken,System.DateTimeOffset,System.Func{Business.Core.Configer.MethodAfter,System.Threading.Tasks.Task},System.Object)">
             <summary>
             Finally
             </summary>
@@ -1399,8 +1406,9 @@
             <param name="token"></param>
             <param name="dtt"></param>
             <param name="callAfterMethod"></param>
+            <param name="origParameters"></param>
         </member>
-        <member name="M:Business.Core.Utils.InterceptorExtensions.ArgsResult(Business.Core.Meta.MetaData,System.String,System.Collections.Generic.IList{Business.Core.Meta.Args},System.Object,System.Object)">
+        <member name="M:Business.Core.Utils.InterceptorExtensions.ArgsResult(Business.Core.Meta.MetaData,System.String,System.Collections.Generic.IEnumerable{Business.Core.Meta.Args},System.Object,System.Object)">
             <summary>
             ArgsResult
             </summary>
@@ -3281,7 +3289,7 @@
             </summary>
             <param name="path"></param>
         </member>
-        <member name="M:Business.Core.Meta.ArgGroup.#ctor(Business.Core.Utils.ReadOnlyCollection{Business.Core.Annotations.Ignore},System.Boolean,Business.Core.Utils.ReadOnlyCollection{Business.Core.Annotations.ArgumentAttribute},System.String,System.String,System.String,System.String,System.Boolean)">
+        <member name="M:Business.Core.Meta.ArgGroup.#ctor(Business.Core.Utils.ReadOnlyCollection{Business.Core.Annotations.Ignore},System.Boolean,Business.Core.Utils.ReadOnlyCollection{Business.Core.Annotations.ArgumentAttribute},System.String,System.String,System.String,System.String,System.Boolean,Business.Core.Annotations.ArgumentAttribute)">
             <summary>
             ArgGroup
             </summary>
@@ -3293,6 +3301,7 @@
             <param name="owner"></param>
             <param name="root"></param>
             <param name="httpFile"></param>
+            <param name="deserialize"></param>
         </member>
         <member name="P:Business.Core.Meta.ArgGroup.Ignore">
             <summary>
@@ -3337,6 +3346,11 @@
         <member name="P:Business.Core.Meta.ArgGroup.HttpFile">
             <summary>
             HttpFile
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.Deserialize">
+            <summary>
+            Deserialize
             </summary>
         </member>
         <member name="T:Business.Core.Meta.MemberDefinitionCode">
@@ -3672,7 +3686,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Meta.MetaData.#ctor(System.Func{System.Object,System.Object[],System.Object},Business.Core.Meta.CommandGroup,Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Meta.MetaLogger},System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Type,System.Type,System.Type,System.Object[],System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},System.Int32,System.String,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.Int32,System.Type},System.String,Business.Core.Annotations.DocAttribute)">
+        <member name="M:Business.Core.Meta.MetaData.#ctor(System.Func{System.Object,System.Object[],System.Object},Business.Core.Meta.CommandGroup,Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Meta.MetaLogger},System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Type,System.Type,System.Type,System.Object[],System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},System.Int32,System.String,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.Int32,System.Type},System.String,Business.Core.Annotations.DocAttribute,System.Boolean)">
             <summary>
             MetaData
             </summary>
@@ -3701,6 +3715,7 @@
             <param name="useTypePosition"></param>
             <param name="methodTypeFullName"></param>
             <param name="doc"></param>
+            <param name="hasParameters"></param>
         </member>
         <member name="P:Business.Core.Meta.MetaData.Accessor">
             <summary>
@@ -3842,6 +3857,11 @@
             Doc
             </summary>
         </member>
+        <member name="P:Business.Core.Meta.MetaData.HasParameters">
+            <summary>
+            Parameters
+            </summary>
+        </member>
         <member name="T:Business.Core.IBootstrap">
             <summary>
             IBootstrap
@@ -3884,7 +3904,7 @@
             BootstrapConfig
             </summary>
         </member>
-        <member name="M:Business.Core.BootstrapConfig.#ctor(Business.Core.Auth.IInterceptor,System.Object[],System.Func{System.Type,System.Object},System.Type)">
+        <member name="M:Business.Core.BootstrapConfig.#ctor(System.Type,System.Object[],System.Func{System.Type,System.Object},System.Type)">
             <summary>
             BootstrapConfig
             </summary>
@@ -3992,7 +4012,7 @@
             <param name="constructorArguments"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.Create``1(System.Object[],System.Func{System.Type,System.Object},Business.Core.Auth.IInterceptor)">
+        <member name="M:Business.Core.Bootstrap.Create``1(System.Object[],System.Func{System.Type,System.Object},System.Type)">
             <summary>
             Initialize a Generic proxy class
             </summary>
@@ -4010,7 +4030,7 @@
             <param name="constructorArguments"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.Create(System.Type,System.Object[],System.Func{System.Type,System.Object},Business.Core.Auth.IInterceptor)">
+        <member name="M:Business.Core.Bootstrap.Create(System.Type,System.Object[],System.Func{System.Type,System.Object},System.Type)">
             <summary>
             Initialize a Type proxy class
             </summary>
@@ -4027,7 +4047,7 @@
             <param name="constructorArguments"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.CreateAll(System.Object[],System.Func{System.Type,System.Object},Business.Core.Auth.IInterceptor)">
+        <member name="M:Business.Core.Bootstrap.CreateAll(System.Object[],System.Func{System.Type,System.Object},System.Type)">
             <summary>
             bootstrap all Business class
             </summary>
@@ -4044,7 +4064,7 @@
             <param name="constructorArguments"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.CreateAll``1(System.Object[],System.Func{System.Type,System.Object},Business.Core.Auth.IInterceptor)">
+        <member name="M:Business.Core.Bootstrap.CreateAll``1(System.Object[],System.Func{System.Type,System.Object},System.Type)">
             <summary>
             bootstrap all Business class
             </summary>
@@ -4720,6 +4740,11 @@
             Annotations
             </summary>
         </member>
+        <member name="P:Business.Core.Document.IMember`1.Parameters">
+            <summary>
+            Parameters
+            </summary>
+        </member>
         <member name="T:Business.Core.Document.IDocArg`1">
             <summary>
             IDocArg
@@ -4907,6 +4932,11 @@
         <member name="P:Business.Core.Document.Member`1.Annotations">
             <summary>
             Annotations
+            </summary>
+        </member>
+        <member name="P:Business.Core.Document.Member`1.Parameters">
+            <summary>
+            Parameters
             </summary>
         </member>
         <member name="T:Business.Core.Document.Testing">
@@ -5343,7 +5373,7 @@
             Logger data object
             </summary>
         </member>
-        <member name="M:Business.Core.Logger.LoggerData.#ctor(System.DateTimeOffset,System.Object,Business.Core.Logger.Type,System.Object,System.Object,System.Double,System.String,System.String)">
+        <member name="M:Business.Core.Logger.LoggerData.#ctor(System.DateTimeOffset,Business.Core.Auth.IToken,Business.Core.Logger.Type,System.Object,System.Object,System.Double,System.String,System.String)">
             <summary>
             Logger data object
             </summary>

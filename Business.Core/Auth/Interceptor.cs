@@ -47,18 +47,6 @@ namespace Business.Core.Auth
         object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null);
     }
 
-    readonly struct ArgResult
-    {
-        public ArgResult(bool isUpdate, dynamic value)
-        {
-            this.isUpdate = isUpdate;
-            this.value = value;
-        }
-
-        public readonly bool isUpdate;
-        public readonly dynamic value;
-    }
-
     /// <summary>
     /// Interceptor
     /// </summary>
@@ -200,8 +188,9 @@ namespace Business.Core.Utils
         /// <param name="group"></param>
         /// <param name="token"></param>
         /// <param name="multipleParameterDeserialize"></param>
+        /// <param name="origParameters"></param>
         /// <returns></returns>
-        public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(this Auth.IInterceptor interceptor, string method, object[] arguments, System.Func<object[], dynamic> call, string group = null, dynamic token = null, bool multipleParameterDeserialize = false)
+        public static async System.Threading.Tasks.ValueTask<dynamic> Intercept(this Auth.IInterceptor interceptor, string method, object[] arguments, System.Func<object[], dynamic> call, string group = null, Auth.IToken token = null, bool multipleParameterDeserialize = false, dynamic origParameters = null)
         {
             var configer = interceptor.Configer;
             var dtt = System.DateTimeOffset.Now;
@@ -213,7 +202,6 @@ namespace Business.Core.Utils
             var logType = Logger.Type.Record;
             //==================================//
             dynamic token2 = null;
-            dynamic token3 = null;
             dynamic returnValue = null;
 
             var group2 = group ?? meta.GroupDefault;
@@ -243,18 +231,14 @@ namespace Business.Core.Utils
                 var tokenArg = meta.Args.FirstOrDefault(c => c.HasToken);
                 if (null != tokenArg)
                 {
-                    token2 = argsObj[tokenArg.Position];
+                    token = argsObj[tokenArg.Position] as Auth.IToken;
                 }
-                else
-                {
-                    token2 = token;
-                }
-                token3 = token2;
+                token2 = token;
 
                 foreach (var item in meta.Args)
                 {
                     IResult result = null;
-                    var value = argsObj[item.Position];// item.HasIArg ? iArgs[item.Position].In : argsObj[item.Position];
+                    var value = argsObj[item.Position];
                     var attrs = item.Group[command.Key].Attrs;
 
                     dynamic error = null;
@@ -265,7 +249,7 @@ namespace Business.Core.Utils
 
                         if (!(multipleParameterDeserialize && argAttr.ArgMeta.Deserialize))
                         {
-                            result = await argAttr.GetProcesResult(value, token3);
+                            result = await argAttr.GetProcesResult(value, token2);
 
                             if (1 > result.State)
                             {
@@ -278,6 +262,7 @@ namespace Business.Core.Utils
                             if (result.HasDataResult)
                             {
                                 value = result.Data;
+                                argsObj[item.Position] = value;
                             }
                         }
                     }
@@ -297,7 +282,7 @@ namespace Business.Core.Utils
                     //!item.HasCollection !!!Checking arrays is not supported
                     if (item.HasLower && !item.HasCollection)// || item.HasCollectionAttr
                     {
-                        result = await ArgsResult(meta, command.Key, item.Children, value, token3);
+                        result = await ArgsResult(meta, command.Key, item.Children, value, token2);
 
                         if (1 > result.State)
                         {
@@ -314,7 +299,7 @@ namespace Business.Core.Utils
 
                     if (item.HasToken)
                     {
-                        token3 = value;
+                        token2 = value;
                     }
 
                     argsObj[item.Position] = value;
@@ -349,7 +334,7 @@ namespace Business.Core.Utils
             }
             finally
             {
-                Finally(configer.Logger, command, meta, returnValue, logType, argsObj, methodName, watch, token2, dtt, configer.CallAfterMethod);
+                Finally(configer.Logger, command, meta, returnValue, logType, argsObj, methodName, watch, token, dtt, configer.CallAfterMethod, origParameters);
             }
         }
 
@@ -367,7 +352,8 @@ namespace Business.Core.Utils
         /// <param name="token"></param>
         /// <param name="dtt"></param>
         /// <param name="callAfterMethod"></param>
-        public async static void Finally(Logger logger, CommandAttribute command, MetaData meta, dynamic returnValue, Logger.Type logType, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch, dynamic token, System.DateTimeOffset dtt, System.Func<Configer.MethodAfter, System.Threading.Tasks.Task> callAfterMethod)
+        /// <param name="origParameters"></param>
+        public async static void Finally(Logger logger, CommandAttribute command, MetaData meta, dynamic returnValue, Logger.Type logType, object[] argsObj, string methodName, System.Diagnostics.Stopwatch watch, Auth.IToken token, System.DateTimeOffset dtt, System.Func<Configer.MethodAfter, System.Threading.Tasks.Task> callAfterMethod, dynamic origParameters = null)
         {
             if (meta.HasAsync && Logger.Type.Record == logType)
             {
@@ -409,15 +395,20 @@ namespace Business.Core.Utils
                 return;
             }
 
-            var argsObjLog = new System.Collections.Generic.List<Logger.ArgsLog>(meta.Args.Count);
-            foreach (var c in meta.Args)
-            {
-                if (!c.Group.TryGetValue(command.Key, out ArgGroup argGroup))
-                {
-                    continue;
-                }
+            System.Collections.Generic.List<Logger.ArgsLog> argsObjLog = null;
 
-                argsObjLog.Add(new Logger.ArgsLog(c.Name, argsObj[c.Position], argGroup.Logger));
+            if (null == origParameters)
+            {
+                argsObjLog = new System.Collections.Generic.List<Logger.ArgsLog>(meta.Args.Count);
+                foreach (var c in meta.Args)
+                {
+                    if (!c.Group.TryGetValue(command.Key, out ArgGroup argGroup))
+                    {
+                        continue;
+                    }
+
+                    argsObjLog.Add(new Logger.ArgsLog(c.Name, argsObj[c.Position], argGroup.Logger));
+                }
             }
 
             if (!object.Equals(null, returnValue) && typeof(IResult).IsAssignableFrom(returnValue.GetType()))
@@ -429,13 +420,13 @@ namespace Business.Core.Utils
                 }
             }
 
-            var logObjs = Logger.LoggerSet(logType, metaLogger, argsObjLog, out bool canWrite, out bool canResult);
+            var logObjs = Logger.LoggerSet(logType, metaLogger, out bool canWrite, out bool canResult, argsObjLog);
 
             watch.Stop();
 
             if (canWrite)
             {
-                var data = new Logger.LoggerData(dtt, token, logType, logObjs, canResult ? returnValue : null, Help.Scale(watch.Elapsed.TotalSeconds, 3), methodName, command.Group);
+                var data = new Logger.LoggerData(dtt, token, logType, origParameters ?? logObjs, canResult ? returnValue : null, Help.Scale(watch.Elapsed.TotalSeconds, 3), methodName, command.Group);
 
                 if (null != logger.call)
                 {
@@ -460,7 +451,7 @@ namespace Business.Core.Utils
         /// <param name="currentValue"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async static System.Threading.Tasks.ValueTask<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IList<Args> args, object currentValue, dynamic token)
+        public async static System.Threading.Tasks.ValueTask<IResult> ArgsResult(MetaData meta, string group, System.Collections.Generic.IEnumerable<Args> args, object currentValue, dynamic token)
         {
             foreach (var item in args)
             {

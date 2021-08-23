@@ -88,7 +88,7 @@ namespace Business.Core
             /// <param name="time"></param>
             /// <param name="member"></param>
             /// <param name="group"></param>
-            public LoggerData(System.DateTimeOffset dtt, dynamic token, Type type, dynamic value, dynamic result, double time, string member, string group)
+            public LoggerData(System.DateTimeOffset dtt, Auth.IToken token, Type type, dynamic value, dynamic result, double time, string member, string group)
             {
                 Dtt = dtt;
                 Token = token;
@@ -108,7 +108,7 @@ namespace Business.Core
             /// <summary>
             /// token
             /// </summary>
-            public dynamic Token { get; }
+            public Auth.IToken Token { get; }
 
             /// <summary>
             /// Logger type
@@ -153,7 +153,7 @@ namespace Business.Core
 
             readonly struct LoggerDataJson
             {
-                public LoggerDataJson(System.DateTimeOffset dtt, dynamic token, Type type, string value, string result, double time, string member, string group)
+                public LoggerDataJson(System.DateTimeOffset dtt, Auth.IToken token, Type type, string value, string result, double time, string member, string group)
                 {
                     Dtt = dtt;
                     Token = token;
@@ -170,7 +170,7 @@ namespace Business.Core
                 /// <summary>
                 /// token
                 /// </summary>
-                public dynamic Token { get; }
+                public Auth.IToken Token { get; }
 
                 /// <summary>
                 /// Logger type
@@ -267,7 +267,7 @@ namespace Business.Core
             }
         }
 
-        internal static System.Collections.Generic.IDictionary<string, dynamic> LoggerSet(Type logType, MetaLogger logger, System.Collections.Generic.IList<ArgsLog> argsObjLog, out bool canWrite, out bool canResult)
+        internal static System.Collections.Generic.IDictionary<string, dynamic> LoggerSet(Type logType, MetaLogger logger, out bool canWrite, out bool canResult, System.Collections.Generic.IList<ArgsLog> argsObjLog = null)
         {
             canWrite = canResult = false;
 
@@ -283,7 +283,7 @@ namespace Business.Core
                             canResult = true;
                         }
 
-                        if (0 < argsObjLog.Count)
+                        if (0 < argsObjLog?.Count)
                         {
                             var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
                             foreach (var log in argsObjLog)
@@ -304,7 +304,7 @@ namespace Business.Core
                             canResult = true;
                         }
 
-                        if (0 < argsObjLog.Count)
+                        if (0 < argsObjLog?.Count)
                         {
                             var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
                             foreach (var log in argsObjLog)
@@ -325,7 +325,7 @@ namespace Business.Core
                             canResult = true;
                         }
 
-                        if (0 < argsObjLog.Count)
+                        if (0 < argsObjLog?.Count)
                         {
                             var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
                             foreach (var log in argsObjLog)

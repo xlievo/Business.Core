@@ -95,13 +95,37 @@ ajax.post(\"" + h + "\","
     });";
 }
 
-function GetSdkNet(route, h, c, data) {
-    var value = "\n\            KeyValuePair.Create(\"" + route.c + "\", \"" + c + "\")";
-    if (data.hasOwnProperty("t")) {
-        value += ",\n\            KeyValuePair.Create(\"" + route.t + "\", \"" + data.t + "\")";
+function GetSdkNet(route, h, c, data, hasParameters = false) {
+    var value = "";
+    if (!hasParameters) {
+        value = "\n\            KeyValuePair.Create(\"" + route.c + "\", \"" + c + "\")";
+        if (data.hasOwnProperty("t")) {
+            value += ",\n\            KeyValuePair.Create(\"" + route.t + "\", \"" + data.t + "\")";
+        }
+        if (data.hasOwnProperty("d")) {
+            value += ",\n\            KeyValuePair.Create(\"" + route.d + "\", " + JSON.stringify(data.d) + ")";
+        }
     }
-    if (data.hasOwnProperty("d")) {
-        value += ",\n\            KeyValuePair.Create(\"" + route.d + "\", " + JSON.stringify(data.d) + ")";
+    else {
+        var data2 = [];
+        for (var i in data) {
+            var kv = {};
+            kv.k = i;
+            kv.v = data[i];
+            data2.push(kv);
+        }
+
+        for (var i = 0; i < data2.length; i++) {
+            if ("object" != data2[i].v.t && "array" != data2[i].v.t && "string" != data2[i].v.t) {
+                value += "\n\            KeyValuePair.Create(\"" + data2[i].k + "\", " + data2[i].v.d + ")";
+            }
+            else {
+                value += "\n\            KeyValuePair.Create(\"" + data2[i].k + "\", " + JSON.stringify(data2[i].v.d) + ")";
+            }
+            if (i < data2.length - 1) {
+                value += ",";
+            }
+        }
     }
 
     return "\
@@ -125,6 +149,8 @@ class Program\n\
 \n\
         var result = await Call("
         +
+        "\"" + h + "\","
+        +
         value
         +
         ");\n\
@@ -134,10 +160,10 @@ class Program\n\
         Console.Read();\n\
     }\n\
 \n\
-    public async static Task<string> Call(params KeyValuePair<string, string>[] data)\n\
+    public async static Task<string> Call(string url, params KeyValuePair<string, string>[] data)\n\
     {\n\
 		using var content = new FormUrlEncodedContent(data);\n\
-        using var request = new HttpRequestMessage(HttpMethod.Post, \"" + h + "\") { Content = content };\n\
+        using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };\n\
         var client = httpClientFactory.CreateClient();\n\
         using var response = await client.SendAsync(request);\n\
         response.EnsureSuccessStatusCode();\n\
@@ -146,33 +172,38 @@ class Program\n\
 }";
 }
 
-function GetCurl(route, h, c, data, data2, encode = false) {
-    var value = "\n";
-    value += "			#Built-in Route   " + h + "?" + route.c + "=&" + route.t + "=&" + route.d + "=";
-    value += "\n\n\curl -X GET \"" + h + "?" + route.c + "=" + (encode ? encodeURIComponent(c) : c);
+function GetCurl(route, h, c, data, data2, encode = false, hasParameters = false) {
+    var value = "";
 
-    // Built-in Route
+    if (!hasParameters) {
+        value = "\n";
+        value += "			#Built-in Route   " + h + "?" + route.c + "=&" + route.t + "=&" + route.d + "=";
+        value += "\n\n\curl -X GET \"" + h + "?" + route.c + "=" + (encode ? encodeURIComponent(c) : c);
 
-    if (data.hasOwnProperty("t")) {
-        value += "&" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
+        // Built-in Route
+
+        if (data.hasOwnProperty("t")) {
+            value += "&" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
+        }
+        if (data.hasOwnProperty("d")) {
+            value += "&" + route.d + "=" + (encode ? encodeURIComponent(data.d) : data.d);
+        }
+
+        value += "\"";
+        value += "\n";
+        value += "\n\curl -X POST -d \"" + "c=" + (encode ? encodeURIComponent(c) : c);
+
+        if (data.hasOwnProperty("t")) {
+            value += "&" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
+        }
+        if (data.hasOwnProperty("d")) {
+            value += "&" + route.d + "=" + (encode ? encodeURIComponent(data.d) : data.d);
+        }
+        value += "\" " + h;
+        value += "\n";
     }
-    if (data.hasOwnProperty("d")) {
-        value += "&" + route.d + "=" + (encode ? encodeURIComponent(data.d) : data.d);
-    }
 
-    value += "\"";
     value += "\n";
-    value += "\n\curl -X POST -d \"" + "c=" + (encode ? encodeURIComponent(c) : c);
-
-    if (data.hasOwnProperty("t")) {
-        value += "&" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
-    }
-    if (data.hasOwnProperty("d")) {
-        value += "&" + route.d + "=" + (encode ? encodeURIComponent(data.d) : data.d);
-    }
-    value += "\" " + h;
-
-    value += "\n\n";
     value += "			#Classical Route   " + h + "/" + (encode ? encodeURIComponent(c) : c);
     value += "\n\n\curl -X GET \"" + h + "/" + (encode ? encodeURIComponent(c) : c);
 
@@ -203,20 +234,23 @@ function GetCurl(route, h, c, data, data2, encode = false) {
     value += "\" " + h + "/" + (encode ? encodeURIComponent(c) : c);
 
     value += "\n";
-    value += "\n\curl -H \"Content-Type:application/json\" -X POST -d \"";
 
-    // application/json
-    if (data.hasOwnProperty("d")) {
-        value += (encode ? encodeURIComponent(data.d) : data.d);
+    if (!hasParameters) {
+        value += "\n\curl -H \"Content-Type:application/json\" -X POST -d \"";
+
+        // application/json
+        if (data.hasOwnProperty("d")) {
+            value += (encode ? encodeURIComponent(data.d) : data.d);
+        }
+
+        value += "\" " + h + "/" + (encode ? encodeURIComponent(c) : c);
+
+        if (data.hasOwnProperty("t")) {
+            value += "?" + route.t + "=" + (encode ? encodeURIComponent(data2.t) : data2.t);
+        }
+
+        value += "\n";
     }
-
-    value += "\" " + h + "/" + (encode ? encodeURIComponent(c) : c);
-
-    if (data.hasOwnProperty("t")) {
-        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data2.t) : data2.t);
-    }
-
-    value += "\n";
 
     return value;
 }

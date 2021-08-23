@@ -927,6 +927,11 @@ namespace Business.Core.Annotations
             internal Proces Proces { get; set; }
 
             /// <summary>
+            /// command key
+            /// </summary>
+            public string Key { get; internal set; }
+
+            /// <summary>
             /// This value indicates that the annotation is a filter model used to apply parameters. The default value is UseNotParameterLevel, which means that the injection parameters are filtered out and the annotation is non parameter level
             /// <para>default: FilterModel.UseNotParameterLevel</para>
             /// </summary>
@@ -954,6 +959,8 @@ namespace Business.Core.Annotations
                 MemberType = metaData.MemberType;
                 //this.MemberOrigType = metaData.MemberOrigType;
                 Arg = metaData.Arg;
+                Deserialize = metaData.Deserialize;
+                Key = metaData.Key;
 
                 if (null != metaData.Proces)
                 {
@@ -2254,7 +2261,7 @@ namespace Business.Core.Annotations
                 return new ValueTask<IResult>(ResultCreate(value2));
             }
 
-            return new ValueTask<IResult>(ResultCreate(State, Message ?? $"Arguments {Alias} Enum value error."));
+            return new ValueTask<IResult>(ResultCreate(State, Message ?? $"{Alias} Enum value error."));
         }
     }
 
@@ -2275,26 +2282,15 @@ namespace Business.Core.Annotations
             Description = "Parameters parsing";
             ArgMeta.Skip = (bool hasUse, bool hasDefinition, AttributeBase.MetaData.DeclaringType declaring, System.Collections.Generic.IEnumerable<ArgumentAttribute> arguments, bool ignoreArg, bool dynamicObject) => !hasDefinition;
         }
-        /*
-        delegate void SetStructHandler<T>(ref T source, object value);
 
-        static SetStructHandler<T> GetDelegate<T>(PropertyInfo fieldInfo)
-        {
-            return (ref T obj, object value) =>
-            {
-                object obj2 = obj;
-                fieldInfo.SetValue(obj2, value);
-                obj = (T)obj2;
-            };
-        }
-        */
         /// <summary>
         /// Proces
         /// </summary>
         /// <typeparam name="Type"></typeparam>
         /// <param name="value"></param>
+        /// <param name="token"></param>
         /// <returns></returns>
-        public override ValueTask<IResult> Proces<Type>(dynamic value)
+        public override async ValueTask<IResult> Proces<Type>(dynamic token, dynamic value)
         {
             try
             {
@@ -2304,38 +2300,38 @@ namespace Business.Core.Annotations
                 {
                     var arg = System.Activator.CreateInstance<Type>();
 
-                    //var dict2 = new System.Collections.Generic.Dictionary<string, object>(dict.Count);
-
                     foreach (var item in ArgMeta.Arg.Children)
                     {
                         if (dict.TryGetValue(item.Name, out string v))
                         {
-                            if (!item.HasDefinition)
+                            var deserialize = item.Group[this.ArgMeta.Key].Deserialize;
+
+                            if (null == deserialize)
                             {
                                 var v2 = Help.ChangeType(v, item.Type);
                                 item.Accessor.Setter(arg, v2);
                             }
-                            //else if (typeof(IArg).IsAssignableFrom(item.Type))
-                            //{
-                            //    var iarg = System.Activator.CreateInstance(ArgMeta.argTypeDefinition.MakeGenericType(item.Type)) as IArg;
-                            //    iarg.In = v;
-                            //    item.Accessor.Setter(arg, iarg);
-                            //}
-                            //else
-                            //{
-                            //    //item.Accessor.Setter(arg, value);
-                            //}
-                            //dict2.Add(item.Name, v2);
+                            else
+                            {
+                                var v2 = await deserialize.GetProcesResult(v, token);
+                                if (0 >= v2.State)
+                                {
+                                    return v2;
+                                }
+                                if (v2.HasData)
+                                {
+                                    item.Accessor.Setter(arg, v2.Data);
+                                }
+                            }
                         }
                     }
 
-                    //return this.ResultCreate(dict2.JsonSerialize().TryJsonDeserialize<Type>());
-                    return new ValueTask<IResult>(ResultCreate(arg));
+                    return ResultCreate(arg);
                 }
 
-                return new ValueTask<IResult>(ResultCreate<Type>(default));
+                return ResultCreate<Type>(default);
             }
-            catch (System.Exception ex) { return new ValueTask<IResult>(ResultCreate(State, Message ?? $"Parameters {Alias} Proces error. {ex.Message}")); }
+            catch (System.Exception ex) { return ResultCreate(State, Message ?? $"{Alias} Proces error. {ex.Message}"); }
         }
     }
 
@@ -2398,7 +2394,7 @@ namespace Business.Core.Annotations
             {
                 return new ValueTask<IResult>(this.ResultCreate(System.Text.Json.JsonSerializer.Deserialize<Type>(value, textJsonOptions)));
             }
-            catch (System.Exception ex) { return new ValueTask<IResult>(ResultCreate(State, Message ?? $"Arguments {Alias} Json deserialize error. {ex.Message}")); }
+            catch (System.Exception ex) { return new ValueTask<IResult>(ResultCreate(State, Message ?? $"{Alias} Json deserialize error. {ex.Message}")); }
         }
     }
 
@@ -2451,7 +2447,7 @@ namespace Business.Core.Annotations
                     return new ValueTask<IResult>(ResultCreate(xmlSerializer.Deserialize(reader)));
                 }
             }
-            catch (System.Exception ex) { return new ValueTask<IResult>(ResultCreate(State, Message ?? $"Arguments {Alias} Xml deserialize error. {ex.Message}")); }
+            catch (System.Exception ex) { return new ValueTask<IResult>(ResultCreate(State, Message ?? $"{Alias} Xml deserialize error. {ex.Message}")); }
         }
     }
 

@@ -217,12 +217,15 @@ public partial class BusinessMember2 : BusinessBase
 
         public int c { get; set; }
 
-        [@JsonArg]
         public Test001Result2 d { get; set; }
+
+        public bool e { get; set; }
+
+        public List<string> f { get; set; }
     }
 
     //post json
-    public virtual async ValueTask<IResult<Z>> TestZ(Z z)
+    public virtual async ValueTask<IResult<Z>> TestZ(Token token2, Z z, HttpFile files)
     {
         return this.ResultCreate(z);
     }

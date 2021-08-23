@@ -358,6 +358,8 @@ namespace Business.Core.Utils
         /// </summary>
         public static string BaseDirectory = System.AppDomain.CurrentDomain.BaseDirectory ?? System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
+        internal static readonly Emit.DynamicMethodBuilder dynamicMethodBuilder = new Emit.DynamicMethodBuilder();
+
         internal static Accessor GetAccessor(this FieldInfo fieldInfo)
         {
             if (null == fieldInfo) { throw new System.ArgumentNullException(nameof(fieldInfo)); }
@@ -1016,7 +1018,8 @@ namespace Business.Core.Utils
                     HttpFile = c2.Value.HasHttpFile,
                     Testing = 0 < testing.Count ? testing.ToDictionary(c3 => c3.Name, c3 => new Testing(c3.Name, c3.Value, c3.Result, c3.Token)) : null,
                     Token = GetDocArg(key, token, argCallback, xmlMembers, member?._params?.Find(c4 => c4.name == token?.Name)?.text),
-                    Annotations = annotations.Any() ? annotations : null
+                    Annotations = annotations.Any() ? annotations : null,
+                    Parameters = meta.HasParameters
                 } as IMember<DocArg>;
 
                 var topTitleArgsName = options.RouteCTD?.D ?? "d";

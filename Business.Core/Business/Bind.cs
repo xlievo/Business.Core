@@ -250,10 +250,11 @@ namespace Business.Core
 
         internal readonly bool hasBusiness;
 
-        internal protected Bind(System.Type type, IInterceptor interceptor, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type resultType = null, IEnumerable<System.Type> useTypes = null, Logger logger = null, IEnumerable<GroupAttribute> attributes = null)
+        internal protected Bind(System.Type type, System.Type interceptorType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type resultType = null, IEnumerable<System.Type> useTypes = null, Logger logger = null, IEnumerable<GroupAttribute> attributes = null)
         {
             var typeInfo = type.GetTypeInfo();
 
+            var interceptor = System.Activator.CreateInstance(interceptorType) as IInterceptor;
             /*
              * Get self reference assembly under single file publishing
              * Exclude duplicate routes
@@ -884,8 +885,6 @@ namespace Business.Core
             return name;
         }
 
-        internal static readonly Utils.Emit.DynamicMethodBuilder dynamicMethodBuilder = new Utils.Emit.DynamicMethodBuilder();
-
         static ConcurrentReadOnlyDictionary<string, MetaData> GetMetaData(Configer cfg, Dictionary<int, MethodInfo> methods)
         {
             var metaData = new ConcurrentReadOnlyDictionary<string, MetaData>();
@@ -968,6 +967,8 @@ namespace Business.Core
                 var childAll = new ReadOnlyCollection<Args>();
                 var args = new ReadOnlyCollection<Args>(parameters.Length);
                 var tokens = new ReadOnlyCollection<Args>();
+                var hasParameters = false;
+                //group.Attrs?.Any(c => c is Annotations.ParametersAttribute) ?? false
 
                 foreach (var argInfo in parameters)
                 {
@@ -1033,7 +1034,7 @@ namespace Business.Core
                     var hasLower = false;
                     var childrens2 = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
 
-                    var children = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(current.type, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, commandGroup.Group, definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : ReadOnlyCollection<Args>.Empty;
+                    var children = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(attributes2, current.type, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, commandGroup.Group, definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : ReadOnlyCollection<Args>.Empty;
 
                     var arg = new Args(argInfo.Name,
                     //cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
@@ -1079,7 +1080,7 @@ namespace Business.Core
                         useTypePosition.dictionary.TryAdd(argInfo.Position, current.origType);
                     }
 
-                    var argGroup = GetArgGroup(argAttrAll, arg, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, default, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out _, argInfo.Name, logAttrArg);
+                    var argGroup = GetArgGroup(attributes2, argAttrAll, arg, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, default, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out _, argInfo.Name, logAttrArg);
                     //arg.HasCollectionAttr = hasCollectionAttr || hasCollectionAttr2;
                     arg.Group = argGroup;
 
@@ -1087,13 +1088,18 @@ namespace Business.Core
                     {
                         tokens.Collection.Add(arg);
                     }
+
+                    if (!hasParameters)
+                    {
+                        hasParameters = argAttrAll.Any(c => c is ParametersAttribute);
+                    }
                 }
 
                 //var groupDefault = cfg.GetCommandGroup(cfg.Info.CommandGroupDefault, name);
                 //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
-                var meta = new MetaData(dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, tokens, loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasValueTask, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>());
+                var meta = new MetaData(Help.dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, tokens, loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasValueTask, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>(), hasParameters);
 
                 if (!metaData.dictionary.TryAdd(name, meta))
                 {
@@ -1177,7 +1183,7 @@ namespace Business.Core
         */
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(System.Type type, string declaring, string businessName, string method, string path, IDictionary<string, CommandAttribute> commands, System.Collections.Specialized.StringCollection definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)//, System.Type argTypeDefinition
+        static ReadOnlyCollection<Args> GetArgChild(List<AttributeBase> metaAttributes, System.Type type, string declaring, string businessName, string method, string path, IDictionary<string, CommandAttribute> commands, System.Collections.Specialized.StringCollection definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)//, System.Type argTypeDefinition
         {
             hasLower = false;
 
@@ -1292,7 +1298,7 @@ namespace Business.Core
 
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
-                var children = current.hasDefinition ? GetArgChild(current.type, declaring, businessName, method, path2, commands, definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
+                var children = current.hasDefinition ? GetArgChild(metaAttributes, current.type, declaring, businessName, method, path2, commands, definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
 
                 var arg = new Args(item.Name,
                     memberType,
@@ -1330,7 +1336,7 @@ namespace Business.Core
                     childrens.Collection.Add(child);
                 }
 
-                var argGroup = GetArgGroup(argAttrAll, arg, declaring, businessName, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, root);
+                var argGroup = GetArgGroup(metaAttributes, argAttrAll, arg, declaring, businessName, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, root);
                 arg.Group = argGroup;
                 //arg.HasCollectionAttr = hasCollectionAttr || hasCollectionAttr2;
                 arg.HasLower = hasLower2 || hasLower3;
@@ -1347,7 +1353,7 @@ namespace Business.Core
         //static readonly System.Type[] procesTypes = new System.Type[] { typeof(object) };
         //static readonly System.Type[] procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(List<AttributeBase> argAttrAll, Args arg, string declaring, string businessName, string method, string path, string owner, string member, IDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, string root, List<LoggerAttribute> log = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(List<AttributeBase> metaAttributes, List<AttributeBase> argAttrAll, Args arg, string declaring, string businessName, string method, string path, string owner, string member, IDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, string root, List<LoggerAttribute> log = null)
         {
             hasLower = false;
             //hasCollectionAttr = false;
@@ -1382,6 +1388,7 @@ namespace Business.Core
                 //var nickValue = string.IsNullOrWhiteSpace(nick?.Name) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Nick) && Help.GroupEquals(c, item.Value.Group)).GroupBy(c => c.Nick, System.StringComparer.InvariantCultureIgnoreCase).FirstOrDefault()?.Key : nick.Name;
                 var alias = aliass.FirstOrDefault(c => c.GroupEquals(group));
                 var aliasValue = string.IsNullOrWhiteSpace(alias?.Name) ? argAttrChild.Where(c => !string.IsNullOrWhiteSpace(c.Alias) && c.GroupEquals(group)).FirstOrDefault()?.Alias : alias.Name;
+                var aliasValue2 = !string.IsNullOrWhiteSpace(aliasValue) ? aliasValue : Configer.JsonOptionsDoc.PropertyNamingPolicy.ConvertName(member);
 
                 //var argAttr = new ConcurrentLinkedList<ArgumentAttribute>();//argAttrChild.Count
                 var argAttr = new ReadOnlyCollection<ArgumentAttribute>();
@@ -1416,7 +1423,7 @@ namespace Business.Core
 
                     if (null != attr.ArgMeta.Proces && attr.ArgMeta.Proces.MethodInfo.IsGenericMethod)
                     {
-                        attr.ArgMeta.Proces.Call = dynamicMethodBuilder.GetDelegate(attr.ArgMeta.Proces.MethodInfo.MakeGenericMethod(arg.Type));
+                        attr.ArgMeta.Proces.Call = Help.dynamicMethodBuilder.GetDelegate(attr.ArgMeta.Proces.MethodInfo.MakeGenericMethod(arg.Type));
                     }
                     ////!procesIArgMethod.DeclaringType.FullName.Equals(argumentAttributeFullName)
                     //if (attr.Meta.Type.GetMethod("Proces", BindingFlags.Public | BindingFlags.Instance, null, procesIArgTypes, null).DeclaringType.FullName.Equals(attr.Meta.Type.FullName))
@@ -1436,6 +1443,7 @@ namespace Business.Core
                     attr.ArgMeta.Member = member;
                     attr.ArgMeta.MemberType = arg.CurrentType;
                     //attr.ArgMeta.MemberOrigType = arg.CurrentOrigType;
+                    attr.ArgMeta.Key = item.Key;
 
                     //attr.ArgumentMeta.Method = item.Value.OnlyName;
                     //attr.ArgumentMeta.Member = path2;
@@ -1447,7 +1455,7 @@ namespace Business.Core
 
                     if (string.IsNullOrWhiteSpace(attr.Alias))
                     {
-                        attr.Alias = !string.IsNullOrWhiteSpace(aliasValue) ? aliasValue : Configer.JsonOptionsDoc.PropertyNamingPolicy.ConvertName(attr.ArgMeta.Member);
+                        attr.Alias = aliasValue2;
                     }
 
                     attr.BindAfter?.Invoke();
@@ -1483,7 +1491,7 @@ namespace Business.Core
                 //}
 
                 //owner ?? Do need only the superior, not the superior path? For doc
-                var group2 = new ArgGroup(ignores.ToReadOnly(), ignoreArg, argAttr, aliasValue, $"{onlyName}.{path}", default == owner ? onlyName : $"{onlyName}.{owner}", $"{onlyName}.{root}", httpFile);
+                var group2 = new ArgGroup(ignores.ToReadOnly(), ignoreArg, argAttr, aliasValue, $"{onlyName}.{path}", default == owner ? onlyName : $"{onlyName}.{owner}", $"{onlyName}.{root}", httpFile, arg.HasDefinition || arg.HasCollection ? Command.GetDeserialize(metaAttributes, resultType, resultTypeDefinition, arg.CurrentType, group, aliasValue2) : null);
 
                 if (0 < log?.Count)
                 {
@@ -1972,7 +1980,7 @@ namespace Business.Core
 
         ArgumentAttribute deserialize;
 
-        readonly System.Func<object[], dynamic, bool, dynamic> call;
+        readonly System.Func<object[], IToken, bool, dynamic, dynamic> call;
 
         /// <summary>
         /// Command
@@ -1983,11 +1991,11 @@ namespace Business.Core
         /// <param name="business"></param>
         public Command(MetaData meta, string key, string group, IBusiness business)
         {
-            this.call = (arguments, token, multipleParameterDeserialize) =>
+            this.call = (arguments, token, multipleParameterDeserialize, origParameters) =>
             {
                 var args = GetArgsObj(meta.DefaultValue, arguments, meta.Args);
 
-                return InterceptorExtensions.Intercept(business.Configer.Interceptor, meta.Name, args, null, key, token, multipleParameterDeserialize).Result;
+                return InterceptorExtensions.Intercept(business.Configer.Interceptor, meta.Name, args, null, key, token, multipleParameterDeserialize, origParameters).Result;
             };
 
             Meta = meta;
@@ -2063,17 +2071,28 @@ namespace Business.Core
 
             if (null != ParametersType)
             {
-                deserialize = Meta.Attributes.FirstOrDefault(c => c is ArgumentAttribute attr && attr.ArgMeta.Deserialize && attr.GroupEquals(group))?.Clone() as ArgumentAttribute;
+                deserialize = GetDeserialize(Meta.Attributes, Meta.ResultType, Meta.ResultTypeDefinition, ParametersType, group, $"{Meta.CommandGroup.Group[key].OnlyName} Arguments");
+            }
+        }
 
-                if (null != deserialize)
+        internal static ArgumentAttribute GetDeserialize(List<AttributeBase> attributes, System.Type resultType, System.Type resultTypeDefinition, System.Type parametersType, string group, string alias)
+        {
+            var deserialize = attributes.FirstOrDefault(c => c is ArgumentAttribute attr && attr.ArgMeta.Deserialize && attr.GroupEquals(group))?.Clone() as ArgumentAttribute;
+
+            if (null != deserialize)
+            {
+                deserialize.Alias = alias;
+                deserialize.ArgMeta.resultType = resultType;
+                deserialize.ArgMeta.resultTypeDefinition = resultTypeDefinition;
+
+                deserialize.ArgMeta.MemberType = parametersType;
+                if (null != deserialize.ArgMeta.Proces && deserialize.ArgMeta.Proces.MethodInfo.IsGenericMethod)
                 {
-                    deserialize.ArgMeta.resultType = Meta.ResultType;
-                    deserialize.ArgMeta.resultTypeDefinition = Meta.ResultTypeDefinition;
-
-                    deserialize.ArgMeta.MemberType = ParametersType;
-                    deserialize.ArgMeta.Proces.Call = Bind.dynamicMethodBuilder.GetDelegate(deserialize.ArgMeta.Proces.MethodInfo.MakeGenericMethod(deserialize.ArgMeta.MemberType));
+                    deserialize.ArgMeta.Proces.Call = Help.dynamicMethodBuilder.GetDelegate(deserialize.ArgMeta.Proces.MethodInfo.MakeGenericMethod(deserialize.ArgMeta.MemberType));
                 }
             }
+
+            return deserialize;
         }
 
         ///// <summary>
@@ -2315,7 +2334,7 @@ namespace Business.Core
         {
             try
             {
-                return call(parameters, token, default);
+                return call(parameters, token, default, default);
             }
             catch (System.Exception ex)
             {
@@ -2362,7 +2381,7 @@ namespace Business.Core
         /// <param name="token"></param>
         /// <param name="useObj"></param>
         /// <returns></returns>
-        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj) => await Async(GetAgs(parameters, token, useObj), token);
+        public async System.Threading.Tasks.ValueTask<dynamic> AsyncCall(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj) => await Async(GetAgs(parameters, token, useObj), token, default, parameters);
 
         /// <summary>
         /// AsyncCall
@@ -2383,7 +2402,7 @@ namespace Business.Core
         /// <returns></returns>
         public async System.Threading.Tasks.ValueTask<IResult> AsyncIResult(IDictionary<string, string> parameters, IToken token, params UseEntry[] useObj) => await AsyncCall(parameters, token, useObj);
 
-        async System.Threading.Tasks.ValueTask<dynamic> Async(object[] parameters, IToken token = default, bool multipleParameterDeserialize = default)
+        async System.Threading.Tasks.ValueTask<dynamic> Async(object[] parameters, IToken token = default, bool multipleParameterDeserialize = false, dynamic origParameters = null)
         {
             try
             {
@@ -2391,21 +2410,21 @@ namespace Business.Core
                 {
                     if (!Meta.HasReturn)
                     {
-                        await call(parameters, token, multipleParameterDeserialize);
+                        await call(parameters, token, multipleParameterDeserialize, origParameters);
 
                         return null;
                     }
 
-                    return await call(parameters, token, multipleParameterDeserialize);
+                    return await call(parameters, token, multipleParameterDeserialize, origParameters);
                 }
                 else
                 {
                     using (var task = System.Threading.Tasks.Task.Factory.StartNew(obj =>
                     {
                         var obj2 = (dynamic)obj;
-                        return call(obj2.parameters, obj2.token, obj2.multipleParameterDeserialize);
+                        return call(obj2.parameters, obj2.token, obj2.multipleParameterDeserialize, obj2.origParameters);
 
-                    }, new { parameters, token, multipleParameterDeserialize }))
+                    }, new { parameters, token, multipleParameterDeserialize, origParameters }))
                     {
                         return await task;
                     }
@@ -2461,13 +2480,13 @@ namespace Business.Core
         {
             if (HasArgSingle)
             {
-                return await Async(GetAgs(new object[] { parameters }, token, useObj), token, !HasArgSingle);
+                return await Async(GetAgs(new object[] { parameters }, token, useObj), token, !HasArgSingle, parameters);
             }
             else
             {
                 if (null != deserialize && null != parametersTypes && Configer.AccessorsArgs.TryGetValue(parametersTypeKey, out Accessors accessors))
                 {
-                    var result = await deserialize.GetProcesResult(parameters);
+                    var result = await deserialize.GetProcesResult(parameters, token);
 
                     if (0 >= result.State || !result.HasData)
                     {
@@ -2487,7 +2506,7 @@ namespace Business.Core
                         i++;
                     }
 
-                    return await Async(GetAgs(values, token, useObj), token, !HasArgSingle);
+                    return await Async(GetAgs(values, token, useObj), token, !HasArgSingle, parameters);
                 }
 
                 return Help.ErrorNull(Meta.ResultTypeDefinition, nameof(deserialize));
@@ -2592,7 +2611,8 @@ namespace Business.Core.Meta
         /// <param name="owner"></param>
         /// <param name="root"></param>
         /// <param name="httpFile"></param>
-        public ArgGroup(ReadOnlyCollection<Ignore> ignore, bool ignoreArg, ReadOnlyCollection<ArgumentAttribute> attrs, string alias, string path, string owner, string root, bool httpFile)
+        /// <param name="deserialize"></param>
+        public ArgGroup(ReadOnlyCollection<Ignore> ignore, bool ignoreArg, ReadOnlyCollection<ArgumentAttribute> attrs, string alias, string path, string owner, string root, bool httpFile, ArgumentAttribute deserialize)
         {
             Ignore = ignore;
             IgnoreArg = ignoreArg;
@@ -2603,6 +2623,7 @@ namespace Business.Core.Meta
             Root = root;
             Logger = default;
             HttpFile = httpFile;
+            Deserialize = deserialize;
         }
 
         /// <summary>
@@ -2624,22 +2645,22 @@ namespace Business.Core.Meta
         /// <summary>
         /// Alias
         /// </summary>
-        public string Alias { get; private set; }
+        public string Alias { get; }
 
         /// <summary>
         /// Path
         /// </summary>
-        public string Path { get; private set; }
+        public string Path { get; }
 
         /// <summary>
         /// Owner
         /// </summary>
-        public string Owner { get; private set; }
+        public string Owner { get; }
 
         /// <summary>
         /// Root
         /// </summary>
-        public string Root { get; private set; }
+        public string Root { get; }
 
         /// <summary>
         /// Logger
@@ -2654,7 +2675,12 @@ namespace Business.Core.Meta
         /// <summary>
         /// HttpFile
         /// </summary>
-        public bool HttpFile { get; private set; }
+        public bool HttpFile { get; }
+
+        /// <summary>
+        /// Deserialize
+        /// </summary>
+        public ArgumentAttribute Deserialize { get; }
     }
 
     /// <summary>
@@ -3130,7 +3156,8 @@ namespace Business.Core.Meta
         /// <param name="useTypePosition"></param>
         /// <param name="methodTypeFullName"></param>
         /// <param name="doc"></param>
-        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> tokens, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, string business, bool hasAsync, bool hasValueTask, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc)
+        /// <param name="hasParameters"></param>
+        public MetaData(System.Func<object, object[], object> accessor, CommandGroup commandGroup, ReadOnlyCollection<Args> args, ReadOnlyCollection<Args> argAll, ReadOnlyCollection<Args> tokens, ReadOnlyDictionary<string, MetaLogger> metaLogger, string path, string name, string fullName, string business, bool hasAsync, bool hasValueTask, bool hasReturn, bool hasIResult, bool hasIResultGeneric, System.Type returnType, System.Type resultTypeDefinition, System.Type resultType, object[] defaultValue, System.Collections.Generic.List<AttributeBase> attributes, int position, string groupDefault, ConcurrentReadOnlyDictionary<int, System.Type> useTypePosition, string methodTypeFullName, DocAttribute doc, bool hasParameters)
         {
             Accessor = accessor;
             CommandGroup = commandGroup;
@@ -3173,6 +3200,7 @@ namespace Business.Core.Meta
             //Ignore = ignore;
             //HasArgSingle = hasArgSingle;
             Doc = doc;
+            HasParameters = hasParameters;
         }
 
         /// <summary>
@@ -3320,6 +3348,11 @@ namespace Business.Core.Meta
         /// Doc
         /// </summary>
         public DocAttribute Doc { get; }
+
+        /// <summary>
+        /// Parameters
+        /// </summary>
+        public bool HasParameters { get; }
 
     }
 

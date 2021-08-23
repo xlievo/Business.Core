@@ -855,6 +855,7 @@ public class BusinessController : Controller
                 }
         }
 
+        parameters.Remove(string.Empty);
         var hasParameters = null != route.Command && null != parameters;
 
         #endregion
@@ -866,7 +867,14 @@ public class BusinessController : Controller
             var arg = d.TryJsonDeserialize<DocUI.BenchmarkArg>();
             if (default(DocUI.BenchmarkArg).Equals(arg)) { return new ArgumentNullException(nameof(arg)).Message; }
             //arg.host = $"{this.Request.Scheme}://localhost:{this.HttpContext.Connection.LocalPort}/{business.Configer.Info.BusinessName}";
+           
             arg.host = $"{Common.Host.Addresses.FirstOrDefault()}/{business.Configer.Info.BusinessName}";
+
+            if (!string.IsNullOrWhiteSpace(arg.cmd))
+            {
+                arg.host += "/" + arg.cmd;
+            }
+
             return await DocUI.Benchmark(arg);
         }
 

@@ -238,6 +238,11 @@
             /// host
             /// </summary>
             public string host { get; set; }
+
+            /// <summary>
+            /// cmd
+            /// </summary>
+            public string cmd { get; set; }
         }
         /*
         macOS: ~
