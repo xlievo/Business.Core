@@ -1,13 +1,40 @@
 ﻿
-function GetSdkJavaScript(route, h, c, data) {
-    var value = "\n\    { " + route.c + ": \"" + c + "\"";
-    if (data.hasOwnProperty("t")) {
-        value += ", " + route.t + ": \"" + data.t + "\"";
+function GetSdkJavaScript(route, h, c, data, hasParameters) {
+    var value = "";
+    if (!hasParameters) {
+        value += "\n\    { " + route.c + ": \"" + c + "\"";
+        if (data.hasOwnProperty(route.t)) {
+            value += ", " + route.t + ": \"" + data[route.t] + "\"";
+        }
+        if (data.hasOwnProperty(route.d)) {
+            value += ", " + route.d + ": " + JSON.stringify(data[route.d]);
+        }
+        value += " }";
     }
-    if (data.hasOwnProperty("d")) {
-        value += ", " + route.d + ": " + JSON.stringify(data.d);
+    else {
+        h += "/" + c;
+        var data2 = [];
+        for (var i in data) {
+            var kv = {};
+            kv.k = i;
+            kv.v = data[i];
+            data2.push(kv);
+        }
+
+        value += "\n\    { "
+        for (var i = 0; i < data2.length; i++) {
+            if ("object" != data2[i].v.t && "array" != data2[i].v.t) {
+                value += data2[i].k + ": \"" + data2[i].v.d  + "\"";
+            }
+            else {
+                value += data2[i].k + ": " + JSON.stringify(data2[i].v.d);
+            }
+            if (i < data2.length - 1) {
+                value += ", ";
+            }
+        }
+        value += " }";
     }
-    value += " }";
 
     return "var ajax = {};\n\
 ajax.x = function () {\n\
@@ -95,18 +122,19 @@ ajax.post(\"" + h + "\","
     });";
 }
 
-function GetSdkNet(route, h, c, data, hasParameters = false) {
+function GetSdkNet(route, h, c, data, hasParameters) {
     var value = "";
     if (!hasParameters) {
         value = "\n\            KeyValuePair.Create(\"" + route.c + "\", \"" + c + "\")";
-        if (data.hasOwnProperty("t")) {
-            value += ",\n\            KeyValuePair.Create(\"" + route.t + "\", \"" + data.t + "\")";
+        if (data.hasOwnProperty(route.t)) {
+            value += ",\n\            KeyValuePair.Create(\"" + route.t + "\", \"" + data[route.t] + "\")";
         }
-        if (data.hasOwnProperty("d")) {
-            value += ",\n\            KeyValuePair.Create(\"" + route.d + "\", " + JSON.stringify(data.d) + ")";
+        if (data.hasOwnProperty(route.d)) {
+            value += ",\n\            KeyValuePair.Create(\"" + route.d + "\", " + JSON.stringify(data[route.d]) + ")";
         }
     }
     else {
+        h += "/" + c;
         var data2 = [];
         for (var i in data) {
             var kv = {};
@@ -116,8 +144,8 @@ function GetSdkNet(route, h, c, data, hasParameters = false) {
         }
 
         for (var i = 0; i < data2.length; i++) {
-            if ("object" != data2[i].v.t && "array" != data2[i].v.t && "string" != data2[i].v.t) {
-                value += "\n\            KeyValuePair.Create(\"" + data2[i].k + "\", " + data2[i].v.d + ")";
+            if ("object" != data2[i].v.t && "array" != data2[i].v.t) {
+                value += "\n\            KeyValuePair.Create(\"" + data2[i].k + "\", \"" + data2[i].v.d + "\")";
             }
             else {
                 value += "\n\            KeyValuePair.Create(\"" + data2[i].k + "\", " + JSON.stringify(data2[i].v.d) + ")";
@@ -135,19 +163,15 @@ using System.Net.Http;\n\
 using System.Threading.Tasks;\n\
 using Microsoft.Extensions.DependencyInjection;\n\
 \n\
-class Program\n\
+static class Program\n\
 {\n\
-    static IHttpClientFactory httpClientFactory;\n\
+    static readonly ServiceProvider serviceProvider = new ServiceCollection().AddHttpClient().BuildServiceProvider();\n\
+    static readonly IHttpClientFactory httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
+    static readonly HttpClient httpClient = httpClientFactory.CreateClient();\n\
 \n\
-    async static Task Main(string[] args)\n\
+    async static Task Main()\n\
     {\n\
-        var serviceProvider = new ServiceCollection()\n\
-            .AddHttpClient()\n\
-            .BuildServiceProvider();\n\
-\n\
-        httpClientFactory = serviceProvider.GetService<IHttpClientFactory>();\n\
-\n\
-        var result = await Call("
+        var result = await httpClient.Call("
         +
         "\"" + h + "\","
         +
@@ -160,11 +184,10 @@ class Program\n\
         Console.Read();\n\
     }\n\
 \n\
-    public async static Task<string> Call(string url, params KeyValuePair<string, string>[] data)\n\
+    public async static ValueTask<string> Call(this HttpClient client, string url, params KeyValuePair<string, string>[] data)\n\
     {\n\
 		using var content = new FormUrlEncodedContent(data);\n\
         using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };\n\
-        var client = httpClientFactory.CreateClient();\n\
         using var response = await client.SendAsync(request);\n\
         response.EnsureSuccessStatusCode();\n\
         return await response.Content.ReadAsStringAsync();\n\
@@ -182,22 +205,22 @@ function GetCurl(route, h, c, data, data2, encode = false, hasParameters = false
 
         // Built-in Route
 
-        if (data.hasOwnProperty("t")) {
-            value += "&" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
+        if (data.hasOwnProperty(route.t)) {
+            value += "&" + route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]);
         }
-        if (data.hasOwnProperty("d")) {
-            value += "&" + route.d + "=" + (encode ? encodeURIComponent(data.d) : data.d);
+        if (data.hasOwnProperty(route.d)) {
+            value += "&" + route.d + "=" + (encode ? encodeURIComponent(data[route.d]) : data[route.d]);
         }
 
         value += "\"";
         value += "\n";
-        value += "\n\curl -X POST -d \"" + "c=" + (encode ? encodeURIComponent(c) : c);
+        value += "\n\curl -X POST -d \"" + route.c + "=" + (encode ? encodeURIComponent(c) : c);
 
-        if (data.hasOwnProperty("t")) {
-            value += "&" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
+        if (data.hasOwnProperty(route.t)) {
+            value += "&" + route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]);
         }
-        if (data.hasOwnProperty("d")) {
-            value += "&" + route.d + "=" + (encode ? encodeURIComponent(data.d) : data.d);
+        if (data.hasOwnProperty(route.d)) {
+            value += "&" + route.d + "=" + (encode ? encodeURIComponent(data[route.d]) : data[route.d]);
         }
         value += "\" " + h;
         value += "\n";
@@ -209,12 +232,12 @@ function GetCurl(route, h, c, data, data2, encode = false, hasParameters = false
 
     // Classical Route
 
-    if (data.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
-        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t) + "&" + data2.d;
+    if (data.hasOwnProperty(route.t) && data2.hasOwnProperty(route.d)) {
+        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]) + "&" + data2.d;
     }
-    else if (data.hasOwnProperty("t")) {
-        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
-    } else if (data2.hasOwnProperty("d")) {
+    else if (data.hasOwnProperty(route.t)) {
+        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]);
+    } else if (data2.hasOwnProperty(route.d)) {
         value += "?" + data2.d;
     }
 
@@ -222,12 +245,12 @@ function GetCurl(route, h, c, data, data2, encode = false, hasParameters = false
     value += "\n";
     value += "\n\curl -X POST -d \"";
 
-    if (data.hasOwnProperty("t") && data2.hasOwnProperty("d")) {
-        value += route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t) + "&" + data2.d;
+    if (data.hasOwnProperty(route.t) && data2.hasOwnProperty(route.d)) {
+        value += route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]) + "&" + data2.d;
     }
-    else if (data.hasOwnProperty("t")) {
-        value += route.t + "=" + (encode ? encodeURIComponent(data.t) : data.t);
-    } else if (data2.hasOwnProperty("d")) {
+    else if (data.hasOwnProperty(route.t)) {
+        value += route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]);
+    } else if (data2.hasOwnProperty(route.d)) {
         value += data2.d;
     }
 
@@ -239,13 +262,13 @@ function GetCurl(route, h, c, data, data2, encode = false, hasParameters = false
         value += "\n\curl -H \"Content-Type:application/json\" -X POST -d \"";
 
         // application/json
-        if (data.hasOwnProperty("d")) {
-            value += (encode ? encodeURIComponent(data.d) : data.d);
+        if (data.hasOwnProperty(route.d)) {
+            value += (encode ? encodeURIComponent(data[route.d]) : data[route.d]);
         }
 
         value += "\" " + h + "/" + (encode ? encodeURIComponent(c) : c);
 
-        if (data.hasOwnProperty("t")) {
+        if (data.hasOwnProperty(route.t)) {
             value += "?" + route.t + "=" + (encode ? encodeURIComponent(data2.t) : data2.t);
         }
 

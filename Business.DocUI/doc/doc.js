@@ -2187,11 +2187,11 @@ function ready(editor) {
                     if (!input.schema.parameters) {
                         data = getData(route, input, false);
                         form.append(route.c, input.schema.name);
-                        if (data.hasOwnProperty("t")) {
-                            form.append(route.t, data.t);
+                        if (data.hasOwnProperty(route.t)) {
+                            form.append(route.t, data[route.t]);
                         }
-                        if (data.hasOwnProperty("d")) {
-                            form.append(route.d, data.d);
+                        if (data.hasOwnProperty(route.d)) {
+                            form.append(route.d, data[route.d]);
                         }
                     }
                     else {
@@ -2224,6 +2224,7 @@ function ready(editor) {
                 else {
                     if (!input.schema.parameters) {
                         data = getData(route, input, false);
+                        data[route.c] = input.schema.name;
                     }
                     else {
                         data = getData3(route, input);
@@ -2414,8 +2415,8 @@ function ready(editor) {
             }
 
             curlValue.setValue(GetCurl(route, h, input.schema.name, data, getData2(route, input, false, input.schema.encode), input.schema.encode, input.schema.parameters));
-            javascriptValue.setValue(GetSdkJavaScript(route, h, input.schema.name, data));
-            netValue.setValue(GetSdkNet(route, !input.schema.parameters ? h : h += "/" + input.schema.name, input.schema.name, !input.schema.parameters ? data : getData4(route, input), input.schema.parameters));
+            javascriptValue.setValue(GetSdkJavaScript(route, h, input.schema.name, !input.schema.parameters ? data : getData4(route, input), input.schema.parameters));
+            netValue.setValue(GetSdkNet(route, h, input.schema.name, !input.schema.parameters ? data : getData4(route, input), input.schema.parameters));
         });
 
         curlValue.jsoneditor.on('ready', function () {
