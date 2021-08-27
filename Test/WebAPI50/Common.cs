@@ -267,7 +267,7 @@ public struct Log
 [@JsonArg(Group = "j")]
 [Command(Group = "s")]
 [@MessagePackArg(Group = "s")]
-[Logger]
+[Logger(Group = "j", ValueType = Logger.ValueType.In)]
 public abstract class BusinessBase : BusinessBase<ResultObject<object>>
 {
     public BusinessBase()
@@ -867,7 +867,7 @@ public class BusinessController : Controller
             var arg = d.TryJsonDeserialize<DocUI.BenchmarkArg>();
             if (default(DocUI.BenchmarkArg).Equals(arg)) { return new ArgumentNullException(nameof(arg)).Message; }
             //arg.host = $"{this.Request.Scheme}://localhost:{this.HttpContext.Connection.LocalPort}/{business.Configer.Info.BusinessName}";
-           
+
             arg.host = $"{Common.Host.Addresses.FirstOrDefault()}/{business.Configer.Info.BusinessName}";
 
             if (!string.IsNullOrWhiteSpace(arg.cmd))
@@ -910,7 +910,7 @@ public class BusinessController : Controller
                     //the incoming use object
                     //new UseEntry(this.HttpContext), //context
                     new UseEntry(this)) : //context
-                    // Framework routing mode
+                                          // Framework routing mode
                 await cmd.AsyncCallFull(
                     //the data of this request, allow null.
                     d,

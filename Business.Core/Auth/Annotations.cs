@@ -698,20 +698,28 @@ namespace Business.Core.Annotations
         /// </summary>
         /// <param name="logType"></param>
         /// <param name="canWrite"></param>
-        public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true)
+        /// <param name="valueType"></param>
+        public LoggerAttribute(Logger.Type logType = Logger.Type.All, bool canWrite = true, Logger.ValueType valueType = Logger.ValueType.Out)
         {
             LogType = logType;
             CanWrite = canWrite;
+            ValueType = valueType;
         }
 
         /// <summary>
         /// Record type
         /// </summary>
         public Logger.Type LogType { get; private set; }
+
         /// <summary>
         /// Allow record
         /// </summary>
         public bool CanWrite { get; set; }
+
+        /// <summary>
+        /// Logger value type
+        /// </summary>
+        public Logger.ValueType ValueType { get; set; } = Logger.ValueType.Out;
 
         /// <summary>
         /// Allowed to return to parameters

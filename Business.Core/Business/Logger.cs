@@ -33,17 +33,13 @@ namespace Business.Core
         public enum ValueType
         {
             /// <summary>
-            /// In
-            /// </summary>
-            All = 0,
-            /// <summary>
-            /// In
-            /// </summary>
-            In = 1,
-            /// <summary>
             /// Out
             /// </summary>
-            Out = 2
+            Out = 0,
+            /// <summary>
+            /// In
+            /// </summary>
+            In = 1
         }
 
         /// <summary>
@@ -253,7 +249,7 @@ namespace Business.Core
         /// <param name="maxCapacity">Gets the max capacity of this queue</param>
         public Logger(System.Func<System.Collections.Generic.IEnumerable<LoggerData>, ValueTask> call, BatchOptions batch = default, bool syn = false, int? maxCapacity = null) => loggerQueue = new Queue<LoggerData>(call, new Queue<LoggerData>.BatchOptions(batch.Interval, batch.MaxNumber), syn, maxCapacity: maxCapacity);
 
-        internal readonly struct ArgsLog
+        readonly struct ArgsLog
         {
             public readonly string name;
             public readonly dynamic value;
@@ -267,7 +263,7 @@ namespace Business.Core
             }
         }
 
-        internal static System.Collections.Generic.IDictionary<string, dynamic> LoggerSet(Type logType, MetaLogger logger, out bool canWrite, out bool canResult, System.Collections.Generic.IList<ArgsLog> argsObjLog = null)
+        internal static dynamic LoggerSet(MetaData meta, string key, object[] argsObj, Type logType, MetaLogger logger, out bool canWrite, out bool canResult, dynamic origParameters = null)
         {
             canWrite = canResult = false;
 
@@ -282,6 +278,13 @@ namespace Business.Core
                         {
                             canResult = true;
                         }
+
+                        if (ValueType.In == logger.Record.ValueType)
+                        {
+                            return origParameters;
+                        }
+
+                        var argsObjLog = GetArgsObjLog();
 
                         if (0 < argsObjLog?.Count)
                         {
@@ -304,6 +307,13 @@ namespace Business.Core
                             canResult = true;
                         }
 
+                        if (ValueType.In == logger.Error.ValueType)
+                        {
+                            return origParameters;
+                        }
+
+                        var argsObjLog = GetArgsObjLog();
+
                         if (0 < argsObjLog?.Count)
                         {
                             var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
@@ -325,6 +335,13 @@ namespace Business.Core
                             canResult = true;
                         }
 
+                        if (ValueType.In == logger.Exception.ValueType)
+                        {
+                            return origParameters;
+                        }
+
+                        var argsObjLog = GetArgsObjLog();
+
                         if (0 < argsObjLog?.Count)
                         {
                             var logObjs = new System.Collections.Generic.Dictionary<string, dynamic>(argsObjLog.Count);
@@ -340,6 +357,22 @@ namespace Business.Core
             }
 
             //return 0 == logObjs.Count ? null : logObjs;
+
+            System.Collections.Generic.List<ArgsLog> GetArgsObjLog()
+            {
+                var argsObjLog = new System.Collections.Generic.List<ArgsLog>(meta.Args.Count);
+                foreach (var c in meta.Args)
+                {
+                    if (!c.Group.TryGetValue(key, out ArgGroup argGroup))
+                    {
+                        continue;
+                    }
+
+                    argsObjLog.Add(new ArgsLog(c.Name, argsObj[c.Position], argGroup.Logger));
+                }
+
+                return argsObjLog;
+            }
 
             void LoggerSet(LoggerValueMode canValue, LoggerAttribute argLogAttr, System.Collections.Generic.IDictionary<string, dynamic> logObjs, ArgsLog log)
             {

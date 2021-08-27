@@ -397,12 +397,13 @@
             LoggerAttribute
             </summary>
         </member>
-        <member name="M:Business.Core.Annotations.LoggerAttribute.#ctor(Business.Core.Logger.Type,System.Boolean)">
+        <member name="M:Business.Core.Annotations.LoggerAttribute.#ctor(Business.Core.Logger.Type,System.Boolean,Business.Core.Logger.ValueType)">
             <summary>
             LoggerAttribute
             </summary>
             <param name="logType"></param>
             <param name="canWrite"></param>
+            <param name="valueType"></param>
         </member>
         <member name="P:Business.Core.Annotations.LoggerAttribute.LogType">
             <summary>
@@ -412,6 +413,11 @@
         <member name="P:Business.Core.Annotations.LoggerAttribute.CanWrite">
             <summary>
             Allow record
+            </summary>
+        </member>
+        <member name="P:Business.Core.Annotations.LoggerAttribute.ValueType">
+            <summary>
+            Logger value type
             </summary>
         </member>
         <member name="P:Business.Core.Annotations.LoggerAttribute.CanValue">
@@ -5328,19 +5334,14 @@
             Logger value type
             </summary>
         </member>
-        <member name="F:Business.Core.Logger.ValueType.All">
+        <member name="F:Business.Core.Logger.ValueType.Out">
             <summary>
-            In
+            Out
             </summary>
         </member>
         <member name="F:Business.Core.Logger.ValueType.In">
             <summary>
             In
-            </summary>
-        </member>
-        <member name="F:Business.Core.Logger.ValueType.Out">
-            <summary>
-            Out
             </summary>
         </member>
         <member name="T:Business.Core.Logger.Type">

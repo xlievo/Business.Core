@@ -395,22 +395,6 @@ namespace Business.Core.Utils
                 return;
             }
 
-            System.Collections.Generic.List<Logger.ArgsLog> argsObjLog = null;
-
-            if (null == origParameters)
-            {
-                argsObjLog = new System.Collections.Generic.List<Logger.ArgsLog>(meta.Args.Count);
-                foreach (var c in meta.Args)
-                {
-                    if (!c.Group.TryGetValue(command.Key, out ArgGroup argGroup))
-                    {
-                        continue;
-                    }
-
-                    argsObjLog.Add(new Logger.ArgsLog(c.Name, argsObj[c.Position], argGroup.Logger));
-                }
-            }
-
             if (!object.Equals(null, returnValue) && typeof(IResult).IsAssignableFrom(returnValue.GetType()))
             {
                 var result = returnValue as IResult;
@@ -420,13 +404,13 @@ namespace Business.Core.Utils
                 }
             }
 
-            var logObjs = Logger.LoggerSet(logType, metaLogger, out bool canWrite, out bool canResult, argsObjLog);
+            dynamic logObjs = Logger.LoggerSet(meta, command.Key, argsObj, logType, metaLogger, out bool canWrite, out bool canResult, origParameters);
 
             watch.Stop();
 
             if (canWrite)
             {
-                var data = new Logger.LoggerData(dtt, token, logType, origParameters ?? logObjs, canResult ? returnValue : null, Help.Scale(watch.Elapsed.TotalSeconds, 3), methodName, command.Group);
+                var data = new Logger.LoggerData(dtt, token, logType, logObjs, canResult ? returnValue : null, Help.Scale(watch.Elapsed.TotalSeconds, 3), methodName, command.Group);
 
                 if (null != logger.call)
                 {
