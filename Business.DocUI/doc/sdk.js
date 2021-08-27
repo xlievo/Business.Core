@@ -24,7 +24,7 @@ function GetSdkJavaScript(route, h, c, data, hasParameters) {
         value += "\n\    { "
         for (var i = 0; i < data2.length; i++) {
             if ("object" != data2[i].v.t && "array" != data2[i].v.t) {
-                value += data2[i].k + ": \"" + data2[i].v.d  + "\"";
+                value += data2[i].k + ": \"" + data2[i].v.d + "\"";
             }
             else {
                 value += data2[i].k + ": " + JSON.stringify(data2[i].v.d);
@@ -233,12 +233,12 @@ function GetCurl(route, h, c, data, data2, encode = false, hasParameters = false
     // Classical Route
 
     if (data.hasOwnProperty(route.t) && data2.hasOwnProperty(route.d)) {
-        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]) + "&" + data2.d;
+        value += "?" + route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]) + "&" + data2[route.d];
     }
     else if (data.hasOwnProperty(route.t)) {
         value += "?" + route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]);
     } else if (data2.hasOwnProperty(route.d)) {
-        value += "?" + data2.d;
+        value += "?" + data2[route.d];
     }
 
     value += "\"";
@@ -246,12 +246,12 @@ function GetCurl(route, h, c, data, data2, encode = false, hasParameters = false
     value += "\n\curl -X POST -d \"";
 
     if (data.hasOwnProperty(route.t) && data2.hasOwnProperty(route.d)) {
-        value += route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]) + "&" + data2.d;
+        value += route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]) + "&" + data2[route.d];
     }
     else if (data.hasOwnProperty(route.t)) {
         value += route.t + "=" + (encode ? encodeURIComponent(data[route.t]) : data[route.t]);
     } else if (data2.hasOwnProperty(route.d)) {
-        value += data2.d;
+        value += data2[route.d];
     }
 
     value += "\" " + h + "/" + (encode ? encodeURIComponent(c) : c);
@@ -269,7 +269,7 @@ function GetCurl(route, h, c, data, data2, encode = false, hasParameters = false
         value += "\" " + h + "/" + (encode ? encodeURIComponent(c) : c);
 
         if (data.hasOwnProperty(route.t)) {
-            value += "?" + route.t + "=" + (encode ? encodeURIComponent(data2.t) : data2.t);
+            value += "?" + route.t + "=" + (encode ? encodeURIComponent(data2[route.t]) : data2[route.t]);
         }
 
         value += "\n";
