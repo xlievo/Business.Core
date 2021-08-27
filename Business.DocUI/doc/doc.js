@@ -2102,14 +2102,15 @@ function ready(editor) {
         var input = editor.input;
         var hasObject = input.editors[route.d] && ("object" === input.schema.properties[route.d].type || "array" === input.schema.properties[route.d].type);
         var data = getData(route, input, false);
-        if (input.schema.argSingle && !input.editors[route.d]) {
-            input.schema.data = { t: data.t };
-        }
-        else if (input.schema.argSingle && input.editors[route.d] && !hasObject) {
-            input.schema.data = { t: data.t, d: data.d };
-        }
-        else {
-            input.schema.data = { t: data.t, d: JSON.parse(data.d) };
+
+        input.schema.data = null;
+        if (input.editors[route.d]) {
+            if (input.schema.argSingle && !hasObject) {
+                input.schema.data = data[route.d];
+            }
+            else {
+                input.schema.data = JSON.parse(data[route.d]);
+            }
         }
 
         if (input.editors[route.t] || input.editors[route.d]) {
@@ -2274,9 +2275,12 @@ function ready(editor) {
                 if (null == el.currentTarget) {
                     return;
                 }
+                if (null == input.schema.data) {
+                    return;
+                }
                 var obj = el.currentTarget;
                 if (-1 !== obj.selectedIndex) {
-                    setData(route, input, input.schema.data.d, recovery = true, refresh = 0 === obj.selectedIndex);
+                    setData(route, input, input.schema.data, recovery = true, refresh = 0 === obj.selectedIndex);
                     input.container.querySelectorAll("[tag='row_number']").forEach(c => { c.value = ""; });
                     if (0 === obj.selectedIndex) {
                         setEdit(input.container, !input.schema.edit);
@@ -2341,9 +2345,9 @@ function ready(editor) {
                     if (!input.schema.parameters) {
                         var data = getData(route, input, false);
                         d = "&" + route.c + "=" + encodeURIComponent(input.schema.name)
-                            + "&" + route.t + "=" + encodeURIComponent(data.t)
+                            + "&" + route.t + "=" + encodeURIComponent(data[route.t])
                             + "&" + route.d + "="
-                            + encodeURIComponent(doc[businessName].options.benchmarkJSON ? JSON.stringify(data.d) : data.d);
+                            + encodeURIComponent(doc[businessName].options.benchmarkJSON ? JSON.stringify(data[route.d]) : data[route.d]);
                     }
                     else {
                         data = getData3(route, input);
@@ -2424,7 +2428,7 @@ function ready(editor) {
             let scroller = curlValue.container.querySelector("div[class='ace_scroller']");
             if (null != scroller) {
                 let icon = document.createElement('i');
-                icon.className = "doc-icon-20 doc-icon-20-debug";
+                icon.className = "doc-icon-20 doc-icon-20-user_death";
                 icon.style = "position:absolute;";
                 icon.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -2741,11 +2745,11 @@ function getData2(route, input, format, encode = false) {
             d = args.join("&");
         }
 
-        data.d = d;
+        data[route.d] = d;
     }
 
     if (input.editors[route.t]) {
-        data.t = input.editors[route.t].getValue();
+        data[route.t] = input.editors[route.t].getValue();
     }
 
     return data;

@@ -262,8 +262,12 @@ html, body {
     background-position: -1px -111px;
 }
 
-.doc-icon-20-warning {
+.doc-icon-20-user_death {
     background-position: -23px -111px;
+}
+
+.doc-icon-20-warning {
+    background-position: -45px -111px;
 }
 
 .doc-icon-15 {
@@ -398,6 +402,10 @@ html, body {
     background-position: -1px -86px;
 }
 
-.doc-icon-15-warning {
+.doc-icon-15-user_death {
     background-position: -18px -86px;
+}
+
+.doc-icon-15-warning {
+    background-position: -35px -86px;
 }
