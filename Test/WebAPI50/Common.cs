@@ -242,11 +242,14 @@ public struct Token : Business.Core.Auth.IToken
 /// </summary>
 [SessionCheck]
 [Use(typeof(Token))]
-public struct Session
+public struct Session : Business.Core.Auth.IToken
 {
     public string Account { get; set; }
     public int Nick { get; set; }
     public List<string> Roles { get; set; }
+    public string Key { get; set; }
+    public Business.Core.Auth.Remote Remote { get; set; }
+    public string Callback { get; set; }
 }
 
 public struct Logs
@@ -511,19 +514,23 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                 o.GroupEnable = true;
                 //o.Host = Common.Host.Addresses;
                 o.Navigtion = true;
-                o.RouteCTD = new RouteCTD
-                {
-                    C = "command",
-                    T = "token",
-                    D = "data"
-                };
+                //o.RouteCTD = new RouteCTD
+                //{
+                //    C = "command",
+                //    T = "token",
+                //    D = "data"
+                //};
             })
             .UseLogger(new Logger(async x =>
             {
-                foreach (var item in x)
-                {
-                    Help.Console(item.ToString());
-                }
+                var sss = x.JsonSerialize();
+
+                Help.Console(sss);
+                //foreach (var item in x)
+                //{
+                //    Help.Console(item.ToString());
+                //}
+
                 //Common.LogClient.Call("Write", null, new Logs { Index = "log", Data = x.Select(c => c.ToString()) }.JsonSerialize());
                 //Help.Console(.ToString());
 

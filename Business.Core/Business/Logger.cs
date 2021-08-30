@@ -19,6 +19,8 @@ namespace Business.Core
 {
     using Annotations;
     using Meta;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using Utils;
 
@@ -68,10 +70,58 @@ namespace Business.Core
             Exception = 0,
         }
 
+        /*
+        /// <summary>
+        /// ILoggerData
+        /// </summary>
+        public interface ILoggerData
+        {
+            /// <summary>
+            /// Dtt
+            /// </summary>
+            System.DateTimeOffset Dtt { get; }
+
+            /// <summary>
+            /// Token
+            /// </summary>
+            dynamic Token { get; }
+
+            /// <summary>
+            /// Type
+            /// </summary>
+            Type Type { get; }
+
+            /// <summary>
+            /// Value
+            /// </summary>
+            dynamic Value { get; }
+
+            /// <summary>
+            /// Result
+            /// </summary>
+            dynamic Result { get; }
+
+            /// <summary>
+            /// Time
+            /// </summary>
+            double Time { get; }
+
+            /// <summary>
+            /// Member
+            /// </summary>
+            string Member { get; }
+
+            /// <summary>
+            /// Group
+            /// </summary>
+            string Group { get; }
+        }
+        */
+
         /// <summary>
         /// Logger data object
         /// </summary>
-        public readonly struct LoggerData
+        public readonly struct LoggerData// : ILoggerData
         {
             /// <summary>
             /// Logger data object
@@ -84,7 +134,7 @@ namespace Business.Core
             /// <param name="time"></param>
             /// <param name="member"></param>
             /// <param name="group"></param>
-            public LoggerData(System.DateTimeOffset dtt, Auth.IToken token, Type type, dynamic value, dynamic result, double time, string member, string group)
+            public LoggerData(System.DateTimeOffset dtt, dynamic token, Type type, dynamic value, dynamic result, double time, string member, string group)
             {
                 Dtt = dtt;
                 Token = token;
@@ -104,7 +154,7 @@ namespace Business.Core
             /// <summary>
             /// token
             /// </summary>
-            public Auth.IToken Token { get; }
+            public dynamic Token { get; }
 
             /// <summary>
             /// Logger type
@@ -119,11 +169,13 @@ namespace Business.Core
             /// <summary>
             /// The parameters of the method
             /// </summary>
+            [JsonConverter(typeof(LoggerDataConverter))]
             public dynamic Value { get; }
 
             /// <summary>
             /// The method's Return Value
             /// </summary>
+            [JsonConverter(typeof(LoggerDataConverter))]
             public dynamic Result { get; }
 
             /// <summary>
@@ -140,63 +192,42 @@ namespace Business.Core
             /// Used for the command group
             /// </summary>
             public string Group { get; }
+        }
+
+        /// <summary>
+        /// LoggerDataConverter
+        /// </summary>
+        class LoggerDataConverter : JsonConverter<dynamic>
+        {
+            /// <summary>
+            /// Read
+            /// </summary>
+            /// <param name="reader"></param>
+            /// <param name="typeToConvert"></param>
+            /// <param name="options"></param>
+            /// <returns></returns>
+            public override dynamic Read(ref Utf8JsonReader reader, System.Type typeToConvert, JsonSerializerOptions options) => throw new System.NotImplementedException();
 
             /// <summary>
-            /// Json format
+            /// Write
             /// </summary>
-            /// <returns></returns>
-            public override string ToString() => new LoggerDataJson(Dtt, Token, Type, null != Value ? Help.JsonSerialize(Value) : null, Result?.ToString(), Time, Member, Group).JsonSerialize();
-
-            readonly struct LoggerDataJson
+            /// <param name="writer"></param>
+            /// <param name="value"></param>
+            /// <param name="options"></param>
+            public override void Write(Utf8JsonWriter writer, dynamic value, JsonSerializerOptions options)
             {
-                public LoggerDataJson(System.DateTimeOffset dtt, Auth.IToken token, Type type, string value, string result, double time, string member, string group)
+                if (typeof(string).Equals(value.GetType()))
                 {
-                    Dtt = dtt;
-                    Token = token;
-                    Type = type;
-                    Value = value;
-                    Result = result;
-                    Time = time;
-                    Member = member;
-                    Group = group;
+                    writer.WriteStringValue(value);
                 }
-
-                public System.DateTimeOffset Dtt { get; }
-
-                /// <summary>
-                /// token
-                /// </summary>
-                public Auth.IToken Token { get; }
-
-                /// <summary>
-                /// Logger type
-                /// </summary>
-                public Type Type { get; }
-
-                /// <summary>
-                /// The parameters of the method
-                /// </summary>
-                public string Value { get; }
-
-                /// <summary>
-                /// The method's Return Value
-                /// </summary>
-                public string Result { get; }
-
-                /// <summary>
-                /// Method execution time
-                /// </summary>
-                public double Time { get; }
-
-                /// <summary>
-                /// Method full name
-                /// </summary>
-                public string Member { get; }
-
-                /// <summary>
-                /// Used for the command group
-                /// </summary>
-                public string Group { get; }
+                else if (typeof(Result.IResult).IsAssignableFrom(value.GetType()))
+                {
+                    writer.WriteStringValue(value.ToString());
+                }
+                else
+                {
+                    JsonSerializer.Serialize(writer, value, options);
+                }
             }
         }
 

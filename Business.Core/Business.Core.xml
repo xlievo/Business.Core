@@ -5374,7 +5374,7 @@
             Logger data object
             </summary>
         </member>
-        <member name="M:Business.Core.Logger.LoggerData.#ctor(System.DateTimeOffset,Business.Core.Auth.IToken,Business.Core.Logger.Type,System.Object,System.Object,System.Double,System.String,System.String)">
+        <member name="M:Business.Core.Logger.LoggerData.#ctor(System.DateTimeOffset,System.Object,Business.Core.Logger.Type,System.Object,System.Object,System.Double,System.String,System.String)">
             <summary>
             Logger data object
             </summary>
@@ -5427,46 +5427,27 @@
             Used for the command group
             </summary>
         </member>
-        <member name="M:Business.Core.Logger.LoggerData.ToString">
+        <member name="T:Business.Core.Logger.LoggerDataConverter">
             <summary>
-            Json format
+            LoggerDataConverter
             </summary>
+        </member>
+        <member name="M:Business.Core.Logger.LoggerDataConverter.Read(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)">
+            <summary>
+            Read
+            </summary>
+            <param name="reader"></param>
+            <param name="typeToConvert"></param>
+            <param name="options"></param>
             <returns></returns>
         </member>
-        <member name="P:Business.Core.Logger.LoggerData.LoggerDataJson.Token">
+        <member name="M:Business.Core.Logger.LoggerDataConverter.Write(System.Text.Json.Utf8JsonWriter,System.Object,System.Text.Json.JsonSerializerOptions)">
             <summary>
-            token
+            Write
             </summary>
-        </member>
-        <member name="P:Business.Core.Logger.LoggerData.LoggerDataJson.Type">
-            <summary>
-            Logger type
-            </summary>
-        </member>
-        <member name="P:Business.Core.Logger.LoggerData.LoggerDataJson.Value">
-            <summary>
-            The parameters of the method
-            </summary>
-        </member>
-        <member name="P:Business.Core.Logger.LoggerData.LoggerDataJson.Result">
-            <summary>
-            The method's Return Value
-            </summary>
-        </member>
-        <member name="P:Business.Core.Logger.LoggerData.LoggerDataJson.Time">
-            <summary>
-            Method execution time
-            </summary>
-        </member>
-        <member name="P:Business.Core.Logger.LoggerData.LoggerDataJson.Member">
-            <summary>
-            Method full name
-            </summary>
-        </member>
-        <member name="P:Business.Core.Logger.LoggerData.LoggerDataJson.Group">
-            <summary>
-            Used for the command group
-            </summary>
+            <param name="writer"></param>
+            <param name="value"></param>
+            <param name="options"></param>
         </member>
         <member name="T:Business.Core.Logger.BatchOptions">
             <summary>

@@ -334,7 +334,7 @@ namespace Business.Core.Utils
             }
             finally
             {
-                Finally(configer.Logger, command, meta, returnValue, logType, argsObj, methodName, watch, token, dtt, configer.CallAfterMethod, origParameters);
+                Finally(configer.Logger, command, meta, returnValue, logType, argsObj, methodName, watch, typeof(Auth.IToken).IsAssignableFrom(token2?.GetType()) ? token2 : token, dtt, configer.CallAfterMethod, origParameters);
             }
         }
 
