@@ -1465,24 +1465,6 @@
             <param name="argType"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.BootstrapExtensions.LoggerSet``1(``0,Business.Core.Annotations.LoggerAttribute,System.String[])">
-            <summary>
-            Set the log characteristics of a parameter, depending on the parameter name
-            </summary>
-            <param name="bootstrap"></param>
-            <param name="logger"></param>
-            <param name="parameterName"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Utils.BootstrapExtensions.IgnoreSet``1(``0,Business.Core.Annotations.Ignore,System.String[])">
-            <summary>
-            Set a parameter's ignore feature, depending on the parameter name
-            </summary>
-            <param name="bootstrap"></param>
-            <param name="ignore"></param>
-            <param name="parameterName"></param>
-            <returns></returns>
-        </member>
         <member name="M:Business.Core.Utils.BootstrapExtensions.IgnoreSet``1(``0,Business.Core.Annotations.Ignore,System.Type[])">
             <summary>
             IgnoreSet
@@ -1499,8 +1481,8 @@
             </summary>
             <typeparam name="Bootstrap"></typeparam>
             <param name="bootstrap"></param>
-            <param name="memberName"></param>
-            <param name="memberObj"></param>
+            <param name="name"></param>
+            <param name="value"></param>
             <param name="skipNull"></param>
             <returns></returns>
         </member>
@@ -1967,16 +1949,6 @@
             <param name="argType"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.LoggerSet``1(``0,Business.Core.Annotations.LoggerAttribute,System.String[])">
-            <summary>
-            LoggerSet
-            </summary>
-            <typeparam name="Business"></typeparam>
-            <param name="business"></param>
-            <param name="logger"></param>
-            <param name="parameterName"></param>
-            <returns></returns>
-        </member>
         <member name="M:Business.Core.Utils.Help.IgnoreSet``1(``0,Business.Core.Annotations.Ignore,System.Type[])">
             <summary>
             IgnoreSet
@@ -1987,24 +1959,14 @@
             <param name="argType"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.IgnoreSet``1(``0,Business.Core.Annotations.Ignore,System.String[])">
-            <summary>
-            IgnoreSet
-            </summary>
-            <typeparam name="Business"></typeparam>
-            <param name="business"></param>
-            <param name="ignore"></param>
-            <param name="parameterName"></param>
-            <returns></returns>
-        </member>
         <member name="M:Business.Core.Utils.Help.MemberSet``1(``0,System.String,System.Object,System.Boolean)">
             <summary>
             MemberSet
             </summary>
             <typeparam name="Business"></typeparam>
             <param name="business"></param>
-            <param name="memberName"></param>
-            <param name="memberObj"></param>
+            <param name="name"></param>
+            <param name="value"></param>
             <param name="skipNull"></param>
             <returns></returns>
         </member>
@@ -5426,6 +5388,12 @@
             <summary>
             Used for the command group
             </summary>
+        </member>
+        <member name="M:Business.Core.Logger.LoggerData.ToString">
+            <summary>
+            to json format
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Business.Core.Logger.LoggerDataConverter">
             <summary>

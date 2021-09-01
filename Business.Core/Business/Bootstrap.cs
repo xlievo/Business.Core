@@ -977,7 +977,7 @@ namespace Business.Core.Utils
         /// <param name="argType"></param>
         /// <returns></returns>
         public static Bootstrap LoggerSet<Bootstrap>(this Bootstrap bootstrap, Annotations.LoggerAttribute logger, params System.Type[] argType) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.LoggerSet(c, logger, argType));
-
+        /*
         /// <summary>
         /// Set the log characteristics of a parameter, depending on the parameter name
         /// </summary>
@@ -995,7 +995,7 @@ namespace Business.Core.Utils
         /// <param name="parameterName"></param>
         /// <returns></returns>
         public static Bootstrap IgnoreSet<Bootstrap>(this Bootstrap bootstrap, Annotations.Ignore ignore, params string[] parameterName) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.IgnoreSet(c, ignore, parameterName));
-
+        */
         /// <summary>
         /// IgnoreSet
         /// </summary>
@@ -1011,10 +1011,10 @@ namespace Business.Core.Utils
         /// </summary>
         /// <typeparam name="Bootstrap"></typeparam>
         /// <param name="bootstrap"></param>
-        /// <param name="memberName"></param>
-        /// <param name="memberObj"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
         /// <param name="skipNull"></param>
         /// <returns></returns>
-        public static Bootstrap MemberSet<Bootstrap>(this Bootstrap bootstrap, string memberName, object memberObj, bool skipNull = false) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.MemberSet(c, memberName, memberObj, skipNull));
+        public static Bootstrap MemberSet<Bootstrap>(this Bootstrap bootstrap, string name, object value, bool skipNull = false) where Bootstrap : IBootstrap => Use(bootstrap, c => Help.MemberSet(c, name, value, skipNull));
     }
 }

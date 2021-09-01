@@ -1579,7 +1579,7 @@ namespace Business.Core.Utils
 
             return business;
         }
-
+        /*
         /// <summary>
         /// LoggerSet
         /// </summary>
@@ -1628,7 +1628,7 @@ namespace Business.Core.Utils
 
             return business;
         }
-
+        */
         /// <summary>
         /// IgnoreSet
         /// </summary>
@@ -1683,7 +1683,7 @@ namespace Business.Core.Utils
 
             return business;
         }
-
+        /*
         /// <summary>
         /// IgnoreSet
         /// </summary>
@@ -1742,31 +1742,31 @@ namespace Business.Core.Utils
 
             return business;
         }
-
+        */
         /// <summary>
         /// MemberSet
         /// </summary>
         /// <typeparam name="Business"></typeparam>
         /// <param name="business"></param>
-        /// <param name="memberName"></param>
-        /// <param name="memberObj"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
         /// <param name="skipNull"></param>
         /// <returns></returns>
-        public static Business MemberSet<Business>(Business business, string memberName, object memberObj, bool skipNull = false) where Business : IBusiness
+        public static Business MemberSet<Business>(Business business, string name, object value, bool skipNull = false) where Business : IBusiness
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
-            if (!Configer.Accessors.TryGetValue(business.Configer.Info.BusinessName, out Accessors meta) || !meta.Accessor.TryGetValue(memberName, out Accessor accessor)) { return business; }
+            if (!Configer.Accessors.TryGetValue(business.Configer.Info.BusinessName, out Accessors meta) || !meta.Accessor.TryGetValue(name, out Accessor accessor)) { return business; }
 
             if (skipNull && !Equals(null, accessor.Getter(business)))
             {
                 return business;
             }
 
-            var value = ChangeType(memberObj, accessor.Type);
-            accessor.Setter(business, value);
+            var value2 = ChangeType(value, accessor.Type);
+            accessor.Setter(business, value2);
 
-            business.Configer.MemberSetAfter?.Invoke(memberName, value);
+            business.Configer.MemberSetAfter?.Invoke(name, value2);
 
             return business;
         }
