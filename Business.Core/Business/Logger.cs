@@ -193,11 +193,11 @@ namespace Business.Core
             /// </summary>
             public string Group { get; }
 
-            /// <summary>
-            /// to json format
-            /// </summary>
-            /// <returns></returns>
-            public override string ToString() => this.JsonSerialize();
+            ///// <summary>
+            ///// to json format
+            ///// </summary>
+            ///// <returns></returns>
+            //public override string ToString() => this.JsonSerialize();
         }
 
         /// <summary>
@@ -222,17 +222,17 @@ namespace Business.Core
             /// <param name="options"></param>
             public override void Write(Utf8JsonWriter writer, dynamic value, JsonSerializerOptions options)
             {
-                if (typeof(string).Equals(value.GetType()))
+                switch (value)
                 {
-                    writer.WriteStringValue(value);
-                }
-                else if (typeof(Result.IResult).IsAssignableFrom(value.GetType()))
-                {
-                    writer.WriteStringValue(value.ToString());
-                }
-                else
-                {
-                    JsonSerializer.Serialize(writer, value, options);
+                    case string v: 
+                        writer.WriteStringValue(v); 
+                        break;
+                    case Result.IResult v: 
+                        writer.WriteStringValue(v.ToString());
+                        break;
+                    default:
+                        JsonSerializer.Serialize(writer, value, options); 
+                        break;
                 }
             }
         }

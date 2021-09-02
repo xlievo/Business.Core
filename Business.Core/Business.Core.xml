@@ -5389,12 +5389,6 @@
             Used for the command group
             </summary>
         </member>
-        <member name="M:Business.Core.Logger.LoggerData.ToString">
-            <summary>
-            to json format
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:Business.Core.Logger.LoggerDataConverter">
             <summary>
             LoggerDataConverter

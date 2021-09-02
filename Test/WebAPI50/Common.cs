@@ -523,9 +523,18 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             })
             .UseLogger(new Logger(async x =>
             {
-                var sss = x.JsonSerialize();
+                var watch = new System.Diagnostics.Stopwatch();
+                watch.Start();
 
-                Help.Console(sss);
+                var dd = new Logs("log", x).JsonSerialize();
+
+                watch.Stop();
+
+                var time = Help.Scale(watch.Elapsed.TotalSeconds, 3);
+
+                Help.Console($"{x.Count()} -> {time}");
+
+                //Help.Console(sss);
                 //foreach (var item in x)
                 //{
                 //    Help.Console(item.ToString());
@@ -539,7 +548,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             }, new Logger.BatchOptions()
             {
                 Interval = TimeSpan.FromSeconds(6),
-                MaxNumber = 2011
+                MaxNumber = 10000
             }));
 
         Configer.GlobalLog = (type, msg) => Help.Console(msg);
@@ -607,6 +616,109 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         });
 
         #endregion
+    }
+
+    readonly struct Logs
+    {
+        public Logs(string index, IEnumerable<Logger.LoggerData> data)
+        {
+            Index = index;
+            Data = data;
+        }
+
+        public string Index { get; }
+
+        public IEnumerable<Logger.LoggerData> Data { get; }
+    }
+
+    readonly struct Logs2
+    {
+        public Logs2(string index, IEnumerable<string> data)
+        {
+            Index = index;
+            Data = data;
+        }
+
+        public string Index { get; }
+
+        public IEnumerable<string> Data { get; }
+    }
+
+    public readonly struct LoggerData// : ILoggerData
+    {
+        /// <summary>
+        /// Logger data object
+        /// </summary>
+        /// <param name="dtt"></param>
+        /// <param name="token"></param>
+        /// <param name="type"></param>
+        /// <param name="value"></param>
+        /// <param name="result"></param>
+        /// <param name="time"></param>
+        /// <param name="member"></param>
+        /// <param name="group"></param>
+        public LoggerData(DateTimeOffset dtt, dynamic token, Logger.Type type, string value, string result, double time, string member, string group)
+        {
+            Dtt = dtt;
+            Token = token;
+            Type = type;
+            Value = value;
+            Result = result;
+            Time = time;
+            Member = member;
+            Group = group;
+        }
+
+        /// <summary>
+        /// Dtt
+        /// </summary>
+        public DateTimeOffset Dtt { get; }
+
+        /// <summary>
+        /// token
+        /// </summary>
+        public dynamic Token { get; }
+
+        /// <summary>
+        /// Logger type
+        /// </summary>
+        public Logger.Type Type { get; }
+
+        ///// <summary>
+        ///// The parameters of the method
+        ///// </summary>
+        //public System.Collections.Generic.IDictionary<string, dynamic> Value { get; }
+
+        /// <summary>
+        /// The parameters of the method
+        /// </summary>
+        public string Value { get; }
+
+        /// <summary>
+        /// The method's Return Value
+        /// </summary>
+        public string Result { get; }
+
+        /// <summary>
+        /// Method execution time
+        /// </summary>
+        public double Time { get; }
+
+        /// <summary>
+        /// Method full name
+        /// </summary>
+        public string Member { get; }
+
+        /// <summary>
+        /// Used for the command group
+        /// </summary>
+        public string Group { get; }
+
+        /// <summary>
+        /// to json format
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString() => this.JsonSerialize();
     }
 
     #region WebSocket
@@ -875,7 +987,12 @@ public class BusinessController : Controller
             if (default(DocUI.BenchmarkArg).Equals(arg)) { return new ArgumentNullException(nameof(arg)).Message; }
             //arg.host = $"{this.Request.Scheme}://localhost:{this.HttpContext.Connection.LocalPort}/{business.Configer.Info.BusinessName}";
 
-            arg.host = $"{Common.Host.Addresses.FirstOrDefault()}/{business.Configer.Info.BusinessName}";
+            if (null != WebAPI50.Startup.httpAddress)
+            {
+                //arg.host = $"{Utils.Environment.Addresses[0]}/{business.Configer.Info.BusinessName}";
+                arg.host = $"{WebAPI50.Startup.httpAddress}/{business.Configer.Info.BusinessName}";
+            }
+            //arg.host = $"{Common.Host.Addresses.FirstOrDefault()}/{business.Configer.Info.BusinessName}";
 
             if (!string.IsNullOrWhiteSpace(arg.cmd))
             {
