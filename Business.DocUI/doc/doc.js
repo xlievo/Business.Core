@@ -2826,7 +2826,7 @@ function getDynamicObject(schema, data) {
                 if (null != d && typeof d === 'object') {
                     var key2 = getKeyIgnoreCase(d, key);
                     if (null != key2) {
-                        getDynamicObject(schema.properties[key], d[key2]);
+                        d[key2] = getDynamicObject(schema.properties[key], d[key2]);
                     }
                 }
             }

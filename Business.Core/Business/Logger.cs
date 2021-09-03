@@ -192,12 +192,6 @@ namespace Business.Core
             /// Used for the command group
             /// </summary>
             public string Group { get; }
-
-            ///// <summary>
-            ///// to json format
-            ///// </summary>
-            ///// <returns></returns>
-            //public override string ToString() => this.JsonSerialize();
         }
 
         /// <summary>
