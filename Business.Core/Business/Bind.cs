@@ -931,13 +931,6 @@ namespace Business.Core
 
                 var ignores = attributes2.GetAttrs<Ignore>();
 
-                //var doc = attributes2.GetAttr<DocAttribute>();
-
-                //if (null != doc && string.IsNullOrWhiteSpace(doc.Alias))
-                //{
-                //    doc.Alias = name;
-                //}
-
                 //======CmdAttrGroup======//
                 var commandGroup = CmdAttrGroup(cfg, name, attributes2, ignores);
 
@@ -945,8 +938,6 @@ namespace Business.Core
 
                 var loggerGroup = new ReadOnlyDictionary<string, MetaLogger>();
 
-                //var tokenPosition = new System.Collections.Generic.List<int>(parameters.Length);
-                //var httpRequestPosition = new System.Collections.Generic.List<int>(parameters.Length);
                 var useTypePosition = new ConcurrentReadOnlyDictionary<int, System.Type>();
 
                 foreach (var item in commandGroup.Group)
@@ -979,57 +970,17 @@ namespace Business.Core
 
                     var argAttrAll = AttributeBase.GetAttributes(argInfo, current.type, current.hasCollection ? current.currentType : null);
 
-                    //var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() : argAttrAll.GetAttr<UseAttribute>();
-
-                    //var use = current.hasIArg ? current.inType.GetAttribute<UseAttribute>() ?? argAttrAll.GetAttr<UseAttribute>(c => c.ParameterName) : argAttrAll.GetAttr<UseAttribute>();
                     var use = argAttrAll.GetAttr<UseAttribute>();
 
                     var hasToken = typeof(IToken).IsAssignableFrom(current.type) || typeof(IToken).IsAssignableFrom(use?.ParameterType);//true == use?.Token;
 
-                    //var hasUse = hasToken || null != use || (current.hasIArg ? cfg.UseTypes.ContainsKey(current.inType.FullName) : false);
                     var hasUse = hasToken || null != use || cfg.UseTypes.ContainsKey(current.currentType.FullName);
-                    //var nick = argAttrAll.GetAttr<NickAttribute>();
-
-                    //var hasCollectionAttr = false;
-                    //if (current.hasCollection)
-                    //{
-                    //    var collectionAttr = AttributeBase.GetCollectionAttributes(current.outType);
-                    //    if (0 < collectionAttr.Count)
-                    //    {
-                    //        hasCollectionAttr = true; //checked hasCollectionAttr 1
-                    //        argAttrAll.AddRange(collectionAttr);
-                    //    }
-                    //}
-
-                    //argAttrAll = argAttrAll.Distinct(!hasUse ? argAttrs : null);
+                    
                     argAttrAll = argAttrAll.Distinct(argAttrs);
 
                     //==================================//
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
-                    //var inLogAttrArg = current.hasIArg ? AttributeBase.GetAttributes<LoggerAttribute>(current.inType, AttributeBase.MetaData.DeclaringType.Parameter, GroupAttribute.Comparer) : null;
-
-                    //var iArgGenericType = new System.Type[cfg.ArgTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
-                    //var parameterType2 = parameterType;
-                    //var cast = !hasUse && !current.hasIArg;
-                    ////var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
-                    //if (cast)
-                    //{
-                    //    current.hasIArg = true;
-                    //    current.inType = typeof(object);
-
-                    //    for (int i = 0; i < iArgGenericType.Length; i++)
-                    //    {
-                    //        iArgGenericType[i] = typeof(object);
-                    //    }
-                    //    if (0 < iArgGenericType.Length)
-                    //    {
-                    //        iArgGenericType[0] = parameterType;
-                    //        parameterType2 = cfg.ArgTypeDefinition.MakeGenericType(iArgGenericType);
-                    //    }
-                    //}
-
-                    //var argGroup = GetArgGroup(argAttrAll, current, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, default, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out _, out bool hasCollectionAttr2, argInfo.Name, logAttrArg, inLogAttrArg);
-
+                    
                     var definitions = current.hasDefinition ? new System.Collections.Specialized.StringCollection { current.type.FullName } : new System.Collections.Specialized.StringCollection();
                     var hasLower = false;
                     var childrens2 = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
@@ -1095,8 +1046,6 @@ namespace Business.Core
                     }
                 }
 
-                //var groupDefault = cfg.GetCommandGroup(cfg.Info.CommandGroupDefault, name);
-                //var args = argAttrGroup.FirstOrDefault().Value.Args;//[groupDefault].Args;
                 var fullName = method.GetMethodFullName();
 
                 var meta = new MetaData(Help.dynamicMethodBuilder.GetDelegate(method), commandGroup, args, childAll, tokens, loggerGroup, method.GetMethodFullName(), name, fullName, cfg.Info.TypeFullName, hasAsync, hasValueTask, hasReturn, hasIResult, hasIResultGeneric, returnType, cfg.ResultTypeDefinition, resultType, GetDefaultValue(args), attributes2, methodMeta.Key, cfg.Info.GetCommandGroup(cfg.Info.CommandGroupDefault, name), useTypePosition, GetMethodTypeFullName(fullName, args), attributes2.GetAttr<DocAttribute>(), hasParameters);
@@ -1244,57 +1193,7 @@ namespace Business.Core
 
                 var hasUse = hasToken || null != use || useTypes.ContainsKey(current.currentType.FullName);
 
-                //var hasCollectionAttr = false;
-                //if (current.hasCollection)
-                //{
-                //    var collectionAttr = AttributeBase.GetCollectionAttributes(current.outType);
-                //    if (0 < collectionAttr.Count)
-                //    {
-                //        hasCollectionAttr = true;//checked hasCollectionAttr 1
-                //        argAttrAll.AddRange(collectionAttr);
-                //    }
-                //}
-
-                //var iArgGenericType = new System.Type[argTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
-                //var memberType2 = memberType;
-                //var cast = !hasUse && !current.hasIArg;
-                //if (cast)
-                //{
-                //    current.hasIArg = true;
-                //    current.inType = typeof(object);
-
-                //    for (int i = 0; i < iArgGenericType.Length; i++)
-                //    {
-                //        iArgGenericType[i] = typeof(object);
-                //    }
-                //    if (0 < iArgGenericType.Length)
-                //    {
-                //        iArgGenericType[0] = memberType;
-                //        memberType2 = argTypeDefinition.MakeGenericType(iArgGenericType);
-                //    }
-                //}
-
                 argAttrAll = argAttrAll.Distinct();
-
-                //var iArgGenericType = new System.Type[argTypeDefinition.GetTypeInfo().GenericTypeParameters.Length];
-                //var parameterType2 = memberType;
-                //var cast = !hasUse && !current.hasIArg;
-                ////var cast = !hasUse && current.hasDefinition && !current.hasIArg && current.outType.IsClass;
-                //if (cast)
-                //{
-                //    current.hasIArg = true;
-                //    current.inType = typeof(object);
-
-                //    for (int i = 0; i < iArgGenericType.Length; i++)
-                //    {
-                //        iArgGenericType[i] = typeof(object);
-                //    }
-                //    if (0 < iArgGenericType.Length)
-                //    {
-                //        iArgGenericType[0] = memberType;
-                //        parameterType2 = argTypeDefinition.MakeGenericType(iArgGenericType);
-                //    }
-                //}
 
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;

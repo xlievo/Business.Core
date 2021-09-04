@@ -1218,6 +1218,7 @@ namespace Business.Core.Utils
         internal static TypeDefinition GetTypeDefinition(this System.Type type, IDictionary<string, Xml.member> xmlMembers = null, string summary = null, string groupKey = "", string pathRoot = null, string name = null)
         {
             var current = GetCurrentType(type);
+            var argAttrAll = Annotations.AttributeBase.GetAttributes(current.type, current.hasCollection ? current.currentType : null);
             var definitions = current.hasDefinition ? new System.Collections.Specialized.StringCollection { type.FullName } : new System.Collections.Specialized.StringCollection();
             var childrens = new ReadOnlyCollection<TypeDefinition>();
             var fullName = type.GetTypeName();
@@ -1270,7 +1271,8 @@ namespace Business.Core.Utils
                 MemberDefinition = current.hasDefinition ? MemberDefinitionCode.Definition : MemberDefinitionCode.No,
                 Summary = summary,
                 Path = type.Name,
-                Group = group
+                Group = group,
+                HasDynamicObject = null != argAttrAll.GetAttr<Annotations.DynamicObjectAttribute>()
             };
 
             return definition;
@@ -1300,6 +1302,10 @@ namespace Business.Core.Utils
                         {
                             var member = item as PropertyInfo;
                             memberType = member.PropertyType;
+                            if (null == member.SetMethod)
+                            {
+                                continue;
+                            }
                             memberDefinition = MemberDefinitionCode.Property;
                         }
                         break;
@@ -1307,6 +1313,7 @@ namespace Business.Core.Utils
                 }
 
                 var current = GetCurrentType(memberType);
+                var argAttrAll = Annotations.AttributeBase.GetAttributes(item, current.type, current.hasCollection ? current.currentType : null);
                 //if (definitions.Contains(memberType.FullName)) { continue; }
                 //else if (current.hasDefinition) { definitions.Add(memberType.FullName); }
                 var definitions2 = new System.Collections.Specialized.StringCollection();
@@ -1383,7 +1390,8 @@ namespace Business.Core.Utils
                     MemberDefinition = memberDefinition,
                     Summary = summary,
                     Path = path2,
-                    Group = group
+                    Group = group,
+                    HasDynamicObject = null != argAttrAll.GetAttr<Annotations.DynamicObjectAttribute>()
                 };
 
                 types.Collection.Add(definition);
@@ -1519,7 +1527,7 @@ namespace Business.Core.Utils
             /// <summary>
             /// Dynamic object, DocUI string type display
             /// </summary>
-            public bool HasDynamicObject { get; }
+            public bool HasDynamicObject { get; set; }
         }
 
         ///// <summary>
@@ -3146,7 +3154,9 @@ namespace Business.Core.Utils
 
         //public static bool SpinWait(this System.TimeSpan timeout) => System.Threading.SpinWait.SpinUntil(() => false, timeout);
 
-        static readonly List<string> SysTypes = Assembly.GetExecutingAssembly().GetType().Module.Assembly.GetExportedTypes().Select(c => c.FullName).ToList();
+        static readonly List<string> SysTypes = Assembly.GetExecutingAssembly().GetType().Module.Assembly.GetExportedTypes().Select(c => c.FullName)
+            //.Concat(typeof(System.Text.Json.JsonDocument).Assembly.GetExportedTypes().Select(c => c.FullName))
+            .ToList();
 
         /// <summary>
         /// IsDefinition

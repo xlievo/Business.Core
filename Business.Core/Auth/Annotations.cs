@@ -206,6 +206,18 @@ namespace Business.Core.Annotations
             return attributes;
         }
 
+        internal static System.Collections.Generic.List<AttributeBase> GetAttributes(System.Type type, System.Type origType)
+        {
+            var attributes = new System.Collections.Generic.List<AttributeBase>();
+            attributes.AddRange(type.GetAttributes<AttributeBase>());
+            if (null != origType && !type.Equals(origType))
+            {
+                attributes.AddRange(origType.GetAttributes<AttributeBase>());
+            }
+            attributes.ForEach(c => c.Meta.Declaring = MetaData.DeclaringType.Children);
+            return attributes;
+        }
+
         internal static System.Collections.Generic.List<Attribute> GetAttributes<Attribute>(System.Type type, MetaData.DeclaringType source, System.Collections.Generic.IEqualityComparer<Attribute> comparer = null) where Attribute : AttributeBase
         {
             var attributes = type.GetAttributes<Attribute>().Distinct(comparer).ToList();

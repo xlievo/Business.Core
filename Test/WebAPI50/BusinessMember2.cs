@@ -104,9 +104,13 @@ public class BusinessMember3 : BusinessBase
         public string A { get; set; }
 
         public string B { get; set; }
+
+        [DynamicObject]
+        public System.Text.Json.JsonElement C { get; set; }
+
     }
 
-    public virtual async ValueTask<dynamic> Test004(Session session, List<Test001> arg, dynamic context, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m)
+    public virtual async ValueTask<dynamic> Test004(Session session, List<Test001> arg, BusinessController context, [Ignore(IgnoreMode.BusinessArg)][Test2] decimal mm = 0.0234m)
     {
         Microsoft.AspNetCore.Http.HttpContext httpContext = context.HttpContext;
 
@@ -405,6 +409,12 @@ public partial class BusinessMember2 : BusinessBase
         public int C322;
 
         /// <summary>
+        /// C3366C3366C3366C3366C3366C3366C3366C3366
+        /// </summary>
+        [DynamicObject]
+        public System.Text.Json.JsonElement C3366 { get; set; }
+
+        /// <summary>
         /// C333C333C333C333C333C333
         /// </summary>
         public List<TeamMember> C333;
@@ -496,7 +506,7 @@ public partial class BusinessMember2 : BusinessBase
         return this.ResultCreate(new { arg, arg2, arg3 });
     }
 
-    public virtual async ValueTask<dynamic> TestMyEnum2(MyEnum? arg)
+    public virtual async ValueTask<IResult> TestMyEnum2(MyEnum? arg)
     {
         return this.ResultCreate(arg.HasValue ? null == arg.Value.GetName() ? null : arg.Value : null);
     }
