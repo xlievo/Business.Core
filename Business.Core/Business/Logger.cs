@@ -225,7 +225,7 @@ namespace Business.Core
                         writer.WriteStringValue(v.ToString());
                         break;
                     default:
-                        JsonSerializer.Serialize(writer, value, options); 
+                        writer.WriteStringValue(JsonSerializer.Serialize(value, options)); 
                         break;
                 }
             }
