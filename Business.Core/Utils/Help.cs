@@ -1859,7 +1859,7 @@ namespace Business.Core.Utils
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
-            if (!Configer.Accessors.TryGetValue(business.Configer.Info.BusinessName, out Accessors meta) || !meta.Accessor.TryGetValue(name, out Accessor accessor)) { return business; }
+            if (!Configer.Accessors.TryGetValue(business.Configer.Info.BusinessName, out Accessors meta) || !meta.Accessor.TryGetValue(name, out Accessor accessor) || meta.Injections.ContainsKey(name)) { return business; }
 
             if (skipNull && !Equals(null, accessor.Getter(business)))
             {
