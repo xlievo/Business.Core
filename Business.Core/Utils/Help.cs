@@ -46,17 +46,17 @@ namespace Business.Core.Utils
         /// <summary>
         /// Type
         /// </summary>
-        public System.Type Type { get; private set; }
+        public System.Type Type { get; }
 
         /// <summary>
         /// Getter
         /// </summary>
-        public System.Func<object, object> Getter { get; private set; }
+        public System.Func<object, object> Getter { get; }
 
         /// <summary>
         /// Setter
         /// </summary>
-        public System.Action<object, object> Setter { get; private set; }
+        public System.Action<object, object> Setter { get; }
 
         /// <summary>
         /// TryGetter
@@ -107,6 +107,8 @@ namespace Business.Core.Utils
         public object[] ConstructorArgs;
 
         public ConcurrentReadOnlyDictionary<string, Proces> Methods;
+
+        public ConcurrentReadOnlyDictionary<string, System.Type> Injections;
     }
 
     /// <summary>
@@ -437,7 +439,13 @@ namespace Business.Core.Utils
                 return;
             }
 
-            var member = accessors.dictionary.GetOrAdd(key2, _ => new Accessors { Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(), ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : c.ParameterType.IsValueType ? System.Activator.CreateInstance(c.ParameterType) : default).ToArray(), Methods = new ConcurrentReadOnlyDictionary<string, Proces>() });
+            var member = accessors.dictionary.GetOrAdd(key2, _ => new Accessors
+            {
+                Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(),
+                ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : c.ParameterType.IsValueType ? System.Activator.CreateInstance(c.ParameterType) : default).ToArray(),
+                Methods = new ConcurrentReadOnlyDictionary<string, Proces>(),
+                Injections = new ConcurrentReadOnlyDictionary<string, System.Type>()
+            });
 
             if (fields)
             {
@@ -450,6 +458,12 @@ namespace Business.Core.Utils
 
                     var accessor = field.GetAccessor();
                     if (null == accessor.Getter || null == accessor.Setter) { continue; }
+
+                    if (null != field.GetAttribute<Annotations.InjectionAttribute>())
+                    {
+                        member.Injections.dictionary.TryAdd(field.Name, field.FieldType);
+                    }
+
                     member.Accessor.dictionary.TryAdd(field.Name, accessor);
                 }
             }
@@ -465,6 +479,12 @@ namespace Business.Core.Utils
 
                     var accessor = property.GetAccessor();
                     if (null == accessor.Getter || null == accessor.Setter) { continue; }
+
+                    if (null != property.GetAttribute<Annotations.InjectionAttribute>())
+                    {
+                        member.Injections.dictionary.TryAdd(property.Name, property.PropertyType);
+                    }
+
                     member.Accessor.dictionary.TryAdd(property.Name, accessor);
                 }
             }
@@ -477,6 +497,81 @@ namespace Business.Core.Utils
                     member.Methods.dictionary.TryAdd(method.Name, accessor);
                 }
             }
+        }
+
+        /// <summary>
+        /// SetInjection
+        /// </summary>
+        /// <param name="accessors"></param>
+        /// <param name="key"></param>
+        /// <param name="constructorArgumentsFunc"></param>
+        /// <param name="target"></param>
+        internal static void SetInjection(this ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key, System.Func<System.Type, object> constructorArgumentsFunc, object target)
+        {
+            if (null == constructorArgumentsFunc)
+            {
+                return;
+            }
+
+            if (!accessors.TryGetValue(key, out Accessors meta))
+            {
+                return;
+            }
+
+            foreach (var item in meta.Injections)
+            {
+                var value = constructorArgumentsFunc.Invoke(item.Value);
+
+                if (!Equals(null, value) && meta.Accessor.TryGetValue(item.Key, out Accessor accessor))
+                {
+                    accessor.Setter(target, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// GetConstructorParameters
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="constructorArguments"></param>
+        /// <param name="constructorArgumentsFunc"></param>
+        /// <returns></returns>
+        public static object[] GetConstructorParameters(System.Type type, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null)
+        {
+            var parameters = type.GetConstructors()?.FirstOrDefault()?.GetParameters();
+
+            var args = new object[parameters?.Length ?? 0];
+
+            if (0 < parameters?.Length)
+            {
+                var arguments = constructorArguments?.ToDictionary(c => c.GetType(), c => c);
+
+                var i = 0;
+                foreach (var parameter in parameters)
+                {
+                    var arg = parameter.HasDefaultValue ? parameter.DefaultValue : null;
+
+                    object value = null;
+
+                    if (0 < arguments?.Count && (arguments?.TryGetValue(parameter.ParameterType, out value) ?? false))
+                    {
+                        arg = value;
+                    }
+                    else
+                    {
+                        value = constructorArgumentsFunc?.Invoke(parameter.ParameterType);
+
+                        if (!Equals(null, value))
+                        {
+                            arg = value;
+                        }
+                    }
+
+                    args[i++] = arg;
+                }
+            }
+
+            return args;
         }
 
         /// <summary>

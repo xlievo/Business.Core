@@ -580,8 +580,10 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// <param name="resultTypeDefinition"></param>
         /// <param name="attributes"></param>
         /// <param name="interceptor"></param>
+        /// <param name="constructorArguments"></param>
+        /// <param name="constructorArgumentsFunc"></param>
         /// <param name="useTypes"></param>
-        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
+        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor, object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -605,6 +607,8 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             this.Interceptor = interceptor;
             //GetCommandGroupDefault = name => GetCommandGroup(CommandGroupDefault, name);
             //this.LoggerUseThreadPool = loggerUseThreadPool;
+            this.ConstructorArguments = constructorArguments;
+            this.ConstructorArgumentsFunc = constructorArgumentsFunc;
 
             if (null != useTypes)
             {
@@ -632,28 +636,28 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// <summary>
         /// Attributes
         /// </summary>
-        public ReadOnlyCollection<Annotations.AttributeBase> Attributes { get; private set; }
+        public ReadOnlyCollection<Annotations.AttributeBase> Attributes { get; }
         //public bool EnableWatcher { get; }
 
         /// <summary>
         /// UseTypes
         /// </summary>
-        public ConcurrentReadOnlyDictionary<string, System.Type> UseTypes { get; private set; }
+        public ConcurrentReadOnlyDictionary<string, System.Type> UseTypes { get; }
 
         /// <summary>
         /// Info
         /// </summary>
-        public Annotations.Info Info { get; private set; }
+        public Annotations.Info Info { get; }
 
         /// <summary>
         /// ResultTypeDefinition
         /// </summary>
-        public System.Type ResultTypeDefinition { get; private set; }
+        public System.Type ResultTypeDefinition { get; }
 
         ///// <summary>
         ///// ArgTypeDefinition
         ///// </summary>
-        //public System.Type ArgTypeDefinition { get; private set; }
+        //public System.Type ArgTypeDefinition { get; }
 
         /// <summary>
         /// Doc
@@ -664,6 +668,16 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// Interceptor
         /// </summary>
         public Auth.IInterceptor Interceptor { get; internal set; }
+
+        /// <summary>
+        /// ConstructorArguments
+        /// </summary>
+        public object[] ConstructorArguments { get; internal set; }
+
+        /// <summary>
+        /// ConstructorArgumentsFunc
+        /// </summary>
+        public System.Func<System.Type, object> ConstructorArgumentsFunc { get; internal set; }
 
         /// <summary>
         /// DocGroup

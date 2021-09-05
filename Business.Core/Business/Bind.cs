@@ -364,7 +364,7 @@ namespace Business.Core
 #else
             
 #endif
-            var cfg = new Configer(info, resultType, topAttrs, interceptor, useTypes)
+            var cfg = new Configer(info, resultType, topAttrs, interceptor, constructorArguments, constructorArgumentsFunc, useTypes)
             {
                 DocInfo = topAttrs.GetAttr<DocAttribute>()
             };
@@ -373,7 +373,7 @@ namespace Business.Core
 
             try
             {
-                cfg.MetaData = GetMetaData(cfg, methods);
+                cfg.MetaData = GetMetaData(cfg, methods, business);
                 interceptor.Configer = cfg;
                 interceptor.Business = instance;
             }
@@ -397,7 +397,7 @@ namespace Business.Core
 
                 GetGroup(business);
 
-                Configer.BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
+                Configer.BusinessList.dictionary.TryAdd(cfg.Info.BusinessName, business);
 
                 foreach (var item in business.Command)
                 {
@@ -416,7 +416,10 @@ namespace Business.Core
                     throw new System.Exception($"Routes exists \"{route}\"");
                 }
 
-                type.LoadAccessors(Configer.Accessors, business.Configer.Info.BusinessName);
+                type.LoadAccessors(Configer.Accessors, cfg.Info.BusinessName);
+
+                // set Injections
+                Configer.Accessors.SetInjection(cfg.Info.BusinessName, constructorArgumentsFunc, business);
 
                 business.BindAfter?.Invoke();
             }
@@ -885,7 +888,7 @@ namespace Business.Core
             return name;
         }
 
-        static ConcurrentReadOnlyDictionary<string, MetaData> GetMetaData(Configer cfg, Dictionary<int, MethodInfo> methods)
+        static ConcurrentReadOnlyDictionary<string, MetaData> GetMetaData(Configer cfg, Dictionary<int, MethodInfo> methods, dynamic business)
         {
             var metaData = new ConcurrentReadOnlyDictionary<string, MetaData>();
 
@@ -975,17 +978,17 @@ namespace Business.Core
                     var hasToken = typeof(IToken).IsAssignableFrom(current.type) || typeof(IToken).IsAssignableFrom(use?.ParameterType);//true == use?.Token;
 
                     var hasUse = hasToken || null != use || cfg.UseTypes.ContainsKey(current.currentType.FullName);
-                    
+
                     argAttrAll = argAttrAll.Distinct(argAttrs);
 
                     //==================================//
                     var logAttrArg = argAttrAll.GetAttrs<LoggerAttribute>();
-                    
+
                     var definitions = current.hasDefinition ? new System.Collections.Specialized.StringCollection { current.type.FullName } : new System.Collections.Specialized.StringCollection();
                     var hasLower = false;
                     var childrens2 = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
 
-                    var children = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(attributes2, current.type, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, commandGroup.Group, definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2) : ReadOnlyCollection<Args>.Empty;
+                    var children = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(attributes2, current.type, cfg.Info.TypeFullName, cfg.Info.BusinessName, business, name, path, commandGroup.Group, definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2, cfg.ConstructorArgumentsFunc) : ReadOnlyCollection<Args>.Empty;
 
                     var arg = new Args(argInfo.Name,
                     //cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
@@ -1002,7 +1005,7 @@ namespace Business.Core
                     //false,//hasCollectionAttr || hasCollectionAttr2,
                     //current.hasCollection ? typeof(IArg).GetTypeInfo().IsAssignableFrom(current.type, out _) : false,
                     current.nullable,
-                    default,
+                    default(Accessor),
                     null,//argGroup,
                     children,
                     childrens2,
@@ -1031,7 +1034,7 @@ namespace Business.Core
                         useTypePosition.dictionary.TryAdd(argInfo.Position, current.origType);
                     }
 
-                    var argGroup = GetArgGroup(attributes2, argAttrAll, arg, cfg.Info.TypeFullName, cfg.Info.BusinessName, name, path, default, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out _, argInfo.Name, logAttrArg);
+                    var argGroup = GetArgGroup(attributes2, argAttrAll, arg, cfg.Info.TypeFullName, cfg.Info.BusinessName, business, name, path, null, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out bool _, argInfo.Name, cfg.ConstructorArgumentsFunc, logAttrArg);
                     //arg.HasCollectionAttr = hasCollectionAttr || hasCollectionAttr2;
                     arg.Group = argGroup;
 
@@ -1132,7 +1135,7 @@ namespace Business.Core
         */
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(List<AttributeBase> metaAttributes, System.Type type, string declaring, string businessName, string method, string path, IDictionary<string, CommandAttribute> commands, System.Collections.Specialized.StringCollection definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens)//, System.Type argTypeDefinition
+        static ReadOnlyCollection<Args> GetArgChild(List<AttributeBase> metaAttributes, System.Type type, string declaring, string businessName, dynamic business, string method, string path, IDictionary<string, CommandAttribute> commands, System.Collections.Specialized.StringCollection definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens, System.Func<System.Type, object> constructorArgumentsFunc)//, System.Type argTypeDefinition
         {
             hasLower = false;
 
@@ -1197,15 +1200,15 @@ namespace Business.Core
 
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
-                var children = current.hasDefinition ? GetArgChild(metaAttributes, current.type, declaring, businessName, method, path2, commands, definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2) : ReadOnlyCollection<Args>.Empty;
+                var children = current.hasDefinition ? GetArgChild(metaAttributes, current.type, declaring, businessName, business, method, path2, commands, definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2, constructorArgumentsFunc) : ReadOnlyCollection<Args>.Empty;
 
                 var arg = new Args(item.Name,
                     memberType,
                     current.type,
                     current.currentType,
                     position++,
-                    default,
-                    default,
+                    null,
+                    false,
                     current.currentType.IsValueType ? System.Activator.CreateInstance(current.currentType) : null,
                     current.hasDictionary,
                     current.hasCollection,
@@ -1235,7 +1238,7 @@ namespace Business.Core
                     childrens.Collection.Add(child);
                 }
 
-                var argGroup = GetArgGroup(metaAttributes, argAttrAll, arg, declaring, businessName, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, root);
+                var argGroup = GetArgGroup(metaAttributes, argAttrAll, arg, declaring, businessName, business, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, root, constructorArgumentsFunc);
                 arg.Group = argGroup;
                 //arg.HasCollectionAttr = hasCollectionAttr || hasCollectionAttr2;
                 arg.HasLower = hasLower2 || hasLower3;
@@ -1252,7 +1255,7 @@ namespace Business.Core
         //static readonly System.Type[] procesTypes = new System.Type[] { typeof(object) };
         //static readonly System.Type[] procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(List<AttributeBase> metaAttributes, List<AttributeBase> argAttrAll, Args arg, string declaring, string businessName, string method, string path, string owner, string member, IDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, string root, List<LoggerAttribute> log = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(List<AttributeBase> metaAttributes, List<AttributeBase> argAttrAll, Args arg, string declaring, string businessName, dynamic business, string method, string path, string owner, string member, IDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, string root, System.Func<System.Type, object> constructorArgumentsFunc, List<LoggerAttribute> log = null)
         {
             hasLower = false;
             //hasCollectionAttr = false;
@@ -1317,6 +1320,7 @@ namespace Business.Core
 
                     var attr = string.IsNullOrWhiteSpace(c.Group) ? c.Clone() : c;
 
+                    attr.Business = business;
                     attr.ArgMeta.resultType = resultType;
                     attr.ArgMeta.resultTypeDefinition = resultTypeDefinition;
 
@@ -1356,6 +1360,9 @@ namespace Business.Core
                     {
                         attr.Alias = aliasValue2;
                     }
+
+                    // set Injections
+                    AttributeBase.Accessors.SetInjection(attr.Meta.Type.FullName, constructorArgumentsFunc, attr);
 
                     attr.BindAfter?.Invoke();
 
@@ -2447,7 +2454,7 @@ namespace Business.Core
         /// <summary>
         /// Meta
         /// </summary>
-        public MetaData Meta { get; private set; }
+        public MetaData Meta { get; }
 
         /// <summary>
         /// HasArgSingle
@@ -2528,7 +2535,7 @@ namespace Business.Core.Meta
         /// <summary>
         /// Ignore
         /// </summary>
-        public ReadOnlyCollection<Ignore> Ignore { get; private set; }
+        public ReadOnlyCollection<Ignore> Ignore { get; }
 
         /// <summary>
         /// IgnoreArg
@@ -2798,7 +2805,7 @@ namespace Business.Core.Meta
         /// <summary>
         /// Name
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Type
@@ -2808,81 +2815,81 @@ namespace Business.Core.Meta
         ///// <summary>
         ///// OrigType
         ///// </summary>
-        //public System.Type OrigType { get; private set; }
+        //public System.Type OrigType { get; }
 
         /// <summary>
         /// LastType
         /// </summary>
-        public System.Type LastType { get; private set; }
+        public System.Type LastType { get; }
 
         ///// <summary>
         ///// Remove IArg type
         ///// </summary>
-        //public System.Type CurrentOrigType { get; private set; }
+        //public System.Type CurrentOrigType { get; }
 
         /// <summary>
         /// Remove IArg Null type
         /// </summary>
-        public System.Type CurrentType { get; private set; }
+        public System.Type CurrentType { get; }
 
         /// <summary>
         /// Position
         /// </summary>
-        public int Position { get; private set; }
+        public int Position { get; }
 
         /// <summary>
         /// DefaultValue
         /// </summary>
-        public object DefaultValue { get; private set; }
+        public object DefaultValue { get; }
 
         /// <summary>
         /// HasDefaultValue
         /// </summary>
-        public bool HasDefaultValue { get; private set; }
+        public bool HasDefaultValue { get; }
 
         /// <summary>
         /// DefaultTypeValue
         /// </summary>
-        public object DefaultTypeValue { get; private set; }
+        public object DefaultTypeValue { get; }
 
         /// <summary>
         /// HasDictionary
         /// </summary>
-        public bool HasDictionary { get; private set; }
+        public bool HasDictionary { get; }
 
         /// <summary>
         /// HasCollection
         /// </summary>
-        public bool HasCollection { get; private set; }
+        public bool HasCollection { get; }
         //===============hasCollectionAttr==================//
         //public bool HasCollectionAttr { get; internal set; }
 
         /// <summary>
         /// Nullable
         /// </summary>
-        public bool Nullable { get; private set; }
+        public bool Nullable { get; }
 
         /// <summary>
         /// Accessor
         /// </summary>
-        public Accessor Accessor { get; private set; }
+        public Accessor Accessor { get; }
 
         /// <summary>
         /// Group
         /// </summary>
         public ConcurrentReadOnlyDictionary<string, ArgGroup> Group { get; internal set; }
         ////===============argAttr==================//
-        //public SafeList<Attributes.ArgumentAttribute> ArgAttr { get; private set; }
+        //public SafeList<Attributes.ArgumentAttribute> ArgAttr { get; }
 
         /// <summary>
         /// Children
         /// </summary>
-        public ReadOnlyCollection<Args> Children { get; private set; }
+        public ReadOnlyCollection<Args> Children { get; }
 
         /// <summary>
         /// Childrens
         /// </summary>
-        public ReadOnlyCollection<Args> Childrens { get; private set; }
+        public ReadOnlyCollection<Args> Childrens { get; }
 
         /// <summary>
         /// Whether there are children
@@ -2892,34 +2899,34 @@ namespace Business.Core.Meta
         /// <summary>
         /// HasDefinition
         /// </summary>
-        public bool HasDefinition { get; private set; }
+        public bool HasDefinition { get; }
 
         ///// <summary>
         ///// IArgOutType
         ///// </summary>
-        //public System.Type IArgOutType { get; private set; }
+        //public System.Type IArgOutType { get; }
 
         ///// <summary>
         ///// IArgInType
         ///// </summary>
-        //public System.Type IArgInType { get; private set; }
+        //public System.Type IArgInType { get; }
         ////==============path===================//
-        //public string Path { get; private set; }
+        //public string Path { get; }
         ////==============source===================//
-        //public string Source { get; private set; }
+        //public string Source { get; }
 
         ///// <summary>
         ///// HasIArg
         ///// </summary>
         //public bool HasIArg { get; internal set; }
-        //public MetaLogger Logger { get; private set; }
-        //public MetaLogger IArgInLogger { get; private set; }
+        //public MetaLogger Logger { get; }
+        //public MetaLogger IArgInLogger { get; }
         //==============group===================//
-        //public string Group2 { get; private set; }
+        //public string Group2 { get; }
         //==============owner===================//
-        //public string Owner { get; private set; }
+        //public string Owner { get; }
         ////==============ignore===================//
-        //public ReadOnlyCollection<Attributes.Ignore> Ignore { get; private set; }
+        //public ReadOnlyCollection<Attributes.Ignore> Ignore { get; }
 
         /// <summary>
         /// Use
@@ -2934,22 +2941,22 @@ namespace Business.Core.Meta
         /// <summary>
         /// HasToken
         /// </summary>
-        public bool HasToken { get; private set; }
+        public bool HasToken { get; }
 
         /// <summary>
         /// MethodTypeFullName
         /// </summary>
-        public string MethodTypeFullName { get; private set; }
+        public string MethodTypeFullName { get; }
 
         /// <summary>
         /// FullName
         /// </summary>
-        public string FullName { get; private set; }
+        public string FullName { get; }
 
         /// <summary>
         /// xml using
         /// </summary>
-        public MemberDefinitionCode MemberDefinition { get; private set; }
+        public MemberDefinitionCode MemberDefinition { get; }
 
         ///// <summary>
         ///// HasCast
@@ -3227,7 +3234,7 @@ namespace Business.Core.Meta
         /// </summary>
         public string GroupDefault { get; }
         ////==============argsFirst===================//
-        //public ReadOnlyCollection<Args> ArgsFirst { get; private set; }
+        //public ReadOnlyCollection<Args> ArgsFirst { get; }
 
         /// <summary>
         /// UseTypePosition
@@ -3239,7 +3246,7 @@ namespace Business.Core.Meta
         /// </summary>
         public string MethodTypeFullName { get; }
         ////==============ignore===================//
-        //public Attributes.Ignore Ignore { get; private set; }
+        //public Attributes.Ignore Ignore { get; }
         //==============hasArgSingle===================//
         //public bool HasArgSingle { get; internal set; }
 

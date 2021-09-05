@@ -314,6 +314,11 @@
             Dynamic object, DocUI string type display
             </summary>
         </member>
+        <member name="T:Business.Core.Annotations.InjectionAttribute">
+            <summary>
+            Injection Property and Field
+            </summary>
+        </member>
         <member name="T:Business.Core.Annotations.AliasAttribute">
             <summary>
             Friendly name
@@ -622,6 +627,11 @@
             </summary>
             <param name="value"></param>
             <returns></returns>
+        </member>
+        <member name="P:Business.Core.Annotations.ArgumentAttribute.Business">
+            <summary>
+            Business
+            </summary>
         </member>
         <member name="P:Business.Core.Annotations.ArgumentAttribute.BindAfter">
             <summary>
@@ -1425,15 +1435,6 @@
             <param name="token"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.InterceptorExtensions.GetConstructorParameters(System.Type,System.Object[],System.Func{System.Type,System.Object})">
-            <summary>
-            GetConstructorParameters
-            </summary>
-            <param name="businessType"></param>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
-            <returns></returns>
-        </member>
         <member name="T:Business.Core.Utils.BootstrapExtensions">
             <summary>
             BootstrapExtensions
@@ -1753,6 +1754,24 @@
             </summary>
             <typeparam name="T"></typeparam>
             <param name="methodSelector"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Utils.Help.SetInjection(Business.Core.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Core.Utils.Accessors},System.String,System.Func{System.Type,System.Object},System.Object)">
+            <summary>
+            SetInjection
+            </summary>
+            <param name="accessors"></param>
+            <param name="key"></param>
+            <param name="constructorArgumentsFunc"></param>
+            <param name="target"></param>
+        </member>
+        <member name="M:Business.Core.Utils.Help.GetConstructorParameters(System.Type,System.Object[],System.Func{System.Type,System.Object})">
+            <summary>
+            GetConstructorParameters
+            </summary>
+            <param name="type"></param>
+            <param name="constructorArguments"></param>
+            <param name="constructorArgumentsFunc"></param>
             <returns></returns>
         </member>
         <member name="M:Business.Core.Utils.Help.UseType``1(``0,System.Type[])">
@@ -5584,7 +5603,7 @@
             FirstCharToLowerNamingPolicy
             </summary>
         </member>
-        <member name="M:Business.Core.Configer.#ctor(Business.Core.Annotations.Info,System.Type,System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},Business.Core.Auth.IInterceptor,System.Collections.Generic.IEnumerable{System.Type})">
+        <member name="M:Business.Core.Configer.#ctor(Business.Core.Annotations.Info,System.Type,System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},Business.Core.Auth.IInterceptor,System.Object[],System.Func{System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Type})">
             <summary>
             Configer
             </summary>
@@ -5592,6 +5611,8 @@
             <param name="resultTypeDefinition"></param>
             <param name="attributes"></param>
             <param name="interceptor"></param>
+            <param name="constructorArguments"></param>
+            <param name="constructorArgumentsFunc"></param>
             <param name="useTypes"></param>
         </member>
         <member name="P:Business.Core.Configer.MetaData">
@@ -5627,6 +5648,16 @@
         <member name="P:Business.Core.Configer.Interceptor">
             <summary>
             Interceptor
+            </summary>
+        </member>
+        <member name="P:Business.Core.Configer.ConstructorArguments">
+            <summary>
+            ConstructorArguments
+            </summary>
+        </member>
+        <member name="P:Business.Core.Configer.ConstructorArgumentsFunc">
+            <summary>
+            ConstructorArgumentsFunc
             </summary>
         </member>
         <member name="P:Business.Core.Configer.DocGroup">

@@ -74,7 +74,7 @@ namespace Business.Core.Auth
         {
             try
             {
-                var args = InterceptorExtensions.GetConstructorParameters(businessType, constructorArguments, constructorArgumentsFunc);
+                var args = Help.GetConstructorParameters(businessType, constructorArguments, constructorArgumentsFunc);
 
                 var instance = System.Activator.CreateInstance(businessType, args);
 
@@ -128,7 +128,7 @@ namespace Business.Core.Auth
 
             try
             {
-                var args = InterceptorExtensions.GetConstructorParameters(businessType, constructorArguments, constructorArgumentsFunc);
+                var args = Help.GetConstructorParameters(businessType, constructorArguments, constructorArgumentsFunc);
 
                 var instance = proxy.CreateClassProxy(businessType, new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(ignoreMethods)), args, this);
 
@@ -497,51 +497,6 @@ namespace Business.Core.Utils
             }
 
             return ResultFactory.ResultCreate(meta.ResultTypeDefinition, currentValue);
-        }
-
-        /// <summary>
-        /// GetConstructorParameters
-        /// </summary>
-        /// <param name="businessType"></param>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
-        /// <returns></returns>
-        public static object[] GetConstructorParameters(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null)
-        {
-            var parameters = businessType.GetConstructors()?.FirstOrDefault()?.GetParameters();
-
-            var args = new object[parameters?.Length ?? 0];
-
-            if (0 < parameters?.Length)
-            {
-                var arguments = constructorArguments?.ToDictionary(c => c.GetType(), c => c);
-
-                var i = 0;
-                foreach (var parameter in parameters)
-                {
-                    var arg = parameter.HasDefaultValue ? parameter.DefaultValue : null;
-
-                    object value = null;
-
-                    if (0 < arguments?.Count && (arguments?.TryGetValue(parameter.ParameterType, out value) ?? false))
-                    {
-                        arg = value;
-                    }
-                    else
-                    {
-                        value = constructorArgumentsFunc?.Invoke(parameter.ParameterType);
-
-                        if (!Equals(null, value))
-                        {
-                            arg = value;
-                        }
-                    }
-
-                    args[i++] = arg;
-                }
-            }
-
-            return args;
         }
     }
 }

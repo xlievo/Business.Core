@@ -1,4 +1,5 @@
 ﻿using Business.Core.Result;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Business.Core.Annotations
@@ -132,13 +133,24 @@ namespace Business.Core.Annotations
 
     public class SessionCheck : ArgumentAttribute
     {
+        [Injection]
+        readonly HttpClient httpClient;
+
         public SessionCheck(int state = -81, string message = null) : base(state, message)
         {
             this.Description = "Session check";
+
+            //this.BindAfter = () =>
+            //{
+            //    var httpClientFactory = this.Business.httpClientFactory as IHttpClientFactory;
+            //    httpClient = httpClientFactory.CreateClient();
+            //};
         }
 
         public override async ValueTask<IResult> Proces<Type>(dynamic token, dynamic value)
         {
+            //var bing = await httpClient.GetStringAsync("https://www.bing.com");
+
             var key = value.Key as string;
 
             //..1: check 2: convert

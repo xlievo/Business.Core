@@ -303,6 +303,11 @@ namespace Business.Core.Annotations
 
             foreach (var item in meta.Accessor)
             {
+                if (meta.Injections.ContainsKey(item.Key))
+                {
+                    continue;
+                }
+
                 item.Value.Setter(attr, item.Value.Getter(this));
             }
 
@@ -612,6 +617,12 @@ namespace Business.Core.Annotations
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Interface | System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
     public sealed class DynamicObjectAttribute : AttributeBase { }
+
+    /// <summary>
+    /// Injection Property and Field
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Property | System.AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
+    public sealed class InjectionAttribute : AttributeBase { }
 
     /// <summary>
     /// Friendly name
@@ -1125,6 +1136,11 @@ namespace Business.Core.Annotations
         }
 
         //public override string GroupKey(string space = "->") => $"{base.GroupKey(space)}{space}{this.CollectionItem}";
+
+        /// <summary>
+        /// Business
+        /// </summary>
+        public dynamic Business { get; internal set; }
 
         /// <summary>
         /// BindAfter
