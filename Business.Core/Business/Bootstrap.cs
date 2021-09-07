@@ -55,6 +55,13 @@ namespace Business.Core
         IBootstrap UseLogger(Logger logger);
 
         /// <summary>
+        /// UseInjection
+        /// </summary>
+        /// <param name="member"></param>
+        /// <returns></returns>
+        IBootstrap UseInjection(System.Func<string, System.Type, object> member);
+
+        /// <summary>
         /// Build
         /// </summary>
         dynamic Build();
@@ -78,14 +85,10 @@ namespace Business.Core
         /// BootstrapConfig
         /// </summary>
         /// <param name="interceptor"></param>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
         /// <param name="type"></param>
-        public BootstrapConfig(System.Type interceptor, object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type type = null) : this()
+        public BootstrapConfig(System.Type interceptor, System.Type type = null) : this()
         {
             Interceptor = interceptor ?? typeof(Auth.InterceptorCastle);
-            ConstructorArguments = constructorArguments;
-            ConstructorArgumentsFunc = constructorArgumentsFunc;
             Type = type;
         }
 
@@ -105,14 +108,14 @@ namespace Business.Core
         public System.Type Interceptor { get; }
 
         /// <summary>
-        /// ConstructorArguments
+        /// ConstructorArgument
         /// </summary>
-        public object[] ConstructorArguments { get; }
+        public object[] ConstructorArgument { get; }
 
         /// <summary>
-        /// ConstructorArgumentsFunc
+        /// InjectionName
         /// </summary>
-        public System.Func<System.Type, object> ConstructorArgumentsFunc { get; }
+        public System.Func<string, System.Type, object> Injection { get; set; }
 
         /// <summary>
         /// Type
@@ -195,27 +198,27 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
+        IBootstrap IBootstrap.UseInjection(System.Func<string, System.Type, object> member) => UseInjection(member);
+
         #endregion
 
         #region Create
 
-        /// <summary>
-        /// Initialize a Generic proxy class
-        /// </summary>
-        /// <typeparam name="Business"></typeparam>
-        /// <param name="constructorArguments"></param>
-        /// <returns></returns>
-        public static Bootstrap<Business> Create<Business>(params object[] constructorArguments) where Business : class => Create<Business>(constructorArguments, null);
+        ///// <summary>
+        ///// Initialize a Generic proxy class
+        ///// </summary>
+        ///// <typeparam name="Business"></typeparam>
+        ///// <param name="constructorArguments"></param>
+        ///// <returns></returns>
+        //public static Bootstrap<Business> Create<Business>(params object[] constructorArguments) where Business : class => Create<Business>(constructorArguments, null);
 
         /// <summary>
         /// Initialize a Generic proxy class
         /// </summary>
         /// <typeparam name="Business"></typeparam>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
         /// <param name="interceptor"></param>
         /// <returns></returns>
-        public static Bootstrap<Business> Create<Business>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type interceptor = null) where Business : class => new Bootstrap<Business>(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc, typeof(Business)));
+        public static Bootstrap<Business> Create<Business>(System.Type interceptor = null) where Business : class => new Bootstrap<Business>(new BootstrapConfig(interceptor, typeof(Business)));
 
         ///// <summary>
         ///// Initialize a Type proxy class
@@ -225,71 +228,66 @@ namespace Business.Core
         ///// <returns></returns>
         //public static Bootstrap Create(System.Type type, params object[] constructorArguments) => Create(type, null, constructorArguments);
 
-        /// <summary>
-        /// Initialize a Type proxy class
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="constructorArguments"></param>
-        /// <returns></returns>
-        public static Bootstrap Create(System.Type type, params object[] constructorArguments) => Create(type, constructorArguments, null);
+        ///// <summary>
+        ///// Initialize a Type proxy class
+        ///// </summary>
+        ///// <param name="type"></param>
+        ///// <param name="constructorArguments"></param>
+        ///// <returns></returns>
+        //public static Bootstrap Create(System.Type type, params object[] constructorArguments) => Create(type, constructorArguments, null);
 
         /// <summary>
         /// Initialize a Type proxy class
         /// </summary>
         /// <param name="type"></param>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
         /// <param name="interceptor"></param>
         /// <returns></returns>
-        public static Bootstrap Create(System.Type type, object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type interceptor = null) => new Bootstrap(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc, type));
-        //public static Bootstrap Create(System.Type type, Auth.IInterceptor interceptor = null, System.Func<System.Type, object> constructorArgumentsFunc = null, params object[] constructorArguments) => new Bootstrap(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc, type));
+        public static Bootstrap Create(System.Type type, System.Type interceptor = null) => new Bootstrap(new BootstrapConfig(interceptor, type));
+
+        ///// <summary>
+        ///// bootstrap all Business class
+        ///// </summary>
+        ///// <param name="constructorArguments"></param>
+        ///// <returns></returns>
+        //public static BootstrapAll CreateAll(params object[] constructorArguments) => CreateAll(constructorArguments, null);
 
         /// <summary>
         /// bootstrap all Business class
         /// </summary>
-        /// <param name="constructorArguments"></param>
-        /// <returns></returns>
-        public static BootstrapAll CreateAll(params object[] constructorArguments) => CreateAll(constructorArguments, null);
-
-        /// <summary>
-        /// bootstrap all Business class
-        /// </summary>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
         /// <param name="interceptor"></param>
         /// <returns></returns>
-        public static BootstrapAll CreateAll(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type interceptor = null) => new BootstrapAll(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc));
-
-        /// <summary>
-        /// bootstrap all Business class
-        /// </summary>
-        /// <typeparam name="Business"></typeparam>
-        /// <param name="constructorArguments"></param>
-        /// <returns></returns>
-        public static BootstrapAll<Business> CreateAll<Business>(params object[] constructorArguments) where Business : class, IBusiness => CreateAll<Business>(constructorArguments, null);
-
-        /// <summary>
-        /// bootstrap all Business class
-        /// </summary>
-        /// <typeparam name="Business"></typeparam>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
-        /// <param name="interceptor"></param>
-        /// <returns></returns>
-        public static BootstrapAll<Business> CreateAll<Business>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type interceptor = null) where Business : class, IBusiness => new BootstrapAll<Business>(new BootstrapConfig(interceptor, constructorArguments, constructorArgumentsFunc));
+        public static BootstrapAll CreateAll(System.Type interceptor = null) => new BootstrapAll(new BootstrapConfig(interceptor));
 
         ///// <summary>
         ///// bootstrap all Business class
         ///// </summary>
         ///// <typeparam name="Business"></typeparam>
-        ///// <typeparam name="IInterceptor"></typeparam>
-        ///// <param name="constructorArguments"></param>
-        ///// <param name="constructorArgumentsFunc"></param>
+        ///// <param name="constructorArgument"></param>
         ///// <returns></returns>
-        //public static BootstrapAll<Business> CreateAll<Business, IInterceptor>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc)
-        //    where Business : class, IBusiness
-        //    where IInterceptor : class, Auth.IInterceptor, new()
-        //    => new BootstrapAll<Business>(new BootstrapConfig(typeof(IInterceptor), constructorArguments, constructorArgumentsFunc));
+        //public static BootstrapAll<Business> CreateAll<Business>(params object[] constructorArgument) where Business : class, IBusiness => CreateAll<Business>(constructorArgument, null);
+
+        /// <summary>
+        /// bootstrap all Business class
+        /// </summary>
+        /// <typeparam name="Business"></typeparam>
+        /// <param name="interceptor"></param>
+        /// <returns></returns>
+        public static BootstrapAll<Business> CreateAll<Business>(System.Type interceptor = null) where Business : class, IBusiness => new BootstrapAll<Business>(new BootstrapConfig(interceptor));
+
+        //public static BootstrapAll<Business> CreateAll<Business>(object[] constructorArgument, System.Func<string, System.Type, object> constructorArgumentFunc, System.Type interceptor = null) where Business : class, IBusiness => new BootstrapAll<Business>(new BootstrapConfig(interceptor, constructorArgument, constructorArgumentFunc));
+
+        /////// <summary>
+        /////// bootstrap all Business class
+        /////// </summary>
+        /////// <typeparam name="Business"></typeparam>
+        /////// <typeparam name="IInterceptor"></typeparam>
+        /////// <param name="constructorArguments"></param>
+        /////// <param name="constructorArgumentsFunc"></param>
+        /////// <returns></returns>
+        ////public static BootstrapAll<Business> CreateAll<Business, IInterceptor>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc)
+        ////    where Business : class, IBusiness
+        ////    where IInterceptor : class, Auth.IInterceptor, new()
+        ////    => new BootstrapAll<Business>(new BootstrapConfig(typeof(IInterceptor), constructorArguments, constructorArgumentsFunc));
 
         #endregion
 
@@ -303,7 +301,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -395,6 +393,17 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// UseInjection
+        /// </summary>
+        /// <param name="member"></param>
+        /// <returns></returns>
+        public virtual Bootstrap UseInjection(System.Func<string, System.Type, object> member)
+        {
+            Config.Injection = member;
+            return this;
+        }
+
         #endregion
     }
 
@@ -426,6 +435,8 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
+        IBootstrap IBootstrap.UseInjection(System.Func<string, System.Type, object> member) => UseInjection(member);
+
         dynamic IBootstrap.Build() => Build();
 
         #endregion
@@ -440,7 +451,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -532,6 +543,17 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// UseInjection
+        /// </summary>
+        /// <param name="member"></param>
+        /// <returns></returns>
+        public virtual Bootstrap<Business> UseInjection(System.Func<string, System.Type, object> member)
+        {
+            Config.Injection = member;
+            return this;
+        }
+
         #endregion
     }
 
@@ -561,6 +583,8 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
+        IBootstrap IBootstrap.UseInjection(System.Func<string, System.Type, object> member) => UseInjection(member);
+
         dynamic IBootstrap.Build()
         {
             Build();
@@ -589,7 +613,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
+                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
                             //Create(type, bootstrap.constructorArguments);
                             return true;
                         }
@@ -597,7 +621,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
+                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
                         return true;
                     }
                 }
@@ -712,6 +736,17 @@ namespace Business.Core
             return this;
         }
 
+        /// <summary>
+        /// UseInjection
+        /// </summary>
+        /// <param name="member"></param>
+        /// <returns></returns>
+        public virtual BootstrapAll UseInjection(System.Func<string, System.Type, object> member)
+        {
+            Config.Injection = member;
+            return this;
+        }
+
         #endregion
     }
 
@@ -748,6 +783,8 @@ namespace Business.Core
 
         IBootstrap IBootstrap.UseLogger(Logger logger) => UseLogger(logger);
 
+        IBootstrap IBootstrap.UseInjection(System.Func<string, System.Type, object> member) => UseInjection(member);
+
         dynamic IBootstrap.Build()
         {
             Build();
@@ -776,7 +813,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
+                            if (new Bind(type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
                             {
                                 BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                             }
@@ -787,7 +824,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        if (new Bind(type, Config.Interceptor, Config.ConstructorArguments, Config.ConstructorArgumentsFunc, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
+                        if (new Bind(type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
                         {
                             BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                         }
@@ -902,6 +939,17 @@ namespace Business.Core
         public virtual BootstrapAll<Business> UseLogger(Logger logger)
         {
             Config.Logger = logger;
+            return this;
+        }
+
+        /// <summary>
+        /// UseInjection
+        /// </summary>
+        /// <param name="member"></param>
+        /// <returns></returns>
+        public virtual BootstrapAll<Business> UseInjection(System.Func<string, System.Type, object> member)
+        {
+            Config.Injection = member;
             return this;
         }
 

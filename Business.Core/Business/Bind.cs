@@ -250,7 +250,7 @@ namespace Business.Core
 
         internal readonly bool hasBusiness;
 
-        internal protected Bind(System.Type type, System.Type interceptorType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Type resultType = null, IEnumerable<System.Type> useTypes = null, Logger logger = null, IEnumerable<GroupAttribute> attributes = null)
+        internal protected Bind(System.Type type, System.Type interceptorType, object[] constructorArgument = null, System.Func<string, System.Type, object> constructorArgumentFunc = null, System.Type resultType = null, IEnumerable<System.Type> useTypes = null, Logger logger = null, IEnumerable<GroupAttribute> attributes = null)
         {
             var typeInfo = type.GetTypeInfo();
 
@@ -281,7 +281,7 @@ namespace Business.Core
             */
             var (methods, ignores) = GetMethods(typeInfo);
 
-            instance = interceptor.Create(type, constructorArguments, constructorArgumentsFunc, ignores);
+            instance = interceptor.Create(type, constructorArgument, constructorArgumentFunc, ignores);
 
             //var proxy = new Castle.DynamicProxy.ProxyGenerator();
 
@@ -364,7 +364,7 @@ namespace Business.Core
 #else
             
 #endif
-            var cfg = new Configer(info, resultType, topAttrs, interceptor, constructorArguments, constructorArgumentsFunc, useTypes)
+            var cfg = new Configer(info, resultType, topAttrs, interceptor, constructorArgumentFunc, useTypes)
             {
                 DocInfo = topAttrs.GetAttr<DocAttribute>()
             };
@@ -419,7 +419,7 @@ namespace Business.Core
                 type.LoadAccessors(Configer.Accessors, cfg.Info.BusinessName);
 
                 // set Injections
-                Configer.Accessors.SetInjection(cfg.Info.BusinessName, constructorArgumentsFunc, business);
+                Configer.Accessors.SetInjection(cfg.Info.BusinessName, constructorArgumentFunc, business);
 
                 business.BindAfter?.Invoke();
             }
@@ -988,7 +988,7 @@ namespace Business.Core
                     var hasLower = false;
                     var childrens2 = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
 
-                    var children = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(attributes2, current.type, cfg.Info.TypeFullName, cfg.Info.BusinessName, business, name, path, commandGroup.Group, definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2, cfg.ConstructorArgumentsFunc) : ReadOnlyCollection<Args>.Empty;
+                    var children = hasUse ? ReadOnlyCollection<Args>.Empty : current.hasDefinition ? GetArgChild(attributes2, current.type, cfg.Info.TypeFullName, cfg.Info.BusinessName, business, name, path, commandGroup.Group, definitions, resultType, cfg.ResultTypeDefinition, cfg.UseTypes, out hasLower, argInfo.Name, childrens2, cfg.ConstructorArgumentFunc) : ReadOnlyCollection<Args>.Empty;
 
                     var arg = new Args(argInfo.Name,
                     //cast ? typeof(Arg<>).GetGenericTypeDefinition().MakeGenericType(parameterType) : parameterType,
@@ -1034,7 +1034,7 @@ namespace Business.Core
                         useTypePosition.dictionary.TryAdd(argInfo.Position, current.origType);
                     }
 
-                    var argGroup = GetArgGroup(attributes2, argAttrAll, arg, cfg.Info.TypeFullName, cfg.Info.BusinessName, business, name, path, null, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out bool _, argInfo.Name, cfg.ConstructorArgumentsFunc, logAttrArg);
+                    var argGroup = GetArgGroup(attributes2, argAttrAll, arg, cfg.Info.TypeFullName, cfg.Info.BusinessName, business, name, path, null, argInfo.Name, commandGroup.Group, resultType, cfg.ResultTypeDefinition, hasUse, out bool _, argInfo.Name, cfg.ConstructorArgumentFunc, logAttrArg);
                     //arg.HasCollectionAttr = hasCollectionAttr || hasCollectionAttr2;
                     arg.Group = argGroup;
 
@@ -1135,7 +1135,7 @@ namespace Business.Core
         */
         #endregion
 
-        static ReadOnlyCollection<Args> GetArgChild(List<AttributeBase> metaAttributes, System.Type type, string declaring, string businessName, dynamic business, string method, string path, IDictionary<string, CommandAttribute> commands, System.Collections.Specialized.StringCollection definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens, System.Func<System.Type, object> constructorArgumentsFunc)//, System.Type argTypeDefinition
+        static ReadOnlyCollection<Args> GetArgChild(List<AttributeBase> metaAttributes, System.Type type, string declaring, string businessName, dynamic business, string method, string path, IDictionary<string, CommandAttribute> commands, System.Collections.Specialized.StringCollection definitions, System.Type resultType, System.Type resultTypeDefinition, ConcurrentReadOnlyDictionary<string, System.Type> useTypes, out bool hasLower, string root, ReadOnlyCollection<Args> childrens, System.Func<string, System.Type, object> constructorArgumentFunc)//, System.Type argTypeDefinition
         {
             hasLower = false;
 
@@ -1200,7 +1200,7 @@ namespace Business.Core
 
                 var hasLower3 = false;
                 var childrens2 = current.hasDefinition ? new ReadOnlyCollection<Args>() : ReadOnlyCollection<Args>.Empty;
-                var children = current.hasDefinition ? GetArgChild(metaAttributes, current.type, declaring, businessName, business, method, path2, commands, definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2, constructorArgumentsFunc) : ReadOnlyCollection<Args>.Empty;
+                var children = current.hasDefinition ? GetArgChild(metaAttributes, current.type, declaring, businessName, business, method, path2, commands, definitions2, resultType, resultTypeDefinition, useTypes, out hasLower3, root, childrens2, constructorArgumentFunc) : ReadOnlyCollection<Args>.Empty;
 
                 var arg = new Args(item.Name,
                     memberType,
@@ -1238,7 +1238,7 @@ namespace Business.Core
                     childrens.Collection.Add(child);
                 }
 
-                var argGroup = GetArgGroup(metaAttributes, argAttrAll, arg, declaring, businessName, business, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, root, constructorArgumentsFunc);
+                var argGroup = GetArgGroup(metaAttributes, argAttrAll, arg, declaring, businessName, business, method, path2, path, item.Name, commands, resultType, resultTypeDefinition, hasUse, out bool hasLower2, root, constructorArgumentFunc);
                 arg.Group = argGroup;
                 //arg.HasCollectionAttr = hasCollectionAttr || hasCollectionAttr2;
                 arg.HasLower = hasLower2 || hasLower3;
@@ -1255,7 +1255,7 @@ namespace Business.Core
         //static readonly System.Type[] procesTypes = new System.Type[] { typeof(object) };
         //static readonly System.Type[] procesIArgCollectionTypes = new System.Type[] { typeof(object), typeof(IArg), typeof(int), typeof(object) };
 
-        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(List<AttributeBase> metaAttributes, List<AttributeBase> argAttrAll, Args arg, string declaring, string businessName, dynamic business, string method, string path, string owner, string member, IDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, string root, System.Func<System.Type, object> constructorArgumentsFunc, List<LoggerAttribute> log = null)
+        static ConcurrentReadOnlyDictionary<string, ArgGroup> GetArgGroup(List<AttributeBase> metaAttributes, List<AttributeBase> argAttrAll, Args arg, string declaring, string businessName, dynamic business, string method, string path, string owner, string member, IDictionary<string, CommandAttribute> commands, System.Type resultType, System.Type resultTypeDefinition, bool hasUse, out bool hasLower, string root, System.Func<string, System.Type, object> constructorArgumentFunc, List<LoggerAttribute> log = null)
         {
             hasLower = false;
             //hasCollectionAttr = false;
@@ -1362,7 +1362,7 @@ namespace Business.Core
                     }
 
                     // set Injections
-                    AttributeBase.Accessors.SetInjection(attr.Meta.Type.FullName, constructorArgumentsFunc, attr);
+                    AttributeBase.Accessors.SetInjection(attr.Meta.Type.FullName, constructorArgumentFunc, attr);
 
                     attr.BindAfter?.Invoke();
 

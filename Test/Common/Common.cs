@@ -494,8 +494,9 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
         //InitRedis();
 
         //Bootstrap.Create().Config.UseDoc.OutDir = "";
-
-        bootstrap = Bootstrap.CreateAll<BusinessBase>(null, type => app.ApplicationServices.GetService(type))
+        //null, type => app.ApplicationServices.GetService(type)
+        bootstrap = Bootstrap.CreateAll<BusinessBase>()
+            .UseInjection((name, type) => app.ApplicationServices.GetService(type))
             //.UseType(contextParameterNames)
             .UseType(typeof(HttpContext), typeof(HttpFile), typeof(WebSocket))
             .IgnoreSet(new Ignore(IgnoreMode.Arg), typeof(HttpContext), typeof(HttpFile), typeof(WebSocket))
@@ -646,7 +647,7 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
                         },
                         //the group of this request.
                         "s", //fixed grouping
-                        //the incoming use object
+                             //the incoming use object
                         new UseEntry(context, "context"), //context
                         new UseEntry(webSocket, "socket"), //webSocket
                         new UseEntry(new Token //token

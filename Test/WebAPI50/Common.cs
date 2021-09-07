@@ -499,11 +499,26 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
 
         //Bootstrap.Create().Config.UseDoc.OutDir = "";
 
-        bootstrap = Bootstrap.CreateAll<BusinessBase>(null, type => app.ApplicationServices.GetService(type))
+        var httpClient = app.ApplicationServices.GetService<HttpClient>();
+
+        //null, (name, type) => app.ApplicationServices.GetService(type)
+        bootstrap = Bootstrap.CreateAll<BusinessBase>()
             //.UseType(contextParameterNames)
             .UseType(typeof(HttpContext), typeof(HttpFile), typeof(WebSocket))
             .IgnoreSet(new Ignore(IgnoreMode.Arg), typeof(HttpContext), typeof(HttpFile), typeof(WebSocket))
             .LoggerSet(new LoggerAttribute(canWrite: false), typeof(HttpContext), typeof(HttpFile), typeof(WebSocket))
+            .UseInjection((name, type) =>
+            {
+                return name switch
+                {
+                    "httpClient2" => httpClient,
+                    _ => type.Name switch
+                    {
+                        nameof(HttpClient) => httpClient,
+                        _ => app.ApplicationServices.GetService(type),
+                    },
+                };
+            })
             .UseDoc(docDir, o =>
             {
                 o.Debug = true;

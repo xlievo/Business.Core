@@ -40,11 +40,11 @@ namespace Business.Core.Auth
         /// Create
         /// </summary>
         /// <param name="businessType"></param>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
+        /// <param name="constructorArgument"></param>
+        /// <param name="constructorArgumentFunc"></param>
         /// <param name="ignoreMethods"></param>
         /// <returns></returns>
-        object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null);
+        object Create(System.Type businessType, object[] constructorArgument = null, System.Func<string, System.Type, object> constructorArgumentFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null);
     }
 
     /// <summary>
@@ -66,15 +66,15 @@ namespace Business.Core.Auth
         /// Create
         /// </summary>
         /// <param name="businessType"></param>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
+        /// <param name="constructorArgument"></param>
+        /// <param name="constructorArgumentFunc"></param>
         /// <param name="ignoreMethods"></param>
         /// <returns></returns>
-        public virtual object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
+        public virtual object Create(System.Type businessType, object[] constructorArgument = null, System.Func<string, System.Type, object> constructorArgumentFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
         {
             try
             {
-                var args = Help.GetConstructorParameters(businessType, constructorArguments, constructorArgumentsFunc);
+                var args = Help.GetConstructorParameters(businessType, constructorArgument, constructorArgumentFunc);
 
                 var instance = System.Activator.CreateInstance(businessType, args);
 
@@ -118,17 +118,17 @@ namespace Business.Core.Auth
         /// Create
         /// </summary>
         /// <param name="businessType"></param>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
+        /// <param name="constructorArgument"></param>
+        /// <param name="constructorArgumentFunc"></param>
         /// <param name="ignoreMethods"></param>
         /// <returns></returns>
-        public override object Create(System.Type businessType, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
+        public override object Create(System.Type businessType, object[] constructorArgument = null, System.Func<string, System.Type, object> constructorArgumentFunc = null, System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> ignoreMethods = null)
         {
             var proxy = new Castle.DynamicProxy.ProxyGenerator();
 
             try
             {
-                var args = Help.GetConstructorParameters(businessType, constructorArguments, constructorArgumentsFunc);
+                var args = Help.GetConstructorParameters(businessType, constructorArgument, constructorArgumentFunc);
 
                 var instance = proxy.CreateClassProxy(businessType, new Castle.DynamicProxy.ProxyGenerationOptions(new BusinessAllMethodsHook(ignoreMethods)), args, this);
 

@@ -580,10 +580,9 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         /// <param name="resultTypeDefinition"></param>
         /// <param name="attributes"></param>
         /// <param name="interceptor"></param>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
+        /// <param name="constructorArgumentFunc"></param>
         /// <param name="useTypes"></param>
-        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor, object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
+        public Configer(Annotations.Info info, System.Type resultTypeDefinition, System.Collections.Generic.List<Annotations.AttributeBase> attributes, Auth.IInterceptor interceptor, System.Func<string, System.Type, object> constructorArgumentFunc, System.Collections.Generic.IEnumerable<System.Type> useTypes = null)
         /*
 #if !Mobile
         , bool enableWatcher = false)
@@ -607,8 +606,7 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
             this.Interceptor = interceptor;
             //GetCommandGroupDefault = name => GetCommandGroup(CommandGroupDefault, name);
             //this.LoggerUseThreadPool = loggerUseThreadPool;
-            this.ConstructorArguments = constructorArguments;
-            this.ConstructorArgumentsFunc = constructorArgumentsFunc;
+            this.ConstructorArgumentFunc = constructorArgumentFunc;
 
             if (null != useTypes)
             {
@@ -670,14 +668,9 @@ SetBusinessAttribute(del.attributes, del.MetaData, item.Value);
         public Auth.IInterceptor Interceptor { get; internal set; }
 
         /// <summary>
-        /// ConstructorArguments
+        /// ConstructorArgumentFunc
         /// </summary>
-        public object[] ConstructorArguments { get; internal set; }
-
-        /// <summary>
-        /// ConstructorArgumentsFunc
-        /// </summary>
-        public System.Func<System.Type, object> ConstructorArgumentsFunc { get; internal set; }
+        public System.Func<string, System.Type, object> ConstructorArgumentFunc { get; internal set; }
 
         /// <summary>
         /// DocGroup

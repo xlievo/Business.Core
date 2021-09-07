@@ -1245,13 +1245,13 @@
             Configer
             </summary>
         </member>
-        <member name="M:Business.Core.Auth.IInterceptor.Create(System.Type,System.Object[],System.Func{System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
+        <member name="M:Business.Core.Auth.IInterceptor.Create(System.Type,System.Object[],System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
             <summary>
             Create
             </summary>
             <param name="businessType"></param>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
+            <param name="constructorArgument"></param>
+            <param name="constructorArgumentFunc"></param>
             <param name="ignoreMethods"></param>
             <returns></returns>
         </member>
@@ -1270,13 +1270,13 @@
             Configer
             </summary>
         </member>
-        <member name="M:Business.Core.Auth.Interceptor.Create(System.Type,System.Object[],System.Func{System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
+        <member name="M:Business.Core.Auth.Interceptor.Create(System.Type,System.Object[],System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
             <summary>
             Create
             </summary>
             <param name="businessType"></param>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
+            <param name="constructorArgument"></param>
+            <param name="constructorArgumentFunc"></param>
             <param name="ignoreMethods"></param>
             <returns></returns>
         </member>
@@ -1285,13 +1285,13 @@
             InterceptorCastle
             </summary>
         </member>
-        <member name="M:Business.Core.Auth.InterceptorCastle.Create(System.Type,System.Object[],System.Func{System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
+        <member name="M:Business.Core.Auth.InterceptorCastle.Create(System.Type,System.Object[],System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
             <summary>
             Create
             </summary>
             <param name="businessType"></param>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
+            <param name="constructorArgument"></param>
+            <param name="constructorArgumentFunc"></param>
             <param name="ignoreMethods"></param>
             <returns></returns>
         </member>
@@ -1668,13 +1668,15 @@
             Accessor
             </summary>
         </member>
-        <member name="M:Business.Core.Utils.Accessor.#ctor(System.Type,System.Func{System.Object,System.Object},System.Action{System.Object,System.Object})">
+        <member name="M:Business.Core.Utils.Accessor.#ctor(System.Type,System.Func{System.Object,System.Object},System.Action{System.Object,System.Object},System.String,System.Boolean)">
             <summary>
             Accessor
             </summary>
             <param name="type"></param>
             <param name="getter"></param>
             <param name="setter"></param>
+            <param name="name"></param>
+            <param name="injection"></param>
         </member>
         <member name="P:Business.Core.Utils.Accessor.Type">
             <summary>
@@ -1689,6 +1691,16 @@
         <member name="P:Business.Core.Utils.Accessor.Setter">
             <summary>
             Setter
+            </summary>
+        </member>
+        <member name="P:Business.Core.Utils.Accessor.Name">
+            <summary>
+            Name
+            </summary>
+        </member>
+        <member name="P:Business.Core.Utils.Accessor.Injection">
+            <summary>
+            Injection
             </summary>
         </member>
         <member name="M:Business.Core.Utils.Accessor.TryGetter(System.Object)">
@@ -1756,22 +1768,22 @@
             <param name="methodSelector"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.SetInjection(Business.Core.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Core.Utils.Accessors},System.String,System.Func{System.Type,System.Object},System.Object)">
+        <member name="M:Business.Core.Utils.Help.SetInjection(Business.Core.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Core.Utils.Accessors},System.String,System.Func{System.String,System.Type,System.Object},System.Object)">
             <summary>
             SetInjection
             </summary>
             <param name="accessors"></param>
             <param name="key"></param>
-            <param name="constructorArgumentsFunc"></param>
+            <param name="constructorArgumentFunc"></param>
             <param name="target"></param>
         </member>
-        <member name="M:Business.Core.Utils.Help.GetConstructorParameters(System.Type,System.Object[],System.Func{System.Type,System.Object})">
+        <member name="M:Business.Core.Utils.Help.GetConstructorParameters(System.Type,System.Object[],System.Func{System.String,System.Type,System.Object})">
             <summary>
             GetConstructorParameters
             </summary>
             <param name="type"></param>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
+            <param name="constructorArgument"></param>
+            <param name="constructorArgumentFunc"></param>
             <returns></returns>
         </member>
         <member name="M:Business.Core.Utils.Help.UseType``1(``0,System.Type[])">
@@ -3876,6 +3888,13 @@
             <param name="logger"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.IBootstrap.UseInjection(System.Func{System.String,System.Type,System.Object})">
+            <summary>
+            UseInjection
+            </summary>
+            <param name="member"></param>
+            <returns></returns>
+        </member>
         <member name="M:Business.Core.IBootstrap.Build">
             <summary>
             Build
@@ -3891,13 +3910,11 @@
             BootstrapConfig
             </summary>
         </member>
-        <member name="M:Business.Core.BootstrapConfig.#ctor(System.Type,System.Object[],System.Func{System.Type,System.Object},System.Type)">
+        <member name="M:Business.Core.BootstrapConfig.#ctor(System.Type,System.Type)">
             <summary>
             BootstrapConfig
             </summary>
             <param name="interceptor"></param>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
             <param name="type"></param>
         </member>
         <member name="P:Business.Core.BootstrapConfig.Use">
@@ -3915,14 +3932,14 @@
             Interceptor
             </summary>
         </member>
-        <member name="P:Business.Core.BootstrapConfig.ConstructorArguments">
+        <member name="P:Business.Core.BootstrapConfig.ConstructorArgument">
             <summary>
-            ConstructorArguments
+            ConstructorArgument
             </summary>
         </member>
-        <member name="P:Business.Core.BootstrapConfig.ConstructorArgumentsFunc">
+        <member name="P:Business.Core.BootstrapConfig.Injection">
             <summary>
-            ConstructorArgumentsFunc
+            InjectionName
             </summary>
         </member>
         <member name="P:Business.Core.BootstrapConfig.Type">
@@ -3991,73 +4008,34 @@
             Config
             </summary>
         </member>
-        <member name="M:Business.Core.Bootstrap.Create``1(System.Object[])">
+        <member name="M:Business.Core.Bootstrap.Create``1(System.Type)">
             <summary>
             Initialize a Generic proxy class
             </summary>
             <typeparam name="Business"></typeparam>
-            <param name="constructorArguments"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Bootstrap.Create``1(System.Object[],System.Func{System.Type,System.Object},System.Type)">
-            <summary>
-            Initialize a Generic proxy class
-            </summary>
-            <typeparam name="Business"></typeparam>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
             <param name="interceptor"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.Create(System.Type,System.Object[])">
+        <member name="M:Business.Core.Bootstrap.Create(System.Type,System.Type)">
             <summary>
             Initialize a Type proxy class
             </summary>
             <param name="type"></param>
-            <param name="constructorArguments"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Bootstrap.Create(System.Type,System.Object[],System.Func{System.Type,System.Object},System.Type)">
-            <summary>
-            Initialize a Type proxy class
-            </summary>
-            <param name="type"></param>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
             <param name="interceptor"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.CreateAll(System.Object[])">
+        <member name="M:Business.Core.Bootstrap.CreateAll(System.Type)">
             <summary>
             bootstrap all Business class
             </summary>
-            <param name="constructorArguments"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Bootstrap.CreateAll(System.Object[],System.Func{System.Type,System.Object},System.Type)">
-            <summary>
-            bootstrap all Business class
-            </summary>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
             <param name="interceptor"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Bootstrap.CreateAll``1(System.Object[])">
+        <member name="M:Business.Core.Bootstrap.CreateAll``1(System.Type)">
             <summary>
             bootstrap all Business class
             </summary>
             <typeparam name="Business"></typeparam>
-            <param name="constructorArguments"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Bootstrap.CreateAll``1(System.Object[],System.Func{System.Type,System.Object},System.Type)">
-            <summary>
-            bootstrap all Business class
-            </summary>
-            <typeparam name="Business"></typeparam>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
             <param name="interceptor"></param>
             <returns></returns>
         </member>
@@ -4094,6 +4072,13 @@
             Log callback for all business classes
             </summary>
             <param name="logger"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Bootstrap.UseInjection(System.Func{System.String,System.Type,System.Object})">
+            <summary>
+            UseInjection
+            </summary>
+            <param name="member"></param>
             <returns></returns>
         </member>
         <member name="T:Business.Core.Bootstrap`1">
@@ -4148,6 +4133,13 @@
             <param name="logger"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.Bootstrap`1.UseInjection(System.Func{System.String,System.Type,System.Object})">
+            <summary>
+            UseInjection
+            </summary>
+            <param name="member"></param>
+            <returns></returns>
+        </member>
         <member name="T:Business.Core.BootstrapAll">
             <summary>
             BootstrapAll
@@ -4198,6 +4190,13 @@
             Log callback for all business classes
             </summary>
             <param name="logger"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.BootstrapAll.UseInjection(System.Func{System.String,System.Type,System.Object})">
+            <summary>
+            UseInjection
+            </summary>
+            <param name="member"></param>
             <returns></returns>
         </member>
         <member name="T:Business.Core.BootstrapAll`1">
@@ -4256,6 +4255,13 @@
             Log callback for all business classes
             </summary>
             <param name="logger"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.BootstrapAll`1.UseInjection(System.Func{System.String,System.Type,System.Object})">
+            <summary>
+            UseInjection
+            </summary>
+            <param name="member"></param>
             <returns></returns>
         </member>
         <member name="T:Business.Core.Document.Xml">
@@ -5603,7 +5609,7 @@
             FirstCharToLowerNamingPolicy
             </summary>
         </member>
-        <member name="M:Business.Core.Configer.#ctor(Business.Core.Annotations.Info,System.Type,System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},Business.Core.Auth.IInterceptor,System.Object[],System.Func{System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Type})">
+        <member name="M:Business.Core.Configer.#ctor(Business.Core.Annotations.Info,System.Type,System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},Business.Core.Auth.IInterceptor,System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Type})">
             <summary>
             Configer
             </summary>
@@ -5611,8 +5617,7 @@
             <param name="resultTypeDefinition"></param>
             <param name="attributes"></param>
             <param name="interceptor"></param>
-            <param name="constructorArguments"></param>
-            <param name="constructorArgumentsFunc"></param>
+            <param name="constructorArgumentFunc"></param>
             <param name="useTypes"></param>
         </member>
         <member name="P:Business.Core.Configer.MetaData">
@@ -5650,14 +5655,9 @@
             Interceptor
             </summary>
         </member>
-        <member name="P:Business.Core.Configer.ConstructorArguments">
+        <member name="P:Business.Core.Configer.ConstructorArgumentFunc">
             <summary>
-            ConstructorArguments
-            </summary>
-        </member>
-        <member name="P:Business.Core.Configer.ConstructorArgumentsFunc">
-            <summary>
-            ConstructorArgumentsFunc
+            ConstructorArgumentFunc
             </summary>
         </member>
         <member name="P:Business.Core.Configer.DocGroup">

@@ -303,7 +303,7 @@ namespace Business.Core.Annotations
 
             foreach (var item in meta.Accessor)
             {
-                if (meta.Injections.ContainsKey(item.Key))
+                if (item.Value.Injection)
                 {
                     continue;
                 }
@@ -332,6 +332,8 @@ namespace Business.Core.Annotations
 
             foreach (var item in meta.Accessor)
             {
+                if (item.Value.Injection) { continue; }
+
                 var member = $"{{{item.Key}}}";
 
                 if (-1 < value.IndexOf(member))

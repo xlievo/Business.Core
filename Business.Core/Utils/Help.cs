@@ -36,11 +36,15 @@ namespace Business.Core.Utils
         /// <param name="type"></param>
         /// <param name="getter"></param>
         /// <param name="setter"></param>
-        public Accessor(System.Type type, System.Func<object, object> getter, System.Action<object, object> setter)
+        /// <param name="name"></param>
+        /// <param name="injection"></param>
+        public Accessor(System.Type type, System.Func<object, object> getter, System.Action<object, object> setter, string name, bool injection)
         {
             Type = type;
             Getter = getter;
             Setter = setter;
+            Name = name;
+            Injection = injection;
         }
 
         /// <summary>
@@ -57,6 +61,16 @@ namespace Business.Core.Utils
         /// Setter
         /// </summary>
         public System.Action<object, object> Setter { get; }
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// Injection
+        /// </summary>
+        public bool Injection { get; }
 
         /// <summary>
         /// TryGetter
@@ -107,8 +121,6 @@ namespace Business.Core.Utils
         public object[] ConstructorArgs;
 
         public ConcurrentReadOnlyDictionary<string, Proces> Methods;
-
-        public ConcurrentReadOnlyDictionary<string, System.Type> Injections;
     }
 
     /// <summary>
@@ -362,24 +374,24 @@ namespace Business.Core.Utils
 
         internal static readonly Emit.DynamicMethodBuilder dynamicMethodBuilder = new Emit.DynamicMethodBuilder();
 
-        internal static Accessor GetAccessor(this FieldInfo fieldInfo)
+        internal static Accessor GetAccessor(this FieldInfo fieldInfo, bool injection = false)
         {
             if (null == fieldInfo) { throw new System.ArgumentNullException(nameof(fieldInfo)); }
 
             var getter = Emit.FieldAccessorGenerator.CreateGetter(fieldInfo);
             var setter = Emit.FieldAccessorGenerator.CreateSetter(fieldInfo);
 
-            return new Accessor(fieldInfo.FieldType, getter, setter);
+            return new Accessor(fieldInfo.FieldType, getter, setter, fieldInfo.Name, injection);
         }
 
-        internal static Accessor GetAccessor(this PropertyInfo propertyInfo)
+        internal static Accessor GetAccessor(this PropertyInfo propertyInfo, bool injection = false)
         {
             if (null == propertyInfo) { throw new System.ArgumentNullException(nameof(propertyInfo)); }
 
             var getter = Emit.PropertyAccessorGenerator.CreateGetter(propertyInfo);
             var setter = Emit.PropertyAccessorGenerator.CreateSetter(propertyInfo);
 
-            return new Accessor(propertyInfo.PropertyType, getter, setter);
+            return new Accessor(propertyInfo.PropertyType, getter, setter, propertyInfo.Name, injection);
         }
 
         /// <summary>
@@ -443,8 +455,7 @@ namespace Business.Core.Utils
             {
                 Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(),
                 ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : c.ParameterType.IsValueType ? System.Activator.CreateInstance(c.ParameterType) : default).ToArray(),
-                Methods = new ConcurrentReadOnlyDictionary<string, Proces>(),
-                Injections = new ConcurrentReadOnlyDictionary<string, System.Type>()
+                Methods = new ConcurrentReadOnlyDictionary<string, Proces>()
             });
 
             if (fields)
@@ -456,14 +467,8 @@ namespace Business.Core.Utils
                         continue;
                     }
 
-                    var accessor = field.GetAccessor();
+                    var accessor = field.GetAccessor(null != field.GetAttribute<Annotations.InjectionAttribute>());
                     if (null == accessor.Getter || null == accessor.Setter) { continue; }
-
-                    if (null != field.GetAttribute<Annotations.InjectionAttribute>())
-                    {
-                        member.Injections.dictionary.TryAdd(field.Name, field.FieldType);
-                    }
-
                     member.Accessor.dictionary.TryAdd(field.Name, accessor);
                 }
             }
@@ -477,14 +482,8 @@ namespace Business.Core.Utils
                         continue;
                     }
 
-                    var accessor = property.GetAccessor();
+                    var accessor = property.GetAccessor(null != property.GetAttribute<Annotations.InjectionAttribute>());
                     if (null == accessor.Getter || null == accessor.Setter) { continue; }
-
-                    if (null != property.GetAttribute<Annotations.InjectionAttribute>())
-                    {
-                        member.Injections.dictionary.TryAdd(property.Name, property.PropertyType);
-                    }
-
                     member.Accessor.dictionary.TryAdd(property.Name, accessor);
                 }
             }
@@ -504,27 +503,29 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="accessors"></param>
         /// <param name="key"></param>
-        /// <param name="constructorArgumentsFunc"></param>
+        /// <param name="constructorArgumentFunc"></param>
         /// <param name="target"></param>
-        internal static void SetInjection(this ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key, System.Func<System.Type, object> constructorArgumentsFunc, object target)
+        internal static void SetInjection(this ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key, System.Func<string, System.Type, object> constructorArgumentFunc, object target)
         {
-            if (null == constructorArgumentsFunc)
+            if (null == accessors || null == constructorArgumentFunc)
             {
                 return;
             }
 
-            if (!accessors.TryGetValue(key, out Accessors meta))
+            if (string.IsNullOrEmpty(key) || !accessors.TryGetValue(key, out Accessors meta))
             {
                 return;
             }
 
-            foreach (var item in meta.Injections)
+            foreach (var item in meta.Accessor)
             {
-                var value = constructorArgumentsFunc.Invoke(item.Value);
+                if (!item.Value.Injection) { continue; }
 
-                if (!Equals(null, value) && meta.Accessor.TryGetValue(item.Key, out Accessor accessor))
+                var value = constructorArgumentFunc.Invoke(item.Value.Name, item.Value.Type);
+
+                if (!Equals(null, value))
                 {
-                    accessor.Setter(target, value);
+                    item.Value.Setter(target, value);
                 }
             }
         }
@@ -533,10 +534,10 @@ namespace Business.Core.Utils
         /// GetConstructorParameters
         /// </summary>
         /// <param name="type"></param>
-        /// <param name="constructorArguments"></param>
-        /// <param name="constructorArgumentsFunc"></param>
+        /// <param name="constructorArgument"></param>
+        /// <param name="constructorArgumentFunc"></param>
         /// <returns></returns>
-        public static object[] GetConstructorParameters(System.Type type, object[] constructorArguments = null, System.Func<System.Type, object> constructorArgumentsFunc = null)
+        public static object[] GetConstructorParameters(System.Type type, object[] constructorArgument = null, System.Func<string, System.Type, object> constructorArgumentFunc = null)
         {
             var parameters = type.GetConstructors()?.FirstOrDefault()?.GetParameters();
 
@@ -544,7 +545,7 @@ namespace Business.Core.Utils
 
             if (0 < parameters?.Length)
             {
-                var arguments = constructorArguments?.ToDictionary(c => c.GetType(), c => c);
+                var arguments = constructorArgument?.ToDictionary(c => c.GetType(), c => c);
 
                 var i = 0;
                 foreach (var parameter in parameters)
@@ -553,18 +554,15 @@ namespace Business.Core.Utils
 
                     object value = null;
 
-                    if (0 < arguments?.Count && (arguments?.TryGetValue(parameter.ParameterType, out value) ?? false))
+                    value = constructorArgumentFunc?.Invoke(parameter.Name, parameter.ParameterType);
+
+                    if (!Equals(null, value))
                     {
                         arg = value;
                     }
-                    else
+                    else if (0 < arguments?.Count && (arguments?.TryGetValue(parameter.ParameterType, out value) ?? false))
                     {
-                        value = constructorArgumentsFunc?.Invoke(parameter.ParameterType);
-
-                        if (!Equals(null, value))
-                        {
-                            arg = value;
-                        }
+                        arg = value;
                     }
 
                     args[i++] = arg;
@@ -1859,7 +1857,7 @@ namespace Business.Core.Utils
         {
             if (null == business) { throw new System.ArgumentNullException(nameof(business)); }
 
-            if (!Configer.Accessors.TryGetValue(business.Configer.Info.BusinessName, out Accessors meta) || !meta.Accessor.TryGetValue(name, out Accessor accessor) || meta.Injections.ContainsKey(name)) { return business; }
+            if (!Configer.Accessors.TryGetValue(business.Configer.Info.BusinessName, out Accessors meta) || !meta.Accessor.TryGetValue(name, out Accessor accessor) || accessor.Injection) { return business; }
 
             if (skipNull && !Equals(null, accessor.Getter(business)))
             {

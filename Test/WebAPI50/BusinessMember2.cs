@@ -59,8 +59,8 @@ public class BusinessMember3 : BusinessBase
 
     public BusinessMember3(System.Net.Http.IHttpClientFactory httpClientFactory, IMemoryCache memoryCache, string dd = "ttt", int cc = 999) : base()
     {
-        memoryCache.Set("a", 333);
-        var ddd = memoryCache.Get<int>("a");
+        memoryCache?.Set("a", 333);
+        var ddd = memoryCache?.Get<int>("a");
 
         this.httpClientFactory = httpClientFactory;
 
@@ -135,13 +135,14 @@ public class BusinessMember3 : BusinessBase
 [@JsonArg2(Group = "j")]
 public partial class BusinessMember2
 {
-    [Injection]
+    //[Injection]
     readonly HttpClient httpClient2;
 
     public readonly IHttpClientFactory httpClientFactory;
 
-    public BusinessMember2(IHttpClientFactory httpClientFactory)
+    public BusinessMember2(IHttpClientFactory httpClientFactory, HttpClient httpClient2)
     {
+        this.httpClient2 = httpClient2;
         this.httpClientFactory = httpClientFactory;
 
         this.BindBefore = c =>
