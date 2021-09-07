@@ -107,10 +107,10 @@ namespace Business.Core
         /// </summary>
         public System.Type Interceptor { get; }
 
-        /// <summary>
-        /// ConstructorArgument
-        /// </summary>
-        public object[] ConstructorArgument { get; }
+        ///// <summary>
+        ///// ConstructorArgument
+        ///// </summary>
+        //public object[] ConstructorArgument { get; }
 
         /// <summary>
         /// InjectionName
@@ -276,19 +276,6 @@ namespace Business.Core
 
         //public static BootstrapAll<Business> CreateAll<Business>(object[] constructorArgument, System.Func<string, System.Type, object> constructorArgumentFunc, System.Type interceptor = null) where Business : class, IBusiness => new BootstrapAll<Business>(new BootstrapConfig(interceptor, constructorArgument, constructorArgumentFunc));
 
-        /////// <summary>
-        /////// bootstrap all Business class
-        /////// </summary>
-        /////// <typeparam name="Business"></typeparam>
-        /////// <typeparam name="IInterceptor"></typeparam>
-        /////// <param name="constructorArguments"></param>
-        /////// <param name="constructorArgumentsFunc"></param>
-        /////// <returns></returns>
-        ////public static BootstrapAll<Business> CreateAll<Business, IInterceptor>(object[] constructorArguments, System.Func<System.Type, object> constructorArgumentsFunc)
-        ////    where Business : class, IBusiness
-        ////    where IInterceptor : class, Auth.IInterceptor, new()
-        ////    => new BootstrapAll<Business>(new BootstrapConfig(typeof(IInterceptor), constructorArguments, constructorArgumentsFunc));
-
         #endregion
 
         IBusiness business;
@@ -301,7 +288,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -451,7 +438,7 @@ namespace Business.Core
         {
             Config.BuildBefore?.Invoke(this);
 
-            var bind = new Bind(Config.Type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
+            var bind = new Bind(Config.Type, Config.Interceptor, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
 
             business = bind.hasBusiness ? (IBusiness)bind.instance : null;
 
@@ -613,7 +600,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            _ = new Bind(type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
+                            _ = new Bind(type, Config.Interceptor, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
                             //Create(type, bootstrap.constructorArguments);
                             return true;
                         }
@@ -621,7 +608,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        _ = new Bind(type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
+                        _ = new Bind(type, Config.Interceptor, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes);
                         return true;
                     }
                 }
@@ -813,7 +800,7 @@ namespace Business.Core
                     {
                         if (businessTypeFullName.Contains(type.FullName))
                         {
-                            if (new Bind(type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
+                            if (new Bind(type, Config.Interceptor, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
                             {
                                 BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                             }
@@ -824,7 +811,7 @@ namespace Business.Core
                     else
                     {
                         //Create(type, bootstrap.constructorArguments);
-                        if (new Bind(type, Config.Interceptor, Config.ConstructorArgument, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
+                        if (new Bind(type, Config.Interceptor, Config.Injection, Config.ResultType, Config.useTypes, Config.Logger, Config.Attributes).instance is Business business)
                         {
                             BusinessList.dictionary.TryAdd(business.Configer.Info.BusinessName, business);
                         }
@@ -949,7 +936,7 @@ namespace Business.Core
         /// <returns></returns>
         public virtual BootstrapAll<Business> UseInjection(System.Func<string, System.Type, object> member)
         {
-            Config.Injection = member;
+            Config.Injection += member;
             return this;
         }
 

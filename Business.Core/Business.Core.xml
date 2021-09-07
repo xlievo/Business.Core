@@ -1245,12 +1245,11 @@
             Configer
             </summary>
         </member>
-        <member name="M:Business.Core.Auth.IInterceptor.Create(System.Type,System.Object[],System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
+        <member name="M:Business.Core.Auth.IInterceptor.Create(System.Type,System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
             <summary>
             Create
             </summary>
             <param name="businessType"></param>
-            <param name="constructorArgument"></param>
             <param name="constructorArgumentFunc"></param>
             <param name="ignoreMethods"></param>
             <returns></returns>
@@ -1270,12 +1269,11 @@
             Configer
             </summary>
         </member>
-        <member name="M:Business.Core.Auth.Interceptor.Create(System.Type,System.Object[],System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
+        <member name="M:Business.Core.Auth.Interceptor.Create(System.Type,System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
             <summary>
             Create
             </summary>
             <param name="businessType"></param>
-            <param name="constructorArgument"></param>
             <param name="constructorArgumentFunc"></param>
             <param name="ignoreMethods"></param>
             <returns></returns>
@@ -1285,12 +1283,11 @@
             InterceptorCastle
             </summary>
         </member>
-        <member name="M:Business.Core.Auth.InterceptorCastle.Create(System.Type,System.Object[],System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
+        <member name="M:Business.Core.Auth.InterceptorCastle.Create(System.Type,System.Func{System.String,System.Type,System.Object},System.Collections.Generic.IEnumerable{System.Reflection.MethodInfo})">
             <summary>
             Create
             </summary>
             <param name="businessType"></param>
-            <param name="constructorArgument"></param>
             <param name="constructorArgumentFunc"></param>
             <param name="ignoreMethods"></param>
             <returns></returns>
@@ -1777,12 +1774,11 @@
             <param name="constructorArgumentFunc"></param>
             <param name="target"></param>
         </member>
-        <member name="M:Business.Core.Utils.Help.GetConstructorParameters(System.Type,System.Object[],System.Func{System.String,System.Type,System.Object})">
+        <member name="M:Business.Core.Utils.Help.GetConstructorParameters(System.Type,System.Func{System.String,System.Type,System.Object})">
             <summary>
             GetConstructorParameters
             </summary>
             <param name="type"></param>
-            <param name="constructorArgument"></param>
             <param name="constructorArgumentFunc"></param>
             <returns></returns>
         </member>
@@ -3930,11 +3926,6 @@
         <member name="P:Business.Core.BootstrapConfig.Interceptor">
             <summary>
             Interceptor
-            </summary>
-        </member>
-        <member name="P:Business.Core.BootstrapConfig.ConstructorArgument">
-            <summary>
-            ConstructorArgument
             </summary>
         </member>
         <member name="P:Business.Core.BootstrapConfig.Injection">

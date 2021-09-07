@@ -250,7 +250,7 @@ namespace Business.Core
 
         internal readonly bool hasBusiness;
 
-        internal protected Bind(System.Type type, System.Type interceptorType, object[] constructorArgument = null, System.Func<string, System.Type, object> constructorArgumentFunc = null, System.Type resultType = null, IEnumerable<System.Type> useTypes = null, Logger logger = null, IEnumerable<GroupAttribute> attributes = null)
+        internal protected Bind(System.Type type, System.Type interceptorType, System.Func<string, System.Type, object> constructorArgumentFunc = null, System.Type resultType = null, IEnumerable<System.Type> useTypes = null, Logger logger = null, IEnumerable<GroupAttribute> attributes = null)
         {
             var typeInfo = type.GetTypeInfo();
 
@@ -281,7 +281,7 @@ namespace Business.Core
             */
             var (methods, ignores) = GetMethods(typeInfo);
 
-            instance = interceptor.Create(type, constructorArgument, constructorArgumentFunc, ignores);
+            instance = interceptor.Create(type, constructorArgumentFunc, ignores);
 
             //var proxy = new Castle.DynamicProxy.ProxyGenerator();
 

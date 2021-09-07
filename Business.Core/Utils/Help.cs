@@ -521,15 +521,20 @@ namespace Business.Core.Utils
             {
                 if (!item.Value.Injection) { continue; }
 
-                var value = constructorArgumentFunc.Invoke(item.Value.Name, item.Value.Type);
-
-                if (!Equals(null, value))
+                foreach (System.Func<string, System.Type, object> item2 in constructorArgumentFunc.GetInvocationList())
                 {
-                    item.Value.Setter(target, value);
+                    var value = item2.Invoke(item.Value.Name, item.Value.Type);
+
+                    if (!Equals(null, value))
+                    {
+                        item.Value.Setter(target, value);
+                        //break;
+                    }
                 }
             }
         }
 
+        /*
         /// <summary>
         /// GetConstructorParameters
         /// </summary>
@@ -567,6 +572,48 @@ namespace Business.Core.Utils
 
                     args[i++] = arg;
                 }
+            }
+
+            return args;
+        }
+        */
+
+        /// <summary>
+        /// GetConstructorParameters
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="constructorArgumentFunc"></param>
+        /// <returns></returns>
+        public static object[] GetConstructorParameters(System.Type type, System.Func<string, System.Type, object> constructorArgumentFunc = null)
+        {
+            var parameters = type.GetConstructors()?.FirstOrDefault()?.GetParameters();
+
+            var args = new object[parameters?.Length ?? 0];
+
+            if (0 == args.Length) { return args; }
+
+            var i = 0;
+            foreach (var parameter in parameters)
+            {
+                args[i] = parameter.HasDefaultValue ? parameter.DefaultValue : null;
+
+                if (null != constructorArgumentFunc)
+                {
+                    object value = null;
+
+                    foreach (System.Func<string, System.Type, object> item in constructorArgumentFunc.GetInvocationList())
+                    {
+                        value = item.Invoke(parameter.Name, parameter.ParameterType);
+
+                        if (!Equals(null, value))
+                        {
+                            args[i] = value;
+                            //break;
+                        }
+                    }
+                }
+
+                i++;
             }
 
             return args;
