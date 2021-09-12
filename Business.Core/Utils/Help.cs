@@ -436,7 +436,7 @@ namespace Business.Core.Utils
 
         internal static readonly ObjectMethods BaseObjectMethods = new ObjectMethods(new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.GetHashCode())), new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.Equals(null))), new ObjectMethods.ObjectMethod(GetMethod<object>(c => c.ToString())));
 
-        internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null, bool propertys = true, bool fields = true, bool methods = false, bool update = false)
+        internal static void LoadAccessors(this System.Type type, ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key = null, bool fields = true, bool propertys = true, bool methods = false, bool update = false)
         {
             var key2 = string.IsNullOrWhiteSpace(key) ? type.FullName : key;
 
@@ -453,40 +453,10 @@ namespace Business.Core.Utils
 
             var member = accessors.dictionary.GetOrAdd(key2, _ => new Accessors
             {
-                Accessor = new ConcurrentReadOnlyDictionary<string, Accessor>(),
+                Accessor = GetAccessors(type, fields, propertys),
                 ConstructorArgs = type.GetConstructors()?.FirstOrDefault()?.GetParameters().Select(c => c.HasDefaultValue ? c.DefaultValue : c.ParameterType.IsValueType ? System.Activator.CreateInstance(c.ParameterType) : default).ToArray(),
                 Methods = new ConcurrentReadOnlyDictionary<string, Proces>()
             });
-
-            if (fields)
-            {
-                foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
-                {
-                    if (typeof(System.MulticastDelegate).IsAssignableFrom(field.FieldType))
-                    {
-                        continue;
-                    }
-
-                    var accessor = field.GetAccessor(null != field.GetAttribute<Annotations.InjectionAttribute>());
-                    if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                    member.Accessor.dictionary.TryAdd(field.Name, accessor);
-                }
-            }
-
-            if (propertys)
-            {
-                foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
-                {
-                    if (typeof(System.MulticastDelegate).IsAssignableFrom(property.PropertyType))
-                    {
-                        continue;
-                    }
-
-                    var accessor = property.GetAccessor(null != property.GetAttribute<Annotations.InjectionAttribute>());
-                    if (null == accessor.Getter || null == accessor.Setter) { continue; }
-                    member.Accessor.dictionary.TryAdd(property.Name, accessor);
-                }
-            }
 
             if (methods)
             {
@@ -499,6 +469,50 @@ namespace Business.Core.Utils
         }
 
         /// <summary>
+        /// GetAccessors Field, Propertie
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="fields"></param>
+        /// <param name="propertys"></param>
+        /// <returns></returns>
+        public static ConcurrentReadOnlyDictionary<string, Accessor> GetAccessors(this System.Type type, bool fields = true, bool propertys = true)
+        {
+            var accessors = new ConcurrentReadOnlyDictionary<string, Accessor>();
+
+            if (fields)
+            {
+                foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
+                {
+                    if (typeof(System.MulticastDelegate).IsAssignableFrom(field.FieldType))
+                    {
+                        continue;
+                    }
+
+                    var accessor = field.GetAccessor(null != field.GetAttribute<Annotations.InjectionAttribute>());
+                    if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                    accessors.dictionary.TryAdd(field.Name, accessor);
+                }
+            }
+
+            if (propertys)
+            {
+                foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.NonPublic | BindingFlags.Static))
+                {
+                    if (typeof(System.MulticastDelegate).IsAssignableFrom(property.PropertyType))
+                    {
+                        continue;
+                    }
+
+                    var accessor = property.GetAccessor(null != property.GetAttribute<Annotations.InjectionAttribute>(true));
+                    if (null == accessor.Getter || null == accessor.Setter) { continue; }
+                    accessors.dictionary.TryAdd(property.Name, accessor);
+                }
+            }
+
+            return accessors;
+        }
+
+        /// <summary>
         /// SetInjection
         /// </summary>
         /// <param name="accessors"></param>
@@ -507,17 +521,65 @@ namespace Business.Core.Utils
         /// <param name="target"></param>
         internal static void SetInjection(this ConcurrentReadOnlyDictionary<string, Accessors> accessors, string key, System.Func<string, System.Type, object> constructorArgumentFunc, object target)
         {
-            if (null == accessors || null == constructorArgumentFunc)
-            {
-                return;
-            }
-
             if (string.IsNullOrEmpty(key) || !accessors.TryGetValue(key, out Accessors meta))
             {
                 return;
             }
 
-            foreach (var item in meta.Accessor)
+            SetInjection(meta.Accessor, constructorArgumentFunc, target);
+        }
+
+        /// <summary>
+        /// SetInjection
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="constructorArgumentFunc"></param>
+        /// <returns></returns>
+        public static object SetInjection(this System.Type type, System.Func<string, System.Type, object> constructorArgumentFunc)
+        {
+            if (type is null)
+            {
+                throw new System.ArgumentNullException(nameof(type));
+            }
+
+            var args = GetConstructorParameters(type, constructorArgumentFunc);
+            var target = System.Activator.CreateInstance(type, args);
+
+            SetInjection(type.GetAccessors(), constructorArgumentFunc, target);
+
+            return target;
+        }
+
+        /// <summary>
+        /// SetInjection
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="constructorArgumentFunc"></param>
+        /// <param name="target"></param>
+        public static void SetInjection(this System.Type type, System.Func<string, System.Type, object> constructorArgumentFunc, object target)
+        {
+            if (null == type || null == constructorArgumentFunc)
+            {
+                return;
+            }
+
+            SetInjection(type.GetAccessors(), constructorArgumentFunc, target);
+        }
+
+        /// <summary>
+        /// SetInjection
+        /// </summary>
+        /// <param name="accessors"></param>
+        /// <param name="constructorArgumentFunc"></param>
+        /// <param name="target"></param>
+        public static void SetInjection(this ConcurrentReadOnlyDictionary<string, Accessor> accessors, System.Func<string, System.Type, object> constructorArgumentFunc, object target)
+        {
+            if (null == accessors || null == constructorArgumentFunc)
+            {
+                return;
+            }
+
+            foreach (var item in accessors)
             {
                 if (!item.Value.Injection) { continue; }
 
@@ -2179,11 +2241,23 @@ namespace Business.Core.Utils
             return 0 < attrs.Length;
         }
 
+        internal static bool Exists<T>(this MemberInfo member) where T : System.Attribute
+        {
+            if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
+
+            return member.IsDefined(typeof(T));
+        }
         internal static bool Exists<T>(this MemberInfo member, bool inherit = true) where T : System.Attribute
         {
             if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
 
             return member.IsDefined(typeof(T), inherit);
+        }
+        internal static bool Exists<T>(this ParameterInfo member) where T : System.Attribute
+        {
+            if (null == member) { throw new System.ArgumentNullException(nameof(member)); }
+
+            return member.IsDefined(typeof(T));
         }
         internal static bool Exists<T>(this ParameterInfo member, bool inherit = true) where T : System.Attribute
         {

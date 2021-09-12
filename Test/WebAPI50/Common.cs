@@ -509,15 +509,24 @@ docker run -itd --name redis-sentinel -e REDIS_MASTER_HOST=192.168.1.121 -e REDI
             .LoggerSet(new LoggerAttribute(canWrite: false), typeof(HttpContext), typeof(HttpFile), typeof(WebSocket))
             .UseInjection((name, type) =>
             {
-                return name switch
+                //return name switch
+                //{
+                //    "httpClient2" => httpClient,
+                //    _ => type.Name switch
+                //    {
+                //        nameof(HttpClient) => httpClient,
+                //        _ => app.ApplicationServices.GetService(type),
+                //    },
+                //};
+
+                switch (type)
                 {
-                    "httpClient2" => httpClient,
-                    _ => type.Name switch
-                    {
-                        nameof(HttpClient) => httpClient,
-                        _ => app.ApplicationServices.GetService(type),
-                    },
-                };
+                    case Type when typeof(IApplicationBuilder).IsAssignableFrom(type):
+                        return app;
+
+                }
+
+                return app.ApplicationServices.GetService(type);
             })
             .UseDoc(docDir, o =>
             {

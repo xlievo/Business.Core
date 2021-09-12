@@ -3,6 +3,7 @@ using Business.Core.Annotations;
 using Business.Core.Auth;
 using Business.Core.Result;
 using Business.Core.Utils;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using System;
@@ -57,7 +58,10 @@ public class BusinessMember3 : BusinessBase
 {
     public readonly System.Net.Http.IHttpClientFactory httpClientFactory;
 
-    public BusinessMember3(System.Net.Http.IHttpClientFactory httpClientFactory, IMemoryCache memoryCache, string dd = "ttt", int cc = 999) : base()
+    [Injection]
+    IApplicationBuilder app;
+
+    public BusinessMember3(System.Net.Http.IHttpClientFactory httpClientFactory, IMemoryCache memoryCache, string dd = "ttt", int cc = 999, ApplicationBuilder app = null) : base()
     {
         memoryCache?.Set("a", 333);
         var ddd = memoryCache?.Get<int>("a");
@@ -85,6 +89,11 @@ public class BusinessMember3 : BusinessBase
                     //result2.State = 111;
                 }
             };
+        };
+
+        this.BindAfter = () => 
+        {
+            this.app.ToString();
         };
     }
 
@@ -557,9 +566,41 @@ public partial class BusinessMember2 : BusinessBase
         }
     }
 
+    public class MyLogicArg2
+    {
+        /// <summary>
+        /// AAA
+        /// </summary>
+        [@CheckNull]
+        [@CheckNull]
+        public string A { get; set; }
+
+        /// <summary>
+        /// BBB
+        /// </summary>
+        [@CheckNull]
+        [@CheckNull]
+        //[JsonArg2]
+        public MyStruct B { get; set; }
+
+        public class MyStruct
+        {
+            /// <summary>
+            /// BBB
+            /// </summary>
+            [@CheckNull]
+            public string BB { get; set; }
+        }
+    }
+
     public virtual async ValueTask<dynamic> MyLogic(Token token, BusinessController context, HttpFile files, MyLogicArg arg)
     {
         return this.ResultCreate(new { token, arg });
+    }
+
+    public virtual async ValueTask<IResult<MyLogicArg2>> MyParameters(Token token, HttpFile files, [Parameters] MyLogicArg2 arg)
+    {
+        return this.ResultCreate(arg);
     }
 
     /// <summary>

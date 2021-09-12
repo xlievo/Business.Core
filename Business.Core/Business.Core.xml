@@ -1765,12 +1765,45 @@
             <param name="methodSelector"></param>
             <returns></returns>
         </member>
+        <member name="M:Business.Core.Utils.Help.GetAccessors(System.Type,System.Boolean,System.Boolean)">
+            <summary>
+            GetAccessors Field, Propertie
+            </summary>
+            <param name="type"></param>
+            <param name="fields"></param>
+            <param name="propertys"></param>
+            <returns></returns>
+        </member>
         <member name="M:Business.Core.Utils.Help.SetInjection(Business.Core.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Core.Utils.Accessors},System.String,System.Func{System.String,System.Type,System.Object},System.Object)">
             <summary>
             SetInjection
             </summary>
             <param name="accessors"></param>
             <param name="key"></param>
+            <param name="constructorArgumentFunc"></param>
+            <param name="target"></param>
+        </member>
+        <member name="M:Business.Core.Utils.Help.SetInjection(System.Type,System.Func{System.String,System.Type,System.Object})">
+            <summary>
+            SetInjection
+            </summary>
+            <param name="type"></param>
+            <param name="constructorArgumentFunc"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Utils.Help.SetInjection(System.Type,System.Func{System.String,System.Type,System.Object},System.Object)">
+            <summary>
+            SetInjection
+            </summary>
+            <param name="type"></param>
+            <param name="constructorArgumentFunc"></param>
+            <param name="target"></param>
+        </member>
+        <member name="M:Business.Core.Utils.Help.SetInjection(Business.Core.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Core.Utils.Accessor},System.Func{System.String,System.Type,System.Object},System.Object)">
+            <summary>
+            SetInjection
+            </summary>
+            <param name="accessors"></param>
             <param name="constructorArgumentFunc"></param>
             <param name="target"></param>
         </member>
