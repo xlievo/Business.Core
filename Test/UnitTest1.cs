@@ -2315,7 +2315,7 @@ public class TestBusinessMember
 
         foreach (var item in attrs)
         {
-            var attr = item.Clone();
+            var attr = item.Value.Clone();
         }
         //Member.Configer.Info.CommandGroupDefault
 

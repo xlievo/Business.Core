@@ -2097,20 +2097,26 @@
             <param name="stream"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.StreamReadString(System.IO.Stream,System.Text.Encoding)">
+        <member name="M:Business.Core.Utils.Help.StreamReadString(System.IO.Stream,System.Text.Encoding,System.Boolean,System.Int32,System.Boolean)">
             <summary>
             StreamReadString
             </summary>
             <param name="stream"></param>
             <param name="encoding"></param>
+            <param name="detectEncodingFromByteOrderMarks"></param>
+            <param name="bufferSize"></param>
+            <param name="leaveOpen"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.StreamReadStringAsync(System.IO.Stream,System.Text.Encoding)">
+        <member name="M:Business.Core.Utils.Help.StreamReadStringAsync(System.IO.Stream,System.Text.Encoding,System.Boolean,System.Int32,System.Boolean)">
             <summary>
             StreamReadStringAsync
             </summary>
             <param name="stream"></param>
             <param name="encoding"></param>
+            <param name="detectEncodingFromByteOrderMarks"></param>
+            <param name="bufferSize"></param>
+            <param name="leaveOpen"></param>
             <returns></returns>
         </member>
         <member name="M:Business.Core.Utils.Help.FileReadString(System.String,System.Text.Encoding)">
@@ -2524,7 +2530,33 @@
             <param name="values"></param>
             <returns></returns>
         </member>
-        <member name="M:Business.Core.Utils.Help.ToReadOnlyDictionary``3(System.Collections.Generic.IEnumerable{``1},System.Func{``1,``0},System.Func{``1,``2},System.Collections.Generic.IEqualityComparer{``0})">
+        <member name="M:Business.Core.Utils.Help.ToConcurrentReadOnlyDictionary``3(System.Collections.Generic.IEnumerable{``1},System.Func{``1,``0},System.Func{``1,``2},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            ToConcurrentReadOnlyDictionary
+            </summary>
+            <typeparam name="TKey"></typeparam>
+            <typeparam name="TSource"></typeparam>
+            <typeparam name="TElement"></typeparam>
+            <param name="source"></param>
+            <param name="keySelector"></param>
+            <param name="elementSelector"></param>
+            <param name="comparer"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Utils.Help.ToConcurrentReadOnlyDictionary``3(System.Collections.Generic.IEnumerable{``1},System.Func{``2,``0},System.Func{``2,``2},System.Collections.Generic.IEqualityComparer{``0})">
+            <summary>
+            ToConcurrentReadOnlyDictionary
+            </summary>
+            <typeparam name="TKey"></typeparam>
+            <typeparam name="TSource"></typeparam>
+            <typeparam name="TElement"></typeparam>
+            <param name="source"></param>
+            <param name="keySelector"></param>
+            <param name="elementSelector"></param>
+            <param name="comparer"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Utils.Help.ToReadOnlyDictionary``3(System.Collections.Generic.IEnumerable{``1},System.Func{``2,``0},System.Func{``2,``2},System.Collections.Generic.IEqualityComparer{``0})">
             <summary>
             ToReadOnlyDictionary
             </summary>
@@ -3304,590 +3336,6 @@
         <member name="P:Business.Core.Command.ParametersType">
             <summary>
             Parameter type called
-            </summary>
-        </member>
-        <member name="T:Business.Core.Meta.ArgGroup">
-            <summary>
-            ArgGroup
-            </summary>
-        </member>
-        <member name="M:Business.Core.Meta.ArgGroup.#ctor(System.String)">
-            <summary>
-            ArgGroup
-            </summary>
-            <param name="path"></param>
-        </member>
-        <member name="M:Business.Core.Meta.ArgGroup.#ctor(Business.Core.Utils.ReadOnlyCollection{Business.Core.Annotations.Ignore},System.Boolean,Business.Core.Utils.ReadOnlyCollection{Business.Core.Annotations.ArgumentAttribute},System.String,System.String,System.String,System.String,System.Boolean,Business.Core.Annotations.ArgumentAttribute)">
-            <summary>
-            ArgGroup
-            </summary>
-            <param name="ignore"></param>
-            <param name="ignoreArg"></param>
-            <param name="attrs"></param>
-            <param name="alias"></param>
-            <param name="path"></param>
-            <param name="owner"></param>
-            <param name="root"></param>
-            <param name="httpFile"></param>
-            <param name="deserialize"></param>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.Ignore">
-            <summary>
-            Ignore
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.IgnoreArg">
-            <summary>
-            IgnoreArg
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.Attrs">
-            <summary>
-            Attrs
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.Alias">
-            <summary>
-            Alias
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.Path">
-            <summary>
-            Path
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.Owner">
-            <summary>
-            Owner
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.Root">
-            <summary>
-            Root
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.Logger">
-            <summary>
-            Logger
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.HttpFile">
-            <summary>
-            HttpFile
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ArgGroup.Deserialize">
-            <summary>
-            Deserialize
-            </summary>
-        </member>
-        <member name="T:Business.Core.Meta.MemberDefinitionCode">
-            <summary>
-            MemberDefinitionCode
-            </summary>
-        </member>
-        <member name="F:Business.Core.Meta.MemberDefinitionCode.No">
-            <summary>
-            No
-            </summary>
-        </member>
-        <member name="F:Business.Core.Meta.MemberDefinitionCode.Definition">
-            <summary>
-            Definition
-            </summary>
-        </member>
-        <member name="F:Business.Core.Meta.MemberDefinitionCode.Field">
-            <summary>
-            Field
-            </summary>
-        </member>
-        <member name="F:Business.Core.Meta.MemberDefinitionCode.Property">
-            <summary>
-            Property
-            </summary>
-        </member>
-        <member name="T:Business.Core.Meta.ITypeDefinition`1">
-            <summary>
-            ITypeDefinition
-            </summary>
-            <typeparam name="TypeDefinition"></typeparam>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.Name">
-            <summary>
-            Name
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.Type">
-            <summary>
-            Type
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.LastType">
-            <summary>
-            LastType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.CurrentType">
-            <summary>
-            Remove IArg Null type
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasDefinition">
-            <summary>
-            HasDefinition
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasCollection">
-            <summary>
-            HasCollection
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasDictionary">
-            <summary>
-            HasDictionary
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.DefaultValue">
-            <summary>
-            DefaultValue
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.Nullable">
-            <summary>
-            Nullable
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.FullName">
-            <summary>
-            FullName
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.MemberDefinition">
-            <summary>
-            MemberDefinition
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasToken">
-            <summary>
-            HasToken
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasDefaultValue">
-            <summary>
-            HasDefaultValue
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.Group">
-            <summary>
-            Group
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.Children">
-            <summary>
-            Children
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.Childrens">
-            <summary>
-            Childrens
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasDynamicObject">
-            <summary>
-            Dynamic object, DocUI string type display
-            </summary>
-        </member>
-        <member name="T:Business.Core.Meta.Args">
-            <summary>
-            Argument
-            </summary>
-        </member>
-        <member name="M:Business.Core.Meta.Args.#ctor(System.String,System.Type,System.Type,System.Type,System.Int32,System.Object,System.Boolean,System.Object,System.Boolean,System.Boolean,System.Boolean,Business.Core.Utils.Accessor,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Core.Meta.ArgGroup},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},System.Boolean,System.Boolean,Business.Core.Annotations.UseAttribute,System.Boolean,System.Boolean,System.String,System.String,Business.Core.Meta.MemberDefinitionCode,System.Boolean)">
-            <summary>
-            Argument
-            </summary>
-            <param name="name"></param>
-            <param name="type"></param>
-            <param name="lastType"></param>
-            <param name="currentType"></param>
-            <param name="position"></param>
-            <param name="defaultValue"></param>
-            <param name="hasDefaultValue"></param>
-            <param name="defaultTypeValue"></param>
-            <param name="hasDictionary"></param>
-            <param name="hasCollection"></param>
-            <param name="nullable"></param>
-            <param name="accessor"></param>
-            <param name="group"></param>
-            <param name="children"></param>
-            <param name="childrens"></param>
-            <param name="hasLower"></param>
-            <param name="hasDefinition"></param>
-            <param name="use"></param>
-            <param name="useType"></param>
-            <param name="hasToken"></param>
-            <param name="methodTypeFullName"></param>
-            <param name="fullName"></param>
-            <param name="memberDefinition"></param>
-            <param name="hasDynamicObject"></param>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Name">
-            <summary>
-            Name
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Type">
-            <summary>
-            Type
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.LastType">
-            <summary>
-            LastType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.CurrentType">
-            <summary>
-            Remove IArg Null type
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Position">
-            <summary>
-            Position
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.DefaultValue">
-            <summary>
-            DefaultValue
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasDefaultValue">
-            <summary>
-            HasDefaultValue
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.DefaultTypeValue">
-            <summary>
-            DefaultTypeValue
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasDictionary">
-            <summary>
-            HasDictionary
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasCollection">
-            <summary>
-            HasCollection
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Nullable">
-            <summary>
-            Nullable
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Accessor">
-            <summary>
-            Accessor
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Group">
-            <summary>
-            Group
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Children">
-            <summary>
-            Children
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Childrens">
-            <summary>
-            Childrens
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasLower">
-            <summary>
-            Whether there are children
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasDefinition">
-            <summary>
-            HasDefinition
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Use">
-            <summary>
-            Use
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.UseType">
-            <summary>
-            UseType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasToken">
-            <summary>
-            HasToken
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.MethodTypeFullName">
-            <summary>
-            MethodTypeFullName
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.FullName">
-            <summary>
-            FullName
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.MemberDefinition">
-            <summary>
-            xml using
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.Parameters">
-            <summary>
-            Parameters
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasDynamicObject">
-            <summary>
-            Dynamic object, DocUI string type display
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.Args.HasObject">
-            <summary>
-            HasObject
-            </summary>
-        </member>
-        <member name="T:Business.Core.Meta.MetaLogger">
-            <summary>
-            MetaLogger
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaLogger.Record">
-            <summary>
-            Record
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaLogger.Error">
-            <summary>
-            Error
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaLogger.Exception">
-            <summary>
-            Exception
-            </summary>
-        </member>
-        <member name="T:Business.Core.Meta.CommandGroup">
-            <summary>
-            CommandGroup
-            </summary>
-        </member>
-        <member name="M:Business.Core.Meta.CommandGroup.#ctor(Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Annotations.CommandAttribute},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Annotations.CommandAttribute}})">
-            <summary>
-            CommandGroup
-            </summary>
-            <param name="group"></param>
-            <param name="full"></param>
-        </member>
-        <member name="P:Business.Core.Meta.CommandGroup.Group">
-            <summary>
-            Group
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.CommandGroup.Full">
-            <summary>
-            Full
-            </summary>
-        </member>
-        <member name="T:Business.Core.Meta.MetaData">
-            <summary>
-            MetaData
-            </summary>
-        </member>
-        <member name="M:Business.Core.Meta.MetaData.ToString">
-            <summary>
-            Name
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Business.Core.Meta.MetaData.#ctor(System.Func{System.Object,System.Object[],System.Object},Business.Core.Meta.CommandGroup,Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Meta.MetaLogger},System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Type,System.Type,System.Type,System.Object[],System.Collections.Generic.List{Business.Core.Annotations.AttributeBase},System.Int32,System.String,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.Int32,System.Type},System.String,Business.Core.Annotations.DocAttribute,System.Boolean)">
-            <summary>
-            MetaData
-            </summary>
-            <param name="accessor"></param>
-            <param name="commandGroup"></param>
-            <param name="args"></param>
-            <param name="argAll"></param>
-            <param name="tokens"></param>
-            <param name="metaLogger"></param>
-            <param name="path"></param>
-            <param name="name"></param>
-            <param name="fullName"></param>
-            <param name="business"></param>
-            <param name="hasAsync"></param>
-            <param name="hasValueTask"></param>
-            <param name="hasReturn"></param>
-            <param name="hasIResult"></param>
-            <param name="hasIResultGeneric"></param>
-            <param name="returnType"></param>
-            <param name="resultTypeDefinition"></param>
-            <param name="resultType"></param>
-            <param name="defaultValue"></param>
-            <param name="attributes"></param>
-            <param name="position"></param>
-            <param name="groupDefault"></param>
-            <param name="useTypePosition"></param>
-            <param name="methodTypeFullName"></param>
-            <param name="doc"></param>
-            <param name="hasParameters"></param>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.Accessor">
-            <summary>
-            Accessor
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.CommandGroup">
-            <summary>
-            CommandGroup
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.Args">
-            <summary>
-            Args
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.ArgAll">
-            <summary>
-            ArgAll
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.Tokens">
-            <summary>
-            Tokens
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.MetaLogger">
-            <summary>
-            MetaLogger
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.Path">
-            <summary>
-            Path
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.Name">
-            <summary>
-            Name
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.FullName">
-            <summary>
-            FullName
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.Business">
-            <summary>
-            Business
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.HasReturn">
-            <summary>
-            HasReturn
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.HasIResult">
-            <summary>
-            HasIResult
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.HasIResultGeneric">
-            <summary>
-            HasIResultGeneric
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.HasObject">
-            <summary>
-            HasObject
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.ReturnType">
-            <summary>
-            ReturnType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.ReturnValueTaskType">
-            <summary>
-            ReturnValueTaskType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.ResultTypeDefinition">
-            <summary>
-            ResultTypeDefinition
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.ResultType">
-            <summary>
-            ResultType
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.ResultGeneric">
-            <summary>
-            ResultGeneric
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.HasAsync">
-            <summary>
-            HasAsync
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.HasValueTask">
-            <summary>
-            HasValueTask
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.DefaultValue">
-            <summary>
-            DefaultValue
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.Attributes">
-            <summary>
-            Attributes
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.Position">
-            <summary>
-            Position
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.GroupDefault">
-            <summary>
-            GroupDefault
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.UseTypePosition">
-            <summary>
-            UseTypePosition
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.MethodTypeFullName">
-            <summary>
-            MethodTypeFullName
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.Doc">
-            <summary>
-            Doc
-            </summary>
-        </member>
-        <member name="P:Business.Core.Meta.MetaData.HasParameters">
-            <summary>
-            Parameters
             </summary>
         </member>
         <member name="T:Business.Core.IBootstrap">
@@ -5501,6 +4949,590 @@
             <param name="batch"></param>
             <param name="syn"></param>
             <param name="maxCapacity">Gets the max capacity of this queue</param>
+        </member>
+        <member name="T:Business.Core.Meta.ArgGroup">
+            <summary>
+            ArgGroup
+            </summary>
+        </member>
+        <member name="M:Business.Core.Meta.ArgGroup.#ctor(System.String)">
+            <summary>
+            ArgGroup
+            </summary>
+            <param name="path"></param>
+        </member>
+        <member name="M:Business.Core.Meta.ArgGroup.#ctor(Business.Core.Utils.ReadOnlyCollection{Business.Core.Annotations.Ignore},System.Boolean,Business.Core.Utils.ReadOnlyCollection{Business.Core.Annotations.ArgumentAttribute},System.String,System.String,System.String,System.String,System.Boolean,Business.Core.Annotations.ArgumentAttribute)">
+            <summary>
+            ArgGroup
+            </summary>
+            <param name="ignore"></param>
+            <param name="ignoreArg"></param>
+            <param name="attrs"></param>
+            <param name="alias"></param>
+            <param name="path"></param>
+            <param name="owner"></param>
+            <param name="root"></param>
+            <param name="httpFile"></param>
+            <param name="deserialize"></param>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.Ignore">
+            <summary>
+            Ignore
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.IgnoreArg">
+            <summary>
+            IgnoreArg
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.Attrs">
+            <summary>
+            Attrs
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.Alias">
+            <summary>
+            Alias
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.Path">
+            <summary>
+            Path
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.Owner">
+            <summary>
+            Owner
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.Root">
+            <summary>
+            Root
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.Logger">
+            <summary>
+            Logger
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.HttpFile">
+            <summary>
+            HttpFile
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ArgGroup.Deserialize">
+            <summary>
+            Deserialize
+            </summary>
+        </member>
+        <member name="T:Business.Core.Meta.MemberDefinitionCode">
+            <summary>
+            MemberDefinitionCode
+            </summary>
+        </member>
+        <member name="F:Business.Core.Meta.MemberDefinitionCode.No">
+            <summary>
+            No
+            </summary>
+        </member>
+        <member name="F:Business.Core.Meta.MemberDefinitionCode.Definition">
+            <summary>
+            Definition
+            </summary>
+        </member>
+        <member name="F:Business.Core.Meta.MemberDefinitionCode.Field">
+            <summary>
+            Field
+            </summary>
+        </member>
+        <member name="F:Business.Core.Meta.MemberDefinitionCode.Property">
+            <summary>
+            Property
+            </summary>
+        </member>
+        <member name="T:Business.Core.Meta.ITypeDefinition`1">
+            <summary>
+            ITypeDefinition
+            </summary>
+            <typeparam name="TypeDefinition"></typeparam>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.Name">
+            <summary>
+            Name
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.Type">
+            <summary>
+            Type
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.LastType">
+            <summary>
+            LastType
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.CurrentType">
+            <summary>
+            Remove IArg Null type
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasDefinition">
+            <summary>
+            HasDefinition
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasCollection">
+            <summary>
+            HasCollection
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasDictionary">
+            <summary>
+            HasDictionary
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.DefaultValue">
+            <summary>
+            DefaultValue
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.Nullable">
+            <summary>
+            Nullable
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.FullName">
+            <summary>
+            FullName
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.MemberDefinition">
+            <summary>
+            MemberDefinition
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasToken">
+            <summary>
+            HasToken
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasDefaultValue">
+            <summary>
+            HasDefaultValue
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.Group">
+            <summary>
+            Group
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.Children">
+            <summary>
+            Children
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.Childrens">
+            <summary>
+            Childrens
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.ITypeDefinition`1.HasDynamicObject">
+            <summary>
+            Dynamic object, DocUI string type display
+            </summary>
+        </member>
+        <member name="T:Business.Core.Meta.Args">
+            <summary>
+            Argument
+            </summary>
+        </member>
+        <member name="M:Business.Core.Meta.Args.#ctor(System.String,System.Type,System.Type,System.Type,System.Int32,System.Object,System.Boolean,System.Object,System.Boolean,System.Boolean,System.Boolean,Business.Core.Utils.Accessor,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.String,Business.Core.Meta.ArgGroup},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},System.Boolean,System.Boolean,Business.Core.Annotations.UseAttribute,System.Boolean,System.Boolean,System.String,System.String,Business.Core.Meta.MemberDefinitionCode,System.Boolean)">
+            <summary>
+            Argument
+            </summary>
+            <param name="name"></param>
+            <param name="type"></param>
+            <param name="lastType"></param>
+            <param name="currentType"></param>
+            <param name="position"></param>
+            <param name="defaultValue"></param>
+            <param name="hasDefaultValue"></param>
+            <param name="defaultTypeValue"></param>
+            <param name="hasDictionary"></param>
+            <param name="hasCollection"></param>
+            <param name="nullable"></param>
+            <param name="accessor"></param>
+            <param name="group"></param>
+            <param name="children"></param>
+            <param name="childrens"></param>
+            <param name="hasLower"></param>
+            <param name="hasDefinition"></param>
+            <param name="use"></param>
+            <param name="useType"></param>
+            <param name="hasToken"></param>
+            <param name="methodTypeFullName"></param>
+            <param name="fullName"></param>
+            <param name="memberDefinition"></param>
+            <param name="hasDynamicObject"></param>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Name">
+            <summary>
+            Name
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Type">
+            <summary>
+            Type
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.LastType">
+            <summary>
+            LastType
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.CurrentType">
+            <summary>
+            Remove IArg Null type
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Position">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.DefaultValue">
+            <summary>
+            DefaultValue
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.HasDefaultValue">
+            <summary>
+            HasDefaultValue
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.DefaultTypeValue">
+            <summary>
+            DefaultTypeValue
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.HasDictionary">
+            <summary>
+            HasDictionary
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.HasCollection">
+            <summary>
+            HasCollection
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Nullable">
+            <summary>
+            Nullable
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Accessor">
+            <summary>
+            Accessor
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Group">
+            <summary>
+            Group
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Children">
+            <summary>
+            Children
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Childrens">
+            <summary>
+            Childrens
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.HasLower">
+            <summary>
+            Whether there are children
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.HasDefinition">
+            <summary>
+            HasDefinition
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Use">
+            <summary>
+            Use
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.UseType">
+            <summary>
+            UseType
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.HasToken">
+            <summary>
+            HasToken
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.MethodTypeFullName">
+            <summary>
+            MethodTypeFullName
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.FullName">
+            <summary>
+            FullName
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.MemberDefinition">
+            <summary>
+            xml using
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.Parameters">
+            <summary>
+            Parameters
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.HasDynamicObject">
+            <summary>
+            Dynamic object, DocUI string type display
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.Args.HasObject">
+            <summary>
+            HasObject
+            </summary>
+        </member>
+        <member name="T:Business.Core.Meta.MetaLogger">
+            <summary>
+            MetaLogger
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaLogger.Record">
+            <summary>
+            Record
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaLogger.Error">
+            <summary>
+            Error
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaLogger.Exception">
+            <summary>
+            Exception
+            </summary>
+        </member>
+        <member name="T:Business.Core.Meta.CommandGroup">
+            <summary>
+            CommandGroup
+            </summary>
+        </member>
+        <member name="M:Business.Core.Meta.CommandGroup.#ctor(Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Annotations.CommandAttribute},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Annotations.CommandAttribute}})">
+            <summary>
+            CommandGroup
+            </summary>
+            <param name="group"></param>
+            <param name="full"></param>
+        </member>
+        <member name="P:Business.Core.Meta.CommandGroup.Group">
+            <summary>
+            Group
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.CommandGroup.Full">
+            <summary>
+            Full
+            </summary>
+        </member>
+        <member name="T:Business.Core.Meta.MetaData">
+            <summary>
+            MetaData
+            </summary>
+        </member>
+        <member name="M:Business.Core.Meta.MetaData.ToString">
+            <summary>
+            Name
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Business.Core.Meta.MetaData.#ctor(System.Func{System.Object,System.Object[],System.Object},Business.Core.Meta.CommandGroup,Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyCollection{Business.Core.Meta.Args},Business.Core.Utils.ReadOnlyDictionary{System.String,Business.Core.Meta.MetaLogger},System.String,System.String,System.String,System.String,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Type,System.Type,System.Type,System.Object[],System.Collections.Generic.IReadOnlyDictionary{System.String,Business.Core.Annotations.GroupAttribute},System.Int32,System.String,Business.Core.Utils.ConcurrentReadOnlyDictionary{System.Int32,System.Type},System.String,Business.Core.Annotations.DocAttribute,System.Boolean)">
+            <summary>
+            MetaData
+            </summary>
+            <param name="accessor"></param>
+            <param name="commandGroup"></param>
+            <param name="args"></param>
+            <param name="argAll"></param>
+            <param name="tokens"></param>
+            <param name="metaLogger"></param>
+            <param name="path"></param>
+            <param name="name"></param>
+            <param name="fullName"></param>
+            <param name="business"></param>
+            <param name="hasAsync"></param>
+            <param name="hasValueTask"></param>
+            <param name="hasReturn"></param>
+            <param name="hasIResult"></param>
+            <param name="hasIResultGeneric"></param>
+            <param name="returnType"></param>
+            <param name="resultTypeDefinition"></param>
+            <param name="resultType"></param>
+            <param name="defaultValue"></param>
+            <param name="attributes"></param>
+            <param name="position"></param>
+            <param name="groupDefault"></param>
+            <param name="useTypePosition"></param>
+            <param name="methodTypeFullName"></param>
+            <param name="doc"></param>
+            <param name="hasParameters"></param>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.Accessor">
+            <summary>
+            Accessor
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.CommandGroup">
+            <summary>
+            CommandGroup
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.Args">
+            <summary>
+            Args
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.ArgAll">
+            <summary>
+            ArgAll
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.Tokens">
+            <summary>
+            Tokens
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.MetaLogger">
+            <summary>
+            MetaLogger
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.Path">
+            <summary>
+            Path
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.Name">
+            <summary>
+            Name
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.FullName">
+            <summary>
+            FullName
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.Business">
+            <summary>
+            Business
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.HasReturn">
+            <summary>
+            HasReturn
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.HasIResult">
+            <summary>
+            HasIResult
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.HasIResultGeneric">
+            <summary>
+            HasIResultGeneric
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.HasObject">
+            <summary>
+            HasObject
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.ReturnType">
+            <summary>
+            ReturnType
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.ReturnValueTaskType">
+            <summary>
+            ReturnValueTaskType
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.ResultTypeDefinition">
+            <summary>
+            ResultTypeDefinition
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.ResultType">
+            <summary>
+            ResultType
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.ResultGeneric">
+            <summary>
+            ResultGeneric
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.HasAsync">
+            <summary>
+            HasAsync
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.HasValueTask">
+            <summary>
+            HasValueTask
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.DefaultValue">
+            <summary>
+            DefaultValue
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.Attributes">
+            <summary>
+            Attributes
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.Position">
+            <summary>
+            Position
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.GroupDefault">
+            <summary>
+            GroupDefault
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.UseTypePosition">
+            <summary>
+            UseTypePosition
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.MethodTypeFullName">
+            <summary>
+            MethodTypeFullName
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.Doc">
+            <summary>
+            Doc
+            </summary>
+        </member>
+        <member name="P:Business.Core.Meta.MetaData.HasParameters">
+            <summary>
+            Parameters
+            </summary>
         </member>
         <member name="T:Business.Core.Configer">
             <summary>

@@ -1198,8 +1198,8 @@ namespace Business.Core.Utils
                 xmlMembers?.TryGetValue($"M:{meta.MethodTypeFullName}", out member);
 
                 var returnType = meta.ReturnType.GetTypeDefinition(xmlMembers, member?.returns?.sub, groupDefault, $"{onlyName}.Returns");
-                var testing = meta.Attributes.GetAttrs<Annotations.TestingAttribute>();
-                var annotations = meta.Attributes.Where(c3 => !(c3 is Annotations.ArgumentAttribute || c3 is Annotations.CommandAttribute || c3 is Annotations.LoggerAttribute || c3 is Annotations.TestingAttribute || c3 is Annotations.Ignore || c3 is Annotations.DocAttribute) && GroupEquals(c3 as Annotations.GroupAttribute, c2.Value.group)).Select(c3 => c3.Meta.Name).Distinct();
+                var testing = meta.Attributes.Values.GetAttrs<Annotations.TestingAttribute>();
+                var annotations = meta.Attributes.Values.Where(c3 => !(c3 is Annotations.ArgumentAttribute || c3 is Annotations.CommandAttribute || c3 is Annotations.LoggerAttribute || c3 is Annotations.TestingAttribute || c3 is Annotations.Ignore || c3 is Annotations.DocAttribute) && GroupEquals(c3, c2.Value.group)).Select(c3 => c3.Meta.Name).Distinct();
 
                 var token = meta.Tokens.FirstOrDefault();
 
@@ -2153,11 +2153,11 @@ namespace Business.Core.Utils
             return attributes;
         }
 
-        internal static List<Attribute> GetAttrs<Attribute>(this IList<Annotations.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null, bool clone = false) where Attribute : Annotations.AttributeBase
+        internal static List<Attribute> GetAttrs<Attribute>(this IEnumerable<Annotations.AttributeBase> attributes, System.Func<Attribute, bool> predicate = null, bool clone = false) where Attribute : Annotations.AttributeBase
         {
             if (null == attributes) { throw new System.ArgumentNullException(nameof(attributes)); }
 
-            var list = new List<Attribute>(attributes.Count);
+            var list = new List<Attribute>();
 
             foreach (var item in attributes)
             {
@@ -2329,6 +2329,7 @@ namespace Business.Core.Utils
                         try
                         {
                             var closedType = (!type.IsGenericTypeDefinition ? type.GetGenericTypeDefinition() : type).MakeGenericType(genericArguments2);
+
                             if (closedType.GetTypeInfo().IsAssignableFrom(fromType))
                             {
                                 genericArguments = genericArguments2.Select(c => c.GetTypeInfo()).ToArray();
@@ -2426,23 +2427,30 @@ namespace Business.Core.Utils
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="encoding"></param>
+        /// <param name="detectEncodingFromByteOrderMarks"></param>
+        /// <param name="bufferSize"></param>
+        /// <param name="leaveOpen"></param>
         /// <returns></returns>
-        public static string StreamReadString(this System.IO.Stream stream, System.Text.Encoding encoding = null)
+        public static string StreamReadString(this System.IO.Stream stream, System.Text.Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 1024, bool leaveOpen = false)
         {
-            using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8))
+            using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
             {
                 return reader.ReadToEnd();
             }
         }
+
         /// <summary>
         /// StreamReadStringAsync
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="encoding"></param>
+        /// <param name="detectEncodingFromByteOrderMarks"></param>
+        /// <param name="bufferSize"></param>
+        /// <param name="leaveOpen"></param>
         /// <returns></returns>
-        public static async System.Threading.Tasks.ValueTask<string> StreamReadStringAsync(this System.IO.Stream stream, System.Text.Encoding encoding = null)
+        public static async System.Threading.Tasks.ValueTask<string> StreamReadStringAsync(this System.IO.Stream stream, System.Text.Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = 1024, bool leaveOpen = false)
         {
-            using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8))
+            using (var reader = new System.IO.StreamReader(stream, encoding ?? UTF8, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen))
             {
                 return await reader.ReadToEndAsync();
             }
@@ -3930,6 +3938,55 @@ namespace Business.Core.Utils
         public static ReadOnlyCollection<T> ToReadOnly<T>(this IEnumerable<T> values) => new ReadOnlyCollection<T>(values);
 
         /// <summary>
+        /// ToConcurrentReadOnlyDictionary
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TElement"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="keySelector"></param>
+        /// <param name="elementSelector"></param>
+        /// <param name="comparer"></param>
+        /// <returns></returns>
+        public static ConcurrentReadOnlyDictionary<TKey, TElement> ToConcurrentReadOnlyDictionary<TKey, TSource, TElement>(this IEnumerable<TSource> source, System.Func<TSource, TKey> keySelector, System.Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer = null)
+        {
+            var dictionary = new System.Collections.Concurrent.ConcurrentDictionary<TKey, TElement>(comparer);
+
+            foreach (var item in source)
+            {
+                dictionary.TryAdd(keySelector(item), elementSelector(item));
+            }
+
+            return new ConcurrentReadOnlyDictionary<TKey, TElement>(dictionary);
+        }
+
+        /// <summary>
+        /// ToConcurrentReadOnlyDictionary
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TElement"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="keySelector"></param>
+        /// <param name="elementSelector"></param>
+        /// <param name="comparer"></param>
+        /// <returns></returns>
+        public static ConcurrentReadOnlyDictionary<TKey, TElement> ToConcurrentReadOnlyDictionary<TKey, TSource, TElement>(this IEnumerable<TSource> source, System.Func<TElement, TKey> keySelector, System.Func<TElement, TElement> elementSelector, IEqualityComparer<TKey> comparer = null)
+        {
+            var dictionary = new System.Collections.Concurrent.ConcurrentDictionary<TKey, TElement>(comparer);
+
+            foreach (var item in source)
+            {
+                if (item is TElement cast)
+                {
+                    dictionary.TryAdd(keySelector(cast), elementSelector(cast));
+                }
+            }
+
+            return new ConcurrentReadOnlyDictionary<TKey, TElement>(dictionary);
+        }
+
+        /// <summary>
         /// ToReadOnlyDictionary
         /// </summary>
         /// <typeparam name="TKey"></typeparam>
@@ -3940,16 +3997,24 @@ namespace Business.Core.Utils
         /// <param name="elementSelector"></param>
         /// <param name="comparer"></param>
         /// <returns></returns>
-        public static ConcurrentReadOnlyDictionary<TKey, TElement> ToReadOnlyDictionary<TKey, TSource, TElement>(this IEnumerable<TSource> source, System.Func<TSource, TKey> keySelector, System.Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer = null)
+        public static IReadOnlyDictionary<TKey, TElement> ToReadOnlyDictionary<TKey, TSource, TElement>(this IEnumerable<TSource> source, System.Func<TElement, TKey> keySelector, System.Func<TElement, TElement> elementSelector, IEqualityComparer<TKey> comparer = null)
         {
-            var dictionary = new System.Collections.Concurrent.ConcurrentDictionary<TKey, TElement>(comparer);
+            var dictionary = new Dictionary<TKey, TElement>(comparer);
 
             foreach (var item in source)
             {
-                dictionary.TryAdd(keySelector(item), elementSelector(item));
+                if (item is TElement cast)
+                {
+                    var k = keySelector(cast);
+
+                    if (!dictionary.ContainsKey(k))
+                    {
+                        dictionary.Add(k, elementSelector(cast));
+                    }
+                }
             }
 
-            return new ConcurrentReadOnlyDictionary<TKey, TElement>(dictionary);
+            return new System.Collections.ObjectModel.ReadOnlyDictionary<TKey, TElement>(dictionary);
         }
 
         /// <summary>

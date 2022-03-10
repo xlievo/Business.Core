@@ -163,16 +163,27 @@ public partial class BusinessMember2
 
             c.CallAfterMethod = async method =>
             {
-                if (typeof(IAsyncResult).IsAssignableFrom(method.Result?.GetType()))
+                //if (typeof(IAsyncResult).IsAssignableFrom(method.Result?.GetType()))
+                //{
+                //    //await result;
+
+                //    //await System.Threading.Tasks.Task.Run(() =>
+                //    //{
+                //    //    System.Threading.Thread.Sleep(3000);
+                //    //});
+
+                //    //result2.State = 111;
+                //}
+
+                if (method.Result is IResult result)
                 {
-                    //await result;
+                    if (1 == result.State)
+                    {
 
-                    //await System.Threading.Tasks.Task.Run(() =>
-                    //{
-                    //    System.Threading.Thread.Sleep(3000);
-                    //});
-
-                    //result2.State = 111;
+                        //...//
+                        //result.m = "ssssss";
+                        method.Result = this.ResultCreate(result.State, "ssssss");
+                    }
                 }
             };
         };
